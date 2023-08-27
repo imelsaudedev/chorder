@@ -1,0 +1,29 @@
+{
+  "siteName": "Chorder",
+  "siteDescription": "A tool for managing chord sheets",
+  "songData": {
+    "title": "Title",
+    "titlePlaceholder": "Song title",
+    "artist": "Artist",
+    "artistPlaceholder": "Song artist",
+    "units": "Unit"
+  },
+  "unitData": {
+    "title": "Title",
+    "titlePlaceholder": "Unit title [optional]",
+    "content": "Chordpro",
+    "contentPlaceholder": "Chordpro content goes here",
+    "unitType": "Unit type"
+  },
+  "unitTypes": {
+    "intro": "Intro",
+    "ending": "Ending",
+    "verse": "Verse",
+    "prechorus": "Prechorus",
+    "chorus": "Chorus",
+    "bridge": "Bridge",
+    "interlude": "Interlude",
+    "solo": "Solo",
+    "neutral": "Neutral"
+  }
+}
