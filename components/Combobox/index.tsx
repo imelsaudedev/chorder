@@ -1,6 +1,8 @@
-import { ChangeEventHandler } from "react";
+import { on } from "events";
+import { ChangeEvent, ChangeEventHandler, useState } from "react";
 
 export default function Combobox({
+  initial,
   options,
   label,
   className,
@@ -9,6 +11,7 @@ export default function Combobox({
   id,
   onChange,
 }: {
+  initial: string;
   options: { [value: string]: string };
   label?: string;
   className?: string;
@@ -21,7 +24,7 @@ export default function Combobox({
     throw new Error("TextInput with label must have an id");
   }
 
-  const classNames = ["flex", "flex-col", "px-4", "py-2"];
+  const classNames = ["flex", "flex-col"];
   if (className) {
     classNames.push(className);
   }
@@ -55,7 +58,11 @@ export default function Combobox({
           {label}
         </label>
       )}
-      <select className={selectClassNames.join(" ")} onChange={onChange}>
+      <select
+        className={selectClassNames.join(" ")}
+        onChange={onChange}
+        defaultValue={initial}
+      >
         {Object.keys(options).map((value) => (
           <option
             key={value}

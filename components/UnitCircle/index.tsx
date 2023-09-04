@@ -1,16 +1,15 @@
-import { UnitType } from "@/models/unit";
+import { Unit } from "@/models/unit";
 import { unitTypeColorClasses } from "../unit-colors";
+import messages from "@/i18n/messages";
 
 export default function UnitCircle({
-  unitType,
-  initial,
+  unit,
   className,
 }: {
-  unitType: UnitType;
-  initial: string;
+  unit: Unit;
   className?: string;
 }) {
-  const colorClasses = unitTypeColorClasses[unitType];
+  const colorClasses = unitTypeColorClasses[unit.type];
   const classList = [
     "h-8",
     "w-8",
@@ -24,6 +23,8 @@ export default function UnitCircle({
   if (className) {
     classList.push(className);
   }
+  const firstLetter = messages.unitTypes[unit.type][0].toUpperCase();
+  const number = unit.localId?.split("--")[1] || "";
 
-  return <div className={classList.join(" ")}>{initial}</div>;
+  return <div className={classList.join(" ")}>{`${firstLetter}${number}`}</div>;
 }

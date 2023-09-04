@@ -1,6 +1,9 @@
 {
   "siteName": "Chorder",
   "siteDescription": "A tool for managing chord sheets",
+  "messages": {
+    "or": "ou"
+  },
   "songData": {
     "title": "Título",
     "titlePlaceholder": "Título da música",
@@ -25,5 +28,9 @@
     "interlude": "Interlúdio",
     "solo": "Solo",
     "neutral": "Neutro"
+  },
+  "songForm": {
+    "addExistingUnit": "Adicionar unidade existente",
+    "newUnit": "Nova unidade"
   }
 }

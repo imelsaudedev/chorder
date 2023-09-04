@@ -7,40 +7,44 @@ import { Unit, UnitType } from "@/models/unit";
 
 export default function UnitForm({
   unit,
+  index,
   setUnit,
 }: {
   unit: Unit;
+  index: number;
   setUnit: (unit: Unit) => void;
 }) {
-  const initial = messages.unitTypes[unit.type][0].toUpperCase();
   const colorClasses = unitTypeColorClasses[unit.type];
 
   const handleChangeType = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
     setUnit({ ...unit, type: event.target.value as UnitType });
   };
 
   return (
     <div
-      className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg p-2 relative flex flex-col`}
+      className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg break-inside-avoid flex flex-col gap-2 px-2 py-2 mb-2`}
     >
-      <Combobox
-        onChange={handleChangeType}
-        label={messages.unitData.unitType}
-        options={messages.unitTypes}
-        id="unit-type"
-      />
-      <UnitCircle
-        className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2"
-        initial={initial}
-        unitType={unit.type}
-      />
+      <div className="flex gap-4 items-center">
+        <UnitCircle className="w-14 h-14" unit={unit} />
+        <Combobox
+          initial={unit.type}
+          className="flex-grow"
+          onChange={handleChangeType}
+          label={messages.unitData.unitType}
+          options={messages.unitTypes}
+          id={`unit-type-${index}`}
+        />
+      </div>
+
       <TextInput
-        id="title"
+        id={`title-${index}`}
         label={messages.unitData.title}
         placeholder={messages.unitData.titlePlaceholder}
       />
       <TextInput
-        id="content"
+        id={`content-${index}`}
         className="flex-grow"
         inputClassName="resize-none flex-grow"
         label={messages.unitData.content}

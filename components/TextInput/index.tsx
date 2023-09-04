@@ -31,7 +31,7 @@ export default function TextInput({
     Component = "input";
   }
 
-  const classNames = ["flex", "flex-col", "px-4", "py-2"];
+  const classNames = ["flex", "flex-col"];
   if (className) {
     classNames.push(className);
   }

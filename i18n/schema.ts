@@ -3,6 +3,9 @@ import { z } from "zod";
 export const messagesSchema = z.object({
   siteName: z.string(),
   siteDescription: z.string(),
+  messages: z.object({
+    or: z.string(),
+  }),
   songData: z.object({
     title: z.string(),
     titlePlaceholder: z.string(),
@@ -27,6 +30,10 @@ export const messagesSchema = z.object({
     interlude: z.string(),
     solo: z.string(),
     neutral: z.string(),
+  }),
+  songForm: z.object({
+    addExistingUnit: z.string(),
+    newUnit: z.string(),
   }),
 });
 
