@@ -4,6 +4,7 @@ import UnitCircle from "@/components/UnitCircle";
 import { unitTypeColorClasses } from "@/components/unit-colors";
 import messages from "@/i18n/messages";
 import { Unit, UnitType } from "@/models/unit";
+import { ChangeEvent } from "react";
 
 export default function UnitForm({
   unit,
@@ -16,10 +17,20 @@ export default function UnitForm({
 }) {
   const colorClasses = unitTypeColorClasses[unit.type];
 
-  const handleChangeType = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChangeType = (event: ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault();
     event.stopPropagation();
     setUnit({ ...unit, type: event.target.value as UnitType });
+  };
+
+  const handleChangeTitle = (event: ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    setUnit({ ...unit, title: event.target.value });
+  };
+
+  const handleChangeChordpro = (event: ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    setUnit({ ...unit, content: event.target.value });
   };
 
   return (
@@ -29,7 +40,7 @@ export default function UnitForm({
       <div className="flex gap-4 items-center">
         <UnitCircle className="w-14 h-14" unit={unit} />
         <Combobox
-          initial={unit.type}
+          value={unit.type}
           className="flex-grow"
           onChange={handleChangeType}
           label={messages.unitData.unitType}
@@ -42,6 +53,8 @@ export default function UnitForm({
         id={`title-${index}`}
         label={messages.unitData.title}
         placeholder={messages.unitData.titlePlaceholder}
+        value={unit.title}
+        onChange={handleChangeTitle}
       />
       <TextInput
         id={`content-${index}`}
@@ -49,6 +62,8 @@ export default function UnitForm({
         inputClassName="resize-none flex-grow"
         label={messages.unitData.content}
         placeholder={messages.unitData.contentPlaceholder}
+        onChange={handleChangeChordpro}
+        value={unit.content}
         long
       />
     </div>

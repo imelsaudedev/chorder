@@ -7,6 +7,7 @@ export default function TextInput({
   labelClassName,
   inputClassName,
   id,
+  value,
   onChange,
   placeholder,
   long,
@@ -16,6 +17,7 @@ export default function TextInput({
   inputClassName?: string;
   label?: string;
   id?: string;
+  value?: string;
   onChange?: ChangeEventHandler;
   placeholder?: string;
   long?: boolean;
@@ -68,6 +70,7 @@ export default function TextInput({
       )}
       <Component
         id={id}
+        value={value}
         className={inputClassNames.join(" ")}
         onChange={onChange}
         placeholder={placeholder}

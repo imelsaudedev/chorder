@@ -2,7 +2,7 @@ import { on } from "events";
 import { ChangeEvent, ChangeEventHandler, useState } from "react";
 
 export default function Combobox({
-  initial,
+  value,
   options,
   label,
   className,
@@ -11,7 +11,7 @@ export default function Combobox({
   id,
   onChange,
 }: {
-  initial: string;
+  value: string;
   options: { [value: string]: string };
   label?: string;
   className?: string;
@@ -61,7 +61,7 @@ export default function Combobox({
       <select
         className={selectClassNames.join(" ")}
         onChange={onChange}
-        defaultValue={initial}
+        value={value}
       >
         {Object.keys(options).map((value) => (
           <option
