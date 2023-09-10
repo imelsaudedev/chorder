@@ -1,6 +1,7 @@
 import Combobox from "@/components/Combobox";
 import TextInput from "@/components/TextInput";
 import UnitCircle from "@/components/UnitCircle";
+import CloseIcon from "@/components/icons/CloseIcon";
 import { unitTypeColorClasses } from "@/components/unit-colors";
 import messages from "@/i18n/messages";
 import { Unit, UnitType } from "@/models/unit";
@@ -10,10 +11,12 @@ export default function UnitForm({
   unit,
   index,
   setUnit,
+  removeUnit,
 }: {
   unit: Unit;
   index: number;
   setUnit: (unit: Unit) => void;
+  removeUnit: () => void;
 }) {
   const colorClasses = unitTypeColorClasses[unit.type];
 
@@ -37,17 +40,21 @@ export default function UnitForm({
     <div
       className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg break-inside-avoid flex flex-col gap-2 px-2 py-2 mb-2`}
     >
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-4 items-center justify-between">
         <UnitCircle className="w-14 h-14" unit={unit} />
-        <Combobox
-          value={unit.type}
-          className="flex-grow"
-          onChange={handleChangeType}
-          label={messages.unitData.unitType}
-          options={messages.unitTypes}
-          id={`unit-type-${index}`}
-        />
+        <button onClick={removeUnit}>
+          <CloseIcon />
+        </button>
       </div>
+
+      <Combobox
+        value={unit.type}
+        className="flex-grow"
+        onChange={handleChangeType}
+        label={messages.unitData.unitType}
+        options={messages.unitTypes}
+        id={`unit-type-${index}`}
+      />
 
       <TextInput
         id={`title-${index}`}

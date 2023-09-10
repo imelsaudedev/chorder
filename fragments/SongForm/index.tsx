@@ -37,6 +37,29 @@ export default function SongForm() {
     });
   };
 
+  const buildRemoveUnitHandler = (index: number) => {
+    return () => {
+      const localId = unitSequence[index].localId;
+      if (
+        unitSequence.filter((unit: Unit) => unit.localId === localId).length <=
+        1
+      ) {
+        setAvailableUnits((units) => {
+          const newUnits = [...units];
+          const index = newUnits.map((unit) => unit.localId).indexOf(localId);
+          newUnits.splice(index, 1);
+          return updateLocalIds(newUnits);
+        });
+      }
+
+      setUnitSequence((currSequence) => {
+        const newSequence = [...currSequence];
+        newSequence.splice(index, 1);
+        return newSequence;
+      });
+    };
+  };
+
   return (
     <>
       <Header>
@@ -66,6 +89,7 @@ export default function SongForm() {
               index={index}
               unit={unit}
               setUnit={updateUnits}
+              removeUnit={buildRemoveUnitHandler(index)}
             />
           ))}
           <AddUnitForm
