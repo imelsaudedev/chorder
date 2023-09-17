@@ -1,13 +1,9 @@
-import { on } from "events";
-import { ChangeEvent, ChangeEventHandler, useState } from "react";
+import { ChangeEventHandler } from "react";
 
 export default function Combobox({
   value,
   options,
-  label,
   className,
-  labelClassName,
-  selectClassName,
   id,
   onChange,
 }: {
@@ -15,26 +11,10 @@ export default function Combobox({
   options: { [value: string]: string };
   label?: string;
   className?: string;
-  labelClassName?: string;
-  selectClassName?: string;
   id?: string;
   onChange?: ChangeEventHandler<HTMLSelectElement>;
 }) {
-  if (label && !id) {
-    throw new Error("TextInput with label must have an id");
-  }
-
-  const classNames = ["flex", "flex-col"];
-  if (className) {
-    classNames.push(className);
-  }
-
-  const labelClassNames = ["block", "text-sm", "font-medium", "text-gray-900"];
-  if (labelClassName) {
-    labelClassNames.push(labelClassName);
-  }
-
-  const selectClassNames = [
+  const classNames = [
     "bg-gray-50",
     "border",
     "border-gray-300",
@@ -47,32 +27,22 @@ export default function Combobox({
     "p-2",
     "w-full",
   ];
-  if (selectClassName) {
-    selectClassNames.push(selectClassName);
+  if (className) {
+    classNames.push(className);
   }
 
   return (
-    <div className={classNames.join(" ")}>
-      {label && (
-        <label htmlFor={id} className={labelClassNames.join(" ")}>
-          {label}
-        </label>
-      )}
-      <select
-        className={selectClassNames.join(" ")}
-        onChange={onChange}
-        value={value}
-      >
-        {Object.keys(options).map((value) => (
-          <option
-            key={value}
-            value={value}
-            className={labelClassNames.join(" ")}
-          >
-            {options[value]}
-          </option>
-        ))}
-      </select>
-    </div>
+    <select
+      id={id}
+      className={classNames.join(" ")}
+      onChange={onChange}
+      value={value}
+    >
+      {Object.keys(options).map((value) => (
+        <option key={value} value={value}>
+          {options[value]}
+        </option>
+      ))}
+    </select>
   );
 }

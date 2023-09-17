@@ -1,4 +1,6 @@
 import Combobox from "@/components/Combobox";
+import FormField from "@/components/FormField";
+import FormLabel from "@/components/FormLabel";
 import TextInput from "@/components/TextInput";
 import UnitCircle from "@/components/UnitCircle";
 import CloseIcon from "@/components/icons/CloseIcon";
@@ -31,6 +33,10 @@ export default function UnitForm({
     setUnit({ ...unit, content: event.target.value });
   };
 
+  const handlePreviewChange = (event: ChangeEvent<HTMLInputElement>) => {
+    console.log(event.target.checked);
+  };
+
   return (
     <div
       className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg break-inside-avoid flex flex-col gap-2 px-2 py-2 mb-2`}
@@ -42,34 +48,45 @@ export default function UnitForm({
         </button>
       </div>
 
-      <Combobox
-        value={unit.type}
-        className="flex-grow"
-        onChange={handleChangeType}
-        label={messages.unitData.unitType}
-        options={messages.unitTypes}
-        id={`unit-type-${index}`}
-      />
+      <FormField>
+        <FormLabel htmlFor={`unit-type-${index}`}>
+          {messages.unitData.unitType}
+        </FormLabel>
+        <Combobox
+          value={unit.type}
+          className="flex-grow"
+          onChange={handleChangeType}
+          options={messages.unitTypes}
+          id={`unit-type-${index}`}
+        />
+      </FormField>
 
-      <TextInput
-        id={`content-${index}`}
-        className="flex-grow"
-        inputClassName="resize-none flex-grow"
-        label={messages.unitData.content}
-        placeholder={messages.unitData.contentPlaceholder}
-        onChange={handleChangeChordpro}
-        value={unit.content}
-        minRows={3}
-        labelRightComponent={
+      <FormField className="flex-grow">
+        <div className="flex justify-between">
+          <FormLabel htmlFor={`title-${index}`}>
+            {messages.unitData.content}
+          </FormLabel>
           <div className="flex gap-1 items-center text-sm">
             <label htmlFor={`preview-${index}`}>
               {messages.messages.preview}
             </label>
-            <input id={`preview-${index}`} type="checkbox" />
+            <input
+              id={`preview-${index}`}
+              type="checkbox"
+              onChange={handlePreviewChange}
+            />
           </div>
-        }
-        long
-      />
+        </div>
+        <TextInput
+          id={`content-${index}`}
+          className="resize-none flex-grow"
+          placeholder={messages.unitData.contentPlaceholder}
+          onChange={handleChangeChordpro}
+          value={unit.content}
+          minRows={3}
+          long
+        />
+      </FormField>
     </div>
   );
 }

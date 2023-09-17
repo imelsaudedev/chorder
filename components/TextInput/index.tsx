@@ -3,33 +3,21 @@ import TextareaAutosize from "react-textarea-autosize";
 
 export default function TextInput({
   className,
-  label,
-  labelClassName,
-  inputClassName,
   id,
   value,
   onChange,
   placeholder,
   long,
   minRows,
-  labelRightComponent,
 }: {
   className?: string;
-  labelClassName?: string;
-  inputClassName?: string;
-  label?: string;
   id?: string;
   value?: string;
   onChange?: ChangeEventHandler;
   placeholder?: string;
   long?: boolean;
   minRows?: number;
-  labelRightComponent?: React.ReactNode;
 }) {
-  if (label && !id) {
-    throw new Error("TextInput with label must have an id");
-  }
-
   let Component;
   if (long) {
     Component = TextareaAutosize;
@@ -37,17 +25,7 @@ export default function TextInput({
     Component = "input";
   }
 
-  const classNames = ["flex", "flex-col"];
-  if (className) {
-    classNames.push(className);
-  }
-
-  const labelClassNames = ["block", "text-sm", "font-medium", "text-gray-900"];
-  if (labelClassName) {
-    labelClassNames.push(labelClassName);
-  }
-
-  const inputClassNames = [
+  const classNames = [
     "border",
     "border-gray-300",
     "bg-gray-50",
@@ -61,33 +39,23 @@ export default function TextInput({
     "w-full",
     "p-2",
   ];
-  if (inputClassName) {
-    inputClassNames.push(inputClassName);
+  if (className) {
+    classNames.push(className);
   }
 
-  const labelComponent = label && (
-    <label htmlFor={id} className={labelClassNames.join(" ")}>
-      {label}
-    </label>
-  );
+  const otherProps: { minRows?: number } = {};
+  if (minRows) {
+    otherProps.minRows = minRows;
+  }
 
   return (
-    <div className={classNames.join(" ")}>
-      {labelRightComponent && (
-        <div className="flex justify-between">
-          {labelComponent}
-          {labelRightComponent}
-        </div>
-      )}
-      {!labelRightComponent && labelComponent}
-      <Component
-        id={id}
-        value={value}
-        className={inputClassNames.join(" ")}
-        onChange={onChange}
-        placeholder={placeholder}
-        minRows={minRows || 1}
-      />
-    </div>
+    <Component
+      id={id}
+      value={value}
+      className={classNames.join(" ")}
+      onChange={onChange}
+      placeholder={placeholder}
+      {...otherProps}
+    />
   );
 }

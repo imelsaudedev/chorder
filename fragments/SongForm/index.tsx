@@ -11,6 +11,8 @@ import { useState } from "react";
 import UnitForm from "../UnitForm";
 import { updateLocalIds } from "./utils";
 import AddUnitForm from "./AddUnitForm";
+import FormField from "@/components/FormField";
+import FormLabel from "@/components/FormLabel";
 
 export default function SongForm() {
   const [availableUnits, setAvailableUnits] = useState<Unit[]>([]);
@@ -67,18 +69,24 @@ export default function SongForm() {
           <ExpandingArrow className="rotate-180 h-6 w-6" />
         </Link>
         <div className="flex mx-4 gap-2">
-          <TextInput
-            label={messages.songData.title}
-            labelClassName="text-purple-700"
-            id="title"
-            placeholder={messages.songData.titlePlaceholder}
-          />
-          <TextInput
-            label={messages.songData.artist}
-            labelClassName="text-purple-700"
-            id="title"
-            placeholder={messages.songData.artistPlaceholder}
-          />
+          <FormField>
+            <FormLabel className="text-purple-700" htmlFor="title">
+              {messages.songData.title}
+            </FormLabel>
+            <TextInput
+              id="title"
+              placeholder={messages.songData.titlePlaceholder}
+            />
+          </FormField>
+          <FormField>
+            <FormLabel className="text-purple-700" htmlFor="artist">
+              {messages.songData.artist}
+            </FormLabel>
+            <TextInput
+              id="artist"
+              placeholder={messages.songData.artistPlaceholder}
+            />
+          </FormField>
         </div>
       </Header>
       <Main className="pt-4">
