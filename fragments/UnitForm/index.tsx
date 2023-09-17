@@ -26,11 +26,6 @@ export default function UnitForm({
     setUnit({ ...unit, type: event.target.value as UnitType });
   };
 
-  const handleChangeTitle = (event: ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    setUnit({ ...unit, title: event.target.value });
-  };
-
   const handleChangeChordpro = (event: ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
     setUnit({ ...unit, content: event.target.value });
@@ -57,13 +52,6 @@ export default function UnitForm({
       />
 
       <TextInput
-        id={`title-${index}`}
-        label={messages.unitData.title}
-        placeholder={messages.unitData.titlePlaceholder}
-        value={unit.title}
-        onChange={handleChangeTitle}
-      />
-      <TextInput
         id={`content-${index}`}
         className="flex-grow"
         inputClassName="resize-none flex-grow"
@@ -71,6 +59,15 @@ export default function UnitForm({
         placeholder={messages.unitData.contentPlaceholder}
         onChange={handleChangeChordpro}
         value={unit.content}
+        minRows={3}
+        labelRightComponent={
+          <div className="flex gap-1 items-center text-sm">
+            <label htmlFor={`preview-${index}`}>
+              {messages.messages.preview}
+            </label>
+            <input id={`preview-${index}`} type="checkbox" />
+          </div>
+        }
         long
       />
     </div>

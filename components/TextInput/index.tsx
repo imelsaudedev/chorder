@@ -11,6 +11,8 @@ export default function TextInput({
   onChange,
   placeholder,
   long,
+  minRows,
+  labelRightComponent,
 }: {
   className?: string;
   labelClassName?: string;
@@ -21,6 +23,8 @@ export default function TextInput({
   onChange?: ChangeEventHandler;
   placeholder?: string;
   long?: boolean;
+  minRows?: number;
+  labelRightComponent?: React.ReactNode;
 }) {
   if (label && !id) {
     throw new Error("TextInput with label must have an id");
@@ -61,19 +65,28 @@ export default function TextInput({
     inputClassNames.push(inputClassName);
   }
 
+  const labelComponent = label && (
+    <label htmlFor={id} className={labelClassNames.join(" ")}>
+      {label}
+    </label>
+  );
+
   return (
     <div className={classNames.join(" ")}>
-      {label && (
-        <label htmlFor={id} className={labelClassNames.join(" ")}>
-          {label}
-        </label>
+      {labelRightComponent && (
+        <div className="flex justify-between">
+          {labelComponent}
+          {labelRightComponent}
+        </div>
       )}
+      {!labelRightComponent && labelComponent}
       <Component
         id={id}
         value={value}
         className={inputClassNames.join(" ")}
         onChange={onChange}
         placeholder={placeholder}
+        minRows={minRows || 1}
       />
     </div>
   );

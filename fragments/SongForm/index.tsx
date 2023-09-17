@@ -82,7 +82,7 @@ export default function SongForm() {
         </div>
       </Header>
       <Main className="pt-4">
-        <section className="columns-xs gap-4">
+        <section>
           {unitSequence.map((unit, index) => (
             <UnitForm
               key={index}

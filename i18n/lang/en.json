@@ -2,7 +2,8 @@
   "siteName": "Chorder",
   "siteDescription": "A tool for managing chord sheets",
   "messages": {
-    "or": "or"
+    "or": "or",
+    "preview": "Preview"
   },
   "songData": {
     "title": "Title",
@@ -12,8 +13,6 @@
     "units": "Unit"
   },
   "unitData": {
-    "title": "Title",
-    "titlePlaceholder": "Unit title [optional]",
     "content": "Chordpro",
     "contentPlaceholder": "Chordpro content goes here",
     "unitType": "Unit type"
@@ -27,7 +26,7 @@
     "bridge": "Bridge",
     "interlude": "Interlude",
     "solo": "Solo",
-    "neutral": "Neutral"
+    "neutral": "Undefined"
   },
   "songForm": {
     "addExistingUnit": "Add existing unit",

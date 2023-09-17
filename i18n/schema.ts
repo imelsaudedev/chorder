@@ -5,6 +5,7 @@ export const messagesSchema = z.object({
   siteDescription: z.string(),
   messages: z.object({
     or: z.string(),
+    preview: z.string(),
   }),
   songData: z.object({
     title: z.string(),
@@ -14,8 +15,6 @@ export const messagesSchema = z.object({
     unit: z.string(),
   }),
   unitData: z.object({
-    title: z.string(),
-    titlePlaceholder: z.string(),
     content: z.string(),
     contentPlaceholder: z.string(),
     unitType: z.string(),
