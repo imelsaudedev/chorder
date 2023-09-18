@@ -21,8 +21,6 @@ export default function UnitForm({
   setUnit: (unit: Unit) => void;
   removeUnit: () => void;
 }) {
-  const [showPreview, setShowPreview] = useState(false);
-
   const colorClasses = unitTypeColorClasses[unit.type];
 
   const handleChangeType = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -37,7 +35,7 @@ export default function UnitForm({
   };
 
   const handlePreviewChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setShowPreview(event.target.checked);
+    setUnit({ ...unit, preview: event.target.checked });
   };
 
   return (
@@ -77,11 +75,16 @@ export default function UnitForm({
               id={`preview-${index}`}
               type="checkbox"
               onChange={handlePreviewChange}
+              checked={unit.preview}
             />
           </div>
         </div>
-        {showPreview && <ChordProViewer chordpro={unit.content} />}
-        {!showPreview && (
+        {unit.preview && (
+          <div className="p-2 bg-white rounded">
+            <ChordProViewer chordpro={unit.content} />
+          </div>
+        )}
+        {!unit.preview && (
           <TextInput
             id={`content-${index}`}
             className="resize-none flex-grow"

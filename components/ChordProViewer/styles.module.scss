@@ -1,13 +1,19 @@
-.chordLyrics {
-  margin-bottom: 0.2rem;
-}
-
-.chord {
-  margin-right: 0.5em;
-  line-height: 1.1em;
-  font-weight: bold;
-}
-
 .lyrics {
-  line-height: 1.5em;
+  display: flex;
+
+  &::after {
+    $line-start: 56%;
+    $line-end: 61%;
+
+    content: "";
+    flex-grow: 1;
+    background: linear-gradient(
+      to bottom,
+      transparent $line-start,
+      #999 $line-start,
+      #999 $line-end,
+      transparent $line-end,
+      transparent 100%
+    );
+  }
 }

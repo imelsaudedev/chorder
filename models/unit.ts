@@ -7,6 +7,8 @@ export type Unit = {
   // These are for history navigation
   prevUnit?: Unit;
   nextUnit?: Unit;
+  // This is for the form
+  preview?: boolean;
 };
 
 export type UnitType =

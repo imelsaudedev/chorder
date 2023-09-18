@@ -32,9 +32,11 @@ function ChordProItem({ item }: { item: any }) {
     return <span className="italic">{item._value}</span>;
   }
   return (
-    <div className={`flex flex-col whitespace-pre-wrap ${styles.chordLyrics}`}>
-      <div>{item.chords}</div>
-      <div>{item.lyrics}</div>
+    <div className={"flex flex-col whitespace-pre-wrap mb-2"}>
+      <span className="mr-1 leading-none font-bold mb-0">{item.chords}</span>
+      <span className={`leading-none ${styles.lyrics}`}>
+        {item.lyrics || " "}
+      </span>
     </div>
   );
 }

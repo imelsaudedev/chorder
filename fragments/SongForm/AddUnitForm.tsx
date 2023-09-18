@@ -1,6 +1,6 @@
 import { MouseEventHandler } from "react";
 import messages from "@/i18n/messages";
-import { Unit } from "@/models/unit";
+import { UnitWithPreview } from "@/models/unit";
 import UnitCircle from "@/components/UnitCircle";
 import Or from "@/components/Or";
 
@@ -9,16 +9,16 @@ export default function AddUnitForm({
   onCreateUnit,
   onAddExistingUnit,
 }: {
-  units: Unit[];
+  units: UnitWithPreview[];
   onCreateUnit: () => void;
-  onAddExistingUnit: (unit: Unit) => void;
+  onAddExistingUnit: (unit: UnitWithPreview) => void;
 }) {
   const handleAddNewUnit: MouseEventHandler = (event) => {
     event.preventDefault();
     onCreateUnit();
   };
 
-  const createAddExistingUnitHandler = (unit: Unit) => {
+  const createAddExistingUnitHandler = (unit: UnitWithPreview) => {
     const handler: MouseEventHandler = (event) => {
       event.preventDefault();
       onAddExistingUnit(unit);

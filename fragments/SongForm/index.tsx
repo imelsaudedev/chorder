@@ -19,7 +19,11 @@ export default function SongForm() {
   const [unitSequence, setUnitSequence] = useState<Unit[]>([]);
 
   const handleCreateUnit = () => {
-    const newUnit: Unit = { type: "neutral", content: "" };
+    const newUnit: Unit = {
+      type: "neutral",
+      content: "",
+      preview: false,
+    };
     setAvailableUnits((units) => updateLocalIds([...units, newUnit]));
     handleAddExistingUnit(newUnit);
   };
@@ -90,7 +94,7 @@ export default function SongForm() {
         </div>
       </Header>
       <Main className="pt-4">
-        <section>
+        <section className="columns-sm">
           {unitSequence.map((unit, index) => (
             <UnitForm
               key={index}
