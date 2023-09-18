@@ -1,3 +1,4 @@
+import ChordProViewer from "@/components/ChordProViewer";
 import Combobox from "@/components/Combobox";
 import FormField from "@/components/FormField";
 import FormLabel from "@/components/FormLabel";
@@ -7,7 +8,7 @@ import CloseIcon from "@/components/icons/CloseIcon";
 import { unitTypeColorClasses } from "@/components/unit-colors";
 import messages from "@/i18n/messages";
 import { Unit, UnitType } from "@/models/unit";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 
 export default function UnitForm({
   unit,
@@ -20,6 +21,8 @@ export default function UnitForm({
   setUnit: (unit: Unit) => void;
   removeUnit: () => void;
 }) {
+  const [showPreview, setShowPreview] = useState(false);
+
   const colorClasses = unitTypeColorClasses[unit.type];
 
   const handleChangeType = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -34,7 +37,7 @@ export default function UnitForm({
   };
 
   const handlePreviewChange = (event: ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.checked);
+    setShowPreview(event.target.checked);
   };
 
   return (
@@ -77,15 +80,18 @@ export default function UnitForm({
             />
           </div>
         </div>
-        <TextInput
-          id={`content-${index}`}
-          className="resize-none flex-grow"
-          placeholder={messages.unitData.contentPlaceholder}
-          onChange={handleChangeChordpro}
-          value={unit.content}
-          minRows={3}
-          long
-        />
+        {showPreview && <ChordProViewer chordpro={unit.content} />}
+        {!showPreview && (
+          <TextInput
+            id={`content-${index}`}
+            className="resize-none flex-grow"
+            placeholder={messages.unitData.contentPlaceholder}
+            onChange={handleChangeChordpro}
+            value={unit.content}
+            minRows={3}
+            long
+          />
+        )}
       </FormField>
     </div>
   );
