@@ -32,6 +32,22 @@ export const parseChordPro = (chordproString: string) => {
   return parsedSong;
 };
 
+export function getLyrics(chordproString: string) {
+  try {
+    const parsedSong = parseChordPro(chordproString);
+    return parsedSong.lines
+      .map((line) =>
+        line.items
+          .map((item: any) => (item._name === "comment" ? "" : item.lyrics))
+          .join("")
+      )
+      .join("\n");
+  } catch (e) {
+    console.log(e);
+    return null;
+  }
+}
+
 const KEYS = {
   C: ["C", "D", "E", "F", "G", "A", "B"],
   "C#": ["C#", "D#", "E#", "F#", "G#", "A#", "B#"],

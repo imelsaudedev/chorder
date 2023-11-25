@@ -24,7 +24,7 @@ export default function UnitCircle({
     classList.push(className);
   }
   const firstLetter = messages.unitTypes[unit.type][0].toUpperCase();
-  const number = unit.localId?.split("--")[1] || "";
+  const number = unit.typeIdx || "";
 
   return <div className={classList.join(" ")}>{`${firstLetter}${number}`}</div>;
 }

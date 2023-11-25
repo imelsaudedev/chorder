@@ -8,55 +8,55 @@ export const unitTypeColorClasses: {
     border: string;
   };
 } = {
-  intro: {
+  INTRO: {
     circleBackground: "bg-orange-400",
     background: "bg-orange-100",
     text: "text-orange-50",
     border: "border-orange-400",
   },
-  ending: {
+  ENDING: {
     circleBackground: "bg-amber-400",
     background: "bg-amber-100",
     text: "text-amber-50",
     border: "border-amber-400",
   },
-  verse: {
+  VERSE: {
     circleBackground: "bg-cyan-400",
     background: "bg-cyan-100",
     text: "text-cyan-50",
     border: "border-cyan-400",
   },
-  prechorus: {
+  PRECHORUS: {
     circleBackground: "bg-fuchsia-400",
     background: "bg-fuchsia-100",
     text: "text-fuchsia-50",
     border: "border-fuchsia-400",
   },
-  chorus: {
+  CHORUS: {
     circleBackground: "bg-violet-400",
     background: "bg-violet-100",
     text: "text-violet-50",
     border: "border-violet-400",
   },
-  bridge: {
+  BRIDGE: {
     circleBackground: "bg-pink-400",
     background: "bg-pink-100",
     text: "text-pink-50",
     border: "border-pink-400",
   },
-  interlude: {
+  INTERLUDE: {
     circleBackground: "bg-indigo-400",
     background: "bg-indigo-100",
     text: "text-indigo-50",
     border: "border-indigo-400",
   },
-  solo: {
+  SOLO: {
     circleBackground: "bg-emerald-400",
     background: "bg-emerald-100",
     text: "text-emerald-50",
     border: "border-emerald-400",
   },
-  neutral: {
+  NEUTRAL: {
     circleBackground: "bg-slate-400",
     background: "bg-slate-100",
     text: "text-slate-50",

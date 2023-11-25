@@ -1,0 +1,49 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model Song {
+  id        Int  @id @default(autoincrement())
+  title     String
+  artist    String?
+  lyrics    String
+  versions  SongVersion[] @relation("Versions")
+}
+
+model SongVersion {
+  id               Int  @id @default(autoincrement())
+  units            SongUnit[] @relation("Units")
+  unitSequenceIds  String
+  song             Song @relation("Versions", fields: [songId], references: [id])
+  songId           Int
+}
+
+model SongUnit {
+  id             Int  @id @default(autoincrement())
+  title          String?
+  content        String
+  type           UnitType   @default(NEUTRAL)
+  localId        Int
+  songVersion    SongVersion @relation("Units", fields: [songVersionId], references: [id])
+  songVersionId  Int
+}
+
+enum UnitType {
+  INTRO
+  ENDING
+  VERSE
+  PRECHORUS
+  CHORUS
+  BRIDGE
+  INTERLUDE
+  SOLO
+  NEUTRAL
+}

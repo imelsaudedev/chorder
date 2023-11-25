@@ -3,7 +3,8 @@
   "siteDescription": "A tool for managing chord sheets",
   "messages": {
     "or": "ou",
-    "preview": "Pré-visualizar"
+    "preview": "Pré-visualizar",
+    "save": "Salvar"
   },
   "songData": {
     "title": "Título",
@@ -18,15 +19,15 @@
     "unitType": "Tipo da unidade"
   },
   "unitTypes": {
-    "intro": "Introdução",
-    "ending": "Saída",
-    "verse": "Verso",
-    "prechorus": "Pré-refrão",
-    "chorus": "Refrão",
-    "bridge": "Ponte",
-    "interlude": "Interlúdio",
-    "solo": "Solo",
-    "neutral": "Indefinido"
+    "INTRO": "Introdução",
+    "ENDING": "Saída",
+    "VERSE": "Verso",
+    "PRECHORUS": "Pré-refrão",
+    "CHORUS": "Refrão",
+    "BRIDGE": "Ponte",
+    "INTERLUDE": "Interlúdio",
+    "SOLO": "Solo",
+    "NEUTRAL": "Indefinido"
   },
   "songForm": {
     "addExistingUnit": "Adicionar unidade existente",

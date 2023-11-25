@@ -3,21 +3,22 @@ export type Unit = {
   content: string;
   type: UnitType;
   // ID within the song
-  localId?: string;
+  localId: number;
   // These are for history navigation
   prevUnit?: Unit;
   nextUnit?: Unit;
   // This is for the form
   preview?: boolean;
+  typeIdx?: number;
 };
 
 export type UnitType =
-  | "intro"
-  | "ending"
-  | "verse"
-  | "prechorus"
-  | "chorus"
-  | "bridge"
-  | "interlude"
-  | "solo"
-  | "neutral";
+  | "INTRO"
+  | "ENDING"
+  | "VERSE"
+  | "PRECHORUS"
+  | "CHORUS"
+  | "BRIDGE"
+  | "INTERLUDE"
+  | "SOLO"
+  | "NEUTRAL";

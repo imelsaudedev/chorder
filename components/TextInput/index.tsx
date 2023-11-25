@@ -1,10 +1,16 @@
-import { ChangeEventHandler } from "react";
+import {
+  ChangeEvent,
+  ChangeEventHandler,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import TextareaAutosize from "react-textarea-autosize";
 
 export default function TextInput({
   className,
   id,
   value,
+  defaultValue,
   onChange,
   placeholder,
   long,
@@ -13,6 +19,7 @@ export default function TextInput({
   className?: string;
   id?: string;
   value?: string;
+  defaultValue?: string;
   onChange?: ChangeEventHandler;
   placeholder?: string;
   long?: boolean;
@@ -24,6 +31,36 @@ export default function TextInput({
   } else {
     Component = "input";
   }
+
+  // https://giacomocerquone.com/keep-input-cursor-still/
+  const position = useRef<{
+    beforeStart: number | null;
+    beforeEnd: number | null;
+  }>({
+    beforeStart: 0,
+    beforeEnd: 0,
+  });
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    inputRef.current?.setSelectionRange(
+      position.current.beforeStart,
+      position.current.beforeEnd
+    );
+  }, [value]);
+
+  const handleChange: ChangeEventHandler = (e) => {
+    const target = e.target as HTMLInputElement;
+    const beforeStart = target.selectionStart;
+    const beforeEnd = target.selectionEnd;
+
+    position.current = {
+      beforeStart,
+      beforeEnd,
+    };
+
+    onChange?.(e);
+  };
 
   const classNames = [
     "border",
@@ -50,10 +87,12 @@ export default function TextInput({
 
   return (
     <Component
+      ref={inputRef}
       id={id}
       value={value}
+      defaultValue={defaultValue}
       className={classNames.join(" ")}
-      onChange={onChange}
+      onChange={handleChange}
       placeholder={placeholder}
       {...otherProps}
     />
