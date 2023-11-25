@@ -1,9 +1,10 @@
 import SongForm from "@/fragments/SongForm";
-import { postSong } from "./actions";
+import SongViewer from "@/fragments/SongViewer";
+import { getSong, postSong } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default function SongPage({
+export default async function SongPage({
   params,
   searchParams,
 }: {
@@ -12,6 +13,13 @@ export default function SongPage({
 }) {
   const songSlug = params.song;
   const edit = searchParams.edit === "true" || songSlug === "new";
+  const songId = parseInt(songSlug);
+  const song = songId ? await getSong(songId) : null;
 
-  return <>{edit && <SongForm postSong={postSong} />}</>;
+  return (
+    <>
+      {!edit && song && <SongViewer song={song} />}
+      {edit && <SongForm postSong={postSong} />}
+    </>
+  );
 }

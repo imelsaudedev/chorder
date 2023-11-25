@@ -1,16 +1,24 @@
 import { Line, Song } from "chordsheetjs";
 import styles from "./styles.module.scss";
 import { parseChordPro } from "../../chopro/music";
-import { useMemo } from "react";
+import { Fragment, useMemo } from "react";
 
-export default function ChordProViewer({ chordpro }: { chordpro: string }) {
+export default function ChordProViewer({
+  chordpro,
+  withoutContainer,
+}: {
+  chordpro: string;
+  withoutContainer?: boolean;
+}) {
   const chordproHtml = useMemo<Song>(() => parseChordPro(chordpro), [chordpro]);
+  const Container = withoutContainer ? Fragment : "div";
+
   return (
-    <div>
+    <Container>
       {chordproHtml.lines.map((line, idx) => (
         <ChordProLine line={line} key={`song-line-${idx}`} />
       ))}
-    </div>
+    </Container>
   );
 }
 

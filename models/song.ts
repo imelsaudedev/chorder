@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 export type Song = {
   id: number;
   title: string;
-  artist?: string;
+  artist?: string | null;
   lyrics: string;
   versions: SongVersion[];
 };
@@ -19,7 +19,7 @@ export async function createSong(
   title: string,
   lyrics: string,
   availableUnits: Unit[],
-  unitSequenceIds: number[],
+  unitSequence: number[],
   artist?: string
 ) {
   const song = await prisma.song.create({
@@ -30,7 +30,7 @@ export async function createSong(
       versions: {
         create: [
           {
-            unitSequenceIds: unitSequenceIds.join(","),
+            unitSequence: unitSequence.join(","),
             units: {
               create: availableUnits.map((unit) => ({
                 title: unit.title,
@@ -46,4 +46,17 @@ export async function createSong(
   });
 
   return song;
+}
+
+export function fetchSong(id: number) {
+  return prisma.song.findUnique({
+    where: { id },
+    include: {
+      versions: {
+        include: {
+          units: true,
+        },
+      },
+    },
+  });
 }

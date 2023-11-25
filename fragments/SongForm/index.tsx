@@ -3,16 +3,15 @@
 import Header from "@/components/Header";
 import Main from "@/components/Main";
 import TextInput from "@/components/TextInput";
-import ExpandingArrow from "@/components/expanding-arrow";
 import messages from "@/i18n/messages";
 import { Unit } from "@/models/unit";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import UnitForm from "../UnitForm";
 import { getNextLocalId, updateTypeIndices } from "./utils";
 import AddUnitForm from "./AddUnitForm";
 import FormField from "@/components/FormField";
 import FormLabel from "@/components/FormLabel";
+import BackArrow from "@/components/BackArrow";
 
 type SongFormProps = {
   postSong: (
@@ -106,9 +105,7 @@ export default function SongForm({ postSong }: SongFormProps) {
   return (
     <form action={postSongWithUnits}>
       <Header>
-        <Link href="/songs" className="flex group mr-6 text-purple-500">
-          <ExpandingArrow className="rotate-180 h-6 w-6" />
-        </Link>
+        <BackArrow href="/songs" />
         <div className="flex mx-4 gap-2">
           <FormField>
             <FormLabel className="text-purple-700" htmlFor="title">

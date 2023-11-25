@@ -21,7 +21,7 @@ model Song {
 model SongVersion {
   id               Int  @id @default(autoincrement())
   units            SongUnit[] @relation("Units")
-  unitSequenceIds  String
+  unitSequence     String
   song             Song @relation("Versions", fields: [songId], references: [id])
   songId           Int
 }
