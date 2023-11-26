@@ -19,7 +19,7 @@ export default async function SongPage({
   return (
     <>
       {!edit && song && <SongViewer song={song} />}
-      {edit && <SongForm postSong={postSong} />}
+      {edit && <SongForm postSong={postSong} song={song} />}
     </>
   );
 }

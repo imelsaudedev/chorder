@@ -12,8 +12,10 @@ import AddUnitForm from "./AddUnitForm";
 import FormField from "@/components/FormField";
 import FormLabel from "@/components/FormLabel";
 import BackArrow from "@/components/BackArrow";
+import { Song } from "@/models/song";
 
 type SongFormProps = {
+  song?: Song;
   postSong: (
     title: string,
     availableUnits: Unit[],
@@ -22,9 +24,9 @@ type SongFormProps = {
   ) => void;
 };
 
-export default function SongForm({ postSong }: SongFormProps) {
-  const [title, setTitle] = useState("");
-  const [artist, setArtist] = useState("");
+export default function SongForm({ song, postSong }: SongFormProps) {
+  const [title, setTitle] = useState(song?.title || "");
+  const [artist, setArtist] = useState(song?.artist || "");
   const [availableUnits, setAvailableUnits] = useState<Unit[]>([]);
   const [localIdToUnit, setLocalIdToUnit] = useState<Map<number, Unit>>();
   const [unitSequence, setUnitSequence] = useState<number[]>([]);
@@ -115,6 +117,7 @@ export default function SongForm({ postSong }: SongFormProps) {
               id="title"
               placeholder={messages.songData.titlePlaceholder}
               onChange={handleChangeTitle}
+              defaultValue={title}
             />
           </FormField>
           <FormField>
@@ -125,6 +128,7 @@ export default function SongForm({ postSong }: SongFormProps) {
               id="artist"
               placeholder={messages.songData.artistPlaceholder}
               onChange={handleChangeArtist}
+              defaultValue={artist}
             />
           </FormField>
         </div>
