@@ -19,7 +19,7 @@ export async function createSong(
   title: string,
   lyrics: string,
   availableUnits: Unit[],
-  unitSequence: number[],
+  unitMap: string,
   artist?: string
 ) {
   const song = await prisma.song.create({
@@ -30,7 +30,7 @@ export async function createSong(
       versions: {
         create: [
           {
-            unitSequence: unitSequence.join(","),
+            unitMap,
             units: {
               create: availableUnits.map((unit) => ({
                 title: unit.title,
@@ -48,15 +48,29 @@ export async function createSong(
   return song;
 }
 
-export function fetchSong(id: number) {
-  return prisma.song.findUnique({
-    where: { id },
-    include: {
-      versions: {
-        include: {
-          units: true,
+export function fetchSong(id: number): Promise<Song | null> {
+  return prisma.song
+    .findUnique({
+      where: { id },
+      include: {
+        versions: {
+          include: {
+            units: true,
+          },
         },
       },
-    },
-  });
+    })
+    .then((song) => {
+      if (!song) return song;
+
+      return {
+        ...song,
+        versions: song.versions.map((version) => {
+          return {
+            ...version,
+            unitSequence: version.unitMap.split(",").map(Number),
+          };
+        }),
+      };
+    });
 }

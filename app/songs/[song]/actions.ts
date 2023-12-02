@@ -23,7 +23,7 @@ export async function postSong(
     title,
     lyrics,
     availableUnits,
-    unitSequence,
+    unitSequence.join(","),
     artist
   );
 

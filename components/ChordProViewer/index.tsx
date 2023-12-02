@@ -52,7 +52,7 @@ function ChordProItem({
   }
 
   const chordClasses = ["mr-1", "leading-none", "font-bold", "mb-0"];
-  if (!item.chords.trim()) {
+  if (!item.chords?.trim()) {
     chordClasses.push("flex-grow");
   }
 
@@ -60,7 +60,7 @@ function ChordProItem({
   if (isConnection) {
     lyricsClasses.push(styles.lyricsConnection);
   }
-  if (!item.lyrics.trim()) {
+  if (!item.lyrics?.trim()) {
     lyricsClasses.push("flex-grow");
   }
 
@@ -81,5 +81,5 @@ function isConnection(items: any, itemIdx: number) {
   if (prevItem._name === "comment" || currentItem._name === "comment") {
     return false;
   }
-  return prevItem.lyrics.trim() && currentItem.lyrics.trim();
+  return prevItem.lyrics?.trim() && currentItem.lyrics?.trim();
 }

@@ -15,21 +15,30 @@ import BackArrow from "@/components/BackArrow";
 import { Song } from "@/models/song";
 
 type SongFormProps = {
-  song?: Song;
+  song?: Song | null;
   postSong: (
     title: string,
     availableUnits: Unit[],
     unitSequence: number[],
     artist: string
   ) => void;
+  versionIdx?: number;
 };
 
-export default function SongForm({ song, postSong }: SongFormProps) {
+export default function SongForm({
+  song,
+  postSong,
+  versionIdx,
+}: SongFormProps) {
   const [title, setTitle] = useState(song?.title || "");
   const [artist, setArtist] = useState(song?.artist || "");
-  const [availableUnits, setAvailableUnits] = useState<Unit[]>([]);
+  const [availableUnits, setAvailableUnits] = useState<Unit[]>(
+    song?.versions[versionIdx || 0].units || []
+  );
   const [localIdToUnit, setLocalIdToUnit] = useState<Map<number, Unit>>();
-  const [unitSequence, setUnitSequence] = useState<number[]>([]);
+  const [unitSequence, setUnitSequence] = useState<number[]>(
+    song?.versions[versionIdx || 0].unitSequence || []
+  );
 
   useEffect(() => {
     setLocalIdToUnit(

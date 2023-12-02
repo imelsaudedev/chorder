@@ -24,13 +24,11 @@ export default function VersionViewer({ version }: VersionViewerProps) {
   useEffect(() => {
     if (!version.unitSequence) return;
 
-    setUnitSequence(
-      (version.unitSequence as any as string).split(",").map((s) => parseInt(s))
-    );
+    setUnitSequence(version.unitSequence);
   }, [version.unitSequence]);
 
   return (
-    <div className="columns-3">
+    <div className="columns-4">
       {unitSequence?.map((localId, idx) => {
         const unit = localIdToUnit.get(localId);
         if (!unit) return "ERROR";

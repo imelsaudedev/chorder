@@ -1,12 +1,11 @@
 export type Unit = {
-  title?: string;
+  id?: number | null;
+  songVersionId?: number | null;
+  title?: string | null;
   content: string;
   type: UnitType;
   // ID within the song
   localId: number;
-  // These are for history navigation
-  prevUnit?: Unit;
-  nextUnit?: Unit;
   // This is for the form
   preview?: boolean;
   typeIdx?: number;

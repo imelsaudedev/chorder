@@ -9,17 +9,25 @@ export default async function SongPage({
   searchParams,
 }: {
   params: { song: string };
-  searchParams: { edit?: string };
+  searchParams: { edit?: string; version?: number };
 }) {
   const songSlug = params.song;
-  const edit = searchParams.edit === "true" || songSlug === "new";
+  const writeMode = searchParams.edit === "true" || songSlug === "new";
   const songId = parseInt(songSlug);
   const song = songId ? await getSong(songId) : null;
 
   return (
     <>
-      {!edit && song && <SongViewer song={song} />}
-      {edit && <SongForm postSong={postSong} song={song} />}
+      {!writeMode && song && (
+        <SongViewer song={song} versionIdx={searchParams.version || 0} />
+      )}
+      {writeMode && (
+        <SongForm
+          postSong={postSong}
+          song={song}
+          versionIdx={searchParams.version || 0}
+        />
+      )}
     </>
   );
 }

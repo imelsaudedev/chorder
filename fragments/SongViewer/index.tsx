@@ -3,16 +3,17 @@
 import BackArrow from "@/components/BackArrow";
 import Header from "@/components/Header";
 import Main from "@/components/Main";
-import { Song } from "@/models/song";
 import VersionViewer from "../VersionViewer";
 import EditIcon from "@/components/icons/EditIcon";
 import AnchorButton from "@/components/AnchorButton";
+import { Song } from "@/models/song";
 
 type SongViewerProps = {
   song: Song;
+  versionIdx: number;
 };
 
-export default function SongViewer({ song }: SongViewerProps) {
+export default function SongViewer({ song, versionIdx }: SongViewerProps) {
   return (
     <>
       <Header>
@@ -25,14 +26,16 @@ export default function SongViewer({ song }: SongViewerProps) {
             {song?.artist && <span className="text-sm">{song?.artist}</span>}
           </div>
           <div>
-            <AnchorButton href={`?edit=true`}>
+            <AnchorButton href={`?version=${versionIdx}&edit=true`}>
               <EditIcon />
             </AnchorButton>
           </div>
         </div>
       </Header>
       <Main className="pt-4">
-        {song?.versions[0] && <VersionViewer version={song.versions[0]} />}
+        {song?.versions[versionIdx] && (
+          <VersionViewer version={song.versions[versionIdx]} />
+        )}
       </Main>
     </>
   );
