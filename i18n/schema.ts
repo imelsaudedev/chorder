@@ -7,6 +7,7 @@ export const messagesSchema = z.object({
     or: z.string(),
     preview: z.string(),
     save: z.string(),
+    songs: z.string(),
   }),
   songData: z.object({
     title: z.string(),

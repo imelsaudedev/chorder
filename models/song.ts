@@ -74,3 +74,9 @@ export function fetchSong(id: number): Promise<Song | null> {
       };
     });
 }
+
+export function fetchAllSongs(): Promise<
+  Pick<Song, "id" | "artist" | "lyrics" | "title">[]
+> {
+  return prisma.song.findMany();
+}
