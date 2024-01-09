@@ -5,7 +5,7 @@ import Main from "@/components/Main";
 import TextInput from "@/components/TextInput";
 import messages from "@/i18n/messages";
 import { Unit } from "@/models/unit";
-import { useEffect, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import UnitForm from "../UnitForm";
 import { getNextLocalId, updateTypeIndices } from "./utils";
 import AddUnitForm from "./AddUnitForm";
@@ -13,6 +13,9 @@ import FormField from "@/components/FormField";
 import FormLabel from "@/components/FormLabel";
 import BackArrow from "@/components/BackArrow";
 import { Song } from "@/models/song";
+import IconButton from "@/components/IconButton";
+import ChevronUpIcon from "@/components/icons/ChevronUpIcon";
+import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 
 type SongFormProps = {
   song?: Song | null;
@@ -152,24 +155,63 @@ export default function SongForm({
         <section className="max-w-lg mx-auto">
           {unitSequence.map((localId, index) => {
             const unit = localIdToUnit?.get(localId);
+
             if (unit) {
+              const hasPrev = index > 0;
+              const hasNext = index < unitSequence.length - 1;
+
+              const handleMoveUp: MouseEventHandler | undefined = hasPrev
+                ? (event) => {
+                    setUnitSequence((currSequence) => [
+                      ...currSequence.slice(0, index - 1),
+                      unit.localId,
+                      currSequence[index - 1],
+                      ...currSequence.slice(index + 1, currSequence.length),
+                    ]);
+                    event.preventDefault();
+                  }
+                : undefined;
+              const handleMoveDown: MouseEventHandler | undefined = hasNext
+                ? (event) => {
+                    setUnitSequence((currSequence) => [
+                      ...currSequence.slice(0, index),
+                      currSequence[index + 1],
+                      unit.localId,
+                      ...currSequence.slice(index + 2, currSequence.length),
+                    ]);
+                    event.preventDefault();
+                  }
+                : undefined;
+
               return (
-                <UnitForm
-                  key={index}
-                  index={index}
-                  unit={unit}
-                  setUnit={updateUnits}
-                  removeUnit={buildRemoveUnitHandler(index)}
-                />
+                <div key={index} className="flex">
+                  <div className="flex flex-col">
+                    <IconButton disabled={!hasPrev} onClick={handleMoveUp}>
+                      <ChevronUpIcon />
+                    </IconButton>
+                    <IconButton disabled={!hasNext} onClick={handleMoveDown}>
+                      <ChevronDownIcon />
+                    </IconButton>
+                  </div>
+                  <UnitForm
+                    index={index}
+                    unit={unit}
+                    setUnit={updateUnits}
+                    removeUnit={buildRemoveUnitHandler(index)}
+                    className="flex-grow"
+                  />
+                </div>
               );
             }
             return "ERROR";
           })}
-          <AddUnitForm
-            units={availableUnits}
-            onCreateUnit={handleCreateUnit}
-            onAddExistingUnit={handleAddExistingUnit}
-          />
+          <div className="pl-10">
+            <AddUnitForm
+              units={availableUnits}
+              onCreateUnit={handleCreateUnit}
+              onAddExistingUnit={handleAddExistingUnit}
+            />
+          </div>
         </section>
       </Main>
     </form>

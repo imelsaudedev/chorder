@@ -15,11 +15,13 @@ export default function UnitForm({
   index,
   setUnit,
   removeUnit,
+  className,
 }: {
   unit: Unit;
   index: number;
   setUnit: (unit: Unit) => void;
   removeUnit: () => void;
+  className?: string;
 }) {
   const colorClasses = unitTypeColorClasses[unit.type];
 
@@ -38,10 +40,23 @@ export default function UnitForm({
     setUnit({ ...unit, preview: event.target.checked });
   };
 
+  const classNames = [
+    "border",
+    colorClasses.border,
+    colorClasses.background,
+    "rounded-lg",
+    "break-inside-avoid",
+    "flex",
+    "flex-col",
+    "gap-2",
+    "px-2",
+    "py-2",
+    "mb-2",
+  ];
+  if (className) classNames.push(className);
+
   return (
-    <div
-      className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg break-inside-avoid flex flex-col gap-2 px-2 py-2 mb-2`}
-    >
+    <div className={classNames.join(" ")}>
       <div className="flex gap-4 items-center justify-between">
         <UnitCircle className="w-14 h-14" unit={unit} />
         <button onClick={removeUnit}>
