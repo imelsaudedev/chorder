@@ -5,42 +5,55 @@ import Main from "@/components/Main";
 import TextInput from "@/components/TextInput";
 import messages from "@/i18n/messages";
 import { Unit } from "@/models/unit";
-import { MouseEventHandler, useEffect, useState } from "react";
+import {
+  Dispatch,
+  MouseEventHandler,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import UnitForm from "../UnitForm";
 import { getNextLocalId, updateTypeIndices } from "./utils";
 import AddUnitForm from "./AddUnitForm";
 import FormField from "@/components/FormField";
 import FormLabel from "@/components/FormLabel";
 import BackArrow from "@/components/BackArrow";
-import { Song } from "@/models/song";
+import { Song, SongVersion } from "@/models/song";
 import IconButton from "@/components/IconButton";
 import ChevronUpIcon from "@/components/icons/ChevronUpIcon";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 
+export type PostSongAction = (
+  songId: number | null,
+  versionId: number | null,
+  title: string,
+  availableUnits: Unit[],
+  unitSequence: number[],
+  artist: string
+) => void;
+
 type SongFormProps = {
-  song?: Song | null;
-  postSong: (
-    title: string,
-    availableUnits: Unit[],
-    unitSequence: number[],
-    artist: string
-  ) => void;
-  versionIdx?: number;
+  song: Song | null;
+  version: SongVersion | null;
+  postSong: PostSongAction;
+  setWriteMode: Dispatch<SetStateAction<boolean>>;
 };
 
 export default function SongForm({
   song,
+  version,
   postSong,
-  versionIdx,
+  setWriteMode,
 }: SongFormProps) {
   const [title, setTitle] = useState(song?.title || "");
   const [artist, setArtist] = useState(song?.artist || "");
   const [availableUnits, setAvailableUnits] = useState<Unit[]>(
-    song?.versions[versionIdx || 0].units || []
+    version?.units || []
   );
   const [localIdToUnit, setLocalIdToUnit] = useState<Map<number, Unit>>();
   const [unitSequence, setUnitSequence] = useState<number[]>(
-    song?.versions[versionIdx || 0].unitSequence || []
+    version?.unitSequence || []
   );
 
   useEffect(() => {
@@ -112,12 +125,21 @@ export default function SongForm({
   const postSongWithUnits = postSong.bind(
     null,
     song?.id || null,
-    song?.versions[versionIdx || 0].id || null,
+    version?.id || null,
     title,
     availableUnits,
     unitSequence,
     artist
   );
+
+  const handleCancelEdit: MouseEventHandler = useCallback(
+    (event) => {
+      event.preventDefault();
+      setWriteMode(false);
+    },
+    [setWriteMode]
+  );
+
   return (
     <form action={postSongWithUnits}>
       <Header>
@@ -146,12 +168,19 @@ export default function SongForm({
             />
           </FormField>
         </div>
-        <button
-          className="ml-auto bg-purple-600 hover:bg-purple-500 text-white px-4 rounded"
-          type="submit"
-        >
-          {messages.messages.save}
-        </button>
+        <div className="ml-auto flex gap-2">
+          {song && version && (
+            <button onClick={handleCancelEdit}>
+              {messages.messages.cancel}
+            </button>
+          )}
+          <button
+            className="bg-purple-600 hover:bg-purple-500 text-white px-4 rounded"
+            type="submit"
+          >
+            {messages.messages.save}
+          </button>
+        </div>
       </Header>
       <Main className="pt-4">
         <section className="max-w-lg mx-auto">

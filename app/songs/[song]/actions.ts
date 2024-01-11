@@ -1,7 +1,11 @@
 "use server";
 
 import { getLyrics } from "@/chopro/music";
-import { createOrUpdateSong, fetchSong } from "@/models/song";
+import {
+  createOrUpdateSong,
+  deleteSongVersion,
+  fetchSong,
+} from "@/models/song";
 import { Unit } from "@/models/unit";
 import { RedirectType, redirect } from "next/navigation";
 
@@ -32,6 +36,12 @@ export async function postSong(
   );
 
   redirect(`./${song.id}`, RedirectType.replace);
+}
+
+export async function deleteVersion(versionId: number) {
+  await deleteSongVersion(versionId);
+
+  redirect(`./`, RedirectType.replace);
 }
 
 export async function getSong(id: number) {

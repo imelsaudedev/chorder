@@ -6,6 +6,7 @@ export const messagesSchema = z.object({
   messages: z.object({
     or: z.string(),
     preview: z.string(),
+    cancel: z.string(),
     save: z.string(),
     songs: z.string(),
   }),

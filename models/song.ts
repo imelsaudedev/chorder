@@ -17,6 +17,21 @@ export type SongVersion = {
   deleted: boolean;
 };
 
+export function getVersionOrDefault(
+  song: Song | null,
+  versionId: number | null
+) {
+  if (song === null) return null;
+  if (versionId) {
+    return (
+      song.versions.filter((version) => version.id === versionId)[0] || null
+    );
+  }
+
+  const defaultVersions = song.versions.filter((version) => version.isDefault);
+  return defaultVersions[0] || null;
+}
+
 export async function createOrUpdateSong(
   songId: number | null,
   versionId: number | null,
@@ -40,7 +55,7 @@ export async function createOrUpdateSong(
     },
     where: {
       id: unit.id,
-    }
+    },
   }));
 
   const query = {
@@ -83,15 +98,27 @@ export async function createOrUpdateSong(
             units: {
               upsert: unitUpserts,
             },
-          }
+          },
         },
       },
     },
-  }
+  };
 
   const song = await prisma.song.upsert(query);
 
   return song;
+}
+
+export async function deleteSongVersion(id: number) {
+  // TODO: MAKE NEXT VERSION THE DEFAULT ONE
+  await prisma.songVersion.update({
+    where: {
+      id,
+    },
+    data: {
+      deleted: true,
+    },
+  });
 }
 
 export function fetchSong(id: number): Promise<Song | null> {
@@ -100,6 +127,9 @@ export function fetchSong(id: number): Promise<Song | null> {
       where: { id },
       include: {
         versions: {
+          where: {
+            deleted: false,
+          },
           include: {
             units: true,
           },
@@ -124,5 +154,13 @@ export function fetchSong(id: number): Promise<Song | null> {
 export function fetchAllSongs(): Promise<
   Pick<Song, "id" | "artist" | "lyrics" | "title">[]
 > {
-  return prisma.song.findMany();
+  return prisma.song.findMany({
+    where: {
+      versions: {
+        some: {
+          deleted: false,
+        },
+      },
+    },
+  });
 }

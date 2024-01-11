@@ -1,42 +1,46 @@
 "use client";
 
-import BackArrow from "@/components/BackArrow";
-import Header from "@/components/Header";
-import Main from "@/components/Main";
-import VersionViewer from "../VersionViewer";
-import EditIcon from "@/components/icons/EditIcon";
-import AnchorButton from "@/components/AnchorButton";
-import { Song } from "@/models/song";
+import SongForm, { PostSongAction } from "@/fragments/SongForm";
+import VersionViewer, { DeleteVersionAction } from "../VersionViewer";
+import { Song, getVersionOrDefault } from "@/models/song";
+import { useState } from "react";
 
 type SongViewerProps = {
-  song: Song;
-  versionIdx: number;
+  song: Song | null;
+  versionId: number | null;
+  initialWriteMode: boolean;
+  postSong: PostSongAction;
+  deleteVersion: DeleteVersionAction;
 };
 
-export default function SongViewer({ song, versionIdx }: SongViewerProps) {
-  return (
-    <>
-      <Header>
-        <BackArrow href="/songs" />
-        <div className="flex mx-4 gap-2 flex-grow justify-between items-center">
-          <div className="flex flex-col">
-            <span className="font-bold text-lg leading-none">
-              {song?.title}
-            </span>
-            {song?.artist && <span className="text-sm">{song?.artist}</span>}
-          </div>
-          <div>
-            <AnchorButton href={`?version=${versionIdx}&edit=true`}>
-              <EditIcon />
-            </AnchorButton>
-          </div>
-        </div>
-      </Header>
-      <Main className="pt-4">
-        {song?.versions[versionIdx] && (
-          <VersionViewer version={song.versions[versionIdx]} />
-        )}
-      </Main>
-    </>
-  );
+export default function SongViewer({
+  song,
+  versionId,
+  postSong,
+  deleteVersion,
+  initialWriteMode,
+}: SongViewerProps) {
+  const [writeMode, setWriteMode] = useState<boolean>(initialWriteMode);
+
+  const version = getVersionOrDefault(song, versionId);
+
+  if (writeMode)
+    return (
+      <SongForm
+        song={song}
+        version={version}
+        postSong={postSong}
+        setWriteMode={setWriteMode}
+      />
+    );
+  if (song && version)
+    return (
+      <VersionViewer
+        song={song}
+        version={version}
+        setWriteMode={setWriteMode}
+        deleteVersion={deleteVersion}
+      />
+    );
+  return null; // TODO: SHOW ERROR PAGE
 }
