@@ -86,11 +86,14 @@ export default function VersionViewer({
             const unit = localIdToUnit.get(localId);
             if (!unit) return "ERROR";
             return (
-              <ChordProViewer
-                chordpro={unit.content}
-                key={`${unit.localId}--${idx}`}
-                withoutContainer
-              />
+              <>
+                {idx > 0 && <div className="h-8"></div>}
+                <ChordProViewer
+                  chordpro={unit.content}
+                  key={`${unit.localId}--${idx}`}
+                  withoutContainer
+                />
+              </>
             );
           })}
         </div>
