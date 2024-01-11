@@ -24,6 +24,8 @@ model SongVersion {
   unitMap          String
   song             Song @relation("Versions", fields: [songId], references: [id])
   songId           Int
+  isDefault        Boolean @default(true)
+  deleted          Boolean @default(false)
 }
 
 model SongUnit {

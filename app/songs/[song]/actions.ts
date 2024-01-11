@@ -1,11 +1,13 @@
 "use server";
 
 import { getLyrics } from "@/chopro/music";
-import { createSong, fetchSong } from "@/models/song";
+import { createOrUpdateSong, fetchSong } from "@/models/song";
 import { Unit } from "@/models/unit";
 import { RedirectType, redirect } from "next/navigation";
 
 export async function postSong(
+  songId: number | null,
+  versionId: number | null,
   title: string,
   availableUnits: Unit[],
   unitSequence: number[],
@@ -19,7 +21,9 @@ export async function postSong(
     .map((localId) => getLyrics(localIdToUnit.get(localId)?.content || ""))
     .join("\n");
 
-  const song = await createSong(
+  const song = await createOrUpdateSong(
+    songId,
+    versionId,
     title,
     lyrics,
     availableUnits,

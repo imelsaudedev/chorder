@@ -111,6 +111,8 @@ export default function SongForm({
 
   const postSongWithUnits = postSong.bind(
     null,
+    song?.id || null,
+    song?.versions[versionIdx || 0].id || null,
     title,
     availableUnits,
     unitSequence,

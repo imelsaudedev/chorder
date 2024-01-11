@@ -13,17 +13,41 @@ export type SongVersion = {
   id: number;
   units: Unit[];
   unitSequence: number[];
+  isDefault: boolean;
+  deleted: boolean;
 };
 
-export async function createSong(
+export async function createOrUpdateSong(
+  songId: number | null,
+  versionId: number | null,
   title: string,
   lyrics: string,
   availableUnits: Unit[],
   unitMap: string,
   artist?: string
 ) {
-  const song = await prisma.song.create({
-    data: {
+  const unitUpserts = availableUnits.map((unit) => ({
+    create: {
+      title: unit.title,
+      content: unit.content,
+      type: unit.type,
+      localId: unit.localId,
+    },
+    update: {
+      title: unit.title,
+      content: unit.content,
+      type: unit.type,
+    },
+    where: {
+      id: unit.id,
+    }
+  }));
+
+  const query = {
+    where: {
+      id: songId,
+    },
+    create: {
       title,
       lyrics,
       artist,
@@ -31,6 +55,8 @@ export async function createSong(
         create: [
           {
             unitMap,
+            isDefault: true,
+            deleted: false,
             units: {
               create: availableUnits.map((unit) => ({
                 title: unit.title,
@@ -43,7 +69,27 @@ export async function createSong(
         ],
       },
     },
-  });
+    update: {
+      title,
+      lyrics,
+      artist,
+      versions: {
+        update: {
+          where: {
+            id: versionId,
+          },
+          data: {
+            unitMap,
+            units: {
+              upsert: unitUpserts,
+            },
+          }
+        },
+      },
+    },
+  }
+
+  const song = await prisma.song.upsert(query);
 
   return song;
 }
