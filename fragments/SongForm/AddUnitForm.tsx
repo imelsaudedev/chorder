@@ -3,6 +3,7 @@ import messages from "@/i18n/messages";
 import { Unit } from "@/models/unit";
 import UnitCircle from "@/components/UnitCircle";
 import Or from "@/components/Or";
+import PlusIcon from "@/components/icons/PlusIcon";
 
 export default function AddUnitForm({
   units,
@@ -56,7 +57,7 @@ export default function AddUnitForm({
           className="h-8 w-8 text-sm shadow-lg inline-flex items-center justify-center bg-none rounded-full bg-purple-600 text-purple-50 group-hover:bg-purple-500 group-hover:shadow-xl"
           id="new-unit"
         >
-          +
+          <PlusIcon />
         </button>
         <label
           htmlFor="new-unit"

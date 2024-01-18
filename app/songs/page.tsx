@@ -1,5 +1,7 @@
+import AnchorButton from "@/components/AnchorButton";
 import Header from "@/components/Header";
 import Main from "@/components/Main";
+import PlusIcon from "@/components/icons/PlusIcon";
 import messages from "@/i18n/messages";
 import { fetchAllSongs, groupSongsByFirstLetter } from "@/models/song";
 import { Fragment } from "react";
@@ -50,7 +52,7 @@ export default async function SongListPage() {
               <Fragment key={`${letter}--section`}>
                 <h2
                   id={letter}
-                  className="text-4xl md:text-9xl col-span-2 md:col-span-1 pr-6"
+                  className="text-4xl md:text-9xl col-span-2 md:col-span-1 pr-6 text-purple-400"
                 >
                   {letter.toUpperCase()}
                 </h2>
@@ -89,6 +91,21 @@ export default async function SongListPage() {
             );
           })}
         </section>
+        <AnchorButton
+          additionalClasses={[
+            "bg-purple-400",
+            "text-white",
+            "rounded-full",
+            "aspect-square",
+            "fixed",
+            "bottom-4",
+            "right-4",
+            "border-none",
+          ]}
+          href="./songs/new"
+        >
+          <PlusIcon />
+        </AnchorButton>
       </Main>
     </>
   );
