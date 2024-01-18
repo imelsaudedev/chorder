@@ -1,11 +1,14 @@
 import { Unit } from "./unit";
 import prisma from "@/lib/prisma";
 
-export type Song = {
+export type SongBase = {
   id: number;
   title: string;
   artist?: string | null;
   lyrics: string;
+};
+
+export type Song = SongBase & {
   versions: SongVersion[];
 };
 
@@ -151,9 +154,7 @@ export function fetchSong(id: number): Promise<Song | null> {
     });
 }
 
-export function fetchAllSongs(): Promise<
-  Pick<Song, "id" | "artist" | "lyrics" | "title">[]
-> {
+export function fetchAllSongs(): Promise<SongBase[]> {
   return prisma.song.findMany({
     where: {
       versions: {
@@ -163,4 +164,23 @@ export function fetchAllSongs(): Promise<
       },
     },
   });
+}
+
+export function groupSongsByFirstLetter(
+  songs: SongBase[]
+): Map<string, SongBase[]> {
+  const byFirstLetter = new Map<string, SongBase[]>();
+
+  songs.forEach((song) => {
+    const firstLetter = song.title.trim().charAt(0).toLowerCase();
+    let letterGroup = byFirstLetter.get(firstLetter);
+    if (!letterGroup) {
+      letterGroup = [];
+      byFirstLetter.set(firstLetter, letterGroup);
+    }
+
+    letterGroup.push(song);
+  });
+
+  return byFirstLetter;
 }
