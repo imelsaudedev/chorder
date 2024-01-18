@@ -9,6 +9,7 @@ import { Song, SongVersion } from "@/models/song";
 import { Unit } from "@/models/unit";
 import {
   Dispatch,
+  Fragment,
   SetStateAction,
   useCallback,
   useEffect,
@@ -81,19 +82,20 @@ export default function VersionViewer({
         </div>
       </Header>
       <Main className="pt-4">
-        <div className="columns-4">
+        <div className="columns-2xs">
           {unitSequence?.map((localId, idx) => {
             const unit = localIdToUnit.get(localId);
             if (!unit) return "ERROR";
             return (
-              <>
-                {idx > 0 && <div className="h-8"></div>}
+              <Fragment key={`unit--${idx}--${localId}`}>
+                {idx > 0 && <div className="h-2"></div>}
                 <ChordProViewer
                   chordpro={unit.content}
                   key={`${unit.localId}--${idx}`}
+                  unitType={unit.type}
                   withoutContainer
                 />
-              </>
+              </Fragment>
             );
           })}
         </div>

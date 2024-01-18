@@ -2,32 +2,61 @@ import { Line, Song } from "chordsheetjs";
 import styles from "./styles.module.scss";
 import { parseChordPro } from "../../chopro/music";
 import { Fragment, useMemo } from "react";
+import { UnitType } from "@prisma/client";
+import { unitTypeColorClasses } from "../unit-colors";
+
+export type ChordProViewerProps = {
+  chordpro: string;
+  unitType?: UnitType;
+  withoutContainer?: boolean;
+};
 
 export default function ChordProViewer({
   chordpro,
+  unitType,
   withoutContainer,
-}: {
-  chordpro: string;
-  withoutContainer?: boolean;
-}) {
+}: ChordProViewerProps) {
   const chordproHtml = useMemo<Song>(() => parseChordPro(chordpro), [chordpro]);
   const Container = withoutContainer ? Fragment : "div";
 
   return (
     <Container>
       {chordproHtml.lines.map((line, idx) => (
-        <ChordProLine line={line} key={`song-line-${idx}`} />
+        <Fragment key={`song-line-${idx}`}>
+          <ChordProLine
+            line={line}
+            isFirst={idx === 0}
+            isLast={idx === chordproHtml.lines.length - 1}
+            unitType={unitType}
+          />
+        </Fragment>
       ))}
     </Container>
   );
 }
 
-function ChordProLine({ line }: { line: Line }) {
+type ChordProLineProps = {
+  line: Line;
+  isFirst: boolean;
+  isLast: boolean;
+  unitType?: UnitType;
+};
+
+function ChordProLine({ line, isFirst, isLast, unitType }: ChordProLineProps) {
+  let className = "flex flex-row flex-wrap relative px-2 border-x";
+  if (unitType) {
+    const unitClasses = unitTypeColorClasses[unitType];
+    className = `${className} ${unitClasses.background} ${unitClasses.border}`;
+
+    if (isFirst) {
+      className = `${className} pt-1 border-t rounded-t`;
+    }
+    if (isLast) {
+      className = `${className} border-b rounded-b`;
+    }
+  }
   return (
-    <div
-      className={`flex flex-row flex-wrap relative`}
-      style={{ breakInside: "avoid" }}
-    >
+    <div className={className} style={{ breakInside: "avoid" }}>
       {line.items.length === 0 && <br />}
       {line.items.map((item, elementIdx) => (
         <ChordProItem
