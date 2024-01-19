@@ -11,6 +11,8 @@
     "test": "jest",
     "lint": "next lint",
     "dbpush": "prisma db push",
+    "dbcreatemigration": "prisma migrate dev --name",
+    "dbmigrate": "prisma migrate deploy",
     "dbgenerate": "prisma generate",
     "dbstudio": "prisma studio"
   },
