@@ -15,37 +15,37 @@ model Song {
   title     String
   artist    String?
   lyrics    String
-  versions  SongVersion[] @relation("Versions")
+  arrangements  SongArrangement[] @relation("Arrangements")
 }
 
-model SongVersion {
+model SongArrangement {
   id               Int  @id @default(autoincrement())
-  units            SongUnit[] @relation("Units")
+  units            Unit[] @relation("Units")
   unitMap          String
-  song             Song @relation("Versions", fields: [songId], references: [id])
+  song             Song @relation("Arrangements", fields: [songId], references: [id])
   songId           Int
   isDefault        Boolean @default(true)
   deleted          Boolean @default(false)
 }
 
-model SongUnit {
+model Unit {
   id             Int  @id @default(autoincrement())
   title          String?
   content        String
   type           UnitType   @default(NEUTRAL)
   localId        Int
-  songVersion    SongVersion @relation("Units", fields: [songVersionId], references: [id])
-  songVersionId  Int
+  songArrangement    SongArrangement @relation("Units", fields: [songArrangementId], references: [id])
+  songArrangementId  Int
 }
 
 enum UnitType {
-  INTRO
-  ENDING
-  VERSE
-  PRECHORUS
-  CHORUS
-  BRIDGE
-  INTERLUDE
-  SOLO
-  NEUTRAL
+  SONG_INTRO
+  SONG_ENDING
+  SONG_VERSE
+  SONG_PRECHORUS
+  SONG_CHORUS
+  SONG_BRIDGE
+  SONG_INTERLUDE
+  SONG_SOLO
+  SONG_BLOCK
 }

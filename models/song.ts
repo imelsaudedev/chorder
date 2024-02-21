@@ -9,10 +9,10 @@ export type SongBase = {
 };
 
 export type Song = SongBase & {
-  versions: SongVersion[];
+  arrangements: SongArrangement[];
 };
 
-export type SongVersion = {
+export type SongArrangement = {
   id: number;
   units: Unit[];
   unitSequence: number[];
@@ -20,24 +20,24 @@ export type SongVersion = {
   deleted: boolean;
 };
 
-export function getVersionOrDefault(
+export function getArrangementOrDefault(
   song: Song | null,
-  versionId: number | null
+  arrangementId: number | null
 ) {
   if (song === null) return null;
-  if (versionId) {
+  if (arrangementId) {
     return (
-      song.versions.filter((version) => version.id === versionId)[0] || null
+      song.arrangements.filter((arrangement) => arrangement.id === arrangementId)[0] || null
     );
   }
 
-  const defaultVersions = song.versions.filter((version) => version.isDefault);
-  return defaultVersions[0] || null;
+  const defaultArrangements = song.arrangements.filter((arrangement) => arrangement.isDefault);
+  return defaultArrangements[0] || null;
 }
 
 export async function createOrUpdateSong(
   songId: number | null,
-  versionId: number | null,
+  arrangementId: number | null,
   title: string,
   lyrics: string,
   availableUnits: Unit[],
@@ -69,7 +69,7 @@ export async function createOrUpdateSong(
       title,
       lyrics,
       artist,
-      versions: {
+      arrangements: {
         create: [
           {
             unitMap,
@@ -91,10 +91,10 @@ export async function createOrUpdateSong(
       title,
       lyrics,
       artist,
-      versions: {
+      arrangements: {
         update: {
           where: {
-            id: versionId,
+            id: arrangementId,
           },
           data: {
             unitMap,
@@ -112,9 +112,9 @@ export async function createOrUpdateSong(
   return song;
 }
 
-export async function deleteSongVersion(id: number) {
-  // TODO: MAKE NEXT VERSION THE DEFAULT ONE
-  await prisma.songVersion.update({
+export async function deleteSongArrangement(id: number) {
+  // TODO: MAKE NEXT ARRANGEMENT THE DEFAULT ONE
+  await prisma.songArrangement.update({
     where: {
       id,
     },
@@ -129,7 +129,7 @@ export function fetchSong(id: number): Promise<Song | null> {
     .findUnique({
       where: { id },
       include: {
-        versions: {
+        arrangements: {
           where: {
             deleted: false,
           },
@@ -144,10 +144,10 @@ export function fetchSong(id: number): Promise<Song | null> {
 
       return {
         ...song,
-        versions: song.versions.map((version) => {
+        arrangements: song.arrangements.map((arrangement) => {
           return {
-            ...version,
-            unitSequence: version.unitMap.split(",").map(Number),
+            ...arrangement,
+            unitSequence: arrangement.unitMap.split(",").map(Number),
           };
         }),
       };
@@ -157,7 +157,7 @@ export function fetchSong(id: number): Promise<Song | null> {
 export function fetchAllSongs(): Promise<SongBase[]> {
   return prisma.song.findMany({
     where: {
-      versions: {
+      arrangements: {
         some: {
           deleted: false,
         },

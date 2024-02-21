@@ -21,15 +21,15 @@
     "unitType": "Unit type"
   },
   "unitTypes": {
-    "INTRO": "Intro",
-    "ENDING": "Ending",
-    "VERSE": "Verse",
-    "PRECHORUS": "Prechorus",
-    "CHORUS": "Chorus",
-    "BRIDGE": "Bridge",
-    "INTERLUDE": "Interlude",
-    "SOLO": "Solo",
-    "NEUTRAL": "Undefined"
+    "SONG_INTRO": "Intro",
+    "SONG_ENDING": "Ending",
+    "SONG_VERSE": "Verse",
+    "SONG_PRECHORUS": "Prechorus",
+    "SONG_CHORUS": "Chorus",
+    "SONG_BRIDGE": "Bridge",
+    "SONG_INTERLUDE": "Interlude",
+    "SONG_SOLO": "Solo",
+    "SONG_BLOCK": "Block"
   },
   "songForm": {
     "addExistingUnit": "Add existing unit",

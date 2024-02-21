@@ -5,7 +5,7 @@ import IconButton from "@/components/IconButton";
 import Main from "@/components/Main";
 import EditIcon from "@/components/icons/EditIcon";
 import TrashIcon from "@/components/icons/TrashIcon";
-import { Song, SongVersion } from "@/models/song";
+import { Song, SongArrangement } from "@/models/song";
 import { Unit } from "@/models/unit";
 import {
   Dispatch,
@@ -16,46 +16,46 @@ import {
   useState,
 } from "react";
 
-export type DeleteVersionAction = (versionId: number) => void;
+export type DeleteArrangementAction = (arrangementId: number) => void;
 
-type VersionViewerProps = {
+type ArrangementViewerProps = {
   song: Song;
-  version: SongVersion;
+  arrangement: SongArrangement;
   setWriteMode: Dispatch<SetStateAction<boolean>>;
-  deleteVersion: DeleteVersionAction;
+  deleteArrangement: DeleteArrangementAction;
 };
 
-export default function VersionViewer({
+export default function ArrangementViewer({
   song,
-  version,
+  arrangement,
   setWriteMode,
-  deleteVersion,
-}: VersionViewerProps) {
+  deleteArrangement,
+}: ArrangementViewerProps) {
   const [localIdToUnit, setLocalIdToUnit] = useState<Map<number, Unit>>(
     new Map()
   );
   const [unitSequence, setUnitSequence] = useState<number[]>();
 
   useEffect(() => {
-    if (!version.units) return;
+    if (!arrangement.units) return;
 
     setLocalIdToUnit(
-      new Map(version.units.map((unit) => [unit.localId, unit]))
+      new Map(arrangement.units.map((unit) => [unit.localId, unit]))
     );
-  }, [version.units]);
+  }, [arrangement.units]);
 
   useEffect(() => {
-    if (!version.unitSequence) return;
+    if (!arrangement.unitSequence) return;
 
-    setUnitSequence(version.unitSequence);
-  }, [version.unitSequence]);
+    setUnitSequence(arrangement.unitSequence);
+  }, [arrangement.unitSequence]);
 
   const handleEditButtonClick = useCallback(() => {
     setWriteMode(true);
   }, [setWriteMode]);
 
   // TODO: MAYBE WE NEED A CONFIRMATION DIALOG FOR THIS?
-  const deleteVersionWithId = deleteVersion.bind(null, version.id);
+  const deleteArrangementWithId = deleteArrangement.bind(null, arrangement.id);
 
   return (
     <>
@@ -68,7 +68,7 @@ export default function VersionViewer({
           </div>
           <div className="flex">
             <form
-              action={deleteVersionWithId}
+              action={deleteArrangementWithId}
               className="grid place-content-center"
             >
               <IconButton type="submit">

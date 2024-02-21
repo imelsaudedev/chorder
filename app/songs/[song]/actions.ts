@@ -3,7 +3,7 @@
 import { getLyrics } from "@/chopro/music";
 import {
   createOrUpdateSong,
-  deleteSongVersion,
+  deleteSongArrangement,
   fetchSong,
 } from "@/models/song";
 import { Unit } from "@/models/unit";
@@ -11,7 +11,7 @@ import { RedirectType, redirect } from "next/navigation";
 
 export async function postSong(
   songId: number | null,
-  versionId: number | null,
+  arrangementId: number | null,
   title: string,
   availableUnits: Unit[],
   unitSequence: number[],
@@ -27,7 +27,7 @@ export async function postSong(
 
   const song = await createOrUpdateSong(
     songId,
-    versionId,
+    arrangementId,
     title,
     lyrics,
     availableUnits,
@@ -38,8 +38,8 @@ export async function postSong(
   redirect(`./${song.id}`, RedirectType.replace);
 }
 
-export async function deleteVersion(versionId: number) {
-  await deleteSongVersion(versionId);
+export async function deleteArrangement(arrangementId: number) {
+  await deleteSongArrangement(arrangementId);
 
   redirect(`./`, RedirectType.replace);
 }

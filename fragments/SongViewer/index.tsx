@@ -1,45 +1,45 @@
 "use client";
 
 import SongForm, { PostSongAction } from "@/fragments/SongForm";
-import VersionViewer, { DeleteVersionAction } from "../VersionViewer";
-import { Song, getVersionOrDefault } from "@/models/song";
+import ArrangementViewer, { DeleteArrangementAction } from "../ArrangementViewer";
+import { Song, getArrangementOrDefault } from "@/models/song";
 import { useState } from "react";
 
 type SongViewerProps = {
   song: Song | null;
-  versionId: number | null;
+  arrangementId: number | null;
   initialWriteMode: boolean;
   postSong: PostSongAction;
-  deleteVersion: DeleteVersionAction;
+  deleteArrangement: DeleteArrangementAction;
 };
 
 export default function SongViewer({
   song,
-  versionId,
+  arrangementId,
   postSong,
-  deleteVersion,
+  deleteArrangement,
   initialWriteMode,
 }: SongViewerProps) {
   const [writeMode, setWriteMode] = useState<boolean>(initialWriteMode);
 
-  const version = getVersionOrDefault(song, versionId);
+  const arrangement = getArrangementOrDefault(song, arrangementId);
 
   if (writeMode)
     return (
       <SongForm
         song={song}
-        version={version}
+        arrangement={arrangement}
         postSong={postSong}
         setWriteMode={setWriteMode}
       />
     );
-  if (song && version)
+  if (song && arrangement)
     return (
-      <VersionViewer
+      <ArrangementViewer
         song={song}
-        version={version}
+        arrangement={arrangement}
         setWriteMode={setWriteMode}
-        deleteVersion={deleteVersion}
+        deleteArrangement={deleteArrangement}
       />
     );
   return null; // TODO: SHOW ERROR PAGE

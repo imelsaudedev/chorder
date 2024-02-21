@@ -19,14 +19,14 @@ import AddUnitForm from "./AddUnitForm";
 import FormField from "@/components/FormField";
 import FormLabel from "@/components/FormLabel";
 import BackArrow from "@/components/BackArrow";
-import { Song, SongVersion } from "@/models/song";
+import { Song, SongArrangement } from "@/models/song";
 import IconButton from "@/components/IconButton";
 import ChevronUpIcon from "@/components/icons/ChevronUpIcon";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 
 export type PostSongAction = (
   songId: number | null,
-  versionId: number | null,
+  arrangementId: number | null,
   title: string,
   availableUnits: Unit[],
   unitSequence: number[],
@@ -35,25 +35,25 @@ export type PostSongAction = (
 
 type SongFormProps = {
   song: Song | null;
-  version: SongVersion | null;
+  arrangement: SongArrangement | null;
   postSong: PostSongAction;
   setWriteMode: Dispatch<SetStateAction<boolean>>;
 };
 
 export default function SongForm({
   song,
-  version,
+  arrangement,
   postSong,
   setWriteMode,
 }: SongFormProps) {
   const [title, setTitle] = useState(song?.title || "");
   const [artist, setArtist] = useState(song?.artist || "");
   const [availableUnits, setAvailableUnits] = useState<Unit[]>(
-    version?.units || []
+    arrangement?.units || []
   );
   const [localIdToUnit, setLocalIdToUnit] = useState<Map<number, Unit>>();
   const [unitSequence, setUnitSequence] = useState<number[]>(
-    version?.unitSequence || []
+    arrangement?.unitSequence || []
   );
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export default function SongForm({
   const postSongWithUnits = postSong.bind(
     null,
     song?.id || null,
-    version?.id || null,
+    arrangement?.id || null,
     title,
     availableUnits,
     unitSequence,
@@ -169,7 +169,7 @@ export default function SongForm({
           </FormField>
         </div>
         <div className="ml-auto flex gap-2">
-          {song && version && (
+          {song && arrangement && (
             <button onClick={handleCancelEdit}>
               {messages.messages.cancel}
             </button>

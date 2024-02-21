@@ -1,6 +1,6 @@
 export type Unit = {
   id?: number | null;
-  songVersionId?: number | null;
+  songArrangementId?: number | null;
   title?: string | null;
   content: string;
   type: UnitType;
@@ -12,12 +12,12 @@ export type Unit = {
 };
 
 export type UnitType =
-  | "INTRO"
-  | "ENDING"
-  | "VERSE"
-  | "PRECHORUS"
-  | "CHORUS"
-  | "BRIDGE"
-  | "INTERLUDE"
-  | "SOLO"
-  | "NEUTRAL";
+  | "SONG_INTRO"
+  | "SONG_ENDING"
+  | "SONG_VERSE"
+  | "SONG_PRECHORUS"
+  | "SONG_CHORUS"
+  | "SONG_BRIDGE"
+  | "SONG_INTERLUDE"
+  | "SONG_SOLO"
+  | "SONG_BLOCK";
