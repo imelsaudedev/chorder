@@ -5,7 +5,7 @@ export type Unit = {
   content: string;
   type: UnitType;
   // ID within the song
-  localId: number;
+  // localId: number;
   // This is for the form
   preview?: boolean;
   typeIdx?: number;

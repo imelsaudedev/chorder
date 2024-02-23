@@ -47,21 +47,19 @@ export default function SongForm({
 }: SongFormProps) {
   const [title, setTitle] = useState(song?.title || "");
   const [artist, setArtist] = useState(song?.artist || "");
-  const [availableUnits, setAvailableUnits] = useState<Unit[]>(
-    (arrangement?.units
-      .map((arrangementUnit) => arrangementUnit.unit)
-      .filter((unit) => !!unit) as Unit[]) || []
+  const [units, setUnits] = useState<ArrangementUnit[]>(
+    (arrangement?.units || [])
   );
-  const [localIdToUnit, setLocalIdToUnit] = useState<Map<number, Unit>>();
-  const [unitSequence, setUnitSequence] = useState<ArrangementUnit[]>(
-    arrangement?.units || []
-  );
+  // const [localIdToUnit, setLocalIdToUnit] = useState<Map<number, Unit>>();
+  // const [unitSequence, setUnitSequence] = useState<ArrangementUnit[]>(
+  //   arrangement?.units || []
+  // );
 
-  useEffect(() => {
-    setLocalIdToUnit(
-      new Map<number, Unit>(availableUnits.map((unit) => [unit.localId, unit]))
-    );
-  }, [availableUnits]);
+  // useEffect(() => {
+  //   setLocalIdToUnit(
+  //     new Map<number, Unit>(units.map((unit) => [unit.localId, unit]))
+  //   );
+  // }, [units]);
 
   const handleChangeTitle = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value);
@@ -72,34 +70,41 @@ export default function SongForm({
   };
 
   const handleCreateUnit = () => {
-    const newUnit: Unit = {
+    // setUnits((units) => updateTypeIndices([...units, newUnit]));
+    handleAddUnit({
       type: "SONG_BLOCK",
       content: "",
       preview: false,
-      localId: getNextLocalId(availableUnits),
-    };
-    setAvailableUnits((units) => updateTypeIndices([...units, newUnit]));
-    handleAddExistingUnit(newUnit);
+      // localId: getNextLocalId(units),
+    })
+    // handleAddExistingUnit(newUnit);
   };
 
-  const handleAddExistingUnit = (unit: Unit) => {
-    setUnitSequence((currSequence) => [
-      ...currSequence,
-      { unit, indexInArrangement: currSequence.length },
-    ]);
+  const handleAddUnit = (unit: Unit) => {
+    // setUnitSequence((currSequence) => [
+    //   ...currSequence,
+    //   { unit, indexInArrangement: currSequence.length },
+    // ]);
+    setUnits((units) => [...units, {
+      arrangement: arrangement || undefined,
+      arrangementId: arrangement?.id || undefined,
+      unit,
+      unitId: unit.id || undefined,
+      indexInArrangement: units.length,
+    }])
   };
 
-  const updateUnits = (updatedUnit: Unit) => {
-    setAvailableUnits((units) => {
-      const newUnits = units.map((unit) => {
-        if (unit.localId === updatedUnit.localId) {
-          return { ...unit, ...updatedUnit };
-        }
-        return unit;
-      });
-      return updateTypeIndices(newUnits);
-    });
-  };
+  // const updateUnits = (updatedUnit: Unit) => {
+  //   setUnits((units) => {
+  //     const newUnits = units.map((unit) => {
+  //       if (unit.localId === updatedUnit.localId) {
+  //         return { ...unit, ...updatedUnit };
+  //       }
+  //       return unit;
+  //     });
+  //     return updateTypeIndices(newUnits);
+  //   });
+  // };
 
   const buildRemoveUnitHandler = (index: number) => {
     return () => {
@@ -108,7 +113,7 @@ export default function SongForm({
         unitSequence.filter((localId) => localId === selectedLocalId).length <=
         1
       ) {
-        setAvailableUnits((units) => {
+        setUnits((units) => {
           const newUnits = [...units];
           const index = newUnits
             .map((unit) => unit.localId)
@@ -131,8 +136,8 @@ export default function SongForm({
     song?.id || null,
     arrangement?.id || null,
     title,
-    availableUnits,
-    unitSequence,
+    units,
+    // unitSequence,
     artist
   );
 
@@ -188,12 +193,14 @@ export default function SongForm({
       </Header>
       <Main className="pt-4">
         <section className="max-w-lg mx-auto">
-          {unitSequence.map((localId, index) => {
-            const unit = localIdToUnit?.get(localId);
+          {/* {unitSequence.map((localId, index) => {
+            const unit = localIdToUnit?.get(localId); */}
+          {units.map((arrangementUnit, index) => {
+            const unit = arrangementUnit.unit;
 
             if (unit) {
               const hasPrev = index > 0;
-              const hasNext = index < unitSequence.length - 1;
+              const hasNext = index < units.length - 1;
 
               const handleMoveUp: MouseEventHandler | undefined = hasPrev
                 ? (event) => {
@@ -242,9 +249,9 @@ export default function SongForm({
           })}
           <div className="pl-10">
             <AddUnitForm
-              units={availableUnits}
+              units={units}
               onCreateUnit={handleCreateUnit}
-              onAddExistingUnit={handleAddExistingUnit}
+              onAddExistingUnit={handleAddUnit}
             />
           </div>
         </section>

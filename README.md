@@ -83,7 +83,7 @@ ALTER USER SOME_USERNAME CREATEDB;
 \q
 ```
 
-Create a `.env.development.local` file with the following:
+Create a `.env` file with the following:
 
 ```
 POSTGRES_PRISMA_URL="postgresql://SOME_USERNAME:SOME_PASSWORD@localhost:5432/SOME_DB_NAME"
