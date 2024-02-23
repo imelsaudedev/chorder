@@ -20,10 +20,9 @@ model Song {
 
 model SongArrangement {
   id               Int  @id @default(autoincrement())
-  units            Unit[] @relation("Units")
-  unitMap          String
   song             Song @relation("Arrangements", fields: [songId], references: [id])
   songId           Int
+  units            ArrangementUnit[]
   isDefault        Boolean @default(true)
   deleted          Boolean @default(false)
 }
@@ -32,10 +31,18 @@ model Unit {
   id             Int  @id @default(autoincrement())
   title          String?
   content        String
-  type           UnitType   @default(NEUTRAL)
+  type           UnitType   @default(SONG_BLOCK)
   localId        Int
-  songArrangement    SongArrangement @relation("Units", fields: [songArrangementId], references: [id])
-  songArrangementId  Int
+  arrangements   ArrangementUnit[]
+}
+
+model ArrangementUnit {
+  id                   Int  @id @default(autoincrement())
+  arrangement          SongArrangement  @relation(fields: [arrangementId], references: [id])
+  arrangementId        Int
+  unit                 Unit  @relation(fields: [unitId], references: [id])
+  unitId               Int
+  indexInArrangement   Int
 }
 
 enum UnitType {

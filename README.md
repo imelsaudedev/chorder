@@ -54,3 +54,46 @@ pnpm dev
 ```
 
 Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples) ([Documentation](https://nextjs.org/docs/deployment)).
+
+### Setup Postgres
+
+You will need PostgreSQL to run this project locally. The easiest way is to use Docker:
+
+```
+docker pull postgres
+docker volume create postgres-data
+docker run --name postgres-container -e POSTGRES_PASSWORD=SOME_PASSWORD -p 5432:5432 -v postgres-data:/var/lib/postgresql/data -d postgres
+```
+
+Now you have to run `psql`. Using Docker:
+
+```
+docker exec -it postgres-container psql -U postgres
+```
+
+Finally, initialize the database:
+
+```
+create database SOME_DB_NAME;
+create user SOME_USERNAME with encrypted password 'SOME_PASSWORD';
+grant all privileges on database SOME_DB_NAME to SOME_USERNAME;
+\c SOME_DB_NAME postgres
+GRANT ALL ON SCHEMA public TO SOME_USERNAME;
+ALTER USER SOME_USERNAME CREATEDB;
+\q
+```
+
+Create a `.env.development.local` file with the following:
+
+```
+POSTGRES_PRISMA_URL="postgresql://SOME_USERNAME:SOME_PASSWORD@localhost:5432/SOME_DB_NAME"
+POSTGRES_URL_NON_POOLING="postgresql://SOME_USERNAME:SOME_PASSWORD@localhost:5432/SOME_DB_NAME"
+```
+
+#### Setup Prisma
+
+To apply Prisma DB schema, run:
+
+```
+pnpm dbpush
+```

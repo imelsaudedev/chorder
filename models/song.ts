@@ -2,7 +2,7 @@ import { Unit } from "./unit";
 import prisma from "@/lib/prisma";
 
 export type SongBase = {
-  id: number;
+  id?: number;
   title: string;
   artist?: string | null;
   lyrics: string;
@@ -13,11 +13,19 @@ export type Song = SongBase & {
 };
 
 export type SongArrangement = {
-  id: number;
-  units: Unit[];
-  unitSequence: number[];
+  id?: number;
+  units: ArrangementUnit[];
   isDefault: boolean;
   deleted: boolean;
+};
+
+export type ArrangementUnit = {
+  id?: number;
+  arrangement?: SongArrangement;
+  arrangementId?: number;
+  unit?: Unit;
+  unitId?: number;
+  indexInArrangement: number;
 };
 
 export function getArrangementOrDefault(
@@ -27,11 +35,15 @@ export function getArrangementOrDefault(
   if (song === null) return null;
   if (arrangementId) {
     return (
-      song.arrangements.filter((arrangement) => arrangement.id === arrangementId)[0] || null
+      song.arrangements.filter(
+        (arrangement) => arrangement.id === arrangementId
+      )[0] || null
     );
   }
 
-  const defaultArrangements = song.arrangements.filter((arrangement) => arrangement.isDefault);
+  const defaultArrangements = song.arrangements.filter(
+    (arrangement) => arrangement.isDefault
+  );
   return defaultArrangements[0] || null;
 }
 
@@ -40,30 +52,46 @@ export async function createOrUpdateSong(
   arrangementId: number | null,
   title: string,
   lyrics: string,
-  availableUnits: Unit[],
-  unitMap: string,
+  units: ArrangementUnit[],
   artist?: string
 ) {
-  const unitUpserts = availableUnits.map((unit) => ({
-    create: {
-      title: unit.title,
-      content: unit.content,
-      type: unit.type,
-      localId: unit.localId,
-    },
-    update: {
-      title: unit.title,
-      content: unit.content,
-      type: unit.type,
-    },
-    where: {
-      id: unit.id,
-    },
-  }));
+  const unitUpserts = units.map((arrangementUnit, idx) => {
+    if (!arrangementUnit.unit) throw new Error("Unit is required");
+    const unitUpsert = {
+      create: {
+        title: arrangementUnit.unit.title,
+        content: arrangementUnit.unit.content,
+        type: arrangementUnit.unit.type,
+        localId: arrangementUnit.unit.localId,
+      },
+      update: {
+        title: arrangementUnit.unit.title,
+        content: arrangementUnit.unit.content,
+        type: arrangementUnit.unit.type,
+        localId: arrangementUnit.unit.localId,
+      },
+      where: {
+        id: arrangementUnit.unit.id || undefined,
+      },
+    };
+    return {
+      create: {
+        unit: unitUpsert,
+        indexInArrangement: idx,
+      },
+      update: {
+        unit: unitUpsert,
+        indexInArrangement: idx,
+      },
+      where: {
+        id: arrangementUnit.id || undefined,
+      },
+    };
+  });
 
   const query = {
     where: {
-      id: songId,
+      id: songId || undefined,
     },
     create: {
       title,
@@ -72,16 +100,10 @@ export async function createOrUpdateSong(
       arrangements: {
         create: [
           {
-            unitMap,
             isDefault: true,
             deleted: false,
             units: {
-              create: availableUnits.map((unit) => ({
-                title: unit.title,
-                content: unit.content,
-                type: unit.type,
-                localId: unit.localId,
-              })),
+              upsert: unitUpserts,
             },
           },
         ],
@@ -94,10 +116,9 @@ export async function createOrUpdateSong(
       arrangements: {
         update: {
           where: {
-            id: arrangementId,
+            id: arrangementId || undefined,
           },
           data: {
-            unitMap,
             units: {
               upsert: unitUpserts,
             },
@@ -147,7 +168,9 @@ export function fetchSong(id: number): Promise<Song | null> {
         arrangements: song.arrangements.map((arrangement) => {
           return {
             ...arrangement,
-            unitSequence: arrangement.unitMap.split(",").map(Number),
+            units: arrangement.units.sort(
+              (a, b) => a.indexInArrangement - b.indexInArrangement
+            ),
           };
         }),
       };

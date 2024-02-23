@@ -19,7 +19,7 @@ import AddUnitForm from "./AddUnitForm";
 import FormField from "@/components/FormField";
 import FormLabel from "@/components/FormLabel";
 import BackArrow from "@/components/BackArrow";
-import { Song, SongArrangement } from "@/models/song";
+import { ArrangementUnit, Song, SongArrangement } from "@/models/song";
 import IconButton from "@/components/IconButton";
 import ChevronUpIcon from "@/components/icons/ChevronUpIcon";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
@@ -28,8 +28,7 @@ export type PostSongAction = (
   songId: number | null,
   arrangementId: number | null,
   title: string,
-  availableUnits: Unit[],
-  unitSequence: number[],
+  units: ArrangementUnit[],
   artist: string
 ) => void;
 
@@ -49,11 +48,13 @@ export default function SongForm({
   const [title, setTitle] = useState(song?.title || "");
   const [artist, setArtist] = useState(song?.artist || "");
   const [availableUnits, setAvailableUnits] = useState<Unit[]>(
-    arrangement?.units || []
+    (arrangement?.units
+      .map((arrangementUnit) => arrangementUnit.unit)
+      .filter((unit) => !!unit) as Unit[]) || []
   );
   const [localIdToUnit, setLocalIdToUnit] = useState<Map<number, Unit>>();
-  const [unitSequence, setUnitSequence] = useState<number[]>(
-    arrangement?.unitSequence || []
+  const [unitSequence, setUnitSequence] = useState<ArrangementUnit[]>(
+    arrangement?.units || []
   );
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function SongForm({
 
   const handleCreateUnit = () => {
     const newUnit: Unit = {
-      type: "NEUTRAL",
+      type: "SONG_BLOCK",
       content: "",
       preview: false,
       localId: getNextLocalId(availableUnits),
@@ -82,7 +83,10 @@ export default function SongForm({
   };
 
   const handleAddExistingUnit = (unit: Unit) => {
-    setUnitSequence((currSequence) => [...currSequence, unit.localId]);
+    setUnitSequence((currSequence) => [
+      ...currSequence,
+      { unit, indexInArrangement: currSequence.length },
+    ]);
   };
 
   const updateUnits = (updatedUnit: Unit) => {
