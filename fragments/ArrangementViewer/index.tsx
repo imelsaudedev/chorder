@@ -6,15 +6,7 @@ import Main from "@/components/Main";
 import EditIcon from "@/components/icons/EditIcon";
 import TrashIcon from "@/components/icons/TrashIcon";
 import { Song, SongArrangement } from "@/models/song";
-import { Unit } from "@/models/unit";
-import {
-  Dispatch,
-  Fragment,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { Dispatch, Fragment, SetStateAction, useCallback } from "react";
 
 export type DeleteArrangementAction = (arrangementId: number) => void;
 
@@ -31,28 +23,13 @@ export default function ArrangementViewer({
   setWriteMode,
   deleteArrangement,
 }: ArrangementViewerProps) {
-  const [localIdToUnit, setLocalIdToUnit] = useState<Map<number, Unit>>(
-    new Map()
-  );
-  const [unitSequence, setUnitSequence] = useState<number[]>();
-
-  useEffect(() => {
-    if (!arrangement.units) return;
-
-    setLocalIdToUnit(
-      new Map(arrangement.units.map((unit) => [unit.localId, unit]))
-    );
-  }, [arrangement.units]);
-
-  useEffect(() => {
-    if (!arrangement.unitSequence) return;
-
-    setUnitSequence(arrangement.unitSequence);
-  }, [arrangement.unitSequence]);
-
   const handleEditButtonClick = useCallback(() => {
     setWriteMode(true);
   }, [setWriteMode]);
+
+  if (!arrangement || !arrangement.id) {
+    return null;
+  }
 
   // TODO: MAYBE WE NEED A CONFIRMATION DIALOG FOR THIS?
   const deleteArrangementWithId = deleteArrangement.bind(null, arrangement.id);
@@ -83,15 +60,15 @@ export default function ArrangementViewer({
       </Header>
       <Main className="pt-4">
         <div className="columns-2xs">
-          {unitSequence?.map((localId, idx) => {
-            const unit = localIdToUnit.get(localId);
+          {arrangement.units?.map((arrangementUnit, idx) => {
+            const unit = arrangementUnit.unit;
             if (!unit) return "ERROR";
             return (
-              <Fragment key={`unit--${idx}--${localId}`}>
+              <Fragment key={`unit--${idx}--${unit.localUID}`}>
                 {idx > 0 && <div className="h-2"></div>}
                 <ChordProViewer
                   chordpro={unit.content}
-                  key={`${unit.localId}--${idx}`}
+                  key={`${unit.localUID}--${idx}`}
                   unitType={unit.type}
                   withoutContainer
                 />

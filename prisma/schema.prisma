@@ -10,42 +10,42 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
-model Song {
+model DBSong {
   id        Int  @id @default(autoincrement())
   title     String
   artist    String?
   lyrics    String
-  arrangements  SongArrangement[] @relation("Arrangements")
+  arrangements  DBSongArrangement[] @relation("Arrangements")
 }
 
-model SongArrangement {
+model DBSongArrangement {
   id               Int  @id @default(autoincrement())
-  song             Song @relation("Arrangements", fields: [songId], references: [id])
+  song             DBSong @relation("Arrangements", fields: [songId], references: [id])
   songId           Int
-  units            ArrangementUnit[]
+  units            DBArrangementUnit[]
   isDefault        Boolean @default(true)
   deleted          Boolean @default(false)
 }
 
-model Unit {
+model DBUnit {
   id             Int  @id @default(autoincrement())
   title          String?
   content        String
-  type           UnitType   @default(SONG_BLOCK)
+  type           DBUnitType   @default(SONG_BLOCK)
   localUID       String?
-  arrangements   ArrangementUnit[]
+  arrangements   DBArrangementUnit[]
 }
 
-model ArrangementUnit {
+model DBArrangementUnit {
   id                   Int  @id @default(autoincrement())
-  arrangement          SongArrangement  @relation(fields: [arrangementId], references: [id])
+  arrangement          DBSongArrangement  @relation(fields: [arrangementId], references: [id])
   arrangementId        Int
-  unit                 Unit  @relation(fields: [unitId], references: [id])
+  unit                 DBUnit  @relation(fields: [unitId], references: [id])
   unitId               Int
   indexInArrangement   Int
 }
 
-enum UnitType {
+enum DBUnitType {
   SONG_INTRO
   SONG_ENDING
   SONG_VERSE

@@ -9,16 +9,18 @@ export const useArrangementUnits = (arrangement: SongArrangement | null) => {
   );
 
   const handleAddUnit = (unit: Unit) => {
-    setArrangementUnits((units) => updateTypeIndices([
-      ...units,
-      {
-        arrangement: arrangement || undefined,
-        arrangementId: arrangement?.id || undefined,
-        unit,
-        unitId: unit.id || undefined,
-        indexInArrangement: units.length,
-      },
-    ]));
+    setArrangementUnits((units) =>
+      updateTypeIndices([
+        ...units,
+        {
+          arrangement: arrangement || undefined,
+          arrangementId: arrangement?.id || undefined,
+          unit,
+          unitId: unit.id || undefined,
+          indexInArrangement: units.length,
+        },
+      ])
+    );
   };
 
   const handleCreateUnit = () => {
@@ -68,6 +70,11 @@ export const useArrangementUnits = (arrangement: SongArrangement | null) => {
             const newSequence = [...currSequence];
             const selectedUnit = newSequence[index];
             const prevUnit = newSequence[index - 1];
+
+            newSequence.forEach((unit, idx) => {
+              unit.indexInArrangement = idx;
+            });
+
             newSequence[index] = prevUnit;
             newSequence[index - 1] = selectedUnit;
             return newSequence;
@@ -88,6 +95,11 @@ export const useArrangementUnits = (arrangement: SongArrangement | null) => {
             const newSequence = [...currSequence];
             const selectedUnit = newSequence[index];
             const nextUnit = newSequence[index + 1];
+
+            newSequence.forEach((unit, idx) => {
+              unit.indexInArrangement = idx;
+            });
+
             newSequence[index] = nextUnit;
             newSequence[index + 1] = selectedUnit;
             return newSequence;
