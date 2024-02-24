@@ -32,7 +32,7 @@ model Unit {
   title          String?
   content        String
   type           UnitType   @default(SONG_BLOCK)
-  localId        Int
+  localUID       String?
   arrangements   ArrangementUnit[]
 }
 

@@ -47,53 +47,121 @@ export function getArrangementOrDefault(
   return defaultArrangements[0] || null;
 }
 
+export async function createOrUpdateUnits(units: Unit[]) {
+  if (units.some((unit) => !unit.localUID)) {
+    throw new Error("Unit is missing localUID");
+  }
+
+  const existingUnits = units.filter((unit) => unit.id);
+  const newUnits = units.filter((unit) => !unit.id);
+
+  const queries = [];
+  if (newUnits.length > 0) {
+    queries.push(
+      prisma.unit.createMany({
+        data: newUnits.map((unit) => ({
+          title: unit.title || null,
+          content: unit.content,
+          type: unit.type,
+          localUID: unit.localUID || null,
+        })),
+      })
+    );
+  }
+  if (existingUnits.length > 0) {
+    queries.push(
+      prisma.unit.updateMany({
+        where: {
+          id: {
+            in: existingUnits.map((unit) => unit.id as number),
+          },
+        },
+        data: existingUnits.map((unit) => ({
+          title: unit.title,
+          content: unit.content,
+          type: unit.type,
+          localUID: unit.localUID,
+        })),
+      })
+    );
+  }
+  await Promise.all(queries);
+
+  return await prisma.unit.findMany({
+    where: {
+      OR: [
+        {
+          id: {
+            in: existingUnits.map((unit) => unit.id as number),
+          },
+        },
+        {
+          localUID: {
+            in: newUnits.map((unit) => unit.localUID as string),
+          },
+        },
+      ],
+    },
+  });
+}
+
 export async function createOrUpdateSong(
   songId: number | null,
   arrangementId: number | null,
   title: string,
   lyrics: string,
-  units: ArrangementUnit[],
+  arrangementUnits: ArrangementUnit[],
   artist?: string
 ) {
-  const unitUpserts = units.map((arrangementUnit, idx) => {
-    if (!arrangementUnit.unit) throw new Error("Unit is required");
-    const unitUpsert = {
-      create: {
-        title: arrangementUnit.unit.title,
-        content: arrangementUnit.unit.content,
-        type: arrangementUnit.unit.type,
-        localId: arrangementUnit.unit.localId,
-      },
-      update: {
-        title: arrangementUnit.unit.title,
-        content: arrangementUnit.unit.content,
-        type: arrangementUnit.unit.type,
-        localId: arrangementUnit.unit.localId,
-      },
-      where: {
-        id: arrangementUnit.unit.id || undefined,
-      },
-    };
-    return {
-      create: {
-        unit: unitUpsert,
-        indexInArrangement: idx,
-      },
-      update: {
-        unit: unitUpsert,
-        indexInArrangement: idx,
-      },
-      where: {
-        id: arrangementUnit.id || undefined,
-      },
-    };
-  });
+  const allUnits = arrangementUnits
+    .map((arrangementUnit) => arrangementUnit.unit)
+    .filter(Boolean) as Unit[];
+  const units = Array.from(
+    new Map(allUnits.map((unit) => [unit.localUID, unit])).values()
+  );
 
-  const query = {
-    where: {
-      id: songId || undefined,
+  const unitsWithId = createOrUpdateUnits(units);
+  const localUIDToUnit = new Map(
+    (await unitsWithId).map((unit) => [unit.localUID, unit])
+  );
+
+  const arrangementUnitCreates = arrangementUnits.map((unit) => ({
+    indexInArrangement: unit.indexInArrangement,
+    unit: {
+      connect: {
+        id: localUIDToUnit.get(unit.unit?.localUID as string)?.id,
+      },
     },
-    create: {
+  }));
+
+  if (songId) {
+    return await prisma.song.update({
+      where: {
+        id: songId,
+      },
+      data: {
+        title,
+        lyrics,
+        artist,
+        arrangements: {
+          update: {
+            where: {
+              id: arrangementId as number,
+            },
+            data: {
+              units: {
+                deleteMany: {},
+                create: arrangementUnitCreates,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  return await prisma.song.create({
+    data: {
       title,
       lyrics,
       artist,
@@ -103,34 +171,13 @@ export async function createOrUpdateSong(
             isDefault: true,
             deleted: false,
             units: {
-              upsert: unitUpserts,
+              create: arrangementUnitCreates,
             },
           },
         ],
       },
     },
-    update: {
-      title,
-      lyrics,
-      artist,
-      arrangements: {
-        update: {
-          where: {
-            id: arrangementId || undefined,
-          },
-          data: {
-            units: {
-              upsert: unitUpserts,
-            },
-          },
-        },
-      },
-    },
-  };
-
-  const song = await prisma.song.upsert(query);
-
-  return song;
+  });
 }
 
 export async function deleteSongArrangement(id: number) {

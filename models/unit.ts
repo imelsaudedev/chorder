@@ -4,10 +4,10 @@ export type Unit = {
   title?: string | null;
   content: string;
   type: UnitType;
+  localUID?: string;
   // ID within the song
   // localId: number;
   // This is for the form
-  localUID?: string;
   preview?: boolean;
   typeIdx?: number;
 };
