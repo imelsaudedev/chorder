@@ -1,120 +1,174 @@
-import { Unit } from "./unit";
+import { Unit, pruneUnits } from "./unit";
 import prisma from "@/lib/prisma";
 
 export type SongBase = {
-  id: number;
+  id?: number;
   title: string;
   artist?: string | null;
   lyrics: string;
 };
 
 export type Song = SongBase & {
-  versions: SongVersion[];
+  arrangements: SongArrangement[];
 };
 
-export type SongVersion = {
-  id: number;
-  units: Unit[];
-  unitSequence: number[];
+export type SongArrangement = {
+  id?: number;
+  units: ArrangementUnit[];
   isDefault: boolean;
   deleted: boolean;
 };
 
-export function getVersionOrDefault(
+export type ArrangementUnit = {
+  id?: number;
+  arrangement?: SongArrangement;
+  arrangementId?: number;
+  unit?: Unit;
+  unitId?: number;
+  indexInArrangement: number;
+};
+
+export function getArrangementOrDefault(
   song: Song | null,
-  versionId: number | null
+  arrangementId: number | null
 ) {
   if (song === null) return null;
-  if (versionId) {
+  if (arrangementId) {
     return (
-      song.versions.filter((version) => version.id === versionId)[0] || null
+      song.arrangements.filter(
+        (arrangement) => arrangement.id === arrangementId
+      )[0] || null
     );
   }
 
-  const defaultVersions = song.versions.filter((version) => version.isDefault);
-  return defaultVersions[0] || null;
+  const defaultArrangements = song.arrangements.filter(
+    (arrangement) => arrangement.isDefault
+  );
+  return defaultArrangements[0] || null;
+}
+
+export async function createOrUpdateUnits(units: Unit[]) {
+  if (units.length === 0) return [];
+
+  if (units.some((unit) => !unit.localUID)) {
+    throw new Error("Unit is missing localUID");
+  }
+
+  await prisma.$transaction(
+    units.map((unit) =>
+      unit.id
+        ? prisma.dBUnit.update({
+            where: {
+              id: unit.id,
+            },
+            data: {
+              title: unit.title,
+              content: unit.content,
+              type: unit.type,
+              localUID: unit.localUID,
+            },
+          })
+        : prisma.dBUnit.create({
+            data: {
+              title: unit.title || null,
+              content: unit.content,
+              type: unit.type,
+              localUID: unit.localUID || null,
+            },
+          })
+    )
+  );
+
+  return await prisma.dBUnit.findMany({
+    where: {
+      localUID: {
+        in: units.map((unit) => unit.localUID as string),
+      },
+    },
+  });
 }
 
 export async function createOrUpdateSong(
   songId: number | null,
-  versionId: number | null,
+  arrangementId: number | null,
   title: string,
   lyrics: string,
-  availableUnits: Unit[],
-  unitMap: string,
+  arrangementUnits: ArrangementUnit[],
   artist?: string
 ) {
-  const unitUpserts = availableUnits.map((unit) => ({
-    create: {
-      title: unit.title,
-      content: unit.content,
-      type: unit.type,
-      localId: unit.localId,
-    },
-    update: {
-      title: unit.title,
-      content: unit.content,
-      type: unit.type,
-    },
-    where: {
-      id: unit.id,
+  const allUnits = arrangementUnits
+    .map((arrangementUnit) => arrangementUnit.unit)
+    .filter(Boolean) as Unit[];
+  const units = Array.from(
+    new Map(allUnits.map((unit) => [unit.localUID, unit])).values()
+  );
+
+  const unitsWithId = createOrUpdateUnits(units);
+  const localUIDToUnit = new Map(
+    (await unitsWithId).map((unit) => [unit.localUID, unit])
+  );
+
+  const arrangementUnitCreates = arrangementUnits.map((unit) => ({
+    indexInArrangement: unit.indexInArrangement,
+    unit: {
+      connect: {
+        id: localUIDToUnit.get(unit.unit?.localUID as string)?.id,
+      },
     },
   }));
 
-  const query = {
-    where: {
-      id: songId,
-    },
-    create: {
-      title,
-      lyrics,
-      artist,
-      versions: {
-        create: [
-          {
-            unitMap,
-            isDefault: true,
-            deleted: false,
-            units: {
-              create: availableUnits.map((unit) => ({
-                title: unit.title,
-                content: unit.content,
-                type: unit.type,
-                localId: unit.localId,
-              })),
-            },
-          },
-        ],
+  let songs;
+  if (songId) {
+    songs = await prisma.dBSong.update({
+      where: {
+        id: songId,
       },
-    },
-    update: {
-      title,
-      lyrics,
-      artist,
-      versions: {
-        update: {
-          where: {
-            id: versionId,
-          },
-          data: {
-            unitMap,
-            units: {
-              upsert: unitUpserts,
+      data: {
+        title,
+        lyrics,
+        artist,
+        arrangements: {
+          update: {
+            where: {
+              id: arrangementId as number,
+            },
+            data: {
+              units: {
+                deleteMany: {},
+                create: arrangementUnitCreates,
+              },
             },
           },
         },
       },
-    },
-  };
-
-  const song = await prisma.song.upsert(query);
-
-  return song;
+    });
+  } else {
+    songs = await prisma.dBSong.create({
+      data: {
+        title,
+        lyrics,
+        artist,
+        arrangements: {
+          create: [
+            {
+              isDefault: true,
+              deleted: false,
+              units: {
+                create: arrangementUnitCreates,
+              },
+            },
+          ],
+        },
+      },
+    });
+  }
+  await pruneUnits();
+  return songs;
 }
 
-export async function deleteSongVersion(id: number) {
-  // TODO: MAKE NEXT VERSION THE DEFAULT ONE
-  await prisma.songVersion.update({
+export async function deleteSongArrangement(id: number) {
+  // TODO: MAKE NEXT ARRANGEMENT THE DEFAULT ONE
+  await prisma.dBSongArrangement.update({
     where: {
       id,
     },
@@ -125,16 +179,20 @@ export async function deleteSongVersion(id: number) {
 }
 
 export function fetchSong(id: number): Promise<Song | null> {
-  return prisma.song
+  return prisma.dBSong
     .findUnique({
       where: { id },
       include: {
-        versions: {
+        arrangements: {
           where: {
             deleted: false,
           },
           include: {
-            units: true,
+            units: {
+              include: {
+                unit: true,
+              },
+            },
           },
         },
       },
@@ -144,10 +202,12 @@ export function fetchSong(id: number): Promise<Song | null> {
 
       return {
         ...song,
-        versions: song.versions.map((version) => {
+        arrangements: song.arrangements.map((arrangement) => {
           return {
-            ...version,
-            unitSequence: version.unitMap.split(",").map(Number),
+            ...arrangement,
+            units: arrangement.units.sort(
+              (a, b) => a.indexInArrangement - b.indexInArrangement
+            ),
           };
         }),
       };
@@ -155,9 +215,9 @@ export function fetchSong(id: number): Promise<Song | null> {
 }
 
 export function fetchAllSongs(): Promise<SongBase[]> {
-  return prisma.song.findMany({
+  return prisma.dBSong.findMany({
     where: {
-      versions: {
+      arrangements: {
         some: {
           deleted: false,
         },

@@ -1,5 +1,5 @@
 import SongViewer from "@/fragments/SongViewer";
-import { deleteVersion, getSong, postSong } from "./actions";
+import { deleteArrangement, getSong, postSong } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +8,7 @@ export default async function SongPage({
   searchParams,
 }: {
   params: { song: string };
-  searchParams: { edit?: string; version?: number };
+  searchParams: { edit?: string; arrangement?: number };
 }) {
   const songSlug = params.song;
   const songId = parseInt(songSlug);
@@ -18,10 +18,10 @@ export default async function SongPage({
   return (
     <SongViewer
       song={song}
-      versionId={searchParams.version || null}
+      arrangementId={searchParams.arrangement || null}
       initialWriteMode={writeMode}
       postSong={postSong}
-      deleteVersion={deleteVersion}
+      deleteArrangement={deleteArrangement}
     />
   );
 }

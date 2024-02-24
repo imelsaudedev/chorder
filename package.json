@@ -1,6 +1,6 @@
 {
-  "name": "vercel-kv-redis-starter",
-  "repository": "https://github.com/vercel/examples.git",
+  "name": "chorder",
+  "repository": "https://github.com/ImelSaude/chorder.git",
   "license": "MIT",
   "version": "0.0.0",
   "private": true,
@@ -21,7 +21,6 @@
     "@types/node": "18.15.11",
     "@types/react": "18.2.37",
     "@types/react-dom": "18.0.11",
-    "@vercel/kv": "0.2.1",
     "autoprefixer": "10.4.14",
     "chordsheetjs": "^8.1.0",
     "eslint": "8.38.0",

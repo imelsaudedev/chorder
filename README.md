@@ -1,56 +1,77 @@
----
-name: Vercel KV for Redis Next.js Starter
-slug: kv-redis-starter
-description: Simple Next.js template that uses Vercel KV for Redis to track pageviews.
-framework: Next.js
-useCase: Starter
-css: Tailwind
-database: Vercel KV
-deployUrl: https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fstorage%2Fkv-redis-starter&project-name=kv-redis-starter&repository-name=kv-redis-starter&demo-title=Vercel%20KV%20for%20Redis%20Next.js%20Starter&demo-description=Simple%20Next.js%20template%20that%20uses%20Vercel%20KV%20for%20Redis%20to%20track%20pageviews.&demo-url=https%3A%2F%2Fkv-redis-starter.vercel.app%2F&demo-image=https%3A%2F%2Fkv-redis-starter.vercel.app%2Fopengraph-image.png&stores=%5B%7B"type"%3A"kv"%7D%5D
-demoUrl: https://kv-redis-starter.vercel.app/
-relatedTemplates:
-  - blob-starter
-  - postgres-starter
----
+# Chorder
 
-# Vercel KV for Redis Next.js Starter
+A song book based on [chordpro](https://www.chordpro.org/).
 
-Simple Next.js template that uses [Vercel KV for Redis](https://vercel.com/kv) to track pageviews.
+## Setup
 
-## Demo
+### Installing dependencies
 
-https://kv-redis-starter.vercel.app/
+Dependencies:
 
-## How to Use
+- [Node.js](https://nodejs.org/en/download)
+- [PNPM](https://pnpm.io/installation)
 
-You can choose from one of the following two methods to use this repository:
+To install the dependencies, run:
 
-### One-Click Deploy
-
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fstorage%2Fkv-redis-starter&project-name=kv-redis-starter&repository-name=kv-redis-starter&demo-title=Vercel%20KV%20for%20Redis%20Next.js%20Starter&demo-description=Simple%20Next.js%20template%20that%20uses%20Vercel%20KV%20for%20Redis%20to%20track%20pageviews.&demo-url=https%3A%2F%2Fkv-redis-starter.vercel.app%2F&demo-image=https%3A%2F%2Fkv-redis-starter.vercel.app%2Fopengraph-image.png&stores=%5B%7B"type"%3A"kv"%7D%5D)
-
-### Clone and Deploy
-
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [pnpm](https://pnpm.io/installation) to bootstrap the example:
-
-```bash
-pnpm create next-app --example https://github.com/vercel/examples/tree/main/storage/kv-redis-starter
+```
+pnpm install
 ```
 
-Once that's done, copy the .env.example file in this directory to .env.local (which will be ignored by Git):
+### Setup Postgres
 
-```bash
-cp .env.example .env.local
+You will need PostgreSQL to run this project locally. The easiest way is to use Docker:
+
+```
+docker pull postgres
+docker volume create postgres-data
+docker run --name postgres-container -e POSTGRES_PASSWORD=SOME_PASSWORD -p 5432:5432 -v postgres-data:/var/lib/postgresql/data -d postgres
 ```
 
-Then open `.env.local` and set the environment variables to match the ones in your Vercel Storage Dashboard.
+Now you have to run `psql`. Using Docker:
 
-Next, run Next.js in development mode:
+```
+docker exec -it postgres-container psql -U postgres
+```
 
-```bash
+Finally, initialize the database:
+
+```
+create database SOME_DB_NAME;
+create user SOME_USERNAME with encrypted password 'SOME_PASSWORD';
+grant all privileges on database SOME_DB_NAME to SOME_USERNAME;
+\c SOME_DB_NAME postgres
+GRANT ALL ON SCHEMA public TO SOME_USERNAME;
+ALTER USER SOME_USERNAME CREATEDB;
+\q
+```
+
+Create a `.env` file with the following:
+
+```
+POSTGRES_PRISMA_URL="postgresql://SOME_USERNAME:SOME_PASSWORD@localhost:5432/SOME_DB_NAME"
+POSTGRES_URL_NON_POOLING="postgresql://SOME_USERNAME:SOME_PASSWORD@localhost:5432/SOME_DB_NAME"
+```
+
+#### Setup Prisma
+
+To apply Prisma DB schema, run:
+
+```
+pnpm dbpush
+```
+
+### Running the server in development mode
+
+Run the following command:
+
+```
 pnpm dev
 ```
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples) ([Documentation](https://nextjs.org/docs/deployment)).
+#### Prisma Studio
+
+[Prisma Studio](https://www.prisma.io/studio) is a useful tool to work with Prisma. You can run it with:
+
+```
+pnpm dbstudio
+```

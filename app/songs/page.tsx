@@ -14,6 +14,7 @@ export default async function SongListPage() {
     new Set([...Array.from("abcdefghijklmnopqrstuvwxyz"), ...existingInitials])
   );
   allInitials.sort();
+  existingInitials.sort();
 
   return (
     <>
@@ -47,12 +48,14 @@ export default async function SongListPage() {
           })}
         </nav>
         <section style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
-          {Array.from(songsByFirstLetter.entries()).map(([letter, songs]) => {
+          {existingInitials.map((letter) => {
+            const songs = songsByFirstLetter.get(letter);
+            if (!songs) return null;
             return (
               <Fragment key={`${letter}--section`}>
                 <h2
                   id={letter}
-                  className="text-4xl md:text-9xl col-span-2 md:col-span-1 pr-6 text-purple-400"
+                  className="text-4xl md:text-9xl col-span-2 md:col-span-1 pr-6 text-purple-400 text-center"
                 >
                   {letter.toUpperCase()}
                 </h2>

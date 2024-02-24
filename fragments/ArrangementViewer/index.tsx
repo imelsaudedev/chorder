@@ -5,57 +5,34 @@ import IconButton from "@/components/IconButton";
 import Main from "@/components/Main";
 import EditIcon from "@/components/icons/EditIcon";
 import TrashIcon from "@/components/icons/TrashIcon";
-import { Song, SongVersion } from "@/models/song";
-import { Unit } from "@/models/unit";
-import {
-  Dispatch,
-  Fragment,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { Song, SongArrangement } from "@/models/song";
+import { Dispatch, Fragment, SetStateAction, useCallback } from "react";
 
-export type DeleteVersionAction = (versionId: number) => void;
+export type DeleteArrangementAction = (arrangementId: number) => void;
 
-type VersionViewerProps = {
+type ArrangementViewerProps = {
   song: Song;
-  version: SongVersion;
+  arrangement: SongArrangement;
   setWriteMode: Dispatch<SetStateAction<boolean>>;
-  deleteVersion: DeleteVersionAction;
+  deleteArrangement: DeleteArrangementAction;
 };
 
-export default function VersionViewer({
+export default function ArrangementViewer({
   song,
-  version,
+  arrangement,
   setWriteMode,
-  deleteVersion,
-}: VersionViewerProps) {
-  const [localIdToUnit, setLocalIdToUnit] = useState<Map<number, Unit>>(
-    new Map()
-  );
-  const [unitSequence, setUnitSequence] = useState<number[]>();
-
-  useEffect(() => {
-    if (!version.units) return;
-
-    setLocalIdToUnit(
-      new Map(version.units.map((unit) => [unit.localId, unit]))
-    );
-  }, [version.units]);
-
-  useEffect(() => {
-    if (!version.unitSequence) return;
-
-    setUnitSequence(version.unitSequence);
-  }, [version.unitSequence]);
-
+  deleteArrangement,
+}: ArrangementViewerProps) {
   const handleEditButtonClick = useCallback(() => {
     setWriteMode(true);
   }, [setWriteMode]);
 
+  if (!arrangement || !arrangement.id) {
+    return null;
+  }
+
   // TODO: MAYBE WE NEED A CONFIRMATION DIALOG FOR THIS?
-  const deleteVersionWithId = deleteVersion.bind(null, version.id);
+  const deleteArrangementWithId = deleteArrangement.bind(null, arrangement.id);
 
   return (
     <>
@@ -68,7 +45,7 @@ export default function VersionViewer({
           </div>
           <div className="flex">
             <form
-              action={deleteVersionWithId}
+              action={deleteArrangementWithId}
               className="grid place-content-center"
             >
               <IconButton type="submit">
@@ -83,15 +60,15 @@ export default function VersionViewer({
       </Header>
       <Main className="pt-4">
         <div className="columns-2xs">
-          {unitSequence?.map((localId, idx) => {
-            const unit = localIdToUnit.get(localId);
+          {arrangement.units?.map((arrangementUnit, idx) => {
+            const unit = arrangementUnit.unit;
             if (!unit) return "ERROR";
             return (
-              <Fragment key={`unit--${idx}--${localId}`}>
+              <Fragment key={`unit--${idx}--${unit.localUID}`}>
                 {idx > 0 && <div className="h-2"></div>}
                 <ChordProViewer
                   chordpro={unit.content}
-                  key={`${unit.localId}--${idx}`}
+                  key={`${unit.localUID}--${idx}`}
                   unitType={unit.type}
                   withoutContainer
                 />

@@ -10,42 +10,49 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
-model Song {
+model DBSong {
   id        Int  @id @default(autoincrement())
   title     String
   artist    String?
   lyrics    String
-  versions  SongVersion[] @relation("Versions")
+  arrangements  DBSongArrangement[] @relation("Arrangements")
 }
 
-model SongVersion {
+model DBSongArrangement {
   id               Int  @id @default(autoincrement())
-  units            SongUnit[] @relation("Units")
-  unitMap          String
-  song             Song @relation("Versions", fields: [songId], references: [id])
+  song             DBSong @relation("Arrangements", fields: [songId], references: [id])
   songId           Int
+  units            DBArrangementUnit[]
   isDefault        Boolean @default(true)
   deleted          Boolean @default(false)
 }
 
-model SongUnit {
+model DBUnit {
   id             Int  @id @default(autoincrement())
   title          String?
   content        String
-  type           UnitType   @default(NEUTRAL)
-  localId        Int
-  songVersion    SongVersion @relation("Units", fields: [songVersionId], references: [id])
-  songVersionId  Int
+  type           DBUnitType   @default(SONG_BLOCK)
+  localUID       String?
+  arrangements   DBArrangementUnit[]
 }
 
-enum UnitType {
-  INTRO
-  ENDING
-  VERSE
-  PRECHORUS
-  CHORUS
-  BRIDGE
-  INTERLUDE
-  SOLO
-  NEUTRAL
+model DBArrangementUnit {
+  id                   Int  @id @default(autoincrement())
+  arrangement          DBSongArrangement  @relation(fields: [arrangementId], references: [id])
+  arrangementId        Int
+  unit                 DBUnit  @relation(fields: [unitId], references: [id])
+  unitId               Int
+  indexInArrangement   Int
+}
+
+enum DBUnitType {
+  SONG_INTRO
+  SONG_ENDING
+  SONG_VERSE
+  SONG_PRECHORUS
+  SONG_CHORUS
+  SONG_BRIDGE
+  SONG_INTERLUDE
+  SONG_SOLO
+  SONG_BLOCK
 }
