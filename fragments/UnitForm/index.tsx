@@ -8,7 +8,7 @@ import CloseIcon from "@/components/icons/CloseIcon";
 import { unitTypeColorClasses } from "@/components/unit-colors";
 import messages from "@/i18n/messages";
 import { Unit, UnitType } from "@/models/unit";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent } from "react";
 
 export default function UnitForm({
   unit,

@@ -1,12 +1,22 @@
+import { parseChordPro } from "@/chopro/music";
 import BackArrow from "@/components/BackArrow";
-import ChordProViewer from "@/components/ChordProViewer";
+import ChordProLine from "@/components/ChordProLine";
 import Header from "@/components/Header";
 import IconButton from "@/components/IconButton";
 import Main from "@/components/Main";
+import ColumnsIcon from "@/components/icons/ColumnsIcon";
 import EditIcon from "@/components/icons/EditIcon";
 import TrashIcon from "@/components/icons/TrashIcon";
 import { Song, SongArrangement } from "@/models/song";
-import { Dispatch, Fragment, SetStateAction, useCallback } from "react";
+import { UnitType } from "@/models/unit";
+import { Line } from "chordsheetjs";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 
 export type DeleteArrangementAction = (arrangementId: number) => void;
 
@@ -17,12 +27,36 @@ type ArrangementViewerProps = {
   deleteArrangement: DeleteArrangementAction;
 };
 
+type LineData = {
+  line: Line;
+  unitType: UnitType;
+  isFirst: boolean;
+  isLast: boolean;
+};
+
 export default function ArrangementViewer({
   song,
   arrangement,
   setWriteMode,
   deleteArrangement,
 }: ArrangementViewerProps) {
+  const [columns, setColumns] = useState(1);
+  const lineData = useMemo(() => {
+    return arrangement.units
+      ?.map((arrangementUnit) => {
+        const unit = arrangementUnit.unit;
+        if (!unit) return [null];
+        const chordproHtml = parseChordPro(unit.content);
+        return chordproHtml.lines.map((line, idx) => ({
+          line,
+          unitType: unit.type,
+          isFirst: idx === 0,
+          isLast: idx === chordproHtml.lines.length - 1,
+        }));
+      })
+      .flat();
+  }, [arrangement.units]);
+
   const handleEditButtonClick = useCallback(() => {
     setWriteMode(true);
   }, [setWriteMode]);
@@ -44,6 +78,7 @@ export default function ArrangementViewer({
             {song.artist && <span className="text-sm">{song.artist}</span>}
           </div>
           <div className="flex">
+            <ColumnButtons setColumns={setColumns} />
             <form
               action={deleteArrangementWithId}
               className="grid place-content-center"
@@ -59,24 +94,83 @@ export default function ArrangementViewer({
         </div>
       </Header>
       <Main className="pt-4">
-        <div className="columns-2xs">
-          {arrangement.units?.map((arrangementUnit, idx) => {
-            const unit = arrangementUnit.unit;
-            if (!unit) return "ERROR";
-            return (
-              <Fragment key={`unit--${idx}--${unit.localUID}`}>
-                {idx > 0 && <div className="h-2"></div>}
-                <ChordProViewer
-                  chordpro={unit.content}
-                  key={`${unit.localUID}--${idx}`}
-                  unitType={unit.type}
-                  withoutContainer
-                />
-              </Fragment>
-            );
-          })}
-        </div>
+        <ColumnViewer columns={columns} lineData={lineData} />
       </Main>
     </>
+  );
+}
+
+function ColumnButtons({
+  setColumns,
+}: {
+  setColumns: Dispatch<SetStateAction<number>>;
+}) {
+  return (
+    <>
+      <IconButton onClick={() => setColumns(1)}>
+        <ColumnsIcon count={1} />
+      </IconButton>
+      <IconButton onClick={() => setColumns(2)}>
+        <ColumnsIcon count={2} />
+      </IconButton>
+      <IconButton onClick={() => setColumns(3)}>
+        <ColumnsIcon count={3} />
+      </IconButton>
+      <IconButton onClick={() => setColumns(4)}>
+        <ColumnsIcon count={4} />
+      </IconButton>
+    </>
+  );
+}
+
+type ColumnViewerProps = {
+  columns: number;
+  lineData: (LineData | null)[];
+};
+
+function ColumnViewer({ columns, lineData }: ColumnViewerProps) {
+  let gridCols;
+  if (columns <= 1) {
+    gridCols = "grid-cols-1";
+  }
+  if (columns === 2) {
+    gridCols = "grid-cols-2";
+  }
+  if (columns === 3) {
+    gridCols = "grid-cols-3";
+  }
+  if (columns >= 4) {
+    gridCols = "grid-cols-4";
+  }
+  const className = `grid ${gridCols} gap-4`;
+
+  return (
+    <div className={className}>
+      {Array.from(Array(columns).keys()).map((i) => {
+        const linesPerColumn = Math.ceil(lineData.length / columns);
+        const colData = lineData.slice(
+          i * linesPerColumn,
+          Math.min((i + 1) * linesPerColumn, lineData.length)
+        );
+        return (
+          <div key={`col-${i}`} className="flex flex-col gap-4">
+            {colData.map((data, idx) =>
+              data ? (
+                <ChordProLine
+                  key={`col-${i}-line-${idx}`}
+                  line={data.line}
+                  unitType={data.unitType}
+                  isFirst={data.isFirst}
+                  isLast={data.isLast}
+                  grow={idx === colData.length - 1}
+                />
+              ) : (
+                <span key={`col-${i}-line-${idx}`}>ERROR</span>
+              )
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }

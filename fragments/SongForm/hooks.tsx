@@ -143,7 +143,7 @@ function getInitialUnits(arrangement: SongArrangement | null) {
     unit.unit.localUID = localUID;
   });
 
-  return units;
+  return updateTypeIndices(units);
 }
 
 function getExistingUIDs(arrangementUnits: ArrangementUnit[]) {

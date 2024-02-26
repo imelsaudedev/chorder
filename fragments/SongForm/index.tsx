@@ -4,14 +4,12 @@ import Header from "@/components/Header";
 import Main from "@/components/Main";
 import TextInput from "@/components/TextInput";
 import messages from "@/i18n/messages";
-import { Unit } from "@/models/unit";
 import {
   ChangeEvent,
   Dispatch,
   MouseEventHandler,
   SetStateAction,
   useCallback,
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -140,11 +138,11 @@ function HeaderForm({
   artist: string;
   setArtist: Dispatch<SetStateAction<string>>;
 }) {
-  const handleChangeTitle = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeTitle = (event: ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value);
   };
 
-  const handleChangeArtist = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeArtist = (event: ChangeEvent<HTMLInputElement>) => {
     setArtist(event.target.value);
   };
 
