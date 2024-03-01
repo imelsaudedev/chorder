@@ -19,11 +19,11 @@ import FormField from "@/components/FormField";
 import FormLabel from "@/components/FormLabel";
 import BackArrow from "@/components/BackArrow";
 import { ArrangementUnit, Song, SongArrangement } from "@/models/song";
-import IconButton from "@/components/IconButton";
 import ChevronUpIcon from "@/components/icons/ChevronUpIcon";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import { useArrangementUnits } from "./hooks";
 import { getUniqueUnits } from "./utils";
+import { Button } from "@/components/ui/button";
 
 export type PostSongAction = (
   songId: number | null,
@@ -222,12 +222,12 @@ function SortingButtons({
 
   return (
     <div className="flex flex-col">
-      <IconButton disabled={!hasPrev} onClick={buildMoveUpHandler(index)}>
+      <Button disabled={!hasPrev} onClick={buildMoveUpHandler(index)}>
         <ChevronUpIcon />
-      </IconButton>
-      <IconButton disabled={!hasNext} onClick={buildMoveDownHandler(index)}>
+      </Button>
+      <Button disabled={!hasNext} onClick={buildMoveDownHandler(index)}>
         <ChevronDownIcon />
-      </IconButton>
+      </Button>
     </div>
   );
 }

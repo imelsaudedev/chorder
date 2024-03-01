@@ -1,4 +1,4 @@
-import "./globals.scss";
+import "./globals.css";
 import { Inter } from "next/font/google";
 import messages from "@/i18n/messages";
 

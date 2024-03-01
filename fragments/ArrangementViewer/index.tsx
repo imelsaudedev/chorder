@@ -2,11 +2,12 @@ import { parseChordPro } from "@/chopro/music";
 import BackArrow from "@/components/BackArrow";
 import ChordProLine from "@/components/ChordProLine";
 import Header from "@/components/Header";
-import IconButton from "@/components/IconButton";
 import Main from "@/components/Main";
 import ColumnsIcon from "@/components/icons/ColumnsIcon";
+import ConfigIcon from "@/components/icons/ConfigIcon";
 import EditIcon from "@/components/icons/EditIcon";
 import TrashIcon from "@/components/icons/TrashIcon";
+import { Button } from "@/components/ui/button";
 import { Song, SongArrangement } from "@/models/song";
 import { UnitType } from "@/models/unit";
 import { Line } from "chordsheetjs";
@@ -41,6 +42,7 @@ export default function ArrangementViewer({
   deleteArrangement,
 }: ArrangementViewerProps) {
   const [columns, setColumns] = useState(1);
+  const [showConfig, setShowConfig] = useState(false);
   const lineData = useMemo(() => {
     return arrangement.units
       ?.map((arrangementUnit) => {
@@ -56,6 +58,10 @@ export default function ArrangementViewer({
       })
       .flat();
   }, [arrangement.units]);
+
+  const handleToggleConfig = useCallback(() => {
+    setShowConfig((prev) => !prev);
+  }, [setShowConfig]);
 
   const handleEditButtonClick = useCallback(() => {
     setWriteMode(true);
@@ -78,25 +84,61 @@ export default function ArrangementViewer({
             {song.artist && <span className="text-sm">{song.artist}</span>}
           </div>
           <div className="flex">
-            <ColumnButtons setColumns={setColumns} />
-            <form
-              action={deleteArrangementWithId}
-              className="grid place-content-center"
-            >
-              <IconButton type="submit">
-                <TrashIcon />
-              </IconButton>
-            </form>
-            <IconButton onClick={handleEditButtonClick}>
-              <EditIcon />
-            </IconButton>
+            <Button variant="outline" onClick={handleToggleConfig}>
+              <ConfigIcon />
+            </Button>
           </div>
         </div>
       </Header>
       <Main className="pt-4">
+        <SongConfig
+          setColumns={setColumns}
+          deleteArrangementWithId={deleteArrangementWithId}
+          onEditButtonClick={handleEditButtonClick}
+          visible={showConfig}
+        />
         <ColumnViewer columns={columns} lineData={lineData} />
       </Main>
     </>
+  );
+}
+
+type SongConfigProps = {
+  setColumns: Dispatch<SetStateAction<number>>;
+  deleteArrangementWithId: () => void;
+  onEditButtonClick: () => void;
+  visible: boolean;
+};
+
+function SongConfig({
+  setColumns,
+  deleteArrangementWithId,
+  onEditButtonClick,
+  visible,
+}: SongConfigProps) {
+  return (
+    <div
+      className={`flex mb-4 bg-gray-200 p-2 rounded justify-between ${
+        visible ? "" : "hidden"
+      }`}
+    >
+      <div className="flex">
+        <ColumnButtons setColumns={setColumns} />
+      </div>
+      <div className="flex">
+        <form
+          action={deleteArrangementWithId}
+          className="grid place-content-center"
+        >
+          <Button type="submit" variant="ghost">
+            <TrashIcon />
+          </Button>
+        </form>
+        <Button onClick={onEditButtonClick} variant="ghost">
+          <EditIcon />
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -107,18 +149,18 @@ function ColumnButtons({
 }) {
   return (
     <>
-      <IconButton onClick={() => setColumns(1)}>
+      <Button onClick={() => setColumns(1)} variant="outline" size="icon">
         <ColumnsIcon count={1} />
-      </IconButton>
-      <IconButton onClick={() => setColumns(2)}>
+      </Button>
+      <Button onClick={() => setColumns(2)} variant="outline" size="icon">
         <ColumnsIcon count={2} />
-      </IconButton>
-      <IconButton onClick={() => setColumns(3)}>
+      </Button>
+      <Button onClick={() => setColumns(3)} variant="outline" size="icon">
         <ColumnsIcon count={3} />
-      </IconButton>
-      <IconButton onClick={() => setColumns(4)}>
+      </Button>
+      <Button onClick={() => setColumns(4)} variant="outline" size="icon">
         <ColumnsIcon count={4} />
-      </IconButton>
+      </Button>
     </>
   );
 }
