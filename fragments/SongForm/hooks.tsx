@@ -1,12 +1,21 @@
 import { ArrangementUnit, SongArrangement } from "@/models/song";
 import { Unit } from "@/models/unit";
-import { MouseEventHandler, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { updateTypeIndices } from "./utils";
+import { getChords, getKeyFromChords } from "@/chopro/music";
 
 export const useArrangementUnits = (arrangement: SongArrangement | null) => {
   const [arrangementUnits, setArrangementUnits] = useState<ArrangementUnit[]>(
     getInitialUnits(arrangement)
   );
+  const [computedKey, setComputedKey] = useState(arrangement?.key || "");
+
+  useEffect(() => {
+    const allChords = arrangementUnits
+      .map((arrangementUnit) => getChords(arrangementUnit.unit?.content))
+      .flat();
+    setComputedKey(getKeyFromChords(allChords) || "");
+  }, [arrangementUnits]);
 
   const handleAddUnit = (unit: Unit) => {
     setArrangementUnits((units) =>
@@ -113,6 +122,7 @@ export const useArrangementUnits = (arrangement: SongArrangement | null) => {
 
   return [
     arrangementUnits,
+    computedKey,
     handleAddUnit,
     handleCreateUnit,
     handleUpdateUnit,

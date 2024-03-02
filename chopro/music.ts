@@ -48,24 +48,42 @@ export function getLyrics(chordproString: string) {
   }
 }
 
+export function getChords(chordproString?: string) {
+  if (!chordproString) return [];
+
+  try {
+    const parsedSong = parseChordPro(chordproString);
+    return parsedSong.lines
+      .map((line) =>
+        line.items.map((item: any) =>
+          item._name === "comment" ? "" : item.chords
+        )
+      )
+      .flat(2);
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
+
 const KEYS = {
-  C: ["C", "D", "E", "F", "G", "A", "B"],
-  "C#": ["C#", "D#", "E#", "F#", "G#", "A#", "B#"],
-  Db: ["Db", "Eb", "F", "Gb", "Ab", "Bb", "C"],
-  D: ["D", "E", "F#", "G", "A", "B", "C#"],
-  "D#": ["D#", "E#", "F##", "G#", "A#", "B#", "C##"],
-  Eb: ["Eb", "F", "G", "Ab", "Bb", "C", "D"],
-  E: ["E", "F#", "G#", "A", "B", "C#", "D#"],
-  F: ["F", "G", "A", "Bb", "C", "D", "E"],
-  "F#": ["F#", "G#", "A#", "B", "C#", "D#", "E#"],
-  Gb: ["Gb", "Ab", "Bb", "Cb", "Db", "Eb", "F"],
-  G: ["G", "A", "B", "C", "D", "E", "F#"],
-  "G#": ["G#", "A#", "B#", "C#", "D#", "E#", "F##"],
-  Ab: ["Ab", "Bb", "C", "Db", "Eb", "F", "G"],
-  A: ["A", "B", "C#", "D", "E", "F#", "G#"],
-  "A#": ["A#", "B#", "C##", "D#", "E#", "F##", "G##"],
-  Bb: ["Bb", "C", "D", "Eb", "F", "G", "A"],
-  B: ["B", "C#", "D#", "E", "F#", "G#", "A#"],
+  C: ["C", "Dm", "Em", "F", "G", "Am", "Bdim"],
+  "C#": ["C#", "D#m", "E#m", "F#", "G#", "A#m", "B#dim"],
+  Db: ["Db", "Ebm", "Fm", "Gb", "Ab", "Bbm", "Cdim"],
+  D: ["D", "Em", "F#m", "G", "A", "Bm", "C#dim"],
+  "D#": ["D#", "E#m", "F##m", "G#", "A#", "B#m", "C##dim"],
+  Eb: ["Eb", "Fm", "Gm", "Ab", "Bb", "Cm", "Ddim"],
+  E: ["E", "F#m", "G#m", "A", "B", "C#m", "D#dim"],
+  F: ["F", "Gm", "Am", "Bb", "C", "Dm", "Edim"],
+  "F#": ["F#", "G#m", "A#m", "B", "C#", "D#m", "E#dim"],
+  Gb: ["Gb", "Abm", "Bbm", "Cb", "Db", "Ebm", "Fdim"],
+  G: ["G", "Am", "Bm", "C", "D", "Em", "F#dim"],
+  "G#": ["G#", "A#m", "B#m", "C#", "D#", "E#m", "F##dim"],
+  Ab: ["Ab", "Bbm", "Cm", "Db", "Eb", "Fm", "Gdim"],
+  A: ["A", "Bm", "C#m", "D", "E", "F#m", "G#dim"],
+  "A#": ["A#", "B#m", "C##m", "D#", "E#", "F##m", "G##dim"],
+  Bb: ["Bb", "Cm", "Dm", "Eb", "F", "Gm", "Adim"],
+  B: ["B", "C#m", "D#m", "E", "F#", "G#m", "A#dim"],
 };
 
 const HALF_TONES = [
@@ -99,6 +117,30 @@ export const simplifyChord = (chord: string) => {
   const match = re.exec(chord);
   return match ? match[0] : null;
 };
+
+export const getKeyFromChords = (chords: string[]) => {
+  const keys = chords
+    .map((chord) => keyFromChord(chord))
+    .filter((key) => key !== null);
+  if (keys.length === 0) return null;
+
+  return getMostLikelyKey(keys as string[]);
+};
+
+function getMostLikelyKey(chords: string[]) {
+  let key = "C";
+  let maxCount = 0;
+  for (const k in KEYS) {
+    const count = chords.filter((chord) =>
+      KEYS[k as keyof typeof KEYS].includes(chord)
+    ).length;
+    if (count > maxCount) {
+      maxCount = count;
+      key = k;
+    }
+  }
+  return key;
+}
 
 export const harmonicIndex = (key: SongKey) => {
   switch (key) {

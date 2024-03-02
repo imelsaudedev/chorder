@@ -10,6 +10,7 @@ import {
   MouseEventHandler,
   SetStateAction,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -48,8 +49,11 @@ export default function SongForm({
 }: SongFormProps) {
   const [title, setTitle] = useState(song?.title || "");
   const [artist, setArtist] = useState(song?.artist || "");
+  const [songKey, setSongKey] = useState(arrangement?.key || "");
+  const [keyManuallySet, setKeyManuallySet] = useState(!!arrangement?.key);
   const [
     arrangementUnits,
+    computedKey,
     handleAddUnit,
     handleCreateUnit,
     handleUpdateUnit,
@@ -58,18 +62,33 @@ export default function SongForm({
     buildMoveDownHandler,
   ] = useArrangementUnits(arrangement);
 
+  useEffect(() => {
+    if (!keyManuallySet) {
+      setSongKey(computedKey);
+    }
+  }, [keyManuallySet, computedKey]);
+
   const postSongWithUnits = postSong.bind(
     null,
     song?.id || null,
     arrangement?.id || null,
     title,
     arrangementUnits,
-    artist
+    artist,
+    songKey
   );
 
   const uniqueUnits = useMemo(
     () => getUniqueUnits(arrangementUnits),
     [arrangementUnits]
+  );
+
+  const handleManuallySetKey = useCallback(
+    (key: string) => {
+      setSongKey(key);
+      setKeyManuallySet(true);
+    },
+    [setSongKey, setKeyManuallySet]
   );
 
   return (
@@ -81,6 +100,8 @@ export default function SongForm({
           setTitle={setTitle}
           artist={artist}
           setArtist={setArtist}
+          songKey={songKey}
+          setSongKey={handleManuallySetKey}
         />
         <SaveButtonSet
           song={song}
@@ -132,11 +153,15 @@ function HeaderForm({
   setTitle,
   artist,
   setArtist,
+  songKey,
+  setSongKey,
 }: {
   title: string;
   setTitle: Dispatch<SetStateAction<string>>;
   artist: string;
   setArtist: Dispatch<SetStateAction<string>>;
+  songKey: string;
+  setSongKey: (key: string) => void;
 }) {
   const handleChangeTitle = (event: ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value);
@@ -144,6 +169,10 @@ function HeaderForm({
 
   const handleChangeArtist = (event: ChangeEvent<HTMLInputElement>) => {
     setArtist(event.target.value);
+  };
+
+  const handleSongKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSongKey(event.target.value);
   };
 
   return (
@@ -168,6 +197,17 @@ function HeaderForm({
           placeholder={messages.songData.artistPlaceholder}
           onChange={handleChangeArtist}
           defaultValue={artist}
+        />
+      </FormField>
+      <FormField>
+        <FormLabel className="text-purple-700" htmlFor="key">
+          {messages.songData.key}
+        </FormLabel>
+        <TextInput
+          id="key"
+          placeholder={messages.songData.keyPlaceholder}
+          onChange={handleSongKeyChange}
+          defaultValue={songKey}
         />
       </FormField>
     </div>
@@ -222,10 +262,20 @@ function SortingButtons({
 
   return (
     <div className="flex flex-col">
-      <Button disabled={!hasPrev} onClick={buildMoveUpHandler(index)}>
+      <Button
+        disabled={!hasPrev}
+        onClick={buildMoveUpHandler(index)}
+        variant="ghost"
+        size="icon"
+      >
         <ChevronUpIcon />
       </Button>
-      <Button disabled={!hasNext} onClick={buildMoveDownHandler(index)}>
+      <Button
+        disabled={!hasNext}
+        onClick={buildMoveDownHandler(index)}
+        variant="ghost"
+        size="icon"
+      >
         <ChevronDownIcon />
       </Button>
     </div>

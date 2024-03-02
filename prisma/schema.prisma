@@ -22,6 +22,7 @@ model DBSongArrangement {
   id               Int  @id @default(autoincrement())
   song             DBSong @relation("Arrangements", fields: [songId], references: [id])
   songId           Int
+  key              String
   units            DBArrangementUnit[]
   isDefault        Boolean @default(true)
   deleted          Boolean @default(false)

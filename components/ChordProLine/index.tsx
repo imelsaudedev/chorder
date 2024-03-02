@@ -7,6 +7,7 @@ type ChordProLineProps = {
   line: Line;
   isFirst: boolean;
   isLast: boolean;
+  isLastOfColumn: boolean;
   unitType?: UnitType;
   grow?: boolean;
 };
@@ -15,6 +16,7 @@ export default function ChordProLine({
   line,
   isFirst,
   isLast,
+  isLastOfColumn,
   unitType,
   grow,
 }: ChordProLineProps) {
@@ -28,6 +30,9 @@ export default function ChordProLine({
     }
     if (isLast) {
       className = `${className} border-b rounded-b`;
+      if (!isLastOfColumn) {
+        className = `${className} mb-2`;
+      }
     }
   }
   if (grow) {

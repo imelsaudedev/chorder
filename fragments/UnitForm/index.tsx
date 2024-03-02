@@ -5,6 +5,7 @@ import FormLabel from "@/components/FormLabel";
 import TextInput from "@/components/TextInput";
 import UnitCircle from "@/components/UnitCircle";
 import CloseIcon from "@/components/icons/CloseIcon";
+import { Button } from "@/components/ui/button";
 import { unitTypeColorClasses } from "@/components/unit-colors";
 import messages from "@/i18n/messages";
 import { Unit, UnitType } from "@/models/unit";
@@ -59,9 +60,9 @@ export default function UnitForm({
     <div className={classNames.join(" ")}>
       <div className="flex gap-4 items-center justify-between">
         <UnitCircle className="w-14 h-14" unit={unit} />
-        <button onClick={removeUnit}>
+        <Button onClick={removeUnit} variant="ghost" size="icon">
           <CloseIcon />
-        </button>
+        </Button>
       </div>
 
       <FormField>

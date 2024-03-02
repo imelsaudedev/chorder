@@ -84,6 +84,7 @@ export default function ArrangementViewer({
             {song.artist && <span className="text-sm">{song.artist}</span>}
           </div>
           <div className="flex">
+            {arrangement.key}
             <Button variant="outline" onClick={handleToggleConfig}>
               <ConfigIcon />
             </Button>
@@ -195,7 +196,7 @@ function ColumnViewer({ columns, lineData }: ColumnViewerProps) {
           Math.min((i + 1) * linesPerColumn, lineData.length)
         );
         return (
-          <div key={`col-${i}`} className="flex flex-col gap-4">
+          <div key={`col-${i}`} className="flex flex-col">
             {colData.map((data, idx) =>
               data ? (
                 <ChordProLine
@@ -204,6 +205,7 @@ function ColumnViewer({ columns, lineData }: ColumnViewerProps) {
                   unitType={data.unitType}
                   isFirst={data.isFirst}
                   isLast={data.isLast}
+                  isLastOfColumn={idx === colData.length - 1}
                   grow={idx === colData.length - 1}
                 />
               ) : (

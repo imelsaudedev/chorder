@@ -15,6 +15,8 @@ export const messagesSchema = z.object({
     titlePlaceholder: z.string(),
     artist: z.string(),
     artistPlaceholder: z.string(),
+    key: z.string(),
+    keyPlaceholder: z.string(),
     unit: z.string(),
   }),
   unitData: z.object({

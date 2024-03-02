@@ -13,6 +13,8 @@
     "titlePlaceholder": "Song title",
     "artist": "Artist",
     "artistPlaceholder": "Song artist",
+    "key": "Key",
+    "keyPlaceholder": "Key",
     "units": "Unit"
   },
   "unitData": {

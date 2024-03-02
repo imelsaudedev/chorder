@@ -14,6 +14,7 @@ export type Song = SongBase & {
 
 export type SongArrangement = {
   id?: number;
+  key?: string;
   units: ArrangementUnit[];
   isDefault: boolean;
   deleted: boolean;
@@ -94,7 +95,8 @@ export async function createOrUpdateSong(
   title: string,
   lyrics: string,
   arrangementUnits: ArrangementUnit[],
-  artist?: string
+  artist: string | undefined,
+  songKey: string
 ) {
   const allUnits = arrangementUnits
     .map((arrangementUnit) => arrangementUnit.unit)
@@ -133,6 +135,7 @@ export async function createOrUpdateSong(
               id: arrangementId as number,
             },
             data: {
+              key: songKey,
               units: {
                 deleteMany: {},
                 create: arrangementUnitCreates,
@@ -153,6 +156,7 @@ export async function createOrUpdateSong(
             {
               isDefault: true,
               deleted: false,
+              key: songKey,
               units: {
                 create: arrangementUnitCreates,
               },

@@ -1,6 +1,6 @@
 "use server";
 
-import { getLyrics } from "@/chopro/music";
+import { getChords, getLyrics } from "@/chopro/music";
 import {
   ArrangementUnit,
   createOrUpdateSong,
@@ -14,7 +14,8 @@ export async function postSong(
   arrangementId: number | null,
   title: string,
   units: ArrangementUnit[],
-  artist?: string
+  artist: string | undefined,
+  songKey: string
 ) {
   const lyrics = units
     .map((arrangementUnit) => getLyrics(arrangementUnit?.unit?.content || ""))
@@ -26,7 +27,8 @@ export async function postSong(
     title,
     lyrics,
     units,
-    artist
+    artist,
+    songKey
   );
 
   redirect(`./${song.id}`, RedirectType.replace);
