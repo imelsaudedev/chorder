@@ -99,6 +99,7 @@ export default function ArrangementViewer({
       </Header>
       <Main className="pt-4">
         <SongConfig
+          columns={columns}
           setColumns={setColumns}
           deleteArrangementWithId={deleteArrangementWithId}
           onEditButtonClick={handleEditButtonClick}
@@ -116,6 +117,7 @@ export default function ArrangementViewer({
 }
 
 type SongConfigProps = {
+  columns: number;
   setColumns: Dispatch<SetStateAction<number>>;
   deleteArrangementWithId: () => void;
   onEditButtonClick: () => void;
@@ -123,6 +125,7 @@ type SongConfigProps = {
 };
 
 function SongConfig({
+  columns,
   setColumns,
   deleteArrangementWithId,
   onEditButtonClick,
@@ -135,7 +138,7 @@ function SongConfig({
       }`}
     >
       <div className="flex">
-        <ColumnButtons setColumns={setColumns} />
+        <ColumnButtons columns={columns} setColumns={setColumns} />
       </div>
       <div className="flex">
         <form
@@ -155,25 +158,51 @@ function SongConfig({
 }
 
 function ColumnButtons({
+  columns,
   setColumns,
 }: {
+  columns: number;
   setColumns: Dispatch<SetStateAction<number>>;
 }) {
   return (
-    <>
-      <Button onClick={() => setColumns(1)} variant="outline" size="icon">
+    <div>
+      <Button
+        onClick={() => setColumns(1)}
+        variant="outline"
+        size="icon"
+        rounded="left"
+        disabled={columns === 1}
+      >
         <ColumnsIcon count={1} />
       </Button>
-      <Button onClick={() => setColumns(2)} variant="outline" size="icon">
+      <Button
+        onClick={() => setColumns(2)}
+        variant="outline"
+        size="icon"
+        rounded="none"
+        disabled={columns === 2}
+      >
         <ColumnsIcon count={2} />
       </Button>
-      <Button onClick={() => setColumns(3)} variant="outline" size="icon">
+      <Button
+        onClick={() => setColumns(3)}
+        variant="outline"
+        size="icon"
+        rounded="none"
+        disabled={columns === 3}
+      >
         <ColumnsIcon count={3} />
       </Button>
-      <Button onClick={() => setColumns(4)} variant="outline" size="icon">
+      <Button
+        onClick={() => setColumns(4)}
+        variant="outline"
+        size="icon"
+        rounded="right"
+        disabled={columns === 4}
+      >
         <ColumnsIcon count={4} />
       </Button>
-    </>
+    </div>
   );
 }
 
