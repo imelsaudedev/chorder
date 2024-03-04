@@ -103,13 +103,14 @@ function ChordProItem({
 }
 
 function isConnection(items: any, itemIdx: number) {
-  if (itemIdx === 0) {
+  if (itemIdx === items.length - 1) {
     return false;
   }
-  const prevItem = items[itemIdx - 1];
+
   const currentItem = items[itemIdx];
-  if (prevItem._name === "comment" || currentItem._name === "comment") {
+  const nextItem = items[itemIdx + 1];
+  if (currentItem._name === "comment" || nextItem._name === "comment") {
     return false;
   }
-  return prevItem.lyrics?.trim() && currentItem.lyrics?.trim();
+  return currentItem.lyrics?.trim() && nextItem.lyrics?.trim();
 }
