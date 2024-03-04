@@ -2,6 +2,7 @@ import { parseChordPro } from "@/chopro/music";
 import BackArrow from "@/components/BackArrow";
 import ChordProLine from "@/components/ChordProLine";
 import Header from "@/components/Header";
+import KeyButtonSet from "@/components/KeyButtonSet";
 import Main from "@/components/Main";
 import ColumnsIcon from "@/components/icons/ColumnsIcon";
 import ConfigIcon from "@/components/icons/ConfigIcon";
@@ -41,6 +42,7 @@ export default function ArrangementViewer({
   setWriteMode,
   deleteArrangement,
 }: ArrangementViewerProps) {
+  const [transpose, setTranspose] = useState(0);
   const [columns, setColumns] = useState(1);
   const [showConfig, setShowConfig] = useState(false);
   const lineData = useMemo(() => {
@@ -78,13 +80,17 @@ export default function ArrangementViewer({
     <>
       <Header>
         <BackArrow href="/songs" />
-        <div className="flex mx-4 gap-2 flex-grow justify-between items-center">
+        <div className="flex ml-4 gap-2 flex-grow justify-between items-center">
           <div className="flex flex-col">
             <span className="font-bold text-lg leading-none">{song.title}</span>
             {song.artist && <span className="text-sm">{song.artist}</span>}
           </div>
-          <div className="flex">
-            {arrangement.key}
+          <div className="flex gap-2">
+            <KeyButtonSet
+              originalKey={arrangement.key || "C"}
+              transpose={transpose}
+              setTranspose={setTranspose}
+            />
             <Button variant="outline" onClick={handleToggleConfig}>
               <ConfigIcon />
             </Button>
@@ -98,7 +104,12 @@ export default function ArrangementViewer({
           onEditButtonClick={handleEditButtonClick}
           visible={showConfig}
         />
-        <ColumnViewer columns={columns} lineData={lineData} />
+        <ColumnViewer
+          columns={columns}
+          lineData={lineData}
+          transpose={transpose}
+          originalKey={arrangement.key}
+        />
       </Main>
     </>
   );
@@ -169,9 +180,16 @@ function ColumnButtons({
 type ColumnViewerProps = {
   columns: number;
   lineData: (LineData | null)[];
+  transpose: number;
+  originalKey?: string;
 };
 
-function ColumnViewer({ columns, lineData }: ColumnViewerProps) {
+function ColumnViewer({
+  columns,
+  lineData,
+  transpose,
+  originalKey,
+}: ColumnViewerProps) {
   let gridCols;
   if (columns <= 1) {
     gridCols = "grid-cols-1";
@@ -207,6 +225,8 @@ function ColumnViewer({ columns, lineData }: ColumnViewerProps) {
                   isLast={data.isLast}
                   isLastOfColumn={idx === colData.length - 1}
                   grow={idx === colData.length - 1}
+                  originalKey={originalKey}
+                  transpose={transpose}
                 />
               ) : (
                 <span key={`col-${i}-line-${idx}`}>ERROR</span>

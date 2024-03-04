@@ -2,6 +2,7 @@ import { Line } from "chordsheetjs";
 import styles from "./styles.module.scss";
 import { unitTypeColorClasses } from "../unit-colors";
 import { UnitType } from "@/models/unit";
+import { transposeChord } from "@/chopro/music";
 
 type ChordProLineProps = {
   line: Line;
@@ -9,6 +10,8 @@ type ChordProLineProps = {
   isLast: boolean;
   isLastOfColumn: boolean;
   unitType?: UnitType;
+  originalKey?: string;
+  transpose?: number;
   grow?: boolean;
 };
 
@@ -18,9 +21,11 @@ export default function ChordProLine({
   isLast,
   isLastOfColumn,
   unitType,
+  originalKey,
+  transpose,
   grow,
 }: ChordProLineProps) {
-  let className = "flex flex-row flex-wrap relative px-2 border-x";
+  let className = "flex flex-col relative px-2 border-x";
   if (unitType) {
     const unitClasses = unitTypeColorClasses[unitType];
     className = `${className} ${unitClasses.background} ${unitClasses.border}`;
@@ -34,30 +39,39 @@ export default function ChordProLine({
         className = `${className} mb-2`;
       }
     }
-  }
-  if (grow) {
-    className = `${className} flex-grow`;
+    if (grow) {
+      className = `${className} flex-grow`;
+    }
   }
   return (
     <div className={className} style={{ breakInside: "avoid" }}>
-      {line.items.length === 0 && <br />}
-      {line.items.map((item, elementIdx) => (
-        <ChordProItem
-          item={item}
-          key={`song-line-item-${elementIdx}`}
-          isConnection={isConnection(line.items, elementIdx)}
-        />
-      ))}
+      <div className="flex flex-row flex-wrap">
+        {line.items.length === 0 && <br />}
+        {line.items.map((item, elementIdx) => (
+          <ChordProItem
+            item={item}
+            originalKey={originalKey}
+            transpose={transpose}
+            key={`song-line-item-${elementIdx}`}
+            isConnection={isConnection(line.items, elementIdx)}
+          />
+        ))}
+      </div>
+      {grow && <div className="flex-grow" />}
     </div>
   );
 }
 
 function ChordProItem({
+  originalKey,
   item,
   isConnection,
+  transpose,
 }: {
+  originalKey?: string;
   item: any;
   isConnection: boolean;
+  transpose?: number;
 }) {
   if (item._name === "comment") {
     return <span className="italic">{item._value}</span>;
@@ -78,7 +92,11 @@ function ChordProItem({
 
   return (
     <div className={"flex flex-col whitespace-pre-wrap mb-2"}>
-      <span className={chordClasses.join(" ")}>{item.chords}</span>
+      <span className={chordClasses.join(" ")}>
+        {transpose && originalKey
+          ? transposeChord(item.chords, originalKey, transpose)
+          : item.chords}
+      </span>
       <span className={lyricsClasses.join(" ")}>{item.lyrics || " "}</span>
     </div>
   );

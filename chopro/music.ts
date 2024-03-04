@@ -1,6 +1,6 @@
 import ChordSheetJS from "chordsheetjs";
 
-type SongKey =
+export type SongKey =
   | "C"
   | "C#"
   | "C##"
@@ -101,15 +101,15 @@ const HALF_TONES = [
   ["B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#"],
 ];
 
-const toHalfToneIndex = (index: number) => {
+export const toHalfToneIndex = (index: number) => {
   const n = HALF_TONES.length;
   return ((index % n) + n) % n;
 };
 
-export const keyFromChord = (chord: string) => {
+export const keyFromChord = (chord: string): SongKey | null => {
   const re = /([ABCDEFG][b#]*)\.*/;
   const match = re.exec(chord);
-  return match ? match[0] : null;
+  return match ? (match[0] as SongKey) : null;
 };
 
 export const simplifyChord = (chord: string) => {
@@ -182,4 +182,33 @@ export const harmonicIndex = (key: SongKey) => {
       return 11;
   }
   return -1;
+};
+
+export const transposeChord = (
+  chord: string,
+  originalKey: string,
+  semitones: number
+) => {
+  if (!chord || toHalfToneIndex(semitones) === 0) return chord;
+
+  const chordKey = keyFromChord(chord);
+  if (!chordKey) return chord;
+
+  let chordIdx = harmonicIndex(chordKey);
+  const originalIdx = harmonicIndex(originalKey as SongKey);
+  const diff = toHalfToneIndex(chordIdx - originalIdx);
+
+  const base = HALF_TONES[toHalfToneIndex(originalIdx + semitones)][diff];
+  let transposed = base + chord.substring(chordKey.length);
+  const slashIdx = transposed.indexOf("/");
+  if (slashIdx >= 0) {
+    transposed =
+      transposed.substring(0, slashIdx + 1) +
+      transposeChord(
+        transposed.substring(slashIdx + 1),
+        originalKey,
+        semitones
+      );
+  }
+  return transposed;
 };
