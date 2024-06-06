@@ -75,3 +75,26 @@ pnpm dev
 ```
 pnpm dbstudio
 ```
+
+## Dev Container
+
+### Setup
+
+To install the dependencies, run:
+
+```
+pnpm install
+```
+
+Then, create (or modify) a file named `.env` in the root directory with the following content:
+
+```
+POSTGRES_PRISMA_URL="postgresql://postgres:postgres@localhost:5432/postgres"
+POSTGRES_URL_NON_POOLING="postgresql://postgres:postgres@localhost:5432/postgres"
+```
+
+Then, create the database with:
+
+```
+pnpm dbpush
+```
