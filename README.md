@@ -86,6 +86,11 @@ To install the dependencies, run:
 pnpm install
 ```
 
+> [!TIP]
+> If you run into an error such as `no such file or directory` (I've had this on MacOS), try running:
+> ```pnpm config set store-dir ~/.local/share/pnpm/store```
+> Then, try to run `pnpm install` again.
+
 Then, create (or modify) a file named `.env` in the root directory with the following content:
 
 ```
