@@ -14,10 +14,11 @@ To install the dependencies, run:
 yarn
 ```
 
-Then, create the database with:
+Then, create the database with (not sure if we need the first command):
 
 ```
 yarn dbpush
+yarn prisma migrate reset
 ```
 
 ## Running the server in development mode
