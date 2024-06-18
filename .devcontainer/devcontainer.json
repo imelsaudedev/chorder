@@ -6,8 +6,13 @@
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	"features": {
+		"ghcr.io/devcontainers/features/node:1": {},
 		"ghcr.io/devcontainers-contrib/features/prisma:2": {},
 		"ghcr.io/devcontainers-contrib/features/vercel-cli:1": {}
+	},
+	"containerEnv": {
+		"POSTGRES_PRISMA_URL": "postgresql://postgres:postgres@localhost:5432/postgres",
+		"POSTGRES_URL_NON_POOLING": "postgresql://postgres:postgres@localhost:5432/postgres"
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
