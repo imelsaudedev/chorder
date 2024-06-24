@@ -8,7 +8,7 @@ type ChordProLineProps = {
   line: Line;
   isFirst: boolean;
   isLast: boolean;
-  isLastOfColumn: boolean;
+  isLastOfColumn?: boolean;
   unitType?: UnitType;
   originalKey?: string;
   transpose?: number;

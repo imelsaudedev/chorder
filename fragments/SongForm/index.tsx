@@ -31,8 +31,9 @@ export type PostSongAction = (
   arrangementId: number | null,
   title: string,
   units: ArrangementUnit[],
-  artist: string
-) => void;
+  artist: string | undefined,
+  songKey: string,
+) => Promise<void>;
 
 type SongFormProps = {
   song: Song | null;

@@ -39,7 +39,7 @@ export default function AddUnitForm({
           <div className="flex gap-2 mb-2">
             {units.map((unit) => (
               <button
-                key={`${unit.localId}`}
+                key={`${unit.localUID}`}
                 onClick={createAddExistingUnitHandler(unit)}
               >
                 <UnitCircle unit={unit} />
