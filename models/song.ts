@@ -236,7 +236,7 @@ export function groupSongsByFirstLetter(
   const byFirstLetter = new Map<string, SongBase[]>();
 
   songs.forEach((song) => {
-    const firstLetter = song.title.trim().charAt(0).toLowerCase();
+    const firstLetter = song.title.trim().charAt(0).toLowerCase().normalize("NFKD").replace(/\p{Diacritic}/gu, "");
     let letterGroup = byFirstLetter.get(firstLetter);
     if (!letterGroup) {
       letterGroup = [];
