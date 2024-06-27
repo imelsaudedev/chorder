@@ -6,7 +6,7 @@
   "service": "app",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "containerEnv": {
-    "MONGO_CONNECTION_STRING": "mongodb://localhost:27017/"
+    "MONGODB_URI": "mongodb://localhost:27017/"
   },
 
   // Configure tool-specific properties.

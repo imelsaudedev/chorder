@@ -1,7 +1,7 @@
-import * as mongoDB from "mongodb";
+import * as mongoDB from 'mongodb';
 
-const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING;
-const DB_NAME = "chorder";
+const MONGODB_URI = process.env.MONGODB_URI;
+const DB_NAME = 'chorder';
 
 type DBData = {
   client: mongoDB.MongoClient;
@@ -9,10 +9,10 @@ type DBData = {
 };
 
 export async function getDB(): Promise<DBData> {
-  if (!CONNECTION_STRING) {
-    throw new Error("MONGO_CONNECTION_STRING is not set");
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI is not set');
   }
-  const client: mongoDB.MongoClient = new mongoDB.MongoClient(CONNECTION_STRING);
+  const client: mongoDB.MongoClient = new mongoDB.MongoClient(MONGODB_URI);
   await client.connect();
   return { client, db: client.db(DB_NAME) };
 }
