@@ -1,12 +1,15 @@
-import { SerializedSong, Song } from "@/models/song";
-import { getDB } from "./client";
-import { getAvailableSlug, saveSlug } from "./slug";
+import { SerializedSong, Song } from '@/models/song';
+import { getDB } from './client';
+import { getAvailableSlug, saveSlug } from './slug';
 
 export function retrieveAllSongs(): Promise<Song[]> {
   return getCollection().then(({ songs }) => {
-    return songs.find({ isDeleted: false }).toArray().then((serializedSongs) => {
-      return serializedSongs.map(Song.deserialize);
-    });
+    return songs
+      .find({ isDeleted: false })
+      .toArray()
+      .then((serializedSongs) => {
+        return serializedSongs.map(Song.deserialize);
+      });
   });
 }
 
@@ -25,6 +28,7 @@ export function retrieveSong(slug: string): Promise<Song | null> {
 export async function saveSong(song: Song): Promise<Song> {
   const { client, songs } = await getCollection();
   if (song.slug) {
+    console.log(song.serialize());
     await songs.updateOne({ slug: song.slug }, { $set: song.serialize() });
   } else {
     const slug = await getAvailableSlug(song.title);
@@ -46,5 +50,5 @@ export async function saveSong(song: Song): Promise<Song> {
 
 async function getCollection() {
   const { client, db } = await getDB();
-  return { client, songs: db.collection<SerializedSong>("songs") };
+  return { client, songs: db.collection<SerializedSong>('songs') };
 }
