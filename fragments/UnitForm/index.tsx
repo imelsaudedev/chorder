@@ -8,8 +8,8 @@ import CloseIcon from "@/components/icons/CloseIcon";
 import { Button } from "@/components/ui/button";
 import { unitTypeColorClasses } from "@/components/unit-colors";
 import messages from "@/i18n/messages";
-import { Unit, UnitType } from "@/models/unit";
-import { ChangeEvent } from "react";
+import { SongUnit, SongUnitType } from "@/models/song-unit";
+import { ChangeEvent, MouseEvent } from "react";
 
 export default function UnitForm({
   unit,
@@ -18,27 +18,33 @@ export default function UnitForm({
   removeUnit,
   className,
 }: {
-  unit: Unit;
+  unit: SongUnit;
   index: number;
-  setUnit: (unit: Unit) => void;
+  setUnit: (unit: SongUnit) => void;
   removeUnit: () => void;
   className?: string;
 }) {
   const colorClasses = unitTypeColorClasses[unit.type];
 
+  const handleRemoveUnit = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    removeUnit();
+  }
+
   const handleChangeType = (event: ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    setUnit({ ...unit, type: event.target.value as UnitType });
+    setUnit(new SongUnit({ ...unit.serialize(), type: event.target.value as SongUnitType }));
   };
 
   const handleChangeChordpro = (event: ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
-    setUnit({ ...unit, content: event.target.value });
+    setUnit(new SongUnit({ ...unit.serialize(), content: event.target.value }));
   };
 
   const handlePreviewChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setUnit({ ...unit, preview: event.target.checked });
+    setUnit(new SongUnit({ ...unit.serialize(), preview: event.target.checked}));
   };
 
   const classNames = [
@@ -60,7 +66,7 @@ export default function UnitForm({
     <div className={classNames.join(" ")}>
       <div className="flex gap-4 items-center justify-between">
         <UnitCircle className="w-14 h-14" unit={unit} />
-        <Button onClick={removeUnit} variant="ghost" size="icon">
+        <Button onClick={handleRemoveUnit} variant="ghost" size="icon">
           <CloseIcon />
         </Button>
       </div>

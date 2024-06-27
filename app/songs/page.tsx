@@ -2,12 +2,13 @@ import AnchorButton from "@/components/AnchorButton";
 import Header from "@/components/Header";
 import Main from "@/components/Main";
 import PlusIcon from "@/components/icons/PlusIcon";
+import { retrieveAllSongs } from "@/database/song";
 import messages from "@/i18n/messages";
-import { fetchAllSongs, groupSongsByFirstLetter } from "@/models/song";
+import { groupSongsByFirstLetter } from "@/models/song";
 import { Fragment } from "react";
 
 export default async function SongListPage() {
-  const songs = await fetchAllSongs();
+  const songs = await retrieveAllSongs();
   const songsByFirstLetter = groupSongsByFirstLetter(songs);
   const existingInitials = Array.from(songsByFirstLetter.keys());
   const allInitials = Array.from(
@@ -69,8 +70,8 @@ export default async function SongListPage() {
 
                     return (
                       <a
-                        href={`/songs/${song.id}`}
-                        key={`song-${song.id}`}
+                        href={`/songs/${song.slug}`}
+                        key={`song-${song.slug}`}
                         className="flex flex-col pt-2 pb-3 border-b-gray-300 border-b-2"
                       >
                         <div className="font-bold text-lg leading-none">

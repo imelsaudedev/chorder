@@ -1,12 +1,14 @@
 "use client";
 
-import SongForm, { PostSongAction } from "@/fragments/SongForm";
-import ArrangementViewer, { DeleteArrangementAction } from "../ArrangementViewer";
-import { Song, getArrangementOrDefault } from "@/models/song";
-import { useState } from "react";
+import SongForm from "@/fragments/SongForm";
+import ArrangementViewer from "../ArrangementViewer";
+import { useMemo, useState } from "react";
+import { SerializedSong, Song } from "@/models/song";
+import { DeleteArrangementAction, PostSongAction } from "@/app/songs/[song]/actions";
+import useSong from "@/hooks/useSong";
 
 type SongViewerProps = {
-  song: Song | null;
+  song: SerializedSong;
   arrangementId: number | null;
   initialWriteMode: boolean;
   postSong: PostSongAction;
@@ -14,33 +16,30 @@ type SongViewerProps = {
 };
 
 export default function SongViewer({
-  song,
+  song: serializedSong,
   arrangementId,
   postSong,
   deleteArrangement,
   initialWriteMode,
 }: SongViewerProps) {
+  const song = useMemo(() => Song.deserialize(serializedSong), [serializedSong]);
+  const songData = useSong(song, arrangementId || 0);
   const [writeMode, setWriteMode] = useState<boolean>(initialWriteMode);
-
-  const arrangement = getArrangementOrDefault(song, arrangementId);
 
   if (writeMode)
     return (
       <SongForm
-        song={song}
-        arrangement={arrangement}
+        songData={songData}
         postSong={postSong}
-        setWriteMode={setWriteMode}
+        setWriteMode={(newWriteMode) => { setWriteMode(newWriteMode) }}
       />
     );
-  if (song && arrangement)
+  else
     return (
       <ArrangementViewer
-        song={song}
-        arrangement={arrangement}
+        songData={songData}
         setWriteMode={setWriteMode}
         deleteArrangement={deleteArrangement}
       />
     );
-  return null; // TODO: SHOW ERROR PAGE
 }
