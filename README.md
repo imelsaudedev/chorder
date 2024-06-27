@@ -13,3 +13,17 @@ Run the following command:
 ```
 yarn dev
 ```
+
+### Running for the first time
+
+If you are running the server for the first time, add some initial data with (if you are already running the server, stop it with `ctrl+c`):
+
+    yarn add-initial-data
+
+Also, it is nice to have some data validation, so run:
+
+    mongosh --file mongosh/setup-schemas.js
+
+## Debugging the database
+
+If you are using our devcontainer on vscode, you should have the MongoDB extension enabled. You can connect to the database for debugging by creating a connection using the connection string (probably `mongodb://localhost:27017/`).
