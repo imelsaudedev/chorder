@@ -1,13 +1,10 @@
-import { ArrangementUnit, SongArrangement } from "@/models/song";
-import { Unit } from "@/models/unit";
 import { MouseEventHandler, useEffect, useState } from "react";
 import { updateTypeIndices } from "./utils";
 import { getChords, getKeyFromChords } from "@/chopro/music";
+import { SongArrangement } from "@/models/song";
+import { SongUnit } from "@/models/song-unit";
 
 export const useArrangementUnits = (arrangement: SongArrangement | null) => {
-  const [arrangementUnits, setArrangementUnits] = useState<ArrangementUnit[]>(
-    getInitialUnits(arrangement)
-  );
   const [computedKey, setComputedKey] = useState(arrangement?.key || "");
 
   useEffect(() => {
@@ -131,30 +128,6 @@ export const useArrangementUnits = (arrangement: SongArrangement | null) => {
     buildMoveDownHandler,
   ] as const;
 };
-
-function getInitialUnits(arrangement: SongArrangement | null) {
-  const units = arrangement?.units || [];
-  const existingUIDs = getExistingUIDs(units);
-  const idToUID = Object.fromEntries(
-    units.map((unit) => [unit.unit?.id || "", unit.unit?.localUID])
-  );
-  units.forEach((unit) => {
-    if (!unit.unit) return;
-    let localUID = unit.unit.localUID;
-    if (!localUID) {
-      localUID = idToUID[unit.unit.id || ""];
-    }
-    if (!localUID) {
-      localUID = createLocalUID(existingUIDs);
-    }
-    if (unit.unit.id) {
-      idToUID[unit.unit.id] = localUID;
-    }
-    unit.unit.localUID = localUID;
-  });
-
-  return updateTypeIndices(units);
-}
 
 function getExistingUIDs(arrangementUnits: ArrangementUnit[]) {
   return arrangementUnits

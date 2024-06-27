@@ -1,5 +1,5 @@
-import { ArrangementUnit } from "@/models/song";
-import { Unit, UnitType } from "@/models/unit";
+import { ArrangementUnit } from "@/modelsOLd/song";
+import { Unit, UnitType } from "@/modelsOLd/unit";
 
 export function updateTypeIndices(arrangementUnits: ArrangementUnit[]) {
   const UIDsPerUnitType = new Map<UnitType, string[]>();

@@ -1,3 +1,4 @@
+import { DeleteArrangementAction } from "@/app/songs/[song]/actions";
 import { parseChordPro } from "@/chopro/music";
 import BackArrow from "@/components/BackArrow";
 import ChordProLine from "@/components/ChordProLine";
@@ -9,8 +10,8 @@ import ConfigIcon from "@/components/icons/ConfigIcon";
 import EditIcon from "@/components/icons/EditIcon";
 import TrashIcon from "@/components/icons/TrashIcon";
 import { Button } from "@/components/ui/button";
-import { Song, SongArrangement } from "@/models/song";
-import { UnitType } from "@/models/unit";
+import { SongHook } from "@/hooks/useSong";
+import { SongUnitType } from "@/models/song-unit";
 import { Line } from "chordsheetjs";
 import {
   Dispatch,
@@ -20,36 +21,31 @@ import {
   useState,
 } from "react";
 
-export type DeleteArrangementAction = (arrangementId: number) => void;
-
 type ArrangementViewerProps = {
-  song: Song;
-  arrangement: SongArrangement;
+  songData: SongHook;
   setWriteMode: Dispatch<SetStateAction<boolean>>;
   deleteArrangement: DeleteArrangementAction;
 };
 
 type LineData = {
   line: Line;
-  unitType: UnitType;
+  unitType: SongUnitType;
   isFirst: boolean;
   isLast: boolean;
 };
 
 export default function ArrangementViewer({
-  song,
-  arrangement,
+  songData,
   setWriteMode,
   deleteArrangement,
 }: ArrangementViewerProps) {
+  const {isNewArrangement, arrangementIndex, song, songUnitMap, songKey} = songData;
   const [transpose, setTranspose] = useState(0);
   const [columns, setColumns] = useState(1);
   const [showConfig, setShowConfig] = useState(false);
   const lineData = useMemo(() => {
-    return arrangement.units
-      ?.map((arrangementUnit) => {
-        const unit = arrangementUnit.unit;
-        if (!unit) return [null];
+    return songUnitMap
+      ?.map((unit) => {
         const chordproHtml = parseChordPro(unit.content);
         return chordproHtml.lines.map((line, idx) => ({
           line,
@@ -59,7 +55,7 @@ export default function ArrangementViewer({
         }));
       })
       .flat();
-  }, [arrangement.units]);
+  }, [songUnitMap]);
 
   const handleToggleConfig = useCallback(() => {
     setShowConfig((prev) => !prev);
@@ -69,12 +65,12 @@ export default function ArrangementViewer({
     setWriteMode(true);
   }, [setWriteMode]);
 
-  if (!arrangement || !arrangement.id) {
+  if (isNewArrangement) {
     return null;
   }
 
   // TODO: MAYBE WE NEED A CONFIRMATION DIALOG FOR THIS?
-  const deleteArrangementWithId = deleteArrangement.bind(null, arrangement.id);
+  const deleteArrangementWithId = deleteArrangement.bind(null, song.serialize(), arrangementIndex);
 
   return (
     <>
@@ -87,7 +83,7 @@ export default function ArrangementViewer({
           </div>
           <div className="flex gap-2">
             <KeyButtonSet
-              originalKey={arrangement.key || "C"}
+              originalKey={songKey || ""}
               transpose={transpose}
               setTranspose={setTranspose}
             />
@@ -109,7 +105,7 @@ export default function ArrangementViewer({
           columns={columns}
           lineData={lineData}
           transpose={transpose}
-          originalKey={arrangement.key}
+          originalKey={songKey}
         />
       </Main>
     </>

@@ -23,15 +23,15 @@
     "unitType": "Tipo da unidade"
   },
   "unitTypes": {
-    "SONG_INTRO": "Introdução",
-    "SONG_ENDING": "Saída",
-    "SONG_VERSE": "Verso",
-    "SONG_PRECHORUS": "Pré-refrão",
-    "SONG_CHORUS": "Refrão",
-    "SONG_BRIDGE": "Ponte",
-    "SONG_INTERLUDE": "Interlúdio",
-    "SONG_SOLO": "Solo",
-    "SONG_BLOCK": "Bloco"
+    "INTRO": "Introdução",
+    "ENDING": "Saída",
+    "VERSE": "Verso",
+    "PRECHORUS": "Pré-refrão",
+    "CHORUS": "Refrão",
+    "BRIDGE": "Ponte",
+    "INTERLUDE": "Interlúdio",
+    "SOLO": "Solo",
+    "BLOCK": "Bloco"
   },
   "songForm": {
     "addExistingUnit": "Adicionar unidade existente",

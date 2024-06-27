@@ -1,5 +1,6 @@
 import SongViewer from "@/fragments/SongViewer";
 import { deleteArrangement, getSong, postSong } from "./actions";
+import { Song } from "@/models/song";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +12,12 @@ export default async function SongPage({
   searchParams: { edit?: string; arrangement?: number };
 }) {
   const songSlug = params.song;
-  const songId = parseInt(songSlug);
-  const song = songId ? await getSong(songId) : null;
+  const song = (songSlug && songSlug !== "new" && await getSong(songSlug)) || new Song({});
   const writeMode = searchParams.edit === "true" || songSlug === "new";
 
   return (
     <SongViewer
-      song={song}
+      song={song.serialize()}
       arrangementId={searchParams.arrangement || null}
       initialWriteMode={writeMode}
       postSong={postSong}

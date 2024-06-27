@@ -1,25 +1,25 @@
 import { MouseEventHandler } from "react";
 import messages from "@/i18n/messages";
-import { Unit } from "@/models/unit";
 import UnitCircle from "@/components/UnitCircle";
 import Or from "@/components/Or";
 import PlusIcon from "@/components/icons/PlusIcon";
+import { SongUnit } from "@/models/song-unit";
 
 export default function AddUnitForm({
   units,
   onCreateUnit,
   onAddExistingUnit,
 }: {
-  units: Unit[];
+  units: SongUnit[];
   onCreateUnit: () => void;
-  onAddExistingUnit: (unit: Unit) => void;
+  onAddExistingUnit: (unit: SongUnit) => void;
 }) {
   const handleAddNewUnit: MouseEventHandler = (event) => {
     event.preventDefault();
     onCreateUnit();
   };
 
-  const createAddExistingUnitHandler = (unit: Unit) => {
+  const createAddExistingUnitHandler = (unit: SongUnit) => {
     const handler: MouseEventHandler = (event) => {
       event.preventDefault();
       onAddExistingUnit(unit);
@@ -39,7 +39,7 @@ export default function AddUnitForm({
           <div className="flex gap-2 mb-2">
             {units.map((unit) => (
               <button
-                key={`${unit.localUID}`}
+                key={`${unit.internalId}`}
                 onClick={createAddExistingUnitHandler(unit)}
               >
                 <UnitCircle unit={unit} />

@@ -1,12 +1,12 @@
 import { Song } from "chordsheetjs";
 import { parseChordPro } from "../../chopro/music";
 import { Fragment, useMemo } from "react";
-import { UnitType } from "@/models/unit";
 import ChordProLine from "../ChordProLine";
+import { SongUnitType } from "@/models/song-unit";
 
 export type ChordProViewerProps = {
   chordpro: string;
-  unitType?: UnitType;
+  unitType?: SongUnitType;
   withoutContainer?: boolean;
 };
 

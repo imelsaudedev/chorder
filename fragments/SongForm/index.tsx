@@ -1,5 +1,3 @@
-"use client";
-
 import Header from "@/components/Header";
 import Main from "@/components/Main";
 import TextInput from "@/components/TextInput";
@@ -10,90 +8,42 @@ import {
   MouseEventHandler,
   SetStateAction,
   useCallback,
-  useEffect,
-  useMemo,
-  useState,
 } from "react";
 import UnitForm from "../UnitForm";
 import AddUnitForm from "./AddUnitForm";
 import FormField from "@/components/FormField";
 import FormLabel from "@/components/FormLabel";
 import BackArrow from "@/components/BackArrow";
-import { ArrangementUnit, Song, SongArrangement } from "@/models/song";
 import ChevronUpIcon from "@/components/icons/ChevronUpIcon";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
-import { useArrangementUnits } from "./hooks";
-import { getUniqueUnits } from "./utils";
 import { Button } from "@/components/ui/button";
-
-export type PostSongAction = (
-  songId: number | null,
-  arrangementId: number | null,
-  title: string,
-  units: ArrangementUnit[],
-  artist: string | undefined,
-  songKey: string,
-) => Promise<void>;
+import { PostSongAction } from "@/app/songs/[song]/actions";
+import { SongHook } from "@/hooks/useSong";
 
 type SongFormProps = {
-  song: Song | null;
-  arrangement: SongArrangement | null;
+  songData: SongHook;
   postSong: PostSongAction;
   setWriteMode: Dispatch<SetStateAction<boolean>>;
 };
 
 export default function SongForm({
-  song,
-  arrangement,
+  songData,
   postSong,
   setWriteMode,
 }: SongFormProps) {
-  const [title, setTitle] = useState(song?.title || "");
-  const [artist, setArtist] = useState(song?.artist || "");
-  const [songKey, setSongKey] = useState(arrangement?.key || "");
-  const [keyManuallySet, setKeyManuallySet] = useState(!!arrangement?.key);
-  const [
-    arrangementUnits,
-    computedKey,
-    handleAddUnit,
-    handleCreateUnit,
-    handleUpdateUnit,
-    buildRemoveUnitHandler,
-    buildMoveUpHandler,
-    buildMoveDownHandler,
-  ] = useArrangementUnits(arrangement);
+  const {song, isNewArrangement, title, setTitle, artist, setArtist, songKey, setSongKey, units, songUnitMap, createUnit, addUnit, moveUnitUp, moveUnitDown, buildRemoveUnitHandler, buildUpdateUnitHandler} = songData;
 
-  useEffect(() => {
-    if (!keyManuallySet) {
-      setSongKey(computedKey);
-    }
-  }, [keyManuallySet, computedKey]);
+  const submitSong = postSong.bind(null, song.serialize() || null);
 
-  const postSongWithUnits = postSong.bind(
-    null,
-    song?.id || null,
-    arrangement?.id || null,
-    title,
-    arrangementUnits,
-    artist,
-    songKey
-  );
-
-  const uniqueUnits = useMemo(
-    () => getUniqueUnits(arrangementUnits),
-    [arrangementUnits]
-  );
-
-  const handleManuallySetKey = useCallback(
+  const handleSetKey = useCallback(
     (key: string) => {
       setSongKey(key);
-      setKeyManuallySet(true);
     },
-    [setSongKey, setKeyManuallySet]
+    [setSongKey]
   );
 
   return (
-    <form action={postSongWithUnits}>
+    <form action={submitSong}>
       <Header>
         <BackArrow href="/songs" />
         <HeaderForm
@@ -101,33 +51,30 @@ export default function SongForm({
           setTitle={setTitle}
           artist={artist}
           setArtist={setArtist}
-          songKey={songKey}
-          setSongKey={handleManuallySetKey}
+          songKey={songKey || ""}
+          setSongKey={handleSetKey}
         />
         <SaveButtonSet
-          song={song}
-          arrangement={arrangement}
+          canCancel={!isNewArrangement}
           setWriteMode={setWriteMode}
         />
       </Header>
       <Main className="pt-4">
         <section className="max-w-lg mx-auto">
-          {arrangementUnits.map((arrangementUnit, index) => {
-            const unit = arrangementUnit.unit;
-
+          {songUnitMap.map((unit, index) => {
             if (unit) {
               return (
                 <div key={index} className="flex">
                   <SortingButtons
-                    buildMoveUpHandler={buildMoveUpHandler}
-                    buildMoveDownHandler={buildMoveDownHandler}
+                    moveUnitUp={moveUnitUp}
+                    moveUnitDown={moveUnitDown}
+                    songMapSize={songUnitMap.length}
                     index={index}
-                    arrangementUnits={arrangementUnits}
                   />
                   <UnitForm
                     index={index}
                     unit={unit}
-                    setUnit={handleUpdateUnit}
+                    setUnit={buildUpdateUnitHandler(index)}
                     removeUnit={buildRemoveUnitHandler(index)}
                     className="flex-grow"
                   />
@@ -138,9 +85,9 @@ export default function SongForm({
           })}
           <div className="pl-10">
             <AddUnitForm
-              units={uniqueUnits}
-              onCreateUnit={handleCreateUnit}
-              onAddExistingUnit={handleAddUnit}
+              units={units}
+              onCreateUnit={createUnit}
+              onAddExistingUnit={addUnit}
             />
           </div>
         </section>
@@ -158,9 +105,9 @@ function HeaderForm({
   setSongKey,
 }: {
   title: string;
-  setTitle: Dispatch<SetStateAction<string>>;
-  artist: string;
-  setArtist: Dispatch<SetStateAction<string>>;
+  setTitle: (newValue: string) => void;
+  artist: string | null;
+  setArtist: (newValue: string | null) => void;
   songKey: string;
   setSongKey: (key: string) => void;
 }) {
@@ -197,7 +144,7 @@ function HeaderForm({
           id="artist"
           placeholder={messages.songData.artistPlaceholder}
           onChange={handleChangeArtist}
-          defaultValue={artist}
+          defaultValue={artist || ""}
         />
       </FormField>
       <FormField>
@@ -216,12 +163,10 @@ function HeaderForm({
 }
 
 function SaveButtonSet({
-  song,
-  arrangement,
+  canCancel,
   setWriteMode,
 }: {
-  song: Song | null;
-  arrangement: SongArrangement | null;
+  canCancel: boolean;
   setWriteMode: Dispatch<SetStateAction<boolean>>;
 }) {
   const handleCancelEdit: MouseEventHandler = useCallback(
@@ -234,7 +179,7 @@ function SaveButtonSet({
 
   return (
     <div className="ml-auto flex gap-2">
-      {song && arrangement && (
+      {canCancel && (
         <button onClick={handleCancelEdit}>{messages.messages.cancel}</button>
       )}
       <button
@@ -248,24 +193,40 @@ function SaveButtonSet({
 }
 
 function SortingButtons({
-  buildMoveUpHandler,
-  buildMoveDownHandler,
+  moveUnitUp,
+  moveUnitDown,
+  songMapSize,
   index,
-  arrangementUnits,
 }: {
-  buildMoveUpHandler: (index: number) => MouseEventHandler | undefined;
-  buildMoveDownHandler: (index: number) => MouseEventHandler | undefined;
+  moveUnitUp: (unitIndex: number) => void;
+  moveUnitDown: (unitIndex: number) => void;
+  songMapSize: number;
   index: number;
-  arrangementUnits: ArrangementUnit[];
 }) {
   const hasPrev = index > 0;
-  const hasNext = index < arrangementUnits.length - 1;
+  const hasNext = index < songMapSize - 1;
+
+  const handleMoveUp: MouseEventHandler = useCallback(
+    (event) => {
+      event.preventDefault();
+      moveUnitUp(index);
+    },
+    [index, moveUnitUp]
+  );
+
+  const handleMoveDown: MouseEventHandler = useCallback(
+    (event) => {
+      event.preventDefault();
+      moveUnitDown(index);
+    },
+    [index, moveUnitDown]
+  );
 
   return (
     <div className="flex flex-col">
       <Button
         disabled={!hasPrev}
-        onClick={buildMoveUpHandler(index)}
+        onClick={handleMoveUp}
         variant="ghost"
         size="icon"
       >
@@ -273,7 +234,7 @@ function SortingButtons({
       </Button>
       <Button
         disabled={!hasNext}
-        onClick={buildMoveDownHandler(index)}
+        onClick={handleMoveDown}
         variant="ghost"
         size="icon"
       >

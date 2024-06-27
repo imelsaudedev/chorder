@@ -1,15 +1,15 @@
 import { Line } from "chordsheetjs";
 import styles from "./styles.module.scss";
 import { unitTypeColorClasses } from "../unit-colors";
-import { UnitType } from "@/models/unit";
 import { transposeChord } from "@/chopro/music";
+import { SongUnitType } from "@/models/song-unit";
 
 type ChordProLineProps = {
   line: Line;
   isFirst: boolean;
   isLast: boolean;
   isLastOfColumn?: boolean;
-  unitType?: UnitType;
+  unitType?: SongUnitType;
   originalKey?: string;
   transpose?: number;
   grow?: boolean;

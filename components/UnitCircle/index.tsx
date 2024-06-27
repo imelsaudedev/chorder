@@ -1,4 +1,4 @@
-import { Unit } from "@/models/unit";
+import { SongUnit } from "@/models/song-unit";
 import { unitTypeColorClasses } from "../unit-colors";
 import messages from "@/i18n/messages";
 
@@ -6,7 +6,7 @@ export default function UnitCircle({
   unit,
   className,
 }: {
-  unit: Unit;
+  unit: SongUnit;
   className?: string;
 }) {
   const colorClasses = unitTypeColorClasses[unit.type];

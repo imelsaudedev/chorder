@@ -1,45 +1,26 @@
 "use server";
 
-import { getChords, getLyrics } from "@/chopro/music";
-import {
-  ArrangementUnit,
-  createOrUpdateSong,
-  deleteSongArrangement,
-  fetchSong,
-} from "@/models/song";
+import { retrieveSong, saveSong } from "@/database/song";
+import { SerializedSong, Song } from "@/models/song";
 import { RedirectType, redirect } from "next/navigation";
 
-export async function postSong(
-  songId: number | null,
-  arrangementId: number | null,
-  title: string,
-  units: ArrangementUnit[],
-  artist: string | undefined,
-  songKey: string
-) {
-  const lyrics = units
-    .map((arrangementUnit) => getLyrics(arrangementUnit?.unit?.content || ""))
-    .join("\n");
+export type PostSongAction = ((song: SerializedSong) => Promise<void>) & Function;
 
-  const song = await createOrUpdateSong(
-    songId,
-    arrangementId,
-    title,
-    lyrics,
-    units,
-    artist,
-    songKey
-  );
-
-  redirect(`./${song.id}`, RedirectType.replace);
+export const postSong: PostSongAction = async function (serializedSong: SerializedSong) {
+  const song = Song.deserialize(serializedSong);
+  let savedSong = await saveSong(song);
+  redirect(`./${savedSong.slug}`, RedirectType.replace);
 }
 
-export async function deleteArrangement(arrangementId: number) {
-  await deleteSongArrangement(arrangementId);
+export type DeleteArrangementAction = ((song: SerializedSong, arrangementId: number) => void) & Function;
 
+export const deleteArrangement: DeleteArrangementAction = async function (serializedSong: SerializedSong, arrangementId: number) {
+  const song = Song.deserialize(serializedSong);
+  song.removeArrangement(arrangementId);
+  await saveSong(song);
   redirect(`./`, RedirectType.replace);
 }
 
-export async function getSong(id: number) {
-  return fetchSong(id);
+export async function getSong(id: string) {
+  return retrieveSong(id);
 }

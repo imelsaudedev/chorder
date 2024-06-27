@@ -1,239 +1,149 @@
-import { Unit, pruneUnits } from "./unit";
-import prisma from "@/lib/prisma";
+import { SerializedSongUnit, SongUnit } from "./song-unit";
+import { getChords, getKeyFromChords, getLyrics } from "@/chopro/music";
 
-export type SongBase = {
-  id?: number;
+export class Song {
   title: string;
-  artist?: string | null;
-  lyrics: string;
-};
-
-export type Song = SongBase & {
+  slug?: string;
+  artist: string | null;
+  isDeleted: boolean;
   arrangements: SongArrangement[];
+
+  constructor({ title, slug, artist, arrangements, isDeleted }: { title?: string, slug?: string, artist?: string | null, arrangements?: SongArrangement[], isDeleted?: boolean }) {
+    this.title = title || "";
+    this.slug = slug;
+    this.artist = artist || null;
+    this.arrangements = arrangements || [];
+    this.isDeleted = isDeleted || false;
+  }
+
+  get lyrics() {
+    return this.defaultArrangement?.units.map((unit) => getLyrics(unit.content) || "").join("\n") || "";
+  }
+
+  get defaultArrangement() {
+    return this.arrangements.find((arrangement) => arrangement.isDefault);
+  }
+
+  serialize(): SerializedSong {
+    return {
+      title: this.title,
+      slug: this.slug || "",
+      artist: this.artist,
+      lyrics: this.lyrics,
+      arrangements: this.arrangements.map((arrangement) => arrangement.serialize()),
+      isDeleted: this.isDeleted,
+    };
+  }
+
+  static deserialize(serialized: SerializedSong): Song {
+    return new Song({
+      ...serialized,
+      arrangements: serialized.arrangements.map((arrangement) => SongArrangement.deserialize(arrangement))
+    });
+  }
+
+  getArrangementOrDefault(arrangementId: number | null): SongArrangement | undefined {
+    if (arrangementId === null) {
+      return this.defaultArrangement;
+    }
+    return this.arrangements[arrangementId];
+  }
+
+  removeArrangement(arrangementId: number) {
+    const arrangement = this.arrangements[arrangementId];
+    if (!arrangement) return;
+    arrangement.isDeleted = true;
+    if (arrangement.isDefault) {
+      arrangement.isDefault = false;
+      const newDefault = this.arrangements.find((arrangement) => !arrangement.isDeleted);
+      if (newDefault) {
+        newDefault.isDefault = true;
+      } else {
+        this.isDeleted = true;
+      }
+    }
+  }
 };
 
-export type SongArrangement = {
-  id?: number;
-  key?: string;
-  units: ArrangementUnit[];
+export class SongArrangement {
+  private _key: string | undefined;
+  units: SongUnit[];
+  songMap: number[];
+  isDeleted: boolean;
   isDefault: boolean;
-  deleted: boolean;
+  lastUnitId: number;
+
+  constructor({ key, units, songMap, isDefault, isDeleted, lastUnitId }: { key?: string, units?: SongUnit[], songMap?: number[], isDefault?: boolean, isDeleted?: boolean, lastUnitId?: number }) {
+    this._key = key || "";
+    this.units = units || [];
+    this.songMap = songMap || [];
+    this.isDefault = isDefault || false;
+    this.isDeleted = isDeleted || false;
+    this.lastUnitId = lastUnitId || 0;
+  }
+
+  serialize(): SerializedSongArrangement {
+    return {
+      key: this.key,
+      units: this.units.map((unit) => unit.serialize()),
+      songMap: this.songMap,
+      isDefault: this.isDefault,
+      isDeleted: this.isDeleted,
+      lastUnitId: this.lastUnitId,
+    };
+  }
+
+  static deserialize(serialized: SerializedSongArrangement): SongArrangement {
+    const units = serialized.units.map((unit) => SongUnit.deserialize(unit));
+    return new SongArrangement({
+      ...serialized,
+      units
+    });
+  }
+
+  set key(newKey: string) {
+    this._key = newKey;
+  }
+
+  get key() {
+    if (!this._key) {
+      const allChords = this.units.map((unit) => getChords(unit.content)).flat();
+      this._key = getKeyFromChords(allChords) || "";
+    }
+    return this._key;
+  }
+
+  get rawKey() {
+    return this._key;
+  }
+
+  swapUnits(index1: number, index2: number) {
+    const temp = this.units[index1];
+    this.units[index1] = this.units[index2];
+    this.units[index2] = temp;
+  }
 };
 
-export type ArrangementUnit = {
-  id?: number;
-  arrangement?: SongArrangement;
-  arrangementId?: number;
-  unit?: Unit;
-  unitId?: number;
-  indexInArrangement: number;
+export type SerializedSong = {
+  title: string;
+  slug: string;
+  artist: string | null;
+  lyrics: string;
+  arrangements: SerializedSongArrangement[];
+  isDeleted: boolean;
 };
 
-export function getArrangementOrDefault(
-  song: Song | null,
-  arrangementId: number | null
-) {
-  if (song === null) return null;
-  if (arrangementId) {
-    return (
-      song.arrangements.filter(
-        (arrangement) => arrangement.id === arrangementId
-      )[0] || null
-    );
-  }
+export type SerializedSongArrangement = {
+  key: string;
+  units: SerializedSongUnit[];
+  songMap: number[];
+  isDefault: boolean;
+  isDeleted: boolean;
+  lastUnitId: number;
+};
 
-  const defaultArrangements = song.arrangements.filter(
-    (arrangement) => arrangement.isDefault
-  );
-  return defaultArrangements[0] || null;
-}
-
-export async function createOrUpdateUnits(units: Unit[]) {
-  if (units.length === 0) return [];
-
-  if (units.some((unit) => !unit.localUID)) {
-    throw new Error("Unit is missing localUID");
-  }
-
-  await prisma.$transaction(
-    units.map((unit) =>
-      unit.id
-        ? prisma.dBUnit.update({
-            where: {
-              id: unit.id,
-            },
-            data: {
-              title: unit.title,
-              content: unit.content,
-              type: unit.type,
-              localUID: unit.localUID,
-            },
-          })
-        : prisma.dBUnit.create({
-            data: {
-              title: unit.title || null,
-              content: unit.content,
-              type: unit.type,
-              localUID: unit.localUID || null,
-            },
-          })
-    )
-  );
-
-  return await prisma.dBUnit.findMany({
-    where: {
-      localUID: {
-        in: units.map((unit) => unit.localUID as string),
-      },
-    },
-  });
-}
-
-export async function createOrUpdateSong(
-  songId: number | null,
-  arrangementId: number | null,
-  title: string,
-  lyrics: string,
-  arrangementUnits: ArrangementUnit[],
-  artist: string | undefined,
-  songKey: string
-) {
-  const allUnits = arrangementUnits
-    .map((arrangementUnit) => arrangementUnit.unit)
-    .filter(Boolean) as Unit[];
-  const units = Array.from(
-    new Map(allUnits.map((unit) => [unit.localUID, unit])).values()
-  );
-
-  const unitsWithId = createOrUpdateUnits(units);
-  const localUIDToUnit = new Map(
-    (await unitsWithId).map((unit) => [unit.localUID, unit])
-  );
-
-  const arrangementUnitCreates = arrangementUnits.map((unit) => ({
-    indexInArrangement: unit.indexInArrangement,
-    unit: {
-      connect: {
-        id: localUIDToUnit.get(unit.unit?.localUID as string)?.id,
-      },
-    },
-  }));
-
-  let songs;
-  if (songId) {
-    songs = await prisma.dBSong.update({
-      where: {
-        id: songId,
-      },
-      data: {
-        title,
-        lyrics,
-        artist,
-        arrangements: {
-          update: {
-            where: {
-              id: arrangementId as number,
-            },
-            data: {
-              key: songKey,
-              units: {
-                deleteMany: {},
-                create: arrangementUnitCreates,
-              },
-            },
-          },
-        },
-      },
-    });
-  } else {
-    songs = await prisma.dBSong.create({
-      data: {
-        title,
-        lyrics,
-        artist,
-        arrangements: {
-          create: [
-            {
-              isDefault: true,
-              deleted: false,
-              key: songKey,
-              units: {
-                create: arrangementUnitCreates,
-              },
-            },
-          ],
-        },
-      },
-    });
-  }
-  await pruneUnits();
-  return songs;
-}
-
-export async function deleteSongArrangement(id: number) {
-  // TODO: MAKE NEXT ARRANGEMENT THE DEFAULT ONE
-  await prisma.dBSongArrangement.update({
-    where: {
-      id,
-    },
-    data: {
-      deleted: true,
-    },
-  });
-}
-
-export function fetchSong(id: number): Promise<Song | null> {
-  return prisma.dBSong
-    .findUnique({
-      where: { id },
-      include: {
-        arrangements: {
-          where: {
-            deleted: false,
-          },
-          include: {
-            units: {
-              include: {
-                unit: true,
-              },
-            },
-          },
-        },
-      },
-    })
-    .then((song) => {
-      if (!song) return song;
-
-      return {
-        ...song,
-        arrangements: song.arrangements.map((arrangement) => {
-          return {
-            ...arrangement,
-            units: arrangement.units.sort(
-              (a, b) => a.indexInArrangement - b.indexInArrangement
-            ),
-          };
-        }),
-      };
-    });
-}
-
-export function fetchAllSongs(): Promise<SongBase[]> {
-  return prisma.dBSong.findMany({
-    where: {
-      arrangements: {
-        some: {
-          deleted: false,
-        },
-      },
-    },
-  });
-}
-
-export function groupSongsByFirstLetter(
-  songs: SongBase[]
-): Map<string, SongBase[]> {
-  const byFirstLetter = new Map<string, SongBase[]>();
+export function groupSongsByFirstLetter(songs: Song[]): Map<string, Song[]> {
+  const byFirstLetter = new Map<string, Song[]>();
 
   songs.forEach((song) => {
     const firstLetter = song.title.trim().charAt(0).toLowerCase().normalize("NFKD").replace(/\p{Diacritic}/gu, "");
