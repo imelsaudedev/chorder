@@ -265,7 +265,7 @@ function useUnitCallbacks(
 
   const moveUnitUp = useCallback(
     (unitIndex: number) => {
-      if (unitIndex <= 0) return;
+      if (unitIndex <= 0 || unitIndex >= internalSongMap.length) return;
       const newSongMap = [...internalSongMap];
       const temp = newSongMap[unitIndex - 1];
       newSongMap[unitIndex - 1] = newSongMap[unitIndex];
@@ -277,7 +277,7 @@ function useUnitCallbacks(
 
   const moveUnitDown = useCallback(
     (unitIndex: number) => {
-      if (unitIndex >= internalSongMap.length - 1) return;
+      if (unitIndex < 0 || unitIndex >= internalSongMap.length - 1) return;
       const newSongMap = [...internalSongMap];
       const temp = newSongMap[unitIndex + 1];
       newSongMap[unitIndex + 1] = newSongMap[unitIndex];
