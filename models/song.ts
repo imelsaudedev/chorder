@@ -1,5 +1,5 @@
-import { SerializedSongUnit, SongUnit } from "./song-unit";
-import { getChords, getKeyFromChords, getLyrics } from "@/chopro/music";
+import { SerializedSongUnit, SongUnit } from './song-unit';
+import { getChords, getKeyFromChords, getLyrics } from '@/chopro/music';
 
 export class Song {
   title: string;
@@ -8,8 +8,20 @@ export class Song {
   isDeleted: boolean;
   arrangements: SongArrangement[];
 
-  constructor({ title, slug, artist, arrangements, isDeleted }: { title?: string, slug?: string, artist?: string | null, arrangements?: SongArrangement[], isDeleted?: boolean }) {
-    this.title = title || "";
+  constructor({
+    title,
+    slug,
+    artist,
+    arrangements,
+    isDeleted,
+  }: {
+    title?: string;
+    slug?: string;
+    artist?: string | null;
+    arrangements?: SongArrangement[];
+    isDeleted?: boolean;
+  }) {
+    this.title = title || '';
     this.slug = slug;
     this.artist = artist || null;
     this.arrangements = arrangements || [];
@@ -17,7 +29,7 @@ export class Song {
   }
 
   get lyrics() {
-    return this.defaultArrangement?.units.map((unit) => getLyrics(unit.content) || "").join("\n") || "";
+    return this.defaultArrangement?.lyrics || '';
   }
 
   get defaultArrangement() {
@@ -27,7 +39,7 @@ export class Song {
   serialize(): SerializedSong {
     return {
       title: this.title,
-      slug: this.slug || "",
+      slug: this.slug || '',
       artist: this.artist,
       lyrics: this.lyrics,
       arrangements: this.arrangements.map((arrangement) => arrangement.serialize()),
@@ -38,12 +50,12 @@ export class Song {
   static deserialize(serialized: SerializedSong): Song {
     return new Song({
       ...serialized,
-      arrangements: serialized.arrangements.map((arrangement) => SongArrangement.deserialize(arrangement))
+      arrangements: serialized.arrangements.map((arrangement) => SongArrangement.deserialize(arrangement)),
     });
   }
 
   getArrangementOrDefault(arrangementId: number | null): SongArrangement | undefined {
-    if (arrangementId === null) {
+    if (arrangementId === null || arrangementId < 0 || arrangementId >= this.arrangements.length) {
       return this.defaultArrangement;
     }
     return this.arrangements[arrangementId];
@@ -63,7 +75,7 @@ export class Song {
       }
     }
   }
-};
+}
 
 export class SongArrangement {
   private _key: string | undefined;
@@ -73,8 +85,22 @@ export class SongArrangement {
   isDefault: boolean;
   lastUnitId: number;
 
-  constructor({ key, units, songMap, isDefault, isDeleted, lastUnitId }: { key?: string, units?: SongUnit[], songMap?: number[], isDefault?: boolean, isDeleted?: boolean, lastUnitId?: number }) {
-    this._key = key || "";
+  constructor({
+    key,
+    units,
+    songMap,
+    isDefault,
+    isDeleted,
+    lastUnitId,
+  }: {
+    key?: string;
+    units?: SongUnit[];
+    songMap?: number[];
+    isDefault?: boolean;
+    isDeleted?: boolean;
+    lastUnitId?: number;
+  }) {
+    this._key = key || '';
     this.units = units || [];
     this.songMap = songMap || [];
     this.isDefault = isDefault || false;
@@ -97,7 +123,7 @@ export class SongArrangement {
     const units = serialized.units.map((unit) => SongUnit.deserialize(unit));
     return new SongArrangement({
       ...serialized,
-      units
+      units,
     });
   }
 
@@ -108,7 +134,7 @@ export class SongArrangement {
   get key() {
     if (!this._key) {
       const allChords = this.units.map((unit) => getChords(unit.content)).flat();
-      this._key = getKeyFromChords(allChords) || "";
+      this._key = getKeyFromChords(allChords) || '';
     }
     return this._key;
   }
@@ -117,12 +143,10 @@ export class SongArrangement {
     return this._key;
   }
 
-  swapUnits(index1: number, index2: number) {
-    const temp = this.units[index1];
-    this.units[index1] = this.units[index2];
-    this.units[index2] = temp;
+  get lyrics() {
+    return this.units.map((unit) => getLyrics(unit.content) || '').join('\n');
   }
-};
+}
 
 export type SerializedSong = {
   title: string;
@@ -146,7 +170,12 @@ export function groupSongsByFirstLetter(songs: Song[]): Map<string, Song[]> {
   const byFirstLetter = new Map<string, Song[]>();
 
   songs.forEach((song) => {
-    const firstLetter = song.title.trim().charAt(0).toLowerCase().normalize("NFKD").replace(/\p{Diacritic}/gu, "");
+    const firstLetter = song.title
+      .trim()
+      .charAt(0)
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/\p{Diacritic}/gu, '');
     let letterGroup = byFirstLetter.get(firstLetter);
     if (!letterGroup) {
       letterGroup = [];
