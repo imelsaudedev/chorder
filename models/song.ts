@@ -79,11 +79,12 @@ export class Song {
 
 export class SongArrangement {
   private _key: string | undefined;
-  units: SongUnit[];
-  songMap: number[];
-  isDeleted: boolean;
-  isDefault: boolean;
-  lastUnitId: number;
+  private _units: SongUnit[];
+  private _songMap: number[];
+  private _isDeleted: boolean;
+  private _isDefault: boolean;
+  private _lastUnitId: number;
+  private _locked: boolean;
 
   constructor({
     key,
@@ -92,6 +93,7 @@ export class SongArrangement {
     isDefault,
     isDeleted,
     lastUnitId,
+    locked,
   }: {
     key?: string;
     units?: SongUnit[];
@@ -99,13 +101,19 @@ export class SongArrangement {
     isDefault?: boolean;
     isDeleted?: boolean;
     lastUnitId?: number;
+    locked?: boolean;
   }) {
     this._key = key || '';
-    this.units = units || [];
-    this.songMap = songMap || [];
-    this.isDefault = isDefault || false;
-    this.isDeleted = isDeleted || false;
-    this.lastUnitId = lastUnitId || 0;
+    this._units = units || [];
+    this._songMap = songMap || [];
+    this._isDefault = isDefault || false;
+    this._isDeleted = isDeleted || false;
+    this._lastUnitId = lastUnitId || 0;
+    this._locked = !!locked;
+  }
+
+  copy() {
+    return SongArrangement.deserialize(this.serialize());
   }
 
   serialize(): SerializedSongArrangement {
@@ -128,6 +136,7 @@ export class SongArrangement {
   }
 
   set key(newKey: string) {
+    if (this._locked) throw new Error('Cannot modify locked song arrangement');
     this._key = newKey;
   }
 
@@ -143,8 +152,67 @@ export class SongArrangement {
     return this._key;
   }
 
+  get units() {
+    return this._units;
+  }
+
+  set units(newValue) {
+    if (this._locked) throw new Error('Cannot modify locked song arrangement');
+    this._units = newValue;
+  }
+
+  get songMap() {
+    return this._songMap;
+  }
+
+  set songMap(newValue) {
+    if (this._locked) throw new Error('Cannot modify locked song arrangement');
+    this._songMap = newValue;
+  }
+
+  get isDefault() {
+    return this._isDefault;
+  }
+
+  set isDefault(newValue) {
+    if (this._locked) throw new Error('Cannot modify locked song arrangement');
+    this._isDefault = newValue;
+  }
+
+  get isDeleted() {
+    return this._isDeleted;
+  }
+
+  set isDeleted(newValue) {
+    if (this._locked) throw new Error('Cannot modify locked song arrangement');
+    this._isDeleted = newValue;
+  }
+
+  get lastUnitId() {
+    return this._lastUnitId;
+  }
+
+  set lastUnitId(newValue) {
+    if (this._locked) throw new Error('Cannot modify locked song arrangement');
+    this._lastUnitId = newValue;
+  }
+
   get lyrics() {
     return this.units.map((unit) => getLyrics(unit.content) || '').join('\n');
+  }
+
+  lock() {
+    this._locked = true;
+    for (const unit of this.units) {
+      unit.lock();
+    }
+  }
+
+  unlock() {
+    this._locked = false;
+    for (const unit of this.units) {
+      unit.unlock();
+    }
   }
 }
 

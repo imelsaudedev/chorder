@@ -6,7 +6,8 @@
     "preview": "Preview",
     "cancel": "Cancel",
     "save": "Save",
-    "songs": "Songs"
+    "songs": "Songs",
+    "services": "Services"
   },
   "songData": {
     "title": "Title",

@@ -16,7 +16,7 @@ export default async function SongListPage() {
 
   return (
     <>
-      <PageHeader currentPage="songs" />
+      <PageHeader currentPage="services" />
       <Main className="pt-4">
         <nav className="mb-4">
           {allInitials.map((initial) => {

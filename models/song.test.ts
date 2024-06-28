@@ -153,6 +153,71 @@ describe('song arrangement', () => {
     });
     expect(arrangement.lyrics).toBe('First line\nThen the second');
   });
+
+  it('cannot modify a locked arrengement', () => {
+    const arrangement = new SongArrangement({});
+    arrangement.key = 'C';
+    expect(arrangement.key).toBe('C');
+    const units = [new SongUnit({ content: '[C]Test [G]content', internalId: 1 })];
+    arrangement.units = units;
+    expect(arrangement.units).toEqual(units);
+    const songMap = [1];
+    arrangement.songMap = songMap;
+    expect(arrangement.songMap).toEqual(songMap);
+    arrangement.isDeleted = true;
+    expect(arrangement.isDeleted).toBe(true);
+    arrangement.isDefault = true;
+    expect(arrangement.isDefault).toBe(true);
+    arrangement.lastUnitId = 5;
+    expect(arrangement.lastUnitId).toBe(5);
+
+    arrangement.lock();
+
+    expect(() => {
+      arrangement.key = 'G';
+    }).toThrow();
+    expect(arrangement.key).toBe('C');
+
+    expect(() => {
+      arrangement.units = [];
+    }).toThrow();
+    expect(arrangement.units).toEqual(units);
+
+    expect(() => {
+      arrangement.songMap = [];
+    }).toThrow();
+    expect(arrangement.songMap).toEqual(songMap);
+
+    expect(() => {
+      arrangement.isDeleted = false;
+    }).toThrow();
+    expect(arrangement.isDeleted).toBe(true);
+
+    expect(() => {
+      arrangement.isDefault = false;
+    }).toThrow();
+    expect(arrangement.isDefault).toBe(true);
+
+    expect(() => {
+      arrangement.lastUnitId = 100;
+    }).toThrow();
+    expect(arrangement.lastUnitId).toBe(5);
+  });
+
+  it('creates a deep copy of the arrangement', () => {
+    const arrangement = new SongArrangement({
+      key: 'C',
+      units: [
+        new SongUnit({ content: '[C]First [G]line', internalId: 1 }),
+        new SongUnit({ content: '[C]Then the se[F]cond', internalId: 2 }),
+      ],
+    });
+    const copy = arrangement.copy();
+    expect(copy).toEqual(arrangement);
+    expect(copy).not.toBe(arrangement);
+    expect(copy.units).not.toBe(arrangement.units);
+    expect(copy.units).toEqual(arrangement.units);
+  });
 });
 
 describe('helper functions', () => {

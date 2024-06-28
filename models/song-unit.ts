@@ -1,14 +1,30 @@
 export class SongUnit {
-  content: string;
-  type: SongUnitType;
-  internalId: number;
   preview: boolean;
   typeIdx: number;
+  private _content: string;
+  private _type: SongUnitType;
+  private _internalId: number;
+  private _locked: boolean;
 
-  constructor({ content, type, internalId, preview, typeIdx }: { content?: string, type?: SongUnitType, internalId: number, preview?: boolean, typeIdx?: number }) {
-    this.content = content || "";
-    this.type = type || "BLOCK";
-    this.internalId = internalId;
+  constructor({
+    content,
+    type,
+    internalId,
+    preview,
+    typeIdx,
+    locked,
+  }: {
+    content?: string;
+    type?: SongUnitType;
+    internalId: number;
+    preview?: boolean;
+    typeIdx?: number;
+    locked?: boolean;
+  }) {
+    this._content = content || '';
+    this._type = type || 'BLOCK';
+    this._internalId = internalId;
+    this._locked = !!locked;
     this.preview = !!preview;
     this.typeIdx = typeIdx || 0;
   }
@@ -24,6 +40,41 @@ export class SongUnit {
   static deserialize(serialized: SerializedSongUnit): SongUnit {
     return new SongUnit(serialized);
   }
+
+  get content() {
+    return this._content;
+  }
+
+  set content(newContent: string) {
+    if (this._locked) throw new Error('Cannot modify locked song unit');
+    this._content = newContent;
+  }
+
+  get type() {
+    return this._type;
+  }
+
+  set type(newType: SongUnitType) {
+    if (this._locked) throw new Error('Cannot modify locked song unit');
+    this._type = newType;
+  }
+
+  get internalId() {
+    return this._internalId;
+  }
+
+  set internalId(newInternalId: number) {
+    if (this._locked) throw new Error('Cannot modify locked song unit');
+    this._internalId = newInternalId;
+  }
+
+  lock() {
+    this._locked = true;
+  }
+
+  unlock() {
+    this._locked = false;
+  }
 }
 
 export type SerializedSongUnit = {
@@ -33,12 +84,12 @@ export type SerializedSongUnit = {
 };
 
 export type SongUnitType =
-  | "INTRO"
-  | "ENDING"
-  | "VERSE"
-  | "PRECHORUS"
-  | "CHORUS"
-  | "BRIDGE"
-  | "INTERLUDE"
-  | "SOLO"
-  | "BLOCK";
+  | 'INTRO'
+  | 'ENDING'
+  | 'VERSE'
+  | 'PRECHORUS'
+  | 'CHORUS'
+  | 'BRIDGE'
+  | 'INTERLUDE'
+  | 'SOLO'
+  | 'BLOCK';

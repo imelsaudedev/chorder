@@ -9,6 +9,7 @@ export const messagesSchema = z.object({
     cancel: z.string(),
     save: z.string(),
     songs: z.string(),
+    services: z.string(),
   }),
   songData: z.object({
     title: z.string(),

@@ -234,7 +234,7 @@ function updateInternalUnits(internalUnits: SongUnit[], setInternalUnits: (units
   }
   if (changed) {
     const newUnits = internalUnits.map((unit, index) => {
-      return new SongUnit({ ...unit, typeIdx: newTypeCounts[index] });
+      return new SongUnit({ ...unit.serialize(), typeIdx: newTypeCounts[index] });
     });
     setInternalUnits(newUnits);
   }
