@@ -27,3 +27,9 @@ Also, it is nice to have some data validation, so run:
 ## Debugging the database
 
 If you are using our devcontainer on vscode, you should have the MongoDB extension enabled. You can connect to the database for debugging by creating a connection using the connection string (probably `mongodb://localhost:27017/`).
+
+## Running the tests
+
+To run the tests:
+
+    yarn test
