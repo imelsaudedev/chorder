@@ -136,11 +136,30 @@ test('should remove a unit', () => {
   const song = createSong();
   const { result } = renderHook(() => useSong(song, 1));
   act(() => {
+    result.current.buildRemoveUnitHandler(1)();
+  });
+  const expectedSongMap = [1, 2, 3];
+  const arrangement = result.current.song.arrangements[1];
+  expect(result.current.songMap).toEqual(expectedSongMap);
+  expect(result.current.units).toHaveLength(3);
+  expect(arrangement.songMap).toEqual(expectedSongMap);
+  expect(arrangement.units).toHaveLength(3);
+});
+
+test('should delete unit if all occurrences in the song map are removed', () => {
+  const song = createSong();
+  const { result } = renderHook(() => useSong(song, 1));
+  act(() => {
     result.current.buildRemoveUnitHandler(0)();
   });
   const expectedSongMap = [2, 2, 3];
+  const expectedUnitIds = [2, 3];
+  const arrangement = result.current.song.arrangements[1];
   expect(result.current.songMap).toEqual(expectedSongMap);
-  expect(result.current.song.arrangements[1].songMap).toEqual(expectedSongMap);
+  expect(result.current.units.map((unit) => unit.internalId)).toEqual(expectedUnitIds);
+  expect(arrangement.songMap).toEqual(expectedSongMap);
+  expect(arrangement.units).toHaveLength(2);
+  expect(arrangement.units.map((unit) => unit.internalId)).toEqual(expectedUnitIds);
 });
 
 test('should update a unit', () => {

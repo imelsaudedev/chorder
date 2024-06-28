@@ -291,11 +291,16 @@ function useUnitCallbacks(
     (unitIndex: number) => {
       return () => {
         const newSongMap = [...internalSongMap];
+        const unitId = newSongMap[unitIndex];
         newSongMap.splice(unitIndex, 1);
         setInternalSongMap(newSongMap);
+        if (!newSongMap.includes(unitId)) {
+          const newUnits = [...internalUnits].filter((unit) => unit.internalId !== unitId);
+          setInternalUnits(newUnits);
+        }
       };
     },
-    [internalSongMap, setInternalSongMap]
+    [internalSongMap, internalUnits, setInternalSongMap, setInternalUnits]
   );
 
   const buildUpdateUnitHandler = useCallback(

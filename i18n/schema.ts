@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const messagesSchema = z.object({
   siteName: z.string(),
@@ -37,6 +37,7 @@ export const messagesSchema = z.object({
   }),
   songForm: z.object({
     addExistingUnit: z.string(),
+    addUnitWithLabel: z.string(),
     newUnit: z.string(),
   }),
 });

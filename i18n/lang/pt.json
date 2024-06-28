@@ -35,6 +35,7 @@
   },
   "songForm": {
     "addExistingUnit": "Adicionar unidade existente",
+    "addUnitWithLabel": "Adicionar unidade {label}",
     "newUnit": "Nova unidade"
   }
 }
