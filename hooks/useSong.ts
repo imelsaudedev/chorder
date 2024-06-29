@@ -1,6 +1,8 @@
 import { Song, SongArrangement } from '@/models/song';
 import { SongUnit, SongUnitType } from '@/models/song-unit';
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import useUpdatableState from './useUpdatableState';
+import useMoveUpDownCallbacks from './useMoveUpDownCallbacks';
 
 export type SongHook = {
   song: Song;
@@ -25,9 +27,9 @@ export type SongHook = {
 
 export default function useSong(song: Song, arrangementIndex: number): SongHook {
   const { arrangement, isNewArrangement } = useArrangement(song, arrangementIndex);
-  const { title, setTitle } = useTitle(song.title);
-  const { artist, setArtist } = useArtist(song.artist);
-  const { key, setKey } = useKey(arrangement.rawKey);
+  const [title, setTitle] = useUpdatableState<string>(song.title);
+  const [artist, setArtist] = useUpdatableState<string | null>(song.artist);
+  const [key, setKey] = useUpdatableState<string | undefined>(arrangement.rawKey);
   const { lastUnitId, nextUnitId } = useUnitId(arrangement.lastUnitId);
   const {
     units,
@@ -127,16 +129,6 @@ function buildSong(
   });
 }
 
-function useTitle(title: string) {
-  const [internalTitle, setInternalTitle] = useState(title);
-
-  useEffect(() => {
-    setInternalTitle(title);
-  }, [title]);
-
-  return { title: internalTitle, setTitle: setInternalTitle };
-}
-
 function useArrangement(song: Song, arrangementIndex: number) {
   return useMemo(() => {
     let arrangement = song.getArrangementOrDefault(arrangementIndex);
@@ -150,27 +142,6 @@ function useArrangement(song: Song, arrangementIndex: number) {
   }, [song, arrangementIndex]);
 }
 
-function useArtist(artist: string | null) {
-  const [internalArtist, setInternalArtist] = useState(artist);
-
-  useEffect(() => {
-    setInternalArtist(artist);
-  }, [artist]);
-
-  return { artist: internalArtist, setArtist: setInternalArtist };
-}
-
-function useKey(key: string | undefined) {
-  const [internalKey, setInternalKey] = useState(key);
-
-  useEffect(() => {
-    if (key === null) return;
-    setInternalKey(key);
-  }, [key]);
-
-  return { key: internalKey, setKey: setInternalKey };
-}
-
 function useUnitId(lastUnitId: number) {
   const [currentUnitId, setCurrentUnitId] = useState(lastUnitId || 0);
   const nextUnitId = useCallback(() => {
@@ -182,8 +153,8 @@ function useUnitId(lastUnitId: number) {
 }
 
 function useUnits(units: SongUnit[], songMap: number[], nextUnitId: () => number) {
-  const [internalUnits, setInternalUnits] = useState(units);
-  const [internalSongMap, setInternalSongMap] = useState(songMap);
+  const [internalUnits, setInternalUnits] = useUpdatableState(units);
+  const [internalSongMap, setInternalSongMap] = useUpdatableState(songMap);
   const songUnitMap = useMemo(
     () =>
       internalSongMap
@@ -193,16 +164,8 @@ function useUnits(units: SongUnit[], songMap: number[], nextUnitId: () => number
   );
 
   useEffect(() => {
-    setInternalUnits(units);
-  }, [units]);
-
-  useEffect(() => {
-    setInternalSongMap(songMap);
-  }, [songMap]);
-
-  useEffect(() => {
     updateInternalUnits(internalUnits, setInternalUnits);
-  }, [internalUnits]);
+  }, [internalUnits, setInternalUnits]);
 
   const { createUnit, addUnit, moveUnitUp, moveUnitDown, buildRemoveUnitHandler, buildUpdateUnitHandler } =
     useUnitCallbacks(nextUnitId, internalUnits, setInternalUnits, internalSongMap, setInternalSongMap, songUnitMap);
@@ -243,49 +206,27 @@ function updateInternalUnits(internalUnits: SongUnit[], setInternalUnits: (units
 function useUnitCallbacks(
   nextUnitId: () => number,
   internalUnits: SongUnit[],
-  setInternalUnits: Dispatch<SetStateAction<SongUnit[]>>,
+  setInternalUnits: (newValue: SongUnit[]) => void,
   internalSongMap: number[],
-  setInternalSongMap: Dispatch<SetStateAction<number[]>>,
+  setInternalSongMap: (newValue: number[]) => void,
   songUnitMap: SongUnit[]
 ) {
   const createUnit = useCallback(() => {
     const newUnit = new SongUnit({ internalId: nextUnitId() });
-    setInternalUnits((units) => [...units, newUnit]);
-    setInternalSongMap((songMap) => [...songMap, newUnit.internalId]);
-  }, [nextUnitId, setInternalSongMap, setInternalUnits]);
+    setInternalUnits([...internalUnits, newUnit]);
+    setInternalSongMap([...internalSongMap, newUnit.internalId]);
+  }, [internalSongMap, internalUnits, nextUnitId, setInternalSongMap, setInternalUnits]);
 
   const addUnit = useCallback(
     (unit: SongUnit) => {
       if (!internalUnits.find((otherUnit) => otherUnit.internalId === unit.internalId))
         throw new Error(`Unit ${unit.internalId} not found`);
-      setInternalSongMap((songMap) => [...songMap, unit.internalId]);
+      setInternalSongMap([...internalSongMap, unit.internalId]);
     },
-    [internalUnits, setInternalSongMap]
+    [internalSongMap, internalUnits, setInternalSongMap]
   );
 
-  const moveUnitUp = useCallback(
-    (unitIndex: number) => {
-      if (unitIndex <= 0 || unitIndex >= internalSongMap.length) return;
-      const newSongMap = [...internalSongMap];
-      const temp = newSongMap[unitIndex - 1];
-      newSongMap[unitIndex - 1] = newSongMap[unitIndex];
-      newSongMap[unitIndex] = temp;
-      setInternalSongMap(newSongMap);
-    },
-    [internalSongMap, setInternalSongMap]
-  );
-
-  const moveUnitDown = useCallback(
-    (unitIndex: number) => {
-      if (unitIndex < 0 || unitIndex >= internalSongMap.length - 1) return;
-      const newSongMap = [...internalSongMap];
-      const temp = newSongMap[unitIndex + 1];
-      newSongMap[unitIndex + 1] = newSongMap[unitIndex];
-      newSongMap[unitIndex] = temp;
-      setInternalSongMap(newSongMap);
-    },
-    [internalSongMap, setInternalSongMap]
-  );
+  const [moveUnitUp, moveUnitDown] = useMoveUpDownCallbacks(internalSongMap, setInternalSongMap);
 
   const buildRemoveUnitHandler = useCallback(
     (unitIndex: number) => {
