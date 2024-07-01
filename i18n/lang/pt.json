@@ -7,7 +7,14 @@
     "cancel": "Cancelar",
     "save": "Salvar",
     "songs": "Músicas",
-    "services": "Liturgias"
+    "services": "Liturgias",
+    "pickDate": "Escolha a data"
+  },
+  "serviceData": {
+    "date": "Data",
+    "worshipLeader": "Dirigente",
+    "worshipLeaderPlaceholder": "Dirigente",
+    "newSongUnit": "Adicionar música"
   },
   "songData": {
     "title": "Título",

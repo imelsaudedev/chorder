@@ -7,7 +7,14 @@
     "cancel": "Cancel",
     "save": "Save",
     "songs": "Songs",
-    "services": "Services"
+    "services": "Services",
+    "pickDate": "Pick a date"
+  },
+  "serviceData": {
+    "date": "Date",
+    "worshipLeader": "Worship leader",
+    "worshipLeaderPlaceholder": "Worship leader",
+    "newSongUnit": "Add song"
   },
   "songData": {
     "title": "Title",

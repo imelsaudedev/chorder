@@ -1,90 +1,77 @@
-import { PostSongAction } from '@/app/songs/[song]/actions';
 import BackArrow from '@/components/BackArrow';
 import Header from '@/components/Header';
 import Main from '@/components/Main';
-import { SongHook } from '@/hooks/useSong';
-import { Dispatch, SetStateAction, useCallback } from 'react';
-import UnitForm from '../UnitForm';
-import AddUnitForm from './AddUnitForm';
+import { Dispatch, SetStateAction } from 'react';
+import { ServiceHook } from '@/hooks/useService';
 import HeaderForm from './HeaderForm';
 import SaveButtonSet from '@/components/SaveButtonSet';
 import SortingButtons from '@/components/SortingButtons';
+import AddUnitForm from './AddUnitForm';
 
 type SongFormProps = {
-  songData: SongHook;
-  postSong: PostSongAction;
+  serviceData: ServiceHook;
   setWriteMode: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function SongForm({ songData, postSong, setWriteMode }: SongFormProps) {
+export default function ServiceForm({ serviceData, setWriteMode }: SongFormProps) {
   const {
-    song,
-    isNewArrangement,
+    service,
+    isNewService,
     title,
     setTitle,
-    artist,
-    setArtist,
-    songKey,
-    setSongKey,
+    worshipLeader,
+    setWorshipLeader,
+    date,
+    setDate,
     units,
-    songUnitMap,
-    createUnit,
-    addUnit,
+    createSongUnit,
     moveUnitUp,
     moveUnitDown,
     buildRemoveUnitHandler,
-    buildUpdateUnitHandler,
-  } = songData;
+  } = serviceData;
 
-  const submitSong = postSong.bind(null, song.serialize() || null);
-
-  const handleSetKey = useCallback(
-    (key: string) => {
-      setSongKey(key);
-    },
-    [setSongKey]
-  );
+  // const submitService = postService.bind(null, service.serialize() || null);
 
   return (
-    <form action={submitSong}>
+    <form>
       <Header>
-        <BackArrow href="/songs" />
+        <BackArrow href="/services" />
         <HeaderForm
           title={title}
           setTitle={setTitle}
-          artist={artist}
-          setArtist={setArtist}
-          songKey={songKey || ''}
-          setSongKey={handleSetKey}
+          worshipLeader={worshipLeader}
+          setWorshipLeader={setWorshipLeader}
+          date={date}
+          setDate={setDate}
         />
-        <SaveButtonSet canCancel={!isNewArrangement} setWriteMode={setWriteMode} />
+        <SaveButtonSet canCancel={!isNewService} setWriteMode={setWriteMode} />
       </Header>
       <Main className="pt-4">
         <section className="max-w-lg mx-auto">
-          {songUnitMap.map((unit, index) => {
+          {units.map((unit, index) => {
             if (unit) {
               return (
                 <div key={index} className="flex">
                   <SortingButtons
                     moveUnitUp={moveUnitUp}
                     moveUnitDown={moveUnitDown}
-                    listSize={songUnitMap.length}
+                    listSize={units.length}
                     index={index}
                   />
-                  <UnitForm
+                  {/* <UnitForm
                     index={index}
                     unit={unit}
                     setUnit={buildUpdateUnitHandler(index)}
                     removeUnit={buildRemoveUnitHandler(index)}
                     className="flex-grow"
-                  />
+                  /> */}
                 </div>
               );
             }
             return 'ERROR';
           })}
           <div className="pl-10">
-            <AddUnitForm units={units} onCreateUnit={createUnit} onAddExistingUnit={addUnit} />
+            <AddUnitForm onCreateUnit={createSongUnit} />
           </div>
         </section>
       </Main>

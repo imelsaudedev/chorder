@@ -10,6 +10,13 @@ export const messagesSchema = z.object({
     save: z.string(),
     songs: z.string(),
     services: z.string(),
+    pickDate: z.string(),
+  }),
+  serviceData: z.object({
+    date: z.string(),
+    worshipLeader: z.string(),
+    worshipLeaderPlaceholder: z.string(),
+    newSongUnit: z.string(),
   }),
   songData: z.object({
     title: z.string(),

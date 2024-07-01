@@ -32,8 +32,12 @@ export class Song {
     return this.defaultArrangement?.lyrics || '';
   }
 
+  get defaultArrangementId() {
+    return this.arrangements.findIndex((arrangement) => arrangement.isDefault);
+  }
+
   get defaultArrangement() {
-    return this.arrangements.find((arrangement) => arrangement.isDefault);
+    return this.arrangements[this.defaultArrangementId];
   }
 
   serialize(): SerializedSong {

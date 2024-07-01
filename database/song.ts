@@ -28,7 +28,6 @@ export function retrieveSong(slug: string): Promise<Song | null> {
 export async function saveSong(song: Song): Promise<Song> {
   const { client, songs } = await getCollection();
   if (song.slug) {
-    console.log(song.serialize());
     await songs.updateOne({ slug: song.slug }, { $set: song.serialize() });
   } else {
     const slug = await getAvailableSlug(song.title);
