@@ -79,8 +79,7 @@ export abstract class ServiceUnit {
 export class ServiceSongUnit extends ServiceUnit {
   song: Song;
   arrangementId: number;
-  arrangement: SongArrangement;
-  _semitoneTranspose: number;
+  semitoneTranspose: number;
   private _originalArrangement: SongArrangement;
 
   constructor({
@@ -95,11 +94,10 @@ export class ServiceSongUnit extends ServiceUnit {
     super('SONG');
     this.song = song;
     this.arrangementId = arrangementId !== undefined ? arrangementId : song.defaultArrangementId;
-    this._semitoneTranspose = semitoneTranspose || 0;
-    this._originalArrangement = song.getArrangementOrDefault(this.arrangementId)!;
+    this.semitoneTranspose = semitoneTranspose || 0;
+    this._originalArrangement = song.arrangements[this.arrangementId].copy();
     this._originalArrangement.lock();
-    this.arrangement = this._originalArrangement.copy();
-    this.arrangement.semitoneTranspose = this.semitoneTranspose;
+    this.song;
   }
 
   serialize(): SerializedSongUnit {
@@ -127,13 +125,8 @@ export class ServiceSongUnit extends ServiceUnit {
     });
   }
 
-  get semitoneTranspose() {
-    return this._semitoneTranspose;
-  }
-
-  set semitoneTranspose(semitones: number) {
-    this._semitoneTranspose = semitones;
-    this.arrangement.semitoneTranspose = semitones;
+  get arrangement() {
+    return this.song.arrangements[this.arrangementId];
   }
 }
 

@@ -17,6 +17,7 @@ export type ServiceHook = {
   createSongUnit: (song: Song, arrangementId: number) => void;
   moveUnitUp: (unitIndex: number) => void;
   moveUnitDown: (unitIndex: number) => void;
+  buildUpdateSong: (unitIndex: number) => (song: Song) => void;
   buildSemitoneTransposeChangeHandler: (unitIndex: number) => (semitones: number) => void;
   buildRemoveUnitHandler: (unitIndex: number) => () => void;
 };
@@ -31,6 +32,7 @@ export default function useService(service: Service): ServiceHook {
     createSongUnit,
     moveUnitUp,
     moveUnitDown,
+    buildUpdateSong,
     buildSemitoneTransposeChangeHandler,
     buildRemoveUnitHandler,
   } = useUnits(service.units);
@@ -50,6 +52,7 @@ export default function useService(service: Service): ServiceHook {
     createSongUnit,
     moveUnitUp,
     moveUnitDown,
+    buildUpdateSong,
     buildSemitoneTransposeChangeHandler,
     buildRemoveUnitHandler,
   };
@@ -69,14 +72,21 @@ function useMemoService(title: string, worshipLeader: string | null, date: Date,
 function useUnits(units: ServiceUnit[]) {
   const [internalUnits, setInternalUnits] = useUpdatableState(units);
 
-  const { createSongUnit, moveUnitUp, moveUnitDown, buildSemitoneTransposeChangeHandler, buildRemoveUnitHandler } =
-    useUnitCallbacks(internalUnits, setInternalUnits);
+  const {
+    createSongUnit,
+    moveUnitUp,
+    moveUnitDown,
+    buildUpdateSong,
+    buildSemitoneTransposeChangeHandler,
+    buildRemoveUnitHandler,
+  } = useUnitCallbacks(internalUnits, setInternalUnits);
 
   return {
     units: internalUnits,
     createSongUnit,
     moveUnitUp,
     moveUnitDown,
+    buildUpdateSong,
     buildSemitoneTransposeChangeHandler,
     buildRemoveUnitHandler,
   };
@@ -92,6 +102,21 @@ function useUnitCallbacks(internalUnits: ServiceUnit[], setInternalUnits: (newVa
   );
 
   const [moveUnitUp, moveUnitDown] = useMoveUpDownCallbacks(internalUnits, setInternalUnits);
+
+  const buildUpdateSong = useCallback(
+    (unitIndex: number) => {
+      return (song: Song) => {
+        if (unitIndex < 0 || unitIndex >= internalUnits.length) return;
+        const newUnits = [...internalUnits];
+        if (newUnits[unitIndex].type === 'SONG') {
+          const unit = newUnits[unitIndex] as ServiceSongUnit;
+          unit.song = song;
+        }
+        setInternalUnits(newUnits);
+      };
+    },
+    [internalUnits, setInternalUnits]
+  );
 
   const buildSemitoneTransposeChangeHandler = useCallback(
     (unitIndex: number) => {
@@ -119,5 +144,12 @@ function useUnitCallbacks(internalUnits: ServiceUnit[], setInternalUnits: (newVa
     [internalUnits, setInternalUnits]
   );
 
-  return { createSongUnit, moveUnitUp, moveUnitDown, buildSemitoneTransposeChangeHandler, buildRemoveUnitHandler };
+  return {
+    createSongUnit,
+    moveUnitUp,
+    moveUnitDown,
+    buildUpdateSong,
+    buildSemitoneTransposeChangeHandler,
+    buildRemoveUnitHandler,
+  };
 }

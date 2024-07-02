@@ -7,7 +7,7 @@ import HeaderForm from './HeaderForm';
 import SaveButtonSet from '@/components/SaveButtonSet';
 import SortingButtons from '@/components/SortingButtons';
 import AddUnitForm from './AddUnitForm';
-import ServiceSongUnitViewer from '../ServiceSongUnitViewer';
+import ServiceSongUnitEditor from '../ServiceSongUnitEditor';
 import { ServiceSongUnit } from '@/models/service';
 
 type SongFormProps = {
@@ -29,10 +29,12 @@ export default function ServiceForm({ serviceData, setWriteMode }: SongFormProps
     createSongUnit,
     moveUnitUp,
     moveUnitDown,
+    buildUpdateSong,
     buildSemitoneTransposeChangeHandler,
     buildRemoveUnitHandler,
   } = serviceData;
 
+  console.log(serviceData.service.serialize());
   // const submitService = postService.bind(null, service.serialize() || null);
 
   return (
@@ -50,7 +52,7 @@ export default function ServiceForm({ serviceData, setWriteMode }: SongFormProps
         <SaveButtonSet canCancel={!isNewService} enabled={service.isValid} setWriteMode={setWriteMode} />
       </Header>
       <Main className="pt-4">
-        <section className="flex flex-col gap-2 max-w-lg mx-auto">
+        <section className="flex flex-col gap-2 mx-auto">
           {units.map((unit, index) => {
             if (unit) {
               return (
@@ -62,8 +64,9 @@ export default function ServiceForm({ serviceData, setWriteMode }: SongFormProps
                     index={index}
                   />
                   {unit.type === 'SONG' ? (
-                    <ServiceSongUnitViewer
+                    <ServiceSongUnitEditor
                       unit={unit as ServiceSongUnit}
+                      updateSong={buildUpdateSong(index)}
                       setSemitoneTranspose={buildSemitoneTransposeChangeHandler(index)}
                       removeUnit={buildRemoveUnitHandler(index)}
                     />

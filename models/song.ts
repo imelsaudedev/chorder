@@ -89,7 +89,6 @@ export class SongArrangement {
   private _isDefault: boolean;
   private _lastUnitId: number;
   private _locked: boolean;
-  semitoneTranspose: number = 0;
 
   constructor({
     key,
@@ -219,7 +218,7 @@ export class SongArrangement {
   }
 
   get lyrics() {
-    return this.units.map((unit) => getLyrics(unit.content) || '').join('\n');
+    return this.units.map((unit) => unit.lyrics).join('\n');
   }
 
   lock() {

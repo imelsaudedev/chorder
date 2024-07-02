@@ -1,3 +1,5 @@
+import { getLyrics } from '@/chopro/music';
+
 export class SongUnit {
   typeIdx: number;
   private _content: string;
@@ -62,6 +64,10 @@ export class SongUnit {
   set internalId(newInternalId: number) {
     if (this._locked) throw new Error('Cannot modify locked song unit');
     this._internalId = newInternalId;
+  }
+
+  get lyrics() {
+    return getLyrics(this.content) || '';
   }
 
   lock() {
