@@ -11,10 +11,11 @@
     "pickDate": "Escolha a data"
   },
   "serviceData": {
+    "title": "Título",
+    "titlePlaceholder": "Título da liturgia",
     "date": "Data",
     "worshipLeader": "Dirigente",
-    "worshipLeaderPlaceholder": "Dirigente",
-    "newSongUnit": "Adicionar música"
+    "worshipLeaderPlaceholder": "Dirigente"
   },
   "songData": {
     "title": "Título",
@@ -23,7 +24,8 @@
     "artistPlaceholder": "Artista da música",
     "key": "Tom",
     "keyPlaceholder": "Tom",
-    "unit": "Unidade"
+    "unit": "Unidade",
+    "lyrics": "Letra"
   },
   "unitData": {
     "content": "Chordpro",
@@ -40,6 +42,10 @@
     "INTERLUDE": "Interlúdio",
     "SOLO": "Solo",
     "BLOCK": "Bloco"
+  },
+  "serviceForm": {
+    "editArrangement": "Editar arranjo",
+    "newSongUnit": "Adicionar música"
   },
   "songForm": {
     "addExistingUnit": "Adicionar unidade existente",

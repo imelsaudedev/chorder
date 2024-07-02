@@ -4,7 +4,7 @@ import { Fragment, ReactNode } from 'react';
 type SongListProps = {
   songs: Song[];
   initialsStyle?: 'grid' | 'row';
-  onSelected?: (song: Song) => void;
+  onSelected?: (song: Song, arrangementId: number) => void;
 };
 
 export default function SongList({ songs, initialsStyle = 'grid', onSelected }: SongListProps) {
@@ -79,7 +79,7 @@ export default function SongList({ songs, initialsStyle = 'grid', onSelected }: 
 
 type AnchorOrButtonProps = {
   song: Song;
-  onSelected?: (song: Song) => void;
+  onSelected?: (song: Song, arrangementId: number) => void;
   children: ReactNode;
 };
 
@@ -87,7 +87,7 @@ function AnchorOrButton({ song, onSelected, children }: AnchorOrButtonProps) {
   if (onSelected) {
     const handleClick = (event: React.MouseEvent) => {
       event.preventDefault();
-      onSelected(song);
+      onSelected(song, song.defaultArrangementId);
     };
     return (
       <button className="flex flex-col pt-2 pb-3 border-b-gray-300 border-b-2 w-full" onClick={handleClick}>

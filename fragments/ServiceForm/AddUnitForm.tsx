@@ -6,10 +6,9 @@ import { Button } from '@/components/ui/button';
 import SongPicker from '../SongPicker';
 import { Song } from '@/models/song';
 import { fetchSongs } from '@/lib/apiClient';
-import { setOriginalNode } from 'typescript';
 
 type AddUnitFormProps = {
-  onCreateUnit: () => void;
+  onCreateUnit: (song: Song, arrangementId: number) => void;
 };
 
 export default function AddUnitForm({ onCreateUnit }: AddUnitFormProps) {
@@ -18,14 +17,9 @@ export default function AddUnitForm({ onCreateUnit }: AddUnitFormProps) {
     fetchSongs().then(setSongs).catch(console.error);
   }, []);
 
-  const handleAddNewUnit: MouseEventHandler = (event) => {
-    event.preventDefault();
-    onCreateUnit();
-  };
-
   const [songPopoverOpen, setSongPopoverOpen] = useState<boolean>(false);
-  const onSelected = (song: Song) => {
-    console.log(song);
+  const onSelected = (song: Song, arrangementId: number) => {
+    onCreateUnit(song, arrangementId);
     setSongPopoverOpen(false);
   };
 
@@ -34,7 +28,7 @@ export default function AddUnitForm({ onCreateUnit }: AddUnitFormProps) {
       <div className="group flex items-center gap-2 w-full cursor-pointer">
         <Popover open={songPopoverOpen} onOpenChange={setSongPopoverOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline">{messages.serviceData.newSongUnit}</Button>
+            <Button variant="outline">{messages.serviceForm.newSongUnit}</Button>
           </PopoverTrigger>
           <PopoverContent className="w-full max-h-[80vh] overflow-auto">
             <SongPicker songs={songs} onSelected={onSelected} />

@@ -52,6 +52,10 @@ export class Service {
       units: serialized.units.map(ServiceUnit.deserialize),
     });
   }
+
+  get isValid() {
+    return (this.worshipLeader?.length || 0) > 0 && this.units.length > 0 && this.date instanceof Date;
+  }
 }
 
 export abstract class ServiceUnit {
@@ -73,19 +77,29 @@ export abstract class ServiceUnit {
 }
 
 export class ServiceSongUnit extends ServiceUnit {
-  song?: Song;
-  arrangementId?: number;
-  arrangement?: SongArrangement;
-  private _originalArrangement?: SongArrangement;
+  song: Song;
+  arrangementId: number;
+  arrangement: SongArrangement;
+  _semitoneTranspose: number;
+  private _originalArrangement: SongArrangement;
 
-  constructor({ song, arrangementId }: { song?: Song; arrangementId?: number }) {
+  constructor({
+    song,
+    arrangementId,
+    semitoneTranspose,
+  }: {
+    song: Song;
+    arrangementId?: number;
+    semitoneTranspose?: number;
+  }) {
     super('SONG');
     this.song = song;
-    this.arrangementId = arrangementId;
-    this._originalArrangement =
-      song && arrangementId !== undefined ? song.getArrangementOrDefault(arrangementId) : undefined;
-    this._originalArrangement?.lock();
-    this.arrangement = this._originalArrangement?.copy();
+    this.arrangementId = arrangementId !== undefined ? arrangementId : song.defaultArrangementId;
+    this._semitoneTranspose = semitoneTranspose || 0;
+    this._originalArrangement = song.getArrangementOrDefault(this.arrangementId)!;
+    this._originalArrangement.lock();
+    this.arrangement = this._originalArrangement.copy();
+    this.arrangement.semitoneTranspose = this.semitoneTranspose;
   }
 
   serialize(): SerializedSongUnit {
@@ -100,6 +114,7 @@ export class ServiceSongUnit extends ServiceUnit {
     return {
       type: 'SONG',
       song: this.song.serialize(),
+      semitoneTranspose: this.semitoneTranspose,
       arrangementId: this.arrangementId || this.song.defaultArrangementId,
       arrangement: this.arrangement.serialize(),
     };
@@ -110,6 +125,15 @@ export class ServiceSongUnit extends ServiceUnit {
       song: Song.deserialize(serialized.song),
       arrangementId: serialized.arrangementId,
     });
+  }
+
+  get semitoneTranspose() {
+    return this._semitoneTranspose;
+  }
+
+  set semitoneTranspose(semitones: number) {
+    this._semitoneTranspose = semitones;
+    this.arrangement.semitoneTranspose = semitones;
   }
 }
 
@@ -129,6 +153,7 @@ export type SerializedServiceUnit = {
 export type SerializedSongUnit = {
   type: 'SONG';
   song: SerializedSong;
+  semitoneTranspose: number;
   arrangementId: number;
   arrangement: SerializedSongArrangement;
 };

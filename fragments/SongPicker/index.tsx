@@ -3,7 +3,7 @@ import SongList from '../SongList';
 
 type SongPickerProps = {
   songs: Song[];
-  onSelected: (song: Song) => void;
+  onSelected: (song: Song, arrangementId: number) => void;
 };
 
 export default function SongPicker({ songs, onSelected }: SongPickerProps) {

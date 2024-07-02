@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { PostSongAction } from '@/app/songs/[song]/actions';
 import { Dispatch, SetStateAction } from 'react';
-import SongForm from '@/fragments/SongForm';
+import ArrangementFormPage from '@/fragments/ArrangementFormPage';
 import { SongUnit } from '@/models/song-unit';
 import { SongHook } from '@/hooks/useSong';
 import messages, { format } from '@/i18n/messages';
@@ -68,7 +68,7 @@ describe('SongForm', () => {
     } else {
       songData.isNewArrangement = false;
     }
-    render(<SongForm songData={songData} postSong={postSong} setWriteMode={setWriteMode} />);
+    render(<ArrangementFormPage songData={songData} postSong={postSong} setWriteMode={setWriteMode} />);
   });
 
   it('shows the cancel button when editing a new arrangement', () => {

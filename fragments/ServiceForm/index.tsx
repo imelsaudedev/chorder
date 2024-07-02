@@ -7,6 +7,8 @@ import HeaderForm from './HeaderForm';
 import SaveButtonSet from '@/components/SaveButtonSet';
 import SortingButtons from '@/components/SortingButtons';
 import AddUnitForm from './AddUnitForm';
+import ServiceSongUnitViewer from '../ServiceSongUnitViewer';
+import { ServiceSongUnit } from '@/models/service';
 
 type SongFormProps = {
   serviceData: ServiceHook;
@@ -27,6 +29,7 @@ export default function ServiceForm({ serviceData, setWriteMode }: SongFormProps
     createSongUnit,
     moveUnitUp,
     moveUnitDown,
+    buildSemitoneTransposeChangeHandler,
     buildRemoveUnitHandler,
   } = serviceData;
 
@@ -44,10 +47,10 @@ export default function ServiceForm({ serviceData, setWriteMode }: SongFormProps
           date={date}
           setDate={setDate}
         />
-        <SaveButtonSet canCancel={!isNewService} setWriteMode={setWriteMode} />
+        <SaveButtonSet canCancel={!isNewService} enabled={service.isValid} setWriteMode={setWriteMode} />
       </Header>
       <Main className="pt-4">
-        <section className="max-w-lg mx-auto">
+        <section className="flex flex-col gap-2 max-w-lg mx-auto">
           {units.map((unit, index) => {
             if (unit) {
               return (
@@ -58,13 +61,13 @@ export default function ServiceForm({ serviceData, setWriteMode }: SongFormProps
                     listSize={units.length}
                     index={index}
                   />
-                  {/* <UnitForm
-                    index={index}
-                    unit={unit}
-                    setUnit={buildUpdateUnitHandler(index)}
-                    removeUnit={buildRemoveUnitHandler(index)}
-                    className="flex-grow"
-                  /> */}
+                  {unit.type === 'SONG' ? (
+                    <ServiceSongUnitViewer
+                      unit={unit as ServiceSongUnit}
+                      setSemitoneTranspose={buildSemitoneTransposeChangeHandler(index)}
+                      removeUnit={buildRemoveUnitHandler(index)}
+                    />
+                  ) : null}
                 </div>
               );
             }

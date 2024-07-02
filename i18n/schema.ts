@@ -13,10 +13,11 @@ export const messagesSchema = z.object({
     pickDate: z.string(),
   }),
   serviceData: z.object({
+    title: z.string(),
+    titlePlaceholder: z.string(),
     date: z.string(),
     worshipLeader: z.string(),
     worshipLeaderPlaceholder: z.string(),
-    newSongUnit: z.string(),
   }),
   songData: z.object({
     title: z.string(),
@@ -26,6 +27,7 @@ export const messagesSchema = z.object({
     key: z.string(),
     keyPlaceholder: z.string(),
     unit: z.string(),
+    lyrics: z.string(),
   }),
   unitData: z.object({
     content: z.string(),
@@ -42,6 +44,10 @@ export const messagesSchema = z.object({
     INTERLUDE: z.string(),
     SOLO: z.string(),
     BLOCK: z.string(),
+  }),
+  serviceForm: z.object({
+    editArrangement: z.string(),
+    newSongUnit: z.string(),
   }),
   songForm: z.object({
     addExistingUnit: z.string(),

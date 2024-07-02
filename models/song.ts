@@ -1,5 +1,5 @@
 import { SerializedSongUnit, SongUnit } from './song-unit';
-import { getChords, getKeyFromChords, getLyrics } from '@/chopro/music';
+import { getChords, getKeyFromChords, getLyrics, transposeChord } from '@/chopro/music';
 
 export class Song {
   title: string;
@@ -89,6 +89,7 @@ export class SongArrangement {
   private _isDefault: boolean;
   private _lastUnitId: number;
   private _locked: boolean;
+  semitoneTranspose: number = 0;
 
   constructor({
     key,
@@ -156,6 +157,16 @@ export class SongArrangement {
     return this._key;
   }
 
+  get transpositionKeys(): [string, number][] {
+    const key = this.key;
+    if (!key) return [];
+
+    return Array.from(Array(12).keys()).map((i) => {
+      const semitones = i - 5;
+      return [transposeChord(key, key, semitones), semitones];
+    });
+  }
+
   get units() {
     return this._units;
   }
@@ -172,6 +183,12 @@ export class SongArrangement {
   set songMap(newValue) {
     if (this._locked) throw new Error('Cannot modify locked song arrangement');
     this._songMap = newValue;
+  }
+
+  get songUnitMap() {
+    return this.songMap
+      .map((songUnitId) => this.units.find((unit) => unit.internalId === songUnitId))
+      .filter(Boolean) as SongUnit[];
   }
 
   get isDefault() {

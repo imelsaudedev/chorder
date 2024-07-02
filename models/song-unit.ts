@@ -1,5 +1,4 @@
 export class SongUnit {
-  preview: boolean;
   typeIdx: number;
   private _content: string;
   private _type: SongUnitType;
@@ -10,14 +9,12 @@ export class SongUnit {
     content,
     type,
     internalId,
-    preview,
     typeIdx,
     locked,
   }: {
     content?: string;
     type?: SongUnitType;
     internalId: number;
-    preview?: boolean;
     typeIdx?: number;
     locked?: boolean;
   }) {
@@ -25,7 +22,6 @@ export class SongUnit {
     this._type = type || 'BLOCK';
     this._internalId = internalId;
     this._locked = !!locked;
-    this.preview = !!preview;
     this.typeIdx = typeIdx || 0;
   }
 

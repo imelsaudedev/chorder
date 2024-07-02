@@ -11,10 +11,11 @@
     "pickDate": "Pick a date"
   },
   "serviceData": {
+    "title": "Title",
+    "titlePlaceholder": "Service title",
     "date": "Date",
     "worshipLeader": "Worship leader",
-    "worshipLeaderPlaceholder": "Worship leader",
-    "newSongUnit": "Add song"
+    "worshipLeaderPlaceholder": "Worship leader"
   },
   "songData": {
     "title": "Title",
@@ -23,7 +24,8 @@
     "artistPlaceholder": "Song artist",
     "key": "Key",
     "keyPlaceholder": "Key",
-    "units": "Unit"
+    "units": "Unit",
+    "lyrics": "Lyrics"
   },
   "unitData": {
     "content": "Chordpro",
@@ -40,6 +42,10 @@
     "INTERLUDE": "Interlude",
     "SOLO": "Solo",
     "BLOCK": "Block"
+  },
+  "serviceForm": {
+    "editArrangement": "Edit arrangement",
+    "newSongUnit": "Add song"
   },
   "songForm": {
     "addExistingUnit": "Add existing unit",

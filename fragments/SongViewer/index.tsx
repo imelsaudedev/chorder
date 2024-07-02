@@ -1,7 +1,7 @@
 'use client';
 
-import SongForm from '@/fragments/SongForm';
-import ArrangementViewer from '../ArrangementViewer';
+import ArrangementFormPage from '@/fragments/ArrangementFormPage';
+import ArrangementViewPage from '../ArrangementViewPage';
 import { useMemo, useState } from 'react';
 import { SerializedSong, Song } from '@/models/song';
 import { DeleteArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
@@ -28,7 +28,7 @@ export default function SongViewer({
 
   if (writeMode)
     return (
-      <SongForm
+      <ArrangementFormPage
         songData={songData}
         postSong={postSong}
         setWriteMode={(newWriteMode) => {
@@ -37,5 +37,7 @@ export default function SongViewer({
       />
     );
   else
-    return <ArrangementViewer songData={songData} setWriteMode={setWriteMode} deleteArrangement={deleteArrangement} />;
+    return (
+      <ArrangementViewPage songData={songData} setWriteMode={setWriteMode} deleteArrangement={deleteArrangement} />
+    );
 }
