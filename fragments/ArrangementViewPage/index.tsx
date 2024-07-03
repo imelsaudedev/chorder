@@ -5,19 +5,18 @@ import KeyButtonSet from '@/components/KeyButtonSet';
 import Main from '@/components/Main';
 import ConfigIcon from '@/components/icons/ConfigIcon';
 import { Button } from '@/components/ui/button';
-import { SongHook } from '@/hooks/useSong';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import ArrangementView from './ArrangementView';
 import SongConfig from './SongConfig';
+import { Song } from '@/models/song';
 
 type ArrangementViewPageProps = {
-  songData: SongHook;
+  song: Song;
   setWriteMode: Dispatch<SetStateAction<boolean>>;
   deleteArrangement: DeleteArrangementAction;
 };
 
-export default function ArrangementViewPage({ songData, setWriteMode, deleteArrangement }: ArrangementViewPageProps) {
-  const { isNewArrangement, arrangementIndex, song, songUnitMap, songKey } = songData;
+export default function ArrangementViewPage({ song, setWriteMode, deleteArrangement }: ArrangementViewPageProps) {
   const [transpose, setTranspose] = useState(0);
   const [columns, setColumns] = useState(1);
   const [showConfig, setShowConfig] = useState(false);
@@ -30,12 +29,9 @@ export default function ArrangementViewPage({ songData, setWriteMode, deleteArra
     setWriteMode(true);
   }, [setWriteMode]);
 
-  if (isNewArrangement) {
-    return null;
-  }
-
   // TODO: MAYBE WE NEED A CONFIRMATION DIALOG FOR THIS?
-  const deleteArrangementWithId = deleteArrangement.bind(null, song.serialize(), arrangementIndex);
+  const deleteArrangementWithId = deleteArrangement.bind(null, song.serialize(), song.currentArrangementId);
+  const arrangement = song.getOrCreateCurrentArrangement();
 
   return (
     <>
@@ -47,7 +43,7 @@ export default function ArrangementViewPage({ songData, setWriteMode, deleteArra
             {song.artist && <span className="text-sm">{song.artist}</span>}
           </div>
           <div className="flex gap-2">
-            <KeyButtonSet originalKey={songKey || ''} transpose={transpose} setTranspose={setTranspose} />
+            <KeyButtonSet originalKey={arrangement.key || ''} transpose={transpose} setTranspose={setTranspose} />
             <Button variant="outline" onClick={handleToggleConfig}>
               <ConfigIcon />
             </Button>
@@ -62,7 +58,12 @@ export default function ArrangementViewPage({ songData, setWriteMode, deleteArra
           onEditButtonClick={handleEditButtonClick}
           visible={showConfig}
         />
-        <ArrangementView columns={columns} songUnitMap={songUnitMap} transpose={transpose} songKey={songKey} />
+        <ArrangementView
+          columns={columns}
+          songUnitMap={arrangement.songUnitMap}
+          transpose={transpose}
+          songKey={arrangement.key}
+        />
       </Main>
     </>
   );

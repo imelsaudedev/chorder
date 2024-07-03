@@ -2,7 +2,8 @@ import CloseIcon from '@/components/icons/CloseIcon';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import messages from '@/i18n/messages';
-import { Song, SongArrangement } from '@/models/song';
+import { Song } from '@/models/song';
+import { SongArrangement } from '@/models/song-arrangement';
 import { MouseEventHandler, useCallback } from 'react';
 
 type ServiceSongUnitEditorHeaderProps = {
@@ -44,7 +45,7 @@ export default function ServiceSongUnitEditorHeader({
           {messages.serviceForm.editArrangement}
         </Button>
         <div>
-          <Select defaultValue="0" onValueChange={handleSemitoneTransposeChange}>
+          <Select defaultValue={arrangement.semitoneTranspose.toString()} onValueChange={handleSemitoneTransposeChange}>
             <SelectTrigger className="w-24">
               <SelectValue placeholder={messages.songData.keyPlaceholder} />
             </SelectTrigger>

@@ -29,6 +29,6 @@ export const deleteArrangement: DeleteArrangementAction = async function (
   redirect(`./`, RedirectType.replace);
 };
 
-export async function getSong(id: string) {
-  return retrieveSong(id);
+export async function getSong(slug: string) {
+  return retrieveSong(slug);
 }

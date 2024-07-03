@@ -7,7 +7,7 @@ type SaveButtonSetProps = {
   enabled?: boolean;
 };
 
-export default function SaveButtonSet({ canCancel, setWriteMode, enabled = false }: SaveButtonSetProps) {
+export default function SaveButtonSet({ canCancel, setWriteMode, enabled = true }: SaveButtonSetProps) {
   const handleCancelEdit: MouseEventHandler = useCallback(
     (event) => {
       event.preventDefault();

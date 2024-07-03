@@ -1,29 +1,25 @@
 import { getLyrics } from '@/chopro/music';
 
 export class SongUnit {
+  content: string;
+  type: SongUnitType;
   typeIdx: number;
-  private _content: string;
-  private _type: SongUnitType;
-  private _internalId: number;
-  private _locked: boolean;
+  internalId: number;
 
   constructor({
     content,
     type,
     internalId,
     typeIdx,
-    locked,
   }: {
     content?: string;
     type?: SongUnitType;
     internalId: number;
     typeIdx?: number;
-    locked?: boolean;
   }) {
-    this._content = content || '';
-    this._type = type || 'BLOCK';
-    this._internalId = internalId;
-    this._locked = !!locked;
+    this.content = content || '';
+    this.type = type || 'BLOCK';
+    this.internalId = internalId;
     this.typeIdx = typeIdx || 0;
   }
 
@@ -35,47 +31,20 @@ export class SongUnit {
     };
   }
 
+  equals(other: SongUnit) {
+    return this.content === other.content && this.type === other.type && this.internalId === other.internalId;
+  }
+
   static deserialize(serialized: SerializedSongUnit): SongUnit {
     return new SongUnit(serialized);
-  }
-
-  get content() {
-    return this._content;
-  }
-
-  set content(newContent: string) {
-    if (this._locked) throw new Error('Cannot modify locked song unit');
-    this._content = newContent;
-  }
-
-  get type() {
-    return this._type;
-  }
-
-  set type(newType: SongUnitType) {
-    if (this._locked) throw new Error('Cannot modify locked song unit');
-    this._type = newType;
-  }
-
-  get internalId() {
-    return this._internalId;
-  }
-
-  set internalId(newInternalId: number) {
-    if (this._locked) throw new Error('Cannot modify locked song unit');
-    this._internalId = newInternalId;
   }
 
   get lyrics() {
     return getLyrics(this.content) || '';
   }
 
-  lock() {
-    this._locked = true;
-  }
-
-  unlock() {
-    this._locked = false;
+  get isValid() {
+    return this.content.trim().length > 0;
   }
 }
 

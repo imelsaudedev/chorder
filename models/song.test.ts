@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
-import { groupSongsByFirstLetter, Song, SongArrangement } from '@/models/song';
+import { groupSongsByFirstLetter, Song } from '@/models/song';
 import { SongUnit } from '@/models/song-unit';
+import { SongArrangement } from './song-arrangement';
 
 describe('song', () => {
   it('should construct a song with default arguments', () => {
@@ -44,10 +45,14 @@ describe('song', () => {
       title: 'Test Song',
       arrangements: [otherArrangement, defaultArrangement],
     });
-    expect(song.getArrangementOrDefault(null)).toBe(defaultArrangement);
-    expect(song.getArrangementOrDefault(123)).toBe(defaultArrangement);
-    expect(song.getArrangementOrDefault(1)).toBe(defaultArrangement);
-    expect(song.getArrangementOrDefault(0)).toBe(otherArrangement);
+    song.currentArrangementId = undefined;
+    expect(song.currentArrangement).toBe(defaultArrangement);
+    song.currentArrangementId = 123;
+    expect(song.currentArrangement).toBe(defaultArrangement);
+    song.currentArrangementId = 1;
+    expect(song.currentArrangement).toBe(defaultArrangement);
+    song.currentArrangementId = 0;
+    expect(song.currentArrangement).toBe(otherArrangement);
   });
 
   it('should return the default arrangement even if it is not the first one', () => {
@@ -152,56 +157,6 @@ describe('song arrangement', () => {
       ],
     });
     expect(arrangement.lyrics).toBe('First line\nThen the second');
-  });
-
-  it('cannot modify a locked arrengement', () => {
-    const arrangement = new SongArrangement({});
-    arrangement.key = 'C';
-    expect(arrangement.key).toBe('C');
-    const units = [new SongUnit({ content: '[C]Test [G]content', internalId: 1 })];
-    arrangement.units = units;
-    expect(arrangement.units).toEqual(units);
-    const songMap = [1];
-    arrangement.songMap = songMap;
-    expect(arrangement.songMap).toEqual(songMap);
-    arrangement.isDeleted = true;
-    expect(arrangement.isDeleted).toBe(true);
-    arrangement.isDefault = true;
-    expect(arrangement.isDefault).toBe(true);
-    arrangement.lastUnitId = 5;
-    expect(arrangement.lastUnitId).toBe(5);
-
-    arrangement.lock();
-
-    expect(() => {
-      arrangement.key = 'G';
-    }).toThrow();
-    expect(arrangement.key).toBe('C');
-
-    expect(() => {
-      arrangement.units = [];
-    }).toThrow();
-    expect(arrangement.units).toEqual(units);
-
-    expect(() => {
-      arrangement.songMap = [];
-    }).toThrow();
-    expect(arrangement.songMap).toEqual(songMap);
-
-    expect(() => {
-      arrangement.isDeleted = false;
-    }).toThrow();
-    expect(arrangement.isDeleted).toBe(true);
-
-    expect(() => {
-      arrangement.isDefault = false;
-    }).toThrow();
-    expect(arrangement.isDefault).toBe(true);
-
-    expect(() => {
-      arrangement.lastUnitId = 100;
-    }).toThrow();
-    expect(arrangement.lastUnitId).toBe(5);
   });
 
   it('creates a deep copy of the arrangement', () => {

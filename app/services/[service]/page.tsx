@@ -1,8 +1,7 @@
 import ServiceViewer from '@/fragments/ServiceViewer';
-import SongViewer from '@/fragments/SongViewer';
 import { Service } from '@/models/service';
-import { Song } from '@/models/song';
 import { cache } from 'react';
+import { getService } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,9 +14,10 @@ export default async function ServicePage({
 }) {
   const serviceSlug = params.service;
   const service =
-    // (serviceSlug && serviceSlug !== 'new' && (await cache((songSlug: string) => getSong(songSlug))(serviceSlug))) ||
-    // new Song({});
-    new Service({});
+    (serviceSlug &&
+      serviceSlug !== 'new' &&
+      (await cache((serviceSlug: string) => getService(serviceSlug))(serviceSlug))) ||
+    new Service({ isNew: true });
   const writeMode = searchParams.edit === 'true' || serviceSlug === 'new';
 
   return <ServiceViewer service={service.serialize()} initialWriteMode={writeMode} />;

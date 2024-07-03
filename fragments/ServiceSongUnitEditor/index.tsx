@@ -1,14 +1,12 @@
-import useSong from '@/hooks/useSong';
-import { ServiceSongUnit } from '@/models/service';
-import { MouseEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import { ServiceSongUnit } from '@/models/service-unit';
+import { MouseEventHandler, useCallback, useState } from 'react';
 import ArrangementForm from '../ArrangementFormPage/ArrangementForm';
 import ServiceSongUnitEditorHeader from './ServiceSongUnitEditorHeader';
 import SongUnitContentView from './SongUnitContentView';
-import { Song } from '@/models/song';
 
 type ServiceSongUnitEditorProps = {
   unit: ServiceSongUnit;
-  updateSong: (song: Song) => void;
+  updateSong: () => void;
   setSemitoneTranspose: (semitones: number) => void;
   removeUnit: () => void;
 };
@@ -19,9 +17,8 @@ export default function ServiceSongUnitEditor({
   setSemitoneTranspose,
   removeUnit,
 }: ServiceSongUnitEditorProps) {
-  const songData = useSong(unit.song, unit.arrangementId);
-  const { song, arrangementIndex } = songData;
-  const arrangement = song.arrangements[arrangementIndex];
+  const song = unit.song;
+  const arrangement = song.getOrCreateCurrentArrangement();
 
   const [editMode, setEditMode] = useState(false);
 
@@ -39,8 +36,10 @@ export default function ServiceSongUnitEditor({
         onToggleEditMode={handleToggleEditMode}
         removeUnit={removeUnit}
       />
-      {editMode && <ArrangementForm songData={songData} />}
-      {!editMode && <SongUnitContentView arrangement={arrangement} />}
+      <div className="mt-8">
+        {editMode && <ArrangementForm arrangement={arrangement} updateSong={updateSong} />}
+        {!editMode && <SongUnitContentView arrangement={arrangement} />}
+      </div>
     </div>
   );
 }

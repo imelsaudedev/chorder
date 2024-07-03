@@ -88,6 +88,10 @@ db.runCommand({
                 bsonType: 'int',
                 description: "'lastUnitId' must be an integer and is required",
               },
+              semitoneTranspose: {
+                bsonType: 'int',
+                description: "'semitoneTranspose' must be an integer",
+              },
             },
           },
         },

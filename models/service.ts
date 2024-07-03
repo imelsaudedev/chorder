@@ -1,4 +1,4 @@
-import { SerializedSong, SerializedSongArrangement, Song, SongArrangement } from './song';
+import { SerializedServiceUnit, ServiceUnit, ServiceUnitType } from './service-unit';
 
 export class Service {
   title: string;
@@ -7,6 +7,7 @@ export class Service {
   date: Date;
   isDeleted: boolean;
   units: ServiceUnit[];
+  isNew: boolean;
 
   constructor({
     title,
@@ -15,6 +16,7 @@ export class Service {
     date,
     isDeleted,
     units,
+    isNew,
   }: {
     title?: string;
     slug?: string;
@@ -22,6 +24,7 @@ export class Service {
     date?: Date;
     isDeleted?: boolean;
     units?: ServiceUnit[];
+    isNew?: boolean;
   }) {
     this.title = title || '';
     this.slug = slug;
@@ -29,6 +32,7 @@ export class Service {
     this.date = date || new Date();
     this.isDeleted = !!isDeleted;
     this.units = units || [];
+    this.isNew = !!isNew;
   }
 
   serialize(): SerializedService {
@@ -54,79 +58,44 @@ export class Service {
   }
 
   get isValid() {
-    return (this.worshipLeader?.length || 0) > 0 && this.units.length > 0 && this.date instanceof Date;
-  }
-}
-
-export abstract class ServiceUnit {
-  type: 'SONG' | 'TEXT';
-
-  constructor(type: 'SONG' | 'TEXT') {
-    this.type = type;
+    return (
+      (this.worshipLeader?.length || 0) > 0 &&
+      this.date instanceof Date &&
+      this.units.length > 0 &&
+      this.units.every((unit) => unit.isValid)
+    );
   }
 
-  abstract serialize(): SerializedServiceUnit;
-
-  static deserialize(serialized: SerializedServiceUnit): ServiceUnit {
-    switch (serialized.type) {
-      case 'SONG':
-        return ServiceSongUnit.deserialize(serialized as SerializedSongUnit);
+  swapUnits(indexA: number, indexB: number) {
+    if (indexA < 0 || indexA >= this.units.length || indexB < 0 || indexB >= this.units.length) {
+      throw new Error('Index out of bounds');
     }
-    throw new Error('Unknown service unit type');
-  }
-}
-
-export class ServiceSongUnit extends ServiceUnit {
-  song: Song;
-  arrangementId: number;
-  semitoneTranspose: number;
-  private _originalArrangement: SongArrangement;
-
-  constructor({
-    song,
-    arrangementId,
-    semitoneTranspose,
-  }: {
-    song: Song;
-    arrangementId?: number;
-    semitoneTranspose?: number;
-  }) {
-    super('SONG');
-    this.song = song;
-    this.arrangementId = arrangementId !== undefined ? arrangementId : song.defaultArrangementId;
-    this.semitoneTranspose = semitoneTranspose || 0;
-    this._originalArrangement = song.arrangements[this.arrangementId].copy();
-    this._originalArrangement.lock();
-    this.song;
+    const temp = this.units[indexA];
+    this.units[indexA] = this.units[indexB];
+    this.units[indexB] = temp;
   }
 
-  serialize(): SerializedSongUnit {
-    if (!this.song) {
-      throw new Error('Cannot serialize song unit without song');
+  moveUnitUp(index: number) {
+    this.swapUnits(index, index - 1);
+  }
+
+  moveUnitDown(index: number) {
+    this.swapUnits(index, index + 1);
+  }
+
+  removeUnit(index: number) {
+    if (index < 0 || index >= this.units.length) {
+      throw new Error('Index out of bounds');
     }
-    if (!this.arrangement) {
-      throw new Error('Cannot serialize song unit without arrangement');
-    }
-
-    // TODO COPY STUFF FROM ORIGINAL ARRANGEMENT AND ADD NEW UNITS TO THIS SEPARATE UNIT
-    return {
-      type: 'SONG',
-      song: this.song.serialize(),
-      semitoneTranspose: this.semitoneTranspose,
-      arrangementId: this.arrangementId || this.song.defaultArrangementId,
-      arrangement: this.arrangement.serialize(),
-    };
+    this.units.splice(index, 1);
   }
 
-  static deserialize(serialized: SerializedSongUnit): ServiceSongUnit {
-    return new ServiceSongUnit({
-      song: Song.deserialize(serialized.song),
-      arrangementId: serialized.arrangementId,
-    });
+  addUnit(unit: ServiceUnit) {
+    this.units.push(unit);
   }
 
-  get arrangement() {
-    return this.song.arrangements[this.arrangementId];
+  getUnitsByType<T>(type: ServiceUnitType): T[] {
+    return this.units.filter((unit) => unit.type === type).map((unit) => unit as T);
   }
 }
 
@@ -139,14 +108,10 @@ export type SerializedService = {
   units: SerializedServiceUnit[];
 };
 
-export type SerializedServiceUnit = {
-  type: 'SONG' | 'TEXT';
-};
-
-export type SerializedSongUnit = {
-  type: 'SONG';
-  song: SerializedSong;
-  semitoneTranspose: number;
-  arrangementId: number;
-  arrangement: SerializedSongArrangement;
-};
+export function getDefaultTitle(worshipLeader: string | null, date: Date) {
+  const year = date.getFullYear().toString();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const worshipLeaderString = worshipLeader ? ` (${worshipLeader})` : '';
+  return `${year}-${month}-${day}${worshipLeaderString}`;
+}

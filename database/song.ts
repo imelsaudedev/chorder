@@ -1,11 +1,27 @@
 import { SerializedSong, Song } from '@/models/song';
-import { getDB } from './client';
+import { DBData, getDB } from './client';
 import { getAvailableSlug, saveSlug } from './slug';
+import { Filter } from 'mongodb';
 
-export function retrieveAllSongs(): Promise<Song[]> {
-  return getCollection().then(({ songs }) => {
+type RetrieveSongOptions = {
+  acceptDeleted?: boolean;
+};
+export function retrieveSongs({
+  filter,
+  options,
+  dbData,
+}: {
+  filter?: Filter<SerializedSong>;
+  options?: RetrieveSongOptions;
+  dbData?: DBData;
+}): Promise<Song[]> {
+  const combinedFilter = filter || {};
+  if (!options?.acceptDeleted) {
+    combinedFilter['isDeleted'] = false;
+  }
+  return getSongsCollection(dbData).then(({ songs }) => {
     return songs
-      .find({ isDeleted: false })
+      .find(combinedFilter)
       .toArray()
       .then((serializedSongs) => {
         return serializedSongs.map(Song.deserialize);
@@ -13,8 +29,15 @@ export function retrieveAllSongs(): Promise<Song[]> {
   });
 }
 
-export function retrieveSong(slug: string): Promise<Song | null> {
-  return getCollection().then(({ songs }) => {
+export function retrieveSongsBySlug(
+  slugs: string[],
+  { options, dbData }: { options?: RetrieveSongOptions; dbData?: DBData }
+): Promise<Song[]> {
+  return retrieveSongs({ filter: { slug: { $in: slugs } }, options, dbData });
+}
+
+export function retrieveSong(slug: string, dbData?: DBData): Promise<Song | null> {
+  return getSongsCollection(dbData).then(({ songs }) => {
     return songs.findOne({ slug, isDeleted: false }).then((serializedSong) => {
       if (serializedSong) {
         return Song.deserialize(serializedSong);
@@ -25,12 +48,12 @@ export function retrieveSong(slug: string): Promise<Song | null> {
   });
 }
 
-export async function saveSong(song: Song): Promise<Song> {
-  const { client, songs } = await getCollection();
+export async function saveSong(song: Song, dbData?: DBData): Promise<Song> {
+  const { client, songs } = await getSongsCollection(dbData);
   if (song.slug) {
     await songs.updateOne({ slug: song.slug }, { $set: song.serialize() });
   } else {
-    const slug = await getAvailableSlug(song.title);
+    const slug = await getAvailableSlug(song.title, dbData);
     song.slug = slug;
 
     const session = client.startSession();
@@ -47,7 +70,7 @@ export async function saveSong(song: Song): Promise<Song> {
   return song;
 }
 
-async function getCollection() {
-  const { client, db } = await getDB();
+export async function getSongsCollection(dbData?: DBData) {
+  const { client, db } = await getDB(dbData);
   return { client, songs: db.collection<SerializedSong>('songs') };
 }

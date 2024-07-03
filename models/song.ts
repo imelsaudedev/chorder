@@ -1,5 +1,4 @@
-import { SerializedSongUnit, SongUnit } from './song-unit';
-import { getChords, getKeyFromChords, getLyrics, transposeChord } from '@/chopro/music';
+import { SerializedSongArrangement, SongArrangement } from './song-arrangement';
 
 export class Song {
   title: string;
@@ -7,6 +6,7 @@ export class Song {
   artist: string | null;
   isDeleted: boolean;
   arrangements: SongArrangement[];
+  currentArrangementId?: number;
 
   constructor({
     title,
@@ -40,6 +40,22 @@ export class Song {
     return this.arrangements[this.defaultArrangementId];
   }
 
+  get currentArrangement(): SongArrangement | undefined {
+    if (
+      this.currentArrangementId === undefined ||
+      this.currentArrangementId < 0 ||
+      this.currentArrangementId >= this.arrangements.length
+    ) {
+      this.currentArrangementId = this.defaultArrangementId;
+      return this.defaultArrangement;
+    }
+    return this.arrangements[this.currentArrangementId];
+  }
+
+  get isValid() {
+    return this.title.trim().length > 0 && this.arrangements.length > 0 && !!this.currentArrangement?.isValid;
+  }
+
   serialize(): SerializedSong {
     return {
       title: this.title,
@@ -58,11 +74,14 @@ export class Song {
     });
   }
 
-  getArrangementOrDefault(arrangementId: number | null): SongArrangement | undefined {
-    if (arrangementId === null || arrangementId < 0 || arrangementId >= this.arrangements.length) {
-      return this.defaultArrangement;
+  createArrangement() {
+    const newArrangement = new SongArrangement({});
+    if (this.arrangements.length === 0) {
+      newArrangement.isDefault = true;
+      newArrangement.isNew = true;
     }
-    return this.arrangements[arrangementId];
+    this.arrangements.push(newArrangement);
+    this.currentArrangementId = this.arrangements.length - 1;
   }
 
   removeArrangement(arrangementId: number) {
@@ -79,160 +98,12 @@ export class Song {
       }
     }
   }
-}
 
-export class SongArrangement {
-  private _key: string | undefined;
-  private _units: SongUnit[];
-  private _songMap: number[];
-  private _isDeleted: boolean;
-  private _isDefault: boolean;
-  private _lastUnitId: number;
-  private _locked: boolean;
-
-  constructor({
-    key,
-    units,
-    songMap,
-    isDefault,
-    isDeleted,
-    lastUnitId,
-    locked,
-  }: {
-    key?: string;
-    units?: SongUnit[];
-    songMap?: number[];
-    isDefault?: boolean;
-    isDeleted?: boolean;
-    lastUnitId?: number;
-    locked?: boolean;
-  }) {
-    this._key = key || '';
-    this._units = units || [];
-    this._songMap = songMap || [];
-    this._isDefault = isDefault || false;
-    this._isDeleted = isDeleted || false;
-    this._lastUnitId = lastUnitId || 0;
-    this._locked = !!locked;
-  }
-
-  copy() {
-    return SongArrangement.deserialize(this.serialize());
-  }
-
-  serialize(): SerializedSongArrangement {
-    return {
-      key: this.key,
-      units: this.units.map((unit) => unit.serialize()),
-      songMap: this.songMap,
-      isDefault: this.isDefault,
-      isDeleted: this.isDeleted,
-      lastUnitId: this.lastUnitId,
-    };
-  }
-
-  static deserialize(serialized: SerializedSongArrangement): SongArrangement {
-    const units = serialized.units.map((unit) => SongUnit.deserialize(unit));
-    return new SongArrangement({
-      ...serialized,
-      units,
-    });
-  }
-
-  set key(newKey: string) {
-    if (this._locked) throw new Error('Cannot modify locked song arrangement');
-    this._key = newKey;
-  }
-
-  get key() {
-    if (!this._key) {
-      const allChords = this.units.map((unit) => getChords(unit.content)).flat();
-      this._key = getKeyFromChords(allChords) || '';
+  getOrCreateCurrentArrangement() {
+    if (!this.currentArrangement) {
+      this.createArrangement();
     }
-    return this._key;
-  }
-
-  get rawKey() {
-    return this._key;
-  }
-
-  get transpositionKeys(): [string, number][] {
-    const key = this.key;
-    if (!key) return [];
-
-    return Array.from(Array(12).keys()).map((i) => {
-      const semitones = i - 5;
-      return [transposeChord(key, key, semitones), semitones];
-    });
-  }
-
-  get units() {
-    return this._units;
-  }
-
-  set units(newValue) {
-    if (this._locked) throw new Error('Cannot modify locked song arrangement');
-    this._units = newValue;
-  }
-
-  get songMap() {
-    return this._songMap;
-  }
-
-  set songMap(newValue) {
-    if (this._locked) throw new Error('Cannot modify locked song arrangement');
-    this._songMap = newValue;
-  }
-
-  get songUnitMap() {
-    return this.songMap
-      .map((songUnitId) => this.units.find((unit) => unit.internalId === songUnitId))
-      .filter(Boolean) as SongUnit[];
-  }
-
-  get isDefault() {
-    return this._isDefault;
-  }
-
-  set isDefault(newValue) {
-    if (this._locked) throw new Error('Cannot modify locked song arrangement');
-    this._isDefault = newValue;
-  }
-
-  get isDeleted() {
-    return this._isDeleted;
-  }
-
-  set isDeleted(newValue) {
-    if (this._locked) throw new Error('Cannot modify locked song arrangement');
-    this._isDeleted = newValue;
-  }
-
-  get lastUnitId() {
-    return this._lastUnitId;
-  }
-
-  set lastUnitId(newValue) {
-    if (this._locked) throw new Error('Cannot modify locked song arrangement');
-    this._lastUnitId = newValue;
-  }
-
-  get lyrics() {
-    return this.units.map((unit) => unit.lyrics).join('\n');
-  }
-
-  lock() {
-    this._locked = true;
-    for (const unit of this.units) {
-      unit.lock();
-    }
-  }
-
-  unlock() {
-    this._locked = false;
-    for (const unit of this.units) {
-      unit.unlock();
-    }
+    return this.currentArrangement!;
   }
 }
 
@@ -243,15 +114,6 @@ export type SerializedSong = {
   lyrics: string;
   arrangements: SerializedSongArrangement[];
   isDeleted: boolean;
-};
-
-export type SerializedSongArrangement = {
-  key: string;
-  units: SerializedSongUnit[];
-  songMap: number[];
-  isDefault: boolean;
-  isDeleted: boolean;
-  lastUnitId: number;
 };
 
 export function groupSongsByFirstLetter(songs: Song[]): Map<string, Song[]> {
@@ -274,4 +136,11 @@ export function groupSongsByFirstLetter(songs: Song[]): Map<string, Song[]> {
   });
 
   return byFirstLetter;
+}
+
+export function mapSongsBySlug(songs: Song[]): Map<string, Song> {
+  return songs.reduce((acc, song) => {
+    acc.set(song.slug!, song);
+    return acc;
+  }, new Map<string, Song>());
 }

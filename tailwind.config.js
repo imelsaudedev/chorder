@@ -8,7 +8,6 @@ module.exports = {
     './app/**/*.{js,ts,jsx,tsx}',
     './src/**/*.{js,ts,jsx,tsx}',
     './models/**/*.{js,ts,jsx,tsx}',
-    './hooks/**/*.{js,ts,jsx,tsx}',
     './database/**/*.{js,ts,jsx,tsx}',
     './chopro/**/*.{js,ts,jsx,tsx}',
   ],

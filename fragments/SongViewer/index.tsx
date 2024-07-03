@@ -1,11 +1,10 @@
 'use client';
 
-import ArrangementFormPage from '@/fragments/ArrangementFormPage';
-import ArrangementViewPage from '../ArrangementViewPage';
-import { useMemo, useState } from 'react';
-import { SerializedSong, Song } from '@/models/song';
 import { DeleteArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
-import useSong from '@/hooks/useSong';
+import ArrangementFormPage from '@/fragments/ArrangementFormPage';
+import { SerializedSong, Song } from '@/models/song';
+import { useEffect, useRef, useState } from 'react';
+import ArrangementViewPage from '../ArrangementViewPage';
 
 type SongViewerProps = {
   song: SerializedSong;
@@ -22,22 +21,29 @@ export default function SongViewer({
   deleteArrangement,
   initialWriteMode,
 }: SongViewerProps) {
-  const song = useMemo(() => Song.deserialize(serializedSong), [serializedSong]);
-  const songData = useSong(song, arrangementId || song.defaultArrangementId);
+  const songRef = useRef(Song.deserialize(serializedSong));
+  const song = songRef.current;
+
+  useEffect(() => {
+    if (arrangementId === null) {
+      if (song.arrangements.length === 0) {
+        song.createArrangement();
+      }
+    } else {
+      song.currentArrangementId = arrangementId;
+    }
+  }, [arrangementId, song]);
   const [writeMode, setWriteMode] = useState<boolean>(initialWriteMode);
 
   if (writeMode)
     return (
       <ArrangementFormPage
-        songData={songData}
+        song={song}
         postSong={postSong}
         setWriteMode={(newWriteMode) => {
           setWriteMode(newWriteMode);
         }}
       />
     );
-  else
-    return (
-      <ArrangementViewPage songData={songData} setWriteMode={setWriteMode} deleteArrangement={deleteArrangement} />
-    );
+  else return <ArrangementViewPage song={song} setWriteMode={setWriteMode} deleteArrangement={deleteArrangement} />;
 }

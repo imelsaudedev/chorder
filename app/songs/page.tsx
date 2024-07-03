@@ -1,13 +1,13 @@
 import AnchorButton from '@/components/AnchorButton';
 import Main from '@/components/Main';
 import PlusIcon from '@/components/icons/PlusIcon';
-import { retrieveAllSongs } from '@/database/song';
+import { retrieveSongs } from '@/database/song';
 import PageHeader from '@/fragments/PageHeader';
 import SongList from '@/fragments/SongList';
 import { cache } from 'react';
 
 export default async function SongListPage() {
-  const songs = await cache(() => retrieveAllSongs())();
+  const songs = await cache(() => retrieveSongs({}))();
 
   return (
     <>

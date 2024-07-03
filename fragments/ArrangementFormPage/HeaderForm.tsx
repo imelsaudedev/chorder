@@ -1,34 +1,40 @@
-import FormField from "@/components/FormField";
-import FormLabel from "@/components/FormLabel";
-import TextInput from "@/components/TextInput";
-import messages from "@/i18n/messages";
-import { ChangeEvent } from "react";
+import FormField from '@/components/FormField';
+import FormLabel from '@/components/FormLabel';
+import TextInput from '@/components/TextInput';
+import messages from '@/i18n/messages';
+import { Song } from '@/models/song';
+import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from 'react';
 
-export default function HeaderForm({
-  title,
-  setTitle,
-  artist,
-  setArtist,
-  songKey,
-  setSongKey,
-}: {
-  title: string;
-  setTitle: (newValue: string) => void;
-  artist: string | null;
-  setArtist: (newValue: string | null) => void;
-  songKey: string;
-  setSongKey: (key: string) => void;
-}) {
+type HeaderFormProps = {
+  song: Song;
+  updateSong: () => void;
+};
+
+export default function HeaderForm({ song, updateSong }: HeaderFormProps) {
+  const arrangement = song.getOrCreateCurrentArrangement();
+
+  const [title, setTitle] = useState(song.title);
   const handleChangeTitle = (event: ChangeEvent<HTMLInputElement>) => {
-    setTitle(event.target.value);
+    const newTitle = event.target.value;
+    setTitle(newTitle);
+    song.title = newTitle;
+    updateSong();
   };
 
+  const [artist, setArtist] = useState(song.artist);
   const handleChangeArtist = (event: ChangeEvent<HTMLInputElement>) => {
-    setArtist(event.target.value);
+    const newArtist = event.target.value;
+    setArtist(newArtist);
+    song.artist = newArtist;
+    updateSong();
   };
 
+  const [songKey, setSongKey] = useState(arrangement.key);
   const handleSongKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSongKey(event.target.value);
+    const newKey = event.target.value;
+    setSongKey(newKey);
+    arrangement.key = newKey;
+    updateSong();
   };
 
   return (
@@ -52,7 +58,7 @@ export default function HeaderForm({
           id="artist"
           placeholder={messages.songData.artistPlaceholder}
           onChange={handleChangeArtist}
-          defaultValue={artist || ""}
+          defaultValue={artist || ''}
         />
       </FormField>
       <FormField>
