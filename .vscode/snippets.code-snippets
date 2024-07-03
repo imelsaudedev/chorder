@@ -1,0 +1,17 @@
+{
+  "React component boilerplate": {
+    "scope": "typescriptreact",
+    "prefix": "comp",
+    "body": [
+      "type $1Props = {",
+      "}",
+      "",
+      "export default function $1({}: $1Props) {",
+      "  return (",
+      "    <div>$1</div>",
+      "  )",
+      "}"
+    ],
+    "description": "Log output to console"
+  }
+}

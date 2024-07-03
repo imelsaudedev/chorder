@@ -23,7 +23,7 @@ export const deleteService: DeleteServiceAction = async function (serializedServ
   const savedService = await saveService(service);
   revalidatePath('/services', 'page');
   revalidatePath(`/services/${savedService.slug}`, 'page');
-  redirect(`./${savedService.slug}`, RedirectType.replace);
+  redirect(`./`, RedirectType.replace);
 };
 
 export async function getService(slug: string) {

@@ -3,6 +3,7 @@
 import { SerializedService, Service } from '@/models/service';
 import { useRef, useState } from 'react';
 import ServiceFormPage from '../ServiceFormPage';
+import ServiceViewPage from '../ServiceViewPage';
 
 type ServiceViewerProps = {
   service: SerializedService;
@@ -15,5 +16,5 @@ export default function ServiceViewer({ service: serializedService, initialWrite
   const [writeMode, setWriteMode] = useState<boolean>(initialWriteMode);
 
   if (writeMode) return <ServiceFormPage service={service} setWriteMode={setWriteMode} />;
-  else return null;
+  else return <ServiceViewPage service={service} setWriteMode={setWriteMode} />;
 }
