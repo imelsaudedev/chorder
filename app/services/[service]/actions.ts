@@ -2,7 +2,6 @@
 
 import { retrieveService, saveService } from '@/database/service';
 import { SerializedService, Service } from '@/models/service';
-import { revalidatePath } from 'next/cache';
 import { RedirectType, redirect } from 'next/navigation';
 
 export type PostServiceAction = ((service: SerializedService) => Promise<void>) & Function;
@@ -10,8 +9,6 @@ export type PostServiceAction = ((service: SerializedService) => Promise<void>) 
 export const postService: PostServiceAction = async function (serializedService: SerializedService) {
   const service = Service.deserialize(serializedService);
   const savedService = await saveService(service);
-  revalidatePath('/services', 'page');
-  revalidatePath(`/services/${savedService.slug}`, 'page');
   redirect(`./${savedService.slug}`, RedirectType.replace);
 };
 
@@ -20,9 +17,7 @@ export type DeleteServiceAction = ((service: SerializedService) => void) & Funct
 export const deleteService: DeleteServiceAction = async function (serializedService: SerializedService) {
   const service = Service.deserialize(serializedService);
   service.isDeleted = true;
-  const savedService = await saveService(service);
-  revalidatePath('/services', 'page');
-  revalidatePath(`/services/${savedService.slug}`, 'page');
+  await saveService(service);
   redirect(`./`, RedirectType.replace);
 };
 
