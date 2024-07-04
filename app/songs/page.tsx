@@ -4,10 +4,11 @@ import PlusIcon from '@/components/icons/PlusIcon';
 import { retrieveSongs } from '@/database/song';
 import PageHeader from '@/fragments/PageHeader';
 import SongList from '@/fragments/SongList';
-import { cache } from 'react';
+
+export const dynamic = 'force-dynamic';
 
 export default async function SongListPage() {
-  const songs = await cache(() => retrieveSongs({}))();
+  const songs = await retrieveSongs({});
 
   return (
     <>

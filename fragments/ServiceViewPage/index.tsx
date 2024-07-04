@@ -5,7 +5,7 @@ import Main from '@/components/Main';
 import { Button } from '@/components/ui/button';
 import { Service } from '@/models/service';
 import { ServiceSongUnit } from '@/models/service-unit';
-import { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import { Dispatch, Fragment, SetStateAction, useCallback, useState } from 'react';
 import ServiceSongUnitView from './ServiceSongUnitView';
 import ServiceConfig from './ServiceConfig';
 import { deleteService } from '@/app/services/[service]/actions';
@@ -35,7 +35,7 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
         <BackArrow href="/services" />
         <div className="flex ml-4 gap-2 flex-grow justify-between items-center">
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-none">{service.title}</span>
+            <span className="font-bold text-lg leading-none">{service.humanReadableTitle}</span>
             {service.worshipLeader && <span className="text-sm">{service.worshipLeader}</span>}
           </div>
           <div className="flex gap-2">
@@ -57,11 +57,11 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
           {units.map((unit, index) => {
             if (unit) {
               return (
-                <>
+                <Fragment key={index}>
                   {unit.type === 'SONG' ? (
                     <ServiceSongUnitView unit={unit as ServiceSongUnit} columns={columns} />
                   ) : null}
-                </>
+                </Fragment>
               );
             }
             return 'ERROR';

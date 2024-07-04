@@ -3,7 +3,7 @@ import FormField from '@/components/FormField';
 import FormLabel from '@/components/FormLabel';
 import TextInput from '@/components/TextInput';
 import messages from '@/i18n/messages';
-import { getDefaultTitle, Service } from '@/models/service';
+import { Service } from '@/models/service';
 import { ChangeEvent, useState } from 'react';
 
 type HeaderFormProps = {
@@ -43,7 +43,7 @@ export default function HeaderForm({ service, updateService }: HeaderFormProps) 
           id="title"
           placeholder={messages.serviceData.titlePlaceholder}
           onChange={handleChangeTitle}
-          defaultValue={title || getDefaultTitle(worshipLeader, date)}
+          defaultValue={title}
         />
       </FormField>
     </div>

@@ -4,10 +4,11 @@ import PlusIcon from '@/components/icons/PlusIcon';
 import { retrieveServices } from '@/database/service';
 import PageHeader from '@/fragments/PageHeader';
 import ServiceList from '@/fragments/ServiceList';
-import { cache } from 'react';
+
+export const dynamic = 'force-dynamic';
 
 export default async function ServiceListPage() {
-  const services = await cache(() => retrieveServices({}))();
+  const services = await retrieveServices({});
 
   return (
     <>

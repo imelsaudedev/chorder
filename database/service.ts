@@ -1,11 +1,11 @@
-import { getDefaultTitle, SerializedService, Service } from '@/models/service';
+import { SerializedService, Service } from '@/models/service';
 import { deserializers, SerializedServiceUnit, ServiceSongUnit, ServiceUnit } from '@/models/service-unit';
 import { mapSongsBySlug, Song } from '@/models/song';
 import { SerializedSongUnit, SongUnit } from '@/models/song-unit';
+import { Filter } from 'mongodb';
 import { DBData, getDB } from './client';
 import { getAvailableSlug, saveSlug } from './slug';
 import { retrieveSongsBySlug, saveSong } from './song';
-import { Filter } from 'mongodb';
 
 type SerializedDBServiceSongUnit = {
   type: 'DB_SONG';
@@ -133,17 +133,13 @@ export async function saveService(service: Service): Promise<Service> {
   const modifiedSongs = await extractSongs(service, dbData);
   replaceDBSongUnitInService(service);
 
-  if (!service.title) {
-    service.title = getDefaultTitle(service.worshipLeader, service.date);
-  }
-
   const session = client.startSession();
   try {
     await session.withTransaction(async () => {
       if (service.slug) {
         await services.updateOne({ slug: service.slug }, { $set: service.serialize() });
       } else {
-        const slug = await getAvailableSlug(service.title, dbData);
+        const slug = await getAvailableSlug(service.dateForSlug, dbData);
         service.slug = slug;
         await services.insertOne(service.serialize());
         await saveSlug(slug);

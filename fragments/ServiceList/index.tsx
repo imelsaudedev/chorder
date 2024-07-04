@@ -5,7 +5,7 @@ type ServiceListProps = {
 };
 
 export default function ServiceList({ services }: ServiceListProps) {
-  services.sort((a, b) => a.date.getTime() - b.date.getTime());
+  services.sort((a, b) => b.date.getTime() - a.date.getTime());
 
   return (
     <>
@@ -13,7 +13,10 @@ export default function ServiceList({ services }: ServiceListProps) {
         {services.map((service) => (
           <div key={`${service.slug!}--section`}>
             <a href={`/services/${service.slug}`} className="flex flex-col pt-2 pb-3 border-b-gray-300 border-b-2">
-              <div className="font-bold text-lg leading-none">{service.title}</div>
+              <div className="text-lg leading-none">
+                {service.humanReadableTitle}
+                {service.worshipLeader && ` (${service.worshipLeader})`}
+              </div>
             </a>
           </div>
         ))}

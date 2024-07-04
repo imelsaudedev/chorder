@@ -7,3 +7,4 @@ You can run the scripts using the following command in the terminal:
     mongosh --file FILENAME
 
 - [`setup-schemas.js`](./setup-schemas.js): add schema validation to our collections.
+- [`reset-db.js`](./reset-db.js): delete all data from the database (schema and other configuration is kept).

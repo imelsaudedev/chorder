@@ -30,6 +30,10 @@ db.runCommand({
           bsonType: 'bool',
           description: "'isDeleted' must be a boolean and is required",
         },
+        legacyId: {
+          bsonType: ['int', 'null'],
+          description: "'legacyId' must be an integer",
+        },
         arrangements: {
           bsonType: 'array',
           description: "'arrangements' must be an array and is required",
@@ -101,6 +105,63 @@ db.runCommand({
   validationLevel: 'strict',
 });
 db.songs.createIndex({ slug: 1 }, { unique: true });
+
+db.runCommand({
+  collMod: 'services',
+  validator: {
+    $jsonSchema: {
+      bsonType: 'object',
+      title: 'Service Object Validation',
+      required: ['_id', 'slug', 'date', 'isDeleted', 'units'],
+      additionalProperties: false,
+      properties: {
+        _id: { bsonType: 'objectId' },
+        legacyId: {
+          bsonType: ['int', 'null'],
+          description: "'legacyId' must be an integer",
+        },
+        title: {
+          bsonType: ['string', 'null'],
+          description: "'title' must be a string",
+        },
+        slug: {
+          bsonType: 'string',
+          description: "'slug' must be a string and is required",
+        },
+        worshipLeader: {
+          bsonType: ['string', 'null'],
+          description: "'worshipLeader' must be a string",
+        },
+        date: {
+          bsonType: 'date',
+          description: "'date' must be a date and is required",
+        },
+        isDeleted: {
+          bsonType: 'bool',
+          description: "'isDeleted' must be a boolean and is required",
+        },
+        units: {
+          bsonType: 'array',
+          description: "'units' must be an array and is required",
+          minItems: 1,
+          items: {
+            bsonType: 'object',
+            additionalProperties: true,
+            required: ['type'],
+            properties: {
+              type: {
+                bsonType: 'string',
+                description: "'type' must be a string and is required",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  validationLevel: 'strict',
+});
+db.services.createIndex({ slug: 1 }, { unique: true });
 
 db.runCommand({
   collMod: 'slugs',
