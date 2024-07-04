@@ -1,6 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import messages from '@/i18n/messages';
-import { SongArrangement } from '@/models/song';
+import { SongArrangement } from '@/models/song-arrangement';
 import { Fragment } from 'react';
 
 type SongUnitContentViewProps = {
