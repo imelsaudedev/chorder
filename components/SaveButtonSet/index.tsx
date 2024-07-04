@@ -1,5 +1,6 @@
 import messages from '@/i18n/messages';
 import { Dispatch, MouseEventHandler, SetStateAction, useCallback } from 'react';
+import { Button } from '../ui/button';
 
 type SaveButtonSetProps = {
   canCancel: boolean;
@@ -18,10 +19,14 @@ export default function SaveButtonSet({ canCancel, setWriteMode, enabled = true 
 
   return (
     <div className="ml-auto flex gap-2">
-      {canCancel && <button onClick={handleCancelEdit}>{messages.messages.cancel}</button>}
-      <button className="bg-purple-600 hover:bg-purple-500 text-white px-4 rounded" type="submit" disabled={!enabled}>
+      {canCancel && (
+        <Button onClick={handleCancelEdit} variant="outline">
+          {messages.messages.cancel}
+        </Button>
+      )}
+      <Button type="submit" disabled={!enabled} variant="secondary">
         {messages.messages.save}
-      </button>
+      </Button>
     </div>
   );
 }

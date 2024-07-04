@@ -1,3 +1,4 @@
+import { config } from 'process';
 import { z } from 'zod';
 
 export const messagesSchema = z.object({
@@ -13,6 +14,10 @@ export const messagesSchema = z.object({
     service: z.string(),
     services: z.string(),
     pickDate: z.string(),
+    toggleConfig: z.string(),
+    columns: z.string(),
+    config: z.string(),
+    auto: z.string(),
   }),
   serviceData: z.object({
     title: z.string(),

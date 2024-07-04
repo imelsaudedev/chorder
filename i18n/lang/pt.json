@@ -10,7 +10,11 @@
     "songs": "Músicas",
     "service": "Liturgia",
     "services": "Liturgias",
-    "pickDate": "Escolha a data"
+    "pickDate": "Escolha a data",
+    "toggleConfig": "Mostrar ou esconder configurações",
+    "columns": "Colunas",
+    "config": "Configuração",
+    "auto": "Automático"
   },
   "serviceData": {
     "title": "Título",

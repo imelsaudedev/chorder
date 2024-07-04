@@ -1,5 +1,3 @@
-import BackArrow from '@/components/BackArrow';
-import Header from '@/components/Header';
 import Main from '@/components/Main';
 import SaveButtonSet from '@/components/SaveButtonSet';
 import { Service } from '@/models/service';
@@ -22,12 +20,11 @@ export default function ServiceFormPage({ service, setWriteMode }: SongFormProps
 
   return (
     <form action={submitService}>
-      <Header>
-        <BackArrow href="/services" />
+      <div>
         <HeaderForm service={service} updateService={updateService} />
         <SaveButtonSet canCancel={!service.isNew} enabled={service.isValid} setWriteMode={setWriteMode} />
-      </Header>
-      <Main className="pt-4">
+      </div>
+      <Main>
         <ServiceForm service={service} updateService={updateService} />
       </Main>
     </form>

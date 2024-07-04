@@ -1,15 +1,16 @@
-import EditIcon from "@/components/icons/EditIcon";
-import TrashIcon from "@/components/icons/TrashIcon";
-import { Button } from "@/components/ui/button";
-import { Dispatch, SetStateAction } from "react";
-import ColumnButtons from "./ColumnButtons";
+import EditIcon from '@/components/icons/EditIcon';
+import TrashIcon from '@/components/icons/TrashIcon';
+import { Button } from '@/components/ui/button';
+import { Dispatch, SetStateAction } from 'react';
+import ColumnButtons from './ColumnButtons';
+import { Label } from '@/components/ui/label';
+import messages from '@/i18n/messages';
 
 type SongConfigProps = {
   columns: number;
   setColumns: Dispatch<SetStateAction<number>>;
   deleteArrangementWithId: () => void;
   onEditButtonClick: () => void;
-  visible: boolean;
 };
 
 export default function SongConfig({
@@ -17,30 +18,26 @@ export default function SongConfig({
   setColumns,
   deleteArrangementWithId,
   onEditButtonClick,
-  visible,
 }: SongConfigProps) {
   return (
-    <div
-      className={`flex mb-4 bg-gray-200 p-2 rounded justify-between ${
-        visible ? "" : "hidden"
-      }`}
-    >
-      <div className="flex">
-        <ColumnButtons columns={columns} setColumns={setColumns} />
-      </div>
-      <div className="flex">
-        <form
-          action={deleteArrangementWithId}
-          className="grid place-content-center"
-        >
-          <Button type="submit" variant="ghost">
-            <TrashIcon />
+    <>
+      <h2 className="text-primary font-bold">{messages.messages.config}</h2>
+      <div className={`flex mb-4 border border-primary p-2 rounded justify-between items-center`}>
+        <div className="">
+          <Label htmlFor="column-count">{messages.messages.columns}</Label>
+          <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={onEditButtonClick} variant="default">
+            <EditIcon />
           </Button>
-        </form>
-        <Button onClick={onEditButtonClick} variant="ghost">
-          <EditIcon />
-        </Button>
+          <form action={deleteArrangementWithId} className="grid place-content-center">
+            <Button type="submit" variant="destructive">
+              <TrashIcon />
+            </Button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

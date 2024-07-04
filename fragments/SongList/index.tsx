@@ -1,4 +1,5 @@
 import { groupSongsByFirstLetter, Song } from '@/models/song';
+import Link from 'next/link';
 import { Fragment, ReactNode } from 'react';
 
 type SongListProps = {
@@ -15,20 +16,21 @@ export default function SongList({ songs, initialsStyle = 'grid', onSelected }: 
   existingInitials.sort();
 
   let sectionStyle = {};
-  let initialsTitleClassName = 'text-xl md:text-2xl font-bold bg-purple-400 text-white p-2 text-center';
+  let initialsTitleClassName =
+    'text-xl md:text-2xl font-bold bg-secondary text-secondary-foreground text-white p-2 text-center';
   if (initialsStyle === 'grid') {
     sectionStyle = { display: 'grid', gridTemplateColumns: 'auto 1fr' };
-    initialsTitleClassName = 'text-4xl md:text-9xl col-span-2 md:col-span-1 pr-6 text-purple-400 text-center';
+    initialsTitleClassName = 'text-4xl md:text-9xl col-span-2 md:col-span-1 pr-6 text-secondary text-center';
   }
 
   return (
     <>
       <nav className="mb-4">
         {allInitials.map((initial) => {
-          const className = 'text-xl px-2';
+          const className = 'text-xl px-2 text-primary';
           if (existingInitials.indexOf(initial) < 0)
             return (
-              <span key={`link-to--${initial}`} className={`${className} text-gray-300`}>
+              <span key={`link-to--${initial}`} className={`${className} text-muted`}>
                 {initial.toUpperCase()}
               </span>
             );
@@ -58,8 +60,8 @@ export default function SongList({ songs, initialsStyle = 'grid', onSelected }: 
 
                   return (
                     <AnchorOrButton song={song} onSelected={onSelected} key={`song-${song.slug}`}>
-                      <div className="font-bold text-lg leading-none">{song.title}</div>
-                      {song.artist && <div className="text-sm text-gray-400 leading-tight mb-1">{song.artist}</div>}
+                      <div className="font-bold text-lg leading-none text-primary">{song.title}</div>
+                      {song.artist && <div className="text-sm text-muted leading-tight mb-1">{song.artist}</div>}
                       {firstLines.map((line, idx) => (
                         <p className="leading-tight" key={`line-${idx}`}>
                           {line}
@@ -96,8 +98,8 @@ function AnchorOrButton({ song, onSelected, children }: AnchorOrButtonProps) {
     );
   }
   return (
-    <a href={`/songs/${song.slug}`} className="flex flex-col pt-2 pb-3 border-b-gray-300 border-b-2">
+    <Link href={`/songs/${song.slug}`} className="flex flex-col pt-2 pb-3 border-b-gray-300 border-b-2">
       {children}
-    </a>
+    </Link>
   );
 }

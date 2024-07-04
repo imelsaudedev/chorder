@@ -1,6 +1,8 @@
 import ChordProLine from '@/components/ChordProLine';
 import { SongUnitType } from '@/models/song-unit';
 import { Line } from 'chordsheetjs';
+import dynamic from 'next/dynamic';
+import { useEffect, useRef, useState } from 'react';
 
 type ColumnViewerProps = {
   columns: number;
@@ -16,7 +18,33 @@ type LineData = {
   isLast: boolean;
 };
 
-export default function ColumnViewer({ columns, lineData, transpose, originalKey }: ColumnViewerProps) {
+export default function ColumnViewer({ columns: columnConfig, lineData, transpose, originalKey }: ColumnViewerProps) {
+  const container = useRef<HTMLDivElement>(null);
+  const [columns, setColumns] = useState(columnConfig);
+  const [containerWidth, setContainerWidth] = useState(630);
+  useEffect(() => {
+    if (columnConfig === 0) {
+      if (containerWidth < 640) {
+        setColumns(1);
+      } else if (containerWidth < 1024) {
+        setColumns(2);
+      } else if (containerWidth < 1280) {
+        setColumns(3);
+      } else {
+        setColumns(4);
+      }
+    } else {
+      setColumns(columnConfig);
+    }
+  }, [columnConfig, containerWidth]);
+
+  const ResizeObserver = dynamic(() => import('./ResizeObserver'), {
+    ssr: false,
+  });
+  const handleResize = (width: number, height: number) => {
+    setContainerWidth(width);
+  };
+
   let gridCols;
   if (columns <= 1) {
     gridCols = 'grid-cols-1';
@@ -33,7 +61,8 @@ export default function ColumnViewer({ columns, lineData, transpose, originalKey
   const className = `grid ${gridCols} gap-4`;
 
   return (
-    <div className={className}>
+    <div ref={container} className={className}>
+      <ResizeObserver target={container} onResize={handleResize} />
       {Array.from(Array(columns).keys()).map((i) => {
         const linesPerColumn = Math.ceil(lineData.length / columns);
         const colData = lineData.slice(i * linesPerColumn, Math.min((i + 1) * linesPerColumn, lineData.length));

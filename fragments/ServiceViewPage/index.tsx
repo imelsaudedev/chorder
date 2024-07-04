@@ -1,5 +1,3 @@
-import BackArrow from '@/components/BackArrow';
-import Header from '@/components/Header';
 import ConfigIcon from '@/components/icons/ConfigIcon';
 import Main from '@/components/Main';
 import { Button } from '@/components/ui/button';
@@ -31,8 +29,7 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
 
   return (
     <>
-      <Header>
-        <BackArrow href="/services" />
+      <div>
         <div className="flex ml-4 gap-2 flex-grow justify-between items-center">
           <div className="flex flex-col">
             <span className="font-bold text-lg leading-none">{service.humanReadableTitle}</span>
@@ -44,8 +41,8 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
             </Button>
           </div>
         </div>
-      </Header>
-      <Main className="pt-4">
+      </div>
+      <Main>
         <ServiceConfig
           columns={columns}
           setColumns={setColumns}

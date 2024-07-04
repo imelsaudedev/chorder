@@ -1,12 +1,21 @@
 import { PostSongAction } from '@/app/songs/[song]/actions';
-import BackArrow from '@/components/BackArrow';
-import Header from '@/components/Header';
 import Main from '@/components/Main';
 import SaveButtonSet from '@/components/SaveButtonSet';
+import { Form } from '@/components/ui/form';
 import { Song } from '@/models/song';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Dispatch, SetStateAction, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import ArrangementForm from './ArrangementForm';
-import HeaderForm from './HeaderForm';
+import InfoForm from './InfoForm';
+import { Separator } from '@/components/ui/separator';
+
+const formSchema = z.object({
+  title: z.string().min(2),
+  artist: z.string().optional(),
+  key: z.string().optional(),
+});
 
 type ArrangementFormPageProps = {
   song: Song;
@@ -17,21 +26,35 @@ type ArrangementFormPageProps = {
 export default function ArrangementFormPage({ song, postSong, setWriteMode }: ArrangementFormPageProps) {
   const arrangement = song.getOrCreateCurrentArrangement();
   const [serializedSong, setSerializedSong] = useState(song.serialize());
-  const submitSong = postSong.bind(null, serializedSong);
   const updateSong = () => {
     setSerializedSong(song.serialize());
   };
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: song.title,
+      artist: song.artist || '',
+      key: arrangement.key,
+    },
+  });
+
+  async function onSubmit() {
+    await postSong(serializedSong);
+  }
+
   return (
-    <form action={submitSong}>
-      <Header>
-        <BackArrow href="/songs" />
-        <HeaderForm song={song} updateSong={updateSong} />
-        <SaveButtonSet canCancel={!arrangement.isNew} setWriteMode={setWriteMode} enabled={song.isValid} />
-      </Header>
-      <Main className="pt-4">
-        <ArrangementForm arrangement={arrangement} updateSong={updateSong} />
-      </Main>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="flex flex-col-reverse md:flex-row px-4 gap-4">
+          <InfoForm song={song} updateSong={updateSong} form={form} />
+          <SaveButtonSet canCancel={!arrangement.isNew} setWriteMode={setWriteMode} enabled={song.isValid} />
+        </div>
+        <Separator className="my-4" />
+        <Main>
+          <ArrangementForm arrangement={arrangement} updateSong={updateSong} />
+        </Main>
+      </form>
+    </Form>
   );
 }

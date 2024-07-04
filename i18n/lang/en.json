@@ -10,7 +10,11 @@
     "songs": "Songs",
     "service": "Service",
     "services": "Services",
-    "pickDate": "Pick a date"
+    "pickDate": "Pick a date",
+    "toggleConfig": "Toggle configuration",
+    "columns": "Columns",
+    "config": "Configuration",
+    "auto": "Automatic"
   },
   "serviceData": {
     "title": "Title",

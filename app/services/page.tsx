@@ -1,8 +1,8 @@
 import AnchorButton from '@/components/AnchorButton';
+import Header from '@/components/Header';
 import Main from '@/components/Main';
 import PlusIcon from '@/components/icons/PlusIcon';
 import { retrieveServices } from '@/database/service';
-import PageHeader from '@/fragments/PageHeader';
 import ServiceList from '@/fragments/ServiceList';
 
 export const dynamic = 'force-dynamic';
@@ -12,8 +12,8 @@ export default async function ServiceListPage() {
 
   return (
     <>
-      <PageHeader currentPage="services" />
-      <Main className="pt-4">
+      <Header currentPage="services" />
+      <Main>
         <ServiceList services={services} />
         <AnchorButton
           additionalClasses={[
