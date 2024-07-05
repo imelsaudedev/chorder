@@ -1,6 +1,6 @@
 import { groupSongsByFirstLetter, Song } from '@/models/song';
 import Link from 'next/link';
-import { Fragment, ReactNode } from 'react';
+import { Fragment, ReactNode, useMemo } from 'react';
 
 type SongListProps = {
   songs: Song[];
@@ -9,11 +9,23 @@ type SongListProps = {
 };
 
 export default function SongList({ songs, initialsStyle = 'grid', onSelected }: SongListProps) {
-  const songsByFirstLetter = groupSongsByFirstLetter(songs);
-  const existingInitials = Array.from(songsByFirstLetter.keys());
-  const allInitials = Array.from(new Set([...Array.from('abcdefghijklmnopqrstuvwxyz'), ...existingInitials]));
-  allInitials.sort();
-  existingInitials.sort();
+  const songsByFirstLetter = useMemo(() => {
+    const byFirstLetter = groupSongsByFirstLetter(songs);
+    byFirstLetter.forEach((songs) =>
+      songs.sort((a, b) => a.title.toLocaleLowerCase().localeCompare(b.title.toLocaleLowerCase()))
+    );
+    return byFirstLetter;
+  }, [songs]);
+  const existingInitials = useMemo(() => {
+    const initials = Array.from(songsByFirstLetter.keys());
+    initials.sort();
+    return initials;
+  }, [songsByFirstLetter]);
+  const allInitials = useMemo(() => {
+    const initials = Array.from(new Set([...Array.from('abcdefghijklmnopqrstuvwxyz'), ...existingInitials]));
+    initials.sort();
+    return initials;
+  }, [existingInitials]);
 
   let sectionStyle = {};
   let initialsTitleClassName =

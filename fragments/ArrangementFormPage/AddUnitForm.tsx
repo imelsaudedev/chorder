@@ -4,6 +4,8 @@ import UnitCircle from '@/components/UnitCircle';
 import Or from '@/components/Or';
 import PlusIcon from '@/components/icons/PlusIcon';
 import { SongUnit } from '@/models/song-unit';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 export default function AddUnitForm({
   units,
@@ -28,7 +30,7 @@ export default function AddUnitForm({
   };
 
   return (
-    <div className={`border rounded-lg break-inside-avoid px-2 py-2 mb-2 bg-purple-100 border-purple-400`}>
+    <div className={`rounded-lg break-inside-avoid px-2 py-2 mb-2 border border-primary`}>
       {units.length > 0 && (
         <>
           <label className="font-bold text-sm">{messages.songForm.addExistingUnit}</label>
@@ -47,16 +49,17 @@ export default function AddUnitForm({
         </>
       )}
       <div className="group flex items-center gap-2 w-full cursor-pointer" onClick={handleAddNewUnit}>
-        <button
-          className="h-8 w-8 text-sm shadow-lg inline-flex items-center justify-center bg-none rounded-full bg-purple-600 text-purple-50 group-hover:bg-purple-500 group-hover:shadow-xl"
+        <Button
+          className="h-8 w-8 rounded-full text-sm grid items-center p-0"
+          variant="secondary"
           id="new-unit"
           aria-label={messages.songForm.newUnit}
         >
           <PlusIcon />
-        </button>
-        <label htmlFor="new-unit" className="flex-grow text-sm font-bold cursor-pointer">
+        </Button>
+        <Label htmlFor="new-unit" className="flex-grow text-sm font-bold cursor-pointer">
           {messages.songForm.newUnit}
-        </label>
+        </Label>
       </div>
     </div>
   );

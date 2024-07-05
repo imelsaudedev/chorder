@@ -7,17 +7,16 @@ import { SongUnit } from '@/models/song-unit';
 
 type ArrangementFormProps = {
   arrangement: SongArrangement;
-  updateSong: () => void;
 };
 
-export default function ArrangementForm({ arrangement, updateSong }: ArrangementFormProps) {
+export default function ArrangementForm({ arrangement }: ArrangementFormProps) {
   const [songUnitMap, setSongUnitMap] = useState(arrangement.songUnitMap);
-  const moveUnitUp = useMoveUnitUpCallback(arrangement, setSongUnitMap, updateSong);
-  const moveUnitDown = useMoveUnitDownCallback(arrangement, setSongUnitMap, updateSong);
-  const buildUpdateUnitHandler = useBuildUpdateUnitHandlerCallback(arrangement, setSongUnitMap, updateSong);
-  const buildRemoveUnitHandler = useBuildRemoveUnitHandlerCallback(arrangement, setSongUnitMap, updateSong);
-  const createUnit = useCreateUnitCallback(arrangement, setSongUnitMap, updateSong);
-  const addUnit = useAddUnitCallback(arrangement, setSongUnitMap, updateSong);
+  const moveUnitUp = useMoveUnitUpCallback(arrangement, setSongUnitMap);
+  const moveUnitDown = useMoveUnitDownCallback(arrangement, setSongUnitMap);
+  const buildUpdateUnitHandler = useBuildUpdateUnitHandlerCallback(arrangement, setSongUnitMap);
+  const buildRemoveUnitHandler = useBuildRemoveUnitHandlerCallback(arrangement, setSongUnitMap);
+  const createUnit = useCreateUnitCallback(arrangement, setSongUnitMap);
+  const addUnit = useAddUnitCallback(arrangement, setSongUnitMap);
 
   return (
     <section className="max-w-lg mx-auto">
@@ -52,87 +51,63 @@ export default function ArrangementForm({ arrangement, updateSong }: Arrangement
 
 function useBuildRemoveUnitHandlerCallback(
   arrangement: SongArrangement,
-  setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>,
-  updateSong: () => void
+  setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>
 ) {
   return useCallback(
     (index: number) => () => {
       arrangement.removeUnitAtMapIndex(index);
       setSongUnitMap([...arrangement.songUnitMap]);
-      updateSong();
     },
-    [arrangement, setSongUnitMap, updateSong]
+    [arrangement, setSongUnitMap]
   );
 }
 
 function useBuildUpdateUnitHandlerCallback(
   arrangement: SongArrangement,
-  setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>,
-  updateSong: () => void
+  setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>
 ) {
   return useCallback(
     (index: number) => (unit: SongUnit) => {
       arrangement.updateUnitAtMapIndex(index, unit);
       setSongUnitMap([...arrangement.songUnitMap]);
-      updateSong();
     },
-    [arrangement, setSongUnitMap, updateSong]
+    [arrangement, setSongUnitMap]
   );
 }
 
-function useMoveUnitDownCallback(
-  arrangement: SongArrangement,
-  setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>,
-  updateSong: () => void
-) {
+function useMoveUnitDownCallback(arrangement: SongArrangement, setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>) {
   return useCallback(
     (index: number) => {
       arrangement.moveUnitDown(index);
       setSongUnitMap([...arrangement.songUnitMap]);
-      updateSong();
     },
-    [arrangement, setSongUnitMap, updateSong]
+    [arrangement, setSongUnitMap]
   );
 }
 
-function useMoveUnitUpCallback(
-  arrangement: SongArrangement,
-  setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>,
-  updateSong: () => void
-) {
+function useMoveUnitUpCallback(arrangement: SongArrangement, setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>) {
   return useCallback(
     (index: number) => {
       arrangement.moveUnitUp(index);
       setSongUnitMap([...arrangement.songUnitMap]);
-      updateSong();
     },
-    [arrangement, setSongUnitMap, updateSong]
+    [arrangement, setSongUnitMap]
   );
 }
 
-function useCreateUnitCallback(
-  arrangement: SongArrangement,
-  setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>,
-  updateSong: () => void
-) {
+function useCreateUnitCallback(arrangement: SongArrangement, setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>) {
   return useCallback(() => {
     arrangement.createUnit(true);
     setSongUnitMap([...arrangement.songUnitMap]);
-    updateSong();
-  }, [arrangement, setSongUnitMap, updateSong]);
+  }, [arrangement, setSongUnitMap]);
 }
 
-function useAddUnitCallback(
-  arrangement: SongArrangement,
-  setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>,
-  updateSong: () => void
-) {
+function useAddUnitCallback(arrangement: SongArrangement, setSongUnitMap: Dispatch<SetStateAction<SongUnit[]>>) {
   return useCallback(
     (unit: SongUnit) => {
       arrangement.addUnitToMap(unit);
       setSongUnitMap([...arrangement.songUnitMap]);
-      updateSong();
     },
-    [arrangement, setSongUnitMap, updateSong]
+    [arrangement, setSongUnitMap]
   );
 }

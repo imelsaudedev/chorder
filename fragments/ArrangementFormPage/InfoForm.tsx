@@ -2,12 +2,10 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import messages from '@/i18n/messages';
 import { Song } from '@/models/song';
-import { ChangeEvent, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
 type InfoFormProps = {
   song: Song;
-  updateSong: () => void;
   form: UseFormReturn<{
     title: string;
     artist?: string | undefined;
@@ -15,33 +13,7 @@ type InfoFormProps = {
   }>;
 };
 
-export default function InfoForm({ song, updateSong, form }: InfoFormProps) {
-  const arrangement = song.getOrCreateCurrentArrangement();
-
-  const [title, setTitle] = useState(song.title);
-  const handleChangeTitle = (event: ChangeEvent<HTMLInputElement>) => {
-    const newTitle = event.target.value;
-    setTitle(newTitle);
-    song.title = newTitle;
-    updateSong();
-  };
-
-  const [artist, setArtist] = useState(song.artist);
-  const handleChangeArtist = (event: ChangeEvent<HTMLInputElement>) => {
-    const newArtist = event.target.value;
-    setArtist(newArtist);
-    song.artist = newArtist;
-    updateSong();
-  };
-
-  const [songKey, setSongKey] = useState(arrangement.key);
-  const handleSongKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const newKey = event.target.value;
-    setSongKey(newKey);
-    arrangement.key = newKey;
-    updateSong();
-  };
-
+export default function InfoForm({ song, form }: InfoFormProps) {
   return (
     <div className="flex-grow space-y-2">
       <FormField
@@ -51,7 +23,7 @@ export default function InfoForm({ song, updateSong, form }: InfoFormProps) {
           <FormItem className="space-y-0">
             <FormLabel className="text-secondary mb-0">{messages.songData.title}</FormLabel>
             <FormControl>
-              <Input placeholder={messages.songData.titlePlaceholder} {...field} onChangeCapture={handleChangeTitle} />
+              <Input placeholder={messages.songData.titlePlaceholder} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -64,11 +36,7 @@ export default function InfoForm({ song, updateSong, form }: InfoFormProps) {
           <FormItem className="space-y-0">
             <FormLabel className="text-secondary">{messages.songData.artist}</FormLabel>
             <FormControl>
-              <Input
-                placeholder={messages.songData.artistPlaceholder}
-                {...field}
-                onChangeCapture={handleChangeArtist}
-              />
+              <Input placeholder={messages.songData.artistPlaceholder} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -81,7 +49,7 @@ export default function InfoForm({ song, updateSong, form }: InfoFormProps) {
           <FormItem className="space-y-0">
             <FormLabel className="text-secondary">{messages.songData.key}</FormLabel>
             <FormControl>
-              <Input placeholder={messages.songData.keyPlaceholder} {...field} onChangeCapture={handleSongKeyChange} />
+              <Input placeholder={messages.songData.keyPlaceholder} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
