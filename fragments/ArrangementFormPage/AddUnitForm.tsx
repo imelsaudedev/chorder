@@ -1,30 +1,28 @@
-import { MouseEventHandler } from 'react';
-import messages, { format } from '@/i18n/messages';
-import UnitCircle from '@/components/UnitCircle';
 import Or from '@/components/Or';
+import UnitCircle from '@/components/UnitCircle';
 import PlusIcon from '@/components/icons/PlusIcon';
-import { SongUnit } from '@/models/song-unit';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import messages, { format } from '@/i18n/messages';
+import { SongUnit } from '@/models/song-unit';
+import { MouseEventHandler } from 'react';
 
-export default function AddUnitForm({
-  units,
-  onCreateUnit,
-  onAddExistingUnit,
-}: {
+type AddUnitFormProps = {
   units: SongUnit[];
   onCreateUnit: () => void;
-  onAddExistingUnit: (unit: SongUnit) => void;
-}) {
+  onAddExistingUnit: (internalId: number) => void;
+};
+
+export default function AddUnitForm({ units, onCreateUnit, onAddExistingUnit }: AddUnitFormProps) {
   const handleAddNewUnit: MouseEventHandler = (event) => {
     event.preventDefault();
     onCreateUnit();
   };
 
-  const createAddExistingUnitHandler = (unit: SongUnit) => {
+  const createAddExistingUnitHandler = (internalId: number) => {
     const handler: MouseEventHandler = (event) => {
       event.preventDefault();
-      onAddExistingUnit(unit);
+      onAddExistingUnit(internalId);
     };
     return handler;
   };
@@ -38,7 +36,7 @@ export default function AddUnitForm({
             {units.map((unit) => (
               <button
                 key={`${unit.internalId}`}
-                onClick={createAddExistingUnitHandler(unit)}
+                onClick={createAddExistingUnitHandler(unit.internalId)}
                 aria-label={format(messages.songForm.addUnitWithLabel, { label: `${unit.type}${unit.typeIdx}` })}
               >
                 <UnitCircle unit={unit} />

@@ -1,5 +1,6 @@
-import { SerializedSongUnit, SongUnit } from './song-unit';
 import { getChords, getKeyFromChords, transposeChord } from '@/chopro/music';
+import { SongUnit, SongUnitType, unitsAreEqual } from './song-unit';
+import { SerializedSongUnit } from './service-unit';
 
 export class SongArrangement {
   private _key: string | undefined;
@@ -47,7 +48,7 @@ export class SongArrangement {
   serialize(): SerializedSongArrangement {
     return {
       key: this.key,
-      units: this.units.map((unit) => unit.serialize()),
+      units: this.units,
       songMap: this.songMap,
       isDefault: this.isDefault,
       isDeleted: this.isDeleted,
@@ -57,11 +58,7 @@ export class SongArrangement {
   }
 
   static deserialize(serialized: SerializedSongArrangement): SongArrangement {
-    const units = serialized.units.map((unit) => SongUnit.deserialize(unit));
-    return new SongArrangement({
-      ...serialized,
-      units,
-    });
+    return new SongArrangement(serialized);
   }
 
   forceSetUnits(units: SongUnit[]) {
@@ -99,6 +96,7 @@ export class SongArrangement {
   }
 
   get units() {
+    updateUnitTypeIndices(this._units);
     return [...this._units];
   }
 
@@ -113,15 +111,20 @@ export class SongArrangement {
   }
 
   get isValid() {
-    return this.units.length > 0 && this.units.every((unit) => unit.isValid);
+    return this.units.length > 0;
   }
 
   get lyrics() {
-    return this.units.map((unit) => unit.lyrics).join('\n');
+    // TODO FIX THIS
+    return this.units.map((unit) => unit.content).join('\n');
   }
 
   createUnit(addToMap: boolean) {
-    const newUnit = new SongUnit({ internalId: this.lastUnitId + 1 });
+    const newUnit: SongUnit = {
+      internalId: this.lastUnitId + 1,
+      content: '',
+      type: 'BLOCK',
+    };
     this._units.push(newUnit);
     this.lastUnitId = newUnit.internalId;
 
@@ -186,7 +189,7 @@ export class SongArrangement {
     this.units.forEach((thisUnit) => {
       const otherUnit = otherArrangement.units.find((unit) => unit.internalId === thisUnit.internalId);
       const unitExistsInOther = !!otherUnit;
-      if (unitExistsInOther && !thisUnit.equals(otherUnit)) {
+      if (unitExistsInOther && !unitsAreEqual(thisUnit, otherUnit)) {
         const newUnit = this.createUnit(false);
         newUnit.content = thisUnit.content;
         newUnit.type = thisUnit.type;
@@ -210,3 +213,11 @@ export type SerializedSongArrangement = {
   lastUnitId: number;
   semitoneTranspose: number;
 };
+
+function updateUnitTypeIndices(newUnits: SongUnit[]) {
+  const countByType = new Map<SongUnitType, number>();
+  newUnits.forEach((unit) => {
+    countByType.set(unit.type, (countByType.get(unit.type) || 0) + 1);
+    unit.typeIdx = countByType.get(unit.type);
+  });
+}

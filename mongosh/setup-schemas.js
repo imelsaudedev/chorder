@@ -68,6 +68,10 @@ db.runCommand({
                       bsonType: 'int',
                       description: "'internalId' must be an integer and is required",
                     },
+                    typeIdx: {
+                      bsonType: 'int',
+                      description: "'typeIdx' must be an integer",
+                    },
                   },
                 },
               },

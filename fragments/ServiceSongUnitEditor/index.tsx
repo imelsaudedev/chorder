@@ -1,6 +1,6 @@
 import { ServiceSongUnit } from '@/models/service-unit';
 import { MouseEventHandler, useCallback, useState } from 'react';
-import ArrangementForm from '../ArrangementFormPage/ArrangementForm';
+import UnitListForm from '../ArrangementFormPage/UnitListForm';
 import ServiceSongUnitEditorHeader from './ServiceSongUnitEditorHeader';
 import SongUnitContentView from './SongUnitContentView';
 
@@ -37,7 +37,7 @@ export default function ServiceSongUnitEditor({
         removeUnit={removeUnit}
       />
       <div className="mt-8">
-        {editMode && <ArrangementForm arrangement={arrangement} updateSong={updateSong} />}
+        {editMode && <UnitListForm arrangement={arrangement} updateSong={updateSong} />}
         {!editMode && <SongUnitContentView arrangement={arrangement} />}
       </div>
     </div>

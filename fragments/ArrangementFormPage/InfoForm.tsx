@@ -1,19 +1,14 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import messages from '@/i18n/messages';
-import { Song } from '@/models/song';
 import { UseFormReturn } from 'react-hook-form';
+import { ArrangementFormSchema } from './arrangement-form-schema';
 
 type InfoFormProps = {
-  song: Song;
-  form: UseFormReturn<{
-    title: string;
-    artist?: string | undefined;
-    key?: string | undefined;
-  }>;
+  form: UseFormReturn<ArrangementFormSchema>;
 };
 
-export default function InfoForm({ song, form }: InfoFormProps) {
+export default function InfoForm({ form }: InfoFormProps) {
   return (
     <div className="flex-grow space-y-2">
       <FormField

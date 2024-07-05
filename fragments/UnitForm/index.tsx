@@ -9,39 +9,55 @@ import { Button } from '@/components/ui/button';
 import { unitTypeColorClasses } from '@/components/unit-colors';
 import messages from '@/i18n/messages';
 import { SongUnit, SongUnitType } from '@/models/song-unit';
-import { ChangeEvent, MouseEvent, useState } from 'react';
+import { ChangeEvent, MouseEvent, useCallback, useId, useState } from 'react';
 
-export default function UnitForm({
-  unit,
-  index,
-  setUnit,
-  removeUnit,
-  className,
-}: {
+type UnitFormProps = {
   unit: SongUnit;
-  index: number;
-  setUnit: (unit: SongUnit) => void;
   removeUnit: () => void;
+  onChangeUnit: (set: UnitSetField) => void;
   className?: string;
-}) {
+};
+
+export type UnitSetField =
+  | {
+      field: 'content';
+      value: string;
+    }
+  | {
+      field: 'type';
+      value: SongUnitType;
+    }
+  | {
+      field: 'internalId';
+      value: number;
+    };
+
+export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: UnitFormProps) {
   const colorClasses = unitTypeColorClasses[unit.type];
   const [preview, setPreview] = useState(false);
 
-  const handleRemoveUnit = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    removeUnit();
-  };
+  const unitTypeId = useId();
+  const contentId = useId();
+  const showPreviewId = useId();
 
-  const handleChangeType = (event: ChangeEvent<HTMLSelectElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setUnit(new SongUnit({ ...unit.serialize(), type: event.target.value as SongUnitType }));
-  };
+  const handleRemoveUnit = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      removeUnit();
+    },
+    [removeUnit]
+  );
+
+  const handleChangeUnitType = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      onChangeUnit({ field: 'type', value: event.target.value as SongUnitType });
+    },
+    [onChangeUnit]
+  );
 
   const handleChangeChordpro = (event: ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    setUnit(new SongUnit({ ...unit.serialize(), content: event.target.value }));
+    // event.preventDefault();
+    onChangeUnit({ field: 'content', value: event.target.value });
   };
 
   const handlePreviewChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -73,22 +89,22 @@ export default function UnitForm({
       </div>
 
       <FormField>
-        <FormLabel htmlFor={`unit-type-${index}`}>{messages.unitData.unitType}</FormLabel>
+        <FormLabel htmlFor={unitTypeId}>{messages.unitData.unitType}</FormLabel>
         <Combobox
           value={unit.type}
           className="flex-grow"
-          onChange={handleChangeType}
+          onChange={handleChangeUnitType}
           options={messages.unitTypes}
-          id={`unit-type-${index}`}
+          id={unitTypeId}
         />
       </FormField>
 
       <FormField className="flex-grow">
         <div className="flex justify-between">
-          <FormLabel htmlFor={`title-${index}`}>{messages.unitData.content}</FormLabel>
+          <FormLabel htmlFor={contentId}>{messages.unitData.content}</FormLabel>
           <div className="flex gap-1 items-center text-sm">
-            <label htmlFor={`preview-${index}`}>{messages.messages.preview}</label>
-            <input id={`preview-${index}`} type="checkbox" onChange={handlePreviewChange} checked={preview} />
+            <label htmlFor={showPreviewId}>{messages.messages.preview}</label>
+            <input id={showPreviewId} type="checkbox" onChange={handlePreviewChange} checked={preview} />
           </div>
         </div>
         {preview && (
@@ -98,7 +114,7 @@ export default function UnitForm({
         )}
         {!preview && (
           <TextInput
-            id={`content-${index}`}
+            id={contentId}
             className="resize-none flex-grow"
             placeholder={messages.unitData.contentPlaceholder}
             onChange={handleChangeChordpro}
