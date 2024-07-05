@@ -1,4 +1,4 @@
-import { updateUnitTypeIndices } from '@/models/song-arrangement';
+import { getInternalId2Unit, updateUnitTypeIndices } from '@/models/song-arrangement';
 import { SongUnit, SongUnitType } from '@/models/song-unit';
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
@@ -19,7 +19,7 @@ export default function useUnitList(
   appendToSongMap: (internalId: number) => void
 ): UnitListHook {
   const [units, setUnits] = useState(initialUnits);
-  const internalId2Unit = useMemo(() => new Map(units.map((u) => [u.internalId, u])), [units]);
+  const internalId2Unit = useMemo(() => getInternalId2Unit(units), [units]);
   const [lastUnitId, setLastUnitId] = useState(initialLastUnitId);
   const [isDirty, setIsDirty] = useState(false);
   const setToDirty = useCallback(() => setIsDirty(true), []);

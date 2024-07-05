@@ -3,15 +3,16 @@ import KeyButtonSet from '@/components/KeyButtonSet';
 import Main from '@/components/Main';
 import ConfigIcon from '@/components/icons/ConfigIcon';
 import { Button } from '@/components/ui/button';
-import { Dispatch, SetStateAction, useCallback, useState } from 'react';
-import ArrangementView from './ArrangementView';
-import SongConfig from './SongConfig';
-import { Song } from '@/models/song';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import messages from '@/i18n/messages';
+import { RequiredArrangement, SongWith } from '@/models/song';
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
+import ArrangementView from './ArrangementView';
+import SongConfig from './SongConfig';
+import { getSongUnitMap } from '@/models/song-arrangement';
 
 type ArrangementViewPageProps = {
-  song: Song;
+  song: SongWith<RequiredArrangement>;
   setWriteMode: Dispatch<SetStateAction<boolean>>;
   deleteArrangement: DeleteArrangementAction;
 };
@@ -25,8 +26,9 @@ export default function ArrangementViewPage({ song, setWriteMode, deleteArrangem
   }, [setWriteMode]);
 
   // TODO: MAYBE WE NEED A CONFIRMATION DIALOG FOR THIS?
-  const deleteArrangementWithId = deleteArrangement.bind(null, song.serialize(), song.currentArrangementId);
-  const arrangement = song.getOrCreateCurrentArrangement();
+  const deleteArrangementWithId = deleteArrangement.bind(null, song, song.currentArrangementId);
+  const arrangement = song.arrangement;
+  const songUnitMap = useMemo(() => getSongUnitMap(arrangement), [arrangement]);
 
   return (
     <Collapsible>
@@ -56,12 +58,7 @@ export default function ArrangementViewPage({ song, setWriteMode, deleteArrangem
             onEditButtonClick={handleEditButtonClick}
           />
         </CollapsibleContent>
-        <ArrangementView
-          columns={columns}
-          songUnitMap={arrangement.songUnitMap}
-          transpose={transpose}
-          songKey={arrangement.key}
-        />
+        <ArrangementView columns={columns} songUnitMap={songUnitMap} transpose={transpose} songKey={arrangement.key} />
       </Main>
     </Collapsible>
   );

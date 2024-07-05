@@ -1,119 +1,33 @@
-import { SerializedSongArrangement, SongArrangement } from './song-arrangement';
+import { SongArrangement } from './song-arrangement';
 
-export class Song {
+export type Song<ArrangementType = SongArrangement> = {
   title: string;
   slug?: string;
   artist: string | null;
+  lyrics?: string;
   isDeleted: boolean;
-  arrangements: SongArrangement[];
+  arrangement?: ArrangementType;
+  arrangements?: ArrangementType[];
   currentArrangementId?: number;
+};
 
-  constructor({
-    title,
-    slug,
-    artist,
-    arrangements,
-    isDeleted,
-  }: {
-    title?: string;
-    slug?: string;
-    artist?: string | null;
-    arrangements?: SongArrangement[];
-    isDeleted?: boolean;
-  }) {
-    this.title = title || '';
-    this.slug = slug;
-    this.artist = artist || null;
-    this.arrangements = arrangements || [];
-    this.isDeleted = isDeleted || false;
-  }
+export type SongWith<T> = Omit<Song, keyof T> & T;
 
-  get lyrics() {
-    return this.defaultArrangement?.lyrics || '';
-  }
-
-  get defaultArrangementId() {
-    return this.arrangements.findIndex((arrangement) => arrangement.isDefault);
-  }
-
-  get defaultArrangement() {
-    return this.arrangements[this.defaultArrangementId];
-  }
-
-  get currentArrangement(): SongArrangement | undefined {
-    if (
-      this.currentArrangementId === undefined ||
-      this.currentArrangementId < 0 ||
-      this.currentArrangementId >= this.arrangements.length
-    ) {
-      this.currentArrangementId = this.defaultArrangementId;
-      return this.defaultArrangement;
-    }
-    return this.arrangements[this.currentArrangementId];
-  }
-
-  get isValid() {
-    return this.title.trim().length > 0 && this.arrangements.length > 0 && !!this.currentArrangement?.isValid;
-  }
-
-  serialize(): SerializedSong {
-    return {
-      title: this.title,
-      slug: this.slug || '',
-      artist: this.artist,
-      lyrics: this.lyrics,
-      arrangements: this.arrangements.map((arrangement) => arrangement.serialize()),
-      isDeleted: this.isDeleted,
-    };
-  }
-
-  static deserialize(serialized: SerializedSong): Song {
-    return new Song({
-      ...serialized,
-      arrangements: serialized.arrangements.map((arrangement) => SongArrangement.deserialize(arrangement)),
-    });
-  }
-
-  createArrangement() {
-    const newArrangement = new SongArrangement({});
-    if (this.arrangements.length === 0) {
-      newArrangement.isDefault = true;
-      newArrangement.isNew = true;
-    }
-    this.arrangements.push(newArrangement);
-    this.currentArrangementId = this.arrangements.length - 1;
-  }
-
-  removeArrangement(arrangementId: number) {
-    const arrangement = this.arrangements[arrangementId];
-    if (!arrangement) return;
-    arrangement.isDeleted = true;
-    if (arrangement.isDefault) {
-      arrangement.isDefault = false;
-      const newDefault = this.arrangements.find((arrangement) => !arrangement.isDeleted);
-      if (newDefault) {
-        newDefault.isDefault = true;
-      } else {
-        this.isDeleted = true;
-      }
-    }
-  }
-
-  getOrCreateCurrentArrangement() {
-    if (!this.currentArrangement) {
-      this.createArrangement();
-    }
-    return this.currentArrangement!;
-  }
-}
-
-export type SerializedSong = {
-  title: string;
+export type RequiredSlug = {
   slug: string;
-  artist: string | null;
+};
+
+export type RequiredLyrics = {
   lyrics: string;
-  arrangements: SerializedSongArrangement[];
-  isDeleted: boolean;
+};
+
+export type RequiredArrangement<ArrangementType = SongArrangement> = {
+  arrangement: ArrangementType;
+  currentArrangementId: number;
+};
+
+export type RequiredArrangements<ArrangementType = SongArrangement> = {
+  arrangements: ArrangementType[];
 };
 
 export function groupSongsByFirstLetter(songs: Song[]): Map<string, Song[]> {
@@ -143,4 +57,23 @@ export function mapSongsBySlug(songs: Song[]): Map<string, Song> {
     acc.set(song.slug!, song);
     return acc;
   }, new Map<string, Song>());
+}
+
+export function removeArrangement(song: SongWith<RequiredArrangements>, arrangementId: number) {
+  const arrangement = song.arrangements[arrangementId];
+  if (!arrangement) return;
+  arrangement.isDeleted = true;
+  if (arrangement.isDefault) {
+    arrangement.isDefault = false;
+    const newDefault = song.arrangements.find((arrangement) => !arrangement.isDeleted);
+    if (newDefault) {
+      newDefault.isDefault = true;
+    } else {
+      song.isDeleted = true;
+    }
+  }
+}
+
+export function getDefaultArrangement(song: SongWith<RequiredArrangements>) {
+  return song.arrangements.find((arrangement) => arrangement.isDefault);
 }

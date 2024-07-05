@@ -18,7 +18,7 @@ export default function SaveButtonSet({ canCancel, setWriteMode, enabled = true 
   );
 
   return (
-    <div className="ml-auto flex gap-2">
+    <div className="flex justify-end gap-2">
       {canCancel && (
         <Button onClick={handleCancelEdit} variant="outline">
           {messages.messages.cancel}

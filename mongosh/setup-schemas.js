@@ -100,6 +100,10 @@ db.runCommand({
                 bsonType: 'int',
                 description: "'semitoneTranspose' must be an integer",
               },
+              isNew: {
+                bsonType: 'bool',
+                description: "'isNew' must be a boolean",
+              },
             },
           },
         },

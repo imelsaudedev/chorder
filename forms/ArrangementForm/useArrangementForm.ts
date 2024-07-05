@@ -1,17 +1,16 @@
-import { Song } from '@/models/song';
-import { SongArrangement } from '@/models/song-arrangement';
-import schema, { ArrangementFormSchema } from './schema';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import schema, { ArrangementFormSchema } from './schema';
+import { RequiredArrangement, SongWith } from '@/models/song';
 
-export function useArrangementForm(song: Song, arrangement: SongArrangement) {
+export function useArrangementForm(song: SongWith<RequiredArrangement>) {
   return useForm<ArrangementFormSchema>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: song.title,
       artist: song.artist || '',
-      key: arrangement.key,
-      songMap: arrangement.songMap.map((internalId) => ({ internalId })),
+      key: song.arrangement.key,
+      songMap: song.arrangement.songMap.map((internalId) => ({ internalId })),
     },
   });
 }

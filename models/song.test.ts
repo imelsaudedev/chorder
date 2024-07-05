@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { groupSongsByFirstLetter, Song } from '@/models/song';
+import { groupSongsByFirstLetter, removeArrangement, Song } from '@/models/song';
 import { SongUnit } from '@/models/song-unit';
 import { SongArrangement } from './song-arrangement';
 
@@ -73,7 +73,7 @@ describe('song', () => {
       title: 'Test Song',
       arrangements: [defaultArrangement, deletedArrangement, otherArrangement],
     });
-    song.removeArrangement(0);
+    removeArrangement(song, 0);
     expect(song.arrangements[0].isDeleted).toBe(true);
     expect(song.arrangements[1].isDeleted).toBe(true);
     expect(song.arrangements[2].isDeleted).toBe(false);
@@ -91,7 +91,7 @@ describe('song', () => {
       title: 'Test Song',
       arrangements: [deletedArrangement, otherArrangement, defaultArrangement],
     });
-    song.removeArrangement(1);
+    removeArrangement(song, 1);
     expect(song.arrangements[0].isDeleted).toBe(true);
     expect(song.arrangements[1].isDeleted).toBe(true);
     expect(song.arrangements[2].isDeleted).toBe(false);

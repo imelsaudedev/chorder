@@ -5,6 +5,12 @@ export type SongUnit = {
   typeIdx?: number;
 };
 
+export type SongUnitWith<T> = Omit<SongUnit, keyof T> & T;
+
+export type RequiredTypeIdx = {
+  typeIdx: number;
+};
+
 export type SongUnitType =
   | 'INTRO'
   | 'ENDING'
@@ -15,6 +21,14 @@ export type SongUnitType =
   | 'INTERLUDE'
   | 'SOLO'
   | 'BLOCK';
+
+export function createUnit({ internalId = -1 }: { internalId?: number }): SongUnit {
+  return {
+    content: '',
+    type: 'BLOCK',
+    internalId: internalId,
+  };
+}
 
 export function unitsAreEqual(unitA: SongUnit, unitB: SongUnit) {
   return unitA.content === unitB.content && unitA.type === unitB.type && unitA.internalId === unitB.internalId;
