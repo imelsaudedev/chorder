@@ -214,7 +214,7 @@ export type SerializedSongArrangement = {
   semitoneTranspose: number;
 };
 
-function updateUnitTypeIndices(newUnits: SongUnit[]) {
+export function updateUnitTypeIndices(newUnits: SongUnit[]) {
   const countByType = new Map<SongUnitType, number>();
   newUnits.forEach((unit) => {
     countByType.set(unit.type, (countByType.get(unit.type) || 0) + 1);

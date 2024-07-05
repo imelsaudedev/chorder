@@ -5,6 +5,8 @@ import ArrangementFormPage from '@/fragments/ArrangementFormPage';
 import { SerializedSong, Song } from '@/models/song';
 import { useEffect, useRef, useState } from 'react';
 import ArrangementViewPage from '../ArrangementViewPage';
+import Main from '@/components/Main';
+import ArrangementForm from '@/forms/ArrangementForm';
 
 type SongViewerProps = {
   song: SerializedSong;
@@ -35,15 +37,22 @@ export default function SongViewer({
   }, [arrangementId, song]);
   const [writeMode, setWriteMode] = useState<boolean>(initialWriteMode);
 
-  if (writeMode)
-    return (
-      <ArrangementFormPage
-        song={song}
-        postSong={postSong}
-        setWriteMode={(newWriteMode) => {
-          setWriteMode(newWriteMode);
-        }}
-      />
-    );
-  else return <ArrangementViewPage song={song} setWriteMode={setWriteMode} deleteArrangement={deleteArrangement} />;
+  return (
+    <>
+      {writeMode && (
+        <Main>
+          <ArrangementForm
+            song={song}
+            postSong={postSong}
+            setWriteMode={(newWriteMode) => {
+              setWriteMode(newWriteMode);
+            }}
+          />
+        </Main>
+      )}
+      {!writeMode && (
+        <ArrangementViewPage song={song} setWriteMode={setWriteMode} deleteArrangement={deleteArrangement} />
+      )}
+    </>
+  );
 }

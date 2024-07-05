@@ -7,6 +7,7 @@ import UnitCircle from '@/components/UnitCircle';
 import CloseIcon from '@/components/icons/CloseIcon';
 import { Button } from '@/components/ui/button';
 import { unitTypeColorClasses } from '@/components/unit-colors';
+import { UnitSetField } from '@/forms/ArrangementForm/useUnitList';
 import messages from '@/i18n/messages';
 import { SongUnit, SongUnitType } from '@/models/song-unit';
 import { ChangeEvent, MouseEvent, useCallback, useId, useState } from 'react';
@@ -17,20 +18,6 @@ type UnitFormProps = {
   onChangeUnit: (set: UnitSetField) => void;
   className?: string;
 };
-
-export type UnitSetField =
-  | {
-      field: 'content';
-      value: string;
-    }
-  | {
-      field: 'type';
-      value: SongUnitType;
-    }
-  | {
-      field: 'internalId';
-      value: number;
-    };
 
 export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: UnitFormProps) {
   const colorClasses = unitTypeColorClasses[unit.type];
@@ -56,7 +43,6 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
   );
 
   const handleChangeChordpro = (event: ChangeEvent<HTMLInputElement>) => {
-    // event.preventDefault();
     onChangeUnit({ field: 'content', value: event.target.value });
   };
 
