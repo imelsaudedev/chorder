@@ -1,3 +1,4 @@
+import { getLyrics } from '@/chopro/music';
 import { createUnit, SongUnit, SongUnitType, unitsAreEqual } from './song-unit';
 
 export type SongArrangement = {
@@ -56,7 +57,7 @@ export function updateUnitTypeIndices(newUnits: SongUnit[]) {
 }
 
 export function getArrangementLyrics(arrangement: SongArrangement) {
-  return arrangement.units.map((unit) => unit.content).join('\n');
+  return arrangement.units.map((unit) => getLyrics(unit.content)).join('\n');
 }
 
 export function getInternalId2Unit(units: SongUnit[]) {

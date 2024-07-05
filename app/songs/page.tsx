@@ -8,7 +8,7 @@ import SongList from '@/fragments/SongList';
 export const dynamic = 'force-dynamic';
 
 export default async function SongListPage() {
-  const songs = await retrieveSongs({});
+  const songs = await retrieveSongs({ options: { excludeArrangements: true } });
 
   return (
     <>

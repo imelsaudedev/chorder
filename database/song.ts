@@ -8,6 +8,7 @@ type PersistedDBSong = SongWith<RequiredArrangements & RequiredLyrics & Required
 
 type RetrieveSongOptions = {
   acceptDeleted?: boolean;
+  excludeArrangements?: boolean;
 };
 export function retrieveSongs({
   filter,
@@ -22,9 +23,20 @@ export function retrieveSongs({
   if (!options?.acceptDeleted) {
     combinedFilter['isDeleted'] = false;
   }
-  return getSongsCollection(dbData).then(({ songs }) => {
-    return songs.find(combinedFilter).toArray();
-  });
+  return getSongsCollection(dbData).then(({ songs: songCollection }) =>
+    songCollection
+      .find(combinedFilter)
+      .toArray()
+      .then((songs) => {
+        if (options?.excludeArrangements) {
+          return songs.map((song) => {
+            const { arrangements, ...songWithoutArrangements } = song;
+            return songWithoutArrangements;
+          });
+        }
+        return songs;
+      })
+  );
 }
 
 export function retrieveSongsBySlug(
