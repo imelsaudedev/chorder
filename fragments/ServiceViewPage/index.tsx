@@ -1,7 +1,7 @@
 import ConfigIcon from '@/components/icons/ConfigIcon';
 import Main from '@/components/Main';
 import { Button } from '@/components/ui/button';
-import { Service } from '@/models/service';
+import { getHumanReadableTitle, Service } from '@/models/service';
 import { ServiceSongUnit } from '@/models/service-unit';
 import { Dispatch, Fragment, SetStateAction, useCallback, useState } from 'react';
 import ServiceSongUnitView from './ServiceSongUnitView';
@@ -25,14 +25,14 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
   const handleEditButtonClick = useCallback(() => {
     setWriteMode(true);
   }, [setWriteMode]);
-  const deleteCurrentService = deleteService.bind(null, service.serialize());
+  const deleteCurrentService = deleteService.bind(null, service);
 
   return (
     <>
       <div>
         <div className="flex ml-4 gap-2 flex-grow justify-between items-center">
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-none">{service.humanReadableTitle}</span>
+            <span className="font-bold text-lg leading-none">{getHumanReadableTitle(service)}</span>
             {service.worshipLeader && <span className="text-sm">{service.worshipLeader}</span>}
           </div>
           <div className="flex gap-2">

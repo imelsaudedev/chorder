@@ -5,13 +5,12 @@ import { Separator } from '@/components/ui/separator';
 import { useArrangementForm } from '@/forms/ArrangementForm/useArrangementForm';
 import { RequiredIsNew, SongArrangementWith } from '@/models/song-arrangement';
 import { Dispatch, SetStateAction, useCallback } from 'react';
-import { useFieldArray, useFormState } from 'react-hook-form';
+import { FormProvider, useFieldArray, useFormState } from 'react-hook-form';
 import InfoForm from './InfoForm';
 import { ArrangementFormSchema } from './schema';
-import UnitListForm from './UnitListForm';
-import useSongMap from './useSongMap';
-import useUnitList from './useUnitList';
+import SongUnitListForm from './SongUnitListForm';
 import { RequiredArrangement, SongWith } from '@/models/song';
+import useArrangementFormFields from './useArrangementFormFields';
 
 type ArrangementFormPageProps = {
   song: SongWith<RequiredArrangement<SongArrangementWith<RequiredIsNew>>>;
@@ -24,43 +23,59 @@ export default function ArrangementForm({ song, postSong, setWriteMode }: Arrang
 
   const form = useArrangementForm(song);
   const { isDirty, isValid } = useFormState({ control: form.control });
-  const songMapFieldArray = useFieldArray({ control: form.control, name: 'songMap' });
-  const appendToSongMap = useCallback(
-    (unitId: number) => songMapFieldArray.append({ internalId: unitId }),
-    [songMapFieldArray]
+  const {
+    fields: units,
+    append: appendSongUnit,
+    remove: removeSongUnit,
+    update: updateSongUnit,
+  } = useFieldArray({
+    control: form.control,
+    name: 'units',
+  });
+  const {
+    fields: songMap,
+    append: appendSongMapElement,
+    remove: removeSongMapElement,
+    swap: swapSongMapElements,
+  } = useFieldArray({
+    control: form.control,
+    name: 'songMap',
+  });
+  const lastUnitId = form.getValues('lastUnitId');
+  const setLastUnitId = useCallback((newLastUnitId: number) => form.setValue('lastUnitId', newLastUnitId), [form]);
+  const arrangementFormFields = useArrangementFormFields(
+    units,
+    appendSongUnit,
+    removeSongUnit,
+    updateSongUnit,
+    songMap,
+    appendSongMapElement,
+    removeSongMapElement,
+    swapSongMapElements,
+    lastUnitId,
+    setLastUnitId
   );
 
-  const unitListHook = useUnitList(arrangement.units, arrangement.lastUnitId, appendToSongMap);
-  const { units, lastUnitId, isDirty: unitsDirty } = unitListHook;
-  const songMapHook = useSongMap(unitListHook.internalId2Unit, songMapFieldArray, unitListHook.onDeleteUnit);
-
-  async function onSubmit({ title, artist, key }: ArrangementFormSchema) {
+  async function onSubmit({ title, artist, key, songMap, units, lastUnitId }: ArrangementFormSchema) {
     song.title = title;
     song.artist = artist || null;
     arrangement.key = key;
-    arrangement.songMap = form.getValues().songMap.map(({ internalId }) => internalId);
+    arrangement.songMap = songMap.map(({ internalId }) => internalId);
     arrangement.units = units;
     arrangement.lastUnitId = lastUnitId;
     await postSong(song);
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
-        <SaveButtonSet
-          canCancel={!arrangement.isNew}
-          setWriteMode={setWriteMode}
-          enabled={(unitsDirty || isDirty) && isValid}
-        />
-        <InfoForm form={form} />
-        <Separator className="" />
-        <UnitListForm
-          songMapFields={songMapFieldArray.fields}
-          arrangement={arrangement}
-          unitListHook={unitListHook}
-          songMapHook={songMapHook}
-        />
-      </form>
-    </Form>
+    <FormProvider {...form}>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
+          <SaveButtonSet canCancel={!arrangement.isNew} setWriteMode={setWriteMode} enabled={isDirty && isValid} />
+          <InfoForm form={form} />
+          <Separator />
+          <SongUnitListForm arrangementFormFields={arrangementFormFields} />
+        </form>
+      </Form>
+    </FormProvider>
   );
 }

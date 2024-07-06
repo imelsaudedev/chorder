@@ -52,11 +52,11 @@ export function groupSongsByFirstLetter(songs: Song[]): Map<string, Song[]> {
   return byFirstLetter;
 }
 
-export function mapSongsBySlug(songs: Song[]): Map<string, Song> {
+export function mapSongsBySlug<T extends SongWith<RequiredSlug>>(songs: T[]): Map<string, T> {
   return songs.reduce((acc, song) => {
-    acc.set(song.slug!, song);
+    acc.set(song.slug, song);
     return acc;
-  }, new Map<string, Song>());
+  }, new Map<string, T>());
 }
 
 export function removeArrangement(song: SongWith<RequiredArrangements>, arrangementId: number) {
@@ -75,5 +75,27 @@ export function removeArrangement(song: SongWith<RequiredArrangements>, arrangem
 }
 
 export function getDefaultArrangement(song: SongWith<RequiredArrangements>) {
-  return song.arrangements.find((arrangement) => arrangement.isDefault);
+  const defaultArrangementId = getDefaultArrangementId(song);
+  if (defaultArrangementId === -1) throw new Error('No default arrangement found');
+  return song.arrangements[defaultArrangementId];
+}
+
+export function getDefaultArrangementId(song: SongWith<RequiredArrangements>) {
+  return song.arrangements.findIndex((arrangement) => arrangement.isDefault);
+}
+
+export function setArrangement<T extends SongWith<RequiredArrangements>>(song: T): SongWith<T & RequiredArrangement> {
+  let arrangement;
+  if (song.currentArrangementId === undefined) {
+    song.currentArrangementId = getDefaultArrangementId(song);
+  }
+  arrangement = song.arrangements[song.currentArrangementId];
+  if (!arrangement) {
+    arrangement = song.arrangements[0];
+  }
+  return {
+    ...song,
+    currentArrangementId: song.currentArrangementId,
+    arrangement: arrangement as SongArrangement,
+  };
 }

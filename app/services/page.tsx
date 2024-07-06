@@ -17,8 +17,8 @@ export default async function ServiceListPage() {
         <ServiceList services={services} />
         <AnchorButton
           additionalClasses={[
-            'bg-purple-400',
-            'text-white',
+            'bg-secondary',
+            'text-secondary-foreground',
             'rounded-full',
             'aspect-square',
             'fixed',

@@ -1,20 +1,18 @@
 'use client';
 
-import { SerializedService, Service } from '@/models/service';
-import { useRef, useState } from 'react';
-import ServiceFormPage from '../ServiceFormPage';
+import { Service } from '@/models/service';
+import { useState } from 'react';
+import ServiceForm from '../../forms/ServiceForm';
 import ServiceViewPage from '../ServiceViewPage';
 
 type ServiceViewerProps = {
-  service: SerializedService;
+  service: Service;
   initialWriteMode: boolean;
 };
 
-export default function ServiceViewer({ service: serializedService, initialWriteMode }: ServiceViewerProps) {
-  const serviceRef = useRef(() => Service.deserialize(serializedService));
-  const service = serviceRef.current();
+export default function ServiceViewer({ service, initialWriteMode }: ServiceViewerProps) {
   const [writeMode, setWriteMode] = useState<boolean>(initialWriteMode);
 
-  if (writeMode) return <ServiceFormPage service={service} setWriteMode={setWriteMode} />;
+  if (writeMode) return <ServiceForm service={service} setWriteMode={setWriteMode} />;
   else return <ServiceViewPage service={service} setWriteMode={setWriteMode} />;
 }

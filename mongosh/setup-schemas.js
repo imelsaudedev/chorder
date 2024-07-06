@@ -148,6 +148,10 @@ db.runCommand({
           bsonType: 'bool',
           description: "'isDeleted' must be a boolean and is required",
         },
+        isNew: {
+          bsonType: 'bool',
+          description: "'isNew' must be a boolean",
+        },
         units: {
           bsonType: 'array',
           description: "'units' must be an array and is required",

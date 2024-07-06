@@ -4,7 +4,7 @@ import messages from '@/i18n/messages';
 import { fetchSongs } from '@/lib/apiClient';
 import { Song } from '@/models/song';
 import { useEffect, useState } from 'react';
-import SongPicker from '../SongPicker';
+import SongPicker from '../../fragments/SongPicker';
 
 type AddUnitFormProps = {
   onCreateUnit: (song: Song, arrangementId: number) => void;

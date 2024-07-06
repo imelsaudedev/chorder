@@ -20,22 +20,21 @@ export type PostSongAction = ((song: SongWith<RequiredArrangement>) => Promise<v
 export const postSong: PostSongAction = async function (incompleteSong: SongWith<RequiredArrangement>) {
   const arrangement = incompleteSong.arrangement;
   const slug = incompleteSong.slug;
-  const existingSong = (slug && (await retrieveSong(slug))) || {};
   if (!arrangement.key || arrangement.key.trim() === '') {
     const allChords = getSongUnitMap(arrangement)
       .map((unit) => getChords(unit.content))
       .flat();
     arrangement.key = getKeyFromChords(allChords) || '';
   }
-  const fullSong = {
-    ...existingSong,
+  let savedSong = await saveSong({
+    slug,
     title: incompleteSong.title,
     artist: incompleteSong.artist,
     isDeleted: incompleteSong.isDeleted,
     lyrics: getArrangementLyrics(arrangement),
-    arrangements: [arrangement],
-  };
-  let savedSong = await saveSong(fullSong);
+    arrangement: arrangement,
+    currentArrangementId: incompleteSong.currentArrangementId,
+  });
   redirect(`./${savedSong.slug}`, RedirectType.replace);
 };
 

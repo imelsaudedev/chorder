@@ -2,9 +2,11 @@ import { RequiredArrangements, RequiredLyrics, RequiredSlug, Song, SongWith } fr
 import { DBData, getDB } from './client';
 import { getAvailableSlug, saveSlug } from './slug';
 import { Filter } from 'mongodb';
+import { SongArrangement } from '@/models/song-arrangement';
 
-type DBSong = SongWith<RequiredArrangements & RequiredLyrics>;
-type PersistedDBSong = SongWith<RequiredArrangements & RequiredLyrics & RequiredSlug>;
+export type DBSong = SongWith<RequiredArrangements & RequiredLyrics>;
+export type PersistedDBSong = SongWith<RequiredArrangements & RequiredLyrics & RequiredSlug>;
+export type PersistedDBSongWithoutArrangements = Omit<PersistedDBSong, 'arrangements'>;
 
 type RetrieveSongOptions = {
   acceptDeleted?: boolean;
@@ -18,7 +20,7 @@ export function retrieveSongs({
   filter?: Filter<PersistedDBSong>;
   options?: RetrieveSongOptions;
   dbData?: DBData;
-}): Promise<Song[]> {
+}): Promise<(PersistedDBSong | PersistedDBSongWithoutArrangements)[]> {
   const combinedFilter = filter || {};
   if (!options?.acceptDeleted) {
     combinedFilter['isDeleted'] = false;
@@ -28,13 +30,13 @@ export function retrieveSongs({
       .find(combinedFilter)
       .toArray()
       .then((songs) => {
-        if (options?.excludeArrangements) {
-          return songs.map((song) => {
-            const { arrangements, ...songWithoutArrangements } = song;
-            return songWithoutArrangements;
-          });
-        }
-        return songs;
+        return songs.map((song) => {
+          delete (song as any)._id;
+          if (options?.excludeArrangements) {
+            delete (song as any).arrangements;
+          }
+          return song;
+        });
       })
   );
 }
@@ -42,7 +44,7 @@ export function retrieveSongs({
 export function retrieveSongsBySlug(
   slugs: string[],
   { options, dbData }: { options?: RetrieveSongOptions; dbData?: DBData }
-): Promise<Song[]> {
+): Promise<(PersistedDBSong | PersistedDBSongWithoutArrangements)[]> {
   return retrieveSongs({ filter: { slug: { $in: slugs } }, options, dbData });
 }
 
@@ -58,9 +60,44 @@ export function retrieveSong(slug: string, dbData?: DBData): Promise<PersistedDB
   });
 }
 
-export async function saveSong(song: DBSong, dbData?: DBData): Promise<PersistedDBSong> {
-  const { client, songs } = await getSongsCollection(dbData);
-  if (song.slug) {
+export async function saveSong(
+  {
+    title,
+    slug,
+    artist,
+    lyrics,
+    isDeleted,
+    arrangement,
+    arrangements,
+    currentArrangementId,
+  }: {
+    title?: string;
+    slug?: string;
+    artist?: string | null;
+    lyrics?: string;
+    isDeleted?: boolean;
+    arrangement?: SongArrangement;
+    arrangements?: SongArrangement[];
+    currentArrangementId?: number;
+  },
+  dbData?: DBData
+): Promise<PersistedDBSong> {
+  const { client, db, songs } = await getSongsCollection(dbData);
+  const song = (slug && (await retrieveSong(slug, { client, db }))) || ({} as DBSong);
+  if (title !== undefined) song.title = title;
+  if (artist !== undefined) song.artist = artist;
+  if (lyrics !== undefined) song.lyrics = lyrics;
+  if (isDeleted !== undefined) song.isDeleted = isDeleted;
+  if (arrangements !== undefined) song.arrangements = arrangements;
+  if (arrangement !== undefined) {
+    if (currentArrangementId !== undefined) {
+      song.arrangements[currentArrangementId] = arrangement;
+    } else {
+      throw new Error('currentArrangementId must be defined when updating arrangement');
+    }
+  }
+
+  if (slug) {
     try {
       await songs.updateOne({ slug: song.slug }, { $set: song });
     } catch (e) {
@@ -90,5 +127,5 @@ export async function saveSong(song: DBSong, dbData?: DBData): Promise<Persisted
 
 export async function getSongsCollection(dbData?: DBData) {
   const { client, db } = await getDB(dbData);
-  return { client, songs: db.collection<PersistedDBSong>('songs') };
+  return { client, db, songs: db.collection<PersistedDBSong>('songs') };
 }

@@ -2,24 +2,21 @@ import SortingButtons from '@/components/SortingButtons';
 import UnitForm from '@/fragments/UnitForm';
 import { SongUnit } from '@/models/song-unit';
 import { useCallback } from 'react';
-import { SongMapHook } from './useSongMap';
-import { UnitSetField } from './useUnitList';
+import { ArrangementFormFields, SongUnitSetField } from './useArrangementFormFields';
 
 type SortableUnitFormProps = {
   index: number;
-  internalId: number;
   unit: SongUnit;
-  songMapHook: SongMapHook;
-  updateUnit: (internalId: number, set: UnitSetField) => void;
+  arrangementFormFields: ArrangementFormFields;
 };
 
-export default function SortableUnitForm({ index, internalId, unit, songMapHook, updateUnit }: SortableUnitFormProps) {
-  const { mapLength, onMoveUnitDown, onMoveUnitUp, onRemoveUnit } = songMapHook;
+export default function SortableUnitForm({ index, unit, arrangementFormFields }: SortableUnitFormProps) {
+  const { mapLength, onMoveUnitDown, onMoveUnitUp, onRemoveUnit, onUpdateUnit } = arrangementFormFields;
   const handleChangeUnit = useCallback(
-    (set: UnitSetField) => {
-      updateUnit(internalId, set);
+    (set: SongUnitSetField) => {
+      onUpdateUnit(unit.internalId, set);
     },
-    [internalId, updateUnit]
+    [unit.internalId, onUpdateUnit]
   );
   const handleRemoveUnit = useCallback(() => {
     onRemoveUnit(index);

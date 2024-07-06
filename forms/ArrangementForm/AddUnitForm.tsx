@@ -4,16 +4,15 @@ import PlusIcon from '@/components/icons/PlusIcon';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import messages, { format } from '@/i18n/messages';
-import { SongUnit } from '@/models/song-unit';
 import { MouseEventHandler } from 'react';
+import { ArrangementFormFields } from './useArrangementFormFields';
 
 type AddUnitFormProps = {
-  units: SongUnit[];
-  onCreateUnit: () => void;
-  onAddExistingUnit: (internalId: number) => void;
+  arrangementFormFields: ArrangementFormFields;
 };
 
-export default function AddUnitForm({ units, onCreateUnit, onAddExistingUnit }: AddUnitFormProps) {
+export default function AddUnitForm({ arrangementFormFields }: AddUnitFormProps) {
+  const { units, onAddExistingUnit, onCreateUnit } = arrangementFormFields;
   const handleAddNewUnit: MouseEventHandler = (event) => {
     event.preventDefault();
     onCreateUnit();
