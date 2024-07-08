@@ -1,56 +1,62 @@
 import CloseIcon from '@/components/icons/CloseIcon';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ServiceFormSchema, SongUnitSchema } from '@/forms/ServiceForm/schema';
 import messages from '@/i18n/messages';
-import { Song } from '@/models/song';
-import { SongArrangement } from '@/models/song-arrangement';
-import { MouseEventHandler, useCallback } from 'react';
+import { MouseEventHandler, useCallback, useMemo } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 type ServiceSongUnitEditorHeaderProps = {
-  song: Song;
-  arrangement: SongArrangement;
-  setSemitoneTranspose: (semitones: number) => void;
+  index: number;
   onToggleEditMode: MouseEventHandler;
-  removeUnit: () => void;
+  onRemoveUnit: () => void;
 };
 
 export default function ServiceSongUnitEditorHeader({
-  song,
-  arrangement,
-  setSemitoneTranspose,
+  index,
   onToggleEditMode,
-  removeUnit,
+  onRemoveUnit,
 }: ServiceSongUnitEditorHeaderProps) {
+  const { setValue, getValues } = useFormContext<ServiceFormSchema>();
+  const unit = getValues(`units.${index}`) as SongUnitSchema;
+
+  const transpositionKeys = useMemo(() => {
+    const baseKey = unit.baseKey;
+    const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const baseKeyIndex = keys.indexOf(baseKey);
+    return keys.map((key, index) => [key, index - baseKeyIndex] as const);
+  }, [unit.baseKey]);
+
   const handleSemitoneTransposeChange = useCallback(
-    (semitoneString: string) => setSemitoneTranspose(parseInt(semitoneString)),
-    [setSemitoneTranspose]
+    (semitoneString: string) => setValue(`units.${index}.semitoneTranspose`, parseInt(semitoneString)),
+    [index, setValue]
   );
 
   const handleRemoveUnit: MouseEventHandler = useCallback(
     (event) => {
       event.preventDefault();
-      removeUnit();
+      onRemoveUnit();
     },
-    [removeUnit]
+    [onRemoveUnit]
   );
 
   return (
     <div className="flex w-full">
       <div className="flex flex-col flex-grow text-left justify-end">
-        <span className="font-bold text-lg leading-none">{song.title}</span>
-        {song.artist && <span className="text-sm">{song.artist}</span>}
+        <span className="font-bold text-lg leading-none">{unit.title}</span>
+        {unit.artist && <span className="text-sm">{unit.artist}</span>}
       </div>
       <div className="flex gap-2 items-end">
         <Button variant="outline" onClick={onToggleEditMode}>
           {messages.serviceForm.editArrangement}
         </Button>
         <div>
-          <Select defaultValue={arrangement.semitoneTranspose.toString()} onValueChange={handleSemitoneTransposeChange}>
+          <Select defaultValue={unit.semitoneTranspose.toString()} onValueChange={handleSemitoneTransposeChange}>
             <SelectTrigger className="w-24">
               <SelectValue placeholder={messages.songData.keyPlaceholder} />
             </SelectTrigger>
             <SelectContent>
-              {arrangement.transpositionKeys.map(([key, semitones]) => (
+              {transpositionKeys.map(([key, semitones]) => (
                 <SelectItem key={`transpose--${key}`} value={semitones.toString()}>
                   {key}
                 </SelectItem>

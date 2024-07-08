@@ -1,25 +1,16 @@
-import { ServiceSongUnit } from '@/models/service-unit';
+import SongUnitListForm from '@/forms/ArrangementForm/SongUnitListForm';
+import { SongUnitSchema } from '@/forms/ServiceForm/schema';
 import { MouseEventHandler, useCallback, useState } from 'react';
 import ServiceSongUnitEditorHeader from './ServiceSongUnitEditorHeader';
 import SongUnitContentView from './SongUnitContentView';
-import SongUnitListForm from '@/forms/ArrangementForm/SongUnitListForm';
+import SongUnitListFormContainer from './SongUnitListFormContainer';
 
 type ServiceSongUnitEditorProps = {
-  unit: ServiceSongUnit;
-  updateSong: () => void;
-  setSemitoneTranspose: (semitones: number) => void;
-  removeUnit: () => void;
+  index: number;
+  onRemoveUnit: () => void;
 };
 
-export default function ServiceSongUnitEditor({
-  unit,
-  updateSong,
-  setSemitoneTranspose,
-  removeUnit,
-}: ServiceSongUnitEditorProps) {
-  const song = unit.song;
-  const arrangement = song.arrangement;
-
+export default function ServiceSongUnitEditor({ index, onRemoveUnit }: ServiceSongUnitEditorProps) {
   const [editMode, setEditMode] = useState(false);
 
   const handleToggleEditMode: MouseEventHandler = useCallback((event) => {
@@ -29,16 +20,10 @@ export default function ServiceSongUnitEditor({
 
   return (
     <div className="flex-grow border border-gray-500 rounded-md py-1 px-2">
-      <ServiceSongUnitEditorHeader
-        song={song}
-        arrangement={arrangement}
-        setSemitoneTranspose={setSemitoneTranspose}
-        onToggleEditMode={handleToggleEditMode}
-        removeUnit={removeUnit}
-      />
+      <ServiceSongUnitEditorHeader index={index} onToggleEditMode={handleToggleEditMode} onRemoveUnit={onRemoveUnit} />
       <div className="mt-8">
-        {editMode && <SongUnitListForm arrangement={arrangement} updateSong={updateSong} />}
-        {!editMode && <SongUnitContentView arrangement={arrangement} />}
+        {editMode && <SongUnitListFormContainer index={index} />}
+        {!editMode && <SongUnitContentView index={index} />}
       </div>
     </div>
   );

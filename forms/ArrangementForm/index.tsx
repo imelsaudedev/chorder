@@ -3,17 +3,16 @@ import SaveButtonSet from '@/components/SaveButtonSet';
 import { Form } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { useArrangementForm } from '@/forms/ArrangementForm/useArrangementForm';
-import { RequiredIsNew, SongArrangementWith } from '@/models/song-arrangement';
+import { NewSong } from '@/models/song';
 import { Dispatch, SetStateAction, useCallback } from 'react';
-import { FormProvider, useFieldArray, useFormState } from 'react-hook-form';
+import { useFieldArray, useFormState } from 'react-hook-form';
 import InfoForm from './InfoForm';
 import { ArrangementFormSchema } from './schema';
 import SongUnitListForm from './SongUnitListForm';
-import { RequiredArrangement, SongWith } from '@/models/song';
 import useArrangementFormFields from './useArrangementFormFields';
 
 type ArrangementFormPageProps = {
-  song: SongWith<RequiredArrangement<SongArrangementWith<RequiredIsNew>>>;
+  song: NewSong;
   postSong: PostSongAction;
   setWriteMode: Dispatch<SetStateAction<boolean>>;
 };
@@ -59,7 +58,9 @@ export default function ArrangementForm({ song, postSong, setWriteMode }: Arrang
   async function onSubmit({ title, artist, key, songMap, units, lastUnitId }: ArrangementFormSchema) {
     song.title = title;
     song.artist = artist || null;
-    arrangement.key = key;
+    if (key) {
+      arrangement.key = key;
+    }
     arrangement.songMap = songMap.map(({ internalId }) => internalId);
     arrangement.units = units;
     arrangement.lastUnitId = lastUnitId;
@@ -67,15 +68,13 @@ export default function ArrangementForm({ song, postSong, setWriteMode }: Arrang
   }
 
   return (
-    <FormProvider {...form}>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
-          <SaveButtonSet canCancel={!arrangement.isNew} setWriteMode={setWriteMode} enabled={isDirty && isValid} />
-          <InfoForm form={form} />
-          <Separator />
-          <SongUnitListForm arrangementFormFields={arrangementFormFields} />
-        </form>
-      </Form>
-    </FormProvider>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
+        <SaveButtonSet canCancel={!arrangement.isNew} setWriteMode={setWriteMode} enabled={isDirty && isValid} />
+        <InfoForm form={form} />
+        <Separator />
+        <SongUnitListForm arrangementFormFields={arrangementFormFields} />
+      </form>
+    </Form>
   );
 }

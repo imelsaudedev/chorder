@@ -1,9 +1,9 @@
-import { Song } from '@/models/song';
+import { RequiredArrangement, SongWith } from '@/models/song';
 import SongList from '../SongList';
 
 type SongPickerProps = {
-  songs: Song[];
-  onSelected: (song: Song, arrangementId: number) => void;
+  songs: SongWith<RequiredArrangement>[];
+  onSelected: (song: SongWith<RequiredArrangement>, arrangementId: number) => void;
 };
 
 export default function SongPicker({ songs, onSelected }: SongPickerProps) {

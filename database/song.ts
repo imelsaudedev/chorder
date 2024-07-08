@@ -1,26 +1,21 @@
-import { RequiredArrangements, RequiredLyrics, RequiredSlug, Song, SongWith } from '@/models/song';
+import { SongArrangement } from '@/models/song-arrangement';
+import { Filter } from 'mongodb';
 import { DBData, getDB } from './client';
 import { getAvailableSlug, saveSlug } from './slug';
-import { Filter } from 'mongodb';
-import { SongArrangement } from '@/models/song-arrangement';
-
-export type DBSong = SongWith<RequiredArrangements & RequiredLyrics>;
-export type PersistedDBSong = SongWith<RequiredArrangements & RequiredLyrics & RequiredSlug>;
-export type PersistedDBSongWithoutArrangements = Omit<PersistedDBSong, 'arrangements'>;
+import { Song } from '@/models/song';
 
 type RetrieveSongOptions = {
   acceptDeleted?: boolean;
-  excludeArrangements?: boolean;
 };
 export function retrieveSongs({
   filter,
   options,
   dbData,
 }: {
-  filter?: Filter<PersistedDBSong>;
+  filter?: Filter<Song>;
   options?: RetrieveSongOptions;
   dbData?: DBData;
-}): Promise<(PersistedDBSong | PersistedDBSongWithoutArrangements)[]> {
+}): Promise<Song[]> {
   const combinedFilter = filter || {};
   if (!options?.acceptDeleted) {
     combinedFilter['isDeleted'] = false;
@@ -32,9 +27,6 @@ export function retrieveSongs({
       .then((songs) => {
         return songs.map((song) => {
           delete (song as any)._id;
-          if (options?.excludeArrangements) {
-            delete (song as any).arrangements;
-          }
           return song;
         });
       })
@@ -44,11 +36,11 @@ export function retrieveSongs({
 export function retrieveSongsBySlug(
   slugs: string[],
   { options, dbData }: { options?: RetrieveSongOptions; dbData?: DBData }
-): Promise<(PersistedDBSong | PersistedDBSongWithoutArrangements)[]> {
+): Promise<Song[]> {
   return retrieveSongs({ filter: { slug: { $in: slugs } }, options, dbData });
 }
 
-export function retrieveSong(slug: string, dbData?: DBData): Promise<PersistedDBSong | null> {
+export function retrieveSong(slug: string, dbData?: DBData): Promise<Song | null> {
   return getSongsCollection(dbData).then(({ songs }) => {
     return songs.findOne({ slug, isDeleted: false }).then((serializedSong) => {
       if (serializedSong) {
@@ -81,9 +73,9 @@ export async function saveSong(
     currentArrangementId?: number;
   },
   dbData?: DBData
-): Promise<PersistedDBSong> {
+): Promise<Song> {
   const { client, db, songs } = await getSongsCollection(dbData);
-  const song = (slug && (await retrieveSong(slug, { client, db }))) || ({} as DBSong);
+  const song = (slug && (await retrieveSong(slug, { client, db }))) || ({} as Song);
   if (title !== undefined) song.title = title;
   if (artist !== undefined) song.artist = artist;
   if (lyrics !== undefined) song.lyrics = lyrics;
@@ -101,7 +93,7 @@ export async function saveSong(
     try {
       await songs.updateOne({ slug: song.slug }, { $set: song });
     } catch (e) {
-      console.error(e, `\nFailed with song ${JSON.stringify(song)}`);
+      console.error(e, `\nFailed with song ${JSON.stringify(song, null, 2)}`);
       throw new Error('Failed to update song');
     }
   } else {
@@ -111,21 +103,21 @@ export async function saveSong(
     const session = client.startSession();
     try {
       await session.withTransaction(async () => {
-        await songs.insertOne(song as PersistedDBSong);
+        await songs.insertOne(song as Song);
         await saveSlug(slug);
       });
     } catch (e) {
-      console.error(e, `\nFailed with song ${JSON.stringify(song)}`);
+      console.error(e, `\nFailed with song ${JSON.stringify(song, null, 2)}`);
       throw new Error('Failed to save song');
     } finally {
       await session.endSession();
       await client.close();
     }
   }
-  return song as PersistedDBSong;
+  return song as Song;
 }
 
 export async function getSongsCollection(dbData?: DBData) {
   const { client, db } = await getDB(dbData);
-  return { client, db, songs: db.collection<PersistedDBSong>('songs') };
+  return { client, db, songs: db.collection<Song>('songs') };
 }

@@ -7,7 +7,7 @@ import UnitCircle from '@/components/UnitCircle';
 import CloseIcon from '@/components/icons/CloseIcon';
 import { Button } from '@/components/ui/button';
 import { unitTypeColorClasses } from '@/components/unit-colors';
-import { UnitSetField } from '@/forms/ArrangementForm/useUnitList';
+import { SongUnitSetField } from '@/forms/ArrangementForm/useArrangementFormFields';
 import messages from '@/i18n/messages';
 import { SongUnit, SongUnitType } from '@/models/song-unit';
 import { ChangeEvent, MouseEvent, useCallback, useId, useState } from 'react';
@@ -15,7 +15,7 @@ import { ChangeEvent, MouseEvent, useCallback, useId, useState } from 'react';
 type UnitFormProps = {
   unit: SongUnit;
   removeUnit: () => void;
-  onChangeUnit: (set: UnitSetField) => void;
+  onChangeUnit: (set: SongUnitSetField) => void;
   className?: string;
 };
 

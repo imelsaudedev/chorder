@@ -3,19 +3,24 @@ import { ServiceUnit } from './service-unit';
 
 export type Service = {
   title?: string;
-  slug?: string;
+  slug: string;
   worshipLeader?: string | null;
   date: Date;
   isDeleted: boolean;
   units: ServiceUnit[];
-  isNew: boolean;
 };
 
 export type ServiceWith<T> = Omit<Service, keyof T> & T;
 
-export type RequiredSlug = {
-  slug: string;
+export type OptionalSlug = {
+  slug?: string;
 };
+
+export type RequiredIsNew = {
+  isNew: boolean;
+};
+
+export type NewService = ServiceWith<OptionalSlug>;
 
 export function dateForSlug(date: Date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -32,6 +37,6 @@ export function getHumanReadableTitle(service: Service) {
   return service.title || getDefaultTitle(service.date);
 }
 
-export function getUnitsByType<T>(service: Service, type: string): T[] {
+export function getUnitsByType<T>(service: NewService, type: string): T[] {
   return service.units?.filter((unit) => unit.type === type).map((unit) => unit as T) || [];
 }

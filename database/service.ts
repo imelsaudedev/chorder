@@ -1,14 +1,12 @@
-import { dateForSlug, getUnitsByType, RequiredSlug, Service, ServiceWith } from '@/models/service';
+import { dateForSlug, getUnitsByType, NewService, Service } from '@/models/service';
 import { ServiceSongUnit } from '@/models/service-unit';
-import { mapSongsBySlug, RequiredArrangement, RequiredArrangements, setArrangement, SongWith } from '@/models/song';
+import { mapSongsBySlug, RequiredArrangement, setArrangement, Song, SongWith } from '@/models/song';
 import { extractDiff } from '@/models/song-arrangement';
 import { SongUnit } from '@/models/song-unit';
 import { Filter } from 'mongodb';
 import { DBData, getDB } from './client';
 import { getAvailableSlug, saveSlug } from './slug';
-import { PersistedDBSong, retrieveSongsBySlug, saveSong } from './song';
-
-type PersistedDBService = ServiceWith<RequiredSlug>;
+import { retrieveSongsBySlug, saveSong } from './song';
 
 type DBServiceSongUnit = {
   type: 'DB_SONG';
@@ -28,10 +26,10 @@ export function retrieveServices({
   options,
   dbData,
 }: {
-  filter?: Filter<PersistedDBService>;
+  filter?: Filter<Service>;
   options?: RetrieveServiceOptions;
   dbData?: DBData;
-}): Promise<PersistedDBService[]> {
+}): Promise<Service[]> {
   const combinedFilter = filter || {};
   if (!options?.acceptDeleted) {
     combinedFilter['isDeleted'] = false;
@@ -47,7 +45,7 @@ export function retrieveServices({
             { dbData }
           ).then((songs) => {
             services.forEach((service) => {
-              hydrate(service, songs as PersistedDBSong[]);
+              hydrate(service, songs);
             });
             return services;
           });
@@ -65,7 +63,7 @@ export function retrieveService(slug: string): Promise<Service | null> {
         const songUnits = getUnitsByType<DBServiceSongUnit>(service, 'DB_SONG');
         const allSlugs = getSlugs(songUnits);
         return retrieveSongsBySlug(allSlugs, { dbData }).then((songs) => {
-          hydrate(service, songs as PersistedDBSong[]);
+          hydrate(service, songs);
           return service;
         });
       } else {
@@ -75,7 +73,7 @@ export function retrieveService(slug: string): Promise<Service | null> {
   });
 }
 
-export async function saveService(service: Service): Promise<PersistedDBService> {
+export async function saveService(service: NewService): Promise<Service> {
   const { client, db, services } = await getServicesCollection();
   const dbData = { client, db };
   const modifiedSongs = await extractSongsAndReplaceSongUnits(service, dbData);
@@ -88,42 +86,45 @@ export async function saveService(service: Service): Promise<PersistedDBService>
       } else {
         const slug = await getAvailableSlug(dateForSlug(service.date), dbData);
         service.slug = slug;
-        await services.insertOne(service as ServiceWith<RequiredSlug>);
+        await services.insertOne(service as Service);
         await saveSlug(slug);
       }
       if (modifiedSongs.length > 0) {
         await Promise.all(
           modifiedSongs.map((song) =>
-            saveSong({ arrangement: song.arrangement, currentArrangementId: song.currentArrangementId }, dbData)
+            saveSong(
+              { slug: song.slug, arrangement: song.arrangement, currentArrangementId: song.currentArrangementId },
+              dbData
+            )
           )
         );
       }
     });
   } catch (e) {
-    console.error(e, `\nFailed with service ${JSON.stringify(service)}`);
+    console.error(e, `\nFailed with service ${JSON.stringify(service, null, 2)}`);
     throw new Error('Failed to update service');
   } finally {
     await session.endSession();
     await client.close();
   }
-  return service as PersistedDBService;
+  return service as Service;
 }
 
 async function getServicesCollection(dbData?: DBData) {
   const { client, db } = await getDB(dbData);
-  return { client, db, services: db.collection<PersistedDBService>('services') };
+  return { client, db, services: db.collection<Service>('services') };
 }
 
-async function extractSongsAndReplaceSongUnits(service: Service, dbData: DBData) {
+async function extractSongsAndReplaceSongUnits(service: NewService, dbData: DBData) {
   const songUnits = getUnitsByType<ServiceSongUnit>(service, 'SONG');
   const allSlugs = songUnits.map((songUnit) => songUnit.song.slug);
   const songs = (
     (await retrieveSongsBySlug(allSlugs, {
       options: { acceptDeleted: true },
       dbData,
-    })) as PersistedDBSong[]
-  ).map((song) => setArrangement(song)) as SongWith<RequiredSlug & RequiredArrangement & RequiredArrangements>[];
-  const songsBySlug = mapSongsBySlug<SongWith<RequiredSlug & RequiredArrangement & RequiredArrangements>>(songs);
+    })) as Song[]
+  ).map((song) => setArrangement(song)) as SongWith<RequiredArrangement>[];
+  const songsBySlug = mapSongsBySlug<SongWith<RequiredArrangement>>(songs);
 
   const modifiedSongs: SongWith<RequiredArrangement>[] = [];
   service.units = await Promise.all(
@@ -136,18 +137,22 @@ async function extractSongsAndReplaceSongUnits(service: Service, dbData: DBData)
 
       referenceSong.currentArrangementId = songUnit.arrangementId;
       const referenceSongWithArrangement = setArrangement(referenceSong);
+      const [additionalSongUnits, songMap, lastUnitId] = extractDiff(
+        songUnit.song.arrangement,
+        referenceSongWithArrangement.arrangement
+      );
 
       const dbSongUnit = {
         type: 'DB_SONG',
         songSlug: songUnit.song.slug,
         arrangementId: songUnit.arrangementId,
         semitoneTranspose: songUnit.song.arrangement.semitoneTranspose,
-        additionalSongUnits: extractDiff(songUnit.song.arrangement, referenceSongWithArrangement.arrangement),
-        songMap: [],
+        additionalSongUnits,
+        songMap,
       };
 
-      if (songUnit.song.arrangement.lastUnitId !== referenceSongWithArrangement.arrangement.lastUnitId) {
-        referenceSongWithArrangement.arrangement.lastUnitId = songUnit.song.arrangement.lastUnitId;
+      if ((referenceSongWithArrangement.arrangement.lastUnitId, lastUnitId)) {
+        referenceSongWithArrangement.arrangement.lastUnitId = lastUnitId;
         modifiedSongs.push(referenceSongWithArrangement);
       }
 
@@ -162,7 +167,7 @@ function getSlugs(songUnits: DBServiceSongUnit[]) {
   return songUnits.map((songUnit) => songUnit.songSlug);
 }
 
-function hydrate(service: Service, songs: SongWith<RequiredSlug & RequiredArrangements>[]) {
+function hydrate(service: Service, songs: Song[]) {
   service.units = service.units.map((unit) => {
     if (unit.type !== 'DB_SONG') return unit;
 

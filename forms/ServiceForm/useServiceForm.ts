@@ -1,14 +1,15 @@
+import { NewService } from '@/models/service';
+import { ServiceSongUnit } from '@/models/service-unit';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import schema, { ServiceFormSchema } from './schema';
-import { Service } from '@/models/service';
-import { ServiceSongUnit } from '@/models/service-unit';
+import schema, { ServiceFormSchema, TextUnitSchema } from './schema';
 
-export function useServiceForm(service: Service) {
+export function useServiceForm(service: NewService) {
   return useForm<ServiceFormSchema>({
     resolver: zodResolver(schema),
     defaultValues: {
-      title: service.title,
+      slug: service.slug,
+      title: service.title || '',
       worshipLeader: service.worshipLeader || '',
       date: service.date,
       units: service.units.map((unit) => {
@@ -16,15 +17,20 @@ export function useServiceForm(service: Service) {
           const song = (unit as ServiceSongUnit).song;
           return {
             type: 'SONG',
-            song: {
-              currentArrangementId: song.currentArrangementId,
-              arrangement: {
-                songMap: song.arrangement.songMap.map((internalId) => ({ internalId })),
-                semitoneTranspose: song.arrangement.semitoneTranspose,
-              },
-            },
+            slug: song.slug,
+            title: song.title,
+            artist: song.artist || '',
+            currentArrangementId: song.currentArrangementId,
+            baseKey: song.arrangement.key || 'C',
+            semitoneTranspose: song.arrangement.semitoneTranspose,
+            lastUnitId: song.arrangement.lastUnitId,
+            songMap: song.arrangement.songMap.map((internalId) => ({ internalId })),
+            units: song.arrangement.units,
           };
+        } else if (unit.type === 'TEXT') {
+          return { type: 'TEXT', content: (unit as TextUnitSchema).content };
         }
+        throw new Error('Invalid unit type');
       }),
     },
   });

@@ -2,23 +2,39 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import messages from '@/i18n/messages';
 import { fetchSongs } from '@/lib/apiClient';
-import { Song } from '@/models/song';
+import { RequiredArrangement, SongWith } from '@/models/song';
 import { useEffect, useState } from 'react';
 import SongPicker from '../../fragments/SongPicker';
+import { ServiceFormFields } from './useServiceFormFields';
 
 type AddUnitFormProps = {
-  onCreateUnit: (song: Song, arrangementId: number) => void;
+  serviceFormFields: ServiceFormFields;
 };
 
-export default function AddUnitForm({ onCreateUnit }: AddUnitFormProps) {
-  const [songs, setSongs] = useState<Song[]>([]);
+export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
+  const { onCreateUnit } = serviceFormFields;
+
+  const [songs, setSongs] = useState<SongWith<RequiredArrangement>[]>([]);
   useEffect(() => {
     fetchSongs().then(setSongs).catch(console.error);
   }, []);
 
   const [songPopoverOpen, setSongPopoverOpen] = useState<boolean>(false);
-  const onSelected = (song: Song, arrangementId: number) => {
-    onCreateUnit(song, arrangementId);
+  const onSelected = (song: SongWith<RequiredArrangement>, arrangementId: number) => {
+    onCreateUnit({
+      type: 'SONG',
+      slug: song.slug!,
+      title: song.title,
+      artist: song.artist || '',
+      currentArrangementId: arrangementId,
+      baseKey: song.arrangement?.key || 'C',
+      semitoneTranspose: song.arrangement?.semitoneTranspose || 0,
+      lastUnitId: song.arrangement.lastUnitId,
+      songMap: song.arrangement.songMap.map((internalId) => ({
+        internalId,
+      })),
+      units: song.arrangement.units,
+    });
     setSongPopoverOpen(false);
   };
 

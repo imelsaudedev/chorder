@@ -1,4 +1,4 @@
-import { RequiredArrangement, RequiredSlug, SongWith } from './song';
+import { RequiredArrangement, SongWith } from './song';
 
 export type ServiceUnit = {
   type: string;
@@ -6,6 +6,6 @@ export type ServiceUnit = {
 
 export type ServiceSongUnit = {
   type: 'SONG';
-  song: SongWith<RequiredSlug & RequiredArrangement>;
+  song: SongWith<RequiredArrangement>;
   arrangementId: number;
 };

@@ -4,20 +4,29 @@ import { getChords, getKeyFromChords } from '@/chopro/music';
 import { retrieveSong, saveSong } from '@/database/song';
 import {
   getDefaultArrangement,
+  NewSong,
+  NewSongArrangement,
+  OptionalLyrics,
+  OptionalSlug,
   removeArrangement,
   RequiredArrangement,
-  RequiredArrangements,
-  RequiredLyrics,
-  RequiredSlug,
   Song,
   SongWith,
 } from '@/models/song';
-import { getArrangementLyrics, getSongUnitMap, RequiredIsNew, SongArrangementWith } from '@/models/song-arrangement';
+import {
+  getArrangementLyrics,
+  getSongUnitMap,
+  OptionalKey,
+  RequiredIsNew,
+  SongArrangementWith,
+} from '@/models/song-arrangement';
 import { redirect, RedirectType } from 'next/navigation';
 
-export type PostSongAction = ((song: SongWith<RequiredArrangement>) => Promise<void>) & Function;
+export type PostSongAction = ((song: SongWith<OptionalLyrics & RequiredArrangement>) => Promise<void>) & Function;
 
-export const postSong: PostSongAction = async function (incompleteSong: SongWith<RequiredArrangement>) {
+export const postSong: PostSongAction = async function (
+  incompleteSong: SongWith<OptionalLyrics & RequiredArrangement>
+) {
   const arrangement = incompleteSong.arrangement;
   const slug = incompleteSong.slug;
   if (!arrangement.key || arrangement.key.trim() === '') {
@@ -38,19 +47,16 @@ export const postSong: PostSongAction = async function (incompleteSong: SongWith
   redirect(`./${savedSong.slug}`, RedirectType.replace);
 };
 
-export type DeleteArrangementAction = ((song: SongWith<RequiredSlug>, arrangementId: number) => void) & Function;
+export type DeleteArrangementAction = ((song: Song, arrangementId: number) => void) & Function;
 
-export const deleteArrangement: DeleteArrangementAction = async function (
-  incompleteSong: SongWith<RequiredSlug>,
-  arrangementId: number
-) {
+export const deleteArrangement: DeleteArrangementAction = async function (incompleteSong: Song, arrangementId: number) {
   const slug = incompleteSong.slug;
   const song = await retrieveSong(slug);
   if (!song) throw new Error('Song not found');
 
-  removeArrangement(song as SongWith<RequiredArrangements>, arrangementId);
+  removeArrangement(song, arrangementId);
 
-  const arrangement = getDefaultArrangement(song as SongWith<RequiredArrangements>);
+  const arrangement = getDefaultArrangement(song);
   if (arrangement) {
     song.lyrics = getArrangementLyrics(arrangement);
   } else if (!song.isDeleted) {
@@ -59,16 +65,16 @@ export const deleteArrangement: DeleteArrangementAction = async function (
     else throw new Error('Song must have a default arrangement');
   }
 
-  await saveSong(song as SongWith<RequiredArrangements & RequiredLyrics>);
+  await saveSong(song);
   redirect(`./`, RedirectType.replace);
 };
 
 export async function getSongOrCreate(
   slug: string | undefined,
   currentArrangementId: number | undefined
-): Promise<SongWith<RequiredArrangement<SongArrangementWith<RequiredIsNew>>>> {
+): Promise<NewSong> {
   const fullSong = (slug && slug !== 'new' && (await retrieveSong(slug))) || null;
-  let arrangement: SongArrangementWith<RequiredIsNew> = {
+  let arrangement: NewSongArrangement = {
     units: [],
     songMap: [],
     isDefault: true,
@@ -97,8 +103,9 @@ export async function getSongOrCreate(
     }
     return {
       title: fullSong.title,
-      slug: fullSong.slug!,
+      slug: fullSong.slug,
       artist: fullSong.artist,
+      arrangements: fullSong.arrangements.map((arrangement) => ({ ...arrangement, isNew: false })),
       isDeleted: fullSong.isDeleted,
       currentArrangementId,
       arrangement,
@@ -107,6 +114,7 @@ export async function getSongOrCreate(
   return {
     title: '',
     artist: null,
+    arrangements: [arrangement],
     isDeleted: false,
     currentArrangementId: 0,
     arrangement,

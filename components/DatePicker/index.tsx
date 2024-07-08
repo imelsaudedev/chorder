@@ -10,7 +10,7 @@ import { ServiceFormSchema } from '@/forms/ServiceForm/schema';
 
 type DatePickerProps = {
   buttonProps?: React.ComponentProps<typeof Button>;
-} & ControllerRenderProps<ServiceFormSchema, 'date'>;
+} & Omit<ControllerRenderProps<ServiceFormSchema, 'date'>, 'ref'>;
 
 export default function DatePicker({ buttonProps, value, disabled, onChange }: DatePickerProps) {
   return (

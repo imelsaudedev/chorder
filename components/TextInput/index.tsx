@@ -1,10 +1,5 @@
-import {
-  ChangeEvent,
-  ChangeEventHandler,
-  useLayoutEffect,
-  useRef,
-} from "react";
-import TextareaAutosize from "react-textarea-autosize";
+import { ChangeEventHandler, useLayoutEffect, useRef } from 'react';
+import TextareaAutosize from 'react-textarea-autosize';
 
 export default function TextInput({
   className,
@@ -29,7 +24,7 @@ export default function TextInput({
   if (long) {
     Component = TextareaAutosize;
   } else {
-    Component = "input";
+    Component = 'input';
   }
 
   // https://giacomocerquone.com/keep-input-cursor-still/
@@ -43,10 +38,7 @@ export default function TextInput({
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useLayoutEffect(() => {
-    inputRef.current?.setSelectionRange(
-      position.current.beforeStart,
-      position.current.beforeEnd
-    );
+    inputRef.current?.setSelectionRange(position.current.beforeStart, position.current.beforeEnd);
   }, [value]);
 
   const handleChange: ChangeEventHandler = (e) => {
@@ -63,18 +55,18 @@ export default function TextInput({
   };
 
   const classNames = [
-    "border",
-    "border-gray-300",
-    "bg-gray-50",
-    "text-gray-900",
-    "flex-grow",
-    "rounded-md",
-    "text-sm",
-    "focus:ring-blue-500",
-    "focus:border-blue-500",
-    "block",
-    "w-full",
-    "p-2",
+    'border',
+    'border-gray-300',
+    'bg-gray-50',
+    'text-gray-900',
+    'flex-grow',
+    'rounded-md',
+    'text-sm',
+    'focus:ring-blue-500',
+    'focus:border-blue-500',
+    'block',
+    'w-full',
+    'p-2',
   ];
   if (className) {
     classNames.push(className);
@@ -91,7 +83,7 @@ export default function TextInput({
       id={id}
       value={value}
       defaultValue={defaultValue}
-      className={classNames.join(" ")}
+      className={classNames.join(' ')}
       onChange={handleChange}
       placeholder={placeholder}
       {...otherProps}

@@ -1,20 +1,23 @@
 import { z } from 'zod';
-import { songMapSchema } from '../ArrangementForm/schema';
+import { songMapSchema, songUnitsSchema } from '../ArrangementForm/schema';
 
 const textUnitSchema = z.object({ type: z.literal('TEXT'), content: z.string() });
 const songUnitSchema = z.object({
   type: z.literal('SONG'),
-  song: z.object({
-    currentArrangementId: z.number(),
-    arrangement: z.object({
-      songMap: songMapSchema,
-      semitoneTranspose: z.number(),
-    }),
-  }),
+  slug: z.string(),
+  title: z.string(),
+  artist: z.string().optional(),
+  currentArrangementId: z.number(),
+  baseKey: z.string(),
+  semitoneTranspose: z.number(),
+  lastUnitId: z.number().positive(),
+  songMap: z.array(songMapSchema),
+  units: z.array(songUnitsSchema),
 });
 const unitSchema = z.union([textUnitSchema, songUnitSchema]);
 
 const schema = z.object({
+  slug: z.string().optional(),
   title: z.string().optional(),
   worshipLeader: z.string().optional(),
   date: z.date(),

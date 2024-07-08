@@ -3,13 +3,12 @@
 import { DeleteArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
 import Main from '@/components/Main';
 import ArrangementForm from '@/forms/ArrangementForm';
-import { RequiredArrangement, SongWith } from '@/models/song';
-import { RequiredIsNew, SongArrangementWith } from '@/models/song-arrangement';
+import { NewSong, RequiredArrangement, SongWith } from '@/models/song';
 import { useState } from 'react';
 import ArrangementViewPage from '../ArrangementViewPage';
 
 type SongViewerProps = {
-  song: SongWith<RequiredArrangement<SongArrangementWith<RequiredIsNew>>>;
+  song: NewSong;
   initialWriteMode: boolean;
   postSong: PostSongAction;
   deleteArrangement: DeleteArrangementAction;
@@ -31,8 +30,12 @@ export default function SongViewer({ song, postSong, deleteArrangement, initialW
           />
         </Main>
       )}
-      {!writeMode && (
-        <ArrangementViewPage song={song} setWriteMode={setWriteMode} deleteArrangement={deleteArrangement} />
+      {!writeMode && song.slug && (
+        <ArrangementViewPage
+          song={song as SongWith<RequiredArrangement>}
+          setWriteMode={setWriteMode}
+          deleteArrangement={deleteArrangement}
+        />
       )}
     </>
   );

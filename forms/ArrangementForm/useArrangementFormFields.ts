@@ -48,7 +48,7 @@ export default function useArrangementFormFields(
     mapLength: songMap.length,
     onMoveUnitUp: useMoveUnitUp(swapSongMapElements),
     onMoveUnitDown: useMoveUnitDown(swapSongMapElements, songMap.length - 1),
-    onRemoveUnit: useRemoveUnit(songMap, removeSongUnit, units, removeSongMapElement, internalId2UnitIndex),
+    onRemoveUnit: useRemoveUnit(songMap, removeSongUnit, removeSongMapElement, internalId2UnitIndex),
   };
 }
 
@@ -71,9 +71,8 @@ type SongMapFormUnit = {
 };
 
 function updateUnitTypeIndicesInForm(units: SongUnit[], updateSongUnit: (index: number, unit: SongUnit) => void) {
-  const prevIndices = units.map((unit) => unit.typeIdx);
   updateUnitTypeIndices(units);
-  units.forEach((unit, index) => prevIndices[index] === unit.typeIdx && updateSongUnit(index, unit));
+  units.forEach((unit, index) => updateSongUnit(index, unit));
 }
 
 function useUpdateUnit(units: SongUnit[], updateSongUnit: (index: number, unit: SongUnit) => void) {
@@ -123,7 +122,6 @@ function useAddExistingUnit(appendSongMapElement: (element: { internalId: number
 function useRemoveUnit(
   songMap: SongMapFormUnit[],
   removeSongUnit: (index: number) => void,
-  units: SongUnit[],
   removeSongMapElement: (index: number) => void,
   internalId2UnitIndex: Map<number, number>
 ) {
@@ -136,6 +134,6 @@ function useRemoveUnit(
       }
       removeSongMapElement(index);
     },
-    [removeSongMapElement, removeSongUnit, songMap, units]
+    [internalId2UnitIndex, removeSongMapElement, removeSongUnit, songMap]
   );
 }

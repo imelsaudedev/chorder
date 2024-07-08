@@ -2,7 +2,7 @@ import { getLyrics } from '@/chopro/music';
 import { createUnit, SongUnit, SongUnitType, unitsAreEqual } from './song-unit';
 
 export type SongArrangement = {
-  key?: string;
+  key: string;
   units: SongUnit[];
   songMap: number[];
   isDefault: boolean;
@@ -13,8 +13,8 @@ export type SongArrangement = {
 
 export type SongArrangementWith<T> = Omit<SongArrangement, keyof T> & T;
 
-export type RequiredKey = {
-  key: string;
+export type OptionalKey = {
+  key?: string;
 };
 
 export type RequiredIsNew = {
@@ -26,26 +26,30 @@ export type RequiredIsNew = {
  *
  * If a unit exists in both arrangements, but has different content or type, it will be included in the diff as a new unit.
  */
-export function extractDiff(baseArrangement: SongArrangement, otherArrangement: SongArrangement) {
+export function extractDiff(
+  baseArrangement: SongArrangement,
+  otherArrangement: SongArrangement
+): [SongUnit[], number[], number] {
   const diff: SongUnit[] = [];
+  let songMap: number[] = baseArrangement.songMap;
+  let lastUnitId = baseArrangement.lastUnitId;
   baseArrangement.units.forEach((thisUnit) => {
     const otherUnit = otherArrangement.units.find((unit) => unit.internalId === thisUnit.internalId);
     const unitExistsInOther = !!otherUnit;
     if (unitExistsInOther && !unitsAreEqual(thisUnit, otherUnit)) {
-      const newUnit = createUnit({ internalId: baseArrangement.lastUnitId++ });
+      lastUnitId++;
+      const newUnit = createUnit({ internalId: lastUnitId });
       baseArrangement.units.push(newUnit);
       newUnit.content = thisUnit.content;
       newUnit.type = thisUnit.type;
       // Replace the unit in the map with the new unit
-      baseArrangement.songMap = baseArrangement.songMap.map((unitId) =>
-        unitId === thisUnit.internalId ? newUnit.internalId : unitId
-      );
+      songMap = songMap.map((unitId) => (unitId === thisUnit.internalId ? newUnit.internalId : unitId));
       diff.push(newUnit);
     } else if (!unitExistsInOther) {
       diff.push(thisUnit);
     }
   });
-  return diff;
+  return [diff, songMap, lastUnitId];
 }
 
 export function updateUnitTypeIndices(newUnits: SongUnit[]) {

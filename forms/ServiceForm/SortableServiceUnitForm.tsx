@@ -1,17 +1,18 @@
 import SortingButtons from '@/components/SortingButtons';
+import ServiceSongUnitEditor from '@/fragments/ServiceSongUnitEditor';
 import { useCallback } from 'react';
-import { SongUnitSchema, UnitSchema } from './schema';
-import SongUnitForm from './SongUnitForm';
-import { ServiceUnitsHook } from './useServiceUnits';
+import { UnitSchema } from './schema';
+import { ServiceFormFields } from './useServiceFormFields';
 
 type SortableServiceUnitFormProps = {
   index: number;
-  unitsHook: ServiceUnitsHook;
   unit: UnitSchema;
+  serviceFormFields: ServiceFormFields;
 };
 
-export default function SortableServiceUnitForm({ index, unitsHook, unit }: SortableServiceUnitFormProps) {
-  const { unitsLength, onMoveUnitDown, onMoveUnitUp, onRemoveUnit } = unitsHook;
+export default function SortableServiceUnitForm({ index, unit, serviceFormFields }: SortableServiceUnitFormProps) {
+  const { unitsLength, onMoveUnitDown, onMoveUnitUp, onRemoveUnit } = serviceFormFields;
+
   const handleRemoveUnit = useCallback(() => {
     onRemoveUnit(index);
   }, [index, onRemoveUnit]);
@@ -19,7 +20,7 @@ export default function SortableServiceUnitForm({ index, unitsHook, unit }: Sort
   return (
     <div className="flex">
       <SortingButtons moveUnitUp={onMoveUnitUp} moveUnitDown={onMoveUnitDown} listSize={unitsLength} index={index} />
-      {unit.type === 'SONG' && <SongUnitForm unit={unit as SongUnitSchema} onRemoveUnit={handleRemoveUnit} />}
+      {unit.type === 'SONG' && <ServiceSongUnitEditor index={index} onRemoveUnit={handleRemoveUnit} />}
     </div>
   );
 }

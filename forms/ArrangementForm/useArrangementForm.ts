@@ -1,9 +1,9 @@
-import { RequiredArrangement, SongWith } from '@/models/song';
+import { NewSong } from '@/models/song';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import schema, { ArrangementFormSchema } from './schema';
 
-export function useArrangementForm(song: SongWith<RequiredArrangement>) {
+export function useArrangementForm(song: NewSong) {
   return useForm<ArrangementFormSchema>({
     resolver: zodResolver(schema),
     defaultValues: {

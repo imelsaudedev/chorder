@@ -4,11 +4,12 @@ import Main from '@/components/Main';
 import PlusIcon from '@/components/icons/PlusIcon';
 import { retrieveSongs } from '@/database/song';
 import SongList from '@/fragments/SongList';
+import { excludeArrangements } from '@/models/song';
 
 export const dynamic = 'force-dynamic';
 
 export default async function SongListPage() {
-  const songs = await retrieveSongs({ options: { excludeArrangements: true } });
+  const songs = (await retrieveSongs({})).map(excludeArrangements);
 
   return (
     <>
