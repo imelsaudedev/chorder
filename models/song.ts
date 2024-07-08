@@ -95,7 +95,7 @@ export function setArrangement<T extends Song>(song: T): SongWith<T & RequiredAr
   }
   arrangement = song.arrangements[song.currentArrangementId];
   if (!arrangement) {
-    arrangement = song.arrangements[0];
+    throw new Error(`Invalid arrangementId: ${song.currentArrangementId}`);
   }
   return {
     ...song,
