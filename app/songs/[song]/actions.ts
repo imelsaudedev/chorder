@@ -2,31 +2,13 @@
 
 import { getChords, getKeyFromChords } from '@/chopro/music';
 import { retrieveSong, saveSong } from '@/database/song';
-import {
-  getDefaultArrangement,
-  NewSong,
-  NewSongArrangement,
-  OptionalLyrics,
-  OptionalSlug,
-  removeArrangement,
-  RequiredArrangement,
-  Song,
-  SongWith,
-} from '@/models/song';
-import {
-  getArrangementLyrics,
-  getSongUnitMap,
-  OptionalKey,
-  RequiredIsNew,
-  SongArrangementWith,
-} from '@/models/song-arrangement';
+import { getDefaultArrangement, NewSong, NewSongArrangement, removeArrangement, Song } from '@/models/song';
+import { getArrangementLyrics, getSongUnitMap, SongArrangement } from '@/models/song-arrangement';
 import { redirect, RedirectType } from 'next/navigation';
 
-export type PostSongAction = ((song: SongWith<OptionalLyrics & RequiredArrangement>) => Promise<void>) & Function;
+export type PostSongAction = ((song: NewSong) => Promise<void>) & Function;
 
-export const postSong: PostSongAction = async function (
-  incompleteSong: SongWith<OptionalLyrics & RequiredArrangement>
-) {
+export const postSong: PostSongAction = async function (incompleteSong: NewSong) {
   const arrangement = incompleteSong.arrangement;
   const slug = incompleteSong.slug;
   if (!arrangement.key || arrangement.key.trim() === '') {
@@ -41,7 +23,7 @@ export const postSong: PostSongAction = async function (
     artist: incompleteSong.artist,
     isDeleted: incompleteSong.isDeleted,
     lyrics: getArrangementLyrics(arrangement),
-    arrangement: arrangement,
+    arrangement: arrangement as SongArrangement,
     currentArrangementId: incompleteSong.currentArrangementId,
   });
   redirect(`./${savedSong.slug}`, RedirectType.replace);

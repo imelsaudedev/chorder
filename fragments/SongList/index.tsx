@@ -1,11 +1,11 @@
-import { groupSongsByFirstLetter, RequiredArrangement, SongWith } from '@/models/song';
+import { groupSongsByFirstLetter, Song, WithoutArrangements } from '@/models/song';
 import Link from 'next/link';
 import { Fragment, ReactNode, useMemo } from 'react';
 
 type SongListProps = {
-  songs: SongWith<RequiredArrangement>[];
+  songs: WithoutArrangements<Song>[];
   initialsStyle?: 'grid' | 'row';
-  onSelected?: (song: SongWith<RequiredArrangement>, arrangementId: number) => void;
+  onSelected?: (song: WithoutArrangements<Song>) => void;
 };
 
 export default function SongList({ songs, initialsStyle = 'grid', onSelected }: SongListProps) {
@@ -92,8 +92,8 @@ export default function SongList({ songs, initialsStyle = 'grid', onSelected }: 
 }
 
 type AnchorOrButtonProps = {
-  song: SongWith<RequiredArrangement>;
-  onSelected?: (song: SongWith<RequiredArrangement>, arrangementId: number) => void;
+  song: WithoutArrangements<Song>;
+  onSelected?: (song: WithoutArrangements<Song>) => void;
   children: ReactNode;
 };
 
@@ -101,7 +101,7 @@ function AnchorOrButton({ song, onSelected, children }: AnchorOrButtonProps) {
   if (onSelected) {
     const handleClick = (event: React.MouseEvent) => {
       event.preventDefault();
-      onSelected(song, song.currentArrangementId);
+      onSelected(song);
     };
     return (
       <button className="flex flex-col pt-2 pb-3 border-b-gray-300 border-b-2 w-full" onClick={handleClick}>

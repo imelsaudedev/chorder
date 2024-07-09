@@ -22,7 +22,7 @@ export default function ServiceConfig({
   return (
     <div className={`flex mb-4 bg-gray-200 p-2 rounded justify-between ${visible ? '' : 'hidden'}`}>
       <div className="flex">
-        <ColumnButtons columns={columns} setColumns={setColumns} />
+        <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
       </div>
       <div className="flex">
         <form action={deleteService} className="grid place-content-center">

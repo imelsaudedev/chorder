@@ -34,7 +34,7 @@ export type NewSong = SongWith<
   NewSongArrangement
 >;
 
-export function groupSongsByFirstLetter<T extends Song>(songs: T[]): Map<string, T[]> {
+export function groupSongsByFirstLetter<T extends { title: string }>(songs: T[]): Map<string, T[]> {
   const byFirstLetter = new Map<string, T[]>();
 
   songs.forEach((song) => {

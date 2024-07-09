@@ -60,7 +60,7 @@ export function updateUnitTypeIndices(newUnits: SongUnit[]) {
   });
 }
 
-export function getArrangementLyrics(arrangement: SongArrangement) {
+export function getArrangementLyrics<T extends Pick<SongArrangement, 'units'>>(arrangement: T) {
   return arrangement.units.map((unit) => getLyrics(unit.content)).join('\n');
 }
 
@@ -68,7 +68,7 @@ export function getInternalId2Unit(units: SongUnit[]) {
   return new Map(units.map((u) => [u.internalId, u]));
 }
 
-export function getSongUnitMap(arrangement: SongArrangement) {
+export function getSongUnitMap<T extends Pick<SongArrangement, 'units' | 'songMap'>>(arrangement: T) {
   const internalId2Unit = getInternalId2Unit(arrangement.units);
   return arrangement.songMap.map((internalId) => internalId2Unit.get(internalId)!);
 }

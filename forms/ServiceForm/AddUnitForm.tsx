@@ -20,13 +20,13 @@ export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
   }, []);
 
   const [songPopoverOpen, setSongPopoverOpen] = useState<boolean>(false);
-  const onSelected = (song: SongWith<RequiredArrangement>, arrangementId: number) => {
+  const onSelected = (song: SongWith<RequiredArrangement>) => {
     onCreateUnit({
       type: 'SONG',
       slug: song.slug!,
       title: song.title,
       artist: song.artist || '',
-      currentArrangementId: arrangementId,
+      currentArrangementId: song.currentArrangementId,
       baseKey: song.arrangement?.key || 'C',
       semitoneTranspose: song.arrangement?.semitoneTranspose || 0,
       lastUnitId: song.arrangement.lastUnitId,
