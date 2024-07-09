@@ -1,16 +1,16 @@
-import { RequiredArrangement, Song, SongWith, WithoutArrangements } from '@/models/song';
-import SongList from '../SongList';
+import { Song, WithoutArrangements } from '@/models/song';
 import { useCallback } from 'react';
+import SongList from '../SongList';
 
 type SongPickerProps = {
-  songs: SongWith<RequiredArrangement>[];
-  onSelected: (song: SongWith<RequiredArrangement>) => void;
+  songs: WithoutArrangements<Song>[];
+  onSelected: (song: WithoutArrangements<Song>) => void;
 };
 
 export default function SongPicker({ songs, onSelected }: SongPickerProps) {
   const handleSelected = useCallback(
     (song: WithoutArrangements<Song>) => {
-      onSelected(song as SongWith<RequiredArrangement>);
+      onSelected(song);
     },
     [onSelected]
   );

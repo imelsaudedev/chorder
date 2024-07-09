@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import messages from '@/i18n/messages';
-import { fetchSongs } from '@/lib/apiClient';
-import { RequiredArrangement, SongWith } from '@/models/song';
+import { fetchSong, fetchSongs } from '@/lib/apiClient';
+import { RequiredArrangement, Song, SongWith, WithoutArrangements } from '@/models/song';
 import { useEffect, useState } from 'react';
 import SongPicker from '../../fragments/SongPicker';
 import { ServiceFormFields } from './useServiceFormFields';
@@ -14,28 +14,32 @@ type AddUnitFormProps = {
 export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
   const { onCreateUnit } = serviceFormFields;
 
-  const [songs, setSongs] = useState<SongWith<RequiredArrangement>[]>([]);
+  const [songs, setSongs] = useState<WithoutArrangements<Song>[]>([]);
   useEffect(() => {
-    fetchSongs().then(setSongs).catch(console.error);
+    fetchSongs({ excludeArrangements: true }).then(setSongs).catch(console.error);
   }, []);
 
   const [songPopoverOpen, setSongPopoverOpen] = useState<boolean>(false);
-  const onSelected = (song: SongWith<RequiredArrangement>) => {
-    onCreateUnit({
-      type: 'SONG',
-      slug: song.slug!,
-      title: song.title,
-      artist: song.artist || '',
-      currentArrangementId: song.currentArrangementId,
-      baseKey: song.arrangement?.key || 'C',
-      semitoneTranspose: song.arrangement?.semitoneTranspose || 0,
-      lastUnitId: song.arrangement.lastUnitId,
-      songMap: song.arrangement.songMap.map((internalId) => ({
-        internalId,
-      })),
-      units: song.arrangement.units,
-    });
-    setSongPopoverOpen(false);
+  const onSelected = (song: WithoutArrangements<Song>) => {
+    fetchSong(song.slug, { selectArrangement: true })
+      .then((song: SongWith<RequiredArrangement>) => {
+        onCreateUnit({
+          type: 'SONG',
+          slug: song.slug!,
+          title: song.title,
+          artist: song.artist || '',
+          currentArrangementId: song.currentArrangementId,
+          baseKey: song.arrangement?.key || 'C',
+          semitoneTranspose: song.arrangement?.semitoneTranspose || 0,
+          lastUnitId: song.arrangement.lastUnitId,
+          songMap: song.arrangement.songMap.map((internalId) => ({
+            internalId,
+          })),
+          units: song.arrangement.units,
+        });
+        setSongPopoverOpen(false);
+      })
+      .catch(console.error);
   };
 
   return (

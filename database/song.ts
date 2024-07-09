@@ -2,7 +2,7 @@ import { SongArrangement } from '@/models/song-arrangement';
 import { Filter } from 'mongodb';
 import { DBData, getDB } from './client';
 import { getAvailableSlug, saveSlug } from './slug';
-import { Song } from '@/models/song';
+import { NewSong, Song } from '@/models/song';
 
 type RetrieveSongOptions = {
   acceptDeleted?: boolean;
@@ -75,7 +75,7 @@ export async function saveSong(
   dbData?: DBData
 ): Promise<Song> {
   const { client, db, songs } = await getSongsCollection(dbData);
-  const song = (slug && (await retrieveSong(slug, { client, db }))) || ({} as Song);
+  const song = (slug && (await retrieveSong(slug, { client, db }))) || ({} as NewSong);
   if (title !== undefined) song.title = title;
   if (artist !== undefined) song.artist = artist;
   if (lyrics !== undefined) song.lyrics = lyrics;
@@ -83,6 +83,7 @@ export async function saveSong(
   if (arrangements !== undefined) song.arrangements = arrangements;
   if (arrangement !== undefined) {
     if (currentArrangementId !== undefined) {
+      if (!song.arrangements) song.arrangements = [];
       song.arrangements[currentArrangementId] = arrangement;
     } else {
       throw new Error('currentArrangementId must be defined when updating arrangement');
@@ -91,7 +92,7 @@ export async function saveSong(
 
   if (slug) {
     try {
-      await songs.updateOne({ slug: song.slug }, { $set: song });
+      await songs.updateOne({ slug: song.slug }, { $set: song as Song });
     } catch (e) {
       console.error(e, `\nFailed with song ${JSON.stringify(song, null, 2)}`);
       throw new Error('Failed to update song');

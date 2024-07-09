@@ -6,7 +6,7 @@ import { NewService, OptionalSlug, RequiredIsNew, Service, ServiceWith } from '@
 import { ServiceSongUnit, ServiceUnit } from '@/models/service-unit';
 import { RequiredArrangement, SongWith } from '@/models/song';
 import { SongArrangement } from '@/models/song-arrangement';
-import { RedirectType, redirect } from 'next/navigation';
+import { redirect, RedirectType } from 'next/navigation';
 
 export type PostServiceAction = ((service: ServiceFormSchema) => Promise<void>) & Function;
 
@@ -71,7 +71,7 @@ export async function getServiceOrCreate(slug: string | undefined): Promise<Serv
   const units = service?.units || ([] as ServiceUnit[]);
   return {
     title: service?.title,
-    slug,
+    slug: slug === 'new' ? undefined : slug,
     worshipLeader: service?.worshipLeader || null,
     date: service?.date || new Date(),
     isDeleted: !!service?.isDeleted,
