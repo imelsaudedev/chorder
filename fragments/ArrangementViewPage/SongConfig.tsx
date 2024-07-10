@@ -1,10 +1,10 @@
+import ConfirmDeleteButton from '@/components/ConfirmDeleteButton';
 import EditIcon from '@/components/icons/EditIcon';
-import TrashIcon from '@/components/icons/TrashIcon';
 import { Button } from '@/components/ui/button';
-import { Dispatch, SetStateAction } from 'react';
-import ColumnButtons from './ColumnButtons';
 import { Label } from '@/components/ui/label';
 import messages from '@/i18n/messages';
+import { Dispatch, SetStateAction } from 'react';
+import ColumnButtons from './ColumnButtons';
 
 type SongConfigProps = {
   columns: number;
@@ -23,7 +23,7 @@ export default function SongConfig({
     <>
       <h2 className="text-primary font-bold">{messages.messages.config}</h2>
       <div className={`flex mb-4 border border-primary p-2 rounded justify-between items-center`}>
-        <div className="">
+        <div>
           <Label htmlFor="column-count">{messages.messages.columns}</Label>
           <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
         </div>
@@ -31,11 +31,11 @@ export default function SongConfig({
           <Button onClick={onEditButtonClick} variant="default">
             <EditIcon />
           </Button>
-          <form action={deleteArrangementWithId} className="grid place-content-center">
-            <Button type="submit" variant="destructive">
-              <TrashIcon />
-            </Button>
-          </form>
+          <ConfirmDeleteButton
+            onDelete={deleteArrangementWithId}
+            alertTitle={messages.songForm.confirmDeleteTitle}
+            alertDescription={messages.songForm.confirmDelete}
+          />
         </div>
       </div>
     </>

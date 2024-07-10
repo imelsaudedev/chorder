@@ -1,12 +1,15 @@
+import { deleteService } from '@/app/services/[service]/actions';
 import ConfigIcon from '@/components/icons/ConfigIcon';
 import Main from '@/components/Main';
 import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleTrigger } from '@/components/ui/collapsible';
+import messages from '@/i18n/messages';
 import { getHumanReadableTitle, Service } from '@/models/service';
 import { ServiceSongUnit } from '@/models/service-unit';
-import { Dispatch, Fragment, SetStateAction, useCallback, useState } from 'react';
-import ServiceSongUnitView from './ServiceSongUnitView';
+import { CollapsibleContent } from '@radix-ui/react-collapsible';
+import { Dispatch, Fragment, SetStateAction, useCallback, useMemo, useState } from 'react';
 import ServiceConfig from './ServiceConfig';
-import { deleteService } from '@/app/services/[service]/actions';
+import ServiceSongUnitView from './ServiceSongUnitView';
 
 type ServiceViewPageProps = {
   service: Service;
@@ -14,13 +17,8 @@ type ServiceViewPageProps = {
 };
 
 export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPageProps) {
-  const [showConfig, setShowConfig] = useState(false);
-  const [columns, setColumns] = useState(2);
+  const [columns, setColumns] = useState(0);
   const units = service.units;
-
-  const handleToggleConfig = useCallback(() => {
-    setShowConfig((prev) => !prev);
-  }, [setShowConfig]);
 
   const handleEditButtonClick = useCallback(() => {
     setWriteMode(true);
@@ -28,28 +26,32 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
   const deleteCurrentService = deleteService.bind(null, service);
 
   return (
-    <>
-      <div>
-        <div className="flex ml-4 gap-2 flex-grow justify-between items-center">
+    <Collapsible>
+      <div className="px-4">
+        <div className="flex gap-2 flex-grow justify-between items-center">
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-none">{getHumanReadableTitle(service)}</span>
-            {service.worshipLeader && <span className="text-sm">{service.worshipLeader}</span>}
+            <span className="font-bold text-lg leading-none text-primary">{getHumanReadableTitle(service)}</span>
+            {service.worshipLeader && <span className="text-sm text-muted">{service.worshipLeader}</span>}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleToggleConfig}>
-              <ConfigIcon />
-            </Button>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="w-9 p-0">
+                <ConfigIcon />
+                <span className="sr-only">{messages.messages.toggleConfig}</span>
+              </Button>
+            </CollapsibleTrigger>
           </div>
         </div>
       </div>
       <Main>
-        <ServiceConfig
-          columns={columns}
-          setColumns={setColumns}
-          deleteService={deleteCurrentService}
-          onEditButtonClick={handleEditButtonClick}
-          visible={showConfig}
-        />
+        <CollapsibleContent>
+          <ServiceConfig
+            columns={columns}
+            setColumns={setColumns}
+            deleteService={deleteCurrentService}
+            onEditButtonClick={handleEditButtonClick}
+          />
+        </CollapsibleContent>
         <section className="flex flex-col gap-6 mx-auto">
           {units.map((unit, index) => {
             if (unit) {
@@ -65,6 +67,6 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
           })}
         </section>
       </Main>
-    </>
+    </Collapsible>
   );
 }

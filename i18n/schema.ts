@@ -8,6 +8,7 @@ export const messagesSchema = z.object({
     or: z.string(),
     preview: z.string(),
     cancel: z.string(),
+    delete: z.string(),
     save: z.string(),
     song: z.string(),
     songs: z.string(),
@@ -55,11 +56,15 @@ export const messagesSchema = z.object({
   serviceForm: z.object({
     editArrangement: z.string(),
     newSongUnit: z.string(),
+    confirmDeleteTitle: z.string(),
+    confirmDelete: z.string(),
   }),
   songForm: z.object({
     addExistingUnit: z.string(),
     addUnitWithLabel: z.string(),
     newUnit: z.string(),
+    confirmDeleteTitle: z.string(),
+    confirmDelete: z.string(),
   }),
 });
 

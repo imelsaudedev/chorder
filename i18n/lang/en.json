@@ -5,6 +5,7 @@
     "or": "or",
     "preview": "Preview",
     "cancel": "Cancel",
+    "delete": "Delete",
     "save": "Save",
     "song": "Song",
     "songs": "Songs",
@@ -51,11 +52,15 @@
   },
   "serviceForm": {
     "editArrangement": "Edit arrangement",
-    "newSongUnit": "Add song"
+    "newSongUnit": "Add song",
+    "confirmDeleteTitle": "Are you sure you want to delete this service?",
+    "confirmDelete": "This action cannot be undone."
   },
   "songForm": {
     "addExistingUnit": "Add existing unit",
     "addUnitWithLabel": "Add unit {label}",
-    "newUnit": "New unit"
+    "newUnit": "New unit",
+    "confirmDeleteTitle": "Are you sure you want to delete this song?",
+    "confirmDelete": "This action cannot be undone."
   }
 }

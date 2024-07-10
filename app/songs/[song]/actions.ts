@@ -38,13 +38,15 @@ export const deleteArrangement: DeleteArrangementAction = async function (incomp
 
   removeArrangement(song, arrangementId);
 
-  const arrangement = getDefaultArrangement(song);
-  if (arrangement) {
+  try {
+    const arrangement = getDefaultArrangement(song);
     song.lyrics = getArrangementLyrics(arrangement);
-  } else if (!song.isDeleted) {
-    if (!song.arrangements || song.arrangements.length === 0)
-      throw new Error('Song must have at least one arrangement');
-    else throw new Error('Song must have a default arrangement');
+  } catch {
+    if (!song.isDeleted) {
+      if (!song.arrangements || song.arrangements.length === 0)
+        throw new Error('Song must have at least one arrangement');
+      else throw new Error('Song must have a default arrangement');
+    }
   }
 
   await saveSong(song);

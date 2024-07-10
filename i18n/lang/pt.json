@@ -5,6 +5,7 @@
     "or": "ou",
     "preview": "Pré-visualizar",
     "cancel": "Cancelar",
+    "delete": "Apagar",
     "save": "Salvar",
     "song": "Música",
     "songs": "Músicas",
@@ -51,11 +52,15 @@
   },
   "serviceForm": {
     "editArrangement": "Editar arranjo",
-    "newSongUnit": "Adicionar música"
+    "newSongUnit": "Adicionar música",
+    "confirmDeleteTitle": "Você tem certeza que deseja deletar esta liturgia?",
+    "confirmDelete": "Esta ação não pode ser desfeita."
   },
   "songForm": {
     "addExistingUnit": "Adicionar unidade existente",
     "addUnitWithLabel": "Adicionar unidade {label}",
-    "newUnit": "Nova unidade"
+    "newUnit": "Nova unidade",
+    "confirmDeleteTitle": "Você tem certeza que deseja deletar esta música?",
+    "confirmDelete": "Esta ação não pode ser desfeita."
   }
 }
