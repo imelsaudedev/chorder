@@ -1,6 +1,4 @@
 import ChordProViewer from '@/components/ChordProViewer';
-import FormField from '@/components/FormField';
-import FormLabel from '@/components/FormLabel';
 import TextInput from '@/components/TextInput';
 import UnitCircle from '@/components/UnitCircle';
 import CloseIcon from '@/components/icons/CloseIcon';
@@ -83,8 +81,10 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
         </Button>
       </div>
 
-      <FormField>
-        <FormLabel htmlFor={unitTypeId}>{messages.unitData.unitType}</FormLabel>
+      <div className="flex flex-col">
+        <label className="block text-sm font-medium text-gray-900" htmlFor={unitTypeId}>
+          {messages.unitData.unitType}
+        </label>
         <ComboBoxResponsive
           value={unit.type}
           className="flex-grow"
@@ -93,11 +93,13 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
           id={unitTypeId}
           placeholder={messages.unitData.unitTypePlaceholder}
         />
-      </FormField>
+      </div>
 
-      <FormField className="flex-grow">
+      <div className="flex flex-col flex-grow">
         <div className="flex justify-between">
-          <FormLabel htmlFor={contentId}>{messages.unitData.content}</FormLabel>
+          <label className="block text-sm font-medium text-gray-900" htmlFor={contentId}>
+            {messages.unitData.content}
+          </label>
           <div className="flex gap-1 items-center text-sm">
             <label htmlFor={showPreviewId}>{messages.messages.preview}</label>
             <input id={showPreviewId} type="checkbox" onChange={handlePreviewChange} checked={preview} />
@@ -119,7 +121,7 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
             long
           />
         )}
-      </FormField>
+      </div>
     </div>
   );
 }
