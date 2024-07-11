@@ -37,7 +37,8 @@
   "unitData": {
     "content": "Chordpro",
     "contentPlaceholder": "O conteúdo no formato chordpro vai aqui",
-    "unitType": "Tipo da unidade"
+    "unitType": "Tipo da unidade",
+    "unitTypePlaceholder": "Selecione o tipo da unidade"
   },
   "unitTypes": {
     "INTRO": "Introdução",

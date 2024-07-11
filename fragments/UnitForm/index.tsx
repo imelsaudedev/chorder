@@ -1,5 +1,4 @@
 import ChordProViewer from '@/components/ChordProViewer';
-import Combobox from '@/components/Combobox';
 import FormField from '@/components/FormField';
 import FormLabel from '@/components/FormLabel';
 import TextInput from '@/components/TextInput';
@@ -10,7 +9,8 @@ import { unitTypeColorClasses } from '@/components/unit-colors';
 import { SongUnitSetField } from '@/forms/ArrangementForm/useArrangementFormFields';
 import messages from '@/i18n/messages';
 import { SongUnit, SongUnitType } from '@/models/song-unit';
-import { ChangeEvent, MouseEvent, useCallback, useId, useState } from 'react';
+import { ChangeEvent, MouseEvent, useCallback, useId, useMemo, useState } from 'react';
+import { ComboBoxResponsive } from '@/components/ComboBoxResponsive';
 
 type UnitFormProps = {
   unit: SongUnit;
@@ -27,6 +27,15 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
   const contentId = useId();
   const showPreviewId = useId();
 
+  const unitTypeOptions = useMemo(
+    () =>
+      Object.entries(messages.unitTypes).map(([value, label]) => ({
+        label,
+        value,
+      })),
+    []
+  );
+
   const handleRemoveUnit = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
@@ -36,8 +45,8 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
   );
 
   const handleChangeUnitType = useCallback(
-    (event: ChangeEvent<HTMLSelectElement>) => {
-      onChangeUnit({ field: 'type', value: event.target.value as SongUnitType });
+    (newValue: string) => {
+      onChangeUnit({ field: 'type', value: newValue as SongUnitType });
     },
     [onChangeUnit]
   );
@@ -76,12 +85,13 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
 
       <FormField>
         <FormLabel htmlFor={unitTypeId}>{messages.unitData.unitType}</FormLabel>
-        <Combobox
+        <ComboBoxResponsive
           value={unit.type}
           className="flex-grow"
           onChange={handleChangeUnitType}
-          options={messages.unitTypes}
+          options={unitTypeOptions}
           id={unitTypeId}
+          placeholder={messages.unitData.unitTypePlaceholder}
         />
       </FormField>
 

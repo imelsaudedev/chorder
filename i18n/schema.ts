@@ -41,6 +41,7 @@ export const messagesSchema = z.object({
     content: z.string(),
     contentPlaceholder: z.string(),
     unitType: z.string(),
+    unitTypePlaceholder: z.string(),
   }),
   unitTypes: z.object({
     INTRO: z.string(),
