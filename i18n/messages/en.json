@@ -69,6 +69,7 @@
     "addUnitWithLabel": "Add unit {label}",
     "newUnit": "New unit",
     "confirmDeleteTitle": "Are you sure you want to delete this song?",
-    "confirmDelete": "This action cannot be undone."
+    "confirmDelete": "This action cannot be undone.",
+    "noSongs": "No songs found"
   }
 }

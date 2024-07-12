@@ -69,6 +69,7 @@
     "addUnitWithLabel": "Adicionar unidade {label}",
     "newUnit": "Nova unidade",
     "confirmDeleteTitle": "Você tem certeza que deseja deletar esta música?",
-    "confirmDelete": "Esta ação não pode ser desfeita."
+    "confirmDelete": "Esta ação não pode ser desfeita.",
+    "noSongs": "Nenhuma música encontrada"
   }
 }

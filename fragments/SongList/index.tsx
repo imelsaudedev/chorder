@@ -1,6 +1,11 @@
+'use client';
+
+import HighlightKeyword, { findKeyword } from '@/components/HighlightKeyword';
+import SearchBar from '@/components/SearchBar';
 import { groupSongsByFirstLetter, Song, WithoutArrangements } from '@/models/song';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Fragment, ReactNode, useMemo } from 'react';
+import { Fragment, ReactNode, useMemo, useState } from 'react';
 
 type SongListProps = {
   songs: WithoutArrangements<Song>[];
@@ -8,7 +13,21 @@ type SongListProps = {
   onSelected?: (song: WithoutArrangements<Song>) => void;
 };
 
-export default function SongList({ songs, initialsStyle = 'grid', onSelected }: SongListProps) {
+export default function SongList({ songs: baseSongs, initialsStyle = 'grid', onSelected }: SongListProps) {
+  const t = useTranslations('SongForm');
+  const [search, setSearch] = useState('');
+
+  const songs = useMemo(() => {
+    if (!search) return baseSongs;
+    const lowerSearch = search.toLocaleLowerCase();
+    return baseSongs.filter(
+      (song) =>
+        song.title.toLocaleLowerCase().includes(lowerSearch) ||
+        song.artist?.toLocaleLowerCase().includes(lowerSearch) ||
+        song.lyrics.toLocaleLowerCase().includes(lowerSearch)
+    );
+  }, [baseSongs, search]);
+
   const songsByFirstLetter = useMemo(() => {
     const byFirstLetter = groupSongsByFirstLetter(songs);
     byFirstLetter.forEach((songs) =>
@@ -53,7 +72,13 @@ export default function SongList({ songs, initialsStyle = 'grid', onSelected }: 
           );
         })}
       </nav>
+      <div className="mb-4">
+        <SearchBar value={search} setValue={setSearch} />
+      </div>
       <section style={sectionStyle}>
+        {(!existingInitials || existingInitials.length === 0) && (
+          <p className="text-muted text-center">{t('noSongs')}</p>
+        )}
         {existingInitials.map((letter) => {
           const songs = songsByFirstLetter.get(letter);
           if (!songs) return null;
@@ -68,15 +93,34 @@ export default function SongList({ songs, initialsStyle = 'grid', onSelected }: 
                     .split('\n')
                     .map((line) => line.trim())
                     .filter((line) => !!line);
-                  const firstLines = lyrics.slice(0, 2);
+                  let firstLines = lyrics.slice(0, 2);
+                  if (
+                    search &&
+                    findKeyword(song.title, search) < 0 &&
+                    (!song.artist || findKeyword(song.artist, search) < 0) &&
+                    firstLines.every((line) => findKeyword(line, search) < 0)
+                  ) {
+                    firstLines = [lyrics[0]];
+                    const lineWithSearch = lyrics.find((line) => findKeyword(line, search) >= 0);
+                    if (lineWithSearch) {
+                      firstLines.push('...');
+                      firstLines.push(lineWithSearch);
+                    }
+                  }
 
                   return (
                     <AnchorOrButton song={song} onSelected={onSelected} key={`song-${song.slug}`}>
-                      <div className="font-bold text-lg leading-none text-primary">{song.title}</div>
-                      {song.artist && <div className="text-sm text-muted leading-tight mb-1">{song.artist}</div>}
+                      <div className="font-bold text-lg leading-none text-primary">
+                        <HighlightKeyword text={song.title} keyword={search} />
+                      </div>
+                      {song.artist && (
+                        <div className="text-sm text-muted leading-tight mb-1">
+                          <HighlightKeyword text={song.artist} keyword={search} />
+                        </div>
+                      )}
                       {firstLines.map((line, idx) => (
                         <p className="leading-tight" key={`line-${idx}`}>
-                          {line}
+                          <HighlightKeyword text={line} keyword={search} />
                         </p>
                       ))}
                     </AnchorOrButton>
