@@ -32,9 +32,9 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
       <div className="px-4">
         <div className="flex gap-2 flex-grow justify-between items-center">
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-none text-primary">
+            <h1 className="font-bold text-2xl leading-none text-primary">
               {getHumanReadableTitle(service, t('service'))}
-            </span>
+            </h1>
             {service.worshipLeader && <span className="text-sm text-muted">{service.worshipLeader}</span>}
           </div>
           <div className="flex gap-2">
