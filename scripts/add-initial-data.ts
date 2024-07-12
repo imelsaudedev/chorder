@@ -53,6 +53,7 @@ const WORSHIP_LEADERS = [
   'Deco',
   'Camila',
   'Okoshi',
+  'Ezequiel',
 ];
 
 async function main() {
@@ -414,6 +415,8 @@ function extractDate(name: string) {
     }
   } else if (name === '2024 - EBF Crianças') {
     return newDate(2024, 6, 5);
+  } else if (name.startsWith('EBF de Adolescentes 2024')) {
+    return newDate(2024, 7, 13);
   }
 
   const formats = [
