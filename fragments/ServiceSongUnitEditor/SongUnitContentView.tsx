@@ -1,7 +1,5 @@
 import { getLyrics } from '@/chopro/music';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ServiceFormSchema } from '@/forms/ServiceForm/schema';
-import messages from '@/i18n/messages';
 import { getInternalId2Unit } from '@/models/song-arrangement';
 import { Fragment, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -18,27 +16,18 @@ export default function SongUnitContentView({ index }: SongUnitContentViewProps)
   }, [songMap, units]);
 
   return (
-    <Accordion type="single" collapsible>
-      <AccordionItem value="item-1">
-        <AccordionTrigger>
-          <div>{messages.songData.lyrics}</div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="columns-xs">
-            {songUnitMap
-              .map((unit) => getLyrics(unit?.content || ''))
-              .filter((verse) => (verse?.length || 0) > 0)
-              .map((verse, verseIdx) => (
-                <Fragment key={verseIdx}>
-                  {verse!.split('\n').map((line, lineIdx) => (
-                    <p key={lineIdx}>{line}</p>
-                  ))}
-                  <p className="h-2"></p>
-                </Fragment>
-              ))}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <div className="columns-xs mt-4">
+      {songUnitMap
+        .map((unit) => getLyrics(unit?.content || ''))
+        .filter((verse) => (verse?.length || 0) > 0)
+        .map((verse, verseIdx) => (
+          <Fragment key={verseIdx}>
+            {verse!.split('\n').map((line, lineIdx) => (
+              <p key={lineIdx}>{line}</p>
+            ))}
+            <p className="h-2"></p>
+          </Fragment>
+        ))}
+    </div>
   );
 }

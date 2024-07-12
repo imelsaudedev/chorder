@@ -1,5 +1,14 @@
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import messages from '@/i18n/messages';
 import { fetchSong, fetchSongs } from '@/lib/apiClient';
 import { RequiredArrangement, Song, SongWith, WithoutArrangements } from '@/models/song';
@@ -43,16 +52,21 @@ export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
   };
 
   return (
-    <div className={`border rounded-lg break-inside-avoid px-2 py-2 mb-2 bg-purple-100 border-purple-400`}>
+    <div className={`rounded-lg break-inside-avoid px-2 py-2 mb-2 border border-primary`}>
       <div className="group flex items-center gap-2 w-full cursor-pointer">
-        <Popover open={songPopoverOpen} onOpenChange={setSongPopoverOpen}>
-          <PopoverTrigger asChild>
+        <Drawer open={songPopoverOpen} onOpenChange={setSongPopoverOpen}>
+          <DrawerTrigger asChild>
             <Button variant="outline">{messages.serviceForm.newSongUnit}</Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-full max-h-[80vh] overflow-auto">
-            <SongPicker songs={songs} onSelected={onSelected} />
-          </PopoverContent>
-        </Popover>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>{messages.serviceForm.pickSong}</DrawerTitle>
+            </DrawerHeader>
+            <div className="max-h-[80vh] overflow-auto p-4">
+              <SongPicker songs={songs} onSelected={onSelected} />
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
     </div>
   );

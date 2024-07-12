@@ -4,8 +4,10 @@
   "messages": {
     "or": "or",
     "preview": "Preview",
+    "edit": "Edit",
     "cancel": "Cancel",
     "delete": "Delete",
+    "hide": "Hide",
     "save": "Save",
     "song": "Song",
     "songs": "Songs",
@@ -32,6 +34,7 @@
     "key": "Key",
     "keyPlaceholder": "Key",
     "units": "Unit",
+    "chords": "Chords",
     "lyrics": "Lyrics"
   },
   "unitData": {
@@ -55,7 +58,8 @@
     "editArrangement": "Edit arrangement",
     "newSongUnit": "Add song",
     "confirmDeleteTitle": "Are you sure you want to delete this service?",
-    "confirmDelete": "This action cannot be undone."
+    "confirmDelete": "This action cannot be undone.",
+    "pickSong": "Select a song"
   },
   "songForm": {
     "addExistingUnit": "Add existing unit",

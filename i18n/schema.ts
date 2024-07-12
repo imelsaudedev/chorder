@@ -7,8 +7,10 @@ export const messagesSchema = z.object({
   messages: z.object({
     or: z.string(),
     preview: z.string(),
+    edit: z.string(),
     cancel: z.string(),
     delete: z.string(),
+    hide: z.string(),
     save: z.string(),
     song: z.string(),
     songs: z.string(),
@@ -35,6 +37,7 @@ export const messagesSchema = z.object({
     key: z.string(),
     keyPlaceholder: z.string(),
     unit: z.string(),
+    chords: z.string(),
     lyrics: z.string(),
   }),
   unitData: z.object({
@@ -59,6 +62,7 @@ export const messagesSchema = z.object({
     newSongUnit: z.string(),
     confirmDeleteTitle: z.string(),
     confirmDelete: z.string(),
+    pickSong: z.string(),
   }),
   songForm: z.object({
     addExistingUnit: z.string(),

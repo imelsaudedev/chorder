@@ -16,7 +16,7 @@ export default function InfoForm({ form }: InfoFormProps) {
         control={form.control}
         name="worshipLeader"
         render={({ field }) => (
-          <FormItem className="space-y-0">
+          <FormItem className="flex flex-col space-y-0">
             <FormLabel className="text-secondary mb-0">{messages.serviceData.worshipLeader}</FormLabel>
             <FormControl>
               <Input placeholder={messages.serviceData.worshipLeaderPlaceholder} {...field} />
@@ -29,7 +29,7 @@ export default function InfoForm({ form }: InfoFormProps) {
         control={form.control}
         name="date"
         render={({ field }) => (
-          <FormItem className="space-y-0">
+          <FormItem className="flex flex-col space-y-0">
             <FormLabel className="text-secondary mb-0">{messages.serviceData.date}</FormLabel>
             <FormControl>
               <DatePicker
@@ -49,7 +49,7 @@ export default function InfoForm({ form }: InfoFormProps) {
         control={form.control}
         name="title"
         render={({ field }) => (
-          <FormItem className="space-y-0">
+          <FormItem className="flex flex-col space-y-0">
             <FormLabel className="text-secondary mb-0">{messages.serviceData.title}</FormLabel>
             <FormControl>
               <Input placeholder={messages.serviceData.titlePlaceholder} {...field} />

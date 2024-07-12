@@ -4,8 +4,10 @@
   "messages": {
     "or": "ou",
     "preview": "Pré-visualizar",
+    "edit": "Editar",
     "cancel": "Cancelar",
     "delete": "Apagar",
+    "hide": "Esconder",
     "save": "Salvar",
     "song": "Música",
     "songs": "Músicas",
@@ -32,6 +34,7 @@
     "key": "Tom",
     "keyPlaceholder": "Tom",
     "unit": "Unidade",
+    "chords": "Cifra",
     "lyrics": "Letra"
   },
   "unitData": {
@@ -55,7 +58,8 @@
     "editArrangement": "Editar arranjo",
     "newSongUnit": "Adicionar música",
     "confirmDeleteTitle": "Você tem certeza que deseja deletar esta liturgia?",
-    "confirmDelete": "Esta ação não pode ser desfeita."
+    "confirmDelete": "Esta ação não pode ser desfeita.",
+    "pickSong": "Selecione uma música"
   },
   "songForm": {
     "addExistingUnit": "Adicionar unidade existente",

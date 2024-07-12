@@ -8,15 +8,10 @@ import { useFormContext } from 'react-hook-form';
 
 type ServiceSongUnitEditorHeaderProps = {
   index: number;
-  onToggleEditMode: MouseEventHandler;
   onRemoveUnit: () => void;
 };
 
-export default function ServiceSongUnitEditorHeader({
-  index,
-  onToggleEditMode,
-  onRemoveUnit,
-}: ServiceSongUnitEditorHeaderProps) {
+export default function ServiceSongUnitEditorHeader({ index, onRemoveUnit }: ServiceSongUnitEditorHeaderProps) {
   const { setValue, getValues } = useFormContext<ServiceFormSchema>();
   const unit = getValues(`units.${index}`) as SongUnitSchema;
 
@@ -47,9 +42,6 @@ export default function ServiceSongUnitEditorHeader({
         {unit.artist && <span className="text-sm">{unit.artist}</span>}
       </div>
       <div className="flex gap-2 items-end">
-        <Button variant="outline" onClick={onToggleEditMode}>
-          {messages.serviceForm.editArrangement}
-        </Button>
         <div>
           <Select defaultValue={unit.semitoneTranspose.toString()} onValueChange={handleSemitoneTransposeChange}>
             <SelectTrigger className="w-24">

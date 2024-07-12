@@ -39,7 +39,7 @@ export default function SongList({ songs, initialsStyle = 'grid', onSelected }: 
     <>
       <nav className="mb-4">
         {allInitials.map((initial) => {
-          const className = 'text-xl px-2 text-primary';
+          const className = 'text-xl px-2';
           if (existingInitials.indexOf(initial) < 0)
             return (
               <span key={`link-to--${initial}`} className={`${className} text-muted`}>
@@ -47,7 +47,7 @@ export default function SongList({ songs, initialsStyle = 'grid', onSelected }: 
               </span>
             );
           return (
-            <a href={`#${initial}`} key={`link-to--${initial}`} className={className}>
+            <a href={`#${initial}`} key={`link-to--${initial}`} className={`${className} text-primary`}>
               {initial.toUpperCase()}
             </a>
           );
