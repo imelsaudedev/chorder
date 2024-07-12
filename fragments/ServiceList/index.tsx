@@ -1,16 +1,33 @@
+'use client';
+
+import { Switch } from '@/components/ui/switch';
 import { getHumanReadableTitle, Service } from '@/models/service';
 import { useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
 
 type ServiceListProps = {
   services: Service[];
 };
 
-export default function ServiceList({ services }: ServiceListProps) {
+export default function ServiceList({ services: baseServices }: ServiceListProps) {
   const t = useTranslations();
-  services.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  const [showOnlyFuture, setShowOnlyFuture] = useState(true);
+
+  const services = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const services = baseServices.filter((service) => !showOnlyFuture || service.date.getTime() >= today.getTime());
+    services.sort((a, b) => b.date.getTime() - a.date.getTime());
+    return services;
+  }, [baseServices, showOnlyFuture]);
 
   return (
-    <>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Switch checked={showOnlyFuture} onCheckedChange={setShowOnlyFuture} />
+        <label>{t('ServiceForm.onlyFuture')}</label>
+      </div>
       <section>
         {services.map((service) => (
           <div key={`${service.slug!}--section`}>
@@ -23,6 +40,6 @@ export default function ServiceList({ services }: ServiceListProps) {
           </div>
         ))}
       </section>
-    </>
+    </div>
   );
 }

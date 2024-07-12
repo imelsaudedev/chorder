@@ -61,7 +61,8 @@
     "newSongUnit": "Adicionar música",
     "confirmDeleteTitle": "Você tem certeza que deseja deletar esta liturgia?",
     "confirmDelete": "Esta ação não pode ser desfeita.",
-    "pickSong": "Selecione uma música"
+    "pickSong": "Selecione uma música",
+    "onlyFuture": "Mostrar apenas liturgias futuras"
   },
   "SongForm": {
     "addExistingUnit": "Adicionar unidade existente",

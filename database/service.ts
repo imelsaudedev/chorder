@@ -51,6 +51,12 @@ export function retrieveServices({
           });
         }
         return services;
+      })
+      .then((services) => {
+        services.forEach((service) => {
+          delete (service as any)._id;
+        });
+        return services;
       });
   });
 }
