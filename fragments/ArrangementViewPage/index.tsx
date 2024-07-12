@@ -4,12 +4,12 @@ import Main from '@/components/Main';
 import ConfigIcon from '@/components/icons/ConfigIcon';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import messages from '@/i18n/messages';
 import { RequiredArrangement, SongWith } from '@/models/song';
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 import ArrangementView from './ArrangementView';
 import SongConfig from './SongConfig';
 import { getSongUnitMap } from '@/models/song-arrangement';
+import { useTranslations } from 'next-intl';
 
 type ArrangementViewPageProps = {
   song: SongWith<RequiredArrangement>;
@@ -18,6 +18,7 @@ type ArrangementViewPageProps = {
 };
 
 export default function ArrangementViewPage({ song, setWriteMode, deleteArrangement }: ArrangementViewPageProps) {
+  const t = useTranslations('Messages');
   const [transpose, setTranspose] = useState(0);
   const [columns, setColumns] = useState(0);
 
@@ -43,7 +44,7 @@ export default function ArrangementViewPage({ song, setWriteMode, deleteArrangem
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="w-9 p-0">
                 <ConfigIcon />
-                <span className="sr-only">{messages.messages.toggleConfig}</span>
+                <span className="sr-only">{t("toggleConfig")}</span>
               </Button>
             </CollapsibleTrigger>
           </div>

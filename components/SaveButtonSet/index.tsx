@@ -1,6 +1,6 @@
-import messages from '@/i18n/messages';
 import { Dispatch, MouseEventHandler, SetStateAction, useCallback } from 'react';
 import { Button } from '../ui/button';
+import { useTranslations } from 'next-intl';
 
 type SaveButtonSetProps = {
   canCancel: boolean;
@@ -9,6 +9,7 @@ type SaveButtonSetProps = {
 };
 
 export default function SaveButtonSet({ canCancel, setWriteMode, enabled = true }: SaveButtonSetProps) {
+  const t = useTranslations('Messages');
   const handleCancelEdit: MouseEventHandler = useCallback(
     (event) => {
       event.preventDefault();
@@ -21,11 +22,11 @@ export default function SaveButtonSet({ canCancel, setWriteMode, enabled = true 
     <div className="flex justify-end gap-2">
       {canCancel && (
         <Button onClick={handleCancelEdit} variant="outline">
-          {messages.messages.cancel}
+          {t("cancel")}
         </Button>
       )}
       <Button type="submit" disabled={!enabled} variant="secondary">
-        {messages.messages.save}
+        {t("save")}
       </Button>
     </div>
   );

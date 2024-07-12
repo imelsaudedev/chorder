@@ -1,7 +1,9 @@
 {
-  "siteName": "Chorder",
-  "siteDescription": "A tool for managing chord sheets",
-  "messages": {
+  "Metadata": {
+    "title": "Chorder",
+    "siteDescription": "A tool for managing chord sheets"
+  },
+  "Messages": {
     "or": "or",
     "preview": "Preview",
     "edit": "Edit",
@@ -19,14 +21,14 @@
     "config": "Configuration",
     "auto": "Automatic"
   },
-  "serviceData": {
+  "ServiceData": {
     "title": "Title",
     "titlePlaceholder": "Service title",
     "date": "Date",
     "worshipLeader": "Worship leader",
     "worshipLeaderPlaceholder": "Worship leader"
   },
-  "songData": {
+  "SongData": {
     "title": "Title",
     "titlePlaceholder": "Song title",
     "artist": "Artist",
@@ -37,13 +39,13 @@
     "chords": "Chords",
     "lyrics": "Lyrics"
   },
-  "unitData": {
+  "UnitData": {
     "content": "Chordpro",
     "contentPlaceholder": "Chordpro content goes here",
     "unitType": "Unit type",
     "unitTypePlaceholder": "Select unit type"
   },
-  "unitTypes": {
+  "UnitTypes": {
     "INTRO": "Intro",
     "ENDING": "Ending",
     "VERSE": "Verse",
@@ -54,14 +56,14 @@
     "SOLO": "Solo",
     "BLOCK": "Block"
   },
-  "serviceForm": {
+  "ServiceForm": {
     "editArrangement": "Edit arrangement",
     "newSongUnit": "Add song",
     "confirmDeleteTitle": "Are you sure you want to delete this service?",
     "confirmDelete": "This action cannot be undone.",
     "pickSong": "Select a song"
   },
-  "songForm": {
+  "SongForm": {
     "addExistingUnit": "Add existing unit",
     "addUnitWithLabel": "Add unit {label}",
     "newUnit": "New unit",

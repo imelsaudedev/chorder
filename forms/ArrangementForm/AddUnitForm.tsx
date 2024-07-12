@@ -3,15 +3,16 @@ import UnitCircle from '@/components/UnitCircle';
 import PlusIcon from '@/components/icons/PlusIcon';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import messages, { format } from '@/i18n/messages';
 import { MouseEventHandler } from 'react';
 import { ArrangementFormFields } from './useArrangementFormFields';
+import { useTranslations } from 'next-intl';
 
 type AddUnitFormProps = {
   arrangementFormFields: ArrangementFormFields;
 };
 
 export default function AddUnitForm({ arrangementFormFields }: AddUnitFormProps) {
+  const t = useTranslations('SongForm');
   const { units, onAddExistingUnit, onCreateUnit } = arrangementFormFields;
   const handleAddNewUnit: MouseEventHandler = (event) => {
     event.preventDefault();
@@ -30,13 +31,13 @@ export default function AddUnitForm({ arrangementFormFields }: AddUnitFormProps)
     <div className={`rounded-lg break-inside-avoid px-2 py-2 mb-2 border border-primary`}>
       {units.length > 0 && (
         <>
-          <label className="font-bold text-sm">{messages.songForm.addExistingUnit}</label>
+          <label className="font-bold text-sm">{t('addExistingUnit')}</label>
           <div className="flex gap-2 mb-2">
             {units.map((unit) => (
               <button
                 key={`${unit.internalId}`}
                 onClick={createAddExistingUnitHandler(unit.internalId)}
-                aria-label={format(messages.songForm.addUnitWithLabel, { label: `${unit.type}${unit.typeIdx}` })}
+                aria-label={t('addUnitWithLabel', { label: `${unit.type}${unit.typeIdx}` })}
               >
                 <UnitCircle unit={unit} />
               </button>
@@ -50,12 +51,12 @@ export default function AddUnitForm({ arrangementFormFields }: AddUnitFormProps)
           className="h-8 w-8 rounded-full text-sm grid items-center p-0"
           variant="secondary"
           id="new-unit"
-          aria-label={messages.songForm.newUnit}
+          aria-label={t('newUnit')}
         >
           <PlusIcon />
         </Button>
         <Label htmlFor="new-unit" className="flex-grow text-sm font-bold cursor-pointer">
-          {messages.songForm.newUnit}
+          {t('newUnit')}
         </Label>
       </div>
     </div>

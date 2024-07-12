@@ -1,15 +1,16 @@
 import DatePicker from '@/components/DatePicker';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import messages from '@/i18n/messages';
 import { UseFormReturn } from 'react-hook-form';
 import { ServiceFormSchema } from './schema';
+import { useTranslations } from 'next-intl';
 
 type InfoFormProps = {
   form: UseFormReturn<ServiceFormSchema>;
 };
 
 export default function InfoForm({ form }: InfoFormProps) {
+  const t = useTranslations('ServiceData');
   return (
     <div className="flex-grow space-y-2">
       <FormField
@@ -17,9 +18,9 @@ export default function InfoForm({ form }: InfoFormProps) {
         name="worshipLeader"
         render={({ field }) => (
           <FormItem className="flex flex-col space-y-0">
-            <FormLabel className="text-secondary mb-0">{messages.serviceData.worshipLeader}</FormLabel>
+            <FormLabel className="text-secondary mb-0">{t('worshipLeader')}</FormLabel>
             <FormControl>
-              <Input placeholder={messages.serviceData.worshipLeaderPlaceholder} {...field} />
+              <Input placeholder={t('worshipLeaderPlaceholder')} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -30,7 +31,7 @@ export default function InfoForm({ form }: InfoFormProps) {
         name="date"
         render={({ field }) => (
           <FormItem className="flex flex-col space-y-0">
-            <FormLabel className="text-secondary mb-0">{messages.serviceData.date}</FormLabel>
+            <FormLabel className="text-secondary mb-0">{t('date')}</FormLabel>
             <FormControl>
               <DatePicker
                 buttonProps={{ id: 'pickDate' }}
@@ -50,9 +51,9 @@ export default function InfoForm({ form }: InfoFormProps) {
         name="title"
         render={({ field }) => (
           <FormItem className="flex flex-col space-y-0">
-            <FormLabel className="text-secondary mb-0">{messages.serviceData.title}</FormLabel>
+            <FormLabel className="text-secondary mb-0">{t('title')}</FormLabel>
             <FormControl>
-              <Input placeholder={messages.serviceData.titlePlaceholder} {...field} />
+              <Input placeholder={t('titlePlaceholder')} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

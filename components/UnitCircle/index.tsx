@@ -1,30 +1,25 @@
-import { SongUnit } from "@/models/song-unit";
-import { unitTypeColorClasses } from "../unit-colors";
-import messages from "@/i18n/messages";
+import { SongUnit } from '@/models/song-unit';
+import { unitTypeColorClasses } from '../unit-colors';
+import { useTranslations } from 'next-intl';
 
-export default function UnitCircle({
-  unit,
-  className,
-}: {
-  unit: SongUnit;
-  className?: string;
-}) {
+export default function UnitCircle({ unit, className }: { unit: SongUnit; className?: string }) {
+  const t = useTranslations('UnitTypes');
   const colorClasses = unitTypeColorClasses[unit.type];
   const classList = [
-    "h-8",
-    "w-8",
-    "flex",
-    "items-center",
-    "justify-center",
-    "rounded-full",
+    'h-8',
+    'w-8',
+    'flex',
+    'items-center',
+    'justify-center',
+    'rounded-full',
     colorClasses.circleBackground,
     colorClasses.text,
   ];
   if (className) {
     classList.push(className);
   }
-  const firstLetter = messages.unitTypes[unit.type][0].toUpperCase();
-  const number = unit.typeIdx || "";
+  const firstLetter = t(unit.type)[0].toUpperCase();
+  const number = unit.typeIdx || '';
 
-  return <div className={classList.join(" ")}>{`${firstLetter}${number}`}</div>;
+  return <div className={classList.join(' ')}>{`${firstLetter}${number}`}</div>;
 }

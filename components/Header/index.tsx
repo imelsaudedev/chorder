@@ -1,4 +1,4 @@
-import messages from '@/i18n/messages';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 type HeaderProps = {
@@ -7,6 +7,8 @@ type HeaderProps = {
 };
 
 export default function Header({ className, currentPage }: HeaderProps) {
+  const t = useTranslations('Messages');
+
   const classNames = ['flex', 'bg-primary', 'text-primary-foreground', 'px-4', 'py-4', 'mb-4'];
   if (className) {
     classNames.push(className);
@@ -19,10 +21,10 @@ export default function Header({ className, currentPage }: HeaderProps) {
           CHORDER
         </Link>
         <Link href="/songs" className={pageLinkClassName(currentPage === 'songs')}>
-          {messages.messages.songs}
+          {t('songs')}
         </Link>
         <Link href="/services" className={pageLinkClassName(currentPage === 'services')}>
-          {messages.messages.services}
+          {t('services')}
         </Link>
       </div>
     </header>

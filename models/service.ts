@@ -1,4 +1,3 @@
-import messages from '@/i18n/messages';
 import { ServiceUnit } from './service-unit';
 
 export type Service = {
@@ -26,15 +25,15 @@ export function dateForSlug(date: Date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
 
-export function getDefaultTitle(date: Date) {
+export function getDefaultTitle(date: Date, serviceString: string) {
   const year = date.getFullYear().toString();
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
-  return `${messages.messages.service} ${day}/${month}/${year}`;
+  return `${serviceString} ${day}/${month}/${year}`;
 }
 
-export function getHumanReadableTitle(service: Service) {
-  return service.title || getDefaultTitle(service.date);
+export function getHumanReadableTitle(service: Service, serviceString: string) {
+  return service.title || getDefaultTitle(service.date, serviceString);
 }
 
 export function getUnitsByType<T>(service: NewService, type: string): T[] {

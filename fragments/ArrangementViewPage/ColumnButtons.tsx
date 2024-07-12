@@ -1,6 +1,6 @@
 import ColumnsIcon from '@/components/icons/ColumnsIcon';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import messages from '@/i18n/messages';
+import { useTranslations } from 'next-intl';
 import { Dispatch, SetStateAction } from 'react';
 
 type ColumnButtonsProps = {
@@ -10,6 +10,7 @@ type ColumnButtonsProps = {
 };
 
 export default function ColumnButtons({ id, columns, setColumns }: ColumnButtonsProps) {
+  const t = useTranslations('Messages');
   const handleValueChange = (value: string) => {
     setColumns(parseInt(value));
   };
@@ -22,15 +23,11 @@ export default function ColumnButtons({ id, columns, setColumns }: ColumnButtons
       value={columns.toString()}
       className="border rounded p-1"
     >
-      <ToggleGroupItem value="0" aria-label={messages.messages.auto}>
+      <ToggleGroupItem value="0" aria-label={t('auto')}>
         AUTO
       </ToggleGroupItem>
       {[1, 2, 3, 4].map((columnCount) => (
-        <ToggleGroupItem
-          key={columnCount}
-          value={columnCount.toString()}
-          aria-label={`${columnCount} ${messages.messages.columns}`}
-        >
+        <ToggleGroupItem key={columnCount} value={columnCount.toString()} aria-label={`${columnCount} ${t('columns')}`}>
           <ColumnsIcon count={columnCount} />
         </ToggleGroupItem>
       ))}

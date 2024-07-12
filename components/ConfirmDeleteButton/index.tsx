@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useCallback } from 'react';
 import { Button } from '../ui/button';
-import messages from '@/i18n/messages';
+import { useTranslations } from 'next-intl';
 
 type ConfirmDeleteButtonProps = {
   alertTitle: string;
@@ -21,6 +21,8 @@ type ConfirmDeleteButtonProps = {
 };
 
 export default function ConfirmDeleteButton({ alertTitle, alertDescription, onDelete }: ConfirmDeleteButtonProps) {
+  const t = useTranslations('Messages');
+
   const handleDelete = useCallback(() => {
     onDelete();
   }, [onDelete]);
@@ -30,7 +32,7 @@ export default function ConfirmDeleteButton({ alertTitle, alertDescription, onDe
       <AlertDialogTrigger asChild>
         <Button type="submit" variant="destructive">
           <TrashIcon />
-          <span className="sr-only">{messages.messages.delete}</span>
+          <span className="sr-only">{t('delete')}</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -39,11 +41,11 @@ export default function ConfirmDeleteButton({ alertTitle, alertDescription, onDe
           <AlertDialogDescription>{alertDescription}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{messages.messages.cancel}</AlertDialogCancel>
+          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
           <AlertDialogAction asChild>
             <Button variant="destructive" onClick={handleDelete}>
               <TrashIcon />
-              <span className="sr-only">{messages.messages.delete}</span>
+              <span className="sr-only">{t('delete')}</span>
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>

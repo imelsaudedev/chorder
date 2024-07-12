@@ -1,7 +1,9 @@
 {
-  "siteName": "Chorder",
-  "siteDescription": "A tool for managing chord sheets",
-  "messages": {
+  "Metadata": {
+    "title": "Chorder",
+    "siteDescription": "Uma ferramenta de gerenciamento de liturgias"
+  },
+  "Messages": {
     "or": "ou",
     "preview": "Pré-visualizar",
     "edit": "Editar",
@@ -19,14 +21,14 @@
     "config": "Configuração",
     "auto": "Automático"
   },
-  "serviceData": {
+  "ServiceData": {
     "title": "Título",
     "titlePlaceholder": "Título da liturgia",
     "date": "Data",
     "worshipLeader": "Dirigente",
     "worshipLeaderPlaceholder": "Dirigente"
   },
-  "songData": {
+  "SongData": {
     "title": "Título",
     "titlePlaceholder": "Título da música",
     "artist": "Artista",
@@ -37,13 +39,13 @@
     "chords": "Cifra",
     "lyrics": "Letra"
   },
-  "unitData": {
+  "UnitData": {
     "content": "Chordpro",
     "contentPlaceholder": "O conteúdo no formato chordpro vai aqui",
     "unitType": "Tipo da unidade",
     "unitTypePlaceholder": "Selecione o tipo da unidade"
   },
-  "unitTypes": {
+  "UnitTypes": {
     "INTRO": "Introdução",
     "ENDING": "Saída",
     "VERSE": "Verso",
@@ -54,14 +56,14 @@
     "SOLO": "Solo",
     "BLOCK": "Bloco"
   },
-  "serviceForm": {
+  "ServiceForm": {
     "editArrangement": "Editar arranjo",
     "newSongUnit": "Adicionar música",
     "confirmDeleteTitle": "Você tem certeza que deseja deletar esta liturgia?",
     "confirmDelete": "Esta ação não pode ser desfeita.",
     "pickSong": "Selecione uma música"
   },
-  "songForm": {
+  "SongForm": {
     "addExistingUnit": "Adicionar unidade existente",
     "addUnitWithLabel": "Adicionar unidade {label}",
     "newUnit": "Nova unidade",

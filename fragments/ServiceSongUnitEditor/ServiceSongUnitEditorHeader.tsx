@@ -2,7 +2,7 @@ import CloseIcon from '@/components/icons/CloseIcon';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ServiceFormSchema, SongUnitSchema } from '@/forms/ServiceForm/schema';
-import messages from '@/i18n/messages';
+import { useTranslations } from 'next-intl';
 import { MouseEventHandler, useCallback, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 
@@ -12,6 +12,7 @@ type ServiceSongUnitEditorHeaderProps = {
 };
 
 export default function ServiceSongUnitEditorHeader({ index, onRemoveUnit }: ServiceSongUnitEditorHeaderProps) {
+  const t = useTranslations('SongData');
   const { setValue, getValues } = useFormContext<ServiceFormSchema>();
   const unit = getValues(`units.${index}`) as SongUnitSchema;
 
@@ -45,7 +46,7 @@ export default function ServiceSongUnitEditorHeader({ index, onRemoveUnit }: Ser
         <div>
           <Select defaultValue={unit.semitoneTranspose.toString()} onValueChange={handleSemitoneTransposeChange}>
             <SelectTrigger className="w-24">
-              <SelectValue placeholder={messages.songData.keyPlaceholder} />
+              <SelectValue placeholder={t('keyPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
               {transpositionKeys.map(([key, semitones]) => (

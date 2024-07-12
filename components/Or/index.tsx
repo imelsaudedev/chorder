@@ -1,10 +1,12 @@
-import messages from "@/i18n/messages";
-import styles from "./styles.module.css";
+import { useTranslations } from 'next-intl';
+import styles from './styles.module.css';
 
 export default function Or() {
+  const t = useTranslations('Messages');
+
   return (
     <div className={`mb-2 ${styles.orContainer}`}>
-      <span className={styles.or}>{messages.messages.or}</span>
+      <span className={styles.or}>{t('or')}</span>
     </div>
   );
 }

@@ -5,10 +5,10 @@ import CloseIcon from '@/components/icons/CloseIcon';
 import { Button } from '@/components/ui/button';
 import { unitTypeColorClasses } from '@/components/unit-colors';
 import { SongUnitSetField } from '@/forms/ArrangementForm/useArrangementFormFields';
-import messages from '@/i18n/messages';
-import { SongUnit, SongUnitType } from '@/models/song-unit';
+import { SONG_UNIT_TYPES, SongUnit, SongUnitType } from '@/models/song-unit';
 import { ChangeEvent, MouseEvent, useCallback, useId, useMemo, useState } from 'react';
 import { ComboBoxResponsive } from '@/components/ComboBoxResponsive';
+import { useTranslations } from 'next-intl';
 
 type UnitFormProps = {
   unit: SongUnit;
@@ -18,6 +18,8 @@ type UnitFormProps = {
 };
 
 export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: UnitFormProps) {
+  const t = useTranslations();
+
   const colorClasses = unitTypeColorClasses[unit.type];
   const [preview, setPreview] = useState(false);
 
@@ -27,11 +29,11 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
 
   const unitTypeOptions = useMemo(
     () =>
-      Object.entries(messages.unitTypes).map(([value, label]) => ({
-        label,
-        value,
+      SONG_UNIT_TYPES.map((type) => ({
+        value: type,
+        label: t(`UnitTypes.${type}`),
       })),
-    []
+    [t]
   );
 
   const handleRemoveUnit = useCallback(
@@ -83,7 +85,7 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
 
       <div className="flex flex-col">
         <label className="block text-sm font-medium text-gray-900" htmlFor={unitTypeId}>
-          {messages.unitData.unitType}
+          {t('UnitData.unitType')}
         </label>
         <ComboBoxResponsive
           value={unit.type}
@@ -91,17 +93,17 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
           onChange={handleChangeUnitType}
           options={unitTypeOptions}
           id={unitTypeId}
-          placeholder={messages.unitData.unitTypePlaceholder}
+          placeholder={t('UnitData.unitTypePlaceholder')}
         />
       </div>
 
       <div className="flex flex-col flex-grow">
         <div className="flex justify-between">
           <label className="block text-sm font-medium text-gray-900" htmlFor={contentId}>
-            {messages.unitData.content}
+            {t('UnitData.content')}
           </label>
           <div className="flex gap-1 items-center text-sm">
-            <label htmlFor={showPreviewId}>{messages.messages.preview}</label>
+            <label htmlFor={showPreviewId}>{t('Messages.preview')}</label>
             <input id={showPreviewId} type="checkbox" onChange={handlePreviewChange} checked={preview} />
           </div>
         </div>
@@ -114,7 +116,7 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
           <TextInput
             id={contentId}
             className="resize-none flex-grow"
-            placeholder={messages.unitData.contentPlaceholder}
+            placeholder={t('UnitData.contentPlaceholder')}
             onChange={handleChangeChordpro}
             value={unit.content}
             minRows={3}

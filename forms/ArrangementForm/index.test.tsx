@@ -1,14 +1,17 @@
 import { PostSongAction } from '@/app/songs/[song]/actions';
-import messages, { format } from '@/i18n/messages';
 import { NewSong } from '@/models/song';
 import { RequiredIsNew, SongArrangementWith } from '@/models/song-arrangement';
 import { SongUnit } from '@/models/song-unit';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { Dispatch, SetStateAction } from 'react';
 import ArrangementForm from '.';
+import { NextIntlClientProvider } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 describe('SongForm', () => {
+  const messages = require(`../../i18n/messages/en.json`);
+
   const units: SongUnit[] = [
     { content: 'Unit 1', type: 'VERSE', internalId: 1, typeIdx: 1 },
     { content: 'Unit 2', type: 'SOLO', internalId: 2, typeIdx: 1 },
@@ -37,6 +40,19 @@ describe('SongForm', () => {
 
   const postSong: PostSongAction = jest.fn();
   const setWriteMode: Dispatch<SetStateAction<boolean>> = jest.fn();
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(), // Deprecated
+      removeListener: jest.fn(), // Deprecated
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
 
   const originalError = console.error.bind(console.error);
   beforeEach(() => {
@@ -50,21 +66,25 @@ describe('SongForm', () => {
     } else {
       song.arrangements[0].isNew = false;
     }
-    render(<ArrangementForm song={song} postSong={postSong} setWriteMode={setWriteMode} />);
+    render(
+      <NextIntlClientProvider messages={messages} locale="en">
+        <ArrangementForm song={song} postSong={postSong} setWriteMode={setWriteMode} />
+      </NextIntlClientProvider>
+    );
   });
 
   it('shows the cancel button when editing a new arrangement', () => {
-    const cancelButton = screen.queryByText(messages.messages.cancel);
+    const cancelButton = screen.queryByText('Cancel');
     expect(cancelButton).toBeInTheDocument();
   });
 
   it('does not show the cancel button when creating a new arrangement', () => {
-    const cancelButton = screen.queryByText(messages.messages.cancel);
+    const cancelButton = screen.queryByText('Cancel');
     expect(cancelButton).not.toBeInTheDocument();
   });
 
   it('shows the save button', () => {
-    const saveButton = screen.getByText(messages.messages.save);
+    const saveButton = screen.getByText('Save');
     expect(saveButton).toBeInTheDocument();
   });
 

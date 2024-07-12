@@ -3,13 +3,13 @@ import ConfigIcon from '@/components/icons/ConfigIcon';
 import Main from '@/components/Main';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleTrigger } from '@/components/ui/collapsible';
-import messages from '@/i18n/messages';
 import { getHumanReadableTitle, Service } from '@/models/service';
 import { ServiceSongUnit } from '@/models/service-unit';
 import { CollapsibleContent } from '@radix-ui/react-collapsible';
 import { Dispatch, Fragment, SetStateAction, useCallback, useMemo, useState } from 'react';
 import ServiceConfig from './ServiceConfig';
 import ServiceSongUnitView from './ServiceSongUnitView';
+import { useTranslations } from 'next-intl';
 
 type ServiceViewPageProps = {
   service: Service;
@@ -17,6 +17,8 @@ type ServiceViewPageProps = {
 };
 
 export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPageProps) {
+  const t = useTranslations('Messages');
+
   const [columns, setColumns] = useState(0);
   const units = service.units;
 
@@ -30,14 +32,16 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
       <div className="px-4">
         <div className="flex gap-2 flex-grow justify-between items-center">
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-none text-primary">{getHumanReadableTitle(service)}</span>
+            <span className="font-bold text-lg leading-none text-primary">
+              {getHumanReadableTitle(service, t('service'))}
+            </span>
             {service.worshipLeader && <span className="text-sm text-muted">{service.worshipLeader}</span>}
           </div>
           <div className="flex gap-2">
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="w-9 p-0">
                 <ConfigIcon />
-                <span className="sr-only">{messages.messages.toggleConfig}</span>
+                <span className="sr-only">{t('toggleConfig')}</span>
               </Button>
             </CollapsibleTrigger>
           </div>

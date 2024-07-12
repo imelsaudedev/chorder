@@ -11,16 +11,18 @@ export type RequiredTypeIdx = {
   typeIdx: number;
 };
 
-export type SongUnitType =
-  | 'INTRO'
-  | 'ENDING'
-  | 'VERSE'
-  | 'PRECHORUS'
-  | 'CHORUS'
-  | 'BRIDGE'
-  | 'INTERLUDE'
-  | 'SOLO'
-  | 'BLOCK';
+export const SONG_UNIT_TYPES = [
+  'INTRO',
+  'ENDING',
+  'VERSE',
+  'PRECHORUS',
+  'CHORUS',
+  'BRIDGE',
+  'INTERLUDE',
+  'SOLO',
+  'BLOCK',
+] as const;
+export type SongUnitType = (typeof SONG_UNIT_TYPES)[number];
 
 export function createUnit({ internalId = -1 }: { internalId?: number }): SongUnit {
   return {

@@ -1,26 +1,18 @@
 import { Button } from '@/components/ui/button';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
-import messages from '@/i18n/messages';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { fetchSong, fetchSongs } from '@/lib/apiClient';
 import { RequiredArrangement, Song, SongWith, WithoutArrangements } from '@/models/song';
 import { useEffect, useState } from 'react';
 import SongPicker from '../../fragments/SongPicker';
 import { ServiceFormFields } from './useServiceFormFields';
+import { useTranslations } from 'next-intl';
 
 type AddUnitFormProps = {
   serviceFormFields: ServiceFormFields;
 };
 
 export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
+  const t = useTranslations('ServiceForm');
   const { onCreateUnit } = serviceFormFields;
 
   const [songs, setSongs] = useState<WithoutArrangements<Song>[]>([]);
@@ -56,11 +48,11 @@ export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
       <div className="group flex items-center gap-2 w-full cursor-pointer">
         <Drawer open={songPopoverOpen} onOpenChange={setSongPopoverOpen}>
           <DrawerTrigger asChild>
-            <Button variant="outline">{messages.serviceForm.newSongUnit}</Button>
+            <Button variant="outline">{t('newSongUnit')}</Button>
           </DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
-              <DrawerTitle>{messages.serviceForm.pickSong}</DrawerTitle>
+              <DrawerTitle>{t('pickSong')}</DrawerTitle>
             </DrawerHeader>
             <div className="max-h-[80vh] overflow-auto p-4">
               <SongPicker songs={songs} onSelected={onSelected} />
