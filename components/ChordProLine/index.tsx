@@ -1,8 +1,8 @@
-import { Line } from "chordsheetjs";
-import styles from "./styles.module.scss";
-import { unitTypeColorClasses } from "../unit-colors";
-import { transposeChord } from "@/chopro/music";
-import { SongUnitType } from "@/models/song-unit";
+import { Line } from 'chordsheetjs';
+import styles from './styles.module.scss';
+import { unitTypeColorClasses } from '../unit-colors';
+import { transposeChord } from '@/chopro/music';
+import { SongUnitType } from '@/models/song-unit';
 
 type ChordProLineProps = {
   line: Line;
@@ -25,7 +25,9 @@ export default function ChordProLine({
   transpose,
   grow,
 }: ChordProLineProps) {
-  let className = "flex flex-col relative px-2 border-x";
+  const hasLyrics = line.items.some((item) => (item as any).lyrics?.trim());
+  const hasChords = line.items.some((item) => (item as any).chords?.trim());
+  let className = 'flex flex-col relative px-2 border-x';
   if (unitType) {
     const unitClasses = unitTypeColorClasses[unitType];
     className = `${className} ${unitClasses.background} ${unitClasses.border}`;
@@ -44,12 +46,14 @@ export default function ChordProLine({
     }
   }
   return (
-    <div className={className} style={{ breakInside: "avoid" }}>
+    <div className={className} style={{ breakInside: 'avoid' }}>
       <div className="flex flex-row flex-wrap">
         {line.items.length === 0 && <br />}
         {line.items.map((item, elementIdx) => (
           <ChordProItem
             item={item}
+            hasLyrics={hasLyrics}
+            hasChords={hasChords}
             originalKey={originalKey}
             transpose={transpose}
             key={`song-line-item-${elementIdx}`}
@@ -64,40 +68,42 @@ export default function ChordProLine({
 
 function ChordProItem({
   originalKey,
+  hasLyrics,
+  hasChords,
   item,
   isConnection,
   transpose,
 }: {
   originalKey?: string;
+  hasLyrics: boolean;
+  hasChords: boolean;
   item: any;
   isConnection: boolean;
   transpose?: number;
 }) {
-  if (item._name === "comment") {
+  if (item._name === 'comment') {
     return <span className="italic">{item._value}</span>;
   }
 
-  const chordClasses = ["mr-1", "leading-none", "font-bold", "mb-0"];
-  if (!item.chords?.trim()) {
-    chordClasses.push("flex-grow");
+  const chordClasses = ['mr-1', 'leading-none', 'font-bold', 'mb-0'];
+  if (hasChords) {
+    chordClasses.push('h-[1em]');
   }
 
-  const lyricsClasses = ["leading-none", styles.lyrics];
+  const lyricsClasses = ['leading-none', styles.lyrics];
   if (isConnection) {
     lyricsClasses.push(styles.lyricsConnection);
   }
-  if (!item.lyrics?.trim()) {
-    lyricsClasses.push("flex-grow");
+  if (hasLyrics) {
+    lyricsClasses.push('h-[1em]');
   }
 
   return (
-    <div className={"flex flex-col whitespace-pre-wrap mb-2"}>
-      <span className={chordClasses.join(" ")}>
-        {transpose && originalKey
-          ? transposeChord(item.chords, originalKey, transpose)
-          : item.chords}
+    <div className={'flex flex-col whitespace-pre-wrap mb-2'}>
+      <span className={chordClasses.join(' ')}>
+        {transpose && originalKey ? transposeChord(item.chords, originalKey, transpose) : item.chords}
       </span>
-      <span className={lyricsClasses.join(" ")}>{item.lyrics || " "}</span>
+      <span className={lyricsClasses.join(' ')}>{item.lyrics || ' '}</span>
     </div>
   );
 }
@@ -109,7 +115,7 @@ function isConnection(items: any, itemIdx: number) {
 
   const currentItem = items[itemIdx];
   const nextItem = items[itemIdx + 1];
-  if (currentItem._name === "comment" || nextItem._name === "comment") {
+  if (currentItem._name === 'comment' || nextItem._name === 'comment') {
     return false;
   }
   return currentItem.lyrics?.trim() && nextItem.lyrics?.trim();
