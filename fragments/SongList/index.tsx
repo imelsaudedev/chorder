@@ -2,9 +2,11 @@
 
 import HighlightKeyword, { findKeyword } from '@/components/HighlightKeyword';
 import SearchBar from '@/components/SearchBar';
+import useUpdateParams from '@/hooks/useUpdateParams';
 import { groupSongsByFirstLetter, Song, WithoutArrangements } from '@/models/song';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Fragment, ReactNode, useMemo, useState } from 'react';
 
 type SongListProps = {
@@ -15,7 +17,13 @@ type SongListProps = {
 
 export default function SongList({ songs: baseSongs, initialsStyle = 'grid', onSelected }: SongListProps) {
   const t = useTranslations('SongForm');
-  const [search, setSearch] = useState('');
+  const searchParams = useSearchParams();
+  const updateParams = useUpdateParams();
+  const [search, setSearch] = useState(searchParams.get('q') || '');
+  const handleSetSearch = (value: string) => {
+    setSearch(value);
+    updateParams('q', value);
+  };
 
   const songs = useMemo(() => {
     if (!search) return baseSongs;
@@ -73,7 +81,7 @@ export default function SongList({ songs: baseSongs, initialsStyle = 'grid', onS
         })}
       </nav>
       <div className="mb-4">
-        <SearchBar value={search} setValue={setSearch} />
+        <SearchBar value={search} setValue={handleSetSearch} />
       </div>
       <section style={sectionStyle}>
         {(!existingInitials || existingInitials.length === 0) && (

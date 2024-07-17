@@ -8,6 +8,7 @@ import { Dispatch, SetStateAction } from 'react';
 import ColumnButtons from '../ArrangementViewPage/ColumnButtons';
 import ModeButtonSet, { Mode } from '@/components/ModeButtonSet';
 import Link from 'next/link';
+import useHrefWithParams from '@/hooks/useHrefWithParams';
 
 type ServiceConfigProps = {
   columns: number;
@@ -29,6 +30,7 @@ export default function ServiceConfig({
   deleteService,
 }: ServiceConfigProps) {
   const t = useTranslations();
+  const createHrefWithParam = useHrefWithParams();
 
   return (
     <>
@@ -50,7 +52,7 @@ export default function ServiceConfig({
         </div>
         <div className="flex gap-2">
           <Button variant="default" asChild>
-            <Link href="?edit=true">
+            <Link href={createHrefWithParam('edit', 'true')}>
               <EditIcon />
             </Link>
           </Button>

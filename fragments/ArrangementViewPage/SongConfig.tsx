@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import FontSizeButtonSet from '@/components/FontSizeButtonSet';
 import ModeButtonSet, { Mode } from '@/components/ModeButtonSet';
 import Link from 'next/link';
+import useHrefWithParams from '@/hooks/useHrefWithParams';
 
 type SongConfigProps = {
   columns: number;
@@ -29,6 +30,8 @@ export default function SongConfig({
   deleteArrangementWithId,
 }: SongConfigProps) {
   const t = useTranslations();
+  const createHrefWithParam = useHrefWithParams();
+
   return (
     <>
       <h2 className="text-primary font-bold">{t('Messages.config')}</h2>
@@ -50,7 +53,7 @@ export default function SongConfig({
 
         <div className="flex gap-2">
           <Button variant="default" asChild>
-            <Link href="?edit=true">
+            <Link href={createHrefWithParam('edit', 'true')}>
               <EditIcon />
             </Link>
           </Button>

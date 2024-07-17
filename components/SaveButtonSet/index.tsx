@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Button } from '../ui/button';
+import useHrefWithParams from '@/hooks/useHrefWithParams';
 
 type SaveButtonSetProps = {
   canCancel: boolean;
@@ -9,12 +10,13 @@ type SaveButtonSetProps = {
 
 export default function SaveButtonSet({ canCancel, enabled = true }: SaveButtonSetProps) {
   const t = useTranslations('Messages');
+  const createHrefWithParam = useHrefWithParams();
 
   return (
     <div className="flex justify-end gap-2">
       {canCancel && (
         <Button variant="outline" asChild>
-          <Link href="?edit=false">{t('cancel')}</Link>
+          <Link href={createHrefWithParam('edit', 'false')}>{t('cancel')}</Link>
         </Button>
       )}
       <Button type="submit" disabled={!enabled} variant="secondary">
