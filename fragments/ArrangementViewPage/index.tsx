@@ -21,6 +21,7 @@ export default function ArrangementViewPage({ song, setWriteMode, deleteArrangem
   const t = useTranslations('Messages');
   const [transpose, setTranspose] = useState(0);
   const [columns, setColumns] = useState(0);
+  const [fontSize, setFontSize] = useState(16);
 
   const handleEditButtonClick = useCallback(() => {
     setWriteMode(true);
@@ -44,7 +45,7 @@ export default function ArrangementViewPage({ song, setWriteMode, deleteArrangem
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="w-9 p-0">
                 <ConfigIcon />
-                <span className="sr-only">{t("toggleConfig")}</span>
+                <span className="sr-only">{t('toggleConfig')}</span>
               </Button>
             </CollapsibleTrigger>
           </div>
@@ -55,11 +56,20 @@ export default function ArrangementViewPage({ song, setWriteMode, deleteArrangem
           <SongConfig
             columns={columns}
             setColumns={setColumns}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
             deleteArrangementWithId={deleteArrangementWithId}
             onEditButtonClick={handleEditButtonClick}
           />
         </CollapsibleContent>
-        <ArrangementView columns={columns} songUnitMap={songUnitMap} transpose={transpose} songKey={arrangement.key} />
+        <div style={{ fontSize: `${fontSize}px` }}>
+          <ArrangementView
+            columns={columns}
+            songUnitMap={songUnitMap}
+            transpose={transpose}
+            songKey={arrangement.key}
+          />
+        </div>
       </Main>
     </Collapsible>
   );

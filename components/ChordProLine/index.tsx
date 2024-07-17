@@ -85,12 +85,12 @@ function ChordProItem({
     return <span className="italic">{item._value}</span>;
   }
 
-  const chordClasses = ['mr-1', 'leading-none', 'font-bold', 'mb-0'];
+  const chordClasses = ['mr-1', 'text-[0.9em]', 'text-secondary', 'leading-none', 'font-bold', 'mb-0'];
   if (hasChords) {
     chordClasses.push('h-[1em]');
   }
 
-  const lyricsClasses = ['leading-none', styles.lyrics];
+  const lyricsClasses = ['leading-none', 'text-[1em]', styles.lyrics];
   if (isConnection) {
     lyricsClasses.push(styles.lyricsConnection);
   }

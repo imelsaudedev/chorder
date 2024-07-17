@@ -16,8 +16,8 @@ export default function ServiceSongUnitView({ unit, columns }: ServiceSongUnitVi
     <div className="w-full">
       <div className="flex gap-2 flex-grow justify-between items-center mb-2">
         <div className="flex flex-col">
-          <h2 className="font-bold text-lg leading-none text-primary">{unit.song.title}</h2>
-          {unit.song.artist && <span className="text-sm text-muted">{unit.song.artist}</span>}
+          <h2 className="font-bold text-[1.125em] leading-none text-primary">{unit.song.title}</h2>
+          {unit.song.artist && <span className="text-[0.875em] text-muted">{unit.song.artist}</span>}
         </div>
         <div className="flex gap-2">
           <KeyButtonSet originalKey={arrangement.key || ''} transpose={transpose} setTranspose={setTranspose} />

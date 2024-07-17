@@ -5,10 +5,13 @@ import { Label } from '@/components/ui/label';
 import { Dispatch, SetStateAction } from 'react';
 import ColumnButtons from './ColumnButtons';
 import { useTranslations } from 'next-intl';
+import FontSizeButtonSet from '@/components/FontSizeButtonSet';
 
 type SongConfigProps = {
   columns: number;
   setColumns: Dispatch<SetStateAction<number>>;
+  fontSize: number;
+  setFontSize: Dispatch<SetStateAction<number>>;
   deleteArrangementWithId: () => void;
   onEditButtonClick: () => void;
 };
@@ -16,6 +19,8 @@ type SongConfigProps = {
 export default function SongConfig({
   columns,
   setColumns,
+  fontSize,
+  setFontSize,
   deleteArrangementWithId,
   onEditButtonClick,
 }: SongConfigProps) {
@@ -24,10 +29,17 @@ export default function SongConfig({
     <>
       <h2 className="text-primary font-bold">{t('Messages.config')}</h2>
       <div className={`flex mb-4 border border-primary p-2 rounded justify-between items-center`}>
-        <div>
-          <Label htmlFor="column-count">{t('Messages.columns')}</Label>
-          <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
+        <div className="flex gap-2">
+          <div>
+            <Label htmlFor="column-count">{t('Messages.columns')}</Label>
+            <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
+          </div>
+          <div>
+            <Label htmlFor="font-size">{t('Messages.fontSize')}</Label>
+            <FontSizeButtonSet id="font-size" fontSize={fontSize} setFontSize={setFontSize} />
+          </div>
         </div>
+
         <div className="flex gap-2">
           <Button onClick={onEditButtonClick} variant="default">
             <EditIcon />

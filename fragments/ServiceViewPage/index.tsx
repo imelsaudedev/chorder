@@ -20,6 +20,7 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
   const t = useTranslations('Messages');
 
   const [columns, setColumns] = useState(0);
+  const [fontSize, setFontSize] = useState(16);
   const units = service.units;
 
   const handleEditButtonClick = useCallback(() => {
@@ -52,11 +53,13 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
           <ServiceConfig
             columns={columns}
             setColumns={setColumns}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
             deleteService={deleteCurrentService}
             onEditButtonClick={handleEditButtonClick}
           />
         </CollapsibleContent>
-        <section className="flex flex-col gap-6 mx-auto">
+        <section className="flex flex-col gap-6 mx-auto" style={{ fontSize: `${fontSize}px` }}>
           {units.map((unit, index) => {
             if (unit) {
               return (
