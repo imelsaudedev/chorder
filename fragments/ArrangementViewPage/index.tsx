@@ -1,33 +1,28 @@
 import { DeleteArrangementAction } from '@/app/songs/[song]/actions';
 import KeyButtonSet from '@/components/KeyButtonSet';
 import Main from '@/components/Main';
+import { Mode } from '@/components/ModeButtonSet';
 import ConfigIcon from '@/components/icons/ConfigIcon';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RequiredArrangement, SongWith } from '@/models/song';
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
-import ArrangementView from './ArrangementView';
-import SongConfig from './SongConfig';
 import { getSongUnitMap } from '@/models/song-arrangement';
 import { useTranslations } from 'next-intl';
-import { Mode } from '@/components/ModeButtonSet';
+import { useMemo, useState } from 'react';
+import ArrangementView from './ArrangementView';
+import SongConfig from './SongConfig';
 
 type ArrangementViewPageProps = {
   song: SongWith<RequiredArrangement>;
-  setWriteMode: Dispatch<SetStateAction<boolean>>;
   deleteArrangement: DeleteArrangementAction;
 };
 
-export default function ArrangementViewPage({ song, setWriteMode, deleteArrangement }: ArrangementViewPageProps) {
+export default function ArrangementViewPage({ song, deleteArrangement }: ArrangementViewPageProps) {
   const t = useTranslations('Messages');
   const [transpose, setTranspose] = useState(0);
   const [columns, setColumns] = useState(0);
   const [fontSize, setFontSize] = useState(16);
   const [mode, setMode] = useState('chords' as Mode);
-
-  const handleEditButtonClick = useCallback(() => {
-    setWriteMode(true);
-  }, [setWriteMode]);
 
   const deleteArrangementWithId = deleteArrangement.bind(null, song, song.currentArrangementId);
   const arrangement = song.arrangement;
@@ -62,7 +57,6 @@ export default function ArrangementViewPage({ song, setWriteMode, deleteArrangem
             mode={mode}
             setMode={setMode}
             deleteArrangementWithId={deleteArrangementWithId}
-            onEditButtonClick={handleEditButtonClick}
           />
         </CollapsibleContent>
         <div style={{ fontSize: `${fontSize}px` }}>

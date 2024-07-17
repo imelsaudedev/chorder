@@ -1,23 +1,22 @@
 import { deleteService } from '@/app/services/[service]/actions';
 import ConfigIcon from '@/components/icons/ConfigIcon';
 import Main from '@/components/Main';
+import { Mode } from '@/components/ModeButtonSet';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { getHumanReadableTitle, Service } from '@/models/service';
 import { ServiceSongUnit } from '@/models/service-unit';
 import { CollapsibleContent } from '@radix-ui/react-collapsible';
-import { Dispatch, Fragment, SetStateAction, useCallback, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Fragment, useState } from 'react';
 import ServiceConfig from './ServiceConfig';
 import ServiceSongUnitView from './ServiceSongUnitView';
-import { useTranslations } from 'next-intl';
-import { Mode } from '@/components/ModeButtonSet';
 
 type ServiceViewPageProps = {
   service: Service;
-  setWriteMode: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPageProps) {
+export default function ServiceViewPage({ service }: ServiceViewPageProps) {
   const t = useTranslations('Messages');
 
   const [columns, setColumns] = useState(0);
@@ -25,9 +24,6 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
   const [mode, setMode] = useState('chords' as Mode);
   const units = service.units;
 
-  const handleEditButtonClick = useCallback(() => {
-    setWriteMode(true);
-  }, [setWriteMode]);
   const deleteCurrentService = deleteService.bind(null, service);
 
   return (
@@ -60,7 +56,6 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
             mode={mode}
             setMode={setMode}
             deleteService={deleteCurrentService}
-            onEditButtonClick={handleEditButtonClick}
           />
         </CollapsibleContent>
         <section className="flex flex-col gap-6 mx-auto" style={{ fontSize: `${fontSize}px` }}>

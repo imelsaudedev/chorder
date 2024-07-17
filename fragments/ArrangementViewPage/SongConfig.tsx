@@ -7,6 +7,7 @@ import ColumnButtons from './ColumnButtons';
 import { useTranslations } from 'next-intl';
 import FontSizeButtonSet from '@/components/FontSizeButtonSet';
 import ModeButtonSet, { Mode } from '@/components/ModeButtonSet';
+import Link from 'next/link';
 
 type SongConfigProps = {
   columns: number;
@@ -16,7 +17,6 @@ type SongConfigProps = {
   mode: Mode;
   setMode: Dispatch<SetStateAction<Mode>>;
   deleteArrangementWithId: () => void;
-  onEditButtonClick: () => void;
 };
 
 export default function SongConfig({
@@ -27,7 +27,6 @@ export default function SongConfig({
   mode,
   setMode,
   deleteArrangementWithId,
-  onEditButtonClick,
 }: SongConfigProps) {
   const t = useTranslations();
   return (
@@ -50,8 +49,10 @@ export default function SongConfig({
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={onEditButtonClick} variant="default">
-            <EditIcon />
+          <Button variant="default" asChild>
+            <Link href="?edit=true">
+              <EditIcon />
+            </Link>
           </Button>
           <ConfirmDeleteButton
             onDelete={deleteArrangementWithId}

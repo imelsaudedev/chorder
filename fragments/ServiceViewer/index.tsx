@@ -8,12 +8,10 @@ import ServiceViewPage from '../ServiceViewPage';
 
 type ServiceViewerProps = {
   service: ServiceWith<OptionalSlug & RequiredIsNew>;
-  initialWriteMode: boolean;
+  writeMode: boolean;
 };
 
-export default function ServiceViewer({ service, initialWriteMode }: ServiceViewerProps) {
-  const [writeMode, setWriteMode] = useState<boolean>(initialWriteMode);
-
-  if (writeMode) return <ServiceForm service={service} setWriteMode={setWriteMode} />;
-  else if (service.slug) return <ServiceViewPage service={service as Service} setWriteMode={setWriteMode} />;
+export default function ServiceViewer({ service, writeMode }: ServiceViewerProps) {
+  if (writeMode) return <ServiceForm service={service} />;
+  else if (service.slug) return <ServiceViewPage service={service as Service} />;
 }

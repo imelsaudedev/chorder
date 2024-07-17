@@ -14,10 +14,9 @@ import useArrangementFormFields from './useArrangementFormFields';
 type ArrangementFormPageProps = {
   song: NewSong;
   postSong: PostSongAction;
-  setWriteMode: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function ArrangementForm({ song, postSong, setWriteMode }: ArrangementFormPageProps) {
+export default function ArrangementForm({ song, postSong }: ArrangementFormPageProps) {
   const arrangement = song.arrangement;
 
   const form = useArrangementForm(song);
@@ -70,7 +69,7 @@ export default function ArrangementForm({ song, postSong, setWriteMode }: Arrang
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
-        <SaveButtonSet canCancel={!arrangement.isNew} setWriteMode={setWriteMode} enabled={isDirty && isValid} />
+        <SaveButtonSet canCancel={!arrangement.isNew} enabled={isDirty && isValid} />
         <InfoForm form={form} />
         <Separator />
         <SongUnitListForm arrangementFormFields={arrangementFormFields} />

@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Dispatch, SetStateAction } from 'react';
 import ColumnButtons from '../ArrangementViewPage/ColumnButtons';
 import ModeButtonSet, { Mode } from '@/components/ModeButtonSet';
+import Link from 'next/link';
 
 type ServiceConfigProps = {
   columns: number;
@@ -16,7 +17,6 @@ type ServiceConfigProps = {
   mode: Mode;
   setMode: Dispatch<SetStateAction<Mode>>;
   deleteService: () => void;
-  onEditButtonClick: () => void;
 };
 
 export default function ServiceConfig({
@@ -27,7 +27,6 @@ export default function ServiceConfig({
   mode,
   setMode,
   deleteService,
-  onEditButtonClick,
 }: ServiceConfigProps) {
   const t = useTranslations();
 
@@ -50,8 +49,10 @@ export default function ServiceConfig({
           </div>
         </div>
         <div className="flex gap-2">
-          <Button onClick={onEditButtonClick} variant="default">
-            <EditIcon />
+          <Button variant="default" asChild>
+            <Link href="?edit=true">
+              <EditIcon />
+            </Link>
           </Button>
           <ConfirmDeleteButton
             onDelete={deleteService}

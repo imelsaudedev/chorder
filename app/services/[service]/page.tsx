@@ -18,7 +18,7 @@ export default async function ServicePage({
   return (
     <>
       <Header currentPage="services" />
-      <ServiceViewer service={service} initialWriteMode={writeMode} />
+      <ServiceViewer service={service} writeMode={writeMode} />
     </>
   );
 }

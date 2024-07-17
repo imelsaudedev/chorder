@@ -1,32 +1,24 @@
-import { Dispatch, MouseEventHandler, SetStateAction, useCallback } from 'react';
-import { Button } from '../ui/button';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { Button } from '../ui/button';
 
 type SaveButtonSetProps = {
   canCancel: boolean;
-  setWriteMode: Dispatch<SetStateAction<boolean>>;
   enabled?: boolean;
 };
 
-export default function SaveButtonSet({ canCancel, setWriteMode, enabled = true }: SaveButtonSetProps) {
+export default function SaveButtonSet({ canCancel, enabled = true }: SaveButtonSetProps) {
   const t = useTranslations('Messages');
-  const handleCancelEdit: MouseEventHandler = useCallback(
-    (event) => {
-      event.preventDefault();
-      setWriteMode(false);
-    },
-    [setWriteMode]
-  );
 
   return (
     <div className="flex justify-end gap-2">
       {canCancel && (
-        <Button onClick={handleCancelEdit} variant="outline">
-          {t("cancel")}
+        <Button variant="outline" asChild>
+          <Link href="?edit=false">{t('cancel')}</Link>
         </Button>
       )}
       <Button type="submit" disabled={!enabled} variant="secondary">
-        {t("save")}
+        {t('save')}
       </Button>
     </div>
   );

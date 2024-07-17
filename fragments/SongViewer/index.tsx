@@ -4,39 +4,23 @@ import { DeleteArrangementAction, PostSongAction } from '@/app/songs/[song]/acti
 import Main from '@/components/Main';
 import ArrangementForm from '@/forms/ArrangementForm';
 import { NewSong, RequiredArrangement, SongWith } from '@/models/song';
-import { useState } from 'react';
 import ArrangementViewPage from '../ArrangementViewPage';
 
 type SongViewerProps = {
   song: NewSong;
-  initialWriteMode: boolean;
+  writeMode: boolean;
   postSong: PostSongAction;
   deleteArrangement: DeleteArrangementAction;
 };
 
-export default function SongViewer({ song, postSong, deleteArrangement, initialWriteMode }: SongViewerProps) {
-  const [writeMode, setWriteMode] = useState<boolean>(initialWriteMode);
-
-  return (
-    <>
-      {writeMode && (
-        <Main>
-          <ArrangementForm
-            song={song}
-            postSong={postSong}
-            setWriteMode={(newWriteMode) => {
-              setWriteMode(newWriteMode);
-            }}
-          />
-        </Main>
-      )}
-      {!writeMode && song.slug && (
-        <ArrangementViewPage
-          song={song as SongWith<RequiredArrangement>}
-          setWriteMode={setWriteMode}
-          deleteArrangement={deleteArrangement}
-        />
-      )}
-    </>
-  );
+export default function SongViewer({ song, postSong, deleteArrangement, writeMode }: SongViewerProps) {
+  if (writeMode) {
+    return (
+      <Main>
+        <ArrangementForm song={song} postSong={postSong} />
+      </Main>
+    );
+  } else if (song.slug) {
+    return <ArrangementViewPage song={song as SongWith<RequiredArrangement>} deleteArrangement={deleteArrangement} />;
+  }
 }

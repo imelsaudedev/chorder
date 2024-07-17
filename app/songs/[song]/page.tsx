@@ -18,7 +18,7 @@ export default async function SongPage({
   return (
     <>
       <Header currentPage="songs" />
-      <SongViewer song={song} initialWriteMode={writeMode} postSong={postSong} deleteArrangement={deleteArrangement} />
+      <SongViewer song={song} writeMode={writeMode} postSong={postSong} deleteArrangement={deleteArrangement} />
     </>
   );
 }
