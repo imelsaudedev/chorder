@@ -10,6 +10,7 @@ import { Dispatch, Fragment, SetStateAction, useCallback, useMemo, useState } fr
 import ServiceConfig from './ServiceConfig';
 import ServiceSongUnitView from './ServiceSongUnitView';
 import { useTranslations } from 'next-intl';
+import { Mode } from '@/components/ModeButtonSet';
 
 type ServiceViewPageProps = {
   service: Service;
@@ -21,6 +22,7 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
 
   const [columns, setColumns] = useState(0);
   const [fontSize, setFontSize] = useState(16);
+  const [mode, setMode] = useState('chords' as Mode);
   const units = service.units;
 
   const handleEditButtonClick = useCallback(() => {
@@ -55,6 +57,8 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
             setColumns={setColumns}
             fontSize={fontSize}
             setFontSize={setFontSize}
+            mode={mode}
+            setMode={setMode}
             deleteService={deleteCurrentService}
             onEditButtonClick={handleEditButtonClick}
           />
@@ -65,7 +69,7 @@ export default function ServiceViewPage({ service, setWriteMode }: ServiceViewPa
               return (
                 <Fragment key={index}>
                   {unit.type === 'SONG' ? (
-                    <ServiceSongUnitView unit={unit as ServiceSongUnit} columns={columns} />
+                    <ServiceSongUnitView unit={unit as ServiceSongUnit} columns={columns} mode={mode} />
                   ) : null}
                 </Fragment>
               );

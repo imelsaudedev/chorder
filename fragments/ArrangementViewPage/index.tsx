@@ -10,6 +10,7 @@ import ArrangementView from './ArrangementView';
 import SongConfig from './SongConfig';
 import { getSongUnitMap } from '@/models/song-arrangement';
 import { useTranslations } from 'next-intl';
+import { Mode } from '@/components/ModeButtonSet';
 
 type ArrangementViewPageProps = {
   song: SongWith<RequiredArrangement>;
@@ -22,12 +23,12 @@ export default function ArrangementViewPage({ song, setWriteMode, deleteArrangem
   const [transpose, setTranspose] = useState(0);
   const [columns, setColumns] = useState(0);
   const [fontSize, setFontSize] = useState(16);
+  const [mode, setMode] = useState('chords' as Mode);
 
   const handleEditButtonClick = useCallback(() => {
     setWriteMode(true);
   }, [setWriteMode]);
 
-  // TODO: MAYBE WE NEED A CONFIRMATION DIALOG FOR THIS?
   const deleteArrangementWithId = deleteArrangement.bind(null, song, song.currentArrangementId);
   const arrangement = song.arrangement;
   const songUnitMap = useMemo(() => getSongUnitMap(arrangement), [arrangement]);
@@ -58,6 +59,8 @@ export default function ArrangementViewPage({ song, setWriteMode, deleteArrangem
             setColumns={setColumns}
             fontSize={fontSize}
             setFontSize={setFontSize}
+            mode={mode}
+            setMode={setMode}
             deleteArrangementWithId={deleteArrangementWithId}
             onEditButtonClick={handleEditButtonClick}
           />
@@ -68,6 +71,7 @@ export default function ArrangementViewPage({ song, setWriteMode, deleteArrangem
             songUnitMap={songUnitMap}
             transpose={transpose}
             songKey={arrangement.key}
+            mode={mode}
           />
         </div>
       </Main>

@@ -3,13 +3,15 @@ import ArrangementView from '../ArrangementViewPage/ArrangementView';
 import { getSongUnitMap } from '@/models/song-arrangement';
 import KeyButtonSet from '@/components/KeyButtonSet';
 import { useState } from 'react';
+import { Mode } from '@/components/ModeButtonSet';
 
 type ServiceSongUnitViewProps = {
   unit: ServiceSongUnit;
   columns: number;
+  mode: Mode;
 };
 
-export default function ServiceSongUnitView({ unit, columns }: ServiceSongUnitViewProps) {
+export default function ServiceSongUnitView({ unit, columns, mode }: ServiceSongUnitViewProps) {
   const [transpose, setTranspose] = useState(unit.song.arrangement.semitoneTranspose);
   const arrangement = unit.song.arrangement;
   return (
@@ -29,6 +31,7 @@ export default function ServiceSongUnitView({ unit, columns }: ServiceSongUnitVi
         songKey={arrangement.key}
         columns={columns}
         transpose={transpose}
+        mode={mode}
       />
     </div>
   );

@@ -19,8 +19,14 @@
     "toggleConfig": "Mostrar ou esconder configurações",
     "columns": "Colunas",
     "fontSize": "Fonte",
+    "mode": "Modo",
     "config": "Configuração",
     "auto": "Automático"
+  },
+  "Modes": {
+    "text": "Texto",
+    "lyrics": "Letra",
+    "chords": "Cifra"
   },
   "ServiceData": {
     "title": "Título",

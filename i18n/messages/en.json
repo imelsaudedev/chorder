@@ -19,8 +19,14 @@
     "toggleConfig": "Toggle configuration",
     "columns": "Columns",
     "fontSize": "Font size",
+    "mode": "Mode",
     "config": "Configuration",
     "auto": "Automatic"
+  },
+  "Modes": {
+    "text": "Text",
+    "lyrics": "Lyrics",
+    "chords": "Chords"
   },
   "ServiceData": {
     "title": "Title",

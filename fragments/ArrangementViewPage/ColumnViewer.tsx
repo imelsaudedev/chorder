@@ -1,4 +1,5 @@
 import ChordProLine from '@/components/ChordProLine';
+import { Mode } from '@/components/ModeButtonSet';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { SongUnitType } from '@/models/song-unit';
 import { Line } from 'chordsheetjs';
@@ -9,6 +10,7 @@ type ColumnViewerProps = {
   lineData: (LineData | null)[];
   transpose: number;
   originalKey?: string;
+  mode: Mode;
 };
 
 type LineData = {
@@ -18,7 +20,13 @@ type LineData = {
   isLast: boolean;
 };
 
-export default function ColumnViewer({ columns: columnConfig, lineData, transpose, originalKey }: ColumnViewerProps) {
+export default function ColumnViewer({
+  columns: columnConfig,
+  lineData,
+  transpose,
+  originalKey,
+  mode,
+}: ColumnViewerProps) {
   const [columns, setColumns] = useState(columnConfig);
 
   const isPhone = useMediaQuery('(max-width: 639px)');
@@ -74,6 +82,7 @@ export default function ColumnViewer({ columns: columnConfig, lineData, transpos
                   grow={idx === colData.length - 1}
                   originalKey={originalKey}
                   transpose={transpose}
+                  mode={mode}
                 />
               ) : (
                 <span key={`col-${i}-line-${idx}`}>ERROR</span>

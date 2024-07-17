@@ -6,12 +6,15 @@ import { Dispatch, SetStateAction } from 'react';
 import ColumnButtons from './ColumnButtons';
 import { useTranslations } from 'next-intl';
 import FontSizeButtonSet from '@/components/FontSizeButtonSet';
+import ModeButtonSet, { Mode } from '@/components/ModeButtonSet';
 
 type SongConfigProps = {
   columns: number;
   setColumns: Dispatch<SetStateAction<number>>;
   fontSize: number;
   setFontSize: Dispatch<SetStateAction<number>>;
+  mode: Mode;
+  setMode: Dispatch<SetStateAction<Mode>>;
   deleteArrangementWithId: () => void;
   onEditButtonClick: () => void;
 };
@@ -21,6 +24,8 @@ export default function SongConfig({
   setColumns,
   fontSize,
   setFontSize,
+  mode,
+  setMode,
   deleteArrangementWithId,
   onEditButtonClick,
 }: SongConfigProps) {
@@ -37,6 +42,10 @@ export default function SongConfig({
           <div>
             <Label htmlFor="font-size">{t('Messages.fontSize')}</Label>
             <FontSizeButtonSet id="font-size" fontSize={fontSize} setFontSize={setFontSize} />
+          </div>
+          <div>
+            <Label htmlFor="mode">{t('Messages.mode')}</Label>
+            <ModeButtonSet id="mode" mode={mode} setMode={setMode} />
           </div>
         </div>
 

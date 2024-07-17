@@ -6,12 +6,15 @@ import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { Dispatch, SetStateAction } from 'react';
 import ColumnButtons from '../ArrangementViewPage/ColumnButtons';
+import ModeButtonSet, { Mode } from '@/components/ModeButtonSet';
 
 type ServiceConfigProps = {
   columns: number;
   setColumns: Dispatch<SetStateAction<number>>;
   fontSize: number;
   setFontSize: Dispatch<SetStateAction<number>>;
+  mode: Mode;
+  setMode: Dispatch<SetStateAction<Mode>>;
   deleteService: () => void;
   onEditButtonClick: () => void;
 };
@@ -21,6 +24,8 @@ export default function ServiceConfig({
   setColumns,
   fontSize,
   setFontSize,
+  mode,
+  setMode,
   deleteService,
   onEditButtonClick,
 }: ServiceConfigProps) {
@@ -38,6 +43,10 @@ export default function ServiceConfig({
           <div>
             <Label htmlFor="font-size">{t('Messages.fontSize')}</Label>
             <FontSizeButtonSet id="font-size" fontSize={fontSize} setFontSize={setFontSize} />
+          </div>
+          <div>
+            <Label htmlFor="mode">{t('Messages.mode')}</Label>
+            <ModeButtonSet id="mode" mode={mode} setMode={setMode} />
           </div>
         </div>
         <div className="flex gap-2">
