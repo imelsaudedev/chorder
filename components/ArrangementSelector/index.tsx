@@ -16,7 +16,7 @@ export default function ArrangementSelector({ song }: ArrangementSelectorProps) 
 
   const arrangementOptions = useMemo(() => {
     return song.arrangements.map((arrangement, idx) => ({
-      label: `${t('arrangement')} ${idx + 1}`, // TODO use arrangement name
+      label: arrangement.name || `${t('arrangement')} ${idx + 1}`,
       value: `${idx}`,
     }));
   }, [song.arrangements, t]);

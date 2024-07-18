@@ -9,10 +9,13 @@ export default async function SongPage({
   searchParams,
 }: {
   params: { song: string };
-  searchParams: { edit?: string; arr?: number };
+  searchParams: { edit?: string; arr?: string };
 }) {
   const songSlug = params.song;
-  const song = await getSongOrCreate(songSlug, searchParams.arr);
+  const song = await getSongOrCreate(
+    songSlug,
+    typeof searchParams.arr === 'string' ? parseInt(searchParams.arr) : searchParams.arr
+  );
   const writeMode = searchParams.edit === 'true' || songSlug === 'new';
 
   return (

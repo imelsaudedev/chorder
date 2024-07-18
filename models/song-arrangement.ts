@@ -3,6 +3,7 @@ import { createUnit, SongUnit, SongUnitType, unitsAreEqual } from './song-unit';
 
 export type SongArrangement = {
   key: string;
+  name?: string;
   units: SongUnit[];
   songMap: number[];
   isDefault: boolean;

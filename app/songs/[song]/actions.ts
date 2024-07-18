@@ -135,3 +135,21 @@ export const moveArrangement: MoveArrangementAction = async function (
 
   redirect(`./${song.slug}?arr=${song.arrangements.length - 1}`, RedirectType.replace);
 };
+
+export type MakeArrangementDefaultAction = ((songSlug: string, arrangementId: number) => Promise<void>) & Function;
+
+export const makeArrangementDefault: MakeArrangementDefaultAction = async function (
+  songSlug: string,
+  arrangementId: number
+) {
+  const song = await retrieveSong(songSlug);
+  if (!song) throw new Error('Song not found');
+  if (arrangementId < 0 || arrangementId >= song.arrangements.length || song.arrangements[arrangementId].isDeleted)
+    throw new Error('Arrangement not found');
+
+  song.arrangements.forEach((arrangement, index) => {
+    arrangement.isDefault = index === arrangementId;
+  });
+
+  await saveSong(song);
+};

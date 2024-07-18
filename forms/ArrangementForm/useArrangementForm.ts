@@ -9,6 +9,7 @@ export function useArrangementForm(song: NewSong) {
     defaultValues: {
       title: song.title,
       artist: song.artist || '',
+      arrangementName: song.arrangement.name || '',
       key: song.arrangement.key,
       lastUnitId: song.arrangement.lastUnitId,
       songMap: song.arrangement.songMap.map((internalId) => ({ internalId })),

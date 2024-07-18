@@ -58,7 +58,7 @@ export function ComboBoxResponsive({
     }
   }, [value, selectedItem]);
 
-  const buttonClassName = ['w-[150px]', 'justify-between', className].filter(Boolean).join(' ');
+  const buttonClassName = ['min-w-[150px]', 'justify-between', className].filter(Boolean).join(' ');
 
   if (isDesktop) {
     return (

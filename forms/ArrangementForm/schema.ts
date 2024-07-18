@@ -26,6 +26,7 @@ export const songUnitsSchema = z.object({
 const schema = z.object({
   title: z.string().min(2, 'CANNOT BE EMPTY'),
   artist: z.string().optional(),
+  arrangementName: z.string().optional(),
   key: z.string().optional(),
   lastUnitId: z.number().positive(),
   songMap: z.array(songMapSchema).nonempty(),

@@ -47,6 +47,10 @@ db.runCommand({
                 bsonType: 'string',
                 description: "'key' must be a string and is required",
               },
+              name: {
+                bsonType: ['string', 'null'],
+                description: "'name' must be a string",
+              },
               units: {
                 bsonType: 'array',
                 description: "'units' must be an array and is required",

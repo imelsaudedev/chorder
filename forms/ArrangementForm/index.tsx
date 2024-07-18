@@ -3,15 +3,14 @@ import SaveButtonSet from '@/components/SaveButtonSet';
 import { Form } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { useArrangementForm } from '@/forms/ArrangementForm/useArrangementForm';
-import { NewSong, RequiredArrangement, SongWith } from '@/models/song';
+import { NewSong } from '@/models/song';
 import { useCallback } from 'react';
 import { useFieldArray, useFormState } from 'react-hook-form';
 import InfoForm from './InfoForm';
-import MoveArrangementButton from './MoveArrangementButton';
 import { ArrangementFormSchema } from './schema';
 import SongUnitListForm from './SongUnitListForm';
 import useArrangementFormFields from './useArrangementFormFields';
-import { RequiredIsNew, SongArrangementWith } from '@/models/song-arrangement';
+import ArrangementInfoForm from './ArrangementInfoForm';
 
 type ArrangementFormPageProps = {
   song: NewSong;
@@ -57,12 +56,13 @@ export default function ArrangementForm({ song, postSong, moveArrangement }: Arr
     setLastUnitId
   );
 
-  async function onSubmit({ title, artist, key, songMap, units, lastUnitId }: ArrangementFormSchema) {
+  async function onSubmit({ title, artist, key, arrangementName, songMap, units, lastUnitId }: ArrangementFormSchema) {
     song.title = title;
     song.artist = artist || null;
     if (key) {
       arrangement.key = key;
     }
+    arrangement.name = arrangementName || undefined;
     arrangement.songMap = songMap.map(({ internalId }) => internalId);
     arrangement.units = units;
     arrangement.lastUnitId = lastUnitId;
@@ -74,13 +74,10 @@ export default function ArrangementForm({ song, postSong, moveArrangement }: Arr
       <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
         <SaveButtonSet canCancel={!arrangement.isNew} enabled={isDirty && isValid} />
         <InfoForm form={form} />
-        {!arrangement.isNew && (
-          <MoveArrangementButton
-            song={song as SongWith<RequiredArrangement<SongArrangementWith<RequiredIsNew>>>}
-            moveArrangement={moveArrangement}
-          />
-        )}
+        <ArrangementInfoForm song={song} form={form} moveArrangement={moveArrangement} />
+
         <Separator />
+
         <SongUnitListForm arrangementFormFields={arrangementFormFields} />
       </form>
     </Form>

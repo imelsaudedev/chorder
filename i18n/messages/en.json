@@ -43,6 +43,11 @@
     "artistPlaceholder": "Song artist",
     "key": "Key",
     "keyPlaceholder": "Key",
+    "arrangementName": "Arrangement name",
+    "arrangementNamePlaceholder": "Give a name to this arrangement (optional)",
+    "arrangementSettings": "Arrangement settings",
+    "alreadyDefault": "Already default",
+    "makeDefault": "Make default",
     "units": "Unit",
     "chords": "Chords",
     "lyrics": "Lyrics"

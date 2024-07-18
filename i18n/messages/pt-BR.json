@@ -43,6 +43,11 @@
     "artistPlaceholder": "Artista da música",
     "key": "Tom",
     "keyPlaceholder": "Tom",
+    "arrangementName": "Nome do arranjo",
+    "arrangementNamePlaceholder": "Dê um nome para este arranjo (opcional)",
+    "arrangementSettings": "Configurações do arranjo",
+    "alreadyDefault": "Já é o padrão",
+    "makeDefault": "Tornar padrão",
     "unit": "Unidade",
     "chords": "Cifra",
     "lyrics": "Letra"
