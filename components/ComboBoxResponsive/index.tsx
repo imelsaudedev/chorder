@@ -21,9 +21,18 @@ type ComboBoxResponsiveProps = {
   id?: string;
   onChange?: (value: string) => void;
   placeholder: string;
+  hideCurrentValue?: boolean;
 };
 
-export function ComboBoxResponsive({ value, options, className, id, onChange, placeholder }: ComboBoxResponsiveProps) {
+export function ComboBoxResponsive({
+  value,
+  options,
+  className,
+  id,
+  onChange,
+  placeholder,
+  hideCurrentValue,
+}: ComboBoxResponsiveProps) {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const [selectedItem, setSelectedItem] = useState<string>(value);
@@ -61,7 +70,13 @@ export function ComboBoxResponsive({ value, options, className, id, onChange, pl
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0" align="start">
-          <ItemList options={options} onChange={handleChange} placeholder={placeholder} />
+          <ItemList
+            options={options}
+            onChange={handleChange}
+            placeholder={placeholder}
+            selectedValue={selectedItem}
+            hideCurrentValue={hideCurrentValue}
+          />
         </PopoverContent>
       </Popover>
     );
@@ -77,7 +92,13 @@ export function ComboBoxResponsive({ value, options, className, id, onChange, pl
       </DrawerTrigger>
       <DrawerContent>
         <div className="mt-4 border-t">
-          <ItemList options={options} onChange={handleChange} placeholder={placeholder} />
+          <ItemList
+            options={options}
+            onChange={handleChange}
+            placeholder={placeholder}
+            selectedValue={selectedItem}
+            hideCurrentValue={hideCurrentValue}
+          />
         </div>
       </DrawerContent>
     </Drawer>
@@ -86,20 +107,28 @@ export function ComboBoxResponsive({ value, options, className, id, onChange, pl
 
 function ItemList({
   options,
+  selectedValue,
+  hideCurrentValue,
   onChange,
   placeholder,
 }: {
   options: ComboBoxItem[];
+  selectedValue?: string;
+  hideCurrentValue?: boolean;
   onChange: (item: string) => void;
   placeholder: string;
 }) {
+  const filteredOptions = useMemo(
+    () => options.filter((option) => hideCurrentValue && option.value !== selectedValue),
+    [hideCurrentValue, options, selectedValue]
+  );
   return (
     <Command>
       <CommandInput placeholder={placeholder} />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>
-          {options.map((option) => (
+          {filteredOptions.map((option) => (
             <CommandItem
               key={option.value}
               value={option.label}

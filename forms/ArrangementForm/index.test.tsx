@@ -1,4 +1,4 @@
-import { PostSongAction } from '@/app/songs/[song]/actions';
+import { MoveArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
 import { NewSong } from '@/models/song';
 import { RequiredIsNew, SongArrangementWith } from '@/models/song-arrangement';
 import { SongUnit } from '@/models/song-unit';
@@ -39,6 +39,7 @@ describe('SongForm', () => {
   };
 
   const postSong: PostSongAction = jest.fn();
+  const moveArrangement: MoveArrangementAction = jest.fn();
   const setWriteMode: Dispatch<SetStateAction<boolean>> = jest.fn();
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
@@ -68,7 +69,7 @@ describe('SongForm', () => {
     }
     render(
       <NextIntlClientProvider messages={messages} locale="en">
-        <ArrangementForm song={song} postSong={postSong} setWriteMode={setWriteMode} />
+        <ArrangementForm song={song} postSong={postSong} moveArrangement={moveArrangement} />
       </NextIntlClientProvider>
     );
   });

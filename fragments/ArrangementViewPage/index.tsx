@@ -1,4 +1,5 @@
 import { DeleteArrangementAction } from '@/app/songs/[song]/actions';
+import ArrangementSelector from '@/components/ArrangementSelector';
 import KeyButtonSet from '@/components/KeyButtonSet';
 import Main from '@/components/Main';
 import { Mode } from '@/components/ModeButtonSet';
@@ -37,6 +38,7 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
             {song.artist && <span className="text-sm text-muted">{song.artist}</span>}
           </div>
           <div className="flex gap-2">
+            {song.arrangements.length > 1 && <ArrangementSelector song={song} />}
             <KeyButtonSet originalKey={arrangement.key || ''} transpose={transpose} setTranspose={setTranspose} />
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="w-9 p-0">

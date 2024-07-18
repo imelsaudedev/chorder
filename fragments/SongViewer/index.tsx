@@ -1,6 +1,6 @@
 'use client';
 
-import { DeleteArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
+import { DeleteArrangementAction, MoveArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
 import Main from '@/components/Main';
 import ArrangementForm from '@/forms/ArrangementForm';
 import { NewSong, RequiredArrangement, SongWith } from '@/models/song';
@@ -11,13 +11,14 @@ type SongViewerProps = {
   writeMode: boolean;
   postSong: PostSongAction;
   deleteArrangement: DeleteArrangementAction;
+  moveArrangement: MoveArrangementAction;
 };
 
-export default function SongViewer({ song, postSong, deleteArrangement, writeMode }: SongViewerProps) {
+export default function SongViewer({ song, postSong, deleteArrangement, moveArrangement, writeMode }: SongViewerProps) {
   if (writeMode) {
     return (
       <Main>
-        <ArrangementForm song={song} postSong={postSong} />
+        <ArrangementForm song={song} postSong={postSong} moveArrangement={moveArrangement} />
       </Main>
     );
   } else if (song.slug) {

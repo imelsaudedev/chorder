@@ -4,6 +4,7 @@
     "siteDescription": "A tool for managing chord sheets"
   },
   "Messages": {
+    "arrangement": "Arrangement",
     "or": "or",
     "preview": "Preview",
     "edit": "Edit",
@@ -77,6 +78,7 @@
     "newUnit": "New unit",
     "confirmDeleteTitle": "Are you sure you want to delete this song?",
     "confirmDelete": "This action cannot be undone.",
-    "noSongs": "No songs found"
+    "noSongs": "No songs found",
+    "moveArrangement": "Move arrangement"
   }
 }

@@ -26,7 +26,7 @@ export const postSong: PostSongAction = async function (incompleteSong: NewSong)
     arrangement: arrangement as SongArrangement,
     currentArrangementId: incompleteSong.currentArrangementId,
   });
-  redirect(`./${savedSong.slug}`, RedirectType.replace);
+  redirect(`./${savedSong.slug}?arr=${incompleteSong.currentArrangementId}`, RedirectType.replace);
 };
 
 export type DeleteArrangementAction = ((song: Song, arrangementId: number) => void) & Function;
@@ -104,3 +104,34 @@ export async function getSongOrCreate(
     arrangement,
   };
 }
+
+export type MoveArrangementAction = ((
+  previousSongSlug: string,
+  arrangementId: number,
+  newSongSlug: string
+) => Promise<void>) &
+  Function;
+
+export const moveArrangement: MoveArrangementAction = async function (
+  previousSongSlug: string,
+  arrangementId: number,
+  newSongSlug: string
+) {
+  const previousSong = await retrieveSong(previousSongSlug);
+  const song = await retrieveSong(newSongSlug);
+  if (!song || !previousSong) throw new Error('Song not found');
+
+  const newArrangement: SongArrangement = {
+    ...previousSong.arrangements[arrangementId],
+    isDefault: false,
+    isDeleted: false,
+  };
+
+  song.arrangements.push(newArrangement);
+  await saveSong(song);
+
+  removeArrangement(previousSong, arrangementId);
+  await saveSong(previousSong);
+
+  redirect(`./${song.slug}?arr=${song.arrangements.length - 1}`, RedirectType.replace);
+};

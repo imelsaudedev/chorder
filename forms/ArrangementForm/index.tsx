@@ -1,22 +1,25 @@
-import { PostSongAction } from '@/app/songs/[song]/actions';
+import { MoveArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
 import SaveButtonSet from '@/components/SaveButtonSet';
 import { Form } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { useArrangementForm } from '@/forms/ArrangementForm/useArrangementForm';
-import { NewSong } from '@/models/song';
-import { Dispatch, SetStateAction, useCallback } from 'react';
+import { NewSong, RequiredArrangement, SongWith } from '@/models/song';
+import { useCallback } from 'react';
 import { useFieldArray, useFormState } from 'react-hook-form';
 import InfoForm from './InfoForm';
+import MoveArrangementButton from './MoveArrangementButton';
 import { ArrangementFormSchema } from './schema';
 import SongUnitListForm from './SongUnitListForm';
 import useArrangementFormFields from './useArrangementFormFields';
+import { RequiredIsNew, SongArrangementWith } from '@/models/song-arrangement';
 
 type ArrangementFormPageProps = {
   song: NewSong;
   postSong: PostSongAction;
+  moveArrangement: MoveArrangementAction;
 };
 
-export default function ArrangementForm({ song, postSong }: ArrangementFormPageProps) {
+export default function ArrangementForm({ song, postSong, moveArrangement }: ArrangementFormPageProps) {
   const arrangement = song.arrangement;
 
   const form = useArrangementForm(song);
@@ -71,6 +74,12 @@ export default function ArrangementForm({ song, postSong }: ArrangementFormPageP
       <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
         <SaveButtonSet canCancel={!arrangement.isNew} enabled={isDirty && isValid} />
         <InfoForm form={form} />
+        {!arrangement.isNew && (
+          <MoveArrangementButton
+            song={song as SongWith<RequiredArrangement<SongArrangementWith<RequiredIsNew>>>}
+            moveArrangement={moveArrangement}
+          />
+        )}
         <Separator />
         <SongUnitListForm arrangementFormFields={arrangementFormFields} />
       </form>

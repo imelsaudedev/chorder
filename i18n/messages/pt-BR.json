@@ -4,6 +4,7 @@
     "siteDescription": "Uma ferramenta de gerenciamento de liturgias"
   },
   "Messages": {
+    "arrangement": "Arranjo",
     "or": "ou",
     "preview": "Pré-visualizar",
     "edit": "Editar",
@@ -77,6 +78,7 @@
     "newUnit": "Nova unidade",
     "confirmDeleteTitle": "Você tem certeza que deseja deletar esta música?",
     "confirmDelete": "Esta ação não pode ser desfeita.",
-    "noSongs": "Nenhuma música encontrada"
+    "noSongs": "Nenhuma música encontrada",
+    "moveArrangement": "Mover arranjo"
   }
 }
