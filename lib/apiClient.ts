@@ -1,3 +1,5 @@
+import { Song } from '@/models/song';
+
 type FetchSongOptions = {
   excludeArrangements?: boolean;
   selectArrangement?: boolean;

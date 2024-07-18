@@ -75,6 +75,8 @@
     "confirmDeleteTitle": "Você tem certeza que deseja deletar esta liturgia?",
     "confirmDelete": "Esta ação não pode ser desfeita.",
     "pickSong": "Selecione uma música",
+    "pickArrangement": "Selecione um arranjo",
+    "add": "Adicionar",
     "onlyFuture": "Mostrar apenas liturgias futuras"
   },
   "SongForm": {
