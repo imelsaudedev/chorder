@@ -35,8 +35,10 @@ export default function ServiceConfig({
   return (
     <>
       <h2 className="text-primary font-bold">{t('Messages.config')}</h2>
-      <div className={`flex mb-4 border border-primary p-2 rounded justify-between items-center`}>
-        <div className="flex gap-2">
+      <div
+        className={`flex flex-col md:flex-row mb-4 border border-primary p-2 rounded justify-between items-start md:items-center gap-4`}
+      >
+        <div className="flex flex-col md:flex-row gap-2">
           <div>
             <Label htmlFor="column-count">{t('Messages.columns')}</Label>
             <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
@@ -50,7 +52,7 @@ export default function ServiceConfig({
             <ModeButtonSet id="mode" mode={mode} setMode={setMode} />
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 self-end">
           <Button variant="default" asChild>
             <Link href={createHrefWithParam('edit', 'true')}>
               <EditIcon />

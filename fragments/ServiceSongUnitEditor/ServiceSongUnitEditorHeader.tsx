@@ -1,5 +1,6 @@
 import CloseIcon from '@/components/icons/CloseIcon';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ServiceFormSchema, SongUnitSchema } from '@/forms/ServiceForm/schema';
 import { useTranslations } from 'next-intl';
@@ -41,9 +42,8 @@ export default function ServiceSongUnitEditorHeader({ index, onRemoveUnit }: Ser
       <div className="flex flex-col flex-grow text-left justify-end">
         <span className="font-bold text-lg leading-none">{unit.title}</span>
         {unit.artist && <span className="text-sm">{unit.artist}</span>}
-      </div>
-      <div className="flex gap-2 items-end">
         <div>
+          <Label>{t('key')}</Label>
           <Select defaultValue={unit.semitoneTranspose.toString()} onValueChange={handleSemitoneTransposeChange}>
             <SelectTrigger className="w-24">
               <SelectValue placeholder={t('keyPlaceholder')} />
@@ -57,6 +57,8 @@ export default function ServiceSongUnitEditorHeader({ index, onRemoveUnit }: Ser
             </SelectContent>
           </Select>
         </div>
+      </div>
+      <div className="flex gap-2 items-start">
         <Button onClick={handleRemoveUnit} variant="ghost" size="icon">
           <CloseIcon />
         </Button>

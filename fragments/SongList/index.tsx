@@ -64,7 +64,7 @@ export default function SongList({ songs: baseSongs, initialsStyle = 'grid', onS
 
   return (
     <>
-      <nav className="mb-4">
+      <nav className="flex flex-wrap mb-4">
         {allInitials.map((initial) => {
           const className = 'text-xl px-2';
           if (existingInitials.indexOf(initial) < 0)

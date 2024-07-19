@@ -37,7 +37,7 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
             <span className="font-bold text-lg leading-none text-primary">{song.title}</span>
             {song.artist && <span className="text-sm text-muted">{song.artist}</span>}
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             {song.arrangements.length > 1 && <ArrangementSelector song={song} />}
             <KeyButtonSet originalKey={arrangement.key || ''} transpose={transpose} setTranspose={setTranspose} />
             <CollapsibleTrigger asChild>

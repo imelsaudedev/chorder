@@ -35,23 +35,25 @@ export default function SongConfig({
   return (
     <>
       <h2 className="text-primary font-bold">{t('Messages.config')}</h2>
-      <div className={`flex mb-4 border border-primary p-2 rounded justify-between items-center`}>
-        <div className="flex gap-2">
+      <div
+        className={`flex flex-col md:flex-row mb-4 border border-primary p-2 rounded justify-between items-start md:items-center gap-4`}
+      >
+        <div className="flex gap-2 flex-col md:flex-row">
           <div>
             <Label htmlFor="column-count">{t('Messages.columns')}</Label>
             <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
           </div>
           <div>
-            <Label htmlFor="font-size">{t('Messages.fontSize')}</Label>
-            <FontSizeButtonSet id="font-size" fontSize={fontSize} setFontSize={setFontSize} />
-          </div>
-          <div>
             <Label htmlFor="mode">{t('Messages.mode')}</Label>
             <ModeButtonSet id="mode" mode={mode} setMode={setMode} />
           </div>
+          <div>
+            <Label htmlFor="font-size">{t('Messages.fontSize')}</Label>
+            <FontSizeButtonSet id="font-size" fontSize={fontSize} setFontSize={setFontSize} />
+          </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 self-end">
           <Button variant="default" asChild>
             <Link href={createHrefWithParam('edit', 'true')}>
               <EditIcon />

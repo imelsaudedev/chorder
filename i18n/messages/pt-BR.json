@@ -50,7 +50,9 @@
     "makeDefault": "Tornar padrão",
     "unit": "Unidade",
     "chords": "Cifra",
-    "lyrics": "Letra"
+    "lyrics": "Letra",
+    "showLyrics": "Mostrar letra",
+    "editSong": "Editar música"
   },
   "UnitData": {
     "content": "Chordpro",

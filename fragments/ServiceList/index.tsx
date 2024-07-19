@@ -25,8 +25,8 @@ export default function ServiceList({ services: baseServices }: ServiceListProps
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Switch checked={showOnlyFuture} onCheckedChange={setShowOnlyFuture} />
-        <label>{t('ServiceForm.onlyFuture')}</label>
+        <Switch id="show-only-future" checked={showOnlyFuture} onCheckedChange={setShowOnlyFuture} />
+        <label htmlFor="show-only-future">{t('ServiceForm.onlyFuture')}</label>
       </div>
       <section>
         {services.map((service) => (
