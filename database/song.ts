@@ -1,8 +1,12 @@
+import { my_unstable_cache } from '@/lib/my_unstable_cache';
+import { NewSong, Song } from '@/models/song';
 import { SongArrangement } from '@/models/song-arrangement';
 import { Filter } from 'mongodb';
+import { revalidateTag } from 'next/cache';
 import { DBData, getDB } from './client';
 import { getAvailableSlug, saveSlug } from './slug';
-import { NewSong, Song } from '@/models/song';
+
+export const SONGS_CACHE_TAG = 'songs';
 
 type RetrieveSongOptions = {
   acceptDeleted?: boolean;
@@ -32,6 +36,7 @@ export function retrieveSongs({
       })
   );
 }
+export const cachedRetrieveSongs = my_unstable_cache(retrieveSongs, ['song-list'], { tags: [SONGS_CACHE_TAG] });
 
 export function retrieveSongsBySlug(
   slugs: string[],
@@ -39,6 +44,9 @@ export function retrieveSongsBySlug(
 ): Promise<Song[]> {
   return retrieveSongs({ filter: { slug: { $in: slugs } }, options, dbData });
 }
+export const cachedRetrieveSongsBySlug = my_unstable_cache(retrieveSongsBySlug, ['songs-by-slug'], {
+  tags: [SONGS_CACHE_TAG],
+});
 
 export function retrieveSong(slug: string, dbData?: DBData): Promise<Song | null> {
   return getSongsCollection(dbData).then(({ songs }) => {
@@ -51,6 +59,7 @@ export function retrieveSong(slug: string, dbData?: DBData): Promise<Song | null
     });
   });
 }
+export const cachedRetrieveSong = my_unstable_cache(retrieveSong, ['song'], { tags: [SONGS_CACHE_TAG] });
 
 export async function saveSong(
   {
@@ -115,6 +124,7 @@ export async function saveSong(
       await client.close();
     }
   }
+  revalidateTag(SONGS_CACHE_TAG);
   return song as Song;
 }
 

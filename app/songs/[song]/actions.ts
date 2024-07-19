@@ -1,7 +1,7 @@
 'use server';
 
 import { getChords, getKeyFromChords } from '@/chopro/music';
-import { retrieveSong, saveSong } from '@/database/song';
+import { cachedRetrieveSong, retrieveSong, saveSong } from '@/database/song';
 import { getDefaultArrangement, NewSong, NewSongArrangement, removeArrangement, Song } from '@/models/song';
 import { getArrangementLyrics, getSongUnitMap, SongArrangement } from '@/models/song-arrangement';
 import { redirect, RedirectType } from 'next/navigation';
@@ -57,7 +57,7 @@ export async function getSongOrCreate(
   slug: string | undefined,
   currentArrangementId: number | undefined
 ): Promise<NewSong> {
-  const fullSong = (slug && slug !== 'new' && (await retrieveSong(slug))) || null;
+  const fullSong = (slug && slug !== 'new' && (await cachedRetrieveSong(slug))) || null;
   let arrangement: NewSongArrangement = {
     units: [],
     songMap: [],

@@ -1,4 +1,4 @@
-import { retrieveSongs } from '@/database/song';
+import { cachedRetrieveSongs } from '@/database/song';
 import {
   excludeArrangements,
   getDefaultArrangementId,
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   if (slug) {
     filter.slug = slug;
   }
-  const songs = await retrieveSongs({ filter }).then((songs) =>
+  const songs = await cachedRetrieveSongs({ filter }).then((songs) =>
     songs.map((song) => {
       let returnSong = song;
       if (shouldSelectArrangement) {

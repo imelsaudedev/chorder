@@ -1,6 +1,6 @@
 'use server';
 
-import { retrieveService, saveService } from '@/database/service';
+import { cachedRetrieveService, saveService } from '@/database/service';
 import { ServiceFormSchema, SongUnitSchema } from '@/forms/ServiceForm/schema';
 import { NewService, OptionalSlug, RequiredIsNew, Service, ServiceWith } from '@/models/service';
 import { ServiceSongUnit, ServiceUnit } from '@/models/service-unit';
@@ -66,7 +66,7 @@ export const deleteService: DeleteServiceAction = async function (service) {
 };
 
 export async function getServiceOrCreate(slug: string | undefined): Promise<ServiceWith<OptionalSlug & RequiredIsNew>> {
-  const service = (slug && slug !== 'new' && (await retrieveService(slug))) || null;
+  const service = (slug && slug !== 'new' && (await cachedRetrieveService(slug))) || null;
   let isNew = !service;
   const units = service?.units || ([] as ServiceUnit[]);
   return {

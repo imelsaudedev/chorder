@@ -2,14 +2,14 @@ import Header from '@/components/Header';
 import Main from '@/components/Main';
 import PlusIcon from '@/components/icons/PlusIcon';
 import { Button } from '@/components/ui/button';
-import { retrieveServices } from '@/database/service';
+import { cachedRetrieveServices } from '@/database/service';
 import ServiceList from '@/fragments/ServiceList';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ServiceListPage() {
-  const services = await retrieveServices({});
+  const services = await cachedRetrieveServices({});
 
   return (
     <>

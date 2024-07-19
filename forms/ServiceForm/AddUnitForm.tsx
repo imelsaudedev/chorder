@@ -28,7 +28,7 @@ export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
     fetchSong(song.slug, { selectArrangement: true })
       .then((song: SongWith<RequiredArrangement> | null) => {
         setSong(song);
-        setSelectedArrangementId(song?.currentArrangementId || null);
+        setSelectedArrangementId(song?.currentArrangementId ?? null);
       })
       .catch(console.error);
   };

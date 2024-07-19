@@ -1,12 +1,16 @@
+import { my_unstable_cache } from '@/lib/my_unstable_cache';
 import { dateForSlug, getUnitsByType, NewService, Service } from '@/models/service';
 import { ServiceSongUnit } from '@/models/service-unit';
 import { mapSongsBySlug, RequiredArrangement, setArrangement, Song, SongWith } from '@/models/song';
 import { extractDiff } from '@/models/song-arrangement';
 import { SongUnit } from '@/models/song-unit';
 import { Filter } from 'mongodb';
+import { revalidateTag } from 'next/cache';
 import { DBData, getDB } from './client';
 import { getAvailableSlug, saveSlug } from './slug';
-import { retrieveSongsBySlug, saveSong } from './song';
+import { retrieveSongsBySlug, saveSong, SONGS_CACHE_TAG } from './song';
+
+export const SERVICES_CACHE_TAG = 'services';
 
 type DBServiceSongUnit = {
   type: 'DB_SONG';
@@ -60,6 +64,9 @@ export function retrieveServices({
       });
   });
 }
+export const cachedRetrieveServices = my_unstable_cache(retrieveServices, ['service-list'], {
+  tags: [SERVICES_CACHE_TAG, SONGS_CACHE_TAG],
+});
 
 export function retrieveService(slug: string): Promise<Service | null> {
   return getServicesCollection().then(({ services, db, client }) => {
@@ -78,6 +85,9 @@ export function retrieveService(slug: string): Promise<Service | null> {
     });
   });
 }
+export const cachedRetrieveService = my_unstable_cache(retrieveService, ['service'], {
+  tags: [SERVICES_CACHE_TAG, SONGS_CACHE_TAG],
+});
 
 export async function saveService(service: NewService): Promise<Service> {
   const { client, db, services } = await getServicesCollection();
@@ -113,6 +123,8 @@ export async function saveService(service: NewService): Promise<Service> {
     await session.endSession();
     await client.close();
   }
+
+  revalidateTag(SERVICES_CACHE_TAG);
   return service as Service;
 }
 

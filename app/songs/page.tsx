@@ -2,7 +2,7 @@ import Header from '@/components/Header';
 import Main from '@/components/Main';
 import PlusIcon from '@/components/icons/PlusIcon';
 import { Button } from '@/components/ui/button';
-import { retrieveSongs } from '@/database/song';
+import { cachedRetrieveSongs } from '@/database/song';
 import SongList from '@/fragments/SongList';
 import { excludeArrangements } from '@/models/song';
 import Link from 'next/link';
@@ -10,7 +10,7 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 
 export default async function SongListPage() {
-  const songs = (await retrieveSongs({})).map(excludeArrangements);
+  const songs = (await cachedRetrieveSongs({})).map(excludeArrangements);
 
   return (
     <>
