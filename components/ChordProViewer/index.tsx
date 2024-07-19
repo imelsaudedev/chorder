@@ -1,8 +1,8 @@
-import { Song } from "chordsheetjs";
-import { parseChordPro } from "../../chopro/music";
-import { Fragment, useMemo } from "react";
-import ChordProLine from "../ChordProLine";
-import { SongUnitType } from "@/models/song-unit";
+import { Song } from 'chordsheetjs';
+import { parseChordPro } from '../../chopro/music';
+import { Fragment, useMemo } from 'react';
+import ChordProLine from '../ChordProLine';
+import { SongUnitType } from '@/models/song-unit';
 
 export type ChordProViewerProps = {
   chordpro: string;
@@ -10,13 +10,9 @@ export type ChordProViewerProps = {
   withoutContainer?: boolean;
 };
 
-export default function ChordProViewer({
-  chordpro,
-  unitType,
-  withoutContainer,
-}: ChordProViewerProps) {
+export default function ChordProViewer({ chordpro, unitType, withoutContainer }: ChordProViewerProps) {
   const chordproHtml = useMemo<Song>(() => parseChordPro(chordpro), [chordpro]);
-  const Container = withoutContainer ? Fragment : "div";
+  const Container = withoutContainer ? Fragment : 'div';
 
   return (
     <Container>
@@ -27,6 +23,7 @@ export default function ChordProViewer({
             isFirst={idx === 0}
             isLast={idx === chordproHtml.lines.length - 1}
             unitType={unitType}
+            mode="chords"
           />
         </Fragment>
       ))}

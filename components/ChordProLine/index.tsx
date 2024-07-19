@@ -3,7 +3,7 @@ import styles from './styles.module.scss';
 import { unitTypeColorClasses } from '../unit-colors';
 import { transposeChord } from '@/chopro/music';
 import { SongUnitType } from '@/models/song-unit';
-import { Mode } from 'fs';
+import { Mode } from '../ModeButtonSet';
 
 type ChordProLineProps = {
   line: Line;
