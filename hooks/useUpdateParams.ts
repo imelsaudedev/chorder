@@ -11,7 +11,7 @@ export default function useUpdateParams(): (name: string, value: string) => void
       const params = new URLSearchParams(searchParams);
       params.set(name, value);
 
-      router.push(`${pathname}?${params.toString()}`, { shallow: true });
+      router.push(`${pathname}?${params.toString()}`);
     },
     [pathname, router, searchParams]
   );
