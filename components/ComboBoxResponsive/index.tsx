@@ -119,7 +119,7 @@ function ItemList({
   placeholder: string;
 }) {
   const filteredOptions = useMemo(
-    () => options.filter((option) => hideCurrentValue && option.value !== selectedValue),
+    () => options.filter((option) => !hideCurrentValue || option.value !== selectedValue),
     [hideCurrentValue, options, selectedValue]
   );
   return (

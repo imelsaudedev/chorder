@@ -38,7 +38,7 @@ export default function useArrangementFormFields(
 
     units,
     onUpdateUnit: useUpdateUnit(units, updateSongUnit),
-    onAddExistingUnit: useAddExistingUnit(appendSongMapElement),
+    onAddExistingUnit: useAddExistingUnit(units, appendSongMapElement, appendSongUnit, lastUnitId, setLastUnitId),
     onCreateUnit: useCreateUnit(units, appendSongMapElement, appendSongUnit, lastUnitId, setLastUnitId),
 
     songUnitMap: useMemo(
@@ -110,12 +110,28 @@ function useCreateUnit(
   }, [appendSongMapElement, appendSongUnit, lastUnitId, setLastUnitId, units]);
 }
 
-function useAddExistingUnit(appendSongMapElement: (element: { internalId: number }) => void) {
+function useAddExistingUnit(
+  units: SongUnit[],
+  appendSongMapElement: (element: { internalId: number }) => void,
+  appendSongUnit: (unit: SongUnit) => void,
+  lastUnitId: number,
+  setLastUnitId: (newLastUnitId: number) => void
+) {
   return useCallback(
     (internalId: number) => {
-      appendSongMapElement({ internalId });
+      const originalUnit = units.find((u) => u.internalId === internalId);
+      const newLastId = lastUnitId + 1;
+      const newBlockType = originalUnit?.type || 'BLOCK';
+      appendSongUnit({
+        internalId: newLastId,
+        type: newBlockType,
+        content: originalUnit?.content || '',
+        typeIdx: units.filter((u) => u.type === newBlockType).length + 1,
+      });
+      setLastUnitId(newLastId);
+      appendSongMapElement({ internalId: newLastId });
     },
-    [appendSongMapElement]
+    [appendSongMapElement, appendSongUnit, lastUnitId, setLastUnitId, units]
   );
 }
 
