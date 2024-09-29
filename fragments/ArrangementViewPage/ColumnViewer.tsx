@@ -1,33 +1,29 @@
 import ChordProLine from '@/components/ChordProLine';
 import { Mode } from '@/components/ModeButtonSet';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { SongUnitType } from '@/models/song-unit';
-import { Line } from 'chordsheetjs';
-import { useEffect, useState } from 'react';
+import { SongUnit } from '@/models/song-unit';
+import { useEffect, useMemo, useState } from 'react';
+import { findBestDistribution } from './column-logic';
+import { unitTypeColorClasses } from '@/components/unit-colors';
 
 type ColumnViewerProps = {
   columns: number;
-  lineData: (LineData | null)[];
+  songUnitMap: SongUnit[];
   transpose: number;
   originalKey?: string;
   mode: Mode;
 };
 
-type LineData = {
-  line: Line;
-  unitType: SongUnitType;
-  isFirst: boolean;
-  isLast: boolean;
-};
-
 export default function ColumnViewer({
   columns: columnConfig,
-  lineData,
+  songUnitMap,
   transpose,
   originalKey,
   mode,
 }: ColumnViewerProps) {
   const [columns, setColumns] = useState(columnConfig);
+
+  const columnData = useMemo(() => findBestDistribution(songUnitMap, columns), [songUnitMap, columns]);
 
   const isPhone = useMediaQuery('(max-width: 639px)');
   const isTablet = useMediaQuery('(max-width: 1023px)');
@@ -61,33 +57,31 @@ export default function ColumnViewer({
   if (columns >= 4) {
     gridCols = 'grid-cols-4';
   }
-  const className = `grid ${gridCols} gap-4`;
 
   return (
-    <div className={className}>
-      {Array.from(Array(columns).keys()).map((i) => {
-        const linesPerColumn = Math.ceil(lineData.length / columns);
-        const colData = lineData.slice(i * linesPerColumn, Math.min((i + 1) * linesPerColumn, lineData.length));
+    <div className={`grid ${gridCols} gap-4`}>
+      {columnData.map((data, idx) => {
         return (
-          <div key={`col-${i}`} className="flex flex-col">
-            {colData.map((data, idx) =>
-              data ? (
-                <ChordProLine
-                  key={`col-${i}-line-${idx}`}
-                  line={data.line}
-                  unitType={data.unitType}
-                  isFirst={data.isFirst}
-                  isLast={data.isLast}
-                  isLastOfColumn={idx === colData.length - 1}
-                  grow={idx === colData.length - 1}
-                  originalKey={originalKey}
-                  transpose={transpose}
-                  mode={mode}
-                />
-              ) : (
-                <span key={`col-${i}-line-${idx}`}>ERROR</span>
-              )
-            )}
+          <div key={`col-${idx}`} className="flex flex-col gap-2">
+            {data.map((unit, unitIdx) => {
+              const unitClasses = unitTypeColorClasses[unit.unitType];
+              let className = `border rounded pt-1 ${unitClasses.background} ${unitClasses.border}`;
+              className = `${className} ${unitIdx === data.length - 1 ? 'flex-grow' : ''}`;
+
+              return (
+                <div key={`unit-${unitIdx}`} className={className}>
+                  {unit.lines.map((line, idx) => (
+                    <ChordProLine
+                      key={`unit-${unitIdx}-line-${idx}`}
+                      line={line}
+                      originalKey={originalKey}
+                      transpose={transpose}
+                      mode={mode}
+                    />
+                  ))}
+                </div>
+              );
+            })}
           </div>
         );
       })}

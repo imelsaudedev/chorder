@@ -108,7 +108,7 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
           </div>
         </div>
         {preview && (
-          <div className="p-2 bg-white rounded">
+          <div className="p-2 bg-white rounded border">
             <ChordProViewer chordpro={unit.content} />
           </div>
         )}

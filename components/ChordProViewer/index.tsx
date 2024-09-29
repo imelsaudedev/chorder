@@ -7,26 +7,16 @@ import { SongUnitType } from '@/models/song-unit';
 export type ChordProViewerProps = {
   chordpro: string;
   unitType?: SongUnitType;
-  withoutContainer?: boolean;
 };
 
-export default function ChordProViewer({ chordpro, unitType, withoutContainer }: ChordProViewerProps) {
+export default function ChordProViewer({ chordpro, unitType }: ChordProViewerProps) {
   const chordproHtml = useMemo<Song>(() => parseChordPro(chordpro), [chordpro]);
-  const Container = withoutContainer ? Fragment : 'div';
 
   return (
-    <Container>
+    <>
       {chordproHtml.lines.map((line, idx) => (
-        <Fragment key={`song-line-${idx}`}>
-          <ChordProLine
-            line={line}
-            isFirst={idx === 0}
-            isLast={idx === chordproHtml.lines.length - 1}
-            unitType={unitType}
-            mode="chords"
-          />
-        </Fragment>
+        <ChordProLine line={line} mode="chords" key={`song-line-${idx}`} />
       ))}
-    </Container>
+    </>
   );
 }

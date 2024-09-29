@@ -1,53 +1,19 @@
 import { Line } from 'chordsheetjs';
 import styles from './styles.module.scss';
-import { unitTypeColorClasses } from '../unit-colors';
 import { transposeChord } from '@/chopro/music';
-import { SongUnitType } from '@/models/song-unit';
 import { Mode } from '../ModeButtonSet';
 
 type ChordProLineProps = {
   line: Line;
-  isFirst: boolean;
-  isLast: boolean;
-  isLastOfColumn?: boolean;
-  unitType?: SongUnitType;
   originalKey?: string;
   transpose?: number;
-  grow?: boolean;
   mode: Mode;
 };
 
-export default function ChordProLine({
-  line,
-  isFirst,
-  isLast,
-  isLastOfColumn,
-  unitType,
-  originalKey,
-  transpose,
-  grow,
-  mode,
-}: ChordProLineProps) {
+export default function ChordProLine({ line, originalKey, transpose, mode }: ChordProLineProps) {
   const hasLyrics = line.items.some((item) => (item as any).lyrics?.trim());
   const hasChords = line.items.some((item) => (item as any).chords?.trim());
-  let className = 'flex flex-col relative px-2 border-x';
-  if (unitType) {
-    const unitClasses = unitTypeColorClasses[unitType];
-    className = `${className} ${unitClasses.background} ${unitClasses.border}`;
-
-    if (isFirst) {
-      className = `${className} pt-1 border-t rounded-t`;
-    }
-    if (isLast) {
-      className = `${className} border-b rounded-b`;
-      if (!isLastOfColumn) {
-        className = `${className} mb-2`;
-      }
-    }
-    if (grow) {
-      className = `${className} flex-grow`;
-    }
-  }
+  let className = 'flex flex-col relative px-2';
   return (
     <div className={className} style={{ breakInside: 'avoid' }}>
       {mode === 'text' && (
@@ -104,7 +70,6 @@ export default function ChordProLine({
           ))}
         </div>
       )}
-      {grow && <div className="flex-grow" />}
     </div>
   );
 }

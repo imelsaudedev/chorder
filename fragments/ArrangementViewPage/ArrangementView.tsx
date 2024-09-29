@@ -33,5 +33,7 @@ export default function ArrangementView({
       .flat();
   }, [songUnitMap]);
 
-  return <ColumnViewer columns={columns} lineData={lineData} transpose={transpose} originalKey={songKey} mode={mode} />;
+  return (
+    <ColumnViewer columns={columns} songUnitMap={songUnitMap} transpose={transpose} originalKey={songKey} mode={mode} />
+  );
 }
