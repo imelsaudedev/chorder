@@ -1,8 +1,8 @@
 import { RequiredArrangement, SongWith } from '@/models/song';
-import { ComboBoxResponsive } from '../ComboBoxResponsive';
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import useUpdateParams from '@/hooks/useUpdateParams';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 type ArrangementSelectorProps = {
   song: SongWith<RequiredArrangement>;
@@ -11,12 +11,11 @@ type ArrangementSelectorProps = {
 export default function ArrangementSelector({ song }: ArrangementSelectorProps) {
   const t = useTranslations('Messages');
 
-  const arrangement = song.arrangement;
   const updateParams = useUpdateParams();
 
   const arrangementOptions = useMemo(() => {
     return song.arrangements.map((arrangement, idx) => ({
-      label: arrangement.name || `${t('arrangement')} ${idx + 1}`,
+      label: arrangement.name || (arrangement.isDefault ? t('defaultArrangement') : `${t('arrangement')} ${idx + 1}`),
       value: `${idx}`,
     }));
   }, [song.arrangements, t]);
@@ -28,12 +27,23 @@ export default function ArrangementSelector({ song }: ArrangementSelectorProps) 
   };
 
   return (
-    <ComboBoxResponsive
+    <Select
       value={`${song.currentArrangementId}`}
-      options={arrangementOptions}
-      placeholder={t('arrangement')}
-      onChange={handleChangeArrangement}
-      hideCurrentValue={true}
-    />
+      onValueChange={handleChangeArrangement}
+      disabled={arrangementOptions.length <= 1}
+    >
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder={t('arrangement')} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {arrangementOptions.map((option) => (
+            <SelectItem key={`option--${option.value}`} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 }

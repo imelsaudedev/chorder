@@ -22,6 +22,7 @@ type ComboBoxResponsiveProps = {
   onChange?: (value: string) => void;
   placeholder: string;
   hideCurrentValue?: boolean;
+  hideSearch?: boolean;
 };
 
 export function ComboBoxResponsive({
@@ -32,6 +33,7 @@ export function ComboBoxResponsive({
   onChange,
   placeholder,
   hideCurrentValue,
+  hideSearch,
 }: ComboBoxResponsiveProps) {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
@@ -76,6 +78,7 @@ export function ComboBoxResponsive({
             placeholder={placeholder}
             selectedValue={selectedItem}
             hideCurrentValue={hideCurrentValue}
+            hideSearch={hideSearch}
           />
         </PopoverContent>
       </Popover>
@@ -98,6 +101,7 @@ export function ComboBoxResponsive({
             placeholder={placeholder}
             selectedValue={selectedItem}
             hideCurrentValue={hideCurrentValue}
+            hideSearch={hideSearch}
           />
         </div>
       </DrawerContent>
@@ -111,12 +115,14 @@ function ItemList({
   hideCurrentValue,
   onChange,
   placeholder,
+  hideSearch,
 }: {
   options: ComboBoxItem[];
   selectedValue?: string;
   hideCurrentValue?: boolean;
   onChange: (item: string) => void;
   placeholder: string;
+  hideSearch?: boolean;
 }) {
   const filteredOptions = useMemo(
     () => options.filter((option) => !hideCurrentValue || option.value !== selectedValue),
@@ -124,7 +130,7 @@ function ItemList({
   );
   return (
     <Command>
-      <CommandInput placeholder={placeholder} />
+      {!hideSearch && <CommandInput placeholder={placeholder} />}
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>
