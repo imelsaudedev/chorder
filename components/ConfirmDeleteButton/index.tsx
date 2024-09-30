@@ -44,8 +44,7 @@ export default function ConfirmDeleteButton({ alertTitle, alertDescription, onDe
           <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
           <AlertDialogAction asChild>
             <Button variant="destructive" onClick={handleDelete}>
-              <TrashIcon />
-              <span className="sr-only">{t('delete')}</span>
+              <span>{t('delete')}</span>
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
