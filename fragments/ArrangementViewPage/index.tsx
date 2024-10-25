@@ -32,13 +32,13 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
   return (
     <Collapsible>
       <div className="px-4">
-        <div className="flex gap-2 flex-grow justify-between items-center">
+        <div className="flex flex-grow flex-col md:flex-row justify-between md:items-center gap-2">
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-none text-primary">{song.title}</span>
+            <span className="font-bold text-lg leading-none text-red">{song.title}</span>
             {song.artist && <span className="text-sm text-muted">{song.artist}</span>}
           </div>
           <div className="flex items-center gap-2">
-            <ArrangementSelector song={song} />
+            {song.arrangements.length > 1 && <ArrangementSelector song={song} />}
             <KeyButtonSet originalKey={arrangement.key || ''} transpose={transpose} setTranspose={setTranspose} />
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="w-9 p-0">
