@@ -1,4 +1,4 @@
-export default function EditIcon({ className }: { className?: string }) {
+export default function EditIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -6,7 +6,7 @@ export default function EditIcon({ className }: { className?: string }) {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className={`w-6 h-6 ${className}`}
+      className={className}
     >
       <path
         strokeLinecap="round"

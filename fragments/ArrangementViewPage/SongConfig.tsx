@@ -1,14 +1,10 @@
-import ConfirmDeleteButton from '@/components/ConfirmDeleteButton';
-import EditIcon from '@/components/icons/EditIcon';
-import { Button } from '@/components/ui/button';
+import FontSizeButtonSet from '@/components/FontSizeButtonSet';
+import KeyButtonSet from '@/components/KeyButtonSet';
+import ModeButtonSet, { Mode } from '@/components/ModeButtonSet';
 import { Label } from '@/components/ui/label';
+import { useTranslations } from 'next-intl';
 import { Dispatch, SetStateAction } from 'react';
 import ColumnButtons from './ColumnButtons';
-import { useTranslations } from 'next-intl';
-import FontSizeButtonSet from '@/components/FontSizeButtonSet';
-import ModeButtonSet, { Mode } from '@/components/ModeButtonSet';
-import Link from 'next/link';
-import useHrefWithParams from '@/hooks/useHrefWithParams';
 
 type SongConfigProps = {
   columns: number;
@@ -17,7 +13,9 @@ type SongConfigProps = {
   setFontSize: Dispatch<SetStateAction<number>>;
   mode: Mode;
   setMode: Dispatch<SetStateAction<Mode>>;
-  deleteArrangementWithId: () => void;
+  originalKey: string;
+  transpose: number;
+  setTranspose: Dispatch<SetStateAction<number>>;
 };
 
 export default function SongConfig({
@@ -27,43 +25,31 @@ export default function SongConfig({
   setFontSize,
   mode,
   setMode,
-  deleteArrangementWithId,
+  originalKey,
+  transpose,
+  setTranspose,
 }: SongConfigProps) {
   const t = useTranslations();
-  const createHrefWithParam = useHrefWithParams();
 
   return (
     <>
       <h2 className="text-primary font-bold">{t('Messages.config')}</h2>
-      <div
-        className={`flex flex-col md:flex-row mb-4 border border-primary p-2 rounded justify-between items-start md:items-center gap-4`}
-      >
-        <div className="flex gap-2 flex-col md:flex-row">
-          <div>
-            <Label htmlFor="column-count">{t('Messages.columns')}</Label>
-            <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
-          </div>
-          <div>
-            <Label htmlFor="mode">{t('Messages.mode')}</Label>
-            <ModeButtonSet id="mode" mode={mode} setMode={setMode} />
-          </div>
-          <div>
-            <Label htmlFor="font-size">{t('Messages.fontSize')}</Label>
-            <FontSizeButtonSet id="font-size" fontSize={fontSize} setFontSize={setFontSize} />
-          </div>
+      <div className={`flex flex-col md:flex-row mb-4 border border-primary p-2 rounded items-start gap-4`}>
+        <div>
+          <Label htmlFor="font-size">{t('SongData.key')}</Label>
+          <KeyButtonSet originalKey={originalKey} transpose={transpose} setTranspose={setTranspose} />
         </div>
-
-        <div className="flex gap-2 self-end">
-          <Button variant="default" asChild>
-            <Link href={createHrefWithParam('edit', 'true')}>
-              <EditIcon />
-            </Link>
-          </Button>
-          <ConfirmDeleteButton
-            onDelete={deleteArrangementWithId}
-            alertTitle={t('SongForm.confirmDeleteTitle')}
-            alertDescription={t('SongForm.confirmDelete')}
-          />
+        <div>
+          <Label htmlFor="font-size">{t('Messages.fontSize')}</Label>
+          <FontSizeButtonSet id="font-size" fontSize={fontSize} setFontSize={setFontSize} />
+        </div>
+        <div>
+          <Label htmlFor="column-count">{t('Messages.columns')}</Label>
+          <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
+        </div>
+        <div>
+          <Label htmlFor="mode">{t('Messages.mode')}</Label>
+          <ModeButtonSet id="mode" mode={mode} setMode={setMode} />
         </div>
       </div>
     </>

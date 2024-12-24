@@ -1,14 +1,9 @@
-import ConfirmDeleteButton from '@/components/ConfirmDeleteButton';
 import FontSizeButtonSet from '@/components/FontSizeButtonSet';
-import EditIcon from '@/components/icons/EditIcon';
-import { Button } from '@/components/ui/button';
+import ModeButtonSet, { Mode } from '@/components/ModeButtonSet';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { Dispatch, SetStateAction } from 'react';
 import ColumnButtons from '../ArrangementViewPage/ColumnButtons';
-import ModeButtonSet, { Mode } from '@/components/ModeButtonSet';
-import Link from 'next/link';
-import useHrefWithParams from '@/hooks/useHrefWithParams';
 
 type ServiceConfigProps = {
   columns: number;
@@ -17,7 +12,6 @@ type ServiceConfigProps = {
   setFontSize: Dispatch<SetStateAction<number>>;
   mode: Mode;
   setMode: Dispatch<SetStateAction<Mode>>;
-  deleteService: () => void;
 };
 
 export default function ServiceConfig({
@@ -27,10 +21,8 @@ export default function ServiceConfig({
   setFontSize,
   mode,
   setMode,
-  deleteService,
 }: ServiceConfigProps) {
   const t = useTranslations();
-  const createHrefWithParam = useHrefWithParams();
 
   return (
     <>
@@ -51,18 +43,6 @@ export default function ServiceConfig({
             <Label htmlFor="mode">{t('Messages.mode')}</Label>
             <ModeButtonSet id="mode" mode={mode} setMode={setMode} />
           </div>
-        </div>
-        <div className="flex gap-2 self-end">
-          <Button variant="default" asChild>
-            <Link href={createHrefWithParam('edit', 'true')}>
-              <EditIcon />
-            </Link>
-          </Button>
-          <ConfirmDeleteButton
-            onDelete={deleteService}
-            alertTitle={t('ServiceForm.confirmDeleteTitle')}
-            alertDescription={t('ServiceForm.confirmDelete')}
-          />
         </div>
       </div>
     </>

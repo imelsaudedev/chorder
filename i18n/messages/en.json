@@ -4,6 +4,7 @@
     "siteDescription": "A tool for managing chord sheets"
   },
   "Messages": {
+    "actions": "Actions",
     "arrangement": "Arrangement",
     "defaultArrangement": "Default arrangement",
     "or": "or",
@@ -44,6 +45,7 @@
     "artistPlaceholder": "Song artist",
     "key": "Key",
     "keyPlaceholder": "Key",
+    "defaultKey": "Default key",
     "arrangementName": "Arrangement name",
     "arrangementNamePlaceholder": "Give a name to this arrangement (optional)",
     "arrangementSettings": "Arrangement settings",

@@ -38,19 +38,6 @@ export default function InfoForm({ form }: InfoFormProps) {
           </FormItem>
         )}
       />
-      <FormField
-        control={form.control}
-        name="key"
-        render={({ field }) => (
-          <FormItem className="space-y-0">
-            <FormLabel className="text-secondary">{t('key')}</FormLabel>
-            <FormControl>
-              <Input placeholder={t('keyPlaceholder')} {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { deleteService } from '@/app/services/[service]/actions';
-import ConfigIcon from '@/components/icons/ConfigIcon';
+import AdjustmentIcon from '@/components/icons/AdjustmentIcon';
 import Main from '@/components/Main';
 import { Mode } from '@/components/ModeButtonSet';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl';
 import { Fragment, useState } from 'react';
 import ServiceConfig from './ServiceConfig';
 import ServiceSongUnitView from './ServiceSongUnitView';
+import ServiceActionMenu from './ServiceActionMenu';
 
 type ServiceViewPageProps = {
   service: Service;
@@ -36,10 +37,11 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
             </h1>
             {service.worshipLeader && <span className="text-sm text-muted">{service.worshipLeader}</span>}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <ServiceActionMenu deleteService={deleteCurrentService} />
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="w-9 p-0">
-                <ConfigIcon />
+              <Button variant="outline" size="sm" className="w-9 p-0">
+                <AdjustmentIcon />
                 <span className="sr-only">{t('toggleConfig')}</span>
               </Button>
             </CollapsibleTrigger>
@@ -55,7 +57,6 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
             setFontSize={setFontSize}
             mode={mode}
             setMode={setMode}
-            deleteService={deleteCurrentService}
           />
         </CollapsibleContent>
         <section className="flex flex-col gap-6 mx-auto" style={{ fontSize: `${fontSize}px` }}>
