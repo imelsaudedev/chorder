@@ -10,7 +10,7 @@ export default function SongUnitListForm({ arrangementFormFields }: ArrangementF
   const { songUnitMap } = arrangementFormFields;
 
   return (
-    <section className="max-w-lg mx-auto">
+    <section className="mx-auto pt-4">
       {songUnitMap.map((field, index) => (
         <SortableUnitForm key={field.id} unit={field} index={index} arrangementFormFields={arrangementFormFields} />
       ))}

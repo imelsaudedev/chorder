@@ -12,15 +12,15 @@ export type RequiredTypeIdx = {
 };
 
 export const SONG_UNIT_TYPES = [
+  'BLOCK',
   'INTRO',
-  'ENDING',
   'VERSE',
   'PRECHORUS',
   'CHORUS',
   'BRIDGE',
   'INTERLUDE',
   'SOLO',
-  'BLOCK',
+  'ENDING',
 ] as const;
 export type SongUnitType = (typeof SONG_UNIT_TYPES)[number];
 

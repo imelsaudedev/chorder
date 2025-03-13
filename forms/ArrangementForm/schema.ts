@@ -5,15 +5,15 @@ export const songMapSchema = z.object({
 });
 
 const songUnitTypeSchema = z.union([
+  z.literal('BLOCK'),
   z.literal('INTRO'),
-  z.literal('ENDING'),
   z.literal('VERSE'),
   z.literal('PRECHORUS'),
   z.literal('CHORUS'),
   z.literal('BRIDGE'),
   z.literal('INTERLUDE'),
   z.literal('SOLO'),
-  z.literal('BLOCK'),
+  z.literal('ENDING'),
 ]);
 
 export const songUnitsSchema = z.object({

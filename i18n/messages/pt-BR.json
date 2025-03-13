@@ -24,7 +24,8 @@
     "fontSize": "Fonte",
     "mode": "Modo",
     "config": "Configuração",
-    "auto": "Automático"
+    "auto": "Automático",
+    "invalidChordPro": "Verifique o Chordpro. Talvez esteja faltando fechar alguma diretiva ou chaves."
   },
   "Modes": {
     "text": "Texto",
@@ -65,15 +66,15 @@
     "unitTypePlaceholder": "Selecione o tipo da unidade"
   },
   "UnitTypes": {
-    "INTRO": "Introdução",
-    "ENDING": "Saída",
+    "BLOCK": "Bloco",
+    "INTRO": "Intro",
     "VERSE": "Verso",
     "PRECHORUS": "Pré-refrão",
     "CHORUS": "Refrão",
     "BRIDGE": "Ponte",
     "INTERLUDE": "Interlúdio",
     "SOLO": "Solo",
-    "BLOCK": "Bloco"
+    "ENDING": "Saída"
   },
   "ServiceForm": {
     "editArrangement": "Editar arranjo",

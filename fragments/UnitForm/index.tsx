@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { unitTypeColorClasses } from '@/components/unit-colors';
 import { SongUnitSetField } from '@/forms/ArrangementForm/useArrangementFormFields';
 import { SONG_UNIT_TYPES, SongUnit, SongUnitType } from '@/models/song-unit';
-import { ChangeEvent, MouseEvent, useCallback, useId, useMemo, useState } from 'react';
+import { ChangeEvent, useCallback, useId, useMemo } from 'react';
 import { ComboBoxResponsive } from '@/components/ComboBoxResponsive';
 import { useTranslations } from 'next-intl';
+import { parseChordPro } from '@/chopro/music';
+import BadgeSelector from '@/components/Badges/BadgeSelector';
 
 type UnitFormProps = {
   unit: SongUnit;
@@ -21,11 +23,9 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
   const t = useTranslations();
 
   const colorClasses = unitTypeColorClasses[unit.type];
-  const [preview, setPreview] = useState(false);
 
   const unitTypeId = useId();
   const contentId = useId();
-  const showPreviewId = useId();
 
   const unitTypeOptions = useMemo(
     () =>
@@ -37,7 +37,7 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
   );
 
   const handleRemoveUnit = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
+    (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
       removeUnit();
     },
@@ -51,78 +51,56 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
     [onChangeUnit]
   );
 
-  const handleChangeChordpro = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleChangeChordpro = (event: ChangeEvent<HTMLTextAreaElement>) => {
     onChangeUnit({ field: 'content', value: event.target.value });
   };
 
-  const handlePreviewChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setPreview(event.target.checked);
-  };
-
-  const classNames = [
-    'border',
-    colorClasses.border,
-    colorClasses.background,
-    'rounded-lg',
-    'break-inside-avoid',
-    'flex',
-    'flex-col',
-    'gap-2',
-    'px-2',
-    'py-2',
-    'mb-2',
-  ];
-  if (className) classNames.push(className);
+  // Verifica se o conteúdo do ChordPro é válido
+  const { hasError } = useMemo(() => {
+    try {
+      parseChordPro(unit.content);
+      return { hasError: false };
+    } catch {
+      return { hasError: true };
+    }
+  }, [unit.content]);
 
   return (
-    <div className={classNames.join(' ')}>
-      <div className="flex gap-4 items-center justify-between">
-        <UnitCircle className="w-14 h-14" unit={unit} />
+    <div
+      className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg p-2 md:p-4 mb-2 ${
+        className || ''
+      }`}
+    >
+      <div className="flex justify-between items-center">
         <Button onClick={handleRemoveUnit} variant="ghost" size="icon">
           <CloseIcon />
         </Button>
       </div>
 
-      <div className="flex flex-col">
-        <label className="block text-sm font-medium text-gray-900" htmlFor={unitTypeId}>
-          {t('UnitData.unitType')}
-        </label>
-        <ComboBoxResponsive
-          value={unit.type}
-          className="flex-grow"
-          onChange={handleChangeUnitType}
-          options={unitTypeOptions}
-          id={unitTypeId}
-          placeholder={t('UnitData.unitTypePlaceholder')}
-        />
+      <div className="mt-2">
+        <BadgeSelector value={unit.type} onChange={handleChangeUnitType} />
       </div>
 
-      <div className="flex flex-col flex-grow">
-        <div className="flex justify-between">
-          <label className="block text-sm font-medium text-gray-900" htmlFor={contentId}>
-            {t('UnitData.content')}
-          </label>
-          <div className="flex gap-1 items-center text-sm">
-            <label htmlFor={showPreviewId}>{t('Messages.preview')}</label>
-            <input id={showPreviewId} type="checkbox" onChange={handlePreviewChange} checked={preview} />
-          </div>
-        </div>
-        {preview && (
-          <div className="p-2 bg-white rounded border">
-            <ChordProViewer chordpro={unit.content} />
-          </div>
-        )}
-        {!preview && (
+      <div className="flex flex-col md:grid md:grid-cols-2 gap-4 mt-4">
+        <div className="flex flex-col">
           <TextInput
             id={contentId}
-            className="resize-none flex-grow"
+            className="resize-none flex-grow bg-white font-mono ling"
             placeholder={t('UnitData.contentPlaceholder')}
             onChange={handleChangeChordpro}
             value={unit.content}
-            minRows={3}
+            minRows={1}
             long
           />
-        )}
+        </div>
+
+        <div className="rounded-md bg-black/5 px-2 py-2">
+          {hasError ? (
+            <p className="text-red-500 text-sm">{t('Messages.invalidChordPro')}</p>
+          ) : (
+            <ChordProViewer chordpro={unit.content} compact />
+          )}
+        </div>
       </div>
     </div>
   );

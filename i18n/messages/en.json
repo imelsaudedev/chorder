@@ -24,7 +24,8 @@
     "fontSize": "Font size",
     "mode": "Mode",
     "config": "Configuration",
-    "auto": "Automatic"
+    "auto": "Automatic",
+    "invalidChordPro": "Check ChordPro directives."
   },
   "Modes": {
     "text": "Text",

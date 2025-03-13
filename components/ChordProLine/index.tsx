@@ -8,12 +8,13 @@ type ChordProLineProps = {
   originalKey?: string;
   transpose?: number;
   mode: Mode;
+  compact?: boolean;
 };
 
-export default function ChordProLine({ line, originalKey, transpose, mode }: ChordProLineProps) {
+export default function ChordProLine({ line, originalKey, transpose, mode, compact }: ChordProLineProps) {
   const hasLyrics = line.items.some((item) => (item as any).lyrics?.trim());
   const hasChords = line.items.some((item) => (item as any).chords?.trim());
-  let className = 'flex flex-col relative px-4';
+  let className = compact ? 'px-2' : 'flex flex-col relative px-4';
   return (
     <div className={className} style={{ breakInside: 'avoid' }}>
       {mode === 'text' && (
@@ -32,6 +33,7 @@ export default function ChordProLine({ line, originalKey, transpose, mode }: Cho
                 hideChords={false}
                 hideLyrics={true}
                 isConnection={isConnection(line.items, elementIdx)}
+                compact={compact}
               />
             ))}
           </div>
@@ -48,6 +50,7 @@ export default function ChordProLine({ line, originalKey, transpose, mode }: Cho
                 hideChords={true}
                 hideLyrics={false}
                 isConnection={isConnection(line.items, elementIdx)}
+                compact={compact}
               />
             ))}
           </div>
@@ -66,6 +69,7 @@ export default function ChordProLine({ line, originalKey, transpose, mode }: Cho
               key={`song-line-item-${elementIdx}`}
               mode={mode}
               isConnection={isConnection(line.items, elementIdx)}
+              compact={compact}
             />
           ))}
         </div>
@@ -84,6 +88,7 @@ function ChordProItem({
   isConnection,
   transpose,
   mode,
+  compact,
 }: {
   originalKey?: string;
   hasLyrics: boolean;
@@ -94,6 +99,7 @@ function ChordProItem({
   isConnection: boolean;
   transpose?: number;
   mode: Mode;
+  compact?: boolean;
 }) {
   if (item._name === 'comment') {
     if (hideLyrics) {
@@ -109,21 +115,20 @@ function ChordProItem({
   let lyrics = item.lyrics || ' ';
   let chords = transpose && originalKey ? transposeChord(item.chords, originalKey, transpose) : item.chords;
 
-  const chordClasses = ['mr-1', 'text-black', 'leading-none', 'font-mono', 'font-black', 'mb-0'];
+  const chordClasses = ['leading-none', 'text-black', 'font-mono', 'font-bold', 'mr-1', 'mb-0'];
   if (mode === 'text') {
-    chordClasses.push('text-[1em]');
-    chordClasses.push('font-mono');
+    chordClasses.push('text-[1em]', 'font-mono');
     if (lyrics.length > chords.length) {
       chords = chords.padEnd(lyrics.length, ' ');
     }
   } else {
-    chordClasses.push('text-[0.9em]');
+    chordClasses.push(compact ? 'text-[0.9em]' : 'text-base');
   }
   if (hasChords) {
     chordClasses.push('h-[1em]');
   }
 
-  const lyricsClasses = ['leading-none', 'text-[1em]', styles.lyrics];
+  const lyricsClasses = ['leading-none', compact ? 'text-sm' : 'text-base', styles.lyrics];
   if (mode === 'text') {
     lyricsClasses.push('font-mono');
     if (chords.length > lyrics.length) {
@@ -138,7 +143,7 @@ function ChordProItem({
   }
 
   return (
-    <div className={'flex flex-col whitespace-pre-wrap mb-2'}>
+    <div className={compact ? 'flex flex-col whitespace-pre-wrap mb-1' : 'flex flex-col whitespace-pre-wrap mb-2'}>
       {!hideChords && mode !== 'lyrics' && <span className={chordClasses.join(' ')}>{chords}</span>}
       {!hideLyrics && <span className={lyricsClasses.join(' ')}>{lyrics}</span>}
     </div>
@@ -149,7 +154,6 @@ function isConnection(items: any, itemIdx: number) {
   if (itemIdx === items.length - 1) {
     return false;
   }
-
   const currentItem = items[itemIdx];
   const nextItem = items[itemIdx + 1];
   if (currentItem._name === 'comment' || nextItem._name === 'comment') {
