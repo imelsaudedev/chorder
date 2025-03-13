@@ -55,7 +55,8 @@
     "chords": "Cifra",
     "lyrics": "Letra",
     "showLyrics": "Mostrar letra",
-    "editSong": "Editar música"
+    "editSong": "Editar ChordPro",
+    "stopEditing": "Sair da edição"
   },
   "UnitData": {
     "content": "Chordpro",
@@ -82,7 +83,7 @@
     "pickSong": "Selecione uma música",
     "pickArrangement": "Selecione um arranjo",
     "add": "Adicionar",
-    "onlyFuture": "Mostrar apenas liturgias futuras"
+    "onlyFuture": "Ocultar liturgias antigas"
   },
   "SongForm": {
     "addExistingUnit": "Adicionar unidade existente",

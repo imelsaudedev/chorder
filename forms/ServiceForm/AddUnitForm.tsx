@@ -57,7 +57,7 @@ export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
   }, []);
 
   return (
-    <div className={`rounded-lg break-inside-avoid px-2 py-2 mb-2 border border-primary`}>
+    <div className={`rounded-lg break-inside-avoid p-4 mb-2 border border-slate-200 border-dashed bg-slate-100`}>
       <div className="group flex items-center gap-2 w-full cursor-pointer">
         <Drawer open={songPopoverOpen} onOpenChange={handlePopoverOpen}>
           <DrawerTrigger asChild>

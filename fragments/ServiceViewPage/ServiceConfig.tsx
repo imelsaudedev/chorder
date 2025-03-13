@@ -25,26 +25,22 @@ export default function ServiceConfig({
   const t = useTranslations();
 
   return (
-    <>
-      <h2 className="text-primary font-bold">{t('Messages.config')}</h2>
-      <div
-        className={`flex flex-col md:flex-row mb-4 border border-primary p-2 rounded justify-between items-start md:items-center gap-4`}
-      >
-        <div className="flex flex-col md:flex-row gap-2">
-          <div>
-            <Label htmlFor="column-count">{t('Messages.columns')}</Label>
-            <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
-          </div>
-          <div>
-            <Label htmlFor="font-size">{t('Messages.fontSize')}</Label>
-            <FontSizeButtonSet id="font-size" fontSize={fontSize} setFontSize={setFontSize} />
-          </div>
-          <div>
-            <Label htmlFor="mode">{t('Messages.mode')}</Label>
-            <ModeButtonSet id="mode" mode={mode} setMode={setMode} />
-          </div>
+    <div className="p-4 mb-8 rounded-lg border border-slate-300">
+      <h2 className="text-lg font-semibold text-primary pb-2">{t('Messages.config')}</h2>
+      <div className="flex flex-col md:flex-row gap-4">
+        <div>
+          <Label htmlFor="column-count">{t('Messages.columns')}</Label>
+          <ColumnButtons id="column-count" columns={columns} setColumns={setColumns} />
+        </div>
+        <div>
+          <Label htmlFor="font-size">{t('Messages.fontSize')}</Label>
+          <FontSizeButtonSet id="font-size" fontSize={fontSize} setFontSize={setFontSize} />
+        </div>
+        <div>
+          <Label htmlFor="mode">{t('Messages.mode')}</Label>
+          <ModeButtonSet id="mode" mode={mode} setMode={setMode} />
         </div>
       </div>
-    </>
+    </div>
   );
 }

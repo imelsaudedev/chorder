@@ -33,7 +33,7 @@ export function getDefaultTitle(date: Date, serviceString: string) {
 }
 
 export function getHumanReadableTitle(service: Service, serviceString: string) {
-  return service.title || getDefaultTitle(service.date, serviceString);
+  return service.title?.trim() || 'Liturgia sem título';
 }
 
 export function getUnitsByType<T>(service: NewService, type: string): T[] {

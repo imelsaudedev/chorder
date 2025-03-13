@@ -22,6 +22,12 @@ module.exports = {
       },
     },
     extend: {
+      // Adicione as fontes personalizadas aqui
+      fontFamily: {
+        sans: ['var(--font-ibm-sans)', 'sans-serif'],
+        serif: ['var(--font-ibm-serif)', 'serif'],
+        mono: ['var(--font-ibm-mono)', 'monospace'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

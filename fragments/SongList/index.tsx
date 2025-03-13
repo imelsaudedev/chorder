@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Fragment, ReactNode, useMemo, useState } from 'react';
+import { NotebookPen } from 'lucide-react';
 
 type SongListProps = {
   songs: WithoutArrangements<Song>[];
@@ -55,11 +56,10 @@ export default function SongList({ songs: baseSongs, initialsStyle = 'grid', onS
   }, [existingInitials]);
 
   let sectionStyle = {};
-  let initialsTitleClassName =
-    'text-xl md:text-2xl font-bold bg-secondary text-secondary-foreground text-white p-2 text-center';
+  let initialsTitleClassName = 'text-xl md:text-4xl font-bold text-secondary py-2 text-left';
   if (initialsStyle === 'grid') {
     sectionStyle = { display: 'grid', gridTemplateColumns: 'auto 1fr' };
-    initialsTitleClassName = 'text-4xl md:text-9xl col-span-2 md:col-span-1 pr-6 text-secondary text-center';
+    initialsTitleClassName = 'text-4xl md:text-8xl col-span-2 md:col-span-1 pr-4 text-secondary';
   }
 
   return (
@@ -118,16 +118,17 @@ export default function SongList({ songs: baseSongs, initialsStyle = 'grid', onS
 
                   return (
                     <AnchorOrButton song={song} onSelected={onSelected} key={`song-${song.slug}`}>
-                      <div className="font-bold text-lg leading-none text-primary">
+                      <div className="text-lg font-semibold leading-none text-primary mb-1">
                         <HighlightKeyword text={song.title} keyword={search} />
                       </div>
                       {song.artist && (
-                        <div className="text-sm text-muted leading-tight mb-1">
+                        <div className="flex text-sm items-center text-slate-400 gap-1 mb-2">
+                          <NotebookPen size={16} />
                           <HighlightKeyword text={song.artist} keyword={search} />
                         </div>
                       )}
                       {firstLines.map((line, idx) => (
-                        <p className="leading-tight" key={`line-${idx}`}>
+                        <p className="text-sm text-primary leading-tight" key={`line-${idx}`}>
                           <HighlightKeyword text={line} keyword={search} />
                         </p>
                       ))}
@@ -156,13 +157,19 @@ function AnchorOrButton({ song, onSelected, children }: AnchorOrButtonProps) {
       onSelected(song);
     };
     return (
-      <button className="flex flex-col pt-2 pb-3 border-b-gray-300 border-b-2 w-full" onClick={handleClick}>
+      <button
+        className="flex flex-col items-start text-left pt-4 pb-4 border-b border-b-slate-300 w-full"
+        onClick={handleClick}
+      >
         {children}
       </button>
     );
   }
   return (
-    <Link href={`/songs/${song.slug}`} className="flex flex-col pt-2 pb-3 border-b-gray-300 border-b-2">
+    <Link
+      href={`/songs/${song.slug}`}
+      className="flex flex-col items-start text-left text-slate-400 border-b pt-4 pb-4 w-full"
+    >
       {children}
     </Link>
   );

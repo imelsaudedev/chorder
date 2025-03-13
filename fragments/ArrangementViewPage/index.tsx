@@ -12,6 +12,7 @@ import { useMemo, useState } from 'react';
 import ArrangementView from './ArrangementView';
 import SongConfig from './SongConfig';
 import ArrangementActionMenu from './ArrangementActionMenu';
+import { NotebookPen } from 'lucide-react';
 
 type ArrangementViewPageProps = {
   song: SongWith<RequiredArrangement>;
@@ -31,13 +32,18 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
 
   return (
     <Collapsible>
-      <div className="px-4">
-        <div className="flex flex-grow flex-col md:flex-row justify-between md:items-center gap-2">
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row gap-2 flex-grow justify-between mt-4 mb-4">
           <div className="flex flex-col">
-            <span className="font-bold text-lg leading-none text-red">{song.title}</span>
-            {song.artist && <span className="text-sm text-muted">{song.artist}</span>}
+            <h1 className="font-bold text-4xl leading-none tracking-tight text-primary mb-2">{song.title}</h1>
+            {song.artist && (
+              <span className="flex items-center gap-1 text-lg text-slate-400">
+                <NotebookPen size={18} />
+                {song.artist}
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2 md:self-end">
             <ArrangementSelector song={song} />
             <ArrangementActionMenu deleteArrangementWithId={deleteArrangementWithId} />
             <CollapsibleTrigger asChild>

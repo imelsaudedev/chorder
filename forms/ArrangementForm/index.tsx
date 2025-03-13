@@ -71,8 +71,13 @@ export default function ArrangementForm({ song, postSong, moveArrangement }: Arr
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
-        <SaveButtonSet canCancel={!arrangement.isNew} enabled={isDirty && isValid} />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="font-bold text-3xl sm:text-4xl leading-none text-secondary tracking-tighter mb-2 sm:mb-4">
+            {arrangement.isNew ? 'Nova música' : 'Editar música'}
+          </h1>
+          <SaveButtonSet canCancel={!arrangement.isNew} enabled={isDirty && isValid} />
+        </div>
         <InfoForm form={form} />
         <ArrangementInfoForm song={song} form={form} moveArrangement={moveArrangement} />
 

@@ -14,6 +14,22 @@ type ColumnViewerProps = {
   mode: Mode;
 };
 
+// Defina o tipo dos tipos de unidade
+type UnitType = keyof typeof unitTypeColorClasses;
+
+// Objeto de tradução para os tipos de unidade
+const unitTypeTranslations: Record<UnitType, string> = {
+  INTRO: 'Intro',
+  ENDING: 'Saída',
+  VERSE: 'Verso',
+  PRECHORUS: 'Pré-Refrão',
+  CHORUS: 'Refrão',
+  BRIDGE: 'Ponte',
+  INTERLUDE: 'Interlúdio',
+  SOLO: 'Solo',
+  BLOCK: 'Bloco',
+};
+
 export default function ColumnViewer({
   columns: columnConfig,
   songUnitMap,
@@ -62,14 +78,26 @@ export default function ColumnViewer({
     <div className={`grid ${gridCols} gap-4`}>
       {columnData.map((data, idx) => {
         return (
-          <div key={`col-${idx}`} className="flex flex-col gap-2">
+          <div key={`col-${idx}`} className="flex flex-col gap-4">
             {data.map((unit, unitIdx) => {
               const unitClasses = unitTypeColorClasses[unit.unitType];
-              let className = `border rounded pt-1 ${unitClasses.background} ${unitClasses.border}`;
+
+              console.log('unitClasses.circleBackground:', unitClasses.circleBackground);
+
+              let className = `border rounded pt-0 pb-2 ${unitClasses.background} ${unitClasses.border}`;
               className = `${className} ${unitIdx === data.length - 1 ? 'flex-grow' : ''}`;
 
               return (
                 <div key={`unit-${unitIdx}`} className={className}>
+                  {/* Label com o tipo da unidade traduzido */}
+                  <div
+                    className={`px-4 py-2 text-xs uppercase tracking-wide !${unitClasses.circleBackground.replace(
+                      'bg-',
+                      'text-'
+                    )}`}
+                  >
+                    {unitTypeTranslations[unit.unitType]}
+                  </div>
                   {unit.lines.map((line, idx) => (
                     <ChordProLine
                       key={`unit-${unitIdx}-line-${idx}`}

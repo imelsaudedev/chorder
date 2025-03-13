@@ -17,7 +17,7 @@ export default function InfoForm({ form }: InfoFormProps) {
         name="title"
         render={({ field }) => (
           <FormItem className="space-y-0">
-            <FormLabel className="text-secondary mb-0">{t('title')}</FormLabel>
+            <FormLabel className="text-primary mb-2">{t('title')}</FormLabel>
             <FormControl>
               <Input placeholder={t('titlePlaceholder')} {...field} />
             </FormControl>
@@ -30,7 +30,7 @@ export default function InfoForm({ form }: InfoFormProps) {
         name="artist"
         render={({ field }) => (
           <FormItem className="space-y-0">
-            <FormLabel className="text-secondary">{t('artist')}</FormLabel>
+            <FormLabel className="text-primary mb-2">{t('artist')}</FormLabel>
             <FormControl>
               <Input placeholder={t('artistPlaceholder')} {...field} />
             </FormControl>

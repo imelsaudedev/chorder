@@ -40,10 +40,14 @@ export default function ServiceForm({ service }: SongFormProps) {
   return (
     <FormProvider {...form}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
-          <SaveButtonSet canCancel={!service.isNew} enabled={isDirty && isValid} />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <h1 className="font-bold text-3xl sm:text-4xl leading-none text-secondary tracking-tighter mb-2 sm:mb-4">
+              {service.isNew ? 'Nova liturgia' : 'Editar liturgia'}
+            </h1>
+            <SaveButtonSet canCancel={!service.isNew} enabled={isDirty && isValid} />
+          </div>
           <InfoForm form={form} />
-          <Separator />
           <ServiceUnitListForm serviceFormFields={serviceFormFields} />
         </form>
       </Form>

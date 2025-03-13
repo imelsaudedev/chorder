@@ -33,7 +33,7 @@ export default function IncreaseDecreaseButtonSet({
       <input
         id={id}
         type={type}
-        className="bg-neutral-100 px-2 py-1 w-10 text-center border-t border-b text-base"
+        className="bg-neutral-100 px-2 py-1 w-10 h-10 text-center border-t border-b text-base"
         value={stringValue}
         onChange={(e) => setStringValue(e.target.value)}
       />

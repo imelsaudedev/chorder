@@ -12,6 +12,7 @@ import { Fragment, useState } from 'react';
 import ServiceConfig from './ServiceConfig';
 import ServiceSongUnitView from './ServiceSongUnitView';
 import ServiceActionMenu from './ServiceActionMenu';
+import { Calendar, MicVocal } from 'lucide-react';
 
 type ServiceViewPageProps = {
   service: Service;
@@ -27,17 +28,42 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
 
   const deleteCurrentService = deleteService.bind(null, service);
 
+  // Formatação da data com iniciais maiúsculas
+  const formattedDate = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+    .format(service.date)
+    .replace(/^\w/, (c) => c.toUpperCase()) // Capitaliza a primeira letra do dia da semana
+    .replace(/ de ([a-z])/, (m, c) => ` de ${c.toUpperCase() + m.slice(5)}`); // Capitaliza a primeira letra do mês
+
   return (
     <Collapsible>
-      <div className="px-4">
-        <div className="flex gap-2 flex-grow justify-between items-center">
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row flex-grow justify-between gap-2 mb-4">
+          {/* Título */}
           <div className="flex flex-col">
-            <h1 className="font-bold text-2xl leading-none text-primary">
+            <h1 className="font-bold text-3xl sm:text-4xl leading-none text-primary tracking-tighter mb-2">
               {getHumanReadableTitle(service, t('service'))}
             </h1>
-            {service.worshipLeader && <span className="text-sm text-muted">{service.worshipLeader}</span>}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-base sm:text-lg">
+              <span className="flex items-center gap-1 text-slate-400">
+                <Calendar size={18} />
+                {formattedDate}
+              </span>
+              {service.worshipLeader && (
+                <span className="flex items-center gap-1 text-slate-400">
+                  <MicVocal size={18} />
+                  {service.worshipLeader}
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2 items-center">
+
+          {/* Botões de Ação e Configuração */}
+          <div className="flex gap-2 items-center md:self-end">
             <ServiceActionMenu deleteService={deleteCurrentService} />
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="sm" className="w-9 p-0">
@@ -48,6 +74,7 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
           </div>
         </div>
       </div>
+
       <Main>
         <CollapsibleContent>
           <ServiceConfig
@@ -59,7 +86,9 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
             setMode={setMode}
           />
         </CollapsibleContent>
-        <section className="flex flex-col gap-6 mx-auto" style={{ fontSize: `${fontSize}px` }}>
+
+        {/* Lista de Unidades (Músicas) */}
+        <section className="flex flex-col gap-4 sm:gap-6 mx-auto" style={{ fontSize: `${fontSize}px` }}>
           {units.map((unit, index) => {
             if (unit) {
               return (

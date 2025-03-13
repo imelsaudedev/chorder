@@ -64,7 +64,7 @@ export default function ArrangementInfoForm({ song, form, moveArrangement }: Arr
         name="arrangementName"
         render={({ field }) => (
           <FormItem className="space-y-0">
-            <FormLabel className="text-secondary">{t('SongData.arrangementName')}</FormLabel>
+            <FormLabel className="text-primary mb-2">{t('SongData.arrangementName')}</FormLabel>
             <FormControl>
               <Input placeholder={`${t('Messages.arrangement')} ${song.currentArrangementId + 1}`} {...field} />
             </FormControl>
@@ -78,7 +78,7 @@ export default function ArrangementInfoForm({ song, form, moveArrangement }: Arr
         name="key"
         render={({ field }) => (
           <FormItem className="space-y-0">
-            <FormLabel className="text-secondary">{t('SongData.defaultKey')}</FormLabel>
+            <FormLabel className="text-primary mb-2">{t('SongData.defaultKey')}</FormLabel>
             <FormControl>
               <Input placeholder={t('SongData.keyPlaceholder')} {...field} />
             </FormControl>

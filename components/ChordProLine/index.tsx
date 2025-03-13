@@ -13,7 +13,7 @@ type ChordProLineProps = {
 export default function ChordProLine({ line, originalKey, transpose, mode }: ChordProLineProps) {
   const hasLyrics = line.items.some((item) => (item as any).lyrics?.trim());
   const hasChords = line.items.some((item) => (item as any).chords?.trim());
-  let className = 'flex flex-col relative px-2';
+  let className = 'flex flex-col relative px-4';
   return (
     <div className={className} style={{ breakInside: 'avoid' }}>
       {mode === 'text' && (
@@ -109,7 +109,7 @@ function ChordProItem({
   let lyrics = item.lyrics || ' ';
   let chords = transpose && originalKey ? transposeChord(item.chords, originalKey, transpose) : item.chords;
 
-  const chordClasses = ['mr-1', 'text-secondary', 'leading-none', 'font-bold', 'mb-0'];
+  const chordClasses = ['mr-1', 'text-black', 'leading-none', 'font-mono', 'font-black', 'mb-0'];
   if (mode === 'text') {
     chordClasses.push('text-[1em]');
     chordClasses.push('font-mono');
