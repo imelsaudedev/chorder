@@ -85,7 +85,7 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
         <div className="flex flex-col">
           <TextInput
             id={contentId}
-            className="resize-none flex-grow bg-white font-mono ling"
+            className="resize-none flex-grow bg-white font-mono"
             placeholder={t('UnitData.contentPlaceholder')}
             onChange={handleChangeChordpro}
             value={unit.content}
