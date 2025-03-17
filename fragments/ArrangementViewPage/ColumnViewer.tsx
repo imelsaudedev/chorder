@@ -82,20 +82,13 @@ export default function ColumnViewer({
             {data.map((unit, unitIdx) => {
               const unitClasses = unitTypeColorClasses[unit.unitType];
 
-              console.log('unitClasses.circleBackground:', unitClasses.circleBackground);
-
               let className = `border rounded pt-0 pb-2 ${unitClasses.background} ${unitClasses.border}`;
               className = `${className} ${unitIdx === data.length - 1 ? 'flex-grow' : ''}`;
 
               return (
                 <div key={`unit-${unitIdx}`} className={className}>
                   {/* Label com o tipo da unidade traduzido */}
-                  <div
-                    className={`px-4 py-2 text-xs uppercase tracking-wide !${unitClasses.circleBackground.replace(
-                      'bg-',
-                      'text-'
-                    )}`}
-                  >
+                  <div className={`px-4 py-2 text-xs uppercase tracking-wide ${unitClasses.text}`}>
                     {unitTypeTranslations[unit.unitType]}
                   </div>
                   {unit.lines.map((line, idx) => (
