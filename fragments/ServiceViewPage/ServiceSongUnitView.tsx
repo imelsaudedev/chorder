@@ -10,9 +10,10 @@ type ServiceSongUnitViewProps = {
   unit: ServiceSongUnit;
   columns: number;
   mode: Mode;
+  order: number;
 };
 
-export default function ServiceSongUnitView({ unit, columns, mode }: ServiceSongUnitViewProps) {
+export default function ServiceSongUnitView({ unit, columns, mode, order }: ServiceSongUnitViewProps) {
   const [transpose, setTranspose] = useState(unit.song.arrangement.semitoneTranspose);
   const arrangement = unit.song.arrangement;
 
@@ -20,7 +21,9 @@ export default function ServiceSongUnitView({ unit, columns, mode }: ServiceSong
     <div className="w-full">
       <div className="flex flex-col md:flex-row gap-2 flex-grow justify-between mt-4 mb-4">
         <div className="flex flex-col md:self-end">
-          <h2 className="font-bold text-2xl leading-none tracking-tight text-black mb-1">{unit.song.title}</h2>
+          <h2 className="font-bold text-2xl leading-none tracking-tight text-black mb-1">
+            {order}. {unit.song.title}
+          </h2>
           {unit.song.artist && (
             <span className="flex items-center gap-1 text-base text-slate-400">
               <NotebookPen size={16} />

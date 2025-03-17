@@ -93,7 +93,12 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
               return (
                 <Fragment key={index}>
                   {unit.type === 'SONG' ? (
-                    <ServiceSongUnitView unit={unit as ServiceSongUnit} columns={columns} mode={mode} />
+                    <ServiceSongUnitView
+                      unit={unit as ServiceSongUnit}
+                      columns={columns}
+                      mode={mode}
+                      order={index + 1}
+                    />
                   ) : null}
                 </Fragment>
               );
