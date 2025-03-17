@@ -75,7 +75,7 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
         </div>
       </div>
 
-      <Main>
+      <Main className="pb-16">
         <CollapsibleContent>
           <ServiceConfig
             columns={columns}
@@ -87,7 +87,6 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
           />
         </CollapsibleContent>
 
-        {/* Lista de Unidades (Músicas) */}
         <section className="flex flex-col gap-4 sm:gap-6 mx-auto" style={{ fontSize: `${fontSize}px` }}>
           {units.map((unit, index) => {
             if (unit) {
