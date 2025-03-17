@@ -1,4 +1,4 @@
-'use client'; // Adicione esta linha para usar hooks como useState
+'use client';
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -16,16 +16,16 @@ export default function Header({ className, currentPage }: HeaderProps) {
   const classNames = [
     'bg-slate-50',
     'text-primary-foreground',
-    'px-4 sm:px-6 lg:px-8', // Padding menor em celulares, maior em tablets/desktops
-    'py-4 sm:py-6', // Padding menor em celulares, maior em tablets/desktops
-    'mb-8 sm:mb-12', // Margem menor em celulares, maior em tablets/desktops
+    'px-4 sm:px-6 lg:px-8',
+    'py-4 sm:py-6',
+    'mb-8 sm:mb-12',
   ];
   if (className) {
     classNames.push(className);
   }
 
   return (
-    <header className={classNames.join(' ')}>
+    <header className={`${classNames.join(' ')} fullscreen-hidden`}>
       <div className="flex justify-start items-center gap-6">
         {/* Nome (lado esquerdo) */}
         <Link href="/" className="font-bold text-lg text-primary leading-none">

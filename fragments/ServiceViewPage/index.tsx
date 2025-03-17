@@ -8,11 +8,13 @@ import { getHumanReadableTitle, Service } from '@/models/service';
 import { ServiceSongUnit } from '@/models/service-unit';
 import { CollapsibleContent } from '@radix-ui/react-collapsible';
 import { useTranslations } from 'next-intl';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useRef } from 'react';
 import ServiceConfig from './ServiceConfig';
 import ServiceSongUnitView from './ServiceSongUnitView';
 import ServiceActionMenu from './ServiceActionMenu';
-import { Calendar, MicVocal } from 'lucide-react';
+import { Calendar, MicVocal, Minimize, Maximize } from 'lucide-react';
+import FloatingNavigation from '@/components/FloatingNavigation';
+import FullScreenToggle from '@/components/FullScreenToggle';
 
 type ServiceViewPageProps = {
   service: Service;
@@ -20,7 +22,8 @@ type ServiceViewPageProps = {
 
 export default function ServiceViewPage({ service }: ServiceViewPageProps) {
   const t = useTranslations('Messages');
-
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const unitRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [columns, setColumns] = useState(0);
   const [fontSize, setFontSize] = useState(16);
   const [mode, setMode] = useState('chords' as Mode);
@@ -28,7 +31,6 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
 
   const deleteCurrentService = deleteService.bind(null, service);
 
-  // Formatação da data com iniciais maiúsculas
   const formattedDate = new Intl.DateTimeFormat('pt-BR', {
     weekday: 'long',
     day: 'numeric',
@@ -36,13 +38,29 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
     year: 'numeric',
   })
     .format(service.date)
-    .replace(/^\w/, (c) => c.toUpperCase()) // Capitaliza a primeira letra do dia da semana
-    .replace(/ de ([a-z])/, (m, c) => ` de ${c.toUpperCase() + m.slice(5)}`); // Capitaliza a primeira letra do mês
+    .replace(/^\w/, (c) => c.toUpperCase())
+    .replace(/ de ([a-z])/, (m, c) => ` de ${c.toUpperCase() + m.slice(5)}`);
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      setCurrentIndex(newIndex);
+      unitRefs.current[newIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleNext = () => {
+    if (currentIndex < units.length - 1) {
+      const newIndex = currentIndex + 1;
+      setCurrentIndex(newIndex);
+      unitRefs.current[newIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   return (
     <Collapsible>
       <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row flex-grow justify-between gap-2 mb-4">
+        <div className="flex flex-col md:flex-row flex-grow justify-between gap-2 mb-4 fullscreen-hidden">
           {/* Título */}
           <div className="flex flex-col">
             <h1 className="font-bold text-3xl sm:text-4xl leading-none text-primary tracking-tighter mb-2">
@@ -93,12 +111,14 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
               return (
                 <Fragment key={index}>
                   {unit.type === 'SONG' ? (
-                    <ServiceSongUnitView
-                      unit={unit as ServiceSongUnit}
-                      columns={columns}
-                      mode={mode}
-                      order={index + 1}
-                    />
+                    <div ref={(el) => (unitRefs.current[index] = el)}>
+                      <ServiceSongUnitView
+                        unit={unit as ServiceSongUnit}
+                        columns={columns}
+                        mode={mode}
+                        order={index + 1}
+                      />
+                    </div>
                   ) : null}
                 </Fragment>
               );
@@ -107,6 +127,8 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
           })}
         </section>
       </Main>
+
+      <FullScreenToggle onPrevious={handlePrevious} onNext={handleNext} />
     </Collapsible>
   );
 }
