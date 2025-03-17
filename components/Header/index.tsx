@@ -26,7 +26,7 @@ export default function Header({ className, currentPage }: HeaderProps) {
 
   return (
     <header className={`${classNames.join(' ')} fullscreen-hidden`}>
-      <div className="flex justify-start items-center gap-6">
+      <div className="flex justify-between items-center gap-6">
         {/* Nome (lado esquerdo) */}
         <Link href="/" className="font-bold text-lg text-primary leading-none">
           IMEL SAÚDE
