@@ -13,7 +13,6 @@ import ServiceConfig from './ServiceConfig';
 import ServiceSongUnitView from './ServiceSongUnitView';
 import ServiceActionMenu from './ServiceActionMenu';
 import { Calendar, MicVocal, Minimize, Maximize } from 'lucide-react';
-import FloatingNavigation from '@/components/FloatingNavigation';
 import FullScreenToggle from '@/components/FullScreenToggle';
 
 type ServiceViewPageProps = {
