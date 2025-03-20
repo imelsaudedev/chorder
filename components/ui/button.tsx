@@ -17,12 +17,14 @@ const buttonVariants = cva(
       },
       size: {
         default: 'h-10 px-4 py-2',
+        square: 'p-4',
         sm: 'h-9 px-3',
         lg: 'h-11 px-8',
         icon: 'h-10 w-10',
       },
       rounded: {
         default: 'rounded-md',
+        lg: 'rounded-2xl',
         left: 'rounded-l-md',
         right: 'rounded-r-md',
         none: 'rounded-none',
@@ -49,10 +51,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : 'button';
     return (
       <Comp
-        className={cn(
-          buttonVariants({ variant, size, rounded, className }),
-          circle && 'rounded-full aspect-square' // Aplica estilos para botões circulares
-        )}
+        className={cn(buttonVariants({ variant, size, rounded, className }), circle && 'rounded-full aspect-square')}
         ref={ref}
         {...props}
       />
