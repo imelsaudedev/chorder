@@ -18,36 +18,46 @@ type ServiceSongUnitViewProps = {
   columns: number;
   mode: Mode;
   order: number;
+  density: 'compact' | 'normal';
 };
 
-export default function ServiceSongUnitView({ unit, columns, mode, order }: ServiceSongUnitViewProps) {
+export default function ServiceSongUnitView({ unit, columns, mode, order, density }: ServiceSongUnitViewProps) {
   const [transpose, setTranspose] = useState(unit.song.arrangement.semitoneTranspose);
   const arrangement = unit.song.arrangement;
 
   return (
     <div className="w-full">
-      <div className="sticky top-0 bg-white z-10 py-2 md:py-2 lg:py-4 flex w-full flex-row justify-between items-center">
+      <div
+        className={`sticky top-0 bg-white z-10 flex w-full flex-row justify-between items-center ${
+          density === 'compact' ? 'py-2 md:py-1 lg:py-2' : 'py-2 md:py-2 lg:py-4'
+        }`}
+      >
         {/* Título e Artista */}
         <div className="flex flex-col">
-          <h2 className="font-bold text-2xl leading-none tracking-tight text-black fullscreen">
+          <h2
+            className={`font-bold tracking-tight text-black fullscreen ${
+              density === 'compact' ? 'text-base leading-tight' : 'text-lg md:text-xl lg:text-2xl leading-none'
+            }`}
+          >
             {order}. {unit.song.title}
           </h2>
           {unit.song.artist && (
-            <span className="song-artist flex items-center gap-1 text-base text-slate-400 fullscreen-hidden">
+            <span
+              className={`song-artist flex items-center text-slate-400 gap-1 fullscreen-hidden ${
+                density === 'compact' ? 'text-xs' : 'text-sm'
+              }`}
+            >
+              {' '}
               <NotebookPen size={16} />
               {unit.song.artist}
             </span>
           )}
         </div>
 
-        {/* Controles e Menu Dropdown */}
         <div className="key-controls flex items-center gap-2 fullscreen-hidden">
-          {/* Controles de Tom no Desktop/Tablet */}
           <div className="hidden md:flex">
             <KeyButtonSet originalKey={arrangement.key || ''} transpose={transpose} setTranspose={setTranspose} />
           </div>
-
-          {/* Menu Dropdown no Mobile */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="md:hidden flex" variant="ghost" size="icon">
@@ -69,6 +79,7 @@ export default function ServiceSongUnitView({ unit, columns, mode, order }: Serv
         columns={columns}
         transpose={transpose}
         mode={mode}
+        density={density}
       />
     </div>
   );

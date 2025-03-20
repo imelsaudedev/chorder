@@ -1,10 +1,18 @@
-export default function Main({ className, children }: { className?: string; children?: React.ReactNode }) {
-  const classNames = [
-    'px-4 sm:px-6 lg:px-8', // Padding horizontal responsivo
-    'pt-4 sm:pt-6', // Padding superior responsivo
-    'pb-4 sm:pb-6', // Padding inferior responsivo
-    'mb-8 sm:mb-12', // Margem inferior responsiva
-  ];
+export default function Main({
+  className,
+  density = 'normal',
+  children,
+}: {
+  className?: string;
+  density?: 'compact' | 'normal';
+  children?: React.ReactNode;
+}) {
+  const densityClasses = {
+    compact: 'p-2 sm:p-2 lg:p-4',
+    normal: 'p-4 sm:p-6 lg:p-8',
+  };
+
+  const classNames = [densityClasses[density]];
   if (className) {
     classNames.push(className);
   }

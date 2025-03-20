@@ -8,13 +8,15 @@ type ChordProLineProps = {
   originalKey?: string;
   transpose?: number;
   mode: Mode;
-  compact?: boolean;
+  density: 'compact' | 'normal';
 };
 
-export default function ChordProLine({ line, originalKey, transpose, mode, compact }: ChordProLineProps) {
+export default function ChordProLine({ line, originalKey, transpose, mode, density }: ChordProLineProps) {
   const hasLyrics = line.items.some((item) => (item as any).lyrics?.trim());
   const hasChords = line.items.some((item) => (item as any).chords?.trim());
-  let className = compact ? 'px-2' : 'flex flex-col relative px-4';
+
+  let className = `flex flex-col relative ${mode === 'text' ? 'px-0 py-0' : density === 'compact' ? 'px-2' : 'px-4'}`;
+
   return (
     <div className={className} style={{ breakInside: 'avoid' }}>
       {mode === 'text' && (
@@ -23,34 +25,34 @@ export default function ChordProLine({ line, originalKey, transpose, mode, compa
           <div className="flex">
             {line.items.map((item, elementIdx) => (
               <ChordProItem
+                key={`song-line-item-${elementIdx}`}
                 item={item}
                 hasLyrics={hasLyrics}
                 hasChords={hasChords}
                 originalKey={originalKey}
                 transpose={transpose}
-                key={`song-line-item-${elementIdx}`}
                 mode={mode}
                 hideChords={false}
                 hideLyrics={true}
                 isConnection={isConnection(line.items, elementIdx)}
-                compact={compact}
+                density={density}
               />
             ))}
           </div>
           <div className="flex">
             {line.items.map((item, elementIdx) => (
               <ChordProItem
+                key={`song-line-item-${elementIdx}`}
                 item={item}
                 hasLyrics={hasLyrics}
                 hasChords={hasChords}
                 originalKey={originalKey}
                 transpose={transpose}
-                key={`song-line-item-${elementIdx}`}
                 mode={mode}
                 hideChords={true}
                 hideLyrics={false}
                 isConnection={isConnection(line.items, elementIdx)}
-                compact={compact}
+                density={density}
               />
             ))}
           </div>
@@ -61,15 +63,15 @@ export default function ChordProLine({ line, originalKey, transpose, mode, compa
           {line.items.length === 0 && <br />}
           {line.items.map((item, elementIdx) => (
             <ChordProItem
+              key={`song-line-item-${elementIdx}`}
               item={item}
               hasLyrics={hasLyrics}
               hasChords={hasChords}
               originalKey={originalKey}
               transpose={transpose}
-              key={`song-line-item-${elementIdx}`}
               mode={mode}
               isConnection={isConnection(line.items, elementIdx)}
-              compact={compact}
+              density={density}
             />
           ))}
         </div>
@@ -88,7 +90,7 @@ function ChordProItem({
   isConnection,
   transpose,
   mode,
-  compact,
+  density,
 }: {
   originalKey?: string;
   hasLyrics: boolean;
@@ -99,7 +101,7 @@ function ChordProItem({
   isConnection: boolean;
   transpose?: number;
   mode: Mode;
-  compact?: boolean;
+  density: 'compact' | 'normal';
 }) {
   if (item._name === 'comment') {
     if (hideLyrics) {
@@ -122,15 +124,15 @@ function ChordProItem({
       chords = chords.padEnd(lyrics.length, ' ');
     }
   } else {
-    chordClasses.push(compact ? 'text-[0.9em]' : 'text-base');
+    chordClasses.push(density === 'compact' ? '' : 'text-base');
   }
   if (hasChords) {
     chordClasses.push('h-[1em]');
   }
 
-  const lyricsClasses = ['leading-none', compact ? 'text-sm' : 'text-base', styles.lyrics];
+  const lyricsClasses = [density === 'compact' ? 'leading-tight' : 'leading-none', styles.lyrics];
   if (mode === 'text') {
-    lyricsClasses.push('font-mono');
+    lyricsClasses.push('font-mono', 'leading-tight');
     if (chords.length > lyrics.length) {
       lyrics = lyrics.padEnd(chords.length, ' ');
     }
@@ -143,7 +145,7 @@ function ChordProItem({
   }
 
   return (
-    <div className={compact ? 'flex flex-col whitespace-pre-wrap mb-1' : 'flex flex-col whitespace-pre-wrap mb-2'}>
+    <div className={`flex flex-col whitespace-pre-wrap ${density === 'compact' ? 'mb-1' : 'mb-2'}`}>
       {!hideChords && mode !== 'lyrics' && <span className={chordClasses.join(' ')}>{chords}</span>}
       {!hideLyrics && <span className={lyricsClasses.join(' ')}>{lyrics}</span>}
     </div>

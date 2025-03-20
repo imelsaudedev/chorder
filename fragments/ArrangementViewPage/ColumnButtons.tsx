@@ -16,13 +16,7 @@ export default function ColumnButtons({ id, columns, setColumns }: ColumnButtons
   };
 
   return (
-    <ToggleGroup
-      id={id}
-      type="single"
-      onValueChange={handleValueChange}
-      value={columns.toString()}
-      className="border rounded"
-    >
+    <ToggleGroup id={id} type="single" onValueChange={handleValueChange} value={columns.toString()} className="">
       <ToggleGroupItem value="0" aria-label={t('auto')}>
         AUTO
       </ToggleGroupItem>

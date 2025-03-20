@@ -78,7 +78,3 @@
 :fullscreen .fullscreen-hidden {
   display: none;
 }
-
-:fullscreen h2.fullscreen {
-  @apply text-xl;
-}

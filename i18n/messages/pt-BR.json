@@ -25,6 +25,9 @@
     "mode": "Modo",
     "config": "Configuração",
     "auto": "Automático",
+    "density": "Densidade",
+    "normal": "Normal",
+    "compact": "Compacta",
     "invalidChordPro": "Verifique o Chordpro. Talvez esteja faltando fechar alguma diretiva ou chaves."
   },
   "Modes": {

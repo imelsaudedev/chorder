@@ -12,7 +12,7 @@ import { Fragment, useState, useRef } from 'react';
 import ServiceConfig from './ServiceConfig';
 import ServiceSongUnitView from './ServiceSongUnitView';
 import ServiceActionMenu from './ServiceActionMenu';
-import { Calendar, MicVocal, Minimize, Maximize } from 'lucide-react';
+import { Calendar, MicVocal } from 'lucide-react';
 import FullScreenToggle from '@/components/FullScreenToggle';
 
 type ServiceViewPageProps = {
@@ -26,14 +26,15 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
   const [columns, setColumns] = useState(0);
   const [fontSize, setFontSize] = useState(16);
   const [mode, setMode] = useState('chords' as Mode);
-  const units = service.units;
+  const [density, setDensity] = useState<'compact' | 'normal'>('normal');
 
+  const units = service.units;
   const deleteCurrentService = deleteService.bind(null, service);
 
   const formattedDate = new Intl.DateTimeFormat('pt-BR', {
     weekday: 'long',
     day: 'numeric',
-    month: 'long',
+    month: 'numeric',
     year: 'numeric',
   })
     .format(service.date)
@@ -58,14 +59,14 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
 
   return (
     <Collapsible>
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row flex-grow justify-between gap-2 mb-4 fullscreen-hidden">
+      <div className={`${density === 'compact' ? 'px-2 sm:px-2 lg:px-4 gap-2' : 'px-4 sm:px-6 lg:px-8 gap-4'}`}>
+        <div className="flex flex-col md:flex-row flex-grow justify-between fullscreen-hidden gap-2">
           {/* Título */}
           <div className="flex flex-col">
             <h1 className="font-bold text-3xl sm:text-4xl leading-none text-primary tracking-tighter mb-2">
               {getHumanReadableTitle(service, t('service'))}
             </h1>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-base sm:text-lg">
+            <div className="flex flex-row items-center gap-4 text-base sm:text-lg">
               <span className="flex items-center gap-1 text-slate-400">
                 <Calendar size={18} />
                 {formattedDate}
@@ -83,16 +84,13 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
           <div className="flex gap-2 items-center md:self-end">
             <ServiceActionMenu deleteService={deleteCurrentService} />
             <CollapsibleTrigger asChild>
-              <Button variant="outline" size="sm" className="w-9 p-0">
+              <Button variant="outline" size="icon">
                 <AdjustmentIcon />
                 <span className="sr-only">{t('toggleConfig')}</span>
               </Button>
             </CollapsibleTrigger>
           </div>
         </div>
-      </div>
-
-      <Main className="pb-16">
         <CollapsibleContent>
           <ServiceConfig
             columns={columns}
@@ -101,10 +99,17 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
             setFontSize={setFontSize}
             mode={mode}
             setMode={setMode}
+            density={density}
+            setDensity={setDensity}
           />
         </CollapsibleContent>
+      </div>
 
-        <section className="flex flex-col gap-4 sm:gap-6 mx-auto" style={{ fontSize: `${fontSize}px` }}>
+      <Main density={density}>
+        <section
+          className={`flex flex-col mx-auto ${density === 'compact' ? 'gap-2 text-sm' : 'gap-4 text-base'}`}
+          style={{ fontSize: `${fontSize}px` }}
+        >
           {units.map((unit, index) => {
             if (unit) {
               return (
@@ -116,6 +121,7 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
                         columns={columns}
                         mode={mode}
                         order={index + 1}
+                        density={density}
                       />
                     </div>
                   ) : null}

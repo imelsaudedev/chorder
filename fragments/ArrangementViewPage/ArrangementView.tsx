@@ -10,6 +10,7 @@ type ArrangementViewProps = {
   columns?: number;
   transpose?: number;
   mode?: Mode;
+  density: 'compact' | 'normal';
 };
 
 export default function ArrangementView({
@@ -18,6 +19,7 @@ export default function ArrangementView({
   columns = 1,
   transpose = 0,
   mode = 'chords',
+  density,
 }: ArrangementViewProps) {
   const lineData = useMemo(() => {
     return songUnitMap
@@ -34,6 +36,13 @@ export default function ArrangementView({
   }, [songUnitMap]);
 
   return (
-    <ColumnViewer columns={columns} songUnitMap={songUnitMap} transpose={transpose} originalKey={songKey} mode={mode} />
+    <ColumnViewer
+      columns={columns}
+      songUnitMap={songUnitMap}
+      transpose={transpose}
+      originalKey={songKey}
+      mode={mode}
+      density={density}
+    />
   );
 }

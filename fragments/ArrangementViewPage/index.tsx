@@ -25,6 +25,7 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
   const [columns, setColumns] = useState(0);
   const [fontSize, setFontSize] = useState(16);
   const [mode, setMode] = useState('chords' as Mode);
+  const [density, setDensity] = useState<'compact' | 'normal'>('normal');
 
   const deleteArrangementWithId = deleteArrangement.bind(null, song, song.currentArrangementId);
   const arrangement = song.arrangement;
@@ -32,7 +33,7 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
 
   return (
     <Collapsible>
-      <div className="px-4 sm:px-6 lg:px-8">
+      <div className={`${density === 'compact' ? 'px-2 sm:px-2 lg:px-4 gap-2' : 'px-4 sm:px-6 lg:px-8 gap-4'}`}>
         <div className="flex flex-col md:flex-row gap-2 flex-grow justify-between mt-4 mb-4">
           <div className="flex flex-col">
             <h1 className="font-bold text-4xl leading-none tracking-tight text-primary mb-2">{song.title}</h1>
@@ -47,15 +48,13 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
             <ArrangementSelector song={song} />
             <ArrangementActionMenu deleteArrangementWithId={deleteArrangementWithId} />
             <CollapsibleTrigger asChild>
-              <Button variant="outline" size="sm" className="w-9 p-0">
+              <Button variant="outline" size="icon">
                 <AdjustmentIcon />
                 <span className="sr-only">{t('toggleConfig')}</span>
               </Button>
             </CollapsibleTrigger>
           </div>
         </div>
-      </div>
-      <Main>
         <CollapsibleContent>
           <SongConfig
             columns={columns}
@@ -67,8 +66,12 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
             originalKey={arrangement.key || ''}
             transpose={transpose}
             setTranspose={setTranspose}
+            density={density}
+            setDensity={setDensity}
           />
         </CollapsibleContent>
+      </div>
+      <Main density={density}>
         <div style={{ fontSize: `${fontSize}px` }}>
           <ArrangementView
             columns={columns}
@@ -76,6 +79,7 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
             transpose={transpose}
             songKey={arrangement.key}
             mode={mode}
+            density={density}
           />
         </div>
       </Main>

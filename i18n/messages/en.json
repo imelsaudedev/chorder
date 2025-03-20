@@ -25,6 +25,9 @@
     "mode": "Mode",
     "config": "Configuration",
     "auto": "Automatic",
+    "density": "Densidade",
+    "compact": "Compact",
+    "normal": "Normal",
     "invalidChordPro": "Check ChordPro directives."
   },
   "Modes": {

@@ -12,6 +12,7 @@ type ColumnViewerProps = {
   transpose: number;
   originalKey?: string;
   mode: Mode;
+  density: 'compact' | 'normal';
 };
 
 // Defina o tipo dos tipos de unidade
@@ -36,6 +37,7 @@ export default function ColumnViewer({
   transpose,
   originalKey,
   mode,
+  density,
 }: ColumnViewerProps) {
   const [columns, setColumns] = useState(columnConfig);
 
@@ -60,52 +62,60 @@ export default function ColumnViewer({
     }
   }, [columnConfig, isDesktop, isPhone, isTablet]);
 
-  let gridCols;
-  if (columns <= 1) {
-    gridCols = 'grid-cols-1';
-  }
-  if (columns === 2) {
-    gridCols = 'grid-cols-2';
-  }
-  if (columns === 3) {
-    gridCols = 'grid-cols-3';
-  }
-  if (columns >= 4) {
-    gridCols = 'grid-cols-4';
-  }
+  const gridCols =
+    mode === 'text'
+      ? 'grid-cols-1'
+      : columns === 2
+      ? 'grid-cols-2'
+      : columns === 3
+      ? 'grid-cols-3'
+      : columns >= 4
+      ? 'grid-cols-4'
+      : 'grid-cols-1';
+
+  const isTextMode = mode === 'text';
 
   return (
-    <div className={`grid ${gridCols} gap-4`}>
-      {columnData.map((data, idx) => {
-        return (
-          <div key={`col-${idx}`} className="flex flex-col gap-4">
-            {data.map((unit, unitIdx) => {
-              const unitClasses = unitTypeColorClasses[unit.unitType];
+    <div className={`grid ${gridCols} ${density === 'compact' ? 'gap-2' : 'gap-4'}`}>
+      {columnData.map((data, idx) => (
+        <div key={`col-${idx}`} className={`flex flex-col ${density === 'compact' ? 'gap-2' : 'gap-4'}`}>
+          {data.map((unit, unitIdx) => {
+            const unitClasses = unitTypeColorClasses[unit.unitType];
 
-              let className = `border rounded pt-0 pb-2 ${unitClasses.background} ${unitClasses.border}`;
-              className = `${className} ${unitIdx === data.length - 1 ? 'flex-grow' : ''}`;
+            let className = `border rounded ${unitClasses.background} ${unitClasses.border} pb-2`;
+            if (isTextMode) {
+              className = `border-t ${unitClasses.background} ${unitClasses.border} bg-transparent mb-4`;
+            }
 
-              return (
-                <div key={`unit-${unitIdx}`} className={className}>
-                  {/* Label com o tipo da unidade traduzido */}
-                  <div className={`px-4 py-2 text-xs uppercase tracking-wide ${unitClasses.text}`}>
-                    {unitTypeTranslations[unit.unitType]}
-                  </div>
-                  {unit.lines.map((line, idx) => (
-                    <ChordProLine
-                      key={`unit-${unitIdx}-line-${idx}`}
-                      line={line}
-                      originalKey={originalKey}
-                      transpose={transpose}
-                      mode={mode}
-                    />
-                  ))}
+            return (
+              <div key={`unit-${unitIdx}`} className={className}>
+                <div
+                  className={`text-xs uppercase tracking-wide ${unitClasses.text} ${
+                    mode === 'text'
+                      ? 'px-0 py-2 text-left text-base font-normal'
+                      : density === 'compact'
+                      ? 'px-2 pt-1 pb-1'
+                      : 'px-4 pt-2 pb-1'
+                  }`}
+                >
+                  {unitTypeTranslations[unit.unitType]}
                 </div>
-              );
-            })}
-          </div>
-        );
-      })}
+
+                {unit.lines.map((line, idx) => (
+                  <ChordProLine
+                    key={`unit-${unitIdx}-line-${idx}`}
+                    line={line}
+                    originalKey={originalKey}
+                    transpose={transpose}
+                    mode={mode}
+                    density={density}
+                  />
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

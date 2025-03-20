@@ -16,7 +16,7 @@ export default function ModeButtonSet({ id, mode, setMode }: ModeButtonSetProps)
   );
 
   return (
-    <ToggleGroup id={id} type="single" onValueChange={handleValueChange} value={mode} className="border rounded">
+    <ToggleGroup id={id} type="single" onValueChange={handleValueChange} value={mode} className="">
       <ToggleGroupItem value="chords" aria-label={t('chords')}>
         {t('chords')}
       </ToggleGroupItem>
