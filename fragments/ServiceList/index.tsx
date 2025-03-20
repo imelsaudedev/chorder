@@ -11,7 +11,6 @@ type ServiceListProps = {
 
 export default function ServiceList({ services: baseServices }: ServiceListProps) {
   const t = useTranslations();
-  const [showOnlyFuture, setShowOnlyFuture] = useState(false);
 
   const today = useMemo(() => {
     const now = new Date();
@@ -55,7 +54,7 @@ export default function ServiceList({ services: baseServices }: ServiceListProps
     <div className="space-y-6">
       {futureServices.length > 0 && (
         <section className="bg-slate-100 p-4 rounded-xl">
-          <h2 className="text-2xl font-semibold text-secondary pb-1">Próximas liturgias</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-secondary">Próximas liturgias</h2>
           <ul>
             {futureServices.map((service) => (
               <ServiceItem key={service.slug} service={service} />
@@ -65,11 +64,10 @@ export default function ServiceList({ services: baseServices }: ServiceListProps
       )}
 
       {Object.keys(pastServicesByMonth).length > 0 && (
-        <section className="border-1">
-          <h2 className="text-2xl font-semibold pt-8">Liturgias anteriores</h2>
+        <section>
           {Object.entries(pastServicesByMonth as Record<string, Service[]>).map(([month, services]) => (
-            <div key={month} className="mt-8">
-              <h3 className="text-lg font-medium text-slate-400 border-b pb-1">{month}</h3>
+            <div key={month} className="mb-8">
+              <h3 className="text-xs uppercase tracking-wide text-secondary">{month}</h3>
               <ul>
                 {services.map((service) => (
                   <ServiceItem key={service.slug} service={service} />
@@ -85,17 +83,17 @@ export default function ServiceList({ services: baseServices }: ServiceListProps
 
 function ServiceItem({ service }: { service: Service }) {
   return (
-    <li className="pt-3">
+    <li className="pt-2">
       <a href={`/services/${service.slug}`} className="block hover:bg-gray-100 transition">
-        <div className="text-lg font-semibold text-black">{getHumanReadableTitle(service, 'Liturgia')}</div>
-        <div className="text-sm flex flex-col sm:flex-row sm:justify-start sm:items-center text-slate-400 gap-2 mt-1">
+        <div className="text-lg font-semibold text-black mt-1">{getHumanReadableTitle(service, 'Liturgia')}</div>
+        <div className="text-sm flex flex-row sm:justify-start sm:items-center text-slate-400 gap-2">
           <div className="flex items-center gap-1">
             <Calendar size={16} />
             {new Date(String(service.date))
               .toLocaleDateString('pt-BR', {
                 weekday: 'long',
                 day: 'numeric',
-                month: 'long',
+                month: 'numeric',
                 year: 'numeric',
               })
               .replace(/^\w/, (c) => c.toUpperCase())}
