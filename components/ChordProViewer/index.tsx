@@ -7,16 +7,16 @@ import { SongUnitType } from '@/models/song-unit';
 export type ChordProViewerProps = {
   chordpro: string;
   unitType?: SongUnitType;
-  compact?: boolean; // Nova prop para estilos reduzidos
+  density: 'compact' | 'normal';
 };
 
-export default function ChordProViewer({ chordpro, unitType, compact }: ChordProViewerProps) {
+export default function ChordProViewer({ chordpro, unitType, density }: ChordProViewerProps) {
   const chordproHtml = useMemo<Song>(() => parseChordPro(chordpro), [chordpro]);
 
   return (
     <>
       {chordproHtml.lines.map((line, idx) => (
-        <ChordProLine line={line} mode="chords" key={`song-line-${idx}`} compact={compact} />
+        <ChordProLine line={line} mode="chords" key={`song-line-${idx}`} density={density} />
       ))}
     </>
   );
