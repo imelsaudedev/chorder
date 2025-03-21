@@ -98,7 +98,7 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
           {hasError ? (
             <p className="text-red-500 text-sm">{t('Messages.invalidChordPro')}</p>
           ) : (
-            <ChordProViewer chordpro={unit.content} compact />
+            <ChordProViewer chordpro={unit.content} density="compact" />
           )}
         </div>
       </div>

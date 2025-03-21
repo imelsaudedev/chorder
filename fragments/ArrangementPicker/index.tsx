@@ -37,15 +37,21 @@ export default function ArrangementPicker({
       </TabsList>
       {song.arrangements.map((arrangement, index) => (
         <TabsContent key={`tab-content--${index}`} value={`${index}`}>
-          <SimpleArrangementView arrangement={arrangement} />
+          <SimpleArrangementView arrangement={arrangement} density="normal" />
         </TabsContent>
       ))}
     </Tabs>
   );
 }
 
-function SimpleArrangementView({ arrangement }: { arrangement: SongArrangement }) {
+function SimpleArrangementView({
+  arrangement,
+  density,
+}: {
+  arrangement: SongArrangement;
+  density: 'compact' | 'normal';
+}) {
   const songUnitMap = useMemo(() => getSongUnitMap(arrangement), [arrangement]);
 
-  return <ArrangementView songUnitMap={songUnitMap} songKey={arrangement.key} />;
+  return <ArrangementView songUnitMap={songUnitMap} songKey={arrangement.key} density={density} />;
 }
