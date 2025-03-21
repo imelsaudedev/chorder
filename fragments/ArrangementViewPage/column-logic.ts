@@ -51,9 +51,18 @@ function findBestDistributionRec(unitData: UnitData[], columns: number) {
     return { columnData: [unitData], columnHeights: [getTotalHeight(unitData)] };
   }
 
+  if (columns > unitData.length) {
+    const columnData: UnitData[][] = Array.from({ length: columns }, (_, i) =>
+      i < unitData.length ? [unitData[i]] : []
+    );
+    const columnHeights = columnData.map((col) => getTotalHeight(col));
+    return { columnData, columnHeights };
+  }
+
   let bestHeightDifference = Infinity;
   let bestColumnData: UnitData[][] = [];
   let bestHeights: number[] = [];
+
   for (let i = 1; i < unitData.length; i++) {
     const left = unitData.slice(0, i);
     const right = unitData.slice(i);
@@ -61,10 +70,17 @@ function findBestDistributionRec(unitData: UnitData[], columns: number) {
     const { columnData: rightColumns, columnHeights: rightColumnHeights } = findBestDistributionRec(right, columns - 1);
 
     const heights = [leftHeight, ...rightColumnHeights];
-    const heightDifference = Math.max(...heights) - (heights.length > 1 ? Math.min(...heights) : 0);
-    // If the height difference is the same, prefer the one with longer columns to the left
+    const maxHeight = Math.max(...heights);
+    const minHeight = Math.min(...heights);
+    const heightDifference = maxHeight - minHeight;
+
+    // Permitir que a última coluna seja um pouco menor sem penalizar a distribuição
+    const lastColumnIsShorter =
+      rightColumnHeights.length > 1 && rightColumnHeights[rightColumnHeights.length - 1] < minHeight * 1.2;
+
     if (
       heightDifference < bestHeightDifference ||
+      (lastColumnIsShorter && heightDifference <= bestHeightDifference + 2) ||
       (heightDifference === bestHeightDifference && computeLeftSkewness(heights) > computeLeftSkewness(bestHeights))
     ) {
       bestHeightDifference = heightDifference;
@@ -72,5 +88,6 @@ function findBestDistributionRec(unitData: UnitData[], columns: number) {
       bestHeights = heights;
     }
   }
+
   return { columnData: bestColumnData, columnHeights: bestHeights };
 }
