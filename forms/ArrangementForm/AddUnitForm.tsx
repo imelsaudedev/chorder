@@ -28,7 +28,7 @@ export default function AddUnitForm({ arrangementFormFields }: AddUnitFormProps)
   };
 
   return (
-    <div className={`rounded-lg break-inside-avoid px-2 py-2 mb-2 border border-primary`}>
+    <div className={`rounded-lg break-inside-avoid p-4 mb-2 border border-zinc-200 border-dashed bg-zinc-100`}>
       {units.length > 0 && (
         <>
           <label className="font-bold text-sm">{t('addExistingUnit')}</label>

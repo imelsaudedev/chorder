@@ -10,7 +10,7 @@ export default function ServiceUnitListForm({ serviceFormFields }: ServiceFormPr
   const { units } = serviceFormFields;
 
   return (
-    <section className="w-full mx-auto space-y-2">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-2 sm:space-y-4">
       {units.map((field, index) => (
         <SortableServiceUnitForm key={field.id} unit={field} index={index} serviceFormFields={serviceFormFields} />
       ))}

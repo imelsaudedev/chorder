@@ -25,6 +25,7 @@ module.exports = {
       // Adicione as fontes personalizadas aqui
       fontFamily: {
         sans: ['var(--font-ibm-sans)', 'sans-serif'],
+        bricolage: ['var(--font-bricolage-grotesque)', 'sans-serif'],
         serif: ['var(--font-ibm-serif)', 'serif'],
         mono: ['var(--font-ibm-mono)', 'monospace'],
       },

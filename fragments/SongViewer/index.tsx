@@ -16,11 +16,7 @@ type SongViewerProps = {
 
 export default function SongViewer({ song, postSong, deleteArrangement, moveArrangement, writeMode }: SongViewerProps) {
   if (writeMode) {
-    return (
-      <Main>
-        <ArrangementForm song={song} postSong={postSong} moveArrangement={moveArrangement} />
-      </Main>
-    );
+    return <ArrangementForm song={song} postSong={postSong} moveArrangement={moveArrangement} />;
   } else if (song.slug) {
     return <ArrangementViewPage song={song as SongWith<RequiredArrangement>} deleteArrangement={deleteArrangement} />;
   }

@@ -1,7 +1,7 @@
+import EditHeader from '@/components/EditHeader';
 import { postService } from '@/app/services/[service]/actions';
 import SaveButtonSet from '@/components/SaveButtonSet';
 import { Form } from '@/components/ui/form';
-import { Separator } from '@/components/ui/separator';
 import { OptionalSlug, RequiredIsNew, ServiceWith } from '@/models/service';
 import { FormProvider, useFieldArray, useFormState } from 'react-hook-form';
 import InfoForm from './InfoForm';
@@ -40,13 +40,11 @@ export default function ServiceForm({ service }: SongFormProps) {
   return (
     <FormProvider {...form}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="flex items-center justify-between">
-            <h1 className="font-bold text-3xl sm:text-4xl leading-none text-secondary tracking-tighter mb-2 sm:mb-4">
-              {service.isNew ? 'Nova liturgia' : 'Editar liturgia'}
-            </h1>
-            <SaveButtonSet canCancel={!service.isNew} enabled={isDirty && isValid} />
-          </div>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <EditHeader
+            title={service.isNew ? 'Nova liturgia' : 'Editar liturgia'}
+            actions={<SaveButtonSet canCancel={!service.isNew} enabled={isDirty && isValid} />}
+          />
           <InfoForm form={form} />
           <ServiceUnitListForm serviceFormFields={serviceFormFields} />
         </form>

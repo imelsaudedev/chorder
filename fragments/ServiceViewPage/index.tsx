@@ -1,3 +1,4 @@
+import PageHeader from '@/components/PageHeader';
 import { deleteService } from '@/app/services/[service]/actions';
 import AdjustmentIcon from '@/components/icons/AdjustmentIcon';
 import Main from '@/components/Main';
@@ -12,8 +13,9 @@ import { Fragment, useState, useRef } from 'react';
 import ServiceConfig from './ServiceConfig';
 import ServiceSongUnitView from './ServiceSongUnitView';
 import ServiceActionMenu from './ServiceActionMenu';
-import { Calendar, MicVocal } from 'lucide-react';
+import { Calendar, MicVocal, ArrowLeft } from 'lucide-react';
 import FullScreenToggle from '@/components/FullScreenToggle';
+import Link from 'next/link';
 
 type ServiceViewPageProps = {
   service: Service;
@@ -57,32 +59,33 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
     }
   };
 
+  const subtitle = (
+    <div className="flex flex-row items-center gap-4 leading-tight">
+      <span className="flex items-center gap-1">
+        <Calendar className="w-4 h-4" />
+        {formattedDate}
+      </span>
+      {service.worshipLeader && (
+        <span className="flex items-center gap-1">
+          <MicVocal className="w-4 h-4" />
+          <span className="hidden sm:block">Dirigido por</span>
+          {service.worshipLeader}
+        </span>
+      )}
+    </div>
+  );
+
   return (
     <Collapsible>
-      <div className={`${density === 'compact' ? 'px-2 sm:px-2 lg:px-4 gap-2' : 'px-4 sm:px-6 lg:px-8 gap-4'}`}>
-        <div className="flex flex-col md:flex-row flex-grow justify-between fullscreen-hidden gap-2">
-          {/* Título */}
-          <div className="flex flex-col">
-            <h1 className="font-bold text-3xl sm:text-4xl leading-none text-primary tracking-tighter mb-2">
-              {getHumanReadableTitle(service, t('service'))}
-            </h1>
-            <div className="flex flex-row items-center gap-4 text-base sm:text-lg">
-              <span className="flex items-center gap-1 text-slate-400">
-                <Calendar size={18} />
-                {formattedDate}
-              </span>
-              {service.worshipLeader && (
-                <span className="flex items-center gap-1 text-slate-400">
-                  <MicVocal size={18} />
-                  {service.worshipLeader}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Botões de Ação e Configuração */}
+      <PageHeader
+        backLinkHref="/services"
+        backLinkText="Liturgias"
+        title={getHumanReadableTitle(service, t('service'))}
+        subtitle={subtitle}
+        actions={
           <div className="flex gap-2 items-center md:self-end">
             <ServiceActionMenu deleteService={deleteCurrentService} />
+            {/* O botão de configuração agora está dentro do Collapsible */}
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="icon">
                 <AdjustmentIcon />
@@ -90,46 +93,42 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
               </Button>
             </CollapsibleTrigger>
           </div>
-        </div>
-        <CollapsibleContent>
-          <ServiceConfig
-            columns={columns}
-            setColumns={setColumns}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-            mode={mode}
-            setMode={setMode}
-            density={density}
-            setDensity={setDensity}
-          />
-        </CollapsibleContent>
-      </div>
+        }
+      />
 
-      <Main density={density}>
+      <CollapsibleContent>
+        <ServiceConfig
+          columns={columns}
+          setColumns={setColumns}
+          fontSize={fontSize}
+          setFontSize={setFontSize}
+          mode={mode}
+          setMode={setMode}
+          density={density}
+          setDensity={setDensity}
+        />
+      </CollapsibleContent>
+
+      <Main density={density} className="py-4 sm:py-6 lg:py-8">
         <section
-          className={`flex flex-col mx-auto ${density === 'compact' ? 'gap-2 text-sm' : 'gap-4 text-base'}`}
+          className={`flex flex-col mx-auto ${density === 'compact' ? 'gap-2 text-sm' : 'gap-8 text-base'}`}
           style={{ fontSize: `${fontSize}px` }}
         >
-          {units.map((unit, index) => {
-            if (unit) {
-              return (
-                <Fragment key={index}>
-                  {unit.type === 'SONG' ? (
-                    <div ref={(el) => (unitRefs.current[index] = el)}>
-                      <ServiceSongUnitView
-                        unit={unit as ServiceSongUnit}
-                        columns={columns}
-                        mode={mode}
-                        order={index + 1}
-                        density={density}
-                      />
-                    </div>
-                  ) : null}
-                </Fragment>
-              );
-            }
-            return 'ERROR';
-          })}
+          {units.map((unit, index) => (
+            <Fragment key={index}>
+              {unit?.type === 'SONG' && (
+                <div ref={(el) => (unitRefs.current[index] = el)}>
+                  <ServiceSongUnitView
+                    unit={unit as ServiceSongUnit}
+                    columns={columns}
+                    mode={mode}
+                    order={index + 1}
+                    density={density}
+                  />
+                </div>
+              )}
+            </Fragment>
+          ))}
         </section>
       </Main>
 

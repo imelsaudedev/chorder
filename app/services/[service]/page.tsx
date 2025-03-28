@@ -1,6 +1,6 @@
 import ServiceViewer from '@/fragments/ServiceViewer';
 import { getServiceOrCreate } from './actions';
-import Header from '@/components/Header';
+// import Header from '@/components/Header';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +17,7 @@ export default async function ServicePage({
 
   return (
     <>
-      <Header currentPage="services" />
+      {/* <Header currentPage="services" /> */}
       <ServiceViewer service={service} writeMode={writeMode} />
     </>
   );

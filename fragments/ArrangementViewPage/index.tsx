@@ -1,3 +1,4 @@
+import PageHeader from '@/components/PageHeader';
 import { DeleteArrangementAction } from '@/app/songs/[song]/actions';
 import ArrangementSelector from '@/components/ArrangementSelector';
 import Main from '@/components/Main';
@@ -12,7 +13,8 @@ import { useMemo, useState } from 'react';
 import ArrangementView from './ArrangementView';
 import SongConfig from './SongConfig';
 import ArrangementActionMenu from './ArrangementActionMenu';
-import { NotebookPen } from 'lucide-react';
+import { NotebookPen, ArrowLeft, Music } from 'lucide-react';
+import Link from 'next/link';
 
 type ArrangementViewPageProps = {
   song: SongWith<RequiredArrangement>;
@@ -31,19 +33,21 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
   const arrangement = song.arrangement;
   const songUnitMap = useMemo(() => getSongUnitMap(arrangement), [arrangement]);
 
+  const subtitle = song.artist ? (
+    <span className="flex items-center gap-1">
+      <NotebookPen className="w-4 h-4" />
+      {song.artist}
+    </span>
+  ) : null;
+
   return (
     <Collapsible>
-      <div className={`${density === 'compact' ? 'px-2 sm:px-2 lg:px-4 gap-2' : 'px-4 sm:px-6 lg:px-8 gap-4'}`}>
-        <div className="flex flex-col md:flex-row gap-2 flex-grow justify-between mt-4 mb-4">
-          <div className="flex flex-col">
-            <h1 className="font-bold text-4xl leading-none tracking-tight text-primary mb-2">{song.title}</h1>
-            {song.artist && (
-              <span className="flex items-center gap-1 text-lg text-slate-400">
-                <NotebookPen size={18} />
-                {song.artist}
-              </span>
-            )}
-          </div>
+      <PageHeader
+        backLinkHref="/songs"
+        backLinkText="Músicas"
+        title={song.title}
+        subtitle={subtitle}
+        actions={
           <div className="flex gap-2 md:self-end">
             <ArrangementSelector song={song} />
             <ArrangementActionMenu deleteArrangementWithId={deleteArrangementWithId} />
@@ -54,24 +58,26 @@ export default function ArrangementViewPage({ song, deleteArrangement }: Arrange
               </Button>
             </CollapsibleTrigger>
           </div>
-        </div>
-        <CollapsibleContent>
-          <SongConfig
-            columns={columns}
-            setColumns={setColumns}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-            mode={mode}
-            setMode={setMode}
-            originalKey={arrangement.key || ''}
-            transpose={transpose}
-            setTranspose={setTranspose}
-            density={density}
-            setDensity={setDensity}
-          />
-        </CollapsibleContent>
-      </div>
-      <Main density={density}>
+        }
+      />
+
+      <CollapsibleContent>
+        <SongConfig
+          columns={columns}
+          setColumns={setColumns}
+          fontSize={fontSize}
+          setFontSize={setFontSize}
+          mode={mode}
+          setMode={setMode}
+          originalKey={arrangement.key || ''}
+          transpose={transpose}
+          setTranspose={setTranspose}
+          density={density}
+          setDensity={setDensity}
+        />
+      </CollapsibleContent>
+
+      <Main density={density} className="py-4 sm:py-6 lg:py-8">
         <div style={{ fontSize: `${fontSize}px` }}>
           <ArrangementView
             columns={columns}

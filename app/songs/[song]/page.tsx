@@ -1,6 +1,6 @@
 import SongViewer from '@/fragments/SongViewer';
 import { deleteArrangement, getSongOrCreate, moveArrangement, postSong } from './actions';
-import Header from '@/components/Header';
+// import Header from '@/components/Header';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +20,7 @@ export default async function SongPage({
 
   return (
     <>
-      <Header currentPage="songs" />
+      {/* <Header currentPage="songs" /> */}
       <SongViewer
         song={song}
         writeMode={writeMode}

@@ -1,3 +1,4 @@
+import Heading from '@/components/Heading';
 import CloseIcon from '@/components/icons/CloseIcon';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -48,26 +49,26 @@ export default function ServiceSongUnitEditorHeader({
   return (
     <div className="flex w-full flex-row justify-between items-start gap-4">
       {/* Coluna 1: Agrupa título, artista, switch e tom */}
-      <div className="flex flex-col md:flex-row md:items-center flex-1 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center flex-1 gap-2">
         {/* Título e artista */}
         <div className="flex flex-col md:flex-1">
-          <h2 className="font-bold text-lg leading-none tracking-tight mb-1 md:mb-0">{unit.title}</h2>
-          {unit.artist && <span className="text-sm text-slate-400">{unit.artist}</span>}
+          <Heading level={3}>{unit.title}</Heading>
+          {unit.artist && <span className="text-xs sm:text-sm text-zinc-600">{unit.artist}</span>}
         </div>
 
         {/* Controles de edição e transposição */}
         <div className="flex flex-row items-center gap-4 md:justify-end">
           {/* Switch de edição */}
           <div className="flex items-center gap-2">
-            <Label htmlFor={`edit-switch-${index}`} className="text-sm">
+            <Switch id={`edit-switch-${index}`} checked={isEditing} onCheckedChange={onToggleEdit} />
+            <Label htmlFor={`edit-switch-${index}`} className="text-xs sm:text-sm">
               {t('editSong')}
             </Label>
-            <Switch id={`edit-switch-${index}`} checked={isEditing} onCheckedChange={onToggleEdit} />
           </div>
 
           {/* Seleção de tom */}
           <div className="flex items-center gap-2">
-            <Label className="text-sm">{t('key')}</Label>
+            <Label className="hidden sm:block text-sm">{t('key')}</Label>
             <Select defaultValue={unit.semitoneTranspose.toString()} onValueChange={handleSemitoneTransposeChange}>
               <SelectTrigger className="w-16">
                 <SelectValue placeholder={t('keyPlaceholder')} />

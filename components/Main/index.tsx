@@ -8,8 +8,8 @@ export default function Main({
   children?: React.ReactNode;
 }) {
   const densityClasses = {
-    compact: 'p-2 sm:p-2 lg:p-4',
-    normal: 'p-4 sm:p-6 lg:p-8',
+    compact: 'px-2 sm:px-2 lg:px-4',
+    normal: 'px-4 sm:px-6 lg:px-8',
   };
 
   const classNames = [densityClasses[density]];

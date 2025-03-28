@@ -1,9 +1,9 @@
 'use client';
 
-import { Calendar, MicVocal } from 'lucide-react';
+import Heading from '@/components/Heading';
 import { getHumanReadableTitle, Service } from '@/models/service';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 type ServiceListProps = {
   services: Service[];
@@ -53,8 +53,8 @@ export default function ServiceList({ services: baseServices }: ServiceListProps
   return (
     <div className="space-y-6">
       {futureServices.length > 0 && (
-        <section className="bg-slate-100 p-4 rounded-xl">
-          <h2 className="text-2xl font-semibold tracking-tight text-secondary">Próximas liturgias</h2>
+        <section className="bg-zinc-50 p-4 sm:p-6 lg:p-8 mb-4 sm:mb-8 rounded-lg border border-zinc-100">
+          <span className="font-bricolage text-base sm:text-lg text-secondary">Próximas liturgias</span>
           <ul>
             {futureServices.map((service) => (
               <ServiceItem key={service.slug} service={service} />
@@ -64,10 +64,10 @@ export default function ServiceList({ services: baseServices }: ServiceListProps
       )}
 
       {Object.keys(pastServicesByMonth).length > 0 && (
-        <section>
+        <section className="px-0 sm:px-6 lg:px-8">
           {Object.entries(pastServicesByMonth as Record<string, Service[]>).map(([month, services]) => (
             <div key={month} className="mb-8">
-              <h3 className="text-xs uppercase tracking-wide text-secondary">{month}</h3>
+              <span className="text-xs font-mono uppercase tracking-wide text-zinc-400">{month}</span>
               <ul>
                 {services.map((service) => (
                   <ServiceItem key={service.slug} service={service} />
@@ -83,26 +83,20 @@ export default function ServiceList({ services: baseServices }: ServiceListProps
 
 function ServiceItem({ service }: { service: Service }) {
   return (
-    <li className="pt-2">
-      <a href={`/services/${service.slug}`} className="block hover:bg-gray-100 transition">
-        <div className="text-lg font-semibold text-black mt-1">{getHumanReadableTitle(service, 'Liturgia')}</div>
-        <div className="text-sm flex flex-row sm:justify-start sm:items-center text-slate-400 gap-2">
+    <li className="pt-4">
+      <a href={`/services/${service.slug}`} className="block">
+        <Heading level={3}>{getHumanReadableTitle(service, 'Liturgia')}</Heading>
+        <div className="text-xs sm:text-sm flex flex-row sm:justify-start sm:items-center text-zinc-600 gap-1">
           <div className="flex items-center gap-1">
-            <Calendar size={16} />
             {new Date(String(service.date))
-              .toLocaleDateString('pt-BR', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'numeric',
-                year: 'numeric',
-              })
+              .toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'numeric' })
               .replace(/^\w/, (c) => c.toUpperCase())}
           </div>
           {service.worshipLeader && (
-            <div className="flex items-center gap-1">
-              <MicVocal size={16} />
-              {service.worshipLeader}
-            </div>
+            <>
+              <span>·</span>
+              <div>{service.worshipLeader}</div>
+            </>
           )}
         </div>
       </a>

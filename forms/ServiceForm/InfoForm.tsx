@@ -13,8 +13,7 @@ export default function InfoForm({ form }: InfoFormProps) {
   const t = useTranslations('ServiceData');
 
   return (
-    <div className="flex-grow space-y-4 pb-4 md:pb-6 lg:pb-8">
-      {/* Título */}
+    <div className="flex-grow space-y-4 px-4 sm:px-6 lg:px-8 py-8 bg-indigo-50">
       <FormField
         control={form.control}
         name="title"
@@ -29,16 +28,13 @@ export default function InfoForm({ form }: InfoFormProps) {
         )}
       />
 
-      {/* Grid para Data e Worship Leader */}
       <div className="flex flex-col md:flex-row gap-4 justify-start">
-        {/* Data */}
         <FormField
           control={form.control}
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col space-y-0 w-full md:w-72">
               {' '}
-              {/* Largura fixa */}
               <FormLabel className="text-primary mb-2">{t('date')}</FormLabel>
               <FormControl>
                 <DatePicker
@@ -54,15 +50,12 @@ export default function InfoForm({ form }: InfoFormProps) {
             </FormItem>
           )}
         />
-
-        {/* Worship Leader */}
         <FormField
           control={form.control}
           name="worshipLeader"
           render={({ field }) => (
             <FormItem className="flex flex-col space-y-0 w-full md:w-64">
               {' '}
-              {/* Largura fixa */}
               <FormLabel className="text-primary mb-2">{t('worshipLeader')}</FormLabel>
               <FormControl>
                 <Input placeholder={t('worshipLeaderPlaceholder')} {...field} />

@@ -37,55 +37,63 @@ export default function ArrangementInfoForm({ song, form, moveArrangement }: Arr
   }
 
   return (
-    <div>
-      <Heading level={3}>{t('SongData.arrangementSettings')}</Heading>
+    <div className="px-4 sm:px-6 lg:px-8 py-8 bg-zinc-50">
+      {/* Heading + Botões abaixo no mobile, à direita no sm */}
+      <div className="sm:flex sm:items-center sm:justify-between">
+        <Heading level={2}>{t('SongData.arrangementSettings')}</Heading>
 
-      <div className="flex justify-end gap-2">
-        <Button
-          onClick={(event) => {
-            event.preventDefault();
-            makeArrangementDefault(song.slug as string, song.currentArrangementId).then(() => router.refresh());
-          }}
-          disabled={isDefault}
-        >
-          {isDefault ? t('SongData.alreadyDefault') : t('SongData.makeDefault')}
-        </Button>
+        {/* Botões alinhados à esquerda no mobile e à direita no sm */}
+        <div className="flex flex-wrap gap-2 mt-4 sm:mt-0 sm:justify-end">
+          <Button
+            variant="outline"
+            onClick={(event) => {
+              event.preventDefault();
+              makeArrangementDefault(song.slug as string, song.currentArrangementId).then(() => router.refresh());
+            }}
+            disabled={isDefault}
+          >
+            {isDefault ? t('SongData.alreadyDefault') : t('SongData.makeDefault')}
+          </Button>
 
-        {!arrangement.isNew && (
-          <MoveArrangementButton
-            song={song as SongWith<RequiredArrangement<SongArrangementWith<RequiredIsNew>>>}
-            moveArrangement={moveArrangement}
-          />
-        )}
+          {!arrangement.isNew && (
+            <MoveArrangementButton
+              song={song as SongWith<RequiredArrangement<SongArrangementWith<RequiredIsNew>>>}
+              moveArrangement={moveArrangement}
+            />
+          )}
+        </div>
       </div>
 
-      <FormField
-        control={form.control}
-        name="arrangementName"
-        render={({ field }) => (
-          <FormItem className="space-y-0">
-            <FormLabel className="text-primary mb-2">{t('SongData.arrangementName')}</FormLabel>
-            <FormControl>
-              <Input placeholder={`${t('Messages.arrangement')} ${song.currentArrangementId + 1}`} {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {/* Campos lado a lado a partir de sm */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+        <FormField
+          control={form.control}
+          name="arrangementName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-primary mb-2">{t('SongData.arrangementName')}</FormLabel>
+              <FormControl>
+                <Input placeholder={`${t('Messages.arrangement')} ${song.currentArrangementId + 1}`} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField
-        control={form.control}
-        name="key"
-        render={({ field }) => (
-          <FormItem className="space-y-0">
-            <FormLabel className="text-primary mb-2">{t('SongData.defaultKey')}</FormLabel>
-            <FormControl>
-              <Input placeholder={t('SongData.keyPlaceholder')} {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <FormField
+          control={form.control}
+          name="key"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-primary mb-2">{t('SongData.defaultKey')}</FormLabel>
+              <FormControl>
+                <Input placeholder={t('SongData.keyPlaceholder')} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 }

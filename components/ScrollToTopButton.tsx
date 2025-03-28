@@ -27,7 +27,7 @@ export default function ScrollToTopButton() {
   return (
     <Button
       variant="outline"
-      className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 transition-opacity duration-300 gap-1 ${
+      className={`fixed bottom-24 sm:bottom-8 left-1/2 transform -translate-x-1/2 transition-opacity duration-300 gap-1 ${
         isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

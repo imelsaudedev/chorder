@@ -1,5 +1,6 @@
 import './globals.css';
 import { IBM_Plex_Sans, IBM_Plex_Serif, IBM_Plex_Mono } from 'next/font/google';
+import { Bricolage_Grotesque } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
@@ -26,6 +27,13 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: 'swap',
 });
 
+const bricolageGrotesque = Bricolage_Grotesque({
+  variable: '--font-bricolage-grotesque', // Definindo a variável CSS
+  weight: ['400', '500', '600', '700'], // Definindo os pesos da fonte
+  subsets: ['latin'],
+  display: 'swap',
+});
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = await getTranslations({ locale, namespace: 'Metadata' });
@@ -41,8 +49,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en">
+      <head></head>
       <body
-        className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} font-sans bg-white text-primary pb-4 md:pb-6 lg:pb-8`}
+        className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${bricolageGrotesque.variable} font-sans pb-4 md:pb-6 lg:pb-8`}
       >
         <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
       </body>

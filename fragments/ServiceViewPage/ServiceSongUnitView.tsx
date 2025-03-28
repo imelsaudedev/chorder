@@ -1,3 +1,4 @@
+import Heading from '@/components/Heading';
 import { ServiceSongUnit } from '@/models/service-unit';
 import ArrangementView from '../ArrangementViewPage/ArrangementView';
 import { getSongUnitMap } from '@/models/song-arrangement';
@@ -28,27 +29,23 @@ export default function ServiceSongUnitView({ unit, columns, mode, order, densit
   return (
     <div className="w-full">
       <div
-        className={`sticky top-0 bg-white z-10 flex w-full flex-row justify-between items-center ${
+        className={`sticky top-0 bg-white/80 backdrop-blur-sm z-10 flex w-full flex-row justify-between items-center ${
           density === 'compact' ? 'py-2 md:py-1 lg:py-2' : 'py-2 md:py-2 lg:py-4'
         }`}
       >
         {/* Título e Artista */}
         <div className="flex flex-col">
-          <h2
-            className={`font-bold tracking-tight text-black fullscreen ${
-              density === 'compact' ? 'text-base leading-tight' : 'text-lg md:text-xl lg:text-2xl leading-none'
-            }`}
-          >
-            {order}. {unit.song.title}
-          </h2>
+          <Heading level={2}>
+            <span>{order}. </span>
+            {unit.song.title}
+          </Heading>
           {unit.song.artist && (
             <span
-              className={`song-artist flex items-center text-slate-400 gap-1 fullscreen-hidden ${
-                density === 'compact' ? 'text-xs' : 'text-sm'
+              className={`song-artist flex items-center text-zinc-600 gap-1 fullscreen-hidden ${
+                density === 'compact' ? 'text-xs' : 'text-sm sm:text-base'
               }`}
             >
               {' '}
-              <NotebookPen size={16} />
               {unit.song.artist}
             </span>
           )}

@@ -14,6 +14,7 @@
     "delete": "Apagar",
     "hide": "Esconder",
     "save": "Salvar",
+    "home": "Início",
     "song": "Música",
     "songs": "Músicas",
     "service": "Liturgia",
@@ -37,7 +38,7 @@
   },
   "ServiceData": {
     "title": "Título",
-    "titlePlaceholder": "Título da liturgia",
+    "titlePlaceholder": "Título da liturgia (ex: Culto matutino)",
     "date": "Data",
     "worshipLeader": "Dirigente",
     "worshipLeaderPlaceholder": "Dirigente"
@@ -45,8 +46,8 @@
   "SongData": {
     "title": "Título",
     "titlePlaceholder": "Título da música",
-    "artist": "Artista",
-    "artistPlaceholder": "Artista da música",
+    "artist": "Compositor",
+    "artistPlaceholder": "Compositor da música",
     "key": "Tom",
     "keyPlaceholder": "Tom",
     "defaultKey": "Tom padrão",

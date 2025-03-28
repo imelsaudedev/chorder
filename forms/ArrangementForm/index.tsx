@@ -1,3 +1,4 @@
+import EditHeader from '@/components/EditHeader';
 import { MoveArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
 import SaveButtonSet from '@/components/SaveButtonSet';
 import { Form } from '@/components/ui/form';
@@ -71,18 +72,13 @@ export default function ArrangementForm({ song, postSong, moveArrangement }: Arr
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="font-bold text-3xl sm:text-4xl leading-none text-secondary tracking-tighter mb-2 sm:mb-4">
-            {arrangement.isNew ? 'Nova música' : 'Editar música'}
-          </h1>
-          <SaveButtonSet canCancel={!arrangement.isNew} enabled={isDirty && isValid} />
-        </div>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <EditHeader
+          title={arrangement.isNew ? 'Nova música' : 'Editar música'}
+          actions={<SaveButtonSet canCancel={!arrangement.isNew} enabled={isDirty && isValid} />}
+        />
         <InfoForm form={form} />
         <ArrangementInfoForm song={song} form={form} moveArrangement={moveArrangement} />
-
-        <Separator />
-
         <SongUnitListForm arrangementFormFields={arrangementFormFields} />
       </form>
     </Form>
