@@ -67,7 +67,7 @@ export default function ServiceList({ services: baseServices }: ServiceListProps
         <section className="px-0 sm:px-6 lg:px-8">
           {Object.entries(pastServicesByMonth as Record<string, Service[]>).map(([month, services]) => (
             <div key={month} className="mb-8">
-              <span className="text-xs font-mono uppercase tracking-wide text-zinc-400">{month}</span>
+              <span className="font-bricolage text-base sm:text-lg text-zinc-400">{month}</span>
               <ul>
                 {services.map((service) => (
                   <ServiceItem key={service.slug} service={service} />
@@ -83,10 +83,10 @@ export default function ServiceList({ services: baseServices }: ServiceListProps
 
 function ServiceItem({ service }: { service: Service }) {
   return (
-    <li className="pt-4">
+    <li className="pt-2">
       <a href={`/services/${service.slug}`} className="block">
         <Heading level={3}>{getHumanReadableTitle(service, 'Liturgia')}</Heading>
-        <div className="text-xs sm:text-sm flex flex-row sm:justify-start sm:items-center text-zinc-600 gap-1">
+        <div className="text-sm flex flex-row sm:justify-start sm:items-center text-zinc-600 gap-1">
           <div className="flex items-center gap-1">
             {new Date(String(service.date))
               .toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'numeric' })

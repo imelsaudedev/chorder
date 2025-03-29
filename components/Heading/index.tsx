@@ -29,7 +29,7 @@ export default function Heading({
   } else {
     Component = 'h1';
     classNames.push(
-      'font-bricolage font-semibold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-primary mb-1 sm:mb-2'
+      'font-bricolage font-bold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-primary mb-1 sm:mb-2'
     );
   }
 
