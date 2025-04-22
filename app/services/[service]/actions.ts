@@ -1,6 +1,6 @@
 'use server';
 
-import { cachedRetrieveService, saveService } from '@/database/service';
+import { cachedRetrieveService, saveService } from '@/database-old/service';
 import { ServiceFormSchema, SongUnitSchema } from '@/forms/ServiceForm/schema';
 import { NewService, OptionalSlug, RequiredIsNew, Service, ServiceWith } from '@/models/service';
 import { ServiceSongUnit, ServiceUnit } from '@/models/service-unit';

@@ -4,7 +4,7 @@ import Heading from '@/components/Heading';
 import Main from '@/components/Main';
 import { Plus, ListMusic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cachedRetrieveServices } from '@/database/service';
+import { cachedRetrieveServices } from '@/database-old/service';
 import ServiceList from '@/fragments/ServiceList';
 import Link from 'next/link';
 import ScrollToTopButton from '@/components/ScrollToTopButton';

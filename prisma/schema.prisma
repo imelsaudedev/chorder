@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Song {
+  id        Int     @id @default(autoincrement())
+  legacyId  Int? @unique
+  title     String
+  slug      String @unique
+  lyrics    String
+  artist    String?
+  isDeleted Boolean @default(false)
+
+  arrangements SongArrangement[]
+}
+
+model SongArrangement {
+  id        Int     @id @default(autoincrement())
+  songId    Int
+  key       String
+  name      String?
+  isDefault Boolean @default(false)
+  isDeleted Boolean @default(false)
+  isServiceArrangement Boolean @default(false)
+
+  song      Song @relation(fields: [songId], references: [id])
+  serviceUnit ServiceUnit?
+  units SongUnit[]
+}
+
+model SongUnit {
+  id        Int     @id @default(autoincrement())
+  arrangementId Int
+  content   String
+  type      SongUnitType
+  order     Int
+
+  arrangement SongArrangement @relation(fields: [arrangementId], references: [id])
+}
+
+enum SongUnitType {
+  BLOCK
+  INTRO
+  VERSE
+  PRECHORUS
+  CHORUS
+  BRIDGE
+  INTERLUDE
+  SOLO
+  ENDING
+}
+
+model Service {
+  id          Int     @id @default(autoincrement())
+  legacyId  Int? @unique
+  title       String?
+  slug        String  @unique
+  worshipLeader String?
+  date        DateTime
+  isDeleted   Boolean @default(false)
+
+  units      ServiceUnit[]
+}
+
+model ServiceUnit {
+  id        Int     @id @default(autoincrement())
+  serviceId Int
+  type      ServiceUnitType
+  arrangementId Int? @unique
+  semitoneTranspose Int? @default(0)
+  order     Int
+
+  service   Service @relation(fields: [serviceId], references: [id])
+  arrangement  SongArrangement? @relation(fields: [arrangementId], references: [id])
+}
+
+enum ServiceUnitType {
+  SONG
+}
