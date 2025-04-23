@@ -1,5 +1,5 @@
 import EditHeader from '@/components/EditHeader';
-import { MoveArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
+import { MoveArrangementAction, PostSongAction } from '@/app/(main)/songs/[song]/actions';
 import SaveButtonSet from '@/components/SaveButtonSet';
 import { Form } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';

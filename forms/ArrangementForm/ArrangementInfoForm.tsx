@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import MoveArrangementButton from './MoveArrangementButton';
 import { RequiredIsNew, SongArrangementWith } from '@/models/song-arrangement';
-import { makeArrangementDefault, MoveArrangementAction } from '@/app/songs/[song]/actions';
+import { makeArrangementDefault, MoveArrangementAction } from '@/app/(main)/songs/[song]/actions';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';

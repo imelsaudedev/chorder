@@ -1,6 +1,6 @@
 'use client';
 
-import { DeleteArrangementAction, MoveArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
+import { DeleteArrangementAction, MoveArrangementAction, PostSongAction } from '@/app/(main)/songs/[song]/actions';
 import Main from '@/components/Main';
 import ArrangementForm from '@/forms/ArrangementForm';
 import { NewSong, RequiredArrangement, SongWith } from '@/models/song';

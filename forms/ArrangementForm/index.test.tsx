@@ -1,4 +1,4 @@
-import { MoveArrangementAction, PostSongAction } from '@/app/songs/[song]/actions';
+import { MoveArrangementAction, PostSongAction } from '@/app/(main)/songs/[song]/actions';
 import { NewSong } from '@/models/song';
 import { RequiredIsNew, SongArrangementWith } from '@/models/song-arrangement';
 import { SongUnit } from '@/models/song-unit';

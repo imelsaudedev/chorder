@@ -1,4 +1,4 @@
-import { MoveArrangementAction } from '@/app/songs/[song]/actions';
+import { MoveArrangementAction } from '@/app/(main)/songs/[song]/actions';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import SongPicker from '@/fragments/SongPicker';

@@ -1,5 +1,5 @@
 import PageHeader from '@/components/PageHeader';
-import { DeleteArrangementAction } from '@/app/songs/[song]/actions';
+import { DeleteArrangementAction } from '@/app/(main)/songs/[song]/actions';
 import ArrangementSelector from '@/components/ArrangementSelector';
 import Main from '@/components/Main';
 import { Mode } from '@/components/ModeButtonSet';

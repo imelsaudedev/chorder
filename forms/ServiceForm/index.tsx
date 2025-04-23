@@ -1,5 +1,5 @@
 import EditHeader from '@/components/EditHeader';
-import { postService } from '@/app/services/[service]/actions';
+import { postService } from '@/app/(main)/services/[service]/actions';
 import SaveButtonSet from '@/components/SaveButtonSet';
 import { Form } from '@/components/ui/form';
 import { OptionalSlug, RequiredIsNew, ServiceWith } from '@/models/service';

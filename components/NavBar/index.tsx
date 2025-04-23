@@ -3,13 +3,12 @@
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Home, Music, ListMusic } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
-type NavbarProps = {
-  currentPage: 'songs' | 'services';
-};
-
-export default function NavBar({ currentPage }: NavbarProps) {
+export default function NavBar() {
   const t = useTranslations('Messages');
+  const pathname = usePathname();
+  const currentPage = pathname.split('/')[1]; // Obtém a parte da URL após a barra inicial
 
   return (
     <>

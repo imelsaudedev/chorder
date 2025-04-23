@@ -1,5 +1,5 @@
 import PageHeader from '@/components/PageHeader';
-import { deleteService } from '@/app/services/[service]/actions';
+import { deleteService } from '@/app/(main)/services/[service]/actions';
 import AdjustmentIcon from '@/components/icons/AdjustmentIcon';
 import Main from '@/components/Main';
 import { Mode } from '@/components/ModeButtonSet';
