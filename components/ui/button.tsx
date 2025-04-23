@@ -46,18 +46,29 @@ export interface ButtonProps
   circle?: boolean; // Opção 2: Nova propriedade para botões circulares
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, rounded, asChild = false, circle = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : 'button';
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, rounded, className }), circle && 'rounded-full aspect-square')}
-        ref={ref}
-        {...props}
-      />
-    );
+const Button = (
+  {
+    ref,
+    className,
+    variant,
+    size,
+    rounded,
+    asChild = false,
+    circle = false,
+    ...props
+  }: ButtonProps & {
+    ref: React.RefObject<HTMLButtonElement>;
   }
-);
+) => {
+  const Comp = asChild ? Slot : 'button';
+  return (
+    <Comp
+      className={cn(buttonVariants({ variant, size, rounded, className }), circle && 'rounded-full aspect-square')}
+      ref={ref}
+      {...props}
+    />
+  );
+};
 Button.displayName = 'Button';
 
 export { Button, buttonVariants };
