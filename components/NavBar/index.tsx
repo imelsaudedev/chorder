@@ -27,7 +27,7 @@ export default function NavBar() {
       </nav>
 
       {/* Menu inferior fixo (aparece apenas em telas pequenas) */}
-      <nav className="sm:hidden fixed bottom-0 left-0 w-full bg-gradient-to-t from-white to-white/50 backdrop-blur-lg shadow-md border-t border-gray-100">
+      <nav className="sm:hidden fixed bottom-0 left-0 w-full bg-linear-to-t from-white to-white/50 backdrop-blur-lg shadow-md border-t border-gray-100">
         <div className="flex justify-around py-3">
           <NavItem href="/" icon={<Home size={24} />} label={t('home')} active={false} />
           <NavItem

@@ -29,7 +29,7 @@ export default function ServiceSongUnitView({ unit, columns, mode, order, densit
   return (
     <div className="w-full">
       <div
-        className={`sticky top-0 bg-white/80 backdrop-blur-sm z-10 flex w-full flex-row justify-between items-center ${
+        className={`sticky top-0 bg-white/80 backdrop-blur-xs z-10 flex w-full flex-row justify-between items-center ${
           density === 'compact' ? 'py-2 md:py-1 lg:py-2' : 'py-2 md:py-2 lg:py-4'
         }`}
       >

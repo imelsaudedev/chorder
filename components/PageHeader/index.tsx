@@ -11,7 +11,7 @@ type PageHeaderProps = {
 
 const PageHeader = ({ title, subtitle, actions, backLinkHref, backLinkText }: PageHeaderProps) => {
   return (
-    <div className="flex flex-col md:flex-row flex-grow justify-between gap-4 p-4 sm:p-6 lg:p-8 bg-zinc-50 border-b border-zinc-100">
+    <div className="flex flex-col md:flex-row grow justify-between gap-4 p-4 sm:p-6 lg:p-8 bg-zinc-50 border-b border-zinc-100">
       <div className="flex flex-col">
         {backLinkHref && backLinkText && <BackLink href={backLinkHref} text={backLinkText} />}
         <Heading level={1}>{title}</Heading>

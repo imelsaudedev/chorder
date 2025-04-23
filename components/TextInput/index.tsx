@@ -59,7 +59,7 @@ export default function TextInput({
     'border-gray-300',
     'bg-gray-50',
     'text-gray-900',
-    'flex-grow',
+    'grow',
     'rounded-md',
     'text-sm',
     'focus:ring-blue-500',

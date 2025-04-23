@@ -12,7 +12,7 @@ export default function ServiceSongUnitEditor({ index, onRemoveUnit }: ServiceSo
   const [editArrangement, setEditArrangement] = useState(false);
 
   return (
-    <div className="flex-grow bg-zinc-50 border border-zinc-200 rounded-md sm:rounded-lg p-2 sm:p-4 ">
+    <div className="grow bg-zinc-50 border border-zinc-200 rounded-md sm:rounded-lg p-2 sm:p-4 ">
       <ServiceSongUnitEditorHeader
         index={index}
         onRemoveUnit={onRemoveUnit}

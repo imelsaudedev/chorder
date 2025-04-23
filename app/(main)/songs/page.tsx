@@ -21,7 +21,7 @@ export default async function SongListPage(props: SongListPageProps) {
 
   return (
     <>
-      <div className="flex flex-col flex-grow justify-between gap-4 px-4 sm:px-12 lg:px-16 pt-8 sm:pt-12 lg:pt-16 pb-4 sm:pb-6 lg:pb-8">
+      <div className="flex flex-col grow justify-between gap-4 px-4 sm:px-12 lg:px-16 pt-8 sm:pt-12 lg:pt-16 pb-4 sm:pb-6 lg:pb-8">
         <Heading level={1} className="flex items-center gap-2">
           <Music className="w-8 lg:w-10 h-8 lg:h-10" />
           Músicas

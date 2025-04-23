@@ -13,7 +13,7 @@ export default function InfoForm({ form }: InfoFormProps) {
   const t = useTranslations('ServiceData');
 
   return (
-    <div className="flex-grow space-y-4 px-4 sm:px-6 lg:px-8 py-8 bg-indigo-50">
+    <div className="grow space-y-4 px-4 sm:px-6 lg:px-8 py-8 bg-indigo-50">
       <FormField
         control={form.control}
         name="title"

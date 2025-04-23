@@ -55,7 +55,7 @@ export default function AddUnitForm({ arrangementFormFields }: AddUnitFormProps)
         >
           <PlusIcon />
         </Button>
-        <Label htmlFor="new-unit" className="flex-grow text-sm font-bold cursor-pointer">
+        <Label htmlFor="new-unit" className="grow text-sm font-bold cursor-pointer">
           {t('newUnit')}
         </Label>
       </div>

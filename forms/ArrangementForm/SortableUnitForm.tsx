@@ -25,7 +25,7 @@ export default function SortableUnitForm({ index, unit, arrangementFormFields }:
   return (
     <div className="flex">
       <SortingButtons moveUnitUp={onMoveUnitUp} moveUnitDown={onMoveUnitDown} listSize={mapLength} index={index} />
-      <UnitForm unit={unit} removeUnit={handleRemoveUnit} onChangeUnit={handleChangeUnit} className="flex-grow" />
+      <UnitForm unit={unit} removeUnit={handleRemoveUnit} onChangeUnit={handleChangeUnit} className="grow" />
     </div>
   );
 }

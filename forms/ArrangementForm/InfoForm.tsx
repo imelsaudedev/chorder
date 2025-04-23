@@ -11,7 +11,7 @@ type InfoFormProps = {
 export default function InfoForm({ form }: InfoFormProps) {
   const t = useTranslations('SongData');
   return (
-    <div className="flex-grow px-4 sm:px-6 lg:px-8 py-8 bg-indigo-50">
+    <div className="grow px-4 sm:px-6 lg:px-8 py-8 bg-indigo-50">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
