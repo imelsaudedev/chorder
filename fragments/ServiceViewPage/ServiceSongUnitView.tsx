@@ -1,36 +1,46 @@
-import Heading from '@/components/Heading';
-import { ServiceSongUnit } from '@/models/service-unit';
-import ArrangementView from '../ArrangementViewPage/ArrangementView';
-import { getSongUnitMap } from '@/models/song-arrangement';
-import KeyButtonSet from '@/components/KeyButtonSet';
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import { Mode } from '@/components/ModeButtonSet';
-import { NotebookPen, MoreVertical } from 'lucide-react';
+import Heading from "@/app/lib/components/Heading";
+import { ServiceSongUnit } from "@/models/service-unit";
+import ArrangementView from "../ArrangementViewPage/ArrangementView";
+import { getSongUnitMap } from "@/models/song-arrangement";
+import KeyButtonSet from "@/components/KeyButtonSet";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Mode } from "@/components/ModeButtonSet";
+import { NotebookPen, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 type ServiceSongUnitViewProps = {
   unit: ServiceSongUnit;
   columns: number;
   mode: Mode;
   order: number;
-  density: 'compact' | 'normal';
+  density: "compact" | "normal";
 };
 
-export default function ServiceSongUnitView({ unit, columns, mode, order, density }: ServiceSongUnitViewProps) {
-  const [transpose, setTranspose] = useState(unit.song.arrangement.semitoneTranspose);
+export default function ServiceSongUnitView({
+  unit,
+  columns,
+  mode,
+  order,
+  density,
+}: ServiceSongUnitViewProps) {
+  const [transpose, setTranspose] = useState(
+    unit.song.arrangement.semitoneTranspose
+  );
   const arrangement = unit.song.arrangement;
 
   return (
     <div className="w-full">
       <div
         className={`sticky top-0 bg-white/80 backdrop-blur-xs z-10 flex w-full flex-row justify-between items-center ${
-          density === 'compact' ? 'py-2 md:py-1 lg:py-2' : 'py-2 md:py-2 lg:py-4'
+          density === "compact"
+            ? "py-2 md:py-1 lg:py-2"
+            : "py-2 md:py-2 lg:py-4"
         }`}
       >
         {/* Título e Artista */}
@@ -42,10 +52,10 @@ export default function ServiceSongUnitView({ unit, columns, mode, order, densit
           {unit.song.artist && (
             <span
               className={`song-artist flex items-center text-zinc-600 gap-1 fullscreen-hidden ${
-                density === 'compact' ? 'text-xs' : 'text-sm sm:text-base'
+                density === "compact" ? "text-xs" : "text-sm sm:text-base"
               }`}
             >
-              {' '}
+              {" "}
               {unit.song.artist}
             </span>
           )}
@@ -53,7 +63,11 @@ export default function ServiceSongUnitView({ unit, columns, mode, order, densit
 
         <div className="key-controls flex items-center gap-2 fullscreen-hidden">
           <div className="hidden md:flex">
-            <KeyButtonSet originalKey={arrangement.key || ''} transpose={transpose} setTranspose={setTranspose} />
+            <KeyButtonSet
+              originalKey={arrangement.key || ""}
+              transpose={transpose}
+              setTranspose={setTranspose}
+            />
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -63,7 +77,11 @@ export default function ServiceSongUnitView({ unit, columns, mode, order, densit
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" sideOffset={4}>
               <DropdownMenuItem asChild>
-                <KeyButtonSet originalKey={arrangement.key || ''} transpose={transpose} setTranspose={setTranspose} />
+                <KeyButtonSet
+                  originalKey={arrangement.key || ""}
+                  transpose={transpose}
+                  setTranspose={setTranspose}
+                />
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

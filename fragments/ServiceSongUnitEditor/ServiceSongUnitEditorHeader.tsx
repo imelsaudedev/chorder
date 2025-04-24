@@ -1,13 +1,19 @@
-import Heading from '@/components/Heading';
-import CloseIcon from '@/components/icons/CloseIcon';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { ServiceFormSchema, SongUnitSchema } from '@/forms/ServiceForm/schema';
-import { useTranslations } from 'next-intl';
-import { MouseEventHandler, useCallback, useMemo } from 'react';
-import { useFormContext } from 'react-hook-form';
+import Heading from "@/app/lib/components/Heading";
+import CloseIcon from "@/components/icons/CloseIcon";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { ServiceFormSchema, SongUnitSchema } from "@/forms/ServiceForm/schema";
+import { useTranslations } from "next-intl";
+import { MouseEventHandler, useCallback, useMemo } from "react";
+import { useFormContext } from "react-hook-form";
 
 type ServiceSongUnitEditorHeaderProps = {
   index: number;
@@ -22,19 +28,33 @@ export default function ServiceSongUnitEditorHeader({
   onToggleEdit,
   isEditing,
 }: ServiceSongUnitEditorHeaderProps) {
-  const t = useTranslations('SongData');
+  const t = useTranslations("SongData");
   const { setValue, getValues } = useFormContext<ServiceFormSchema>();
   const unit = getValues(`units.${index}`) as SongUnitSchema;
 
   const transpositionKeys = useMemo(() => {
     const baseKey = unit.baseKey;
-    const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const keys = [
+      "C",
+      "C#",
+      "D",
+      "D#",
+      "E",
+      "F",
+      "F#",
+      "G",
+      "G#",
+      "A",
+      "A#",
+      "B",
+    ];
     const baseKeyIndex = keys.indexOf(baseKey);
     return keys.map((key, index) => [key, index - baseKeyIndex] as const);
   }, [unit.baseKey]);
 
   const handleSemitoneTransposeChange = useCallback(
-    (semitoneString: string) => setValue(`units.${index}.semitoneTranspose`, parseInt(semitoneString)),
+    (semitoneString: string) =>
+      setValue(`units.${index}.semitoneTranspose`, parseInt(semitoneString)),
     [index, setValue]
   );
 
@@ -53,29 +73,46 @@ export default function ServiceSongUnitEditorHeader({
         {/* Título e artista */}
         <div className="flex flex-col md:flex-1">
           <Heading level={3}>{unit.title}</Heading>
-          {unit.artist && <span className="text-xs sm:text-sm text-zinc-600">{unit.artist}</span>}
+          {unit.artist && (
+            <span className="text-xs sm:text-sm text-zinc-600">
+              {unit.artist}
+            </span>
+          )}
         </div>
 
         {/* Controles de edição e transposição */}
         <div className="flex flex-row items-center gap-4 md:justify-end">
           {/* Switch de edição */}
           <div className="flex items-center gap-2">
-            <Switch id={`edit-switch-${index}`} checked={isEditing} onCheckedChange={onToggleEdit} />
-            <Label htmlFor={`edit-switch-${index}`} className="text-xs sm:text-sm">
-              {t('editSong')}
+            <Switch
+              id={`edit-switch-${index}`}
+              checked={isEditing}
+              onCheckedChange={onToggleEdit}
+            />
+            <Label
+              htmlFor={`edit-switch-${index}`}
+              className="text-xs sm:text-sm"
+            >
+              {t("editSong")}
             </Label>
           </div>
 
           {/* Seleção de tom */}
           <div className="flex items-center gap-2">
-            <Label className="hidden sm:block text-sm">{t('key')}</Label>
-            <Select defaultValue={unit.semitoneTranspose.toString()} onValueChange={handleSemitoneTransposeChange}>
+            <Label className="hidden sm:block text-sm">{t("key")}</Label>
+            <Select
+              defaultValue={unit.semitoneTranspose.toString()}
+              onValueChange={handleSemitoneTransposeChange}
+            >
               <SelectTrigger className="w-16">
-                <SelectValue placeholder={t('keyPlaceholder')} />
+                <SelectValue placeholder={t("keyPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {transpositionKeys.map(([key, semitones]) => (
-                  <SelectItem key={`transpose--${key}`} value={semitones.toString()}>
+                  <SelectItem
+                    key={`transpose--${key}`}
+                    value={semitones.toString()}
+                  >
                     {key}
                   </SelectItem>
                 ))}

@@ -1,4 +1,4 @@
-import Heading from "@/components/Heading";
+import Heading from "@/app/lib/components/Heading";
 import HighlightKeyword, { findKeyword } from "@/components/HighlightKeyword";
 import {
   groupSongsByFirstLetter,

@@ -1,17 +1,20 @@
-import Heading from "@/components/Heading";
-import HighlightKeyword, { findKeyword } from "@/components/HighlightKeyword";
 import { groupSongsByFirstLetter } from "@/models/song";
 import { retrieveSongs } from "@/prisma/data";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Fragment, ReactNode } from "react";
+import InitialsNav from "./InitialsNav";
+import BigLetter from "./BigLetter";
+import SongListEntry from "@/app/lib/components/SongListEntry";
+import { ClientSong } from "@/prisma/models";
+import { Skeleton } from "@/components/ui/skeleton";
+import clsx from "clsx";
 
 type SongListProps = {
   query?: string;
 };
 
 export default async function SongList({ query = "" }: SongListProps) {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
   const songs = await retrieveSongs({
     query,
     limitLines: 3,
@@ -20,57 +23,14 @@ export default async function SongList({ query = "" }: SongListProps) {
   const t = await getTranslations("SongForm");
 
   const songsByFirstLetter = groupSongsByFirstLetter(songs);
-  songsByFirstLetter.forEach((songs) =>
-    songs.sort((a, b) =>
-      a.title.toLocaleLowerCase().localeCompare(b.title.toLocaleLowerCase())
-    )
-  );
+  songsByFirstLetter.forEach(sortByTitle);
   const existingInitials = Array.from(songsByFirstLetter.keys());
   existingInitials.sort();
-  const allInitials = Array.from(
-    new Set([...Array.from("abcdefghijklmnopqrstuvwxyz"), ...existingInitials])
-  );
-  allInitials.sort();
-
-  const sectionStyle = { display: "grid", gridTemplateColumns: "auto 1fr" };
-  const initialsTitleClassName = [
-    "font-bricolage",
-    "font-light",
-    "text-4xl",
-    "md:text-8xl",
-    "col-span-2",
-    "md:col-span-1",
-    "pr-4",
-    "pt-2",
-    "text-secondary",
-  ].join(" ");
 
   return (
     <>
-      <nav className="flex flex-wrap mb-4">
-        {allInitials.map((initial) => {
-          const className = "font-bricolage text-xl px-2";
-          if (existingInitials.indexOf(initial) < 0)
-            return (
-              <span
-                key={`link-to--${initial}`}
-                className={`${className} text-muted`}
-              >
-                {initial.toUpperCase()}
-              </span>
-            );
-          return (
-            <a
-              href={`#${initial}`}
-              key={`link-to--${initial}`}
-              className={`${className} text-secondary`}
-            >
-              {initial.toUpperCase()}
-            </a>
-          );
-        })}
-      </nav>
-      <section style={sectionStyle}>
+      <InitialsNav existingInitials={existingInitials} />
+      <section className="grid grid-cols-[auto_1fr]">
         {(!existingInitials || existingInitials.length === 0) && (
           <p className="text-muted text-center">{t("noSongs")}</p>
         )}
@@ -78,59 +38,12 @@ export default async function SongList({ query = "" }: SongListProps) {
           const songs = songsByFirstLetter.get(letter);
           if (!songs) return null;
           return (
-            <Fragment key={`${letter}--section`}>
-              <span id={letter} className={initialsTitleClassName}>
-                {letter.toUpperCase()}
-              </span>
-              <div>
-                {songs.map((song) => {
-                  const lyrics = song.lyrics
-                    .split("\n")
-                    .map((line) => line.trim())
-                    .filter((line) => !!line);
-                  let firstLines = lyrics.slice(0, 2);
-                  if (
-                    query &&
-                    findKeyword(song.title, query) < 0 &&
-                    (!song.artist || findKeyword(song.artist, query) < 0) &&
-                    firstLines.every((line) => findKeyword(line, query) < 0)
-                  ) {
-                    firstLines = [lyrics[0]];
-                    const lineWithSearch = lyrics.find(
-                      (line) => findKeyword(line, query) >= 0
-                    );
-                    if (lineWithSearch) {
-                      firstLines.push("...");
-                      firstLines.push(lineWithSearch);
-                    }
-                  }
-
-                  return (
-                    <SongLink songSlug={song.slug} key={`song-${song.slug}`}>
-                      <Heading level={3}>
-                        <HighlightKeyword text={song.title} keyword={query} />
-                      </Heading>
-                      {song.artist && (
-                        <div className="flex text-sm items-center text-zinc-600 gap-1 mb-2">
-                          <HighlightKeyword
-                            text={song.artist}
-                            keyword={query}
-                          />
-                        </div>
-                      )}
-                      {firstLines.map((line, idx) => (
-                        <p
-                          className="text-sm text-primary text-zinc-400"
-                          key={`line-${idx}`}
-                        >
-                          <HighlightKeyword text={line} keyword={query} />
-                        </p>
-                      ))}
-                    </SongLink>
-                  );
-                })}
-              </div>
-            </Fragment>
+            <InitialAndSongs
+              songs={songs}
+              letter={letter}
+              query={query}
+              key={`${letter}--section`}
+            />
           );
         })}
       </section>
@@ -139,7 +52,47 @@ export default async function SongList({ query = "" }: SongListProps) {
 }
 
 export function SongListSkeleton() {
-  return <div>Loading...</div>;
+  const lineWidths = [
+    ["w-1/2", "w-1/3", "w-4/5", "w-3/4"],
+    ["w-1/4", "w-1/5", "w-3/4", "w-2/3"],
+    ["w-1/3", "w-1/4", "w-5/6", "w-1/2"],
+  ];
+
+  return (
+    <>
+      <InitialsNav existingInitials={[]} />
+      <section className="grid grid-cols-[auto_1fr]">
+        {new Array(3).fill(0).map((_, idx) => (
+          <Fragment key={`skeleton-${idx}`}>
+            <Skeleton className="col-span-2 md:col-span-1 my-4 mr-4 pt-2 bg-secondary/50 size-10 md:size-20" />
+            <div className="col-span-2 md:col-span-1">
+              {lineWidths.map((widths, idx) => (
+                <div
+                  className="flex flex-col items-start border-b border-zinc-100 py-4 sm:p-4 w-full sm:rounded-lg"
+                  key={`skeleton-${idx}`}
+                >
+                  <Skeleton
+                    className={clsx(widths[0], "h-6 bg-primary mb-1 sm:mb-2")}
+                  />
+                  <Skeleton
+                    className={clsx(widths[1], "h-4 bg-zinc-400 mb-2")}
+                  />
+                  <div className="flex flex-col gap-1 w-full">
+                    {widths.slice(2).map((width, idx) => (
+                      <Skeleton
+                        className={clsx("h-4 bg-zinc-200", width)}
+                        key={`line-${idx}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Fragment>
+        ))}
+      </section>
+    </>
+  );
 }
 
 type SongLinkProps = {
@@ -155,5 +108,34 @@ function SongLink({ songSlug, children }: SongLinkProps) {
     >
       {children}
     </Link>
+  );
+}
+
+function sortByTitle(songs: { title: string }[]) {
+  songs.sort((a, b) =>
+    a.title.toLocaleLowerCase().localeCompare(b.title.toLocaleLowerCase())
+  );
+}
+
+type InitialAndSongsProps = {
+  letter: string;
+  songs: ClientSong[];
+  query: string;
+};
+
+function InitialAndSongs({ letter, songs, query }: InitialAndSongsProps) {
+  return (
+    <Fragment key={`${letter}--section`}>
+      <BigLetter letter={letter} />
+      <div>
+        {songs.map((song) => {
+          return (
+            <SongLink songSlug={song.slug} key={`song-${song.slug}`}>
+              <SongListEntry song={song} query={query} />
+            </SongLink>
+          );
+        })}
+      </div>
+    </Fragment>
   );
 }

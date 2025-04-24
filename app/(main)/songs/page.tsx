@@ -1,4 +1,4 @@
-import Heading from "@/components/Heading";
+import Heading from "@/app/lib/components/Heading";
 import Main from "@/components/Main";
 import { Plus, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export default async function SongListPage(props: SongListPageProps) {
           <div className="mb-4">
             <SearchBar />
           </div>
-          <Suspense fallback={<SongListSkeleton />}>
+          <Suspense key={query} fallback={<SongListSkeleton />}>
             <SongList query={query} />
           </Suspense>
         </div>
@@ -41,13 +41,7 @@ export default async function SongListPage(props: SongListPageProps) {
 
       {/* Botão flutuante */}
       <div className="fixed bottom-24 right-4 sm:bottom-8 sm:right-8">
-        <Button
-          asChild
-          variant="secondary"
-          size="square"
-          rounded="full"
-          className="shadow-lg"
-        >
+        <Button asChild variant="secondary" className="shadow-lg rounded-full">
           <Link href="./songs/new" className="flex items-center gap-1 sm:pr-6">
             <Plus />
             <span className="hidden sm:inline">Nova música</span>

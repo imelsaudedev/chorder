@@ -1,8 +1,7 @@
-import { PrismaClient } from '@/generated/prisma'
-import { createServicesFromLocal, createSongsFromLocal } from './local-data';
-import { addNewServices, addNewSongs } from './legacy-data';
-
-const prisma = new PrismaClient()
+import { PrismaClient } from "@/generated/prisma";
+import { createServicesFromLocal, createSongsFromLocal } from "./local-data";
+import { addNewServices, addNewSongs } from "./legacy-data";
+import prisma from "../client";
 
 export async function main() {
   const songs = await createSongsFromLocal(prisma);
@@ -17,7 +16,7 @@ export async function main() {
   console.log(`Total songs: ${totalSongs._count}`);
   console.log(`Total services: ${totalServices._count}`);
 
-  console.log('Seeding completed.');
+  console.log("Seeding completed.");
 }
 
 main();

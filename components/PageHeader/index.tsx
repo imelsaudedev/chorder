@@ -1,5 +1,5 @@
-import BackLink from '@/components/BackLink';
-import Heading from '../Heading';
+import BackLink from "@/components/BackLink";
+import Heading from "../../app/lib/components/Heading";
 
 type PageHeaderProps = {
   title: string;
@@ -9,17 +9,29 @@ type PageHeaderProps = {
   backLinkText?: string;
 };
 
-const PageHeader = ({ title, subtitle, actions, backLinkHref, backLinkText }: PageHeaderProps) => {
+const PageHeader = ({
+  title,
+  subtitle,
+  actions,
+  backLinkHref,
+  backLinkText,
+}: PageHeaderProps) => {
   return (
     <div className="flex flex-col md:flex-row grow justify-between gap-4 p-4 sm:p-6 lg:p-8 bg-zinc-50 border-b border-zinc-100">
       <div className="flex flex-col">
-        {backLinkHref && backLinkText && <BackLink href={backLinkHref} text={backLinkText} />}
+        {backLinkHref && backLinkText && (
+          <BackLink href={backLinkHref} text={backLinkText} />
+        )}
         <Heading level={1}>{title}</Heading>
-        {subtitle && <div className="text-base sm:text-lg text-zinc-600">{subtitle}</div>}
+        {subtitle && (
+          <div className="text-base sm:text-lg text-zinc-600">{subtitle}</div>
+        )}
       </div>
 
       {/* Botões de Ação e Configuração */}
-      {actions && <div className="flex gap-2 items-center md:self-end">{actions}</div>}
+      {actions && (
+        <div className="flex gap-2 items-center md:self-end">{actions}</div>
+      )}
     </div>
   );
 };

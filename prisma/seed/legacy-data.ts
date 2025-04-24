@@ -1,9 +1,9 @@
-import axios from 'axios';
-import { getChords, getKeyFromChords, getLyrics } from '../../chopro/music';
-import moment from 'moment-timezone';
-import { PrismaClient, Song } from '@/generated/prisma';
-import { slugFor } from '../slug';
-import { SongWithArrangements } from '../models';
+import axios from "axios";
+import { getChords, getKeyFromChords, getLyrics } from "../../chopro/music";
+import moment from "moment-timezone";
+import { PrismaClient } from "@/generated/prisma";
+import { slugFor } from "../slug";
+import { SongWithArrangements } from "../models";
 
 type LegacySong = {
   id: number;
@@ -15,7 +15,7 @@ type LegacySongUnit = {
   type: string;
   content: string;
   order: number;
-}
+};
 
 type LegacyPlaylist = {
   id: number;
@@ -31,24 +31,24 @@ type LegacyPlaylistSong = {
 };
 
 const WORSHIP_LEADERS = [
-  'Tiago e Ângela',
-  'Ângela e Tiago',
-  'Ângela e Solange',
-  'Tiago',
-  'Ângela',
-  'Nogi',
-  'Hugo',
-  'Riva',
-  'Solange',
-  'Felipe',
-  'Deco',
-  'Camila',
-  'Okoshi',
-  'Ezequiel',
+  "Tiago e Ângela",
+  "Ângela e Tiago",
+  "Ângela e Solange",
+  "Tiago",
+  "Ângela",
+  "Nogi",
+  "Hugo",
+  "Riva",
+  "Solange",
+  "Felipe",
+  "Deco",
+  "Camila",
+  "Okoshi",
+  "Ezequiel",
 ];
 
 export async function addNewSongs(prisma: PrismaClient) {
-  const response = await axios.get('https://imelsaude.org.br/cifras/api/');
+  const response = await axios.get("https://imelsaude.org.br/cifras/api/");
   let allSongsData = (await response.data) as LegacySong[];
 
   const songsWithLegacyId = await prisma.song.findMany({
@@ -57,59 +57,65 @@ export async function addNewSongs(prisma: PrismaClient) {
   });
   const existingIds = songsWithLegacyId.map((song) => song.legacyId);
 
-  allSongsData = allSongsData.filter((song) => !existingIds.includes(song.id) && song.filename !== 'deletar');
-  console.log(`Adding ${allSongsData.length} new songs. ${existingIds.length} already exist.`);
+  allSongsData = allSongsData.filter(
+    (song) => !existingIds.includes(song.id) && song.filename !== "deletar"
+  );
+  console.log(
+    `Adding ${allSongsData.length} new songs. ${existingIds.length} already exist.`
+  );
 
   const songsWithSlug = await prisma.song.findMany({
     select: { slug: true },
   });
   const slugs = songsWithSlug.map((song) => song.slug);
 
-  await Promise.all(allSongsData.map(async (song) => {
-    const { title, artist, key, units, lyrics } = parseChordProData(song);
-    return prisma.song.create({
-      data: {
-        legacyId: song.id,
-        title,
-        slug: await slugFor(title, slugs),
-        artist,
-        lyrics,
-        isDeleted: false,
-        arrangements: {
-          create: [
-            {
-              key,
-              isDefault: true,
-              isDeleted: false,
-              isServiceArrangement: false,
-              units: {
-                createMany: {
-                  data: units.map((unit) => ({
-                    content: unit.content.trim(),
-                    type: unit.type as any,
-                    order: unit.order,
-                  })),
+  await Promise.all(
+    allSongsData.map(async (song) => {
+      const { title, artist, key, units, lyrics } = parseChordProData(song);
+      return prisma.song.create({
+        data: {
+          legacyId: song.id,
+          title,
+          slug: await slugFor(title, slugs),
+          artist,
+          lyrics,
+          isDeleted: false,
+          arrangements: {
+            create: [
+              {
+                key,
+                isDefault: true,
+                isDeleted: false,
+                isServiceArrangement: false,
+                units: {
+                  createMany: {
+                    data: units.map((unit) => ({
+                      content: unit.content.trim(),
+                      type: unit.type as any,
+                      order: unit.order,
+                    })),
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
-    });
-  }));
+      });
+    })
+  );
 }
 
 function parseChordProData(legacySong: LegacySong) {
   const chopro = legacySong.chopro;
-  const lines = chopro.split('\n');
+  const lines = chopro.split("\n");
 
-  let songTitle = legacySong.filename || '';
-  let songArtist = '';
+  let songTitle = legacySong.filename || "";
+  let songArtist = "";
   let songKey;
   let order = 1;
   let currentUnit = {
-    type: 'BLOCK',
-    content: '',
+    type: "BLOCK",
+    content: "",
     order,
   };
   let units: LegacySongUnit[] = [currentUnit];
@@ -119,80 +125,83 @@ function parseChordProData(legacySong: LegacySong) {
     if (tagValue) {
       const tag = tagValue[1].trim();
       const value = tagValue[2].trim();
-      if (['title', 't'].includes(tag)) {
+      if (["title", "t"].includes(tag)) {
         songTitle = value;
-      } else if (['Composer', 'composer', 'artist', 'a', 'st'].includes(tag)) {
+      } else if (["Composer", "composer", "artist", "a", "st"].includes(tag)) {
         songArtist = value;
-      } else if (['key', 'k'].includes(tag)) {
+      } else if (["key", "k"].includes(tag)) {
         songKey = value;
-      } else if (tag === 'sov') {
+      } else if (tag === "sov") {
         order++;
         currentUnit = {
-          type: 'VERSE',
+          type: "VERSE",
           content: value,
           order,
         };
         units.push(currentUnit);
       } else {
-        currentUnit.content += line + '\n';
+        currentUnit.content += line + "\n";
       }
     } else {
       const tagMatch = line.match(/\{(.*?)\}/);
       if (tagMatch) {
         const tag = tagMatch[1].trim();
-        if (['start_of_intro'].includes(tag)) {
+        if (["start_of_intro"].includes(tag)) {
           order++;
           currentUnit = {
-            type: 'INTRO',
-            content: '',
+            type: "INTRO",
+            content: "",
             order,
           };
           units.push(currentUnit);
-        } else if (['start_of_chorus', 'soc'].includes(tag)) {
+        } else if (["start_of_chorus", "soc"].includes(tag)) {
           order++;
           currentUnit = {
-            type: 'CHORUS',
-            content: '',
+            type: "CHORUS",
+            content: "",
             order,
           };
           units.push(currentUnit);
-        } else if (['start_of_verse', 'start_of_Verse', 'sov'].includes(tag)) {
+        } else if (["start_of_verse", "start_of_Verse", "sov"].includes(tag)) {
           order++;
           currentUnit = {
-            type: 'VERSE',
-            content: '',
+            type: "VERSE",
+            content: "",
             order,
           };
           units.push(currentUnit);
-        } else if (['start_of_exit', 'soe'].includes(tag)) {
+        } else if (["start_of_exit", "soe"].includes(tag)) {
           order++;
           currentUnit = {
-            type: 'ENDING',
-            content: '',
+            type: "ENDING",
+            content: "",
             order,
           };
           units.push(currentUnit);
-        } else if (['start_of_interlude'].includes(tag)) {
+        } else if (["start_of_interlude"].includes(tag)) {
           order++;
           currentUnit = {
-            type: 'INTERLUDE',
-            content: '',
+            type: "INTERLUDE",
+            content: "",
             order,
           };
           units.push(currentUnit);
-        } else if (['start_of_bridge', 'sob'].includes(tag)) {
+        } else if (["start_of_bridge", "sob"].includes(tag)) {
           order++;
           currentUnit = {
-            type: 'BRIDGE',
-            content: '',
+            type: "BRIDGE",
+            content: "",
             order,
           };
           units.push(currentUnit);
-        } else if (tag.startsWith('end_of_') || ['eoc', 'eov', 'eob', 'sot', 'eot'].includes(tag)) {
+        } else if (
+          tag.startsWith("end_of_") ||
+          ["eoc", "eov", "eob", "sot", "eot"].includes(tag)
+        ) {
           order++;
           currentUnit = {
-            type: 'BLOCK',
-            content: '',
+            type: "BLOCK",
+            content: "",
             order,
           };
           units.push(currentUnit);
@@ -202,13 +211,13 @@ function parseChordProData(legacySong: LegacySong) {
       } else if (line.trim().length === 0) {
         order++;
         currentUnit = {
-          type: 'BLOCK',
-          content: '',
+          type: "BLOCK",
+          content: "",
           order,
         };
         units.push(currentUnit);
       } else {
-        currentUnit.content += line + '\n';
+        currentUnit.content += line + "\n";
       }
     }
   }
@@ -216,7 +225,7 @@ function parseChordProData(legacySong: LegacySong) {
   const lyrics = units
     .map((unit) => unit.content)
     .map((chopro) => getLyrics(chopro))
-    .join('\n')
+    .join("\n")
     .trim();
 
   return {
@@ -232,26 +241,36 @@ function estimateKey(units: { content: string }[]) {
   const allChords = getChords(
     units
       .map((unit) => unit.content)
-      .join('\n')
+      .join("\n")
       .trim()
   );
-  return getKeyFromChords(allChords) || '';
+  return getKeyFromChords(allChords) || "";
 }
 
 export async function addNewServices(prisma: PrismaClient) {
-  const playlistResponse = await axios.get('https://imelsaude.org.br/cifras/api/playlist');
+  const playlistResponse = await axios.get(
+    "https://imelsaude.org.br/cifras/api/playlist"
+  );
   const legacyPlaylistsData = (await playlistResponse.data) as LegacyPlaylist[];
 
-  const playlistSongsResponse = await axios.get('https://imelsaude.org.br/cifras/api/playlist-song');
-  const legacyPlaylistSongsData = (await playlistSongsResponse.data) as LegacyPlaylistSong[];
-  const legacyPlaylistSongById = groupById(legacyPlaylistSongsData, (song) => song.id);
+  const playlistSongsResponse = await axios.get(
+    "https://imelsaude.org.br/cifras/api/playlist-song"
+  );
+  const legacyPlaylistSongsData =
+    (await playlistSongsResponse.data) as LegacyPlaylistSong[];
+  const legacyPlaylistSongById = groupById(
+    legacyPlaylistSongsData,
+    (song) => song.id
+  );
 
-  const songsByLegacyId = await prisma.song.findMany({
-    where: { legacyId: { not: null } },
-    include: { arrangements: { include: { units: true } } },
-  }).then((songs) => {
-    return groupById(songs, (song) => song.legacyId as number);
-  });
+  const songsByLegacyId = await prisma.song
+    .findMany({
+      where: { legacyId: { not: null } },
+      include: { arrangements: { include: { units: true } } },
+    })
+    .then((songs) => {
+      return groupById(songs, (song) => song.legacyId as number);
+    });
 
   const servicesWithSlug = await prisma.service.findMany({
     select: { slug: true },
@@ -262,13 +281,22 @@ export async function addNewServices(prisma: PrismaClient) {
   for (let legacyPlaylist of legacyPlaylistsData) {
     const date = extractDate(legacyPlaylist.name);
     if (!date) {
-      console.log(`Ignoring ${legacyPlaylist.name} because it has no valid date.`);
+      console.log(
+        `Ignoring ${legacyPlaylist.name} because it has no valid date.`
+      );
       continue;
     }
 
-    const units = await getUnits(prisma, legacyPlaylist.songs, legacyPlaylistSongById, songsByLegacyId);
+    const units = await getUnits(
+      prisma,
+      legacyPlaylist.songs,
+      legacyPlaylistSongById,
+      songsByLegacyId
+    );
     if (units.length === 0) {
-      console.log(`Ignoring ${legacyPlaylist.name} because it has no valid songs.`);
+      console.log(
+        `Ignoring ${legacyPlaylist.name} because it has no valid songs.`
+      );
       continue;
     }
 
@@ -292,14 +320,16 @@ export async function addNewServices(prisma: PrismaClient) {
   }
   playlists.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  const existingIds = await prisma.service.findMany({
-    where: {
-      legacyId: { not: null }
-    },
-    select: { legacyId: true },
-  }).then((services) => {
-    return services.map((service) => service.legacyId as number);
-  });
+  const existingIds = await prisma.service
+    .findMany({
+      where: {
+        legacyId: { not: null },
+      },
+      select: { legacyId: true },
+    })
+    .then((services) => {
+      return services.map((service) => service.legacyId as number);
+    });
 
   playlists = playlists.filter((service) => {
     if (existingIds.includes(service.legacyId)) {
@@ -308,16 +338,18 @@ export async function addNewServices(prisma: PrismaClient) {
     }
     return true;
   });
-  console.log(`Adding ${playlists.length} new services. ${existingIds.length} already exist.`);
+  console.log(
+    `Adding ${playlists.length} new services. ${existingIds.length} already exist.`
+  );
 
   if (playlists.length === 0) {
-    console.log('No playlists to add to database');
+    console.log("No playlists to add to database");
     return;
   }
 
   for (const playlist of playlists) {
     await prisma.service.create({
-      data: playlist
+      data: playlist,
     });
   }
   console.log(`Added ${playlists.length} new services from the legacy server.`);
@@ -325,21 +357,21 @@ export async function addNewServices(prisma: PrismaClient) {
 
 function extractDate(name: string) {
   name = name.trim();
-  if (name === 'DED 2020') {
+  if (name === "DED 2020") {
     return newDate(2020, 1, 21);
-  } else if (name === 'Natal 2022') {
+  } else if (name === "Natal 2022") {
     return newDate(2022, 11, 11);
-  } else if (name.startsWith('Retiro de')) {
-    if (name.endsWith('Deco')) {
+  } else if (name.startsWith("Retiro de")) {
+    if (name.endsWith("Deco")) {
       return newDate(2023, 3, 29);
-    } else if (name.endsWith('Okoshi')) {
+    } else if (name.endsWith("Okoshi")) {
       return newDate(2023, 3, 30);
-    } else if (name.endsWith('Camila')) {
+    } else if (name.endsWith("Camila")) {
       return newDate(2023, 4, 1);
     }
-  } else if (name === '2024 - EBF Crianças') {
+  } else if (name === "2024 - EBF Crianças") {
     return newDate(2024, 6, 5);
-  } else if (name.startsWith('EBF de Adolescentes 2024')) {
+  } else if (name.startsWith("EBF de Adolescentes 2024")) {
     return newDate(2024, 7, 13);
   }
 
@@ -392,25 +424,28 @@ function extractLeader(name: string) {
 function extractTitle(name: string, worshipLeader: string | null, date: Date) {
   const original = name;
   name = name
-    .replace(/\d+[-/. ]\d+[-/. ]\d+/, '')
-    .replace('(', '')
-    .replace(')', '')
-    .replace(/\s*-\s*/, '');
+    .replace(/\d+[-/. ]\d+[-/. ]\d+/, "")
+    .replace("(", "")
+    .replace(")", "")
+    .replace(/\s*-\s*/, "");
   if (worshipLeader) {
-    name = name.replace(new RegExp(worshipLeader, 'i'), '');
+    name = name.replace(new RegExp(worshipLeader, "i"), "");
   }
   name = name.trim();
-  if (!name || ['4ºDom', 'Liturgia', 'Louvor', 'Sequência Músicas'].includes(name)) {
+  if (
+    !name ||
+    ["4ºDom", "Liturgia", "Louvor", "Sequência Músicas"].includes(name)
+  ) {
     return null;
   }
-  if (name === '2024EBF Crianças') {
-    return 'EBF Crianças 2024';
-  } else if (name.toLowerCase() === 'retiro de jovens') {
-    return 'Retiro de Jovens 2023';
-  } else if (original.trim() === '04/12/2022 - Okoshi (Natal)') {
-    return 'Natal Crianças 2022';
-  } else if (original.trim() === '12/12/21 (Tiago) - Natal') {
-    return 'Natal 2021';
+  if (name === "2024EBF Crianças") {
+    return "EBF Crianças 2024";
+  } else if (name.toLowerCase() === "retiro de jovens") {
+    return "Retiro de Jovens 2023";
+  } else if (original.trim() === "04/12/2022 - Okoshi (Natal)") {
+    return "Natal Crianças 2022";
+  } else if (original.trim() === "12/12/21 (Tiago) - Natal") {
+    return "Natal 2021";
   }
   return name;
 }
@@ -432,61 +467,69 @@ async function getUnits(
   legacyPlaylistSongById: Record<number, LegacyPlaylistSong>,
   songsByLegacyId: Record<number, SongWithArrangements>
 ) {
-  return (await Promise.all(legacyPlaylistSongURLs
-    .map(async (url, idx) => {
-      const urlParts = url.split('/');
-      const id = parseInt(urlParts[urlParts.length - 2]);
-      const legacyPlaylistSong = legacyPlaylistSongById[id];
-      if (!legacyPlaylistSong) {
-        console.error(`Song not found (${id}): ${url}`);
-        return null;
-      }
-      const legacyUrlParts = legacyPlaylistSong.song.split('/');
-      const songId = parseInt(legacyUrlParts[legacyUrlParts.length - 2]);
-      const song = songsByLegacyId[songId];
-      if (!song) {
-        console.error(`Song not found (${songId}): ${legacyPlaylistSong.song}`);
-        return null;
-      }
-      const defaultArrangement = song.arrangements.find((arrangement) => arrangement.isDefault);
-      if (!defaultArrangement) {
-        console.error(`Song has no default arrangement: ${song.title}`);
-        return null;
-      }
-      if (defaultArrangement.units.length === 0) {
-        console.error(`Song has no units: ${song.title}`);
-        return null;
-      }
+  return (
+    await Promise.all(
+      legacyPlaylistSongURLs.map(async (url, idx) => {
+        const urlParts = url.split("/");
+        const id = parseInt(urlParts[urlParts.length - 2]);
+        const legacyPlaylistSong = legacyPlaylistSongById[id];
+        if (!legacyPlaylistSong) {
+          console.error(`Song not found (${id}): ${url}`);
+          return null;
+        }
+        const legacyUrlParts = legacyPlaylistSong.song.split("/");
+        const songId = parseInt(legacyUrlParts[legacyUrlParts.length - 2]);
+        const song = songsByLegacyId[songId];
+        if (!song) {
+          console.error(
+            `Song not found (${songId}): ${legacyPlaylistSong.song}`
+          );
+          return null;
+        }
+        const defaultArrangement = song.arrangements.find(
+          (arrangement) => arrangement.isDefault
+        );
+        if (!defaultArrangement) {
+          console.error(`Song has no default arrangement: ${song.title}`);
+          return null;
+        }
+        if (defaultArrangement.units.length === 0) {
+          console.error(`Song has no units: ${song.title}`);
+          return null;
+        }
 
-      const arrangement = await prisma.songArrangement.create({
-        data: {
-          key: defaultArrangement.key,
-          songId: song.id,
-          isDefault: false,
-          isDeleted: false,
-          isServiceArrangement: true,
-          units: {
-            createMany: {
-              data: defaultArrangement.units.map((unit) => ({
-                content: unit.content.trim(),
-                type: unit.type as any,
-                order: unit.order,
-              })),
+        const arrangement = await prisma.songArrangement.create({
+          data: {
+            key: defaultArrangement.key,
+            songId: song.id,
+            isDefault: false,
+            isDeleted: false,
+            isServiceArrangement: true,
+            units: {
+              createMany: {
+                data: defaultArrangement.units.map((unit) => ({
+                  content: unit.content.trim(),
+                  type: unit.type as any,
+                  order: unit.order,
+                })),
+              },
             },
           },
-        },
-      })
+        });
 
-      return {
-        type: 'SONG' as const,
-        semitoneTranspose: legacyPlaylistSong.transpose,
-        order: idx + 1,
-        arrangementId: arrangement.id,
-      };
-    }))
+        return {
+          type: "SONG" as const,
+          semitoneTranspose: legacyPlaylistSong.transpose,
+          order: idx + 1,
+          arrangementId: arrangement.id,
+        };
+      })
+    )
   ).filter((unit) => unit !== null);
 }
 
 function newDate(year: number, month: number, day: number) {
-  return moment.tz(`${year}-${month}-${day} 10:00`, 'America/Sao_Paulo').toDate();
+  return moment
+    .tz(`${year}-${month}-${day} 10:00`, "America/Sao_Paulo")
+    .toDate();
 }
