@@ -1,9 +1,9 @@
-import Heading from "@/app/lib/components/Heading";
+import Heading from "@components/Heading";
 import { ServiceSongUnit } from "@/models/service-unit";
 import ArrangementView from "../ArrangementViewPage/ArrangementView";
 import { getSongUnitMap } from "@/models/song-arrangement";
 import KeyButtonSet from "@/components/KeyButtonSet";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import { useState } from "react";
 import { Mode } from "@/components/ModeButtonSet";
 import { NotebookPen, MoreVertical } from "lucide-react";
@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+} from "@ui/dropdown-menu";
 
 type ServiceSongUnitViewProps = {
   unit: ServiceSongUnit;

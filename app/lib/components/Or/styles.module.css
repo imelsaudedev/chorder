@@ -1,0 +1,24 @@
+.orContainer {
+  --or-color: #33333377;
+  display: flex;
+}
+
+.orContainer::before,
+.orContainer::after {
+  content: "";
+  flex-grow: 1;
+  background: linear-gradient(
+    to bottom,
+    transparent 48%,
+    var(--or-color) 48%,
+    var(--or-color) 52%,
+    transparent 52%
+  );
+}
+
+.or {
+  margin-inline: 1rem;
+  font-weight: bold;
+  color: var(--or-color);
+  text-transform: uppercase;
+}

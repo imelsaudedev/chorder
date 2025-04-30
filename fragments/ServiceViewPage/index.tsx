@@ -1,43 +1,43 @@
-import PageHeader from '@/components/PageHeader';
-import { deleteService } from '@/app/(main)/services/[service]/actions';
-import AdjustmentIcon from '@/components/icons/AdjustmentIcon';
-import Main from '@/components/Main';
-import { Mode } from '@/components/ModeButtonSet';
-import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { getHumanReadableTitle, Service } from '@/models/service';
-import { ServiceSongUnit } from '@/models/service-unit';
-import { CollapsibleContent } from '@radix-ui/react-collapsible';
-import { useTranslations } from 'next-intl';
-import { Fragment, useState, useRef } from 'react';
-import ServiceConfig from './ServiceConfig';
-import ServiceSongUnitView from './ServiceSongUnitView';
-import ServiceActionMenu from './ServiceActionMenu';
-import { Calendar, MicVocal, ArrowLeft } from 'lucide-react';
-import FullScreenToggle from '@/components/FullScreenToggle';
-import Link from 'next/link';
+import PageHeader from "@/components/PageHeader";
+import { deleteService } from "@/app/(main)/services/[service]/actions";
+import AdjustmentIcon from "@/components/icons/AdjustmentIcon";
+import Main from "@/components/Main";
+import { Mode } from "@/components/ModeButtonSet";
+import { Button } from "@ui/button";
+import { Collapsible, CollapsibleTrigger } from "@ui/collapsible";
+import { getHumanReadableTitle, Service } from "@/models/service";
+import { ServiceSongUnit } from "@/models/service-unit";
+import { CollapsibleContent } from "@radix-ui/react-collapsible";
+import { useTranslations } from "next-intl";
+import { Fragment, useState, useRef } from "react";
+import ServiceConfig from "./ServiceConfig";
+import ServiceSongUnitView from "./ServiceSongUnitView";
+import ServiceActionMenu from "./ServiceActionMenu";
+import { Calendar, MicVocal, ArrowLeft } from "lucide-react";
+import FullScreenToggle from "@/components/FullScreenToggle";
+import Link from "next/link";
 
 type ServiceViewPageProps = {
   service: Service;
 };
 
 export default function ServiceViewPage({ service }: ServiceViewPageProps) {
-  const t = useTranslations('Messages');
+  const t = useTranslations("Messages");
   const [currentIndex, setCurrentIndex] = useState(0);
   const unitRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [columns, setColumns] = useState(0);
   const [fontSize, setFontSize] = useState(16);
-  const [mode, setMode] = useState('chords' as Mode);
-  const [density, setDensity] = useState<'compact' | 'normal'>('normal');
+  const [mode, setMode] = useState("chords" as Mode);
+  const [density, setDensity] = useState<"compact" | "normal">("normal");
 
   const units = service.units;
   const deleteCurrentService = deleteService.bind(null, service);
 
-  const formattedDate = new Intl.DateTimeFormat('pt-BR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric',
+  const formattedDate = new Intl.DateTimeFormat("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
   })
     .format(service.date)
     .replace(/^\w/, (c) => c.toUpperCase())
@@ -47,7 +47,10 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
     if (currentIndex > 0) {
       const newIndex = currentIndex - 1;
       setCurrentIndex(newIndex);
-      unitRefs.current[newIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      unitRefs.current[newIndex]?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 
@@ -55,7 +58,10 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
     if (currentIndex < units.length - 1) {
       const newIndex = currentIndex + 1;
       setCurrentIndex(newIndex);
-      unitRefs.current[newIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      unitRefs.current[newIndex]?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 
@@ -80,7 +86,7 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
       <PageHeader
         backLinkHref="/services"
         backLinkText="Liturgias"
-        title={getHumanReadableTitle(service, t('service'))}
+        title={getHumanReadableTitle(service, t("service"))}
         subtitle={subtitle}
         actions={
           <div className="flex gap-2 items-center md:self-end">
@@ -89,7 +95,7 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="icon">
                 <AdjustmentIcon />
-                <span className="sr-only">{t('toggleConfig')}</span>
+                <span className="sr-only">{t("toggleConfig")}</span>
               </Button>
             </CollapsibleTrigger>
           </div>
@@ -111,12 +117,14 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
 
       <Main density={density} className="py-4 sm:py-6 lg:py-8">
         <section
-          className={`flex flex-col mx-auto ${density === 'compact' ? 'gap-2 text-sm' : 'gap-8 text-base'}`}
+          className={`flex flex-col mx-auto ${
+            density === "compact" ? "gap-2 text-sm" : "gap-8 text-base"
+          }`}
           style={{ fontSize: `${fontSize}px` }}
         >
           {units.map((unit, index) => (
             <Fragment key={index}>
-              {unit?.type === 'SONG' && (
+              {unit?.type === "SONG" && (
                 <div ref={(el) => (unitRefs.current[index] = el)}>
                   <ServiceSongUnitView
                     unit={unit as ServiceSongUnit}

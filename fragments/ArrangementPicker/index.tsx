@@ -1,9 +1,9 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Song } from '@/models/song';
-import { useTranslations } from 'next-intl';
-import ArrangementView from '../ArrangementViewPage/ArrangementView';
-import { getSongUnitMap, SongArrangement } from '@/models/song-arrangement';
-import { useCallback, useMemo } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@ui/tabs";
+import { Song } from "@/models/song";
+import { useTranslations } from "next-intl";
+import ArrangementView from "../ArrangementViewPage/ArrangementView";
+import { getSongUnitMap, SongArrangement } from "@/models/song-arrangement";
+import { useCallback, useMemo } from "react";
 
 type ArrangementPickerProps = {
   song: Song;
@@ -16,7 +16,7 @@ export default function ArrangementPicker({
   setSelectedArrangementId,
   defaultArrangementId,
 }: ArrangementPickerProps) {
-  const t = useTranslations('Messages');
+  const t = useTranslations("Messages");
 
   const handleValueChange = useCallback(
     (strValue: string) => {
@@ -27,11 +27,15 @@ export default function ArrangementPicker({
   );
 
   return (
-    <Tabs defaultValue={`${defaultArrangementId}`} className="w-[400px]" onValueChange={handleValueChange}>
+    <Tabs
+      defaultValue={`${defaultArrangementId}`}
+      className="w-[400px]"
+      onValueChange={handleValueChange}
+    >
       <TabsList>
         {song.arrangements.map((arrangement, index) => (
           <TabsTrigger key={`tab-trigger--${index}`} value={`${index}`}>
-            {arrangement.name || `${t('arrangement')} ${index + 1}`}
+            {arrangement.name || `${t("arrangement")} ${index + 1}`}
           </TabsTrigger>
         ))}
       </TabsList>
@@ -49,9 +53,15 @@ function SimpleArrangementView({
   density,
 }: {
   arrangement: SongArrangement;
-  density: 'compact' | 'normal';
+  density: "compact" | "normal";
 }) {
   const songUnitMap = useMemo(() => getSongUnitMap(arrangement), [arrangement]);
 
-  return <ArrangementView songUnitMap={songUnitMap} songKey={arrangement.key} density={density} />;
+  return (
+    <ArrangementView
+      songUnitMap={songUnitMap}
+      songKey={arrangement.key}
+      density={density}
+    />
+  );
 }

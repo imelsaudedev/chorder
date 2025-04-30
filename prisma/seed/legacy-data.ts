@@ -2,8 +2,8 @@ import axios from "axios";
 import { getChords, getKeyFromChords, getLyrics } from "../../chopro/music";
 import moment from "moment-timezone";
 import { PrismaClient } from "@/generated/prisma";
-import { slugFor } from "../slug";
 import { SongWithArrangements } from "../models";
+import { slugFor } from "../data";
 
 type LegacySong = {
   id: number;

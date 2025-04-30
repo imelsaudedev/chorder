@@ -1,12 +1,19 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { Drawer, DrawerContent, DrawerTrigger } from '../ui/drawer';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ChevronsUpDown } from 'lucide-react';
+import { Button } from "@ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@ui/popover";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronsUpDown } from "lucide-react";
 
 type ComboBoxItem = {
   label: string;
@@ -36,7 +43,7 @@ export function ComboBoxResponsive({
   hideSearch,
 }: ComboBoxResponsiveProps) {
   const [open, setOpen] = useState(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   const [selectedItem, setSelectedItem] = useState<string>(value);
   const selectedLabel = useMemo(
     () => options.find((option) => option.value === selectedItem)?.label,
@@ -60,7 +67,9 @@ export function ComboBoxResponsive({
     }
   }, [value, selectedItem]);
 
-  const buttonClassName = ['min-w-[150px]', 'justify-between', className].filter(Boolean).join(' ');
+  const buttonClassName = ["min-w-[150px]", "justify-between", className]
+    .filter(Boolean)
+    .join(" ");
 
   if (isDesktop) {
     return (
@@ -125,7 +134,10 @@ function ItemList({
   hideSearch?: boolean;
 }) {
   const filteredOptions = useMemo(
-    () => options.filter((option) => !hideCurrentValue || option.value !== selectedValue),
+    () =>
+      options.filter(
+        (option) => !hideCurrentValue || option.value !== selectedValue
+      ),
     [hideCurrentValue, options, selectedValue]
   );
   return (

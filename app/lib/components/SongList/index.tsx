@@ -1,26 +1,37 @@
-import { groupSongsByFirstLetter } from "@/models/song";
-import { retrieveSongs } from "@/prisma/data";
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useFetchSongs } from "@/app/api/api-client";
+import SongListEntry from "@components/SongListEntry";
+import { Skeleton } from "@ui/skeleton";
+import { ClientSong } from "@/prisma/models";
+import clsx from "clsx";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Fragment, ReactNode } from "react";
-import InitialsNav from "./InitialsNav";
 import BigLetter from "./BigLetter";
-import SongListEntry from "@/app/lib/components/SongListEntry";
-import { ClientSong } from "@/prisma/models";
-import { Skeleton } from "@/components/ui/skeleton";
-import clsx from "clsx";
+import InitialsNav from "./InitialsNav";
 
 type SongListProps = {
   query?: string;
+  initialsInSeparateRow?: boolean;
+  onSelected?: (s: ClientSong) => void;
 };
 
-export default async function SongList({ query = "" }: SongListProps) {
-  const songs = await retrieveSongs({
+export default function SongList({
+  query = "",
+  initialsInSeparateRow = false,
+  onSelected,
+}: SongListProps) {
+  const { songs, isLoading } = useFetchSongs({
     query,
     limitLines: 3,
     forceIncludeFirstLine: true,
   });
-  const t = await getTranslations("SongForm");
+  const t = useTranslations("SongForm");
+
+  if (isLoading) {
+    return <SongListSkeleton />;
+  }
 
   const songsByFirstLetter = groupSongsByFirstLetter(songs);
   songsByFirstLetter.forEach(sortByTitle);
@@ -30,7 +41,11 @@ export default async function SongList({ query = "" }: SongListProps) {
   return (
     <>
       <InitialsNav existingInitials={existingInitials} />
-      <section className="grid grid-cols-[auto_1fr]">
+      <section
+        className={clsx({
+          "grid grid-cols-[auto_1fr]": !initialsInSeparateRow,
+        })}
+      >
         {(!existingInitials || existingInitials.length === 0) && (
           <p className="text-muted text-center">{t("noSongs")}</p>
         )}
@@ -42,6 +57,8 @@ export default async function SongList({ query = "" }: SongListProps) {
               songs={songs}
               letter={letter}
               query={query}
+              onSelected={onSelected}
+              initialsInSeparateRow={initialsInSeparateRow}
               key={`${letter}--section`}
             />
           );
@@ -111,6 +128,26 @@ function SongLink({ songSlug, children }: SongLinkProps) {
   );
 }
 
+type SongButtonProps = {
+  song: ClientSong;
+  onSelected: (s: ClientSong) => void;
+  children: ReactNode;
+};
+function SongButton({ song, onSelected, children }: SongButtonProps) {
+  const handleClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    onSelected(song);
+  };
+  return (
+    <button
+      className="flex flex-col items-start text-left pt-4 pb-4 border-b border-zinc-200 w-full"
+      onClick={handleClick}
+    >
+      {children}
+    </button>
+  );
+}
+
 function sortByTitle(songs: { title: string }[]) {
   songs.sort((a, b) =>
     a.title.toLocaleLowerCase().localeCompare(b.title.toLocaleLowerCase())
@@ -120,22 +157,63 @@ function sortByTitle(songs: { title: string }[]) {
 type InitialAndSongsProps = {
   letter: string;
   songs: ClientSong[];
+  onSelected?: (s: ClientSong) => void;
   query: string;
+  initialsInSeparateRow: boolean;
 };
 
-function InitialAndSongs({ letter, songs, query }: InitialAndSongsProps) {
+function InitialAndSongs({
+  letter,
+  songs,
+  onSelected,
+  query,
+  initialsInSeparateRow,
+}: InitialAndSongsProps) {
   return (
     <Fragment key={`${letter}--section`}>
-      <BigLetter letter={letter} />
+      <BigLetter letter={letter} veryBig={!initialsInSeparateRow} />
       <div>
         {songs.map((song) => {
           return (
-            <SongLink songSlug={song.slug} key={`song-${song.slug}`}>
-              <SongListEntry song={song} query={query} />
-            </SongLink>
+            <Fragment key={`song-${song.slug}`}>
+              {!onSelected && (
+                <SongLink songSlug={song.slug}>
+                  <SongListEntry song={song} query={query} />
+                </SongLink>
+              )}
+              {!!onSelected && (
+                <SongButton song={song} onSelected={onSelected}>
+                  <SongListEntry song={song} query={query} />
+                </SongButton>
+              )}
+            </Fragment>
           );
         })}
       </div>
     </Fragment>
   );
+}
+
+function groupSongsByFirstLetter(
+  songs: ClientSong[]
+): Map<string, ClientSong[]> {
+  const byFirstLetter = new Map<string, ClientSong[]>();
+
+  songs.forEach((song) => {
+    const firstLetter = song.title
+      .trim()
+      .charAt(0)
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/\p{Diacritic}/gu, "");
+    let letterGroup = byFirstLetter.get(firstLetter);
+    if (!letterGroup) {
+      letterGroup = [];
+      byFirstLetter.set(firstLetter, letterGroup);
+    }
+
+    letterGroup.push(song);
+  });
+
+  return byFirstLetter;
 }

@@ -1,17 +1,20 @@
-import EditHeader from '@/components/EditHeader';
-import { MoveArrangementAction, PostSongAction } from '@/app/(main)/songs/[song]/actions';
-import SaveButtonSet from '@/components/SaveButtonSet';
-import { Form } from '@/components/ui/form';
-import { Separator } from '@/components/ui/separator';
-import { useArrangementForm } from '@/forms/ArrangementForm/useArrangementForm';
-import { NewSong } from '@/models/song';
-import { useCallback } from 'react';
-import { useFieldArray, useFormState } from 'react-hook-form';
-import InfoForm from './InfoForm';
-import { ArrangementFormSchema } from './schema';
-import SongUnitListForm from './SongUnitListForm';
-import useArrangementFormFields from './useArrangementFormFields';
-import ArrangementInfoForm from './ArrangementInfoForm';
+import EditHeader from "@/components/EditHeader";
+import {
+  MoveArrangementAction,
+  PostSongAction,
+} from "@/app/(main)/songs/[song]/actions";
+import SaveButtonSet from "@/components/SaveButtonSet";
+import { Form } from "@ui/form";
+import { Separator } from "@ui/separator";
+import { useArrangementForm } from "@/forms/ArrangementForm/useArrangementForm";
+import { NewSong } from "@/models/song";
+import { useCallback } from "react";
+import { useFieldArray, useFormState } from "react-hook-form";
+import InfoForm from "./InfoForm";
+import { ArrangementFormSchema } from "./schema";
+import SongUnitListForm from "./SongUnitListForm";
+import useArrangementFormFields from "./useArrangementFormFields";
+import ArrangementInfoForm from "./ArrangementInfoForm";
 
 type ArrangementFormPageProps = {
   song: NewSong;
@@ -19,7 +22,11 @@ type ArrangementFormPageProps = {
   moveArrangement: MoveArrangementAction;
 };
 
-export default function ArrangementForm({ song, postSong, moveArrangement }: ArrangementFormPageProps) {
+export default function ArrangementForm({
+  song,
+  postSong,
+  moveArrangement,
+}: ArrangementFormPageProps) {
   const arrangement = song.arrangement;
 
   const form = useArrangementForm(song);
@@ -31,7 +38,7 @@ export default function ArrangementForm({ song, postSong, moveArrangement }: Arr
     update: updateSongUnit,
   } = useFieldArray({
     control: form.control,
-    name: 'units',
+    name: "units",
   });
   const {
     fields: songMap,
@@ -40,10 +47,13 @@ export default function ArrangementForm({ song, postSong, moveArrangement }: Arr
     swap: swapSongMapElements,
   } = useFieldArray({
     control: form.control,
-    name: 'songMap',
+    name: "songMap",
   });
-  const lastUnitId = form.getValues('lastUnitId');
-  const setLastUnitId = useCallback((newLastUnitId: number) => form.setValue('lastUnitId', newLastUnitId), [form]);
+  const lastUnitId = form.getValues("lastUnitId");
+  const setLastUnitId = useCallback(
+    (newLastUnitId: number) => form.setValue("lastUnitId", newLastUnitId),
+    [form]
+  );
   const arrangementFormFields = useArrangementFormFields(
     units,
     appendSongUnit,
@@ -57,7 +67,15 @@ export default function ArrangementForm({ song, postSong, moveArrangement }: Arr
     setLastUnitId
   );
 
-  async function onSubmit({ title, artist, key, arrangementName, songMap, units, lastUnitId }: ArrangementFormSchema) {
+  async function onSubmit({
+    title,
+    artist,
+    key,
+    arrangementName,
+    songMap,
+    units,
+    lastUnitId,
+  }: ArrangementFormSchema) {
     song.title = title;
     song.artist = artist || null;
     if (key) {
@@ -74,11 +92,20 @@ export default function ArrangementForm({ song, postSong, moveArrangement }: Arr
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <EditHeader
-          title={arrangement.isNew ? 'Nova música' : 'Editar música'}
-          actions={<SaveButtonSet canCancel={!arrangement.isNew} enabled={isDirty && isValid} />}
+          title={arrangement.isNew ? "Nova música" : "Editar música"}
+          actions={
+            <SaveButtonSet
+              canCancel={!arrangement.isNew}
+              enabled={isDirty && isValid}
+            />
+          }
         />
         <InfoForm form={form} />
-        <ArrangementInfoForm song={song} form={form} moveArrangement={moveArrangement} />
+        <ArrangementInfoForm
+          song={song}
+          form={form}
+          moveArrangement={moveArrangement}
+        />
         <SongUnitListForm arrangementFormFields={arrangementFormFields} />
       </form>
     </Form>

@@ -4,12 +4,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@ui/form";
 import { NewSong, RequiredArrangement, SongWith } from "@/models/song";
 import { useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ArrangementFormSchema } from "./schema";
-import { Input } from "@/components/ui/input";
+import { Input } from "@ui/input";
 import { useTranslations } from "next-intl";
 import MoveArrangementButton from "./MoveArrangementButton";
 import { RequiredIsNew, SongArrangementWith } from "@/models/song-arrangement";
@@ -21,11 +21,11 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import { useRouter } from "next/navigation";
-import Heading from "@/app/lib/components/Heading";
+import Heading from "@components/Heading";
 
 type ArrangementInfoFormProps = {
   song: NewSong;

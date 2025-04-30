@@ -1,12 +1,11 @@
-import Heading from "@/app/lib/components/Heading";
+import Heading from "@components/Heading";
+import SongList from "@components/SongList";
 import Main from "@/components/Main";
-import { Plus, Music } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
-import SongList, { SongListSkeleton } from "./SongList";
+import { Button } from "@ui/button";
+import { Music, Plus } from "lucide-react";
+import Link from "next/link";
 import SearchBar from "./SearchBar";
-import { Suspense } from "react";
 
 type SongListPageProps = {
   searchParams?: Promise<{
@@ -33,9 +32,7 @@ export default async function SongListPage(props: SongListPageProps) {
           <div className="mb-4">
             <SearchBar />
           </div>
-          <Suspense key={query} fallback={<SongListSkeleton />}>
-            <SongList query={query} />
-          </Suspense>
+          <SongList query={query} />
         </div>
       </Main>
 

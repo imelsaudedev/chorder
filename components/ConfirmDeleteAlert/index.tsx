@@ -6,10 +6,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useTranslations } from 'next-intl';
-import { useCallback } from 'react';
-import { Button } from '../ui/button';
+} from "@ui/alert-dialog";
+import { useTranslations } from "next-intl";
+import { useCallback } from "react";
+import { Button } from "../ui/button";
 
 type ConfirmDeleteAlertProps = {
   alertTitle: string;
@@ -17,8 +17,12 @@ type ConfirmDeleteAlertProps = {
   onDelete: () => void;
 };
 
-export default function ConfirmDeleteAlert({ alertTitle, alertDescription, onDelete }: ConfirmDeleteAlertProps) {
-  const t = useTranslations('Messages');
+export default function ConfirmDeleteAlert({
+  alertTitle,
+  alertDescription,
+  onDelete,
+}: ConfirmDeleteAlertProps) {
+  const t = useTranslations("Messages");
 
   const handleDelete = useCallback(() => {
     onDelete();
@@ -31,10 +35,10 @@ export default function ConfirmDeleteAlert({ alertTitle, alertDescription, onDel
         <AlertDialogDescription>{alertDescription}</AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
         <AlertDialogAction asChild>
           <Button variant="destructive" onClick={handleDelete}>
-            <span>{t('delete')}</span>
+            <span>{t("delete")}</span>
           </Button>
         </AlertDialogAction>
       </AlertDialogFooter>

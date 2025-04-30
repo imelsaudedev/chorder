@@ -1,6 +1,6 @@
 "use client";
 
-import Heading from "@/app/lib/components/Heading";
+import Heading from "@components/Heading";
 import { getHumanReadableTitle, Service } from "@/models/service";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";

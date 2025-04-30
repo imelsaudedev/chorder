@@ -1,13 +1,16 @@
-import { useState } from 'react';
-import { Minimize, Maximize, ChevronUp, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { Minimize, Maximize, ChevronUp, ChevronDown } from "lucide-react";
+import { Button } from "@ui/button";
 
 type FullscreenToggleProps = {
   onPrevious: () => void;
   onNext: () => void;
 };
 
-export default function FullscreenToggle({ onPrevious, onNext }: FullscreenToggleProps) {
+export default function FullscreenToggle({
+  onPrevious,
+  onNext,
+}: FullscreenToggleProps) {
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const toggleFullScreen = () => {
@@ -36,7 +39,13 @@ export default function FullscreenToggle({ onPrevious, onNext }: FullscreenToggl
           </Button>
         </div>
       )}
-      <Button circle variant="secondary" size="square" rounded="full" onClick={toggleFullScreen}>
+      <Button
+        circle
+        variant="secondary"
+        size="square"
+        rounded="full"
+        onClick={toggleFullScreen}
+      >
         {isFullScreen ? <Minimize size={24} /> : <Maximize size={24} />}
       </Button>
     </div>

@@ -1,26 +1,41 @@
-import { Button } from '@/components/ui/button';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { fetchSong, fetchSongs } from '@/lib/apiClient';
-import { RequiredArrangement, Song, SongWith, WithoutArrangements } from '@/models/song';
-import { useCallback, useEffect, useState } from 'react';
-import SongPicker from '../../fragments/SongPicker';
-import { ServiceFormFields } from './useServiceFormFields';
-import { useTranslations } from 'next-intl';
-import ArrangementPicker from '@/fragments/ArrangementPicker';
+import { Button } from "@ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@ui/drawer";
+import { fetchSong, fetchSongs } from "@/lib/apiClient";
+import {
+  RequiredArrangement,
+  Song,
+  SongWith,
+  WithoutArrangements,
+} from "@/models/song";
+import { useCallback, useEffect, useState } from "react";
+import SongPicker from "../../fragments/SongPicker";
+import { ServiceFormFields } from "./useServiceFormFields";
+import { useTranslations } from "next-intl";
+import ArrangementPicker from "@/fragments/ArrangementPicker";
 
 type AddUnitFormProps = {
   serviceFormFields: ServiceFormFields;
 };
 
 export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
-  const t = useTranslations('ServiceForm');
+  const t = useTranslations("ServiceForm");
   const { onCreateUnit } = serviceFormFields;
   const [song, setSong] = useState<SongWith<RequiredArrangement> | null>(null);
-  const [selectedArrangementId, setSelectedArrangementId] = useState<number | null>(null);
+  const [selectedArrangementId, setSelectedArrangementId] = useState<
+    number | null
+  >(null);
 
   const [songs, setSongs] = useState<WithoutArrangements<Song>[]>([]);
   useEffect(() => {
-    fetchSongs({ excludeArrangements: true }).then(setSongs).catch(console.error);
+    fetchSongs({ excludeArrangements: true })
+      .then(setSongs)
+      .catch(console.error);
   }, []);
 
   const [songPopoverOpen, setSongPopoverOpen] = useState<boolean>(false);
@@ -35,12 +50,12 @@ export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
   const handleAddSongUnit = useCallback(() => {
     const arrangement = song!.arrangements[selectedArrangementId!];
     onCreateUnit({
-      type: 'SONG',
+      type: "SONG",
       slug: song!.slug!,
       title: song!.title,
-      artist: song!.artist || '',
+      artist: song!.artist || "",
       currentArrangementId: selectedArrangementId!,
-      baseKey: arrangement.key || 'C',
+      baseKey: arrangement.key || "C",
       semitoneTranspose: arrangement.semitoneTranspose || 0,
       lastUnitId: arrangement.lastUnitId,
       songMap: arrangement.songMap.map((internalId) => ({
@@ -57,17 +72,19 @@ export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
   }, []);
 
   return (
-    <div className={`rounded-lg break-inside-avoid p-4 mb-2 border border-zinc-200 border-dashed bg-zinc-100`}>
+    <div
+      className={`rounded-lg break-inside-avoid p-4 mb-2 border border-zinc-200 border-dashed bg-zinc-100`}
+    >
       <div className="group flex items-center gap-2 w-full cursor-pointer">
         <Drawer open={songPopoverOpen} onOpenChange={handlePopoverOpen}>
           <DrawerTrigger asChild>
-            <Button variant="outline">{t('newSongUnit')}</Button>
+            <Button variant="outline">{t("newSongUnit")}</Button>
           </DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
               <DrawerTitle className="flex justify-between items-center">
-                <span>{song ? t('pickArrangement') : t('pickSong')}</span>
-                <Button onClick={handleAddSongUnit}>{t('add')}</Button>
+                <span>{song ? t("pickArrangement") : t("pickSong")}</span>
+                <Button onClick={handleAddSongUnit}>{t("add")}</Button>
               </DrawerTitle>
             </DrawerHeader>
             <div className="max-h-[80vh] overflow-auto p-4">

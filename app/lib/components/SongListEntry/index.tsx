@@ -1,7 +1,5 @@
-import Heading from "@/app/lib/components/Heading";
-import HighlightKeyword, {
-  findKeyword,
-} from "@/app/lib/components/HighlightKeyword";
+import Heading from "@components/Heading";
+import HighlightKeyword, { findKeyword } from "@components/HighlightKeyword";
 import { ClientSong } from "@/prisma/models";
 
 type SongListEntry = {

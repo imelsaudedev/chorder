@@ -1,15 +1,15 @@
-import Heading from "@/app/lib/components/Heading";
+import Heading from "@components/Heading";
 import CloseIcon from "@/components/icons/CloseIcon";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Button } from "@ui/button";
+import { Label } from "@ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+} from "@ui/select";
+import { Switch } from "@ui/switch";
 import { ServiceFormSchema, SongUnitSchema } from "@/forms/ServiceForm/schema";
 import { useTranslations } from "next-intl";
 import { MouseEventHandler, useCallback, useMemo } from "react";

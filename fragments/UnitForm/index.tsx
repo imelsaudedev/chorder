@@ -1,16 +1,16 @@
-import ChordProViewer from '@/components/ChordProViewer';
-import TextInput from '@/components/TextInput';
-import UnitCircle from '@/components/UnitCircle';
-import CloseIcon from '@/components/icons/CloseIcon';
-import { Button } from '@/components/ui/button';
-import { unitTypeColorClasses } from '@/components/unit-colors';
-import { SongUnitSetField } from '@/forms/ArrangementForm/useArrangementFormFields';
-import { SONG_UNIT_TYPES, SongUnit, SongUnitType } from '@/models/song-unit';
-import { ChangeEvent, useCallback, useId, useMemo } from 'react';
-import { ComboBoxResponsive } from '@/components/ComboBoxResponsive';
-import { useTranslations } from 'next-intl';
-import { parseChordPro } from '@/chopro/music';
-import BadgeSelector from '@/components/Badges/BadgeSelector';
+import ChordProViewer from "@/components/ChordProViewer";
+import TextInput from "@/components/TextInput";
+import UnitCircle from "@/components/UnitCircle";
+import CloseIcon from "@/components/icons/CloseIcon";
+import { Button } from "@ui/button";
+import { unitTypeColorClasses } from "@/components/unit-colors";
+import { SongUnitSetField } from "@/forms/ArrangementForm/useArrangementFormFields";
+import { SONG_UNIT_TYPES, SongUnit, SongUnitType } from "@/models/song-unit";
+import { ChangeEvent, useCallback, useId, useMemo } from "react";
+import { ComboBoxResponsive } from "@/components/ComboBoxResponsive";
+import { useTranslations } from "next-intl";
+import { parseChordPro } from "@/chopro/music";
+import BadgeSelector from "@/components/Badges/BadgeSelector";
 
 type UnitFormProps = {
   unit: SongUnit;
@@ -19,7 +19,12 @@ type UnitFormProps = {
   className?: string;
 };
 
-export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: UnitFormProps) {
+export default function UnitForm({
+  unit,
+  removeUnit,
+  onChangeUnit,
+  className,
+}: UnitFormProps) {
   const t = useTranslations();
 
   const colorClasses = unitTypeColorClasses[unit.type];
@@ -46,13 +51,13 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
 
   const handleChangeUnitType = useCallback(
     (newValue: string) => {
-      onChangeUnit({ field: 'type', value: newValue as SongUnitType });
+      onChangeUnit({ field: "type", value: newValue as SongUnitType });
     },
     [onChangeUnit]
   );
 
   const handleChangeChordpro = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    onChangeUnit({ field: 'content', value: event.target.value });
+    onChangeUnit({ field: "content", value: event.target.value });
   };
 
   // Verifica se o conteúdo do ChordPro é válido
@@ -67,9 +72,9 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
 
   return (
     <div
-      className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg p-2 md:p-4 mb-2 ${
-        className || ''
-      }`}
+      className={`border ${colorClasses.border} ${
+        colorClasses.background
+      } rounded-lg p-2 md:p-4 mb-2 ${className || ""}`}
     >
       <div className="flex justify-between items-center">
         <Button onClick={handleRemoveUnit} variant="ghost" size="icon">
@@ -86,7 +91,7 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
           <TextInput
             id={contentId}
             className="resize-none grow bg-white font-mono"
-            placeholder={t('UnitData.contentPlaceholder')}
+            placeholder={t("UnitData.contentPlaceholder")}
             onChange={handleChangeChordpro}
             value={unit.content}
             minRows={1}
@@ -96,7 +101,9 @@ export default function UnitForm({ unit, removeUnit, onChangeUnit, className }: 
 
         <div className="rounded-md bg-black/5 px-2 py-2">
           {hasError ? (
-            <p className="text-red-500 text-sm">{t('Messages.invalidChordPro')}</p>
+            <p className="text-red-500 text-sm">
+              {t("Messages.invalidChordPro")}
+            </p>
           ) : (
             <ChordProViewer chordpro={unit.content} density="compact" />
           )}

@@ -1,8 +1,7 @@
-import NavBar from "@/components/NavBar";
-import Heading from "@/app/lib/components/Heading";
+import Heading from "@components/Heading";
 import Main from "@/components/Main";
 import { Plus, ListMusic } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/button";
 import ServiceList from "@/fragments/ServiceList";
 import Link from "next/link";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
