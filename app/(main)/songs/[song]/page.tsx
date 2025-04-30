@@ -4,14 +4,16 @@ import ArrangementViewerHeader from "../ArrangementViewer/ArrangementViewerHeade
 
 export default async function SongPage({
   params,
+  searchParams,
 }: {
   params: { song: string };
-  searchParams: { arrangement?: string };
+  searchParams?: { arrangement?: number };
 }) {
   const { song: songSlug } = await params;
+  const arrangementId = searchParams?.arrangement;
 
   return (
-    <ArrangementViewContext songSlug={songSlug}>
+    <ArrangementViewContext songSlug={songSlug} arrangementId={arrangementId}>
       <ArrangementViewerHeader />
       <ArrangementViewer />
     </ArrangementViewContext>

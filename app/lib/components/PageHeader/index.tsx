@@ -2,7 +2,7 @@ import BackLink from "@components/BackLink";
 import Heading from "@components/Heading";
 
 type PageHeaderProps = {
-  title: string;
+  title: React.ReactNode;
   subtitle?: React.ReactNode;
   actions?: React.ReactNode;
   backLinkHref?: string;

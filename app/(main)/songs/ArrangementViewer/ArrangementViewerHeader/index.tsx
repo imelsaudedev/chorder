@@ -8,20 +8,24 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@ui/collapsible";
+import { Skeleton } from "@ui/skeleton";
 import { NotebookPen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useArrangement, useSong } from "../ArrangementViewContext";
 import ArrangementActionMenu from "./ArrangementActionMenu";
 import ArrangementSelector from "./ArrangementSelector";
 import SongConfig from "./SongConfig";
+import { useSearchParams } from "next/navigation";
 
 export default function ArrangementViewerHeader() {
   const t = useTranslations("Messages");
   const { song } = useSong();
   const { arrangement, arrangementId, setArrangementId } = useArrangement();
 
+  const searchParams = useSearchParams();
+
   if (!song) {
-    return null;
+    return <ArrangementViewerHeaderSkeleton />;
   }
 
   const subtitle = song.artist ? (
@@ -33,6 +37,17 @@ export default function ArrangementViewerHeader() {
 
   const handleArrangementChange = (arrangementId: number) => {
     setArrangementId(arrangementId);
+    const params = new URLSearchParams(searchParams);
+    if (arrangementId) {
+      params.set("arrangement", arrangementId.toString());
+    } else {
+      params.delete("arrangement");
+    }
+    window.history.replaceState(
+      {},
+      "",
+      `${window.location.pathname}?${params.toString()}`
+    );
   };
 
   return (
@@ -67,5 +82,18 @@ export default function ArrangementViewerHeader() {
         <SongConfig originalKey={arrangement?.key ?? ""} />
       </CollapsibleContent>
     </Collapsible>
+  );
+}
+
+function ArrangementViewerHeaderSkeleton() {
+  const t = useTranslations("Messages");
+
+  return (
+    <PageHeader
+      backLinkHref="/songs"
+      backLinkText={t("songs")}
+      title={<Skeleton className="h-10 w-72 my-2 bg-primary" />}
+      subtitle={<Skeleton className="h-6 w-1/3 bg-zinc-500" />}
+    />
   );
 }
