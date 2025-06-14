@@ -10,6 +10,8 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import ConfirmDeleteAlert from "@components/ConfirmDeleteAlert";
 import { deleteArrangementAction } from "../actions";
+import { useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 interface ArrangementActionMenuProps {
   songSlug: string;
@@ -21,12 +23,14 @@ export default function ArrangementActionMenu({
   arrangementId,
 }: ArrangementActionMenuProps) {
   const t = useTranslations();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const deleteArrangementWithIdAction = deleteArrangementAction.bind(
-    null,
-    songSlug,
-    arrangementId ?? "default"
-  );
+  const onDelete = useCallback(() => {
+    deleteArrangementAction(songSlug, arrangementId ?? "default");
+    const parentPath = pathname.split("/").slice(0, -1).join("/");
+    router.replace(parentPath);
+  }, [songSlug, arrangementId, router, pathname]);
 
   return (
     <div className="flex gap-1">
@@ -37,7 +41,12 @@ export default function ArrangementActionMenu({
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>
-              <Link href="./edit">{t("Messages.edit")}</Link>
+              <Link
+                href={`/songs/${songSlug}/edit?arrangement=${arrangementId}`}
+                className="w-full"
+              >
+                {t("Messages.edit")}
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <AlertDialogTrigger className="w-full text-left">
@@ -50,7 +59,7 @@ export default function ArrangementActionMenu({
         <ConfirmDeleteAlert
           alertTitle={t("SongForm.confirmDeleteTitle")}
           alertDescription={t("SongForm.confirmDelete")}
-          onDelete={deleteArrangementWithIdAction}
+          onDelete={onDelete}
         />
       </AlertDialog>
     </div>

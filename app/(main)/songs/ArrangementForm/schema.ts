@@ -20,7 +20,7 @@ export const songUnitsSchema = z.object({
 
 const schema = z.object({
   // Song data
-  title: z.string().min(2, "CANNOT BE EMPTY"),
+  title: z.string().min(2, "cantBeEmpty"),
   artist: z.string().optional(),
   // Arrangement data
   arrangementId: z.number().optional(),

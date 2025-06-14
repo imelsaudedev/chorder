@@ -1,9 +1,12 @@
-import { Song, SongArrangementWithUnits } from "@/prisma/models";
+import { ClientSong, SongArrangementWithUnits } from "@/prisma/models";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import schema, { ArrangementFormSchema } from "./schema";
 
-export function initForm(song?: Song, arrangement?: SongArrangementWithUnits) {
+export function initForm(
+  song?: ClientSong,
+  arrangement?: SongArrangementWithUnits
+) {
   return {
     mode: "onChange" as const,
     resolver: zodResolver(schema),
@@ -12,7 +15,7 @@ export function initForm(song?: Song, arrangement?: SongArrangementWithUnits) {
       artist: song?.artist ?? "",
       arrangementId: arrangement?.id,
       arrangementName: arrangement?.name ?? "",
-      key: arrangement?.key,
+      key: arrangement?.key ?? "",
       units: arrangement?.units,
     },
   };

@@ -10,7 +10,7 @@ export default async function SongPage({
   searchParams?: { arrangement?: number };
 }) {
   const { song: songSlug } = await params;
-  const arrangementId = searchParams?.arrangement;
+  const arrangementId = (await searchParams)?.arrangement;
 
   return (
     <ArrangementViewContext songSlug={songSlug} arrangementId={arrangementId}>

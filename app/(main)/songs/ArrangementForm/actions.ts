@@ -1,7 +1,5 @@
 "use server";
 
-import { SongUnitSchema } from "./schema";
-import { getChords, getKeyFromChords, getLyrics } from "@chopro/music";
 import {
   createArrangementWithSong,
   makeArrangementDefault,
@@ -10,6 +8,9 @@ import {
   slugForSong,
   updateArrangement,
 } from "@/prisma/data";
+import { SongArrangementWithSong } from "@/prisma/models";
+import { getChords, getKeyFromChords, getLyrics } from "@chopro/music";
+import { SongUnitSchema } from "./schema";
 
 export async function saveSongAction(
   title: string,
@@ -25,7 +26,7 @@ export async function saveSongAction(
     key = getKeyFromChords(allChords) || "";
   }
 
-  let arrangement;
+  let arrangement: SongArrangementWithSong | null = null;
   if (arrangementId) {
     arrangement = await retrieveArrangement(arrangementId, {
       includeSong: true,
@@ -55,6 +56,8 @@ export async function saveSongAction(
         slug,
         lyrics,
         artist: artist ?? null,
+        name: arrangementName ?? null,
+        key: key || "",
         isDeleted: false,
         units: unitsWithOrder,
       },
@@ -77,7 +80,7 @@ export async function saveSongAction(
       }
     );
   }
-  return arrangement;
+  return arrangement!;
 }
 
 export async function makeArrangementDefaultAction(arrangementId: number) {

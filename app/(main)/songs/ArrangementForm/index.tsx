@@ -2,7 +2,7 @@
 
 import { Form } from "@/components/ui/form";
 import {
-  Song,
+  ClientSong,
   SongArrangementWithSong,
   SongArrangementWithUnits,
 } from "@/prisma/models";
@@ -15,9 +15,10 @@ import { ArrangementFormSchema } from "./schema";
 import SongInfoForm from "./SongInfoForm";
 import SongUnitListForm from "./SongUnitListForm";
 import { initForm } from "./useArrangementForm";
+import { usePathname, useSearchParams } from "next/navigation";
 
 type ArrangementFormProps = {
-  song?: Song;
+  song?: ClientSong;
   arrangement?: SongArrangementWithUnits;
   onSaved?: (arrangement: SongArrangementWithSong) => void;
 };
@@ -29,6 +30,9 @@ export default function ArrangementForm({
 }: ArrangementFormProps) {
   const form = useForm<ArrangementFormSchema>(initForm(song, arrangement));
   const { isDirty, isValid } = form.formState;
+  const searchParams = useSearchParams().toString();
+  const pathname = usePathname().replace("/edit", "");
+  const cancelUrl = `${pathname}${searchParams ? `?${searchParams}` : ""}`;
 
   async function onSubmit({
     title,
@@ -58,7 +62,10 @@ export default function ArrangementForm({
         <EditHeader
           title={isNew ? "Nova música" : "Editar música"}
           actions={
-            <SaveButtonSet canCancel={!isNew} enabled={isDirty && isValid} />
+            <SaveButtonSet
+              cancelUrl={isNew ? undefined : cancelUrl}
+              enabled={isDirty && isValid}
+            />
           }
         />
         <SongInfoForm />

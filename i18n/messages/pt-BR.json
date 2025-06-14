@@ -97,6 +97,7 @@
     "confirmDeleteTitle": "Você tem certeza que deseja deletar esta música?",
     "confirmDelete": "Esta ação não pode ser desfeita.",
     "noSongs": "Nenhuma música encontrada",
-    "moveArrangement": "Mesclar arranjo"
+    "moveArrangement": "Mesclar arranjo",
+    "cantBeEmpty": "Não pode ser vazio"
   }
 }

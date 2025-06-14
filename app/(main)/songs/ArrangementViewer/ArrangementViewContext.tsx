@@ -55,6 +55,9 @@ export default function ArrangementViewContext({
 
   const { song } = useFetchSong(songSlug);
   const { arrangement } = useFetchArrangement(songSlug, arrangementId);
+  if (arrangement && arrangement.id !== arrangementId) {
+    setArrangementId(arrangement.id);
+  }
 
   return (
     <Ctx.Provider

@@ -184,7 +184,7 @@ export async function createArrangementWithSong(
     includeUnits = false,
   }: CreateArrangementWithSongArgs = {}
 ) {
-  prisma.songArrangement.create({
+  return prisma.songArrangement.create({
     data: {
       name: arrangementName,
       key,
@@ -223,12 +223,14 @@ export async function updateArrangement(
     slug: string;
     lyrics: string;
     artist: string | null;
+    name: string | null;
+    key: string;
     isDeleted: boolean;
     units?: ClientSongUnit[];
   },
   { includeSong = false, includeUnits = false }: UpdateArrangementArgs = {}
 ) {
-  const { units, ...rest } = data;
+  const { units, title, slug, lyrics, artist, ...rest } = data;
   const inputData: typeof rest & { units?: any } = rest;
   if (units) {
     inputData["units"] = {
@@ -238,6 +240,14 @@ export async function updateArrangement(
       },
     };
   }
+  await prisma.song.update({
+    where: { slug },
+    data: {
+      title,
+      lyrics,
+      artist,
+    },
+  });
   return prisma.songArrangement.update({
     where: {
       id: arrangementId,

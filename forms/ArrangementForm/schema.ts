@@ -1,19 +1,19 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const songMapSchema = z.object({
   internalId: z.number(),
 });
 
 const songUnitTypeSchema = z.union([
-  z.literal('BLOCK'),
-  z.literal('INTRO'),
-  z.literal('VERSE'),
-  z.literal('PRECHORUS'),
-  z.literal('CHORUS'),
-  z.literal('BRIDGE'),
-  z.literal('INTERLUDE'),
-  z.literal('SOLO'),
-  z.literal('ENDING'),
+  z.literal("BLOCK"),
+  z.literal("INTRO"),
+  z.literal("VERSE"),
+  z.literal("PRECHORUS"),
+  z.literal("CHORUS"),
+  z.literal("BRIDGE"),
+  z.literal("INTERLUDE"),
+  z.literal("SOLO"),
+  z.literal("ENDING"),
 ]);
 
 export const songUnitsSchema = z.object({
@@ -24,7 +24,7 @@ export const songUnitsSchema = z.object({
 });
 
 const schema = z.object({
-  title: z.string().min(2, 'CANNOT BE EMPTY'),
+  title: z.string().min(2, "cantBeEmpty"),
   artist: z.string().optional(),
   arrangementName: z.string().optional(),
   key: z.string().optional(),

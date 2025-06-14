@@ -96,6 +96,7 @@
     "confirmDeleteTitle": "Are you sure you want to delete this song?",
     "confirmDelete": "This action cannot be undone.",
     "noSongs": "No songs found",
-    "moveArrangement": "Move arrangement"
+    "moveArrangement": "Move arrangement",
+    "cantBeEmpty": "Cannot be empty"
   }
 }
