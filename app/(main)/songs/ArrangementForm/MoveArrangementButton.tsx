@@ -10,6 +10,7 @@ import {
 import { ClientSong } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 import { moveArrangementAction } from "./actions";
+import { useRouter } from "next/navigation";
 
 type MoveArrangementButtonProps = {
   songSlug: string;
@@ -22,9 +23,12 @@ export default function MoveArrangementButton({
 }: MoveArrangementButtonProps) {
   const excludedSongSlugs = [songSlug];
   const t = useTranslations();
+  const router = useRouter();
 
   const moveArrangementTo = (destSong: ClientSong) => {
-    moveArrangementAction(arrangementId, destSong.slug);
+    moveArrangementAction(arrangementId, destSong.slug).then(() => {
+      router.push(`/songs/${destSong.slug}?arrangement=${arrangementId}`);
+    });
   };
 
   return (
