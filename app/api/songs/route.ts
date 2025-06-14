@@ -7,11 +7,16 @@ export async function GET(request: Request) {
   const forceIncludeFirstLine =
     url.searchParams.get("forceIncludeFirstLine") === "true";
   const limitLinesNumber = limitLines ? parseInt(limitLines) : undefined;
+  const excludedSongSlugs = (url.searchParams.get("excludedSongSlugs") || "")
+    .split(",")
+    .map((slug) => slug.trim())
+    .filter(Boolean);
 
   const songs = await retrieveSongs({
     query,
     limitLines: limitLinesNumber,
     forceIncludeFirstLine,
+    excludedSongSlugs,
   });
   return Response.json(songs);
 }

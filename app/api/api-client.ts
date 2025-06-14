@@ -11,11 +11,13 @@ type FetchSongsArgs = {
   query?: string;
   limitLines?: number;
   forceIncludeFirstLine?: boolean;
+  excludedSongSlugs?: string[];
 };
 export function useFetchSongs({
   query,
   limitLines,
   forceIncludeFirstLine,
+  excludedSongSlugs,
 }: FetchSongsArgs) {
   const params = new URLSearchParams();
   if (query) {
@@ -26,6 +28,9 @@ export function useFetchSongs({
   }
   if (forceIncludeFirstLine) {
     params.set("forceIncludeFirstLine", forceIncludeFirstLine.toString());
+  }
+  if (excludedSongSlugs && excludedSongSlugs.length > 0) {
+    params.set("excludedSongSlugs", excludedSongSlugs.join(","));
   }
   const queryString = params.toString();
   const { data, error, isLoading } = useSWR(

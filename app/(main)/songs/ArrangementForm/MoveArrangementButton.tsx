@@ -12,12 +12,15 @@ import { useTranslations } from "next-intl";
 import { moveArrangementAction } from "./actions";
 
 type MoveArrangementButtonProps = {
+  songSlug: string;
   arrangementId: number;
 };
 
 export default function MoveArrangementButton({
+  songSlug,
   arrangementId,
 }: MoveArrangementButtonProps) {
+  const excludedSongSlugs = [songSlug];
   const t = useTranslations();
 
   const moveArrangementTo = (destSong: ClientSong) => {
@@ -34,7 +37,10 @@ export default function MoveArrangementButton({
           <DrawerTitle>{t("ServiceForm.pickSong")}</DrawerTitle>
         </DrawerHeader>
         <div className="max-h-[80vh] overflow-auto p-4">
-          <SongPicker onSelected={moveArrangementTo} />
+          <SongPicker
+            onSelected={moveArrangementTo}
+            excludedSongSlugs={excludedSongSlugs}
+          />
         </div>
       </DrawerContent>
     </Drawer>

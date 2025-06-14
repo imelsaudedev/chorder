@@ -15,11 +15,13 @@ import MoveArrangementButton from "./MoveArrangementButton";
 import { ArrangementFormSchema } from "./schema";
 
 type ArrangementInfoFormProps = {
+  songSlug?: string;
   arrangementId?: number;
   isDefault: boolean;
 };
 
 export default function ArrangementInfoForm({
+  songSlug,
   arrangementId,
   isDefault,
 }: ArrangementInfoFormProps) {
@@ -49,8 +51,11 @@ export default function ArrangementInfoForm({
               : t("SongData.makeDefault")}
           </Button>
 
-          {arrangementId && (
-            <MoveArrangementButton arrangementId={arrangementId} />
+          {arrangementId && songSlug && (
+            <MoveArrangementButton
+              songSlug={songSlug}
+              arrangementId={arrangementId}
+            />
           )}
         </div>
       </div>

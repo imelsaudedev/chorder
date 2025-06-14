@@ -13,12 +13,14 @@ import InitialsNav from "./InitialsNav";
 
 type SongListProps = {
   query?: string;
+  excludedSongSlugs?: string[];
   initialsInSeparateRow?: boolean;
   onSelected?: (s: ClientSong) => void;
 };
 
 export default function SongList({
   query = "",
+  excludedSongSlugs = [],
   initialsInSeparateRow = false,
   onSelected,
 }: SongListProps) {
@@ -26,6 +28,7 @@ export default function SongList({
     query,
     limitLines: 3,
     forceIncludeFirstLine: true,
+    excludedSongSlugs,
   });
   const t = useTranslations("SongForm");
 

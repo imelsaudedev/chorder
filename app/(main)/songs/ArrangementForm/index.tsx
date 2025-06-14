@@ -70,6 +70,7 @@ export default function ArrangementForm({
         />
         <SongInfoForm />
         <ArrangementInfoForm
+          songSlug={song?.slug}
           arrangementId={arrangement?.id}
           isDefault={arrangement?.isDefault ?? true}
         />

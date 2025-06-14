@@ -46,15 +46,20 @@ type RetrieveSongsArgs = {
   query?: string;
   limitLines?: number;
   forceIncludeFirstLine?: boolean;
+  excludedSongSlugs?: string[];
 };
 export async function retrieveSongs({
   query = "",
   limitLines,
   forceIncludeFirstLine = true,
+  excludedSongSlugs = [],
 }: RetrieveSongsArgs) {
   let songs = await prisma.song.findMany({
     where: {
       isDeleted: false,
+      slug: {
+        notIn: excludedSongSlugs,
+      },
       OR: [
         {
           title: {
