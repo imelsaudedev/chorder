@@ -1,9 +1,5 @@
 import prisma from "./client";
-import {
-  ClientSongUnit,
-  SongArrangement,
-  SongArrangementWithSong,
-} from "./models";
+import { ClientSongUnit } from "./models";
 
 export function retrieveSongSlugs() {
   return prisma.song
@@ -133,6 +129,7 @@ export async function retrieveArrangement(
       where: {
         song: {
           slug: songSlug,
+          isDeleted: false,
         },
         isDefault: true,
         isDeleted: false,
@@ -147,7 +144,7 @@ export async function retrieveArrangement(
   const where: {
     id: number;
     isDeleted: boolean;
-    song?: { slug: string };
+    song?: { slug: string; isDeleted: boolean };
   } = {
     id: parseInt(arrangementId.toString()),
     isDeleted: false,
@@ -155,6 +152,7 @@ export async function retrieveArrangement(
   if (songSlug) {
     where["song"] = {
       slug: songSlug,
+      isDeleted: false,
     };
   }
 
@@ -184,7 +182,7 @@ export async function createArrangementWithSong(
     includeUnits = false,
   }: CreateArrangementWithSongArgs = {}
 ) {
-  return prisma.songArrangement.create({
+  const arrangement = await prisma.songArrangement.create({
     data: {
       name: arrangementName,
       key,
@@ -206,10 +204,28 @@ export async function createArrangementWithSong(
       },
     },
     include: {
-      song: includeSong,
+      song: true,
       units: includeUnits,
     },
   });
+  if (arrangement.song.isDeleted) {
+    await prisma.song.update({
+      where: { id: arrangement.song.id },
+      data: {
+        isDeleted: false,
+        slug: songSlug,
+        title: songTitle,
+        artist,
+        lyrics,
+      },
+    });
+    await makeArrangementDefault(arrangement.id);
+  }
+  if (!includeSong) {
+    const { song, ...rest } = arrangement;
+    return rest;
+  }
+  return arrangement;
 }
 
 type UpdateArrangementArgs = {

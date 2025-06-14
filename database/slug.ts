@@ -1,4 +1,4 @@
-import { DBData, getDB } from './client';
+import { DBData, getDB } from "./client";
 
 type Slug = {
   slug: string;
@@ -9,17 +9,19 @@ export async function getAvailableSlug(original: string, dbData?: DBData) {
   let slug = original
     .trim()
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[()]/g, '')
-    .replace(/[^a-z0-9]/g, '-');
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[()]/g, "")
+    .replace(/[^a-z0-9]/g, "-");
   slug = await slugs
     .find({ slug: { $regex: `^${slug}` } })
     .toArray()
-    .then((existingSlugs) => {
+    .then((existingSlugs: { slug: string }[]) => {
       let idx = 1;
       let newSlug = slug;
-      while (existingSlugs.some((existingSlug) => existingSlug.slug === newSlug)) {
+      while (
+        existingSlugs.some((existingSlug) => existingSlug.slug === newSlug)
+      ) {
         newSlug = `${slug}-${idx}`;
         idx++;
       }
@@ -35,5 +37,5 @@ export async function saveSlug(slug: string) {
 
 async function getCollection(dbData?: DBData) {
   const { client, db } = await getDB(dbData);
-  return { client, slugs: db.collection<Slug>('slugs') };
+  return { client, slugs: db.collection<Slug>("slugs") };
 }
