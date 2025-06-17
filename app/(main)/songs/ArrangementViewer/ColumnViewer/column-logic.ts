@@ -58,10 +58,8 @@ function findBestDistributionRec(unitData: UnitData[], columns: number) {
     };
   }
 
-  if (columns > unitData.length) {
-    const columnData: UnitData[][] = Array.from({ length: columns }, (_, i) =>
-      i < unitData.length ? [unitData[i]] : []
-    );
+  if (columns >= unitData.length) {
+    const columnData = unitData.map((unit) => [unit]);
     const columnHeights = columnData.map((col) => getTotalHeight(col));
     return { columnData, columnHeights };
   }

@@ -33,6 +33,12 @@ export default function ColumnViewer({
     [songUnits, columns]
   );
 
+  useEffect(() => {
+    if (columnData.length !== columns) {
+      setColumns(columnData.length);
+    }
+  }, [columnData.length, columns]);
+
   const isPhone = useMediaQuery("(max-width: 639px)");
   const isTablet = useMediaQuery("(max-width: 1023px)");
   const isDesktop = useMediaQuery("(max-width: 1279px)");
