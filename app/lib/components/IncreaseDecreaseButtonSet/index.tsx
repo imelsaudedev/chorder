@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { Button } from "@ui/button";
 
 type IncreaseDecreaseButtonSetProps = {
@@ -29,22 +30,22 @@ export default function IncreaseDecreaseButtonSet({
     <div className="flex flex-row">
       <Button
         variant="outline"
-        className="rounded-l"
+        className="rounded-l-md rounded-r-none"
         onClick={decrease}
         disabled={!!decreaseDisabled}
       >
         {decreaseLabel}
       </Button>
-      <input
+      <Input
         id={id}
         type={type}
-        className="bg-neutral-100 px-2 py-1 w-10 h-10 text-center border-t border-b text-base"
+        className="px-2 w-10 text-center text-base rounded-none"
         value={stringValue}
         onChange={(e) => setStringValue(e.target.value)}
       />
       <Button
         variant="outline"
-        className="rounded-r"
+        className="rounded-r-md rounded-l-none"
         onClick={increase}
         disabled={!!increaseDisabled}
       >

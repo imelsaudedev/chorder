@@ -22,12 +22,12 @@ export default function ColumnButtons({
   return (
     <ToggleGroup
       id={id}
+      variant="outline"
       type="single"
       onValueChange={handleValueChange}
       value={columns.toString()}
-      className=""
     >
-      <ToggleGroupItem value="0" aria-label={t("auto")}>
+      <ToggleGroupItem value="0" aria-label={t("auto")} className="px-4">
         AUTO
       </ToggleGroupItem>
       {[1, 2, 3, 4].map((columnCount) => (

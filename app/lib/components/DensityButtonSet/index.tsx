@@ -28,6 +28,7 @@ export default function DensityButtonSet({
       <legend className="sr-only">{t("density")}</legend>
       <ToggleGroup
         id={id}
+        variant="outline"
         type="single"
         onValueChange={handleValueChange}
         value={density}

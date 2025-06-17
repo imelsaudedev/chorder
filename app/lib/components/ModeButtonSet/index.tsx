@@ -29,7 +29,7 @@ export default function ModeButtonSet({
       type="single"
       onValueChange={handleValueChange}
       value={mode}
-      className=""
+      variant="outline"
     >
       <ToggleGroupItem value="chords" aria-label={t("chords")}>
         {t("chords")}
