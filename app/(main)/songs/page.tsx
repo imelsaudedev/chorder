@@ -1,7 +1,7 @@
 import Heading from "@components/Heading";
 import SongList from "@components/SongList";
-import Main from "@/components/Main";
-import ScrollToTopButton from "@/components/ScrollToTopButton";
+import Main from "@components/Main";
+import ScrollToTopButton from "@components/ScrollToTopButton";
 import { Button } from "@ui/button";
 import { Music, Plus } from "lucide-react";
 import Link from "next/link";

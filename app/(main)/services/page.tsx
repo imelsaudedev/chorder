@@ -7,8 +7,6 @@ import Link from "next/link";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { retrieveServices } from "@/prisma/data";
 
-export const dynamic = "force-dynamic";
-
 export default async function ServiceListPage() {
   const services = await retrieveServices();
 
