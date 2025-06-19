@@ -1,45 +1,51 @@
-import PageHeader from "@/components/PageHeader";
-import { deleteService } from "@/app/(main)/services/[service]/actions";
-import AdjustmentIcon from "@/components/icons/AdjustmentIcon";
-import Main from "@/components/Main";
-import { Mode } from "@/components/ModeButtonSet";
+"use client";
+
+import { ServiceSongUnit } from "@/prisma/models";
+import FullScreenToggle from "@components/FullScreenToggle";
+import AdjustmentIcon from "@components/icons/AdjustmentIcon";
+import Main from "@components/Main";
+import PageHeader from "@components/PageHeader";
+import { CollapsibleContent } from "@radix-ui/react-collapsible";
 import { Button } from "@ui/button";
 import { Collapsible, CollapsibleTrigger } from "@ui/collapsible";
-import { getHumanReadableTitle, Service } from "@/models/service";
-import { ServiceSongUnit } from "@/models/service-unit";
-import { CollapsibleContent } from "@radix-ui/react-collapsible";
-import { useTranslations } from "next-intl";
-import { Fragment, useState, useRef } from "react";
+import { Calendar, MicVocal } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { Fragment, useMemo, useRef, useState } from "react";
+import { deleteServiceAction } from "../actions";
+import ServiceActionMenu from "./ServiceActionMenu";
 import ServiceConfig from "./ServiceConfig";
 import ServiceSongUnitView from "./ServiceSongUnitView";
-import ServiceActionMenu from "./ServiceActionMenu";
-import { Calendar, MicVocal, ArrowLeft } from "lucide-react";
-import FullScreenToggle from "@/components/FullScreenToggle";
-import Link from "next/link";
+import { useDensity, useFontSize, useService } from "./ServiceViewContext";
 
-type ServiceViewPageProps = {
-  service: Service;
-};
-
-export default function ServiceViewPage({ service }: ServiceViewPageProps) {
-  const t = useTranslations("Messages");
+export default function ServiceViewPage() {
+  const t = useTranslations();
   const [currentIndex, setCurrentIndex] = useState(0);
   const unitRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [columns, setColumns] = useState(0);
-  const [fontSize, setFontSize] = useState(16);
-  const [mode, setMode] = useState("chords" as Mode);
-  const [density, setDensity] = useState<"compact" | "normal">("normal");
+  const { service } = useService();
+  const { density } = useDensity();
+  const { fontSize } = useFontSize();
+
+  const locale = useLocale();
+
+  const serviceTitle = useMemo(
+    () => service?.title?.trim() || t("Service.noTitle"),
+    [service?.title, t]
+  );
+
+  if (!service) {
+    return null;
+  }
 
   const units = service.units;
-  const deleteCurrentService = deleteService.bind(null, service);
+  const deleteCurrentService = deleteServiceAction.bind(null, service.slug);
 
-  const formattedDate = new Intl.DateTimeFormat("pt-BR", {
+  const formattedDate = new Intl.DateTimeFormat(locale, {
     weekday: "long",
     day: "numeric",
     month: "numeric",
     year: "numeric",
   })
-    .format(service.date)
+    .format(new Date(service.date))
     .replace(/^\w/, (c) => c.toUpperCase())
     .replace(/ de ([a-z])/, (m, c) => ` de ${c.toUpperCase() + m.slice(5)}`);
 
@@ -74,7 +80,7 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
       {service.worshipLeader && (
         <span className="flex items-center gap-1">
           <MicVocal className="w-4 h-4" />
-          <span className="hidden sm:block">Dirigido por</span>
+          <span className="hidden sm:block">{t("Service.ledBy")}</span>
           {service.worshipLeader}
         </span>
       )}
@@ -85,8 +91,8 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
     <Collapsible>
       <PageHeader
         backLinkHref="/services"
-        backLinkText="Liturgias"
-        title={getHumanReadableTitle(service, t("service"))}
+        backLinkText={t("Messages.services")}
+        title={serviceTitle}
         subtitle={subtitle}
         actions={
           <div className="flex gap-2 items-center md:self-end">
@@ -95,7 +101,7 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="icon">
                 <AdjustmentIcon />
-                <span className="sr-only">{t("toggleConfig")}</span>
+                <span className="sr-only">{t("Messages.toggleConfig")}</span>
               </Button>
             </CollapsibleTrigger>
           </div>
@@ -103,16 +109,7 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
       />
 
       <CollapsibleContent>
-        <ServiceConfig
-          columns={columns}
-          setColumns={setColumns}
-          fontSize={fontSize}
-          setFontSize={setFontSize}
-          mode={mode}
-          setMode={setMode}
-          density={density}
-          setDensity={setDensity}
-        />
+        <ServiceConfig />
       </CollapsibleContent>
 
       <Main density={density} className="py-4 sm:py-6 lg:py-8">
@@ -128,10 +125,7 @@ export default function ServiceViewPage({ service }: ServiceViewPageProps) {
                 <div ref={(el) => (unitRefs.current[index] = el)}>
                   <ServiceSongUnitView
                     unit={unit as ServiceSongUnit}
-                    columns={columns}
-                    mode={mode}
                     order={index + 1}
-                    density={density}
                   />
                 </div>
               )}

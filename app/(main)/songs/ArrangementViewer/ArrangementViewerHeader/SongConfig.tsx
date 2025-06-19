@@ -1,3 +1,4 @@
+import ColumnButtons from "@components/ColumnButtons";
 import DensityButtonSet from "@components/DensityButtonSet";
 import FontSizeButtonSet from "@components/FontSizeButtonSet";
 import KeyButtonSet from "@components/KeyButtonSet";
@@ -11,7 +12,6 @@ import {
   useMode,
   useTranspose,
 } from "../ArrangementViewContext";
-import ColumnButtons from "./ColumnButtons";
 
 type SongConfigProps = {
   originalKey: string;

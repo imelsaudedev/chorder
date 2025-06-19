@@ -1,6 +1,10 @@
 "use client";
 
-import Main from "@components/Main";
+import { unitTypeColorClasses } from "@components/unit-colors";
+import { useMediaQuery } from "@hooks/useMediaQuery";
+import { Skeleton } from "@ui/skeleton";
+import clsx from "clsx";
+import { useEffect, useState } from "react";
 import {
   Density,
   useArrangement,
@@ -11,11 +15,6 @@ import {
   useTranspose,
 } from "./ArrangementViewContext";
 import ColumnViewer from "./ColumnViewer";
-import { Skeleton } from "@ui/skeleton";
-import { useMediaQuery } from "@hooks/useMediaQuery";
-import { useEffect, useState } from "react";
-import clsx from "clsx";
-import { unitTypeColorClasses } from "@components/unit-colors";
 
 export default function ArrangementViewer() {
   const { arrangement } = useArrangement();
@@ -30,18 +29,16 @@ export default function ArrangementViewer() {
   }
 
   return (
-    <Main density={density} className="py-4 sm:py-6 lg:py-8">
-      <div style={{ fontSize: `${fontSize}px` }}>
-        <ColumnViewer
-          columns={columns}
-          songUnits={arrangement.units}
-          transpose={transpose}
-          originalKey={arrangement.key}
-          mode={mode}
-          density={density}
-        />
-      </div>
-    </Main>
+    <div style={{ fontSize: `${fontSize}px` }}>
+      <ColumnViewer
+        columns={columns}
+        songUnits={arrangement.units}
+        transpose={transpose}
+        originalKey={arrangement.key}
+        mode={mode}
+        density={density}
+      />
+    </div>
   );
 }
 
@@ -95,23 +92,21 @@ function ArrangementViewerSkeleton({
   ] as const;
 
   return (
-    <Main density={density} className="py-4 sm:py-6 lg:py-8">
-      <div
-        className={`grid ${gridCols} ${
-          density === "compact" ? "gap-2" : "gap-4"
-        }`}
-      >
-        {skeletons.map((unit, index) => (
-          <Skeleton
-            key={index}
-            className={clsx(
-              "h-12 w-full border",
-              unitTypeColorClasses[unit].border,
-              unitTypeColorClasses[unit].background
-            )}
-          />
-        ))}
-      </div>
-    </Main>
+    <div
+      className={`grid ${gridCols} ${
+        density === "compact" ? "gap-2" : "gap-4"
+      }`}
+    >
+      {skeletons.map((unit, index) => (
+        <Skeleton
+          key={index}
+          className={clsx(
+            "h-12 w-full border",
+            unitTypeColorClasses[unit].border,
+            unitTypeColorClasses[unit].background
+          )}
+        />
+      ))}
+    </div>
   );
 }

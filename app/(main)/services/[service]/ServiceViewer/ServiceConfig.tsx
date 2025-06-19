@@ -1,35 +1,22 @@
-import FontSizeButtonSet from "@/components/FontSizeButtonSet";
-import ModeButtonSet, { Mode } from "@/components/ModeButtonSet";
-import DensityButtonSet from "@/components/DensityButtonSet";
+import DensityButtonSet from "@components/DensityButtonSet";
+import FontSizeButtonSet from "@components/FontSizeButtonSet";
+import ColumnButtons from "@components/ColumnButtons";
+import ModeButtonSet from "@components/ModeButtonSet";
 import { Label } from "@ui/label";
 import { useTranslations } from "next-intl";
-import { Dispatch, SetStateAction } from "react";
-import ColumnButtons from "../ArrangementViewPage/ColumnButtons";
+import {
+  useColumns,
+  useDensity,
+  useFontSize,
+  useMode,
+} from "./ServiceViewContext";
 
-type Density = "compact" | "normal";
-
-type ServiceConfigProps = {
-  columns: number;
-  setColumns: Dispatch<SetStateAction<number>>;
-  fontSize: number;
-  setFontSize: Dispatch<SetStateAction<number>>;
-  mode: Mode;
-  setMode: Dispatch<SetStateAction<Mode>>;
-  density: Density;
-  setDensity: Dispatch<SetStateAction<Density>>;
-};
-
-export default function ServiceConfig({
-  columns,
-  setColumns,
-  fontSize,
-  setFontSize,
-  mode,
-  setMode,
-  density,
-  setDensity,
-}: ServiceConfigProps) {
+export default function ServiceConfig() {
   const t = useTranslations();
+  const { columns, setColumns } = useColumns();
+  const { fontSize, setFontSize } = useFontSize();
+  const { mode, setMode } = useMode();
+  const { density, setDensity } = useDensity();
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8 bg-zinc-50">

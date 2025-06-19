@@ -75,15 +75,23 @@ export function useFetchSongArrangements(slug: string, includeUnits?: boolean) {
   }
 }
 
-export function useFetchArrangement(songSlug: string, arrangementId?: number) {
-  const { data, error, isLoading } = useSWR(
-    `/api/songs/${songSlug}/arrangements/${
-      arrangementId?.toString() ?? "default"
-    }`,
-    (...args) => fetch(...args).then((res) => res.json())
+export function useFetchArrangement(songSlug?: string, arrangementId?: number) {
+  if (!songSlug && !arrangementId) {
+    throw new Error("Either songSlug or arrangementId must be provided");
+  }
+
+  const url = songSlug
+    ? `/api/songs/${songSlug}/arrangements/${
+        arrangementId?.toString() ?? "default"
+      }`
+    : `/api/arrangements/${arrangementId!.toString()}`;
+  const { data, error, isLoading } = useSWR(url, (...args) =>
+    fetch(...args).then((res) => res.json())
   );
   return {
-    arrangement: data,
+    arrangement: data as
+      | (SongArrangementWithUnits & { song: ClientSong })
+      | null,
     isLoading,
     isError: error,
   };

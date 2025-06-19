@@ -15,14 +15,10 @@ export default function FullscreenToggle({
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((err) => {
-        console.error(`Erro ao tentar entrar em tela cheia: ${err.message}`);
-      });
+      enterFullScreen();
       setIsFullScreen(true);
     } else {
-      document.exitFullscreen().catch((err) => {
-        console.error(`Erro ao sair do modo tela cheia: ${err.message}`);
-      });
+      exitFullScreen();
       setIsFullScreen(false);
     }
   };
@@ -40,14 +36,26 @@ export default function FullscreenToggle({
         </div>
       )}
       <Button
-        circle
         variant="secondary"
-        size="square"
-        rounded="full"
         onClick={toggleFullScreen}
+        className="shadow-md rounded-full"
       >
         {isFullScreen ? <Minimize size={24} /> : <Maximize size={24} />}
       </Button>
     </div>
   );
+}
+
+function exitFullScreen() {
+  document.exitFullscreen().catch((err) => {
+    console.error(`Error attempting to exit full-screen mode: ${err.message}`);
+  });
+}
+
+function enterFullScreen() {
+  document.documentElement.requestFullscreen().catch((err) => {
+    console.error(
+      `Error attempting to enable full-screen mode: ${err.message}`
+    );
+  });
 }

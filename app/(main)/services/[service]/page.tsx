@@ -1,24 +1,18 @@
-import ServiceViewer from '@/fragments/ServiceViewer';
-import { getServiceOrCreate } from './actions';
-// import Header from '@/components/Header';
+import ServiceViewer from "./ServiceViewer";
+import ServiceViewContext from "./ServiceViewer/ServiceViewContext";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function ServicePage({
   params,
-  searchParams,
 }: {
   params: { service: string };
-  searchParams: { edit?: string };
 }) {
-  const serviceSlug = params.service;
-  const service = await getServiceOrCreate(serviceSlug);
-  const writeMode = searchParams.edit === 'true' || serviceSlug === 'new';
+  const { service: serviceSlug } = await params;
 
   return (
-    <>
-      {/* <Header currentPage="services" /> */}
-      <ServiceViewer service={service} writeMode={writeMode} />
-    </>
+    <ServiceViewContext serviceSlug={serviceSlug}>
+      <ServiceViewer />
+    </ServiceViewContext>
   );
 }

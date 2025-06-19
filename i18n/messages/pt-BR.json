@@ -37,6 +37,11 @@
     "lyrics": "Letra",
     "chords": "Cifra"
   },
+  "Service": {
+    "ledBy": "Dirigido por",
+    "noTitle": "Liturgia sem título",
+    "nextService": "Próxima liturgia"
+  },
   "ServiceData": {
     "title": "Título",
     "titlePlaceholder": "Título da liturgia (ex: Culto matutino)",

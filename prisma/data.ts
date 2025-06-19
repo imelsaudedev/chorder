@@ -399,11 +399,39 @@ export async function deleteArrangement(
   await updateDefaultArrangement(songId);
 }
 
+export async function retrieveService(slug: string) {
+  return prisma.service.findFirst({
+    where: {
+      slug,
+      isDeleted: false,
+    },
+    include: {
+      units: true,
+    },
+  });
+}
+
 export async function retrieveServices() {
   return prisma.service.findMany({
     where: {
       isDeleted: false,
     },
+  });
+}
+
+export async function deleteService(slug: string) {
+  const service = await prisma.service.findFirst({
+    where: {
+      slug,
+      isDeleted: false,
+    },
+  });
+  if (!service) {
+    throw new Error("Service not found");
+  }
+  return prisma.service.update({
+    where: { id: service.id },
+    data: { isDeleted: true },
   });
 }
 

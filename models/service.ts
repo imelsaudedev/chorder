@@ -1,4 +1,4 @@
-import { ServiceUnit } from './service-unit';
+import { ServiceUnit } from "./service-unit";
 
 export type Service = {
   title?: string;
@@ -27,15 +27,19 @@ export function dateForSlug(date: Date) {
 
 export function getDefaultTitle(date: Date, serviceString: string) {
   const year = date.getFullYear().toString();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
   return `${serviceString} ${day}/${month}/${year}`;
 }
 
-export function getHumanReadableTitle(service: Service, serviceString: string) {
-  return service.title?.trim() || 'Liturgia sem título';
+export function getHumanReadableTitle(service: Service) {
+  return service.title?.trim() || "Liturgia sem título";
 }
 
 export function getUnitsByType<T>(service: NewService, type: string): T[] {
-  return service.units?.filter((unit) => unit.type === type).map((unit) => unit as T) || [];
+  return (
+    service.units
+      ?.filter((unit) => unit.type === type)
+      .map((unit) => unit as T) || []
+  );
 }

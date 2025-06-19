@@ -1,10 +1,10 @@
 import Heading from "@components/Heading";
-import Main from "@/components/Main";
+import Main from "@components/Main";
 import { Plus, ListMusic } from "lucide-react";
 import { Button } from "@ui/button";
-import ServiceList from "@/fragments/ServiceList";
+import ServiceList from "./ServiceList";
 import Link from "next/link";
-import ScrollToTopButton from "@/components/ScrollToTopButton";
+import ScrollToTopButton from "@components/ScrollToTopButton";
 import { retrieveServices } from "@/prisma/data";
 
 export default async function ServiceListPage() {
@@ -25,13 +25,7 @@ export default async function ServiceListPage() {
 
       {/* Botão flutuante */}
       <div className="fixed bottom-24 sm:bottom-8 right-4 sm:right-8">
-        <Button
-          asChild
-          variant="secondary"
-          size="square"
-          rounded="full"
-          className="shadow-md"
-        >
+        <Button asChild variant="secondary" className="shadow-md rounded-full">
           <Link
             href="./services/new"
             className="flex items-center gap-1 sm:pr-6"

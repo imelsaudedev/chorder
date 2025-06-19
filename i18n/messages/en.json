@@ -37,6 +37,11 @@
     "lyrics": "Lyrics",
     "chords": "Chords"
   },
+  "Service": {
+    "ledBy": "Led by",
+    "noTitle": "Service without title",
+    "nextService": "Next service"
+  },
   "ServiceData": {
     "title": "Title",
     "titlePlaceholder": "Service title",

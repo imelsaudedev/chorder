@@ -1,6 +1,6 @@
 "use client";
 
-import { useFetchArrangement, useFetchSong } from "@/app/api/api-client";
+import { useFetchArrangement } from "@/app/api/api-client";
 import { ClientSong, SongArrangementWithUnits } from "@/prisma/models";
 import { Mode } from "@components/ModeButtonSet";
 import {
@@ -8,15 +8,16 @@ import {
   Dispatch,
   SetStateAction,
   useContext,
+  useEffect,
   useState,
 } from "react";
 
 export type Density = "compact" | "normal";
 
 type ArrangementViewContextType = {
-  song: ClientSong | null;
-  songSlug: string;
-  setSongSlug: Dispatch<SetStateAction<string>>;
+  song: ClientSong | null | undefined;
+  songSlug: string | undefined;
+  setSongSlug: Dispatch<SetStateAction<string | undefined>>;
   arrangement: SongArrangementWithUnits | null;
   arrangementId: number | undefined;
   setArrangementId: Dispatch<SetStateAction<number | undefined>>;
@@ -35,28 +36,54 @@ type ArrangementViewContextType = {
 const Ctx = createContext<ArrangementViewContextType | null>(null);
 
 type ArrangementViewContextProps = {
-  songSlug: string;
+  songSlug?: string;
   arrangementId?: number;
+  transpose?: number | null;
+  columns?: number | null;
+  fontSize?: number | null;
+  mode?: Mode | null;
+  density?: Density | null;
   children: React.ReactNode;
 };
 
 export default function ArrangementViewContext({
   songSlug: initialSongSlug,
   arrangementId: initialArrangementId,
+  transpose: initialTranspose,
+  columns: initialColumns,
+  fontSize: initialFontSize,
+  mode: initialMode,
+  density: initialDensity,
   children,
 }: ArrangementViewContextProps) {
   const [songSlug, setSongSlug] = useState(initialSongSlug);
   const [arrangementId, setArrangementId] = useState(initialArrangementId);
-  const [transpose, setTranspose] = useState(0);
-  const [columns, setColumns] = useState(0);
-  const [fontSize, setFontSize] = useState(16);
-  const [mode, setMode] = useState("chords" as Mode);
-  const [density, setDensity] = useState<Density>("normal");
+  const [transpose, setTranspose] = useState(initialTranspose ?? 0);
+  const [columns, setColumns] = useState(initialColumns ?? 0);
+  const [fontSize, setFontSize] = useState(initialFontSize ?? 16);
+  const [mode, setMode] = useState(initialMode ?? ("chords" as Mode));
+  const [density, setDensity] = useState<Density>(initialDensity ?? "normal");
 
-  const { song } = useFetchSong(songSlug);
+  useEffect(() => {
+    setColumns((prev) => initialColumns ?? prev);
+  }, [initialColumns]);
+  useEffect(() => {
+    setFontSize((prev) => initialFontSize ?? prev);
+  }, [initialFontSize]);
+  useEffect(() => {
+    setMode((prev) => initialMode ?? prev);
+  }, [initialMode]);
+  useEffect(() => {
+    setDensity((prev) => initialDensity ?? prev);
+  }, [initialDensity]);
+
   const { arrangement } = useFetchArrangement(songSlug, arrangementId);
   if (arrangement && arrangement.id !== arrangementId) {
     setArrangementId(arrangement.id);
+  }
+  const song = arrangement?.song;
+  if (song && song.slug !== songSlug) {
+    setSongSlug(song.slug);
   }
 
   return (
