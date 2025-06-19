@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Minimize, Maximize, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@ui/button";
 
@@ -12,6 +12,18 @@ export default function FullscreenToggle({
   onNext,
 }: FullscreenToggleProps) {
   const [isFullScreen, setIsFullScreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+    };
+  }, []);
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
