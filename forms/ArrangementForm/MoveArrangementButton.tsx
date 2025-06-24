@@ -1,12 +1,12 @@
-import { MoveArrangementAction } from "@/app/(main)/songs/[song]/actions";
-import { Button } from "@ui/button";
+import { MoveArrangementAction } from "@/app-old/(main)/songs/[song]/actions";
+import { Button } from "@/components-old/ui/button";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@ui/drawer";
+} from "@/components-old/ui/drawer";
 import SongPicker from "@/fragments/SongPicker";
 import { fetchSongs } from "@/lib/apiClient";
 import {

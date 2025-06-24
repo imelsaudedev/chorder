@@ -20,11 +20,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"],
-      "@ui/*": ["./components/ui/*"],
-      "@components/*": ["./app/lib/components/*"],
-      "@chopro/*": ["./app/lib/chopro/*"],
-      "@hooks/*": ["./app/lib/hooks/*"]
+      "@/*": ["./*"]
     }
   },
   "include": [

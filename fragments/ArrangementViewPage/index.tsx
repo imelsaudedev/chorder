@@ -1,15 +1,15 @@
-import PageHeader from "@/components/PageHeader";
-import { DeleteArrangementAction } from "@/app/(main)/songs/[song]/actions";
-import ArrangementSelector from "@/components/ArrangementSelector";
-import Main from "@/components/Main";
-import { Mode } from "@/components/ModeButtonSet";
-import AdjustmentIcon from "@/components/icons/AdjustmentIcon";
-import { Button } from "@ui/button";
+import PageHeader from "@/components-old/PageHeader";
+import { DeleteArrangementAction } from "@/app-old/(main)/songs/[song]/actions";
+import ArrangementSelector from "@/components-old/ArrangementSelector";
+import Main from "@/components-old/Main";
+import { Mode } from "@/components-old/ModeButtonSet";
+import AdjustmentIcon from "@/components-old/icons/AdjustmentIcon";
+import { Button } from "@/components-old/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@ui/collapsible";
+} from "@/components-old/ui/collapsible";
 import { RequiredArrangement, SongWith } from "@/models/song";
 import { getSongUnitMap } from "@/models/song-arrangement";
 import { useTranslations } from "next-intl";

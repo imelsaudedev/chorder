@@ -1,13 +1,15 @@
 import { retrieveSongs } from "@/prisma/data";
+import { NextRequest } from "next/server";
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const query = url.searchParams.get("query") || "";
-  const limitLines = url.searchParams.get("limitLines");
+export async function GET(request: NextRequest) {
+  const query = request.nextUrl.searchParams.get("query") || "";
+  const limitLines = request.nextUrl.searchParams.get("limitLines");
   const forceIncludeFirstLine =
-    url.searchParams.get("forceIncludeFirstLine") === "true";
+    request.nextUrl.searchParams.get("forceIncludeFirstLine") === "true";
   const limitLinesNumber = limitLines ? parseInt(limitLines) : undefined;
-  const excludedSongSlugs = (url.searchParams.get("excludedSongSlugs") || "")
+  const excludedSongSlugs = (
+    request.nextUrl.searchParams.get("excludedSongSlugs") || ""
+  )
     .split(",")
     .map((slug) => slug.trim())
     .filter(Boolean);

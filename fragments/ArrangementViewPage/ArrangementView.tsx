@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import ColumnViewer from './ColumnViewer';
-import { parseChordPro } from '@/chopro/music';
-import { SongUnit } from '@/models/song-unit';
-import { Mode } from '@/components/ModeButtonSet';
+import { useMemo } from "react";
+import ColumnViewer from "./ColumnViewer";
+import { parseChordPro } from "@/chopro/music";
+import { SongUnit } from "@/models/song-unit";
+import { Mode } from "@/components-old/ModeButtonSet";
 
 type ArrangementViewProps = {
   songUnitMap: SongUnit[];
@@ -10,7 +10,7 @@ type ArrangementViewProps = {
   columns?: number;
   transpose?: number;
   mode?: Mode;
-  density: 'compact' | 'normal';
+  density: "compact" | "normal";
 };
 
 export default function ArrangementView({
@@ -18,7 +18,7 @@ export default function ArrangementView({
   songKey,
   columns = 1,
   transpose = 0,
-  mode = 'chords',
+  mode = "chords",
   density,
 }: ArrangementViewProps) {
   const lineData = useMemo(() => {

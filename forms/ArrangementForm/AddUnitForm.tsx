@@ -1,8 +1,8 @@
-import Or from "@/components/Or";
-import UnitCircle from "@/components/UnitCircle";
-import PlusIcon from "@/components/icons/PlusIcon";
-import { Button } from "@ui/button";
-import { Label } from "@ui/label";
+import Or from "@/components-old/Or";
+import UnitCircle from "@/components-old/UnitCircle";
+import PlusIcon from "@/components-old/icons/PlusIcon";
+import { Button } from "@/components-old/ui/button";
+import { Label } from "@/components-old/ui/label";
 import { MouseEventHandler } from "react";
 import { ArrangementFormFields } from "./useArrangementFormFields";
 import { useTranslations } from "next-intl";

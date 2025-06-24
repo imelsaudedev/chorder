@@ -25,3 +25,11 @@ If you are running the server for the first time, setup the database with (if yo
 To run the tests:
 
     yarn test
+
+## Running Storybook
+
+Storybook is used for developing and testing UI components in isolation. To run Storybook, you need to have it installed in your project. To run Storybook, use the following command:
+
+```
+yarn storybook
+```

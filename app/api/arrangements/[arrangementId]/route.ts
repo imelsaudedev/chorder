@@ -1,13 +1,17 @@
 import { retrieveArrangement } from "@/prisma/data";
+import { NextRequest } from "next/server";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { arrangementId: number } }
 ) {
   const { arrangementId } = await params;
+  const searchParams = request.nextUrl.searchParams;
+  const includeUnits = searchParams.get("includeUnits") === "true";
+  const includeSong = searchParams.get("includeSong") === "true";
   const arrangement = await retrieveArrangement(arrangementId, {
-    includeSong: true,
-    includeUnits: true,
+    includeSong,
+    includeUnits,
   });
   if (!arrangement) {
     return new Response("Arrangement not found", { status: 404 });

@@ -1,5 +1,5 @@
-import ColumnsIcon from "@/components/icons/ColumnsIcon";
-import { ToggleGroup, ToggleGroupItem } from "@ui/toggle-group";
+import ColumnsIcon from "@/components-old/icons/ColumnsIcon";
+import { ToggleGroup, ToggleGroupItem } from "@/components-old/ui/toggle-group";
 import { useTranslations } from "next-intl";
 import { Dispatch, SetStateAction } from "react";
 

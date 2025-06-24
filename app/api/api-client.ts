@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  ClientSong,
-  SongArrangement,
-  SongArrangementWithUnits,
-} from "@/prisma/models";
+import { ClientArrangement, ClientSong } from "@/prisma/models";
 import useSWR from "swr";
 
 type FetchSongsArgs = {
@@ -60,38 +56,40 @@ export function useFetchSongArrangements(slug: string, includeUnits?: boolean) {
     `/api/songs/${slug}/arrangements?includeUnits=${(!!includeUnits).toString()}`,
     (...args) => fetch(...args).then((res) => res.json())
   );
-  if (includeUnits) {
-    return {
-      arrangements: data as SongArrangementWithUnits[],
-      isLoading,
-      isError: error,
-    };
-  } else {
-    return {
-      arrangements: data as SongArrangement[],
-      isLoading,
-      isError: error,
-    };
-  }
+  return {
+    arrangements: data as ClientArrangement[],
+    isLoading,
+    isError: error,
+  };
 }
 
-export function useFetchArrangement(songSlug?: string, arrangementId?: number) {
-  if (!songSlug && !arrangementId) {
-    throw new Error("Either songSlug or arrangementId must be provided");
+export function useFetchArrangement(
+  songSlug?: string,
+  arrangementId?: number,
+  initialArrangement?: ClientArrangement | null
+) {
+  if (!songSlug && !arrangementId && !initialArrangement) {
+    throw new Error(
+      "Either songSlug, arrangementId or initialArrangement must be provided"
+    );
   }
 
   const url = songSlug
     ? `/api/songs/${songSlug}/arrangements/${
         arrangementId?.toString() ?? "default"
       }`
-    : `/api/arrangements/${arrangementId!.toString()}`;
-  const { data, error, isLoading } = useSWR(url, (...args) =>
-    fetch(...args).then((res) => res.json())
-  );
+    : `/api/arrangements/${arrangementId?.toString()}`;
+
+  const { data, error, isLoading } = useSWR(url, (...args) => {
+    if (initialArrangement) {
+      return Promise.resolve(initialArrangement);
+    }
+    return fetch(...args).then((res) => res.json());
+  });
   return {
-    arrangement: data as
-      | (SongArrangementWithUnits & { song: ClientSong })
-      | null,
+    arrangement: initialArrangement
+      ? initialArrangement
+      : (data as (ClientArrangement & { song: ClientSong }) | null),
     isLoading,
     isError: error,
   };

@@ -1,16 +1,16 @@
-import ChordProViewer from "@/components/ChordProViewer";
-import TextInput from "@/components/TextInput";
-import UnitCircle from "@/components/UnitCircle";
-import CloseIcon from "@/components/icons/CloseIcon";
-import { Button } from "@ui/button";
-import { unitTypeColorClasses } from "@/components/unit-colors";
+import ChordProViewer from "@/components-old/ChordProViewer";
+import TextInput from "@/components-old/TextInput";
+import UnitCircle from "@/components-old/UnitCircle";
+import CloseIcon from "@/components-old/icons/CloseIcon";
+import { Button } from "@/components-old/ui/button";
+import { unitTypeColorClasses } from "@/components-old/unit-colors";
 import { SongUnitSetField } from "@/forms/ArrangementForm/useArrangementFormFields";
 import { SONG_UNIT_TYPES, SongUnit, SongUnitType } from "@/models/song-unit";
 import { ChangeEvent, useCallback, useId, useMemo } from "react";
-import { ComboBoxResponsive } from "@/components/ComboBoxResponsive";
+import { ComboBoxResponsive } from "@/components-old/ComboBoxResponsive";
 import { useTranslations } from "next-intl";
 import { parseChordPro } from "@/chopro/music";
-import BadgeSelector from "@/components/Badges/BadgeSelector";
+import BadgeSelector from "@/components-old/Badges/BadgeSelector";
 
 type UnitFormProps = {
   unit: SongUnit;

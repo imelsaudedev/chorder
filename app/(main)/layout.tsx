@@ -1,4 +1,4 @@
-import NavBar from "@/components/NavBar";
+import NavBar from "@/components/common/NavBar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,5 +9,5 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Conteúdo principal com deslocamento para a direita em telas grandes */}
       <div className="flex flex-col grow ml-0 sm:ml-20">{children}</div>
     </div>
-  )
+  );
 }

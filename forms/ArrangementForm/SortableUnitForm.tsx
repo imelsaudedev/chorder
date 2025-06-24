@@ -1,8 +1,11 @@
-import SortingButtons from '@/components/SortingButtons';
-import UnitForm from '@/fragments/UnitForm';
-import { SongUnit } from '@/models/song-unit';
-import { useCallback } from 'react';
-import { ArrangementFormFields, SongUnitSetField } from './useArrangementFormFields';
+import SortingButtons from "@/components-old/SortingButtons";
+import UnitForm from "@/fragments/UnitForm";
+import { SongUnit } from "@/models/song-unit";
+import { useCallback } from "react";
+import {
+  ArrangementFormFields,
+  SongUnitSetField,
+} from "./useArrangementFormFields";
 
 type SortableUnitFormProps = {
   index: number;
@@ -10,8 +13,18 @@ type SortableUnitFormProps = {
   arrangementFormFields: ArrangementFormFields;
 };
 
-export default function SortableUnitForm({ index, unit, arrangementFormFields }: SortableUnitFormProps) {
-  const { mapLength, onMoveUnitDown, onMoveUnitUp, onRemoveUnit, onUpdateUnit } = arrangementFormFields;
+export default function SortableUnitForm({
+  index,
+  unit,
+  arrangementFormFields,
+}: SortableUnitFormProps) {
+  const {
+    mapLength,
+    onMoveUnitDown,
+    onMoveUnitUp,
+    onRemoveUnit,
+    onUpdateUnit,
+  } = arrangementFormFields;
   const handleChangeUnit = useCallback(
     (set: SongUnitSetField) => {
       onUpdateUnit(unit.internalId, set);
@@ -24,8 +37,18 @@ export default function SortableUnitForm({ index, unit, arrangementFormFields }:
 
   return (
     <div className="flex">
-      <SortingButtons moveUnitUp={onMoveUnitUp} moveUnitDown={onMoveUnitDown} listSize={mapLength} index={index} />
-      <UnitForm unit={unit} removeUnit={handleRemoveUnit} onChangeUnit={handleChangeUnit} className="grow" />
+      <SortingButtons
+        moveUnitUp={onMoveUnitUp}
+        moveUnitDown={onMoveUnitDown}
+        listSize={mapLength}
+        index={index}
+      />
+      <UnitForm
+        unit={unit}
+        removeUnit={handleRemoveUnit}
+        onChangeUnit={handleChangeUnit}
+        className="grow"
+      />
     </div>
   );
 }

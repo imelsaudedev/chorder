@@ -4,8 +4,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@ui/form";
-import { Input } from "@ui/input";
+} from "@/components-old/ui/form";
+import { Input } from "@/components-old/ui/input";
 import { useTranslations } from "next-intl";
 import { UseFormReturn } from "react-hook-form";
 import { ArrangementFormSchema } from "./schema";

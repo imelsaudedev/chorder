@@ -1,8 +1,8 @@
-import FontSizeButtonSet from "@/components/FontSizeButtonSet";
-import KeyButtonSet from "@/components/KeyButtonSet";
-import ModeButtonSet, { Mode } from "@/components/ModeButtonSet";
-import DensityButtonSet from "@/components/DensityButtonSet";
-import { Label } from "@ui/label";
+import FontSizeButtonSet from "@/components-old/FontSizeButtonSet";
+import KeyButtonSet from "@/components-old/KeyButtonSet";
+import ModeButtonSet, { Mode } from "@/components-old/ModeButtonSet";
+import DensityButtonSet from "@/components-old/DensityButtonSet";
+import { Label } from "@/components-old/ui/label";
 import { useTranslations } from "next-intl";
 import { Dispatch, SetStateAction } from "react";
 import ColumnButtons from "./ColumnButtons";

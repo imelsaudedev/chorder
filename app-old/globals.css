@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-ibm-sans), sans-serif;
+  --font-bricolage: var(--font-bricolage-grotesque), sans-serif;
+  --font-serif: var(--font-ibm-serif), serif;
+  --font-mono: var(--font-ibm-mono), monospace;
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(232 84% 4.9%);
+
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(232 84% 4.9%);
+
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(232 84% 4.9%);
+
+  --primary: hsl(240, 5.9%, 10%);
+  --primary-foreground: hsl(232 95% 99%);
+
+  --secondary: hsl(238.7, 83.5%, 66.7%);
+  --secondary-foreground: hsl(225.9, 100%, 96.7%);
+
+  --muted: hsl(229 8% 72%);
+  --muted-foreground: hsl(226 5% 48%);
+
+  --accent: hsl(23 100% 60%);
+  --accent-foreground: hsl(24 93% 98%);
+
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(232 95% 99%);
+
+  --border: hsl(214.3 31.8% 91.4%);
+  --input: hsl(214.3 31.8% 91.4%);
+  --ring: hsl(232 84% 4.9%);
+
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(232 84% 4.9%);
+  --foreground: hsl(232 95% 99%);
+
+  --card: hsl(232 84% 4.9%);
+  --card-foreground: hsl(232 95% 99%);
+
+  --popover: hsl(232 84% 4.9%);
+  --popover-foreground: hsl(232 95% 99%);
+
+  --primary: hsl(0, 0%, 14.9%);
+  --primary-foreground: hsl(232 89% 14%);
+
+  --secondary: hsl(23 100% 60%);
+  --secondary-foreground: hsl(232 95% 99%);
+
+  --muted: hsl(217.2 32.6% 17.5%);
+  --muted-foreground: hsl(215 20.2% 65.1%);
+
+  --accent: hsl(23 100% 60%);
+  --accent-foreground: hsl(232 95% 99%);
+
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(232 95% 99%);
+
+  --border: hsl(217.2 32.6% 17.5%);
+  --input: hsl(217.2 32.6% 17.5%);
+  --ring: hsl(212.7 26.8% 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-white text-foreground;
+  }
+}
+
+:fullscreen .fullscreen-hidden {
+  display: none;
+}

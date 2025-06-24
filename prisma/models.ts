@@ -6,7 +6,6 @@ import {
   SongArrangement,
   Service,
   ServiceUnit,
-  ServiceUnitType,
 } from "@/generated/prisma";
 
 export type { Song, SongUnit, SongUnitType, SongArrangement, ServiceUnit };
@@ -14,29 +13,29 @@ export type { Song, SongUnit, SongUnitType, SongArrangement, ServiceUnit };
 export const SongUnitTypes = $Enums["SongUnitType"];
 export const ServiceUnitTypes = $Enums["ServiceUnitType"];
 
-export type ClientSong = Omit<Song, "id" | "legacyId">;
+export type ClientSong = Omit<Song, "id" | "legacyId"> & {
+  id?: number;
+  arrangements?: ClientArrangement[];
+};
 export type ClientArrangement = Omit<
   SongArrangement,
   "id" | "legacyId" | "songId"
->;
-export type ClientSongUnit = Omit<SongUnit, "id" | "arrangementId">;
-
-export type SongArrangementWithSong = SongArrangement & {
-  song: ClientSong;
+> & {
+  id?: number;
+  songId?: number;
+  song?: ClientSong;
+  units?: ClientSongUnit[];
 };
-export type SongArrangementWithUnits = SongArrangement & {
-  units: SongUnit[];
+export type ClientSongUnit = Omit<SongUnit, "id" | "arrangementId"> & {
+  id?: number;
+  arrangementId?: number;
 };
-
-export type SongWithArrangements = Song & {
-  arrangements: SongArrangementWithUnits[];
-};
-
-export type ClientService = Omit<Service, "id">;
-export type ServiceWithUnits = ClientService & {
-  units: ServiceUnit[];
-};
-export type ServiceSongUnit = ServiceUnit & {
+export type ClientServiceSongUnit = Omit<ServiceUnit, "id" | "serviceId"> & {
   type: "SONG";
-  arrangementId: number;
+  arrangement?: ClientArrangement | null;
+  serviceId?: number;
+};
+export type ClientServiceUnit = ClientServiceSongUnit;
+export type ClientService = Omit<Service, "id"> & {
+  units?: ClientServiceUnit[];
 };

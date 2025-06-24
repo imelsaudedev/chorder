@@ -1,11 +1,11 @@
-import EditHeader from "@/components/EditHeader";
+import EditHeader from "@/components-old/EditHeader";
 import {
   MoveArrangementAction,
   PostSongAction,
-} from "@/app/(main)/songs/[song]/actions";
-import SaveButtonSet from "@/components/SaveButtonSet";
-import { Form } from "@ui/form";
-import { Separator } from "@ui/separator";
+} from "@/app-old/(main)/songs/[song]/actions";
+import SaveButtonSet from "@/components-old/SaveButtonSet";
+import { Form } from "@/components-old/ui/form";
+import { Separator } from "@/components-old/ui/separator";
 import { useArrangementForm } from "@/forms/ArrangementForm/useArrangementForm";
 import { NewSong } from "@/models/song";
 import { useCallback } from "react";

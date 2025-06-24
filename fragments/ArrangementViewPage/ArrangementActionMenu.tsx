@@ -1,12 +1,15 @@
-import ConfirmDeleteAlert from "@/components/ConfirmDeleteAlert";
-import { AlertDialog, AlertDialogTrigger } from "@ui/alert-dialog";
-import { Button } from "@ui/button";
+import ConfirmDeleteAlert from "@/components-old/ConfirmDeleteAlert";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+} from "@/components-old/ui/alert-dialog";
+import { Button } from "@/components-old/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@ui/dropdown-menu";
+} from "@/components-old/ui/dropdown-menu";
 import useHrefWithParams from "@/hooks/useHrefWithParams";
 import { useTranslations } from "next-intl";
 import Link from "next/link";

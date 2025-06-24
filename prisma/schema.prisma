@@ -83,7 +83,7 @@ model ServiceUnit {
   order     Int
 
   service   Service @relation(fields: [serviceId], references: [id])
-  arrangement  SongArrangement? @relation(fields: [arrangementId], references: [id])
+  arrangement  SongArrangement? @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
 }
 
 enum ServiceUnitType {
