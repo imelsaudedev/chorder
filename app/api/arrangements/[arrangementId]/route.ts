@@ -3,13 +3,13 @@ import { NextRequest } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { arrangementId: number } }
+  { params }: { params: { arrangementId: string } }
 ) {
   const { arrangementId } = await params;
   const searchParams = request.nextUrl.searchParams;
   const includeUnits = searchParams.get("includeUnits") === "true";
   const includeSong = searchParams.get("includeSong") === "true";
-  const arrangement = await retrieveArrangement(arrangementId, {
+  const arrangement = await retrieveArrangement(parseInt(arrangementId), {
     includeSong,
     includeUnits,
   });
@@ -26,10 +26,10 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { arrangementId: number } }
+  { params }: { params: { arrangementId: string } }
 ) {
   const { arrangementId } = await params;
-  const success = await deleteArrangement(arrangementId);
+  const success = await deleteArrangement(parseInt(arrangementId));
   if (!success) {
     return new Response("Failed to delete arrangement", { status: 500 });
   }

@@ -437,9 +437,13 @@ async function updateDefaultArrangement(songId: number): Promise<void> {
   if (!originalSong || !originalSong.arrangements?.length) {
     return;
   }
-  if (originalSong.arrangements.length > 0) {
+  const notDeletedArrangements = originalSong.arrangements.filter(
+    (arr) => !arr.isDeleted
+  );
+
+  if (notDeletedArrangements.length > 0) {
     await prisma.songArrangement.update({
-      where: { id: originalSong.arrangements[0].id },
+      where: { id: notDeletedArrangements[0].id },
       data: { isDefault: true },
     });
   } else {
@@ -450,49 +454,61 @@ async function updateDefaultArrangement(songId: number): Promise<void> {
   }
 }
 
-export async function deleteArrangement(
-  songSlugOrId: string | number,
-  arrangementId?: number | null
+export async function deleteDefaultArrangement(
+  songSlugOrId: string | number
 ): Promise<boolean> {
-  let songId: number;
-  if (!arrangementId) {
-    const song = await retrieveSong(songSlugOrId, {
-      includeArrangements: true,
-    });
-    if (!song?.arrangements?.length) {
-      return false;
-    }
-    const defaultArrangement = song.arrangements.find(
-      (arr) => arr.isDefault && !arr.isDeleted
+  const song = await retrieveSong(songSlugOrId, {
+    includeArrangements: true,
+  });
+  if (!song?.arrangements?.length) {
+    console.error(
+      `No arrangements found for song ${songSlugOrId}. Cannot delete default arrangement`
     );
-    if (defaultArrangement) {
-      await prisma.songArrangement.update({
-        where: {
-          id: defaultArrangement.id,
-          isDefault: true,
-          isDeleted: false,
-        },
-        data: { isDeleted: true },
-        include: {
-          song: true,
-        },
-      });
-    } else {
-      return false;
-    }
-    songId = song.id!;
-  } else {
-    const arrangement = await prisma.songArrangement.update({
-      where: { id: arrangementId },
+    return false;
+  }
+  const defaultArrangement = song.arrangements.find(
+    (arr) => arr.isDefault && !arr.isDeleted
+  );
+  if (defaultArrangement) {
+    await prisma.songArrangement.update({
+      where: {
+        id: defaultArrangement.id,
+        isDefault: true,
+        isDeleted: false,
+      },
       data: { isDeleted: true },
       include: {
         song: true,
       },
     });
-    if (!arrangement?.song) return false;
-    songId = arrangement.song.id;
+  } else {
+    console.error(
+      `No default arrangement found for song ${songSlugOrId}. Cannot delete default arrangement`
+    );
+    return false;
   }
-  await updateDefaultArrangement(songId);
+  await updateDefaultArrangement(song.id!);
+  return true;
+}
+
+export async function deleteArrangement(
+  arrangementId: number
+): Promise<boolean> {
+  const arrangement = await prisma.songArrangement.update({
+    where: { id: arrangementId },
+    data: { isDeleted: true },
+    include: {
+      song: true,
+    },
+  });
+  console.log(arrangement);
+  if (!arrangement?.song) {
+    console.error(
+      `Arrangement with ID ${arrangementId} not found or already deleted`
+    );
+    return false;
+  }
+  await updateDefaultArrangement(arrangement.song.id);
   return true;
 }
 

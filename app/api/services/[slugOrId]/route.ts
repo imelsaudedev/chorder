@@ -4,7 +4,7 @@ export async function GET(
   request: Request,
   {
     params,
-  }: { params: { slugOrId: string; arrangementId: number | "default" } }
+  }: { params: { slugOrId: string; arrangementId: string | "default" } }
 ) {
   const { slugOrId } = await params;
   const service = await retrieveService(slugOrId);
