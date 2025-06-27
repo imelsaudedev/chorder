@@ -1,0 +1,44 @@
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useTranslations } from "next-intl";
+import { Dispatch, SetStateAction, useCallback } from "react";
+import { Density } from "@/components/config/config";
+
+type DensityButtonSetProps = {
+  id?: string;
+  density: Density;
+  setDensity: Dispatch<SetStateAction<Density>>;
+};
+
+export default function DensityButtonSet({
+  id,
+  density,
+  setDensity,
+}: DensityButtonSetProps) {
+  const t = useTranslations("Messages");
+  const handleValueChange = useCallback(
+    (value: string) => {
+      if (value) setDensity(value as Density);
+    },
+    [setDensity]
+  );
+
+  return (
+    <fieldset>
+      <legend className="sr-only">{t("density")}</legend>
+      <ToggleGroup
+        id={id}
+        variant="outline"
+        type="single"
+        onValueChange={handleValueChange}
+        value={density}
+      >
+        <ToggleGroupItem value="normal" aria-label={t("normal")}>
+          {t("normal")}
+        </ToggleGroupItem>
+        <ToggleGroupItem value="compact" aria-label={t("compact")}>
+          {t("compact")}
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </fieldset>
+  );
+}

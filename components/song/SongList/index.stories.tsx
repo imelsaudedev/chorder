@@ -43,10 +43,12 @@ export const Default: Story = {
 
 function mockSong(title: string, index: number): ClientSong {
   return {
-    slug: `song-${index}`,
+    slug: `song-${index + 1}`,
     title,
-    artist: `Artist ${index}`,
-    lyrics: `Lyrics for song ${index}\nLine 2 of song ${index}\nLine 3 of song ${index}`,
+    artist: `Artist ${index + 1}`,
+    lyrics: `Lyrics for song ${index + 1}\nLine 2 of song ${
+      index + 1
+    }\nLine 3 of song ${index + 1}`,
     isDeleted: false,
   };
 }

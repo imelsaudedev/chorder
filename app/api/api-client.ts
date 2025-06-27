@@ -2,6 +2,7 @@
 
 import { ClientArrangement, ClientSong } from "@/prisma/models";
 import useSWR from "swr";
+import useSWRMutation from "swr/mutation";
 
 type FetchSongsArgs = {
   query?: string;
@@ -74,11 +75,10 @@ export function useFetchArrangement(
     );
   }
 
+  const arrangementIdStr = arrangementId?.toString() ?? "default";
   const url = songSlug
-    ? `/api/songs/${songSlug}/arrangements/${
-        arrangementId?.toString() ?? "default"
-      }`
-    : `/api/arrangements/${arrangementId?.toString()}`;
+    ? `/api/songs/${songSlug}/arrangements/${arrangementIdStr}?includeSong=true&includeUnits=true`
+    : `/api/arrangements/${arrangementIdStr}?includeSong=true&includeUnits=true`;
 
   const { data, error, isLoading } = useSWR(url, (...args) => {
     if (initialArrangement) {
@@ -91,6 +91,27 @@ export function useFetchArrangement(
       ? initialArrangement
       : (data as (ClientArrangement & { song: ClientSong }) | null),
     isLoading,
+    isError: error,
+  };
+}
+
+export function useDeleteArrangement(arrangementId: number) {
+  const deleteArrangement = async () => {
+    const response = await fetch(`/api/arrangements/${arrangementId}`, {
+      method: "DELETE",
+    });
+    return response.ok;
+  };
+
+  const { data, trigger, isMutating, error } = useSWRMutation(
+    `/api/arrangements/${arrangementId}`,
+    deleteArrangement
+  );
+
+  return {
+    success: data as boolean | undefined,
+    deleteArrangement: trigger,
+    isMutating,
     isError: error,
   };
 }

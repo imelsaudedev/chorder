@@ -1,4 +1,4 @@
-import { retrieveArrangement } from "@/prisma/data";
+import { deleteArrangement, retrieveArrangement } from "@/prisma/data";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -22,4 +22,16 @@ export async function GET(
       "Content-Type": "application/json",
     },
   });
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { arrangementId: number } }
+) {
+  const { arrangementId } = await params;
+  const success = await deleteArrangement(arrangementId);
+  if (!success) {
+    return new Response("Failed to delete arrangement", { status: 500 });
+  }
+  return new Response(null, { status: 204 });
 }

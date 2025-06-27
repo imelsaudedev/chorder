@@ -5,14 +5,14 @@ export async function GET(
   request: NextRequest,
   {
     params,
-  }: { params: { slugOrId: string; arrangementId: number | "default" } }
+  }: { params: { slugOrId: string; arrangementId: string | "default" } }
 ) {
   const { slugOrId, arrangementId } = await params;
   const searchParams = request.nextUrl.searchParams;
   const includeUnits = searchParams.get("includeUnits") === "true";
   const includeSong = searchParams.get("includeSong") === "true";
   const arrangement = await retrieveArrangement(
-    arrangementId === "default" ? null : arrangementId,
+    arrangementId === "default" ? null : parseInt(arrangementId),
     {
       songSlugOrId: slugOrId,
       includeUnits,

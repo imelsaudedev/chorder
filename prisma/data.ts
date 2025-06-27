@@ -193,7 +193,15 @@ export async function retrieveArrangement(
       },
       include: {
         units: includeUnits,
-        song: includeSong,
+        song: includeSong
+          ? {
+              include: {
+                arrangements: {
+                  where: { isDeleted: false },
+                },
+              },
+            }
+          : false,
       },
     });
   }
@@ -217,7 +225,15 @@ export async function retrieveArrangement(
     where,
     include: {
       units: includeUnits,
-      song: includeSong,
+      song: includeSong
+        ? {
+            include: {
+              arrangements: {
+                where: { isDeleted: false },
+              },
+            },
+          }
+        : false,
     },
   });
 }
@@ -329,7 +345,15 @@ export async function updateArrangement(
     },
     data: inputData,
     include: {
-      song: includeSong,
+      song: includeSong
+        ? {
+            include: {
+              arrangements: {
+                where: { isDeleted: false },
+              },
+            },
+          }
+        : false,
       units: includeUnits,
     },
   });
@@ -429,15 +453,14 @@ async function updateDefaultArrangement(songId: number): Promise<void> {
 export async function deleteArrangement(
   songSlugOrId: string | number,
   arrangementId?: number | null
-): Promise<void> {
+): Promise<boolean> {
   let songId: number;
   if (!arrangementId) {
     const song = await retrieveSong(songSlugOrId, {
       includeArrangements: true,
     });
-    if (!song) throw new Error("Song not found");
-    if (!song.arrangements?.length) {
-      throw new Error("No arrangements to delete");
+    if (!song?.arrangements?.length) {
+      return false;
     }
     const defaultArrangement = song.arrangements.find(
       (arr) => arr.isDefault && !arr.isDeleted
@@ -454,6 +477,8 @@ export async function deleteArrangement(
           song: true,
         },
       });
+    } else {
+      return false;
     }
     songId = song.id!;
   } else {
@@ -464,11 +489,11 @@ export async function deleteArrangement(
         song: true,
       },
     });
-    if (!arrangement) throw new Error("Arrangement not found");
-    if (!arrangement.song) throw new Error("Song not found");
+    if (!arrangement?.song) return false;
     songId = arrangement.song.id;
   }
   await updateDefaultArrangement(songId);
+  return true;
 }
 
 export async function retrieveService(
