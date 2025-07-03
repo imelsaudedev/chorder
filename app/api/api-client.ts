@@ -95,6 +95,40 @@ export function useFetchArrangement(
   };
 }
 
+export function useCreateOrUpdateArrangement(arrangementId?: number | null) {
+  async function createOrUpdateArrangement(
+    url: string,
+    { arg }: { arg: ClientArrangement }
+  ) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create arrangement");
+    }
+    return response.json();
+  }
+
+  const url = arrangementId
+    ? `/api/arrangements/${arrangementId}`
+    : "/api/arrangements";
+
+  const { data, trigger, isMutating, error } = useSWRMutation(
+    url,
+    createOrUpdateArrangement
+  );
+  return {
+    arrangement: data as ClientArrangement | undefined,
+    createOrUpdateArrangement: trigger,
+    isMutating,
+    isError: error,
+  };
+}
+
 export function useDeleteArrangement(arrangementId: number) {
   const deleteArrangement = async () => {
     const response = await fetch(`/api/arrangements/${arrangementId}`, {
@@ -111,6 +145,56 @@ export function useDeleteArrangement(arrangementId: number) {
   return {
     success: data as boolean | undefined,
     deleteArrangement: trigger,
+    isMutating,
+    isError: error,
+  };
+}
+
+export function useMoveArrangement(arrangementId: number) {
+  async function moveArrangement(url: string, { arg }: { arg: string }) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ targetSong: arg }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to move arrangement");
+    }
+    return response.json();
+  }
+
+  const { trigger, isMutating, error } = useSWRMutation(
+    `/api/arrangements/${arrangementId}/move`,
+    moveArrangement
+  );
+
+  return {
+    moveArrangement: trigger,
+    isMutating,
+    isError: error,
+  };
+}
+
+export function useMakeArrangementDefault(arrangementId: number) {
+  async function makeDefault(url: string) {
+    const response = await fetch(url, {
+      method: "POST",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to make arrangement default");
+    }
+    return response.json();
+  }
+
+  const { trigger, isMutating, error } = useSWRMutation(
+    `/api/arrangements/${arrangementId}/default`,
+    makeDefault
+  );
+
+  return {
+    makeArrangementDefault: trigger,
     isMutating,
     isError: error,
   };

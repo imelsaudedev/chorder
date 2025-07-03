@@ -1,12 +1,12 @@
 "use client";
 
+import { useFetchArrangement } from "#api-client";
 import Main from "@/components/common/Main";
-import ArrangementView from "@/components/song/ArrangementView";
-import ArrangementHeader from "@/components/song/ArrangementHeader";
 import SongConfigProvider, {
   useSongConfig,
 } from "@/components/config/SongConfig";
-import { useFetchArrangement } from "@/app/api/api-client";
+import ArrangementHeader from "@/components/song/ArrangementHeader";
+import ArrangementView from "@/components/song/ArrangementView";
 
 type ClientPageProps = { songSlug: string; arrangementId?: number };
 export default function ClientPage({

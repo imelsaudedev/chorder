@@ -1,9 +1,8 @@
 "use client";
 
-import { useFetchSongs } from "@/app/api/api-client";
+import { useFetchSongs } from "#api-client";
 import SongList from "@/components/song/SongList";
 import SongListSkeleton from "@/components/song/SongList/SongListSkeleton";
-import { ClientSong } from "@/prisma/models";
 
 type ClientSongListProps = {
   query?: string;

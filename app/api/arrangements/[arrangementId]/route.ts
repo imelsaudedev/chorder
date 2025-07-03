@@ -1,4 +1,9 @@
-import { deleteArrangement, retrieveArrangement } from "@/prisma/data";
+import {
+  deleteArrangement,
+  retrieveArrangement,
+  updateArrangement,
+} from "@/prisma/data";
+import { arrangementSchema } from "@/schemas/arrangement";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -34,4 +39,33 @@ export async function DELETE(
     return new Response("Failed to delete arrangement", { status: 500 });
   }
   return new Response(null, { status: 204 });
+}
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { arrangementId: string } }
+) {
+  const { arrangementId } = await params;
+  const arrangement = arrangementSchema.parse(await request.json());
+  if (arrangement.id !== parseInt(arrangementId)) {
+    return new Response("Arrangement ID mismatch", { status: 400 });
+  }
+  if (
+    !arrangement.id ||
+    !arrangement ||
+    !arrangement.song ||
+    !arrangement.units
+  ) {
+    return new Response("Invalid arrangement data", { status: 400 });
+  }
+
+  const createdArrangement = await updateArrangement(arrangement, {
+    includeSong: true,
+    includeUnits: true,
+  });
+
+  return new Response(JSON.stringify(createdArrangement), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }

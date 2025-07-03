@@ -1,3 +1,4 @@
+import { getLyrics } from "@/chopro/music";
 import prisma from "./client";
 import {
   ClientArrangement,
@@ -5,7 +6,6 @@ import {
   ClientServiceSongUnit,
   ClientServiceUnit,
   ClientSong,
-  ClientSongUnit,
 } from "./models";
 
 export function retrieveSongSlugs() {
@@ -239,13 +239,7 @@ export async function retrieveArrangement(
 }
 
 export async function createArrangementWithSong(
-  songTitle: string,
-  songSlug: string,
-  artist: string | null,
-  lyrics: string,
-  arrangementName: string | null,
-  key: string,
-  units: ClientSongUnit[],
+  arrangement: ClientArrangement,
   {
     includeSong = false,
     includeUnits = false,
@@ -254,16 +248,33 @@ export async function createArrangementWithSong(
     includeUnits?: boolean;
   } = {}
 ): Promise<ClientArrangement> {
-  const arrangement = await prisma.songArrangement.create({
+  if (!arrangement.song) {
+    throw new Error("Arrangement must have a song to create an arrangement");
+  }
+  const songSlug = await slugForSong(arrangement.song.title);
+  if (!arrangement.units || arrangement.units.length === 0) {
+    throw new Error("Arrangement must have at least one unit");
+  }
+  const lyrics = arrangement.units
+    .map((unit) => getLyrics(unit.content))
+    .join("\n");
+  const title = arrangement.song.title;
+  const artist =
+    arrangement.song.artist && arrangement.song.artist.trim().length
+      ? arrangement.song.artist
+      : null;
+
+  const createdArrangement = await prisma.songArrangement.create({
     data: {
-      name: arrangementName,
-      key,
+      name: arrangement.name,
+      key: arrangement.key,
+      isDefault: arrangement.isDefault,
       song: {
         connectOrCreate: {
           where: { slug: songSlug },
           create: {
             slug: songSlug,
-            title: songTitle,
+            title,
             artist,
             lyrics,
           },
@@ -271,7 +282,7 @@ export async function createArrangementWithSong(
       },
       units: {
         createMany: {
-          data: units,
+          data: arrangement.units,
         },
       },
     },
@@ -280,39 +291,29 @@ export async function createArrangementWithSong(
       units: includeUnits,
     },
   });
-  if (arrangement.song.isDeleted) {
+  if (createdArrangement.song.isDeleted) {
     // Restore the song if it was previously deleted
     await prisma.song.update({
-      where: { id: arrangement.song.id },
+      where: { id: createdArrangement.song.id },
       data: {
         isDeleted: false,
         slug: songSlug,
-        title: songTitle,
+        title,
         artist,
         lyrics,
       },
     });
-    await makeArrangementDefault(arrangement.id);
+    await makeArrangementDefault(createdArrangement.id);
   }
   if (!includeSong) {
-    const { song, ...rest } = arrangement;
+    const { song, ...rest } = createdArrangement;
     return rest;
   }
-  return arrangement;
+  return createdArrangement;
 }
 
 export async function updateArrangement(
-  arrangementId: number,
-  data: {
-    title: string;
-    slug: string;
-    lyrics: string;
-    artist: string | null;
-    name: string | null;
-    key: string;
-    isDeleted: boolean;
-    units?: ClientSongUnit[];
-  },
+  arrangement: ClientArrangement,
   {
     includeSong = false,
     includeUnits = false,
@@ -321,29 +322,59 @@ export async function updateArrangement(
     includeUnits?: boolean;
   } = {}
 ): Promise<ClientArrangement> {
-  const { units, title, slug, lyrics, artist, ...rest } = data;
-  const inputData: typeof rest & { units?: any } = rest;
-  if (units) {
-    inputData["units"] = {
+  if (!arrangement.id) {
+    throw new Error("Arrangement ID is required to update an arrangement");
+  }
+  const baseArrangement = await retrieveArrangement(arrangement.id, {
+    includeSong,
+    includeUnits,
+  });
+  if (!baseArrangement) {
+    throw new Error("Arrangement not found");
+  }
+  const arrangementData: {
+    id: number;
+    name?: string | null;
+    key?: string;
+    units?: any;
+  } = {
+    id: arrangement.id,
+    name: arrangement.name,
+    key: arrangement.key,
+  };
+
+  const song = arrangement.song ?? baseArrangement.song!;
+  const songData: {
+    title: string;
+    artist: string | null;
+    lyrics?: string;
+  } = {
+    title: song.title,
+    artist: song.artist,
+  };
+  if (arrangement.isDefault && arrangement.units) {
+    songData.lyrics = arrangement.units
+      .map((unit) => getLyrics(unit.content))
+      .join("\n");
+  }
+
+  if (arrangement.units) {
+    arrangementData["units"] = {
       deleteMany: {},
       createMany: {
-        data: units,
+        data: arrangement.units,
       },
     };
   }
   await prisma.song.update({
-    where: { slug },
-    data: {
-      title,
-      lyrics,
-      artist,
-    },
+    where: { slug: song.slug },
+    data: songData,
   });
   return prisma.songArrangement.update({
     where: {
-      id: arrangementId,
+      id: arrangement.id,
     },
-    data: inputData,
+    data: arrangementData,
     include: {
       song: includeSong
         ? {
@@ -434,7 +465,7 @@ async function updateDefaultArrangement(songId: number): Promise<void> {
   const originalSong = await retrieveSong(songId, {
     includeArrangements: true,
   });
-  if (!originalSong || !originalSong.arrangements?.length) {
+  if (!originalSong || !originalSong.arrangements) {
     return;
   }
   const notDeletedArrangements = originalSong.arrangements.filter(

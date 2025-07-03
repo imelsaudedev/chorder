@@ -1,5 +1,9 @@
-import { IBM_Plex_Sans, IBM_Plex_Serif, IBM_Plex_Mono } from "next/font/google";
-import { Bricolage_Grotesque } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  IBM_Plex_Mono,
+  IBM_Plex_Sans,
+  IBM_Plex_Serif,
+} from "next/font/google";
 
 export const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-sans",

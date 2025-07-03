@@ -19,7 +19,9 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
+      // "#api-client": ["app/api/api-client.ts"],
       "@/*": ["./*"]
     }
   },

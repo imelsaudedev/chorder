@@ -1,3 +1,5 @@
+import { useDeleteArrangement } from "#api-client";
+import ConfirmDeleteAlert from "@/components/common/ConfirmDeleteAlert";
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,13 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ClientArrangement } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import ConfirmDeleteAlert from "@/components/common/ConfirmDeleteAlert";
-import { useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ClientArrangement } from "@/prisma/models";
-import { useDeleteArrangement } from "@/app/api/api-client";
+import { useCallback } from "react";
 
 interface ArrangementActionMenuProps {
   arrangement: ClientArrangement;

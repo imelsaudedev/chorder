@@ -1,4 +1,4 @@
-import { retrieveArrangement, retrieveSong } from "@/prisma/data";
+import { retrieveArrangement } from "@/prisma/data";
 import ClientArrangementEditPage from "./ClientArrangementEditPage";
 
 export default async function EditSongPage({
@@ -8,20 +8,17 @@ export default async function EditSongPage({
   params: { song: string };
   searchParams: { arrangement?: number };
 }) {
-  const { song: songSlug } = await params;
+  const { song: songSlugOrId } = await params;
   const arrangementId = (await searchParams)?.arrangement;
 
-  const [song, arrangement] = await Promise.all([
-    retrieveSong(songSlug),
-    retrieveArrangement(arrangementId ?? "default", {
-      songSlug,
-      includeUnits: true,
-    }),
-  ]);
+  const arrangement = await retrieveArrangement(arrangementId, {
+    songSlugOrId,
+    includeUnits: true,
+  });
 
   if (!song || !arrangement) {
     return null;
   }
 
-  return <ClientArrangementEditPage song={song} arrangement={arrangement} />;
+  return <ClientArrangementEditPage arrangement={arrangement} />;
 }

@@ -28,3 +28,19 @@ export const Default: Story = {
     </div>
   ),
 };
+
+export const Edit: Story = {
+  parameters: {
+    layout: "centered",
+  },
+  args: {
+    title: "Edit Page Header",
+    actions: <Button>Action</Button>,
+    variant: "edit",
+  },
+  render: (args) => (
+    <div className="w-4xl">
+      <PageHeader {...args} />
+    </div>
+  ),
+};
