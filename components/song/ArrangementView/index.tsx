@@ -1,6 +1,6 @@
+import { useSongConfig } from "@/components/config/SongConfig";
 import { ClientArrangement } from "@/prisma/models";
 import ColumnViewer from "./ColumnViewer";
-import { useSongConfig } from "@/components/config/SongConfig";
 import Skeleton from "./Skeleton";
 
 type ArrangementViewerProps = {

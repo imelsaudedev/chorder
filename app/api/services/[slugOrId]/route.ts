@@ -1,4 +1,4 @@
-import { retrieveService } from "@/prisma/data";
+import { deleteService, retrieveService } from "@/prisma/data";
 
 export async function GET(
   request: Request,
@@ -17,4 +17,16 @@ export async function GET(
       "Content-Type": "application/json",
     },
   });
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { slugOrId: string } }
+) {
+  const { slugOrId } = await params;
+  const success = await deleteService(slugOrId);
+  if (!success) {
+    return new Response("Failed to delete arrangement", { status: 500 });
+  }
+  return new Response(null, { status: 204 });
 }

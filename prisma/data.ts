@@ -532,7 +532,7 @@ export async function deleteArrangement(
       song: true,
     },
   });
-  console.log(arrangement);
+
   if (!arrangement?.song) {
     console.error(
       `Arrangement with ID ${arrangementId} not found or already deleted`
@@ -560,6 +560,7 @@ export async function retrieveService(
             },
             include: {
               song: true,
+              units: true,
             },
           },
         },
@@ -677,7 +678,9 @@ async function createOrUpdateServiceArrangements(
   return await Promise.all(unitPromises);
 }
 
-export async function deleteService(slugOrId: string | number): Promise<void> {
+export async function deleteService(
+  slugOrId: string | number
+): Promise<boolean> {
   const service = await prisma.service.findFirst({
     where: {
       ...selectSlugOrId(slugOrId),
@@ -685,12 +688,14 @@ export async function deleteService(slugOrId: string | number): Promise<void> {
     },
   });
   if (!service) {
-    throw new Error("Service not found");
+    console.error("Service not found");
+    return false;
   }
   await prisma.service.update({
     where: { id: service.id },
     data: { isDeleted: true },
   });
+  return true;
 }
 
 function limitLyrics(

@@ -1,34 +1,29 @@
-import KeyButtonSet from "@/app-old/lib/components/KeyButtonSet";
-import { Skeleton } from "@/components-old/ui/skeleton";
-import Heading from "@/components/common/Heading";
-import { Button } from "@/components-old/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components-old/ui/dropdown-menu";
+import Heading from "@/components/common/Heading";
+import KeyButtonSet from "@/components/config/KeyButtonSet";
+import { useSongConfig } from "@/components/config/SongConfig";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ClientArrangement } from "@/prisma/models";
 import { MoreVertical } from "lucide-react";
-import {
-  useArrangement,
-  useDensity,
-  useSong,
-  useTranspose,
-} from "@/app-old/(main)/songs/ArrangementViewer/ArrangementViewContext";
 
 type ServiceArrangementHeaderProps = {
+  arrangement: ClientArrangement | null;
   order: number;
 };
 
 export default function ServiceArrangementHeader({
+  arrangement,
   order,
 }: ServiceArrangementHeaderProps) {
-  const { song } = useSong();
-  const { arrangement } = useArrangement();
-  const { transpose, setTranspose } = useTranspose();
-  const { density } = useDensity();
+  const { transpose, setTranspose, density } = useSongConfig();
 
-  if (!song || !arrangement) {
+  if (!arrangement) {
     return (
       <div className="sticky top-0 bg-white/80 backdrop-blur-xs z-10 flex w-full flex-row justify-between items-center py-2 md:py-2 lg:py-4">
         <Skeleton className="w-1/3 h-12 bg-gray-500" />
@@ -37,26 +32,29 @@ export default function ServiceArrangementHeader({
     );
   }
 
+  if (!arrangement.song) {
+    throw new Error("Arrangement song is not available");
+  }
+
   return (
     <div
       className={`sticky top-0 bg-white/80 backdrop-blur-xs z-10 flex w-full flex-row justify-between items-center ${
         density === "compact" ? "py-2 md:py-1 lg:py-2" : "py-2 md:py-2 lg:py-4"
       }`}
     >
-      {/* Título e Artista */}
       <div className="flex flex-col">
         <Heading level={2}>
           <span>{order}. </span>
-          {song.title}
+          {arrangement.song.title}
         </Heading>
-        {song.artist && (
+        {arrangement.song.artist && (
           <span
-            className={`song-artist flex items-center text-zinc-600 gap-1 fullscreen-hidden ${
+            className={`flex items-center text-zinc-600 gap-1 fullscreen-hidden ${
               density === "compact" ? "text-xs" : "text-sm sm:text-base"
             }`}
           >
             {" "}
-            {song.artist}
+            {arrangement.song.artist}
           </span>
         )}
       </div>

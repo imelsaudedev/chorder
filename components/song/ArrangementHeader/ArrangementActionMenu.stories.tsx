@@ -1,6 +1,6 @@
-import { ClientArrangement } from "@/prisma/models";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import arrangements from "@/mock/arrangements";
 import ArrangementActionMenu from "./ArrangementActionMenu";
 
 const meta = {
@@ -16,22 +16,6 @@ export const Default: Story = {
     layout: "centered",
   },
   args: {
-    arrangement: buildArrangement(1, true, "A"),
+    arrangement: arrangements[1],
   },
 };
-
-function buildArrangement(
-  id: number,
-  isDefault: boolean,
-  key: string,
-  name?: string
-): ClientArrangement {
-  return {
-    id,
-    name: name ?? null,
-    isDefault,
-    key,
-    isDeleted: false,
-    isServiceArrangement: false,
-  };
-}

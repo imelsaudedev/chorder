@@ -199,3 +199,38 @@ export function useMakeArrangementDefault(arrangementId: number) {
     isError: error,
   };
 }
+
+export function useFetchService(slugOrId: string | number) {
+  const url = `/api/services/${slugOrId}`;
+  const { data, error, isLoading } = useSWR(url, (...args) =>
+    fetch(...args).then((res) => res.json())
+  );
+  return {
+    service: data,
+    isLoading,
+    isError: error,
+  };
+}
+
+export function useDeleteService(slugOrId: string | number) {
+  async function deleteService(url: string) {
+    const response = await fetch(url, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete service");
+    }
+    return response.status === 204;
+  }
+
+  const { trigger, isMutating, error } = useSWRMutation(
+    `/api/services/${slugOrId}`,
+    deleteService
+  );
+
+  return {
+    deleteService: trigger,
+    isMutating,
+    isError: error,
+  };
+}

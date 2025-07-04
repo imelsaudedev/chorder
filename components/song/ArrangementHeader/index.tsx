@@ -1,6 +1,5 @@
 "use client";
 
-import AdjustmentIcon from "@/app-old/lib/components/icons/AdjustmentIcon";
 import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,12 +8,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ClientArrangement, ClientSong } from "@/prisma/models";
-import { NotebookPen } from "lucide-react";
+import { NotebookPen, Settings2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import ArrangementActionMenu from "./ArrangementActionMenu";
 import ArrangementSelector from "./ArrangementSelector";
-import SongConfig from "./SongConfig";
 import Skeleton from "./Skeleton";
+import SongConfig from "./SongConfig";
 
 type ArrangementViewerHeaderProps = {
   arrangement: ClientArrangement | null;
@@ -44,7 +43,7 @@ export default function ArrangementViewerHeader({
             <ArrangementActionMenu arrangement={arrangement} />
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="icon">
-                <AdjustmentIcon />
+                <Settings2 />
                 <span className="sr-only">{t("toggleConfig")}</span>
               </Button>
             </CollapsibleTrigger>

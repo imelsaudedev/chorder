@@ -1,22 +1,23 @@
-import DensityButtonSet from "@/app-old/lib/components/DensityButtonSet";
-import FontSizeButtonSet from "@/app-old/lib/components/FontSizeButtonSet";
-import ColumnButtons from "@/app-old/lib/components/ColumnButtons";
-import ModeButtonSet from "@/app-old/lib/components/ModeButtonSet";
-import { Label } from "@/components-old/ui/label";
+import ColumnButtons from "@/components/config/ColumnButtons";
+import DensityButtonSet from "@/components/config/DensityButtonSet";
+import FontSizeButtonSet from "@/components/config/FontSizeButtonSet";
+import ModeButtonSet from "@/components/config/ModeButtonSet";
+import { useServiceConfig } from "@/components/config/ServiceConfig";
+import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
-import {
-  useColumns,
-  useDensity,
-  useFontSize,
-  useMode,
-} from "./ServiceViewContext";
 
 export default function ServiceConfig() {
   const t = useTranslations();
-  const { columns, setColumns } = useColumns();
-  const { fontSize, setFontSize } = useFontSize();
-  const { mode, setMode } = useMode();
-  const { density, setDensity } = useDensity();
+  const {
+    columns,
+    setColumns,
+    fontSize,
+    setFontSize,
+    mode,
+    setMode,
+    density,
+    setDensity,
+  } = useServiceConfig();
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8 bg-zinc-50">

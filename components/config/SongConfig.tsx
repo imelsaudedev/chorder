@@ -45,22 +45,38 @@ export default function SongConfigProvider({
   children,
 }: SongConfigContextProps) {
   const [transpose, setTranspose] = useState(initialTranspose ?? 0);
-  const [columns, setColumns] = useState(initialColumns ?? 0);
-  const [fontSize, setFontSize] = useState(initialFontSize ?? 16);
-  const [mode, setMode] = useState(initialMode ?? ("chords" as Mode));
-  const [density, setDensity] = useState<Density>(initialDensity ?? "normal");
+  const [columns, setColumns, setUntouchedColumns, columnsTouched] =
+    useTouchedState(initialColumns ?? 0);
+  const [fontSize, setFontSize, setUntouchedFontSize, fontSizeTouched] =
+    useTouchedState(initialFontSize ?? 16);
+  const [mode, setMode, setUntouchedMode, modeTouched] = useTouchedState(
+    initialMode ?? ("chords" as Mode)
+  );
+  const [density, setDensity, setUntouchedDensity, densityTouched] =
+    useTouchedState<Density>(initialDensity ?? "normal");
 
   useEffect(() => {
-    setColumns((prev) => initialColumns ?? prev);
+    setTranspose(initialTranspose ?? 0);
+  }, [initialTranspose]);
+  useEffect(() => {
+    if (!columnsTouched) {
+      setUntouchedColumns((prev) => initialColumns ?? prev);
+    }
   }, [initialColumns]);
   useEffect(() => {
-    setFontSize((prev) => initialFontSize ?? prev);
+    if (!fontSizeTouched) {
+      setUntouchedFontSize((prev) => initialFontSize ?? prev);
+    }
   }, [initialFontSize]);
   useEffect(() => {
-    setMode((prev) => initialMode ?? prev);
+    if (!modeTouched) {
+      setUntouchedMode((prev) => initialMode ?? prev);
+    }
   }, [initialMode]);
   useEffect(() => {
-    setDensity((prev) => initialDensity ?? prev);
+    if (!densityTouched) {
+      setUntouchedDensity((prev) => initialDensity ?? prev);
+    }
   }, [initialDensity]);
 
   return (
@@ -89,4 +105,18 @@ export function useSongConfig() {
     throw new Error("useSongConfig must be used within a SongConfigProvider");
   }
   return context;
+}
+
+function useTouchedState<T>(
+  initialValue: T
+): [T, Dispatch<SetStateAction<T>>, Dispatch<SetStateAction<T>>, boolean] {
+  const [value, setValue] = useState(initialValue);
+  const [touched, setTouched] = useState(false);
+
+  const setTouchedValue: Dispatch<SetStateAction<T>> = (newValue) => {
+    setTouched(true);
+    setValue(newValue);
+  };
+
+  return [value, setTouchedValue, setValue, touched];
 }

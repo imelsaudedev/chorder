@@ -1,14 +1,14 @@
 import {
   $Enums,
-  Song,
-  SongUnit,
-  SongUnitType,
-  SongArrangement,
   Service,
   ServiceUnit,
+  Song,
+  SongArrangement,
+  SongUnit,
+  SongUnitType,
 } from "@/generated/prisma";
 
-export type { Song, SongUnit, SongUnitType, SongArrangement, ServiceUnit };
+export type { ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType };
 
 export const SongUnitTypes = $Enums["SongUnitType"];
 export const ServiceUnitTypes = $Enums["ServiceUnitType"];
@@ -36,6 +36,7 @@ export type ClientServiceSongUnit = Omit<ServiceUnit, "id" | "serviceId"> & {
   serviceId?: number;
 };
 export type ClientServiceUnit = ClientServiceSongUnit;
-export type ClientService = Omit<Service, "id"> & {
+export type ClientService = Omit<Service, "id" | "legacyId"> & {
+  id?: number;
   units?: ClientServiceUnit[];
 };
