@@ -1,55 +1,58 @@
-import { Button } from "@/components-old/ui/button";
+import { defaultArrangementValues } from "@/components/song/ArrangementForm/useArrangementForm";
+import ArrangementPicker from "@/components/song/ArrangementPicker";
+import SongPicker from "@/components/song/SongPicker";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components-old/ui/drawer";
-import { useCallback, useState } from "react";
-import { ServiceFormFields } from "./useServiceFormFields";
+} from "@/components/ui/drawer";
+import { ClientArrangement, ClientSong } from "@/prisma/models";
+import { ArrangementSchema } from "@/schemas/arrangement";
 import { useTranslations } from "next-intl";
-import ArrangementPicker from "@/app-old/lib/components/ArrangementPicker";
-import SongPicker from "@/app-old/lib/components/SongPicker";
-import { ClientSong, SongArrangementWithSongAndUnits } from "@/prisma/models";
-import { ArrangementFormSchema } from "../../songs/ArrangementForm/schema";
+import { useCallback, useState } from "react";
+import { useServiceUnitsFieldArray } from "../useServiceForm";
 
-type AddUnitFormProps = {
-  serviceFormFields: ServiceFormFields;
-};
-
-export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
+export default function AddUnitForm() {
   const t = useTranslations("ServiceForm");
-  const { onCreateUnit } = serviceFormFields;
+
+  const { units, append } = useServiceUnitsFieldArray();
+
   const [song, setSong] = useState<ClientSong | null>(null);
-  const [selectedArrangement, setSelectedArrangement] =
-    useState<SongArrangementWithSongAndUnits | null>(null);
+  const [arrangement, setArrangement] = useState<ClientArrangement | null>(
+    null
+  );
 
   const [songPopoverOpen, setSongPopoverOpen] = useState<boolean>(false);
+
   const handleSongSelected = (song: ClientSong) => {
     setSong(song);
   };
+
   const handleAddSongUnit = useCallback(() => {
-    const arrangement = selectedArrangement!;
-    onCreateUnit({
+    if (!song || !arrangement) {
+      throw new Error("Song and arrangement must be selected");
+    }
+
+    append({
       type: "SONG",
       semitoneTranspose: 0,
-      songId: arrangement.songId,
+      arrangementId: arrangement?.id ?? -1,
       arrangement: {
-        title: arrangement.song.title,
-        artist: arrangement.song.artist ?? undefined,
-        arrangementId: arrangement.id,
-        arrangementName: arrangement.name ?? undefined,
-        key: arrangement.key || "C",
-        units: arrangement.units as unknown as ArrangementFormSchema["units"],
+        ...defaultArrangementValues(arrangement),
+        units: arrangement.units! as ArrangementSchema["units"],
       },
+      order: units.length + 1,
     });
     setSongPopoverOpen(false);
-  }, [onCreateUnit, selectedArrangement]);
+  }, [append, arrangement, song, units.length]);
+
   const handlePopoverOpen = useCallback((open: boolean) => {
     setSongPopoverOpen(open);
     setSong(null);
-    setSelectedArrangement(null);
+    setArrangement(null);
   }, []);
 
   return (
@@ -65,14 +68,16 @@ export default function AddUnitForm({ serviceFormFields }: AddUnitFormProps) {
             <DrawerHeader>
               <DrawerTitle className="flex justify-between items-center">
                 <span>{song ? t("pickArrangement") : t("pickSong")}</span>
-                <Button onClick={handleAddSongUnit}>{t("add")}</Button>
+                <Button onClick={handleAddSongUnit} disabled={!song}>
+                  {t("add")}
+                </Button>
               </DrawerTitle>
             </DrawerHeader>
             <div className="max-h-[80vh] min-h-[50vh] overflow-auto p-4">
               {song ? (
                 <ArrangementPicker
                   songSlug={song.slug}
-                  setSelectedArrangement={setSelectedArrangement}
+                  onSelected={setArrangement}
                 />
               ) : (
                 <SongPicker onSelected={handleSongSelected} />

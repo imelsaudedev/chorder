@@ -23,3 +23,9 @@ export const useMoveArrangement = fn(actual.useMoveArrangement).mockName(
 export const useMakeArrangementDefault = fn(
   actual.useMakeArrangementDefault
 ).mockName("useMakeArrangementDefault");
+export const useDeleteService = fn(actual.useDeleteService).mockName(
+  "useDeleteService"
+);
+export const useCreateOrUpdateService = fn(
+  actual.useCreateOrUpdateService
+).mockName("useCreateOrUpdateService");

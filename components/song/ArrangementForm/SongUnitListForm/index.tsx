@@ -13,10 +13,15 @@ export default function SongUnitListForm({
   return (
     <section className="px-4 sm:px-6 lg:px-8 py-8 space-y-2">
       {units?.map((unit, index) => (
-        <SortableUnitForm key={index} unit={unit} index={index} />
+        <SortableUnitForm
+          key={index}
+          unit={unit}
+          index={index}
+          fieldPrefix={fieldPrefix}
+        />
       ))}
       <div className="pl-10">
-        <AddUnitForm />
+        <AddUnitForm fieldPrefix={fieldPrefix} />
       </div>
     </section>
   );

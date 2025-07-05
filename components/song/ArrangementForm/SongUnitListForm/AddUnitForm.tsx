@@ -8,10 +8,13 @@ import { MouseEventHandler, useCallback } from "react";
 import { useArrangementUnitsFieldArray } from "../useArrangementForm";
 import useUnitsWithIndices from "./useUnitsWithIndices";
 
-export default function AddUnitForm() {
+type AddUnitFormProps = {
+  fieldPrefix?: string;
+};
+export default function AddUnitForm({ fieldPrefix = "" }: AddUnitFormProps) {
   const t = useTranslations("SongForm");
 
-  const { units, append } = useArrangementUnitsFieldArray();
+  const { units, append } = useArrangementUnitsFieldArray(fieldPrefix);
   const unitsWithIndices = useUnitsWithIndices(units);
 
   const handleAddNewUnit: MouseEventHandler = useCallback(
@@ -20,7 +23,7 @@ export default function AddUnitForm() {
       append({
         type: "BLOCK",
         content: "",
-        order: units?.length ?? 0,
+        order: (units?.length ?? 0) + 1,
       });
     },
     [append, units?.length]

@@ -3,7 +3,6 @@ import prisma from "./client";
 import {
   ClientArrangement,
   ClientService,
-  ClientServiceSongUnit,
   ClientServiceUnit,
   ClientSong,
 } from "./models";
@@ -134,7 +133,11 @@ export async function retrieveSong(
         ? {
             where: { isDeleted: false },
             include: {
-              units: includeUnits,
+              units: includeUnits
+                ? {
+                    orderBy: { order: "asc" },
+                  }
+                : false,
             },
           }
         : false,
@@ -159,7 +162,11 @@ export async function retrieveSongArrangements(
     },
     include: {
       song: includeSong,
-      units: includeUnits,
+      units: includeUnits
+        ? {
+            orderBy: { order: "asc" },
+          }
+        : false,
     },
   });
 }
@@ -192,7 +199,11 @@ export async function retrieveArrangement(
         isDeleted: false,
       },
       include: {
-        units: includeUnits,
+        units: includeUnits
+          ? {
+              orderBy: { order: "asc" },
+            }
+          : false,
         song: includeSong
           ? {
               include: {
@@ -224,7 +235,11 @@ export async function retrieveArrangement(
   return prisma.songArrangement.findFirst({
     where,
     include: {
-      units: includeUnits,
+      units: includeUnits
+        ? {
+            orderBy: { order: "asc" },
+          }
+        : false,
       song: includeSong
         ? {
             include: {
@@ -288,7 +303,11 @@ export async function createArrangementWithSong(
     },
     include: {
       song: true,
-      units: includeUnits,
+      units: includeUnits
+        ? {
+            orderBy: { order: "asc" },
+          }
+        : false,
     },
   });
   if (createdArrangement.song.isDeleted) {
@@ -385,7 +404,11 @@ export async function updateArrangement(
             },
           }
         : false,
-      units: includeUnits,
+      units: includeUnits
+        ? {
+            orderBy: { order: "asc" },
+          }
+        : false,
     },
   });
 }
@@ -553,6 +576,7 @@ export async function retrieveService(
     },
     include: {
       units: {
+        orderBy: { order: "asc" },
         include: {
           arrangement: {
             where: {
@@ -560,7 +584,7 @@ export async function retrieveService(
             },
             include: {
               song: true,
-              units: true,
+              units: { orderBy: { order: "asc" } },
             },
           },
         },
@@ -578,66 +602,61 @@ export async function retrieveServices(): Promise<ClientService[]> {
 }
 
 export async function createOrUpdateService(
-  title: string | null | undefined,
-  slug: string | null | undefined,
-  worshipLeader: string | null,
-  date: Date,
-  units: ClientServiceUnit[]
+  service: ClientService
 ): Promise<ClientService> {
-  const serviceSlug = slug ?? (await slugForService(date));
-  const serviceUnits = await createOrUpdateServiceArrangements(units);
-
-  const baseData = {
+  const serviceSlug = service.slug ?? (await slugForService(service.date));
+  const data = {
+    title: service.title,
     slug: serviceSlug,
-    title,
-    worshipLeader,
-    date,
-    units: {
-      createMany: {
-        data: serviceUnits.map((unit) => ({
-          type: unit.type,
-          arrangementId: unit.arrangementId,
-          semitoneTranspose: unit.semitoneTranspose,
-          order: unit.order,
-        })),
-      },
-    },
+    worshipLeader: service.worshipLeader,
+    date: service.date,
   };
-  return prisma.service.upsert({
+  const newOrUpdatedService = await prisma.service.upsert({
     where: {
       slug: serviceSlug,
     },
-    update: {
-      ...baseData,
-      units: {
-        ...baseData.units,
-        deleteMany: {},
-      },
-    },
-    create: baseData,
+    update: data,
+    create: data,
+  });
+
+  const serviceUnits = await createOrUpdateServiceArrangements(service.units!);
+  const unitsWithId = await createOrUpdateServiceUnits(
+    serviceUnits,
+    newOrUpdatedService.id
+  );
+  await deleteServiceUnitsNotIn(
+    service.id!,
+    unitsWithId.map((unit) => unit.id!)
+  );
+  const retService = await prisma.service.findUnique({
+    where: { id: newOrUpdatedService.id },
     include: {
       units: {
+        orderBy: { order: "asc" },
         include: {
           arrangement: {
             include: {
               song: true,
-              units: true,
+              units: { orderBy: { order: "asc" } },
             },
           },
         },
       },
     },
   });
+  if (!retService) {
+    throw new Error("Service not found after creation or update");
+  }
+  return retService;
 }
 
-async function createOrUpdateServiceArrangements(
-  units: ClientServiceSongUnit[]
-) {
+async function createOrUpdateServiceArrangements(units: ClientServiceUnit[]) {
   const unitPromises = units.map(async (unit) => {
     if (unit.type === "SONG") {
       const arrangement = await prisma.songArrangement.upsert({
         where: {
-          id: unit.arrangementId ?? undefined,
+          id: unit.arrangementId ?? -1,
+          isServiceArrangement: true,
         },
         update: {
           name: unit.arrangement!!.name,
@@ -664,7 +683,7 @@ async function createOrUpdateServiceArrangements(
           },
         },
         include: {
-          units: true,
+          units: { orderBy: { order: "asc" } },
           song: true,
         },
       });
@@ -676,6 +695,62 @@ async function createOrUpdateServiceArrangements(
     return unit;
   });
   return await Promise.all(unitPromises);
+}
+
+async function createOrUpdateServiceUnits(
+  units: ClientServiceUnit[],
+  serviceId: number
+): Promise<ClientServiceUnit[]> {
+  const unitPromises = units.map(async (unit) => {
+    const data = {
+      serviceId,
+      type: unit.type,
+      arrangementId: unit.arrangementId,
+      semitoneTranspose: unit.semitoneTranspose,
+      order: unit.order,
+    };
+    return prisma.serviceUnit.upsert({
+      where: { id: unit.id ?? -1 },
+      update: data,
+      create: data,
+    });
+  });
+  return await Promise.all(unitPromises);
+}
+
+async function deleteServiceUnitsNotIn(id: number, unitIds: number[]) {
+  await prisma.songArrangement
+    .deleteMany({
+      where: {
+        serviceUnit: {
+          serviceId: id,
+          id: {
+            notIn: unitIds,
+          },
+        },
+      },
+    })
+    .catch((error) => {
+      console.error(
+        `Error deleting arrangements associated with service units not in provided list for service ID ${id}:`,
+        error
+      );
+    });
+  return prisma.serviceUnit
+    .deleteMany({
+      where: {
+        serviceId: id,
+        id: {
+          notIn: unitIds,
+        },
+      },
+    })
+    .catch((error) => {
+      console.error(
+        `Error deleting service units not in provided list for service ID ${id}:`,
+        error
+      );
+    });
 }
 
 export async function deleteService(

@@ -1,5 +1,5 @@
 import { retrieveService } from "@/prisma/data";
-import ClientServiceEditPage from "./ClientServiceEditPage";
+import ClientServiceFormPage from "../../ClientServiceFormPage";
 
 export default async function EditServicePage({
   params,
@@ -11,8 +11,8 @@ export default async function EditServicePage({
   const service = await retrieveService(serviceSlug);
 
   if (!service) {
-    return null;
+    throw new Error(`Service with slug "${serviceSlug}" not found.`);
   }
 
-  return <ClientServiceEditPage service={service} />;
+  return <ClientServiceFormPage service={service} />;
 }

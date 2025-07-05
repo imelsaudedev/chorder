@@ -1,11 +1,11 @@
 import { useServiceConfig } from "@/components/config/ServiceConfig";
 import SongConfigProvider from "@/components/config/SongConfig";
 import ArrangementView from "@/components/song/ArrangementView";
-import { ClientServiceSongUnit } from "@/prisma/models";
+import { ClientServiceUnit } from "@/prisma/models";
 import ServiceArrangementHeader from "./ServiceArrangementHeader";
 
 type ServiceSongUnitViewProps = {
-  unit: ClientServiceSongUnit;
+  unit: ClientServiceUnit;
 };
 
 export default function ServiceSongUnitView({

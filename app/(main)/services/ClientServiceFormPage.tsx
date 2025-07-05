@@ -1,17 +1,17 @@
 "use client";
 
-import { ServiceWithUnits } from "@/prisma/models";
+import ServiceForm from "@/components/service/ServiceForm";
+import { ClientService } from "@/prisma/models";
 import { useRouter } from "next/navigation";
-import ServiceForm from "../../ServiceForm";
 
 export default function ClientServiceEditPage({
   service,
 }: {
-  service: ServiceWithUnits;
+  service: ClientService;
 }) {
   const router = useRouter();
 
-  const handleSaved = (service: ServiceWithUnits) => {
+  const handleSaved = (service: ClientService) => {
     router.push(`/services/${service.slug}`);
   };
 

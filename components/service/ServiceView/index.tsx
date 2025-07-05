@@ -2,7 +2,7 @@
 
 import FullScreenToggle from "@/components/common/FullScreenToggle";
 import { useServiceConfig } from "@/components/config/ServiceConfig";
-import { ClientService, ClientServiceSongUnit } from "@/prisma/models";
+import { ClientService, ClientServiceUnit } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 import { Fragment, useRef } from "react";
 import ServiceSongUnitView from "./ServiceSongUnitView";
@@ -35,7 +35,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
           <Fragment key={index}>
             {unit?.type === "SONG" && (
               <div ref={(el) => (unitRefs.current[index] = el)}>
-                <ServiceSongUnitView unit={unit as ClientServiceSongUnit} />
+                <ServiceSongUnitView unit={unit as ClientServiceUnit} />
               </div>
             )}
           </Fragment>

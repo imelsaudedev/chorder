@@ -4,6 +4,7 @@ import SaveButtonSet from "@/components/common/SaveButtonSet";
 import { Form } from "@/components/ui/form";
 import { ClientArrangement } from "@/prisma/models";
 import { ArrangementSchema } from "@/schemas/arrangement";
+import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import ArrangementInfoForm from "./ArrangementInfoForm";
@@ -20,10 +21,10 @@ export default function ArrangementForm({
   arrangement: origArrangement,
   onSaved,
 }: ArrangementFormProps) {
+  const t = useTranslations("Messages");
   const form = useForm<ArrangementSchema>(initForm(origArrangement));
   const arrangement: ClientArrangement = form.getValues();
   const { isDirty, isValid } = form.formState;
-  console.log("ArrangementForm", { arrangement, isDirty, isValid });
 
   const searchParams = useSearchParams().toString();
   const pathname = usePathname().replace("/edit", "");
@@ -47,7 +48,7 @@ export default function ArrangementForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <PageHeader
-          title={isNew ? "Nova música" : "Editar música"}
+          title={isNew ? t("newSong") : t("editSong")}
           actions={
             <SaveButtonSet
               cancelUrl={isNew ? undefined : cancelUrl}

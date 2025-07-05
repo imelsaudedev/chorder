@@ -1,23 +1,21 @@
 import SortingButtons from "@/components/common/SortingButtons";
 import { useSwapAndUpdateOrder } from "@/hooks/useSwapAndUpdateOrder";
-import { ClientSongUnit } from "@/prisma/models";
+import { ClientServiceUnit } from "@/prisma/models";
+import { ServiceUnitSchema } from "@/schemas/service-unit";
 import { useCallback } from "react";
-import { useArrangementUnitsFieldArray } from "../useArrangementForm";
-import UnitForm from "./UnitForm";
+import { useServiceUnitsFieldArray } from "../useServiceForm";
+import ServiceSongUnitForm from "./ServiceSongUnitForm";
 
-type SortableUnitFormProps = {
+type SortableServiceUnitFormProps = {
   index: number;
-  unit: ClientSongUnit;
-  fieldPrefix?: string;
+  unit: ClientServiceUnit;
 };
 
-export default function SortableUnitForm({
+export default function SortableServiceUnitForm({
   index,
   unit,
-  fieldPrefix = "",
-}: SortableUnitFormProps) {
-  const { units, update, swap, remove } =
-    useArrangementUnitsFieldArray(fieldPrefix);
+}: SortableServiceUnitFormProps) {
+  const { units, update, swap, remove } = useServiceUnitsFieldArray();
   const swapAndUpdateOrder = useSwapAndUpdateOrder(units, update, swap);
   const handleMoveUnitUp = useCallback(() => {
     index > 0 && swapAndUpdateOrder(index, index - 1);
@@ -32,7 +30,7 @@ export default function SortableUnitForm({
     }
   }, [index, remove]);
   const handleChangeUnit = useCallback(
-    (unit: ClientSongUnit) => {
+    (unit: ServiceUnitSchema) => {
       update(index, unit);
     },
     [index, update]
@@ -46,12 +44,14 @@ export default function SortableUnitForm({
         listSize={units.length}
         index={index}
       />
-      <UnitForm
-        unit={unit}
-        removeUnit={handleRemoveUnit}
-        onChangeUnit={handleChangeUnit}
-        className="grow"
-      />
+      {unit.type === "SONG" && (
+        <ServiceSongUnitForm
+          index={index}
+          unit={unit}
+          removeUnit={handleRemoveUnit}
+          onChangeUnit={handleChangeUnit}
+        />
+      )}
     </div>
   );
 }

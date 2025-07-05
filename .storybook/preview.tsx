@@ -7,8 +7,8 @@ import {
   ibmPlexSerif,
 } from "../app/fonts";
 import "../app/globals.css";
-import pt from "../i18n/messages/pt-BR.json";
 import en from "../i18n/messages/en.json";
+import pt from "../i18n/messages/pt-BR.json";
 
 const preview: Preview = {
   globalTypes: {
@@ -58,7 +58,11 @@ const preview: Preview = {
         <div
           className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${bricolageGrotesque.variable} font-sans`}
         >
-          <NextIntlClientProvider locale={locale} messages={messages}>
+          <NextIntlClientProvider
+            locale={locale}
+            messages={messages}
+            timeZone="America/Sao_Paulo"
+          >
             <Story />
           </NextIntlClientProvider>
         </div>

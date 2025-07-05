@@ -30,12 +30,11 @@ export type ClientSongUnit = Omit<SongUnit, "id" | "arrangementId"> & {
   id?: number;
   arrangementId?: number;
 };
-export type ClientServiceSongUnit = Omit<ServiceUnit, "id" | "serviceId"> & {
-  type: "SONG";
+export type ClientServiceUnit = Omit<ServiceUnit, "id" | "serviceId"> & {
+  id?: number;
   arrangement?: ClientArrangement | null;
   serviceId?: number;
 };
-export type ClientServiceUnit = ClientServiceSongUnit;
 export type ClientService = Omit<Service, "id" | "legacyId"> & {
   id?: number;
   units?: ClientServiceUnit[];

@@ -3,12 +3,10 @@ import { ClientArrangement } from "@/prisma/models";
 import ColumnViewer from "./ColumnViewer";
 import Skeleton from "./Skeleton";
 
-type ArrangementViewerProps = {
+type ArrangementViewProps = {
   arrangement: ClientArrangement | null;
 };
-export default function ArrangementViewer({
-  arrangement,
-}: ArrangementViewerProps) {
+export default function ArrangementView({ arrangement }: ArrangementViewProps) {
   const { density, fontSize, columns, transpose, mode } = useSongConfig();
 
   if (!arrangement) {

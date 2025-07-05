@@ -234,3 +234,40 @@ export function useDeleteService(slugOrId: string | number) {
     isError: error,
   };
 }
+
+export function useCreateOrUpdateService(
+  serviceIdOrSlug: string | number | null
+) {
+  async function createOrUpdateService(url: string, { arg }: { arg: any }) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) {
+      throw new Error(
+        `Failed to create or update service. Status: ${response.status}. ${
+          response.body ? await response.text() : ""
+        }`
+      );
+    }
+    return response.json();
+  }
+
+  const url = serviceIdOrSlug
+    ? `/api/services/${serviceIdOrSlug}`
+    : "/api/services";
+
+  const { trigger, isMutating, error } = useSWRMutation(
+    url,
+    createOrUpdateService
+  );
+
+  return {
+    createOrUpdateService: trigger,
+    isMutating,
+    isError: error,
+  };
+}

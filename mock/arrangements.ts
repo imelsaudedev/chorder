@@ -20,30 +20,30 @@ export default [
       {
         type: "INTRO" as const,
         content: "[||:] [G] [C] [D7] [:||]",
-        order: 0,
-      },
-      {
-        type: "VERSE" as const,
-        content:
-          "[G]A alegria está no coração\nDe q[C]uem já conhece a Jes[G]us\n[G]A verdadeira [Em]paz só tem aquele\nQue [A7]já conhece a Jes[D]us",
         order: 1,
       },
       {
         type: "VERSE" as const,
         content:
-          "[G]O sentimento mais p[G7]recioso\nQue v[C]em do nosso Senh[A]or\nÉ o am[G]or [Em]  que só [Am]tem\nQuem já conh[D]ece a  Jes[G]us",
+          "[G]A alegria está no coração\nDe q[C]uem já conhece a Jes[G]us\n[G]A verdadeira [Em]paz só tem aquele\nQue [A7]já conhece a Jes[D]us",
         order: 2,
+      },
+      {
+        type: "VERSE" as const,
+        content:
+          "[G]O sentimento mais p[G7]recioso\nQue v[C]em do nosso Senh[A]or\nÉ o am[G]or [Em]  que só [Am]tem\nQuem já conh[D]ece a  Jes[G]us",
+        order: 3,
       },
       {
         type: "CHORUS" as const,
         content:
           "Ale[G]luia!\nAle[C]lui[G]a!\nAle[G]lui[Em]a!\nAle[A7]lui[D7]a!",
-        order: 3,
+        order: 4,
       },
       {
         type: "INTERLUDE" as const,
         content: "[D7] Ah... Ah... Ah... Ah... Ah...!",
-        order: 4,
+        order: 5,
       },
     ],
   },
@@ -68,36 +68,36 @@ export default [
       {
         type: "INTRO" as const,
         content: "[||:] [G] [C] [D7] [:||]",
-        order: 0,
-      },
-      {
-        type: "VERSE" as const,
-        content:
-          "[G]A alegria está no coração\nDe q[C]uem já conhece a Jes[G]us\n[G]A verdadeira [Em]paz só tem aquele\nQue [A7]já conhece a Jes[D]us",
         order: 1,
       },
       {
         type: "VERSE" as const,
         content:
-          "[G]O sentimento mais p[G7]recioso\nQue v[C]em do nosso Senh[A]or\nÉ o am[G]or [Em]  que só [Am]tem\nQuem já conh[D]ece a  Jes[G]us",
+          "[G]A alegria está no coração\nDe q[C]uem já conhece a Jes[G]us\n[G]A verdadeira [Em]paz só tem aquele\nQue [A7]já conhece a Jes[D]us",
         order: 2,
-      },
-      {
-        type: "CHORUS" as const,
-        content:
-          "Ale[G]luia!\nAle[C]lui[G]a!\nAle[G]lui[Em]a!\nAle[A7]lui[D7]a!",
-        order: 3,
       },
       {
         type: "VERSE" as const,
         content:
           "[G]O sentimento mais p[G7]recioso\nQue v[C]em do nosso Senh[A]or\nÉ o am[G]or [Em]  que só [Am]tem\nQuem já conh[D]ece a  Jes[G]us",
+        order: 3,
+      },
+      {
+        type: "CHORUS" as const,
+        content:
+          "Ale[G]luia!\nAle[C]lui[G]a!\nAle[G]lui[Em]a!\nAle[A7]lui[D7]a!",
         order: 4,
+      },
+      {
+        type: "VERSE" as const,
+        content:
+          "[G]O sentimento mais p[G7]recioso\nQue v[C]em do nosso Senh[A]or\nÉ o am[G]or [Em]  que só [Am]tem\nQuem já conh[D]ece a  Jes[G]us",
+        order: 5,
       },
       {
         type: "INTERLUDE" as const,
         content: "[D7] Ah... Ah... Ah... Ah... Ah...!",
-        order: 5,
+        order: 6,
       },
     ],
   },

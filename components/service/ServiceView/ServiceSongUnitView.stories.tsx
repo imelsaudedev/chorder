@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import ServiceConfigProvider from "@/components/config/ServiceConfig";
 import service from "@/mock/service";
-import { ClientServiceSongUnit } from "@/prisma/models";
+import { ClientServiceUnit } from "@/prisma/models";
 import ServiceSongUnitView from "./ServiceSongUnitView";
 
 const meta = {
@@ -12,7 +12,7 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<{
-  unit: ClientServiceSongUnit;
+  unit: ClientServiceUnit;
 }>;
 
 export const Default: Story = {
@@ -20,7 +20,7 @@ export const Default: Story = {
     layout: "centered",
   },
   args: {
-    unit: service.units[0] as ClientServiceSongUnit,
+    unit: service.units[0] as ClientServiceUnit,
   },
   render: ({ unit }) => {
     return (

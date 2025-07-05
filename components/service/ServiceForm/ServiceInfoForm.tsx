@@ -1,27 +1,24 @@
-import DatePicker from "@/components-old/DatePicker";
+import DatePicker from "@/components/common/DatePicker";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components-old/ui/form";
-import { Input } from "@/components-old/ui/input";
-import { UseFormReturn } from "react-hook-form";
-import { ServiceFormSchema } from "./schema";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
+import { useFormContext } from "react-hook-form";
 
-type InfoFormProps = {
-  form: UseFormReturn<ServiceFormSchema>;
-};
-
-export default function InfoForm({ form }: InfoFormProps) {
+export default function ServiceInfoForm() {
   const t = useTranslations("ServiceData");
+
+  const { control } = useFormContext();
 
   return (
     <div className="grow space-y-4 px-4 sm:px-6 lg:px-8 py-8 bg-indigo-50">
       <FormField
-        control={form.control}
+        control={control}
         name="title"
         render={({ field }) => (
           <FormItem className="flex flex-col space-y-0">
@@ -36,18 +33,15 @@ export default function InfoForm({ form }: InfoFormProps) {
 
       <div className="flex flex-col md:flex-row gap-4 justify-start">
         <FormField
-          control={form.control}
+          control={control}
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col space-y-0 w-full md:w-72">
-              {" "}
               <FormLabel className="text-primary mb-2">{t("date")}</FormLabel>
               <FormControl>
                 <DatePicker
-                  buttonProps={{ id: "pickDate", className: "w-full" }} // Largura responsiva
+                  buttonProps={{ className: "w-full" }}
                   disabled={field.disabled}
-                  name={field.name}
-                  onBlur={field.onBlur}
                   onChange={field.onChange}
                   value={field.value}
                 />
@@ -57,7 +51,7 @@ export default function InfoForm({ form }: InfoFormProps) {
           )}
         />
         <FormField
-          control={form.control}
+          control={control}
           name="worshipLeader"
           render={({ field }) => (
             <FormItem className="flex flex-col space-y-0 w-full md:w-64">

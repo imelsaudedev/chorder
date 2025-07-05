@@ -15,7 +15,7 @@ export const songUnitTypeSchema = z.union([
 export const songUnitSchema = z.object({
   content: z.string().min(1),
   type: songUnitTypeSchema,
-  order: z.number().nonnegative(),
+  order: z.number().positive(),
 });
 
 export type SongUnitSchema = z.infer<typeof songUnitSchema>;
