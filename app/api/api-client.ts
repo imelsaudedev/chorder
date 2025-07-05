@@ -200,10 +200,12 @@ export function useMakeArrangementDefault(arrangementId: number) {
   };
 }
 
-export function useFetchService(slugOrId: string | number) {
+export function useFetchService(slugOrId: string | number | null) {
   const url = `/api/services/${slugOrId}`;
   const { data, error, isLoading } = useSWR(url, (...args) =>
-    fetch(...args).then((res) => res.json())
+    slugOrId === null
+      ? Promise.resolve(null)
+      : fetch(...args).then((res) => res.json())
   );
   return {
     service: data,

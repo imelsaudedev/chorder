@@ -89,3 +89,17 @@ export default function AddUnitForm() {
     </div>
   );
 }
+
+export function AddUnitFormSkeleton() {
+  const t = useTranslations("Messages");
+
+  return (
+    <div className="rounded-lg break-inside-avoid p-4 mb-2 border border-zinc-200 border-dashed bg-zinc-100">
+      <div className="group flex items-center gap-2 w-full cursor-pointer">
+        <Button variant="outline" disabled>
+          {t("loading")}
+        </Button>
+      </div>
+    </div>
+  );
+}

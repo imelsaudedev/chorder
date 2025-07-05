@@ -12,7 +12,7 @@ import { useFormatter, useTranslations } from "next-intl";
 type DatePickerProps = {
   buttonProps?: React.ComponentProps<typeof Button>;
   disabled?: boolean;
-  onChange: (date: Date | undefined) => void;
+  onChange?: (date: Date | undefined) => void;
   value?: Date;
 };
 
@@ -25,7 +25,7 @@ export default function DatePicker({
   const t = useTranslations("Messages");
   const format = useFormatter();
   const formattedDate = value ? (
-    format.dateTime(value, {
+    format.dateTime(new Date(value), {
       year: "numeric",
       month: "short",
       day: "numeric",

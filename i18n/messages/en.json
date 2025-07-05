@@ -34,7 +34,8 @@
     "density": "Densidade",
     "compact": "Compact",
     "normal": "Normal",
-    "invalidChordPro": "Check ChordPro directives."
+    "invalidChordPro": "Check ChordPro directives.",
+    "loading": "Loading..."
   },
   "Modes": {
     "text": "Text",
