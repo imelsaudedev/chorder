@@ -25,7 +25,7 @@ export default function ServiceForm({ service, onSaved }: ServiceFormProps) {
   try {
     serviceSchema.parse(form.getValues());
   } catch (error) {
-    console.error("Invalid service data:", error);
+    console.log("Invalid service data:", error);
   }
 
   const searchParams = useSearchParams().toString();

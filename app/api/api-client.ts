@@ -52,9 +52,16 @@ export function useFetchSong(slug: string) {
   };
 }
 
-export function useFetchSongArrangements(slug: string, includeUnits?: boolean) {
+type FetchSongArrangementsArgs = {
+  includeUnits?: boolean;
+  includeSong?: boolean;
+};
+export function useFetchSongArrangements(
+  slug: string,
+  { includeSong = false, includeUnits = false }: FetchSongArrangementsArgs = {}
+) {
   const { data, error, isLoading } = useSWR(
-    `/api/songs/${slug}/arrangements?includeUnits=${(!!includeUnits).toString()}`,
+    `/api/songs/${slug}/arrangements?includeUnits=${(!!includeUnits).toString()}&includeSong=${(!!includeSong).toString()}`,
     (...args) => fetch(...args).then((res) => res.json())
   );
   return {

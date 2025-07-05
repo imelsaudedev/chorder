@@ -604,7 +604,9 @@ export async function retrieveServices(): Promise<ClientService[]> {
 export async function createOrUpdateService(
   service: ClientService
 ): Promise<ClientService> {
-  const serviceSlug = service.slug ?? (await slugForService(service.date));
+  const serviceSlug = service.slug?.length
+    ? service.slug
+    : await slugForService(service.date);
   const data = {
     title: service.title,
     slug: serviceSlug,

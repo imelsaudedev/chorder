@@ -11,7 +11,7 @@ export function initForm(
   return {
     resolver: zodResolver(serviceSchema),
     defaultValues: {
-      id: service?.id ?? -1,
+      id: service?.id,
       slug: service?.slug ?? "",
       title: service?.title ?? "",
       worshipLeader: service?.worshipLeader ?? "",

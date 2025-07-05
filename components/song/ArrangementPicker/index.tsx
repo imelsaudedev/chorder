@@ -18,7 +18,10 @@ export default function ArrangementPicker({
 }: ArrangementPickerProps) {
   const t = useTranslations("Messages");
 
-  const { arrangements, isLoading } = useFetchSongArrangements(songSlug, true);
+  const { arrangements, isLoading } = useFetchSongArrangements(songSlug, {
+    includeSong: true,
+    includeUnits: true,
+  });
 
   const handleValueChange = useCallback(
     (strValue: string) => {
@@ -29,7 +32,7 @@ export default function ArrangementPicker({
     [arrangements, onSelected]
   );
 
-  const defaultArrangementId = arrangements.findIndex(
+  const defaultArrangementId = arrangements?.findIndex(
     (arrangement: ClientArrangement) => arrangement.isDefault
   );
 
