@@ -33,7 +33,7 @@ export default function AddUnitForm({ fieldPrefix = "" }: AddUnitFormProps) {
     (index: number) => {
       const handler: MouseEventHandler = (event) => {
         event.preventDefault();
-        append({ ...units[index], order: units.length });
+        append({ ...units[index], order: (units?.length ?? 0) + 1 });
       };
       return handler;
     },
