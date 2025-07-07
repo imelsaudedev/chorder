@@ -1,7 +1,6 @@
-import { PrismaClient } from "@/generated/prisma";
-import { createServicesFromLocal, createSongsFromLocal } from "./local-data";
-import { addNewServices, addNewSongs } from "./legacy-data";
 import prisma from "../client";
+import { addNewServices, addNewSongs } from "./legacy-data";
+import { createServicesFromLocal, createSongsFromLocal } from "./local-data";
 
 export async function main() {
   const songs = await createSongsFromLocal(prisma);

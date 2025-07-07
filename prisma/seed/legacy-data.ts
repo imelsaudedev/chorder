@@ -1,9 +1,9 @@
-import axios from "axios";
-import { getChords, getKeyFromChords, getLyrics } from "../../chopro/music";
-import moment from "moment-timezone";
 import { PrismaClient } from "@/generated/prisma";
-import { SongWithArrangements } from "../models";
+import axios from "axios";
+import moment from "moment-timezone";
+import { getChords, getKeyFromChords, getLyrics } from "../../chopro/music";
 import { slugFor } from "../data";
+import { ClientSong } from "../models";
 
 type LegacySong = {
   id: number;
@@ -465,7 +465,7 @@ async function getUnits(
   prisma: PrismaClient,
   legacyPlaylistSongURLs: string[],
   legacyPlaylistSongById: Record<number, LegacyPlaylistSong>,
-  songsByLegacyId: Record<number, SongWithArrangements>
+  songsByLegacyId: Record<number, ClientSong>
 ) {
   return (
     await Promise.all(
@@ -486,14 +486,14 @@ async function getUnits(
           );
           return null;
         }
-        const defaultArrangement = song.arrangements.find(
+        const defaultArrangement = song.arrangements!.find(
           (arrangement) => arrangement.isDefault
         );
         if (!defaultArrangement) {
           console.error(`Song has no default arrangement: ${song.title}`);
           return null;
         }
-        if (defaultArrangement.units.length === 0) {
+        if (defaultArrangement.units!.length === 0) {
           console.error(`Song has no units: ${song.title}`);
           return null;
         }
@@ -501,13 +501,13 @@ async function getUnits(
         const arrangement = await prisma.songArrangement.create({
           data: {
             key: defaultArrangement.key,
-            songId: song.id,
+            songId: song.id!,
             isDefault: false,
             isDeleted: false,
             isServiceArrangement: true,
             units: {
               createMany: {
-                data: defaultArrangement.units.map((unit) => ({
+                data: defaultArrangement.units!.map((unit) => ({
                   content: unit.content.trim(),
                   type: unit.type as any,
                   order: unit.order,

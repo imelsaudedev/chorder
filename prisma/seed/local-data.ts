@@ -1,12 +1,11 @@
 import { PrismaClient } from "@/generated/prisma";
-import { SongUnitType } from "../models";
-import baseSongs from "./songs.json";
+import { ClientSong, SongUnitType } from "../models";
 import baseServices from "./services.json";
-import { SongWithArrangements } from "../models";
+import baseSongs from "./songs.json";
 
 export async function createSongsFromLocal(prisma: PrismaClient) {
   const songData = getSongData();
-  const songs: SongWithArrangements[] = [];
+  const songs: ClientSong[] = [];
   for (const song of songData) {
     const existingSong = song.legacyId
       ? await prisma.song.findUnique({
@@ -29,7 +28,7 @@ export async function createSongsFromLocal(prisma: PrismaClient) {
 
 export async function createServicesFromLocal(
   prisma: PrismaClient,
-  songs: SongWithArrangements[]
+  songs: ClientSong[]
 ) {
   const serviceData = getServiceData(songs);
 
@@ -74,7 +73,7 @@ function getSongData() {
   }));
 }
 
-function getServiceData(songs: SongWithArrangements[]) {
+function getServiceData(songs: ClientSong[]) {
   const songDataBySlug = Object.fromEntries(
     songs.map((song) => [song.slug, song])
   );
@@ -92,9 +91,9 @@ function getServiceData(songs: SongWithArrangements[]) {
         if (!song) {
           throw new Error(`Song with slug ${unit.songSlug} not found`);
         }
-        const arrangement = song.arrangements[unit.arrangementId];
+        const arrangement = song.arrangements![unit.arrangementId];
         const unitsByInternalId = Object.fromEntries(
-          arrangement.units.map((unit) => [unit.order, unit])
+          arrangement.units!.map((unit) => [unit.order, unit])
         );
         unit.additionalSongUnits.forEach((additionalUnit) => {
           unitsByInternalId[additionalUnit.internalId] = {

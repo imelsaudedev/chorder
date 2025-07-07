@@ -497,12 +497,13 @@ export async function moveArrangement(
 async function updateDefaultArrangement(songId: number): Promise<void> {
   const originalSong = await retrieveSong(songId, {
     includeArrangements: true,
+    includeServiceArrangements: true,
   });
   if (!originalSong || !originalSong.arrangements) {
     return;
   }
   const notDeletedArrangements = originalSong.arrangements.filter(
-    (arr) => !arr.isDeleted
+    (arr) => !arr.isDeleted && !arr.isServiceArrangement
   );
 
   if (notDeletedArrangements.length > 0) {
