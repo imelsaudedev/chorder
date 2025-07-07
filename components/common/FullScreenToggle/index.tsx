@@ -1,4 +1,4 @@
-import { Button } from "@/components-old/ui/button";
+import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Maximize, Minimize } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 

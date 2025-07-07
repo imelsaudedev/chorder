@@ -1,4 +1,4 @@
-import { SONG_UNIT_TYPES, SongUnitType } from "@/models/song-unit";
+import { SONG_UNIT_TYPES, SongUnitType } from "@/prisma/models";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import UnitCircle from "./index";
 

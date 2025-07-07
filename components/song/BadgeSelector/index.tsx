@@ -1,5 +1,5 @@
 import { unitColorClasses } from "@/components/song/unit-colors";
-import { SONG_UNIT_TYPES, SongUnitType } from "@/models/song-unit";
+import { SONG_UNIT_TYPES, SongUnitType } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 
 type BadgeSelectorProps = {

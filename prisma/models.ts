@@ -1,5 +1,4 @@
 import {
-  $Enums,
   Service,
   ServiceUnit,
   Song,
@@ -10,8 +9,18 @@ import {
 
 export type { ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType };
 
-export const SongUnitTypes = $Enums["SongUnitType"];
-export const ServiceUnitTypes = $Enums["ServiceUnitType"];
+export const SERVICE_UNIT_TYPES = ["SONG"];
+export const SONG_UNIT_TYPES = [
+  "BLOCK",
+  "INTRO",
+  "VERSE",
+  "PRECHORUS",
+  "CHORUS",
+  "BRIDGE",
+  "INTERLUDE",
+  "SOLO",
+  "ENDING",
+];
 
 export type ClientSong = Omit<Song, "id" | "legacyId"> & {
   id?: number;

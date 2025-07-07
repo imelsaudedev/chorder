@@ -16,9 +16,9 @@ export default function SortableUnitForm({
   unit,
   fieldPrefix = "",
 }: SortableUnitFormProps) {
-  const { units, update, swap, remove } =
+  const { units, update, swap, remove, setValue } =
     useArrangementUnitsFieldArray(fieldPrefix);
-  const swapAndUpdateOrder = useSwapAndUpdateOrder(units, update, swap);
+  const swapAndUpdateOrder = useSwapAndUpdateOrder(units, setValue, swap);
   const handleMoveUnitUp = useCallback(() => {
     index > 0 && swapAndUpdateOrder(index, index - 1);
   }, [index, swapAndUpdateOrder]);
@@ -26,10 +26,10 @@ export default function SortableUnitForm({
     index < units.length - 1 && swapAndUpdateOrder(index, index + 1);
   }, [index, units.length, swapAndUpdateOrder]);
   const handleRemoveUnit = useCallback(() => {
-    remove(index);
     for (let i = index + 1; i < units.length; i++) {
-      update(i, { ...units[i], order: units[i].order - 1 });
+      setValue(i, "order", units[i].order - 1);
     }
+    remove(index);
   }, [index, remove]);
   const handleChangeUnit = useCallback(
     (unit: ClientSongUnit) => {

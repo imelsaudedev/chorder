@@ -14,7 +14,7 @@ export default function SongUnitListForm({
     <section className="px-4 sm:px-6 lg:px-8 py-8 space-y-2">
       {units?.map((unit, index) => (
         <SortableUnitForm
-          key={index}
+          key={`${unit.id}--${index}`}
           unit={unit}
           index={index}
           fieldPrefix={fieldPrefix}

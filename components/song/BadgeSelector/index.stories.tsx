@@ -1,4 +1,4 @@
-import { SongUnitType } from "@/models/song-unit";
+import { SongUnitType } from "@/generated/prisma";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import BadgeSelector from "./index";

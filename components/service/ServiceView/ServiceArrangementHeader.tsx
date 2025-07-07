@@ -1,13 +1,13 @@
+import Heading from "@/components/common/Heading";
+import KeyButtonSet from "@/components/config/KeyButtonSet";
+import { useSongConfig } from "@/components/config/SongConfig";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components-old/ui/dropdown-menu";
-import Heading from "@/components/common/Heading";
-import KeyButtonSet from "@/components/config/KeyButtonSet";
-import { useSongConfig } from "@/components/config/SongConfig";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientArrangement } from "@/prisma/models";
 import { MoreVertical } from "lucide-react";

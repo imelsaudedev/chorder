@@ -1,9 +1,9 @@
-"use client"; // Marca o componente como Client Component
+"use client";
 
-import { Button } from "@/components-old/ui/button";
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { CircleArrowUp } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 
 type ScrollToTopButtonProps = {
   scrollThreshold?: number;

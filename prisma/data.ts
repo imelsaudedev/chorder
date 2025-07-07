@@ -116,9 +116,11 @@ export async function retrieveSong(
   slugOrId: string | number,
   {
     includeArrangements = false,
+    includeServiceArrangements = false,
     includeUnits = false,
   }: {
     includeArrangements?: boolean;
+    includeServiceArrangements?: boolean;
     includeUnits?: boolean;
   } = {}
 ): Promise<ClientSong | null> {
@@ -131,7 +133,12 @@ export async function retrieveSong(
     include: {
       arrangements: includeArrangements
         ? {
-            where: { isDeleted: false },
+            where: {
+              isDeleted: false,
+              isServiceArrangement: includeServiceArrangements
+                ? undefined
+                : false,
+            },
             include: {
               units: includeUnits
                 ? {
@@ -149,9 +156,11 @@ export async function retrieveSongArrangements(
   songSlugOrId: string | number,
   {
     includeSong = false,
+    includeServiceArrangements = false,
     includeUnits = false,
   }: {
     includeSong?: boolean;
+    includeServiceArrangements?: boolean;
     includeUnits?: boolean;
   } = {}
 ): Promise<ClientArrangement[]> {
@@ -159,6 +168,7 @@ export async function retrieveSongArrangements(
     where: {
       song: selectSlugOrId(songSlugOrId),
       isDeleted: false,
+      isServiceArrangement: includeServiceArrangements ? undefined : false,
     },
     include: {
       song: includeSong,
@@ -208,7 +218,7 @@ export async function retrieveArrangement(
           ? {
               include: {
                 arrangements: {
-                  where: { isDeleted: false },
+                  where: { isDeleted: false, isServiceArrangement: false },
                 },
               },
             }
@@ -244,7 +254,7 @@ export async function retrieveArrangement(
         ? {
             include: {
               arrangements: {
-                where: { isDeleted: false },
+                where: { isDeleted: false, isServiceArrangement: false },
               },
             },
           }
@@ -673,6 +683,7 @@ async function createOrUpdateServiceArrangements(units: ClientServiceUnit[]) {
         create: {
           name: unit.arrangement!!.name,
           key: unit.arrangement!!.key,
+          isServiceArrangement: true,
           song: {
             connect: {
               id: unit.arrangement!!.songId,

@@ -1,21 +1,21 @@
-import { useMoveUnitDown, useMoveUnitUp } from '@/hooks/moveUpDown';
-import { UnitSchema } from './schema';
+import { useMoveUnitDown, useMoveUnitUp } from "@/hooks/moveUpDown";
+import { ServiceUnitSchema } from "@/schemas/service-unit";
 
 export type ServiceFormFields = {
-  units: ({ id: string } & UnitSchema)[];
+  units: ({ id: string } & ServiceUnitSchema)[];
   unitsLength: number;
-  onUpdateUnit: (index: number, unit: UnitSchema) => void;
-  onCreateUnit: (unit: UnitSchema) => void;
+  onUpdateUnit: (index: number, unit: ServiceUnitSchema) => void;
+  onCreateUnit: (unit: ServiceUnitSchema) => void;
   onMoveUnitUp: (index: number) => void;
   onMoveUnitDown: (index: number) => void;
   onRemoveUnit: (index: number) => void;
 };
 
 export default function useServiceFormFields(
-  units: ({ id: string } & UnitSchema)[],
-  appendUnit: (unit: UnitSchema) => void,
+  units: ({ id: string } & ServiceUnitSchema)[],
+  appendUnit: (unit: ServiceUnitSchema) => void,
   removeUnit: (index: number) => void,
-  updateUnit: (index: number, unit: UnitSchema) => void,
+  updateUnit: (index: number, unit: ServiceUnitSchema) => void,
   swapUnits: (indexA: number, indexB: number) => void
 ): ServiceFormFields {
   return {

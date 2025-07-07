@@ -1,6 +1,6 @@
 import { useMoveUnitDown, useMoveUnitUp } from "@/hooks/moveUpDown";
 import { ClientSongUnit, SongUnitType } from "@/prisma/models";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 export type ArrangementFormFields = {
   units: ClientSongUnit[];

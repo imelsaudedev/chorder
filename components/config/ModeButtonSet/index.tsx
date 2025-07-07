@@ -1,6 +1,6 @@
-import { Dispatch, SetStateAction, useCallback } from "react";
-import { ToggleGroup, ToggleGroupItem } from "@/components-old/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTranslations } from "next-intl";
+import { Dispatch, SetStateAction, useCallback } from "react";
 import { Mode } from "../config";
 
 type ModeButtonSetProps = {

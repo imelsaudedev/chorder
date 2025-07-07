@@ -15,12 +15,12 @@ import ArrangementSelector from "./ArrangementSelector";
 import Skeleton from "./Skeleton";
 import SongConfig from "./SongConfig";
 
-type ArrangementViewerHeaderProps = {
+type ArrangementHeaderProps = {
   arrangement: ClientArrangement | null;
 };
-export default function ArrangementViewerHeader({
+export default function ArrangementHeader({
   arrangement,
-}: ArrangementViewerHeaderProps) {
+}: ArrangementHeaderProps) {
   const t = useTranslations("Messages");
 
   if (!arrangement) {

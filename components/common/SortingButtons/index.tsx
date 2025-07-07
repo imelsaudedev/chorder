@@ -1,6 +1,5 @@
-import ChevronDownIcon from "@/components-old/icons/ChevronDownIcon";
-import ChevronUpIcon from "@/components-old/icons/ChevronUpIcon";
-import { Button } from "@/components-old/ui/button";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { MouseEventHandler, useCallback } from "react";
 
 type SortingButtonsProps = {
@@ -43,7 +42,7 @@ export default function SortingButtons({
         variant="ghost"
         size="icon"
       >
-        <ChevronUpIcon />
+        <ChevronUp />
       </Button>
       <Button
         disabled={!hasNext}
@@ -51,7 +50,7 @@ export default function SortingButtons({
         variant="ghost"
         size="icon"
       >
-        <ChevronDownIcon />
+        <ChevronDown />
       </Button>
     </div>
   );

@@ -1,4 +1,4 @@
-import BackLink from "@/app-old/lib/components/BackLink";
+import BackLink from "@/components/common/BackLink";
 import Heading from "@/components/common/Heading";
 import clsx from "clsx";
 

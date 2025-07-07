@@ -1,7 +1,7 @@
 import { useCreateOrUpdateService } from "#api-client";
-import { Form } from "@/components-old/ui/form";
 import PageHeader from "@/components/common/PageHeader";
 import SaveButtonSet from "@/components/common/SaveButtonSet";
+import { Form } from "@/components/ui/form";
 import { ClientService } from "@/prisma/models";
 import { serviceSchema, ServiceSchema } from "@/schemas/service";
 import { useTranslations } from "next-intl";

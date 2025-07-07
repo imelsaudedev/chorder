@@ -1,4 +1,4 @@
-import { SongUnitType } from "@/models/song-unit";
+import { SongUnitType } from "@/generated/prisma";
 
 export const unitColorClasses: {
   [type in SongUnitType]: {
