@@ -4,8 +4,8 @@ export default async function SongPage({
   params,
   searchParams,
 }: {
-  params: { song: string };
-  searchParams?: { arrangement?: number };
+  params: Promise<{ song: string }>;
+  searchParams?: Promise<{ arrangement?: number }>;
 }) {
   const { song: songSlug } = await params;
   const arrangementId = (await searchParams)?.arrangement;

@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { arrangementId: string } }
+  { params }: { params: Promise<{ arrangementId: string }> }
 ) {
   const { arrangementId: arrangementIdStr } = await params;
   const arrangementId = parseInt(arrangementIdStr);

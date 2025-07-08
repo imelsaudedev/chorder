@@ -10,7 +10,9 @@ export async function GET(
   request: Request,
   {
     params,
-  }: { params: { slugOrId: string; arrangementId: string | "default" } }
+  }: {
+    params: Promise<{ slugOrId: string; arrangementId: string | "default" }>;
+  }
 ) {
   const { slugOrId } = await params;
   const service = await retrieveService(slugOrId);
@@ -27,7 +29,7 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { slugOrId: string } }
+  { params }: { params: Promise<{ slugOrId: string }> }
 ) {
   const { slugOrId } = await params;
   const success = await deleteService(slugOrId);
@@ -39,7 +41,7 @@ export async function DELETE(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slugOrId: string } }
+  { params }: { params: Promise<{ slugOrId: string }> }
 ) {
   const { slugOrId } = await params;
   const service = serviceSchema.parse(await request.json());

@@ -27,9 +27,9 @@ export const Default: Story = {
     return (
       <div className="max-w-2xl">
         <Form {...form}>
-          {units.map((unit, index) => (
+          {units?.map((unit, index) => (
             <SortableServiceUnitForm
-              key={`${index}-${unit.arrangement.song.id}`}
+              key={`${index}-${unit.arrangement!.song!.id}`}
               unit={unit}
               index={index}
             />

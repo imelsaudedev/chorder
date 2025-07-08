@@ -8,7 +8,7 @@ import { NextRequest } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { arrangementId: string } }
+  { params }: { params: Promise<{ arrangementId: string }> }
 ) {
   const { arrangementId } = await params;
   const searchParams = request.nextUrl.searchParams;
@@ -31,7 +31,7 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { arrangementId: string } }
+  { params }: { params: Promise<{ arrangementId: string }> }
 ) {
   const { arrangementId } = await params;
   const success = await deleteArrangement(parseInt(arrangementId));
@@ -43,7 +43,7 @@ export async function DELETE(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { arrangementId: string } }
+  { params }: { params: Promise<{ arrangementId: string }> }
 ) {
   const { arrangementId } = await params;
   const arrangement = arrangementSchema.parse(await request.json());

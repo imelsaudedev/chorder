@@ -3,6 +3,7 @@
 import ArrangementForm from "@/components/song/ArrangementForm";
 import { ClientArrangement } from "@/prisma/models";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
 export default function ClientArrangementEditPage({
   arrangement,
@@ -22,6 +23,11 @@ export default function ClientArrangementEditPage({
   };
 
   return (
-    <ArrangementForm arrangement={arrangement ?? null} onSaved={handleSaved} />
+    <Suspense>
+      <ArrangementForm
+        arrangement={arrangement ?? null}
+        onSaved={handleSaved}
+      />
+    </Suspense>
   );
 }

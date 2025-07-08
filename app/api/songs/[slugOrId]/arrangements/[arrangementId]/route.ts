@@ -5,7 +5,9 @@ export async function GET(
   request: NextRequest,
   {
     params,
-  }: { params: { slugOrId: string; arrangementId: string | "default" } }
+  }: {
+    params: Promise<{ slugOrId: string; arrangementId: string | "default" }>;
+  }
 ) {
   const { slugOrId, arrangementId } = await params;
   const searchParams = request.nextUrl.searchParams;

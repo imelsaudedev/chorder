@@ -25,7 +25,9 @@ export const Default: Story = {
         {items.map((item, index) => (
           <div
             key={index}
-            ref={(el) => (unitRefs.current[index] = el)}
+            ref={(el) => {
+              unitRefs.current[index] = el;
+            }}
             className={`p-4 mb-4 min-w-1/2 h-[70vh] rounded-lg ${
               index === curItem ? "bg-primary text-white" : "bg-gray-200"
             }`}

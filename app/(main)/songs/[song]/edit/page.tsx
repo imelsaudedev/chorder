@@ -5,8 +5,8 @@ export default async function EditSongPage({
   params,
   searchParams,
 }: {
-  params: { song: string };
-  searchParams: { arrangement?: string };
+  params: Promise<{ song: string }>;
+  searchParams: Promise<{ arrangement?: string }>;
 }) {
   const arrangementId = (await searchParams)?.arrangement;
 

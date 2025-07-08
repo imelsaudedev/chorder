@@ -34,7 +34,11 @@ export default function ServiceView({ service }: ServiceViewProps) {
         {service.units.map((unit, index) => (
           <Fragment key={index}>
             {unit?.type === "SONG" && (
-              <div ref={(el) => (unitRefs.current[index] = el)}>
+              <div
+                ref={(el) => {
+                  unitRefs.current[index] = el;
+                }}
+              >
                 <ServiceSongUnitView unit={unit as ClientServiceUnit} />
               </div>
             )}

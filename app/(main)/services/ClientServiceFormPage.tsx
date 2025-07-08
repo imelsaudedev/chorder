@@ -5,6 +5,7 @@ import ServiceForm from "@/components/service/ServiceForm";
 import ServiceFormSkeleton from "@/components/service/ServiceForm/Skeleton";
 import { ClientService } from "@/prisma/models";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
 type ClientServiceFormPageProps = {
   serviceSlug: string | null;
@@ -19,9 +20,11 @@ export default function ClientServiceFormPage({
     router.push(`/services/${service.slug}`);
   };
 
-  if (!service && serviceSlug) {
-    return <ServiceFormSkeleton />;
-  }
-
-  return <ServiceForm service={service} onSaved={handleSaved} />;
+  const isLoading = !service && serviceSlug;
+  return (
+    <Suspense>
+      {isLoading && <ServiceFormSkeleton />}
+      {!isLoading && <ServiceForm service={service} onSaved={handleSaved} />}
+    </Suspense>
+  );
 }

@@ -20,7 +20,7 @@ export const SONG_UNIT_TYPES = [
   "INTERLUDE",
   "SOLO",
   "ENDING",
-];
+] as const;
 
 export type ClientSong = Omit<Song, "id" | "legacyId"> & {
   id?: number;

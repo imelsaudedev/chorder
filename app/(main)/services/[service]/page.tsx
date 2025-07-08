@@ -3,7 +3,7 @@ import ClientPage from "./ClientPage";
 export default async function ServicePage({
   params,
 }: {
-  params: { service: string };
+  params: Promise<{ service: string }>;
 }) {
   const { service: serviceSlug } = await params;
 

@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slugOrId: string } }
+  { params }: { params: Promise<{ slugOrId: string }> }
 ) {
   const { slugOrId } = await params;
   const searchParams = request.nextUrl.searchParams;
