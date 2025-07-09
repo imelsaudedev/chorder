@@ -332,7 +332,10 @@ export async function addNewServices(prisma: PrismaClient) {
     });
 
   playlists = playlists.filter((service) => {
-    if (existingIds.includes(service.legacyId)) {
+    if (
+      existingIds.includes(service.legacyId) ||
+      slugs.includes(service.slug)
+    ) {
       slugs.slice(slugs.indexOf(service.slug), 1);
       return false;
     }
