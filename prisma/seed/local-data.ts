@@ -7,12 +7,13 @@ export async function createSongsFromLocal(prisma: PrismaClient) {
   const songData = getSongData();
   const songs: ClientSong[] = [];
   for (const song of songData) {
-    const existingSong = song.legacyId
-      ? await prisma.song.findUnique({
-          where: { legacyId: song.legacyId },
-          include: { arrangements: { include: { units: true } } },
-        })
-      : null;
+    const existingSong =
+      song.legacyId || song.slug
+        ? await prisma.song.findFirst({
+            where: { OR: [{ legacyId: song.legacyId }, { slug: song.slug }] },
+            include: { arrangements: { include: { units: true } } },
+          })
+        : null;
     if (existingSong) {
       songs.push(existingSong);
     } else {
@@ -23,7 +24,9 @@ export async function createSongsFromLocal(prisma: PrismaClient) {
       songs.push(newSong);
     }
   }
-  return songs;
+  return await prisma.song.findMany({
+    include: { arrangements: { include: { units: true } } },
+  });
 }
 
 export async function createServicesFromLocal(
@@ -33,12 +36,15 @@ export async function createServicesFromLocal(
   const serviceData = getServiceData(songs);
 
   for (const service of serviceData) {
-    const existingService = service.legacyId
-      ? await prisma.service.findUnique({
-          where: { legacyId: service.legacyId },
-          include: { units: true },
-        })
-      : null;
+    const existingService =
+      service.legacyId || service.slug
+        ? await prisma.service.findFirst({
+            where: {
+              OR: [{ legacyId: service.legacyId }, { slug: service.slug }],
+            },
+            include: { units: true },
+          })
+        : null;
     if (existingService) {
       console.log(`Service with legacyId ${service.legacyId} already exists.`);
     } else {
