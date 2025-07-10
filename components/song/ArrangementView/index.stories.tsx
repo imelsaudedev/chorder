@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import SongConfigProvider from "@/components/config/SongConfig";
+import arrangements from "@/mock/arrangements";
 import { ClientArrangement } from "@/prisma/models";
 import SongConfig from "../ArrangementHeader/SongConfig";
 import ArrangementView from "./index";
@@ -20,35 +21,12 @@ export const Default: Story = {
     layout: "centered",
   },
   args: {
-    arrangement: {
-      key: "C",
-      name: "Test Arrangement",
-      isDefault: true,
-      isDeleted: false,
-      isServiceArrangement: false,
-      units: [
-        {
-          content: "[C]This is a [G]test line with [Am]chords",
-          type: "INTRO",
-          order: 0,
-        },
-        {
-          content: "[F]Another line with [Dm]chords",
-          type: "VERSE",
-          order: 1,
-        },
-        {
-          content: "[G]Ending line with [C]chords",
-          type: "CHORUS",
-          order: 2,
-        },
-      ],
-    },
+    arrangement: arrangements[2],
   },
   render: ({ arrangement }) => {
     return (
       <SongConfigProvider>
-        <SongConfig originalKey="C" />
+        <SongConfig originalKey={arrangement.key} />
         <ArrangementView arrangement={arrangement} />
       </SongConfigProvider>
     );

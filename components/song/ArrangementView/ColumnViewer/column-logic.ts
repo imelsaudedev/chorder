@@ -12,7 +12,11 @@ export function findBestDistribution(
   columns: number
 ) {
   const unitData: UnitData[] = songUnitMap.map((unit) => {
-    const chordproHtml = parseChordPro(unit.content);
+    const content = unit.content
+      .split("\n")
+      .map((line) => line.trim())
+      .join("\n");
+    const chordproHtml = parseChordPro(content);
     return {
       lines: chordproHtml.lines,
       unitType: unit.type,
