@@ -5,21 +5,25 @@ import { Line } from "chordsheetjs";
 type UnitData = {
   lines: Line[];
   unitType: SongUnitType;
+  unitTypeIndex: number;
 };
 
 export function findBestDistribution(
   songUnitMap: ClientSongUnit[],
   columns: number
 ) {
+  const unitTypeIndices: Record<string, number> = {};
   const unitData: UnitData[] = songUnitMap.map((unit) => {
     const content = unit.content
       .split("\n")
       .map((line) => line.trim())
       .join("\n");
     const chordproHtml = parseChordPro(content);
+    unitTypeIndices[unit.type] = (unitTypeIndices[unit.type] || 0) + 1;
     return {
       lines: chordproHtml.lines,
       unitType: unit.type,
+      unitTypeIndex: unitTypeIndices[unit.type],
     };
   });
 

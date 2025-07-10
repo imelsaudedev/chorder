@@ -68,7 +68,7 @@ export default function ColumnViewer({
                     }
                   )}
                 >
-                  {t(unit.unitType)}
+                  {t(unit.unitType)} {unit.unitTypeIndex}
                 </div>
 
                 {unit.lines.map((line, idx) => (
