@@ -1,4 +1,5 @@
 import { ClientService } from "@/prisma/models";
+import { DateTime } from "luxon";
 import { useLocale } from "next-intl";
 import { useMemo } from "react";
 
@@ -34,7 +35,7 @@ export function usePastAndFutureServices(
 
 export function useServicesByMonth(
   services: ClientService[]
-): Record<string, ClientService[]> {
+): [string, ClientService[]][] {
   const locale = useLocale();
 
   return useMemo(() => {
@@ -45,9 +46,9 @@ export function useServicesByMonth(
         service.date instanceof Date
           ? service.date
           : new Date(String(service.date));
-      const monthKey = serviceDate
-        .toLocaleDateString(locale, { month: "long", year: "numeric" })
-        .replace(/^\w/, (c) => c.toUpperCase());
+      const monthKey = DateTime.fromJSDate(serviceDate)
+        .startOf("month")
+        .toString();
 
       if (!servicesByMonth[monthKey]) {
         servicesByMonth[monthKey] = [];
@@ -58,16 +59,18 @@ export function useServicesByMonth(
     const sortedServicesByMonth: [string, ClientService[]][] = Object.entries(
       servicesByMonth
     )
-      .sort(
-        ([monthA], [monthB]) =>
-          new Date(monthB).getTime() - new Date(monthA).getTime()
-      )
+      .sort(([monthA], [monthB]) => {
+        return (
+          DateTime.fromISO(monthB).toMillis() -
+          DateTime.fromISO(monthA).toMillis()
+        );
+      })
       .map(([month, services]) => [
         month,
         services.sort((a, b) => b.date.getTime() - a.date.getTime()),
       ]);
 
-    return Object.fromEntries(sortedServicesByMonth);
+    return sortedServicesByMonth;
   }, [locale, services]);
 }
 

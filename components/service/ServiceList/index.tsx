@@ -1,5 +1,6 @@
 import { ClientService } from "@/prisma/models";
-import { useTranslations } from "next-intl";
+import { DateTime } from "luxon";
+import { useLocale, useTranslations } from "next-intl";
 import ServiceListEntry from "../ServiceListEntry";
 import { usePastAndFutureServices, useServicesByMonth } from "./hooks";
 
@@ -11,6 +12,7 @@ export default function ServiceList({
   services: allServices,
 }: ServiceListProps) {
   const t = useTranslations();
+  const locale = useLocale();
   const [pastServices, futureServices] = usePastAndFutureServices(allServices);
   const pastServicesByMonth = useServicesByMonth(pastServices);
 
@@ -31,12 +33,13 @@ export default function ServiceList({
 
       {Object.keys(pastServicesByMonth).length > 0 && (
         <section className="px-0 sm:px-6 lg:px-8">
-          {Object.entries(
-            pastServicesByMonth as Record<string, ClientService[]>
-          ).map(([month, services]) => (
+          {pastServicesByMonth.map(([month, services]) => (
             <div key={month} className="mb-8">
               <span className="font-bricolage text-base sm:text-lg text-zinc-400">
-                {month}
+                {DateTime.fromISO(month)
+                  .setLocale(locale)
+                  .toLocaleString({ month: "long", year: "numeric" })
+                  .toUpperCase()}
               </span>
               <ul>
                 {services.map((service) => (
