@@ -13,11 +13,11 @@ export function usePastAndFutureServices(
     const future: ClientService[] = [];
 
     allServices.forEach((service) => {
-      const serviceDate =
+      service.date =
         service.date instanceof Date
           ? service.date
           : new Date(String(service.date));
-      const isFuture = serviceDate.getTime() >= today.getTime();
+      const isFuture = service.date.getTime() >= today.getTime();
 
       if (isFuture) {
         future.push(service);

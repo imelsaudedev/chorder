@@ -46,7 +46,11 @@ export async function createServicesFromLocal(
           })
         : null;
     if (existingService) {
-      console.log(`Service with legacyId ${service.legacyId} already exists.`);
+      console.log(
+        `Service with legacyId ${
+          service.legacyId ?? service.slug
+        } already exists.`
+      );
     } else {
       await prisma.service.create({ data: service });
     }

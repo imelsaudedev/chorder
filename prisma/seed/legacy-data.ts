@@ -1,6 +1,6 @@
 import { PrismaClient } from "@/generated/prisma";
 import axios from "axios";
-import moment from "moment-timezone";
+import { DateTime } from "luxon";
 import { getChords, getKeyFromChords, getLyrics } from "../../chopro/music";
 import { slugFor } from "../data";
 import { ClientSong } from "../models";
@@ -276,6 +276,7 @@ export async function addNewServices(prisma: PrismaClient) {
     select: { slug: true },
   });
   const slugs = servicesWithSlug.map((service) => service.slug);
+  const originalSlugs = [...slugs];
 
   let playlists = [];
   for (let legacyPlaylist of legacyPlaylistsData) {
@@ -301,7 +302,9 @@ export async function addNewServices(prisma: PrismaClient) {
     }
 
     const worshipLeader = extractLeader(legacyPlaylist.name);
-    const title = extractTitle(legacyPlaylist.name, worshipLeader, date);
+    const title =
+      extractTitle(legacyPlaylist.name, worshipLeader, date) ??
+      "Culto dominical";
     const slug = await slugFor(getTitleForSlug(date), slugs);
 
     playlists.push({
@@ -330,11 +333,14 @@ export async function addNewServices(prisma: PrismaClient) {
     .then((services) => {
       return services.map((service) => service.legacyId as number);
     });
+  console.log(
+    `Found ${JSON.stringify(slugs.sort())} existing services with legacyId.`
+  );
 
   playlists = playlists.filter((service) => {
     if (
       existingIds.includes(service.legacyId) ||
-      slugs.includes(service.slug)
+      originalSlugs.includes(service.slug)
     ) {
       slugs.slice(slugs.indexOf(service.slug), 1);
       return false;
@@ -388,7 +394,7 @@ function extractDate(name: string) {
       }),
     },
     {
-      regex: /(\d{4})[-/. ](\d{2})[-/. ](\d{2})/,
+      regex: /(\d{4})[-/. ](\d\d?)[-/. ](\d\d?)/,
       parse: (match: RegExpMatchArray) => ({
         year: parseInt(match[1]),
         month: parseInt(match[2]),
@@ -401,6 +407,14 @@ function extractDate(name: string) {
         day: parseInt(match[1]),
         month: parseInt(match[2]),
         year: parseInt(match[3]) + 2000,
+      }),
+    },
+    {
+      regex: /(\d{4})(\d{2})(\d{2})/,
+      parse: (match: RegExpMatchArray) => ({
+        year: parseInt(match[1]),
+        month: parseInt(match[2]),
+        day: parseInt(match[3]),
       }),
     },
   ];
@@ -532,7 +546,19 @@ async function getUnits(
 }
 
 function newDate(year: number, month: number, day: number) {
-  return moment
-    .tz(`${year}-${month}-${day} 10:00`, "America/Sao_Paulo")
-    .toDate();
+  let yearStr;
+  if (year < 100) {
+    yearStr = `20${year.toString().padStart(2, "0")}`;
+  } else {
+    yearStr = year.toString();
+  }
+  const monthStr = month.toString().padStart(2, "0");
+  const dayStr = day.toString().padStart(2, "0");
+  return DateTime.fromFormat(
+    `${yearStr}-${monthStr}-${dayStr} 10:00`,
+    "yyyy-MM-dd HH:mm",
+    {
+      zone: "America/Sao_Paulo",
+    }
+  ).toJSDate();
 }

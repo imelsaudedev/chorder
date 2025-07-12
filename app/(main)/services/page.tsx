@@ -2,14 +2,12 @@ import FloatingAddLink from "@/components/common/FloatingAddLink";
 import Heading from "@/components/common/Heading";
 import Main from "@/components/common/Main";
 import ScrollToTopButton from "@/components/common/ScrollToTopButton";
-import ServiceList from "@/components/service/ServiceList";
-import { retrieveServices } from "@/prisma/data";
 import { ListMusic } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import ClientServiceList from "./ClientServiceList";
 
 export default async function ServiceListPage() {
   const t = await getTranslations();
-  const services = await retrieveServices();
 
   return (
     <>
@@ -21,7 +19,7 @@ export default async function ServiceListPage() {
       </div>
 
       <Main>
-        <ServiceList services={services} />
+        <ClientServiceList />
       </Main>
 
       <FloatingAddLink href="./services/new" label={t("Messages.newService")} />

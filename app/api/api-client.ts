@@ -31,8 +31,9 @@ export function useFetchSongs({
   }
   const queryString = params.toString();
   const { data, error, isLoading } = useSWR(
-    `/api/songs?${queryString}`,
-    (...args) => fetch(...args).then((res) => res.json())
+    ["/api/songs", queryString],
+    ([url, queryString]: [string, string]) =>
+      fetch(`${url}?${queryString}`).then((res) => res.json())
   );
   return {
     songs: data as ClientSong[],
@@ -61,8 +62,12 @@ export function useFetchSongArrangements(
   { includeSong = false, includeUnits = false }: FetchSongArrangementsArgs = {}
 ) {
   const { data, error, isLoading } = useSWR(
-    `/api/songs/${slug}/arrangements?includeUnits=${(!!includeUnits).toString()}&includeSong=${(!!includeSong).toString()}`,
-    (...args) => fetch(...args).then((res) => res.json())
+    [
+      `/api/songs/${slug}/arrangements`,
+      `includeUnits=${(!!includeUnits).toString()}&includeSong=${(!!includeSong).toString()}`,
+    ],
+    ([url, queryString]: [string, string]) =>
+      fetch(`${url}?${queryString}`).then((res) => res.json())
   );
   return {
     arrangements: data as ClientArrangement[],
@@ -84,15 +89,19 @@ export function useFetchArrangement(
 
   const arrangementIdStr = arrangementId?.toString() ?? "default";
   const url = songSlug
-    ? `/api/songs/${songSlug}/arrangements/${arrangementIdStr}?includeSong=true&includeUnits=true`
-    : `/api/arrangements/${arrangementIdStr}?includeSong=true&includeUnits=true`;
+    ? `/api/songs/${songSlug}/arrangements/${arrangementIdStr}`
+    : `/api/arrangements/${arrangementIdStr}`;
+  const queryString = "includeSong=true&includeUnits=true";
 
-  const { data, error, isLoading } = useSWR(url, (...args) => {
-    if (initialArrangement) {
-      return Promise.resolve(initialArrangement);
+  const { data, error, isLoading } = useSWR(
+    [url, queryString],
+    ([url, queryString]: [string, string]) => {
+      if (initialArrangement) {
+        return Promise.resolve(initialArrangement);
+      }
+      return fetch(`${url}?${queryString}`).then((res) => res.json());
     }
-    return fetch(...args).then((res) => res.json());
-  });
+  );
   return {
     arrangement: initialArrangement
       ? initialArrangement
@@ -159,7 +168,7 @@ export function useDeleteArrangement(arrangementId: number) {
 
 export function useMoveArrangement(arrangementId: number) {
   async function moveArrangement(url: string, { arg }: { arg: string }) {
-    const response = await fetch(url, {
+    const response = await fetch(`${url}/move`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -173,7 +182,7 @@ export function useMoveArrangement(arrangementId: number) {
   }
 
   const { trigger, isMutating, error } = useSWRMutation(
-    `/api/arrangements/${arrangementId}/move`,
+    `/api/arrangements/${arrangementId}`,
     moveArrangement
   );
 
@@ -186,7 +195,7 @@ export function useMoveArrangement(arrangementId: number) {
 
 export function useMakeArrangementDefault(arrangementId: number) {
   async function makeDefault(url: string) {
-    const response = await fetch(url, {
+    const response = await fetch(`${url}/default`, {
       method: "POST",
     });
     if (!response.ok) {
@@ -196,13 +205,24 @@ export function useMakeArrangementDefault(arrangementId: number) {
   }
 
   const { trigger, isMutating, error } = useSWRMutation(
-    `/api/arrangements/${arrangementId}/default`,
+    `/api/arrangements/${arrangementId}`,
     makeDefault
   );
 
   return {
     makeArrangementDefault: trigger,
     isMutating,
+    isError: error,
+  };
+}
+
+export function useFetchServices() {
+  const { data, error, isLoading } = useSWR("/api/services", (...args) =>
+    fetch(...args).then((res) => res.json())
+  );
+  return {
+    services: data,
+    isLoading,
     isError: error,
   };
 }

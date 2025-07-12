@@ -19,7 +19,7 @@ export default function ClientSongList({
     forceIncludeFirstLine: true,
     excludedSongSlugs,
   });
-  if (isLoading) {
+  if (!songs || isLoading) {
     return <SongListSkeleton />;
   }
   return <SongList songs={songs} query={query} />;

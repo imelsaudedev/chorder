@@ -82,7 +82,7 @@ model ServiceUnit {
   semitoneTranspose Int?            @default(0)
   order             Int
 
-  service     Service          @relation(fields: [serviceId], references: [id])
+  service     Service          @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   arrangement SongArrangement? @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
 }
 
