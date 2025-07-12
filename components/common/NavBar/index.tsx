@@ -1,6 +1,7 @@
 "use client";
 
-import { Home, ListMusic, Music } from "lucide-react";
+import clsx from "clsx";
+import { ListMusic, Music } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,7 +9,13 @@ import { usePathname } from "next/navigation";
 export default function NavBar() {
   const t = useTranslations("Messages");
   const pathname = usePathname();
-  const currentPage = pathname.split("/")[1]; // Obtém a parte da URL após a barra inicial
+  const pathParts = pathname.split("/");
+  const currentPage = pathParts[1]; // Obtém a parte da URL após a barra inicial
+  const isServicePage =
+    currentPage === "services" &&
+    pathParts.length > 2 &&
+    pathParts[2] !== "new" &&
+    pathParts[2] !== "edit";
 
   return (
     <>
@@ -31,14 +38,13 @@ export default function NavBar() {
       </nav>
 
       {/* Menu inferior fixo (aparece apenas em telas pequenas) */}
-      <nav className="sm:hidden fixed bottom-0 left-0 w-full bg-linear-to-t from-white to-white/50 backdrop-blur-lg shadow-md border-t border-gray-100">
+      <nav
+        className={clsx(
+          "sm:hidden fixed bottom-0 left-0 w-full bg-linear-to-t from-white to-white/50 backdrop-blur-lg shadow-md border-t border-gray-100",
+          { hidden: isServicePage }
+        )}
+      >
         <div className="flex justify-around py-3">
-          <NavItem
-            href="/"
-            icon={<Home size={24} />}
-            label={t("home")}
-            active={false}
-          />
           <NavItem
             href="/services"
             icon={<ListMusic size={24} />}
