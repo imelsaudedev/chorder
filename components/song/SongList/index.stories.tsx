@@ -30,12 +30,14 @@ export const Default: Story = {
         <p className="text-red-500">
           Selected: {selectedSong?.title ?? "None"}
         </p>
-        <SongList
-          songs={songs}
-          query={query}
-          initialsInSeparateRow={initialsInSeparateRow}
-          onSelected={setSelectedSong}
-        />
+        <div className="w-full max-w-xl">
+          <SongList
+            songs={songs}
+            query={query}
+            initialsInSeparateRow={initialsInSeparateRow}
+            onSelected={setSelectedSong}
+          />
+        </div>
       </>
     );
   },

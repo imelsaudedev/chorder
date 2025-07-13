@@ -8,8 +8,6 @@ export default function BigLetter({ letter, veryBig = true }: BigLetterProps) {
     initialsTitleClassName.push(
       "text-4xl",
       "md:text-8xl",
-      "col-span-2",
-      "md:col-span-1",
       "pr-4",
       "pt-2",
       "font-light"

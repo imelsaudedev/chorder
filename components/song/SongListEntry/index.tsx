@@ -35,7 +35,7 @@ export default function SongListEntry({ song, query = "" }: SongListEntry) {
         <HighlightKeyword text={song.title} keyword={query} />
       </Heading>
       {song.artist && (
-        <div className="flex text-sm items-center text-zinc-600 whitespace-pre mb-2">
+        <div className="flex text-sm items-center text-zinc-600 whitespace-pre-wrap mb-2">
           <HighlightKeyword text={song.artist} keyword={query} />
         </div>
       )}

@@ -1,5 +1,6 @@
 import SongListEntry from "@/components/song/SongListEntry";
 import { ClientSong } from "@/prisma/models";
+import clsx from "clsx";
 import Link from "next/link";
 import { ReactNode } from "react";
 import BigLetter from "./BigLetter";
@@ -22,7 +23,7 @@ export default function InitialAndSongs({
   return (
     <>
       <BigLetter letter={letter} veryBig={veryBigInitial} />
-      <div>
+      <div className="max-w-full">
         {songs.map((song) => (
           <SongLinkOrButton
             key={`song-${song.slug}`}
@@ -50,7 +51,7 @@ function SongLinkOrButton({ song, onSelected, query }: SongLinkOrButtonProps) {
     );
   }
   return (
-    <SongLink songSlug={song.slug}>
+    <SongLink songSlug={song.slug} className="text-wrap">
       <SongListEntry song={song} query={query} />
     </SongLink>
   );
@@ -59,12 +60,16 @@ function SongLinkOrButton({ song, onSelected, query }: SongLinkOrButtonProps) {
 type SongLinkProps = {
   songSlug: string;
   children: ReactNode;
+  className?: string;
 };
-function SongLink({ songSlug, children }: SongLinkProps) {
+function SongLink({ songSlug, children, className }: SongLinkProps) {
   return (
     <Link
       href={`/songs/${songSlug}`}
-      className="flex flex-col items-start text-left text-zinc-400 border-b border-zinc-100 py-4 sm:p-4 w-full sm:rounded-lg hover:bg-zinc-100 cursor-pointer"
+      className={clsx(
+        "flex flex-col items-start text-left text-zinc-400 border-b border-zinc-100 py-4 sm:p-4 w-full sm:rounded-lg hover:bg-zinc-100 cursor-pointer",
+        className
+      )}
     >
       {children}
     </Link>

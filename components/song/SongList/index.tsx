@@ -28,8 +28,8 @@ export default function SongList({
     <>
       <InitialsNav existingInitials={existingInitials} />
       <section
-        className={clsx({
-          "grid grid-cols-[auto_1fr]": !initialsInSeparateRow,
+        className={clsx("max-w-full", {
+          "md:grid md:grid-cols-[auto_1fr]": !initialsInSeparateRow,
         })}
       >
         {(!existingInitials || existingInitials.length === 0) && (
