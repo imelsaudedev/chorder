@@ -42,6 +42,10 @@ export const parseChordPro = (chordproString: string) => {
 
 export function getLyrics(chordproString: string) {
   try {
+    chordproString = chordproString
+      .split("\n")
+      .map((line) => line.trim())
+      .join("\n");
     const parsedSong = parseChordPro(chordproString);
     return parsedSong.lines
       .map((line) =>
@@ -203,7 +207,6 @@ export const harmonicIndex = (key: SongKey) => {
     case "Cb":
       return 11;
   }
-  return -1;
 };
 
 export const transposeChord = (
