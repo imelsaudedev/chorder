@@ -39,11 +39,14 @@ export async function retrieveServiceSlugs() {
     .then((services) => services.map((service) => service.slug));
 }
 
-export async function slugForService(date: Date) {
-  // Default slug format: YYYY-MM-DD
-  const dateString = date.toISOString().split("T")[0];
+export async function slugForService() {
   const slugs = await retrieveServiceSlugs();
-  return slugFor(dateString, slugs);
+  while (true) {
+    const slug = Math.random().toString(36).split(".")[1].substring(0, 6);
+    if (!slugs.includes(slug)) {
+      return slug;
+    }
+  }
 }
 
 export async function slugFor(original: string, slugs: string[]) {
@@ -617,7 +620,7 @@ export async function createOrUpdateService(
 ): Promise<ClientService> {
   const serviceSlug = service.slug?.length
     ? service.slug
-    : await slugForService(service.date);
+    : await slugForService();
   const data = {
     title: service.title,
     slug: serviceSlug,
