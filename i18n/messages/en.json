@@ -71,7 +71,8 @@
     "chords": "Chords",
     "lyrics": "Lyrics",
     "showLyrics": "Show lyrics",
-    "editSong": "Edit song"
+    "editSong": "Edit song",
+    "editOriginal": "Edit original"
   },
   "UnitData": {
     "content": "Chordpro",

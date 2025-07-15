@@ -13,6 +13,7 @@ import { ClientServiceUnit, ClientSong } from "@/prisma/models";
 import { ServiceUnitSchema } from "@/schemas/service-unit";
 import { XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { MouseEventHandler, useCallback, useMemo } from "react";
 
 type FormHeaderProps = {
@@ -32,6 +33,8 @@ export default function FormHeader({
   onToggleEdit,
   isEditing,
 }: FormHeaderProps) {
+  const t = useTranslations("SongData");
+
   const handleSemitoneTransposeChange = useCallback(
     (semitoneString: string) =>
       onChangeUnit({
@@ -60,6 +63,14 @@ export default function FormHeader({
         <TitleAndArtist song={unit.arrangement.song} />
 
         <div className="flex flex-row items-center gap-4 md:justify-end">
+          {unit.arrangement.originalArrangementId && (
+            <Link
+              className="text-xs sm:text-sm underline"
+              href={`/songs/${unit.arrangement.song.id}/edit?arrangement=${unit.arrangement.originalArrangementId}`}
+            >
+              {t("editOriginal")}
+            </Link>
+          )}
           <ToggleEdit
             id={`${index}-${unit.arrangement.song.id}`}
             isEditing={isEditing}

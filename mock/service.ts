@@ -15,7 +15,7 @@ export default {
       arrangement: {
         id: 14,
         songId: 53,
-        originalArrangementId: null,
+        originalArrangementId: 1,
         key: "D",
         name: null,
         isDefault: false,
