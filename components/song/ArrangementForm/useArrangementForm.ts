@@ -20,6 +20,7 @@ export function defaultArrangementValues(
     id: arrangement?.id,
     name: arrangement?.name ?? "",
     songId: arrangement?.songId,
+    originalArrangementId: arrangement?.originalArrangementId ?? null,
     key: arrangement?.key ?? "C",
     isDefault: arrangement?.songId ? arrangement.isDefault : true,
     isDeleted: false,

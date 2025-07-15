@@ -7,6 +7,7 @@ export const arrangementSchema = z
     id: z.number().optional(),
     name: z.string().nullable(),
     songId: z.number().optional(),
+    originalArrangementId: z.number().nullable(),
     key: z.string(),
     isDefault: z.boolean(),
     isDeleted: z.boolean(),

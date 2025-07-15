@@ -15,6 +15,7 @@ export default {
       arrangement: {
         id: 14,
         songId: 53,
+        originalArrangementId: null,
         key: "D",
         name: null,
         isDefault: false,
@@ -70,6 +71,7 @@ export default {
       arrangement: {
         id: 2,
         songId: 108,
+        originalArrangementId: null,
         key: "E",
         name: "Arranjo Original",
         isDefault: false,

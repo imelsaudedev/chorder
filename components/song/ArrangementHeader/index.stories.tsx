@@ -54,6 +54,7 @@ function buildArrangement(
   return {
     id,
     name: name ?? null,
+    originalArrangementId: null,
     isDefault,
     key,
     isDeleted: false,

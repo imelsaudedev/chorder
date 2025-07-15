@@ -2,6 +2,7 @@ export default [
   {
     id: 1,
     songId: 1,
+    originalArrangementId: null,
     key: "G",
     name: null,
     isDefault: false,
@@ -50,6 +51,7 @@ export default [
   {
     id: 2,
     songId: 1,
+    originalArrangementId: null,
     key: "G",
     name: "Arranjo Original",
     isDefault: true,
@@ -104,6 +106,7 @@ export default [
   {
     id: 3,
     songId: 2,
+    originalArrangementId: null,
     name: "Arranjo Original",
     isDefault: true,
     isDeleted: false,
