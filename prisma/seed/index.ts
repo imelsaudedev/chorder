@@ -3,6 +3,7 @@ import { addNewServices, addNewSongs } from "./legacy-data";
 import { createServicesFromLocal, createSongsFromLocal } from "./local-data";
 
 export async function main() {
+  await prisma.service.deleteMany({});
   const songs = await createSongsFromLocal(prisma);
   await createServicesFromLocal(prisma, songs);
 

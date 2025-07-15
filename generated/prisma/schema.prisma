@@ -27,17 +27,20 @@ model Song {
 }
 
 model SongArrangement {
-  id                   Int     @id @default(autoincrement())
-  songId               Int
-  key                  String
-  name                 String?
-  isDefault            Boolean @default(false)
-  isDeleted            Boolean @default(false)
-  isServiceArrangement Boolean @default(false)
+  id                    Int     @id @default(autoincrement())
+  songId                Int
+  originalArrangementId Int?
+  key                   String
+  name                  String?
+  isDefault             Boolean @default(false)
+  isDeleted             Boolean @default(false)
+  isServiceArrangement  Boolean @default(false)
 
-  song        Song         @relation(fields: [songId], references: [id])
-  serviceUnit ServiceUnit?
-  units       SongUnit[]
+  song                 Song              @relation(fields: [songId], references: [id])
+  originalArrangement  SongArrangement?  @relation("OriginalArrangement", fields: [originalArrangementId], references: [id])
+  childrenArrangements SongArrangement[] @relation("OriginalArrangement")
+  serviceUnit          ServiceUnit?
+  units                SongUnit[]
 }
 
 model SongUnit {
@@ -47,7 +50,7 @@ model SongUnit {
   type          SongUnitType
   order         Int
 
-  arrangement SongArrangement @relation(fields: [arrangementId], references: [id])
+  arrangement SongArrangement @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
 }
 
 enum SongUnitType {

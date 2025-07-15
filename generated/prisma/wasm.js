@@ -133,6 +133,7 @@ exports.Prisma.SongScalarFieldEnum = {
 exports.Prisma.SongArrangementScalarFieldEnum = {
   id: 'id',
   songId: 'songId',
+  originalArrangementId: 'originalArrangementId',
   key: 'key',
   name: 'name',
   isDefault: 'isDefault',

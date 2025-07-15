@@ -122,6 +122,7 @@ function getServiceData(songs: ClientSong[]) {
             create: {
               key: arrangement.key,
               songId: song.id,
+              originalArrangementId: arrangement.id,
               isDefault: false,
               isDeleted: arrangement.isDeleted,
               isServiceArrangement: true,

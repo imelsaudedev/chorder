@@ -693,6 +693,11 @@ async function createOrUpdateServiceArrangements(units: ClientServiceUnit[]) {
               id: unit.arrangement!!.songId,
             },
           },
+          originalArrangement: {
+            connect: {
+              id: unit.arrangement!!.id,
+            },
+          },
           units: {
             createMany: {
               data: unit.arrangement!!.units ?? [],

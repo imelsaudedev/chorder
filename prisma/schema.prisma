@@ -29,6 +29,7 @@ model Song {
 model SongArrangement {
   id        Int     @id @default(autoincrement())
   songId    Int
+  originalArrangementId Int?
   key       String
   name      String?
   isDefault Boolean @default(false)
@@ -36,6 +37,8 @@ model SongArrangement {
   isServiceArrangement Boolean @default(false)
 
   song      Song @relation(fields: [songId], references: [id])
+  originalArrangement SongArrangement? @relation("OriginalArrangement", fields: [originalArrangementId], references: [id])
+  childrenArrangements SongArrangement[] @relation("OriginalArrangement")
   serviceUnit ServiceUnit?
   units SongUnit[]
 }
@@ -47,7 +50,7 @@ model SongUnit {
   type      SongUnitType
   order     Int
 
-  arrangement SongArrangement @relation(fields: [arrangementId], references: [id])
+  arrangement SongArrangement @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
 }
 
 enum SongUnitType {

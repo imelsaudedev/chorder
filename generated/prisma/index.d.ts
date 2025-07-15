@@ -1299,10 +1299,12 @@ export namespace Prisma {
    */
 
   export type SongArrangementCountOutputType = {
+    childrenArrangements: number
     units: number
   }
 
   export type SongArrangementCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    childrenArrangements?: boolean | SongArrangementCountOutputTypeCountChildrenArrangementsArgs
     units?: boolean | SongArrangementCountOutputTypeCountUnitsArgs
   }
 
@@ -1315,6 +1317,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the SongArrangementCountOutputType
      */
     select?: SongArrangementCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * SongArrangementCountOutputType without action
+   */
+  export type SongArrangementCountOutputTypeCountChildrenArrangementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SongArrangementWhereInput
   }
 
   /**
@@ -2509,16 +2518,19 @@ export namespace Prisma {
   export type SongArrangementAvgAggregateOutputType = {
     id: number | null
     songId: number | null
+    originalArrangementId: number | null
   }
 
   export type SongArrangementSumAggregateOutputType = {
     id: number | null
     songId: number | null
+    originalArrangementId: number | null
   }
 
   export type SongArrangementMinAggregateOutputType = {
     id: number | null
     songId: number | null
+    originalArrangementId: number | null
     key: string | null
     name: string | null
     isDefault: boolean | null
@@ -2529,6 +2541,7 @@ export namespace Prisma {
   export type SongArrangementMaxAggregateOutputType = {
     id: number | null
     songId: number | null
+    originalArrangementId: number | null
     key: string | null
     name: string | null
     isDefault: boolean | null
@@ -2539,6 +2552,7 @@ export namespace Prisma {
   export type SongArrangementCountAggregateOutputType = {
     id: number
     songId: number
+    originalArrangementId: number
     key: number
     name: number
     isDefault: number
@@ -2551,16 +2565,19 @@ export namespace Prisma {
   export type SongArrangementAvgAggregateInputType = {
     id?: true
     songId?: true
+    originalArrangementId?: true
   }
 
   export type SongArrangementSumAggregateInputType = {
     id?: true
     songId?: true
+    originalArrangementId?: true
   }
 
   export type SongArrangementMinAggregateInputType = {
     id?: true
     songId?: true
+    originalArrangementId?: true
     key?: true
     name?: true
     isDefault?: true
@@ -2571,6 +2588,7 @@ export namespace Prisma {
   export type SongArrangementMaxAggregateInputType = {
     id?: true
     songId?: true
+    originalArrangementId?: true
     key?: true
     name?: true
     isDefault?: true
@@ -2581,6 +2599,7 @@ export namespace Prisma {
   export type SongArrangementCountAggregateInputType = {
     id?: true
     songId?: true
+    originalArrangementId?: true
     key?: true
     name?: true
     isDefault?: true
@@ -2678,6 +2697,7 @@ export namespace Prisma {
   export type SongArrangementGroupByOutputType = {
     id: number
     songId: number
+    originalArrangementId: number | null
     key: string
     name: string | null
     isDefault: boolean
@@ -2707,12 +2727,15 @@ export namespace Prisma {
   export type SongArrangementSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     songId?: boolean
+    originalArrangementId?: boolean
     key?: boolean
     name?: boolean
     isDefault?: boolean
     isDeleted?: boolean
     isServiceArrangement?: boolean
     song?: boolean | SongDefaultArgs<ExtArgs>
+    originalArrangement?: boolean | SongArrangement$originalArrangementArgs<ExtArgs>
+    childrenArrangements?: boolean | SongArrangement$childrenArrangementsArgs<ExtArgs>
     serviceUnit?: boolean | SongArrangement$serviceUnitArgs<ExtArgs>
     units?: boolean | SongArrangement$unitsArgs<ExtArgs>
     _count?: boolean | SongArrangementCountOutputTypeDefaultArgs<ExtArgs>
@@ -2721,28 +2744,33 @@ export namespace Prisma {
   export type SongArrangementSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     songId?: boolean
+    originalArrangementId?: boolean
     key?: boolean
     name?: boolean
     isDefault?: boolean
     isDeleted?: boolean
     isServiceArrangement?: boolean
     song?: boolean | SongDefaultArgs<ExtArgs>
+    originalArrangement?: boolean | SongArrangement$originalArrangementArgs<ExtArgs>
   }, ExtArgs["result"]["songArrangement"]>
 
   export type SongArrangementSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     songId?: boolean
+    originalArrangementId?: boolean
     key?: boolean
     name?: boolean
     isDefault?: boolean
     isDeleted?: boolean
     isServiceArrangement?: boolean
     song?: boolean | SongDefaultArgs<ExtArgs>
+    originalArrangement?: boolean | SongArrangement$originalArrangementArgs<ExtArgs>
   }, ExtArgs["result"]["songArrangement"]>
 
   export type SongArrangementSelectScalar = {
     id?: boolean
     songId?: boolean
+    originalArrangementId?: boolean
     key?: boolean
     name?: boolean
     isDefault?: boolean
@@ -2750,30 +2778,37 @@ export namespace Prisma {
     isServiceArrangement?: boolean
   }
 
-  export type SongArrangementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "songId" | "key" | "name" | "isDefault" | "isDeleted" | "isServiceArrangement", ExtArgs["result"]["songArrangement"]>
+  export type SongArrangementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "songId" | "originalArrangementId" | "key" | "name" | "isDefault" | "isDeleted" | "isServiceArrangement", ExtArgs["result"]["songArrangement"]>
   export type SongArrangementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     song?: boolean | SongDefaultArgs<ExtArgs>
+    originalArrangement?: boolean | SongArrangement$originalArrangementArgs<ExtArgs>
+    childrenArrangements?: boolean | SongArrangement$childrenArrangementsArgs<ExtArgs>
     serviceUnit?: boolean | SongArrangement$serviceUnitArgs<ExtArgs>
     units?: boolean | SongArrangement$unitsArgs<ExtArgs>
     _count?: boolean | SongArrangementCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type SongArrangementIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     song?: boolean | SongDefaultArgs<ExtArgs>
+    originalArrangement?: boolean | SongArrangement$originalArrangementArgs<ExtArgs>
   }
   export type SongArrangementIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     song?: boolean | SongDefaultArgs<ExtArgs>
+    originalArrangement?: boolean | SongArrangement$originalArrangementArgs<ExtArgs>
   }
 
   export type $SongArrangementPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "SongArrangement"
     objects: {
       song: Prisma.$SongPayload<ExtArgs>
+      originalArrangement: Prisma.$SongArrangementPayload<ExtArgs> | null
+      childrenArrangements: Prisma.$SongArrangementPayload<ExtArgs>[]
       serviceUnit: Prisma.$ServiceUnitPayload<ExtArgs> | null
       units: Prisma.$SongUnitPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       songId: number
+      originalArrangementId: number | null
       key: string
       name: string | null
       isDefault: boolean
@@ -3174,6 +3209,8 @@ export namespace Prisma {
   export interface Prisma__SongArrangementClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     song<T extends SongDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SongDefaultArgs<ExtArgs>>): Prisma__SongClient<$Result.GetResult<Prisma.$SongPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    originalArrangement<T extends SongArrangement$originalArrangementArgs<ExtArgs> = {}>(args?: Subset<T, SongArrangement$originalArrangementArgs<ExtArgs>>): Prisma__SongArrangementClient<$Result.GetResult<Prisma.$SongArrangementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    childrenArrangements<T extends SongArrangement$childrenArrangementsArgs<ExtArgs> = {}>(args?: Subset<T, SongArrangement$childrenArrangementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SongArrangementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     serviceUnit<T extends SongArrangement$serviceUnitArgs<ExtArgs> = {}>(args?: Subset<T, SongArrangement$serviceUnitArgs<ExtArgs>>): Prisma__ServiceUnitClient<$Result.GetResult<Prisma.$ServiceUnitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     units<T extends SongArrangement$unitsArgs<ExtArgs> = {}>(args?: Subset<T, SongArrangement$unitsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SongUnitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -3207,6 +3244,7 @@ export namespace Prisma {
   interface SongArrangementFieldRefs {
     readonly id: FieldRef<"SongArrangement", 'Int'>
     readonly songId: FieldRef<"SongArrangement", 'Int'>
+    readonly originalArrangementId: FieldRef<"SongArrangement", 'Int'>
     readonly key: FieldRef<"SongArrangement", 'String'>
     readonly name: FieldRef<"SongArrangement", 'String'>
     readonly isDefault: FieldRef<"SongArrangement", 'Boolean'>
@@ -3605,6 +3643,49 @@ export namespace Prisma {
      * Limit how many SongArrangements to delete.
      */
     limit?: number
+  }
+
+  /**
+   * SongArrangement.originalArrangement
+   */
+  export type SongArrangement$originalArrangementArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SongArrangement
+     */
+    select?: SongArrangementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SongArrangement
+     */
+    omit?: SongArrangementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SongArrangementInclude<ExtArgs> | null
+    where?: SongArrangementWhereInput
+  }
+
+  /**
+   * SongArrangement.childrenArrangements
+   */
+  export type SongArrangement$childrenArrangementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SongArrangement
+     */
+    select?: SongArrangementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SongArrangement
+     */
+    omit?: SongArrangementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SongArrangementInclude<ExtArgs> | null
+    where?: SongArrangementWhereInput
+    orderBy?: SongArrangementOrderByWithRelationInput | SongArrangementOrderByWithRelationInput[]
+    cursor?: SongArrangementWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SongArrangementScalarFieldEnum | SongArrangementScalarFieldEnum[]
   }
 
   /**
@@ -7081,6 +7162,7 @@ export namespace Prisma {
   export const SongArrangementScalarFieldEnum: {
     id: 'id',
     songId: 'songId',
+    originalArrangementId: 'originalArrangementId',
     key: 'key',
     name: 'name',
     isDefault: 'isDefault',
@@ -7323,12 +7405,15 @@ export namespace Prisma {
     NOT?: SongArrangementWhereInput | SongArrangementWhereInput[]
     id?: IntFilter<"SongArrangement"> | number
     songId?: IntFilter<"SongArrangement"> | number
+    originalArrangementId?: IntNullableFilter<"SongArrangement"> | number | null
     key?: StringFilter<"SongArrangement"> | string
     name?: StringNullableFilter<"SongArrangement"> | string | null
     isDefault?: BoolFilter<"SongArrangement"> | boolean
     isDeleted?: BoolFilter<"SongArrangement"> | boolean
     isServiceArrangement?: BoolFilter<"SongArrangement"> | boolean
     song?: XOR<SongScalarRelationFilter, SongWhereInput>
+    originalArrangement?: XOR<SongArrangementNullableScalarRelationFilter, SongArrangementWhereInput> | null
+    childrenArrangements?: SongArrangementListRelationFilter
     serviceUnit?: XOR<ServiceUnitNullableScalarRelationFilter, ServiceUnitWhereInput> | null
     units?: SongUnitListRelationFilter
   }
@@ -7336,12 +7421,15 @@ export namespace Prisma {
   export type SongArrangementOrderByWithRelationInput = {
     id?: SortOrder
     songId?: SortOrder
+    originalArrangementId?: SortOrderInput | SortOrder
     key?: SortOrder
     name?: SortOrderInput | SortOrder
     isDefault?: SortOrder
     isDeleted?: SortOrder
     isServiceArrangement?: SortOrder
     song?: SongOrderByWithRelationInput
+    originalArrangement?: SongArrangementOrderByWithRelationInput
+    childrenArrangements?: SongArrangementOrderByRelationAggregateInput
     serviceUnit?: ServiceUnitOrderByWithRelationInput
     units?: SongUnitOrderByRelationAggregateInput
   }
@@ -7352,12 +7440,15 @@ export namespace Prisma {
     OR?: SongArrangementWhereInput[]
     NOT?: SongArrangementWhereInput | SongArrangementWhereInput[]
     songId?: IntFilter<"SongArrangement"> | number
+    originalArrangementId?: IntNullableFilter<"SongArrangement"> | number | null
     key?: StringFilter<"SongArrangement"> | string
     name?: StringNullableFilter<"SongArrangement"> | string | null
     isDefault?: BoolFilter<"SongArrangement"> | boolean
     isDeleted?: BoolFilter<"SongArrangement"> | boolean
     isServiceArrangement?: BoolFilter<"SongArrangement"> | boolean
     song?: XOR<SongScalarRelationFilter, SongWhereInput>
+    originalArrangement?: XOR<SongArrangementNullableScalarRelationFilter, SongArrangementWhereInput> | null
+    childrenArrangements?: SongArrangementListRelationFilter
     serviceUnit?: XOR<ServiceUnitNullableScalarRelationFilter, ServiceUnitWhereInput> | null
     units?: SongUnitListRelationFilter
   }, "id">
@@ -7365,6 +7456,7 @@ export namespace Prisma {
   export type SongArrangementOrderByWithAggregationInput = {
     id?: SortOrder
     songId?: SortOrder
+    originalArrangementId?: SortOrderInput | SortOrder
     key?: SortOrder
     name?: SortOrderInput | SortOrder
     isDefault?: SortOrder
@@ -7383,6 +7475,7 @@ export namespace Prisma {
     NOT?: SongArrangementScalarWhereWithAggregatesInput | SongArrangementScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"SongArrangement"> | number
     songId?: IntWithAggregatesFilter<"SongArrangement"> | number
+    originalArrangementId?: IntNullableWithAggregatesFilter<"SongArrangement"> | number | null
     key?: StringWithAggregatesFilter<"SongArrangement"> | string
     name?: StringNullableWithAggregatesFilter<"SongArrangement"> | string | null
     isDefault?: BoolWithAggregatesFilter<"SongArrangement"> | boolean
@@ -7657,6 +7750,8 @@ export namespace Prisma {
     isDeleted?: boolean
     isServiceArrangement?: boolean
     song: SongCreateNestedOneWithoutArrangementsInput
+    originalArrangement?: SongArrangementCreateNestedOneWithoutChildrenArrangementsInput
+    childrenArrangements?: SongArrangementCreateNestedManyWithoutOriginalArrangementInput
     serviceUnit?: ServiceUnitCreateNestedOneWithoutArrangementInput
     units?: SongUnitCreateNestedManyWithoutArrangementInput
   }
@@ -7664,11 +7759,13 @@ export namespace Prisma {
   export type SongArrangementUncheckedCreateInput = {
     id?: number
     songId: number
+    originalArrangementId?: number | null
     key: string
     name?: string | null
     isDefault?: boolean
     isDeleted?: boolean
     isServiceArrangement?: boolean
+    childrenArrangements?: SongArrangementUncheckedCreateNestedManyWithoutOriginalArrangementInput
     serviceUnit?: ServiceUnitUncheckedCreateNestedOneWithoutArrangementInput
     units?: SongUnitUncheckedCreateNestedManyWithoutArrangementInput
   }
@@ -7680,6 +7777,8 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
     song?: SongUpdateOneRequiredWithoutArrangementsNestedInput
+    originalArrangement?: SongArrangementUpdateOneWithoutChildrenArrangementsNestedInput
+    childrenArrangements?: SongArrangementUpdateManyWithoutOriginalArrangementNestedInput
     serviceUnit?: ServiceUnitUpdateOneWithoutArrangementNestedInput
     units?: SongUnitUpdateManyWithoutArrangementNestedInput
   }
@@ -7687,11 +7786,13 @@ export namespace Prisma {
   export type SongArrangementUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     songId?: IntFieldUpdateOperationsInput | number
+    originalArrangementId?: NullableIntFieldUpdateOperationsInput | number | null
     key?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
+    childrenArrangements?: SongArrangementUncheckedUpdateManyWithoutOriginalArrangementNestedInput
     serviceUnit?: ServiceUnitUncheckedUpdateOneWithoutArrangementNestedInput
     units?: SongUnitUncheckedUpdateManyWithoutArrangementNestedInput
   }
@@ -7699,6 +7800,7 @@ export namespace Prisma {
   export type SongArrangementCreateManyInput = {
     id?: number
     songId: number
+    originalArrangementId?: number | null
     key: string
     name?: string | null
     isDefault?: boolean
@@ -7717,6 +7819,7 @@ export namespace Prisma {
   export type SongArrangementUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     songId?: IntFieldUpdateOperationsInput | number
+    originalArrangementId?: NullableIntFieldUpdateOperationsInput | number | null
     key?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
@@ -8098,6 +8201,11 @@ export namespace Prisma {
     isNot?: SongWhereInput
   }
 
+  export type SongArrangementNullableScalarRelationFilter = {
+    is?: SongArrangementWhereInput | null
+    isNot?: SongArrangementWhereInput | null
+  }
+
   export type ServiceUnitNullableScalarRelationFilter = {
     is?: ServiceUnitWhereInput | null
     isNot?: ServiceUnitWhereInput | null
@@ -8116,6 +8224,7 @@ export namespace Prisma {
   export type SongArrangementCountOrderByAggregateInput = {
     id?: SortOrder
     songId?: SortOrder
+    originalArrangementId?: SortOrder
     key?: SortOrder
     name?: SortOrder
     isDefault?: SortOrder
@@ -8126,11 +8235,13 @@ export namespace Prisma {
   export type SongArrangementAvgOrderByAggregateInput = {
     id?: SortOrder
     songId?: SortOrder
+    originalArrangementId?: SortOrder
   }
 
   export type SongArrangementMaxOrderByAggregateInput = {
     id?: SortOrder
     songId?: SortOrder
+    originalArrangementId?: SortOrder
     key?: SortOrder
     name?: SortOrder
     isDefault?: SortOrder
@@ -8141,6 +8252,7 @@ export namespace Prisma {
   export type SongArrangementMinOrderByAggregateInput = {
     id?: SortOrder
     songId?: SortOrder
+    originalArrangementId?: SortOrder
     key?: SortOrder
     name?: SortOrder
     isDefault?: SortOrder
@@ -8151,6 +8263,7 @@ export namespace Prisma {
   export type SongArrangementSumOrderByAggregateInput = {
     id?: SortOrder
     songId?: SortOrder
+    originalArrangementId?: SortOrder
   }
 
   export type EnumSongUnitTypeFilter<$PrismaModel = never> = {
@@ -8298,11 +8411,6 @@ export namespace Prisma {
     isNot?: ServiceWhereInput
   }
 
-  export type SongArrangementNullableScalarRelationFilter = {
-    is?: SongArrangementWhereInput | null
-    isNot?: SongArrangementWhereInput | null
-  }
-
   export type ServiceUnitCountOrderByAggregateInput = {
     id?: SortOrder
     serviceId?: SortOrder
@@ -8432,6 +8540,19 @@ export namespace Prisma {
     connect?: SongWhereUniqueInput
   }
 
+  export type SongArrangementCreateNestedOneWithoutChildrenArrangementsInput = {
+    create?: XOR<SongArrangementCreateWithoutChildrenArrangementsInput, SongArrangementUncheckedCreateWithoutChildrenArrangementsInput>
+    connectOrCreate?: SongArrangementCreateOrConnectWithoutChildrenArrangementsInput
+    connect?: SongArrangementWhereUniqueInput
+  }
+
+  export type SongArrangementCreateNestedManyWithoutOriginalArrangementInput = {
+    create?: XOR<SongArrangementCreateWithoutOriginalArrangementInput, SongArrangementUncheckedCreateWithoutOriginalArrangementInput> | SongArrangementCreateWithoutOriginalArrangementInput[] | SongArrangementUncheckedCreateWithoutOriginalArrangementInput[]
+    connectOrCreate?: SongArrangementCreateOrConnectWithoutOriginalArrangementInput | SongArrangementCreateOrConnectWithoutOriginalArrangementInput[]
+    createMany?: SongArrangementCreateManyOriginalArrangementInputEnvelope
+    connect?: SongArrangementWhereUniqueInput | SongArrangementWhereUniqueInput[]
+  }
+
   export type ServiceUnitCreateNestedOneWithoutArrangementInput = {
     create?: XOR<ServiceUnitCreateWithoutArrangementInput, ServiceUnitUncheckedCreateWithoutArrangementInput>
     connectOrCreate?: ServiceUnitCreateOrConnectWithoutArrangementInput
@@ -8443,6 +8564,13 @@ export namespace Prisma {
     connectOrCreate?: SongUnitCreateOrConnectWithoutArrangementInput | SongUnitCreateOrConnectWithoutArrangementInput[]
     createMany?: SongUnitCreateManyArrangementInputEnvelope
     connect?: SongUnitWhereUniqueInput | SongUnitWhereUniqueInput[]
+  }
+
+  export type SongArrangementUncheckedCreateNestedManyWithoutOriginalArrangementInput = {
+    create?: XOR<SongArrangementCreateWithoutOriginalArrangementInput, SongArrangementUncheckedCreateWithoutOriginalArrangementInput> | SongArrangementCreateWithoutOriginalArrangementInput[] | SongArrangementUncheckedCreateWithoutOriginalArrangementInput[]
+    connectOrCreate?: SongArrangementCreateOrConnectWithoutOriginalArrangementInput | SongArrangementCreateOrConnectWithoutOriginalArrangementInput[]
+    createMany?: SongArrangementCreateManyOriginalArrangementInputEnvelope
+    connect?: SongArrangementWhereUniqueInput | SongArrangementWhereUniqueInput[]
   }
 
   export type ServiceUnitUncheckedCreateNestedOneWithoutArrangementInput = {
@@ -8464,6 +8592,30 @@ export namespace Prisma {
     upsert?: SongUpsertWithoutArrangementsInput
     connect?: SongWhereUniqueInput
     update?: XOR<XOR<SongUpdateToOneWithWhereWithoutArrangementsInput, SongUpdateWithoutArrangementsInput>, SongUncheckedUpdateWithoutArrangementsInput>
+  }
+
+  export type SongArrangementUpdateOneWithoutChildrenArrangementsNestedInput = {
+    create?: XOR<SongArrangementCreateWithoutChildrenArrangementsInput, SongArrangementUncheckedCreateWithoutChildrenArrangementsInput>
+    connectOrCreate?: SongArrangementCreateOrConnectWithoutChildrenArrangementsInput
+    upsert?: SongArrangementUpsertWithoutChildrenArrangementsInput
+    disconnect?: SongArrangementWhereInput | boolean
+    delete?: SongArrangementWhereInput | boolean
+    connect?: SongArrangementWhereUniqueInput
+    update?: XOR<XOR<SongArrangementUpdateToOneWithWhereWithoutChildrenArrangementsInput, SongArrangementUpdateWithoutChildrenArrangementsInput>, SongArrangementUncheckedUpdateWithoutChildrenArrangementsInput>
+  }
+
+  export type SongArrangementUpdateManyWithoutOriginalArrangementNestedInput = {
+    create?: XOR<SongArrangementCreateWithoutOriginalArrangementInput, SongArrangementUncheckedCreateWithoutOriginalArrangementInput> | SongArrangementCreateWithoutOriginalArrangementInput[] | SongArrangementUncheckedCreateWithoutOriginalArrangementInput[]
+    connectOrCreate?: SongArrangementCreateOrConnectWithoutOriginalArrangementInput | SongArrangementCreateOrConnectWithoutOriginalArrangementInput[]
+    upsert?: SongArrangementUpsertWithWhereUniqueWithoutOriginalArrangementInput | SongArrangementUpsertWithWhereUniqueWithoutOriginalArrangementInput[]
+    createMany?: SongArrangementCreateManyOriginalArrangementInputEnvelope
+    set?: SongArrangementWhereUniqueInput | SongArrangementWhereUniqueInput[]
+    disconnect?: SongArrangementWhereUniqueInput | SongArrangementWhereUniqueInput[]
+    delete?: SongArrangementWhereUniqueInput | SongArrangementWhereUniqueInput[]
+    connect?: SongArrangementWhereUniqueInput | SongArrangementWhereUniqueInput[]
+    update?: SongArrangementUpdateWithWhereUniqueWithoutOriginalArrangementInput | SongArrangementUpdateWithWhereUniqueWithoutOriginalArrangementInput[]
+    updateMany?: SongArrangementUpdateManyWithWhereWithoutOriginalArrangementInput | SongArrangementUpdateManyWithWhereWithoutOriginalArrangementInput[]
+    deleteMany?: SongArrangementScalarWhereInput | SongArrangementScalarWhereInput[]
   }
 
   export type ServiceUnitUpdateOneWithoutArrangementNestedInput = {
@@ -8488,6 +8640,20 @@ export namespace Prisma {
     update?: SongUnitUpdateWithWhereUniqueWithoutArrangementInput | SongUnitUpdateWithWhereUniqueWithoutArrangementInput[]
     updateMany?: SongUnitUpdateManyWithWhereWithoutArrangementInput | SongUnitUpdateManyWithWhereWithoutArrangementInput[]
     deleteMany?: SongUnitScalarWhereInput | SongUnitScalarWhereInput[]
+  }
+
+  export type SongArrangementUncheckedUpdateManyWithoutOriginalArrangementNestedInput = {
+    create?: XOR<SongArrangementCreateWithoutOriginalArrangementInput, SongArrangementUncheckedCreateWithoutOriginalArrangementInput> | SongArrangementCreateWithoutOriginalArrangementInput[] | SongArrangementUncheckedCreateWithoutOriginalArrangementInput[]
+    connectOrCreate?: SongArrangementCreateOrConnectWithoutOriginalArrangementInput | SongArrangementCreateOrConnectWithoutOriginalArrangementInput[]
+    upsert?: SongArrangementUpsertWithWhereUniqueWithoutOriginalArrangementInput | SongArrangementUpsertWithWhereUniqueWithoutOriginalArrangementInput[]
+    createMany?: SongArrangementCreateManyOriginalArrangementInputEnvelope
+    set?: SongArrangementWhereUniqueInput | SongArrangementWhereUniqueInput[]
+    disconnect?: SongArrangementWhereUniqueInput | SongArrangementWhereUniqueInput[]
+    delete?: SongArrangementWhereUniqueInput | SongArrangementWhereUniqueInput[]
+    connect?: SongArrangementWhereUniqueInput | SongArrangementWhereUniqueInput[]
+    update?: SongArrangementUpdateWithWhereUniqueWithoutOriginalArrangementInput | SongArrangementUpdateWithWhereUniqueWithoutOriginalArrangementInput[]
+    updateMany?: SongArrangementUpdateManyWithWhereWithoutOriginalArrangementInput | SongArrangementUpdateManyWithWhereWithoutOriginalArrangementInput[]
+    deleteMany?: SongArrangementScalarWhereInput | SongArrangementScalarWhereInput[]
   }
 
   export type ServiceUnitUncheckedUpdateOneWithoutArrangementNestedInput = {
@@ -8828,17 +8994,21 @@ export namespace Prisma {
     isDefault?: boolean
     isDeleted?: boolean
     isServiceArrangement?: boolean
+    originalArrangement?: SongArrangementCreateNestedOneWithoutChildrenArrangementsInput
+    childrenArrangements?: SongArrangementCreateNestedManyWithoutOriginalArrangementInput
     serviceUnit?: ServiceUnitCreateNestedOneWithoutArrangementInput
     units?: SongUnitCreateNestedManyWithoutArrangementInput
   }
 
   export type SongArrangementUncheckedCreateWithoutSongInput = {
     id?: number
+    originalArrangementId?: number | null
     key: string
     name?: string | null
     isDefault?: boolean
     isDeleted?: boolean
     isServiceArrangement?: boolean
+    childrenArrangements?: SongArrangementUncheckedCreateNestedManyWithoutOriginalArrangementInput
     serviceUnit?: ServiceUnitUncheckedCreateNestedOneWithoutArrangementInput
     units?: SongUnitUncheckedCreateNestedManyWithoutArrangementInput
   }
@@ -8875,6 +9045,7 @@ export namespace Prisma {
     NOT?: SongArrangementScalarWhereInput | SongArrangementScalarWhereInput[]
     id?: IntFilter<"SongArrangement"> | number
     songId?: IntFilter<"SongArrangement"> | number
+    originalArrangementId?: IntNullableFilter<"SongArrangement"> | number | null
     key?: StringFilter<"SongArrangement"> | string
     name?: StringNullableFilter<"SongArrangement"> | string | null
     isDefault?: BoolFilter<"SongArrangement"> | boolean
@@ -8904,6 +9075,71 @@ export namespace Prisma {
   export type SongCreateOrConnectWithoutArrangementsInput = {
     where: SongWhereUniqueInput
     create: XOR<SongCreateWithoutArrangementsInput, SongUncheckedCreateWithoutArrangementsInput>
+  }
+
+  export type SongArrangementCreateWithoutChildrenArrangementsInput = {
+    key: string
+    name?: string | null
+    isDefault?: boolean
+    isDeleted?: boolean
+    isServiceArrangement?: boolean
+    song: SongCreateNestedOneWithoutArrangementsInput
+    originalArrangement?: SongArrangementCreateNestedOneWithoutChildrenArrangementsInput
+    serviceUnit?: ServiceUnitCreateNestedOneWithoutArrangementInput
+    units?: SongUnitCreateNestedManyWithoutArrangementInput
+  }
+
+  export type SongArrangementUncheckedCreateWithoutChildrenArrangementsInput = {
+    id?: number
+    songId: number
+    originalArrangementId?: number | null
+    key: string
+    name?: string | null
+    isDefault?: boolean
+    isDeleted?: boolean
+    isServiceArrangement?: boolean
+    serviceUnit?: ServiceUnitUncheckedCreateNestedOneWithoutArrangementInput
+    units?: SongUnitUncheckedCreateNestedManyWithoutArrangementInput
+  }
+
+  export type SongArrangementCreateOrConnectWithoutChildrenArrangementsInput = {
+    where: SongArrangementWhereUniqueInput
+    create: XOR<SongArrangementCreateWithoutChildrenArrangementsInput, SongArrangementUncheckedCreateWithoutChildrenArrangementsInput>
+  }
+
+  export type SongArrangementCreateWithoutOriginalArrangementInput = {
+    key: string
+    name?: string | null
+    isDefault?: boolean
+    isDeleted?: boolean
+    isServiceArrangement?: boolean
+    song: SongCreateNestedOneWithoutArrangementsInput
+    childrenArrangements?: SongArrangementCreateNestedManyWithoutOriginalArrangementInput
+    serviceUnit?: ServiceUnitCreateNestedOneWithoutArrangementInput
+    units?: SongUnitCreateNestedManyWithoutArrangementInput
+  }
+
+  export type SongArrangementUncheckedCreateWithoutOriginalArrangementInput = {
+    id?: number
+    songId: number
+    key: string
+    name?: string | null
+    isDefault?: boolean
+    isDeleted?: boolean
+    isServiceArrangement?: boolean
+    childrenArrangements?: SongArrangementUncheckedCreateNestedManyWithoutOriginalArrangementInput
+    serviceUnit?: ServiceUnitUncheckedCreateNestedOneWithoutArrangementInput
+    units?: SongUnitUncheckedCreateNestedManyWithoutArrangementInput
+  }
+
+  export type SongArrangementCreateOrConnectWithoutOriginalArrangementInput = {
+    where: SongArrangementWhereUniqueInput
+    create: XOR<SongArrangementCreateWithoutOriginalArrangementInput, SongArrangementUncheckedCreateWithoutOriginalArrangementInput>
+  }
+
+  export type SongArrangementCreateManyOriginalArrangementInputEnvelope = {
+    data: SongArrangementCreateManyOriginalArrangementInput | SongArrangementCreateManyOriginalArrangementInput[]
+    skipDuplicates?: boolean
   }
 
   export type ServiceUnitCreateWithoutArrangementInput = {
@@ -8979,6 +9215,58 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
   }
 
+  export type SongArrangementUpsertWithoutChildrenArrangementsInput = {
+    update: XOR<SongArrangementUpdateWithoutChildrenArrangementsInput, SongArrangementUncheckedUpdateWithoutChildrenArrangementsInput>
+    create: XOR<SongArrangementCreateWithoutChildrenArrangementsInput, SongArrangementUncheckedCreateWithoutChildrenArrangementsInput>
+    where?: SongArrangementWhereInput
+  }
+
+  export type SongArrangementUpdateToOneWithWhereWithoutChildrenArrangementsInput = {
+    where?: SongArrangementWhereInput
+    data: XOR<SongArrangementUpdateWithoutChildrenArrangementsInput, SongArrangementUncheckedUpdateWithoutChildrenArrangementsInput>
+  }
+
+  export type SongArrangementUpdateWithoutChildrenArrangementsInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
+    song?: SongUpdateOneRequiredWithoutArrangementsNestedInput
+    originalArrangement?: SongArrangementUpdateOneWithoutChildrenArrangementsNestedInput
+    serviceUnit?: ServiceUnitUpdateOneWithoutArrangementNestedInput
+    units?: SongUnitUpdateManyWithoutArrangementNestedInput
+  }
+
+  export type SongArrangementUncheckedUpdateWithoutChildrenArrangementsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    songId?: IntFieldUpdateOperationsInput | number
+    originalArrangementId?: NullableIntFieldUpdateOperationsInput | number | null
+    key?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
+    serviceUnit?: ServiceUnitUncheckedUpdateOneWithoutArrangementNestedInput
+    units?: SongUnitUncheckedUpdateManyWithoutArrangementNestedInput
+  }
+
+  export type SongArrangementUpsertWithWhereUniqueWithoutOriginalArrangementInput = {
+    where: SongArrangementWhereUniqueInput
+    update: XOR<SongArrangementUpdateWithoutOriginalArrangementInput, SongArrangementUncheckedUpdateWithoutOriginalArrangementInput>
+    create: XOR<SongArrangementCreateWithoutOriginalArrangementInput, SongArrangementUncheckedCreateWithoutOriginalArrangementInput>
+  }
+
+  export type SongArrangementUpdateWithWhereUniqueWithoutOriginalArrangementInput = {
+    where: SongArrangementWhereUniqueInput
+    data: XOR<SongArrangementUpdateWithoutOriginalArrangementInput, SongArrangementUncheckedUpdateWithoutOriginalArrangementInput>
+  }
+
+  export type SongArrangementUpdateManyWithWhereWithoutOriginalArrangementInput = {
+    where: SongArrangementScalarWhereInput
+    data: XOR<SongArrangementUpdateManyMutationInput, SongArrangementUncheckedUpdateManyWithoutOriginalArrangementInput>
+  }
+
   export type ServiceUnitUpsertWithoutArrangementInput = {
     update: XOR<ServiceUnitUpdateWithoutArrangementInput, ServiceUnitUncheckedUpdateWithoutArrangementInput>
     create: XOR<ServiceUnitCreateWithoutArrangementInput, ServiceUnitUncheckedCreateWithoutArrangementInput>
@@ -9039,17 +9327,21 @@ export namespace Prisma {
     isDeleted?: boolean
     isServiceArrangement?: boolean
     song: SongCreateNestedOneWithoutArrangementsInput
+    originalArrangement?: SongArrangementCreateNestedOneWithoutChildrenArrangementsInput
+    childrenArrangements?: SongArrangementCreateNestedManyWithoutOriginalArrangementInput
     serviceUnit?: ServiceUnitCreateNestedOneWithoutArrangementInput
   }
 
   export type SongArrangementUncheckedCreateWithoutUnitsInput = {
     id?: number
     songId: number
+    originalArrangementId?: number | null
     key: string
     name?: string | null
     isDefault?: boolean
     isDeleted?: boolean
     isServiceArrangement?: boolean
+    childrenArrangements?: SongArrangementUncheckedCreateNestedManyWithoutOriginalArrangementInput
     serviceUnit?: ServiceUnitUncheckedCreateNestedOneWithoutArrangementInput
   }
 
@@ -9076,17 +9368,21 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
     song?: SongUpdateOneRequiredWithoutArrangementsNestedInput
+    originalArrangement?: SongArrangementUpdateOneWithoutChildrenArrangementsNestedInput
+    childrenArrangements?: SongArrangementUpdateManyWithoutOriginalArrangementNestedInput
     serviceUnit?: ServiceUnitUpdateOneWithoutArrangementNestedInput
   }
 
   export type SongArrangementUncheckedUpdateWithoutUnitsInput = {
     id?: IntFieldUpdateOperationsInput | number
     songId?: IntFieldUpdateOperationsInput | number
+    originalArrangementId?: NullableIntFieldUpdateOperationsInput | number | null
     key?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
+    childrenArrangements?: SongArrangementUncheckedUpdateManyWithoutOriginalArrangementNestedInput
     serviceUnit?: ServiceUnitUncheckedUpdateOneWithoutArrangementNestedInput
   }
 
@@ -9174,17 +9470,21 @@ export namespace Prisma {
     isDeleted?: boolean
     isServiceArrangement?: boolean
     song: SongCreateNestedOneWithoutArrangementsInput
+    originalArrangement?: SongArrangementCreateNestedOneWithoutChildrenArrangementsInput
+    childrenArrangements?: SongArrangementCreateNestedManyWithoutOriginalArrangementInput
     units?: SongUnitCreateNestedManyWithoutArrangementInput
   }
 
   export type SongArrangementUncheckedCreateWithoutServiceUnitInput = {
     id?: number
     songId: number
+    originalArrangementId?: number | null
     key: string
     name?: string | null
     isDefault?: boolean
     isDeleted?: boolean
     isServiceArrangement?: boolean
+    childrenArrangements?: SongArrangementUncheckedCreateNestedManyWithoutOriginalArrangementInput
     units?: SongUnitUncheckedCreateNestedManyWithoutArrangementInput
   }
 
@@ -9241,22 +9541,27 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
     song?: SongUpdateOneRequiredWithoutArrangementsNestedInput
+    originalArrangement?: SongArrangementUpdateOneWithoutChildrenArrangementsNestedInput
+    childrenArrangements?: SongArrangementUpdateManyWithoutOriginalArrangementNestedInput
     units?: SongUnitUpdateManyWithoutArrangementNestedInput
   }
 
   export type SongArrangementUncheckedUpdateWithoutServiceUnitInput = {
     id?: IntFieldUpdateOperationsInput | number
     songId?: IntFieldUpdateOperationsInput | number
+    originalArrangementId?: NullableIntFieldUpdateOperationsInput | number | null
     key?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
+    childrenArrangements?: SongArrangementUncheckedUpdateManyWithoutOriginalArrangementNestedInput
     units?: SongUnitUncheckedUpdateManyWithoutArrangementNestedInput
   }
 
   export type SongArrangementCreateManySongInput = {
     id?: number
+    originalArrangementId?: number | null
     key: string
     name?: string | null
     isDefault?: boolean
@@ -9270,28 +9575,43 @@ export namespace Prisma {
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
+    originalArrangement?: SongArrangementUpdateOneWithoutChildrenArrangementsNestedInput
+    childrenArrangements?: SongArrangementUpdateManyWithoutOriginalArrangementNestedInput
     serviceUnit?: ServiceUnitUpdateOneWithoutArrangementNestedInput
     units?: SongUnitUpdateManyWithoutArrangementNestedInput
   }
 
   export type SongArrangementUncheckedUpdateWithoutSongInput = {
     id?: IntFieldUpdateOperationsInput | number
+    originalArrangementId?: NullableIntFieldUpdateOperationsInput | number | null
     key?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
+    childrenArrangements?: SongArrangementUncheckedUpdateManyWithoutOriginalArrangementNestedInput
     serviceUnit?: ServiceUnitUncheckedUpdateOneWithoutArrangementNestedInput
     units?: SongUnitUncheckedUpdateManyWithoutArrangementNestedInput
   }
 
   export type SongArrangementUncheckedUpdateManyWithoutSongInput = {
     id?: IntFieldUpdateOperationsInput | number
+    originalArrangementId?: NullableIntFieldUpdateOperationsInput | number | null
     key?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     isDefault?: BoolFieldUpdateOperationsInput | boolean
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type SongArrangementCreateManyOriginalArrangementInput = {
+    id?: number
+    songId: number
+    key: string
+    name?: string | null
+    isDefault?: boolean
+    isDeleted?: boolean
+    isServiceArrangement?: boolean
   }
 
   export type SongUnitCreateManyArrangementInput = {
@@ -9299,6 +9619,41 @@ export namespace Prisma {
     content: string
     type: $Enums.SongUnitType
     order: number
+  }
+
+  export type SongArrangementUpdateWithoutOriginalArrangementInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
+    song?: SongUpdateOneRequiredWithoutArrangementsNestedInput
+    childrenArrangements?: SongArrangementUpdateManyWithoutOriginalArrangementNestedInput
+    serviceUnit?: ServiceUnitUpdateOneWithoutArrangementNestedInput
+    units?: SongUnitUpdateManyWithoutArrangementNestedInput
+  }
+
+  export type SongArrangementUncheckedUpdateWithoutOriginalArrangementInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    songId?: IntFieldUpdateOperationsInput | number
+    key?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
+    childrenArrangements?: SongArrangementUncheckedUpdateManyWithoutOriginalArrangementNestedInput
+    serviceUnit?: ServiceUnitUncheckedUpdateOneWithoutArrangementNestedInput
+    units?: SongUnitUncheckedUpdateManyWithoutArrangementNestedInput
+  }
+
+  export type SongArrangementUncheckedUpdateManyWithoutOriginalArrangementInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    songId?: IntFieldUpdateOperationsInput | number
+    key?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    isDefault?: BoolFieldUpdateOperationsInput | boolean
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    isServiceArrangement?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SongUnitUpdateWithoutArrangementInput = {

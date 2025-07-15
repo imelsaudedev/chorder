@@ -519,6 +519,7 @@ async function getUnits(
           data: {
             key: defaultArrangement.key,
             songId: song.id!,
+            originalArrangementId: defaultArrangement.id,
             isDefault: false,
             isDeleted: false,
             isServiceArrangement: true,
