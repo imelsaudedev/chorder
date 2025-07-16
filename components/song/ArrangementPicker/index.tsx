@@ -46,7 +46,7 @@ export default function ArrangementPicker({
     } else if (arrangements.length > 0) {
       onSelected(arrangements[0]);
     }
-  }, [arrangements]);
+  }, [arrangements, defaultArrangementId, onSelected]);
 
   if (isLoading) {
     return <Skeleton className="w-[400px] h-[300px]" />;

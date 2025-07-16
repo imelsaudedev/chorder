@@ -62,22 +62,22 @@ export default function SongConfigProvider({
     if (!columnsTouched) {
       setUntouchedColumns((prev) => initialColumns ?? prev);
     }
-  }, [initialColumns]);
+  }, [initialColumns, columnsTouched, setUntouchedColumns]);
   useEffect(() => {
     if (!fontSizeTouched) {
       setUntouchedFontSize((prev) => initialFontSize ?? prev);
     }
-  }, [initialFontSize]);
+  }, [initialFontSize, fontSizeTouched, setUntouchedFontSize]);
   useEffect(() => {
     if (!modeTouched) {
       setUntouchedMode((prev) => initialMode ?? prev);
     }
-  }, [initialMode]);
+  }, [initialMode, modeTouched, setUntouchedMode]);
   useEffect(() => {
     if (!densityTouched) {
       setUntouchedDensity((prev) => initialDensity ?? prev);
     }
-  }, [initialDensity]);
+  }, [initialDensity, densityTouched, setUntouchedDensity]);
 
   return (
     <SongConfigContext.Provider

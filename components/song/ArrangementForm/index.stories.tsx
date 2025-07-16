@@ -52,7 +52,7 @@ async function beforeEach() {
 }
 
 function makeRenderer(origArrangement: ClientArrangement | null) {
-  return () => {
+  return function ArrangementFormRenderer() {
     const [arrangement, setArrangement] = useState<ClientArrangement | null>(
       origArrangement
     );

@@ -71,7 +71,7 @@ export function useServicesByMonth(
       ]);
 
     return sortedServicesByMonth;
-  }, [locale, services]);
+  }, [services]);
 }
 
 function getCurrentDate() {

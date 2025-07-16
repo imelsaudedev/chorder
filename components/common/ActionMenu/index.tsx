@@ -34,7 +34,7 @@ export default function ActionMenu({
     onDelete();
     const parentPath = pathname.split("/").slice(0, -1).join("/");
     router.replace(parentPath);
-  }, [router, pathname]);
+  }, [router, pathname, onDelete]);
 
   return (
     <div className="flex gap-1">

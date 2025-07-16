@@ -63,7 +63,7 @@ async function beforeEach() {
 }
 
 function makeRenderer(origService: ClientService | null) {
-  return () => {
+  return function ServiceFormRenderer() {
     const [service, setService] = useState<ClientService | null>(origService);
 
     function onSubmit(service: ClientService) {

@@ -28,7 +28,7 @@ export default function SortableServiceUnitForm({
       setValue(i, "order", units[i].order - 1);
     }
     remove(index);
-  }, [index, remove]);
+  }, [index, remove, setValue, units]);
   const handleChangeUnit = useCallback(
     (unit: ServiceUnitSchema) => {
       update(index, unit);

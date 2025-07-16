@@ -69,7 +69,7 @@ function useFullScreen(
     return () => {
       document.removeEventListener("fullscreenchange", handleFullScreenChange);
     };
-  }, []);
+  }, [setIsFullScreen]);
 }
 
 function useOnNext(
@@ -86,7 +86,7 @@ function useOnNext(
         block: "start",
       });
     }
-  }, [unitRefs.current, currentIndex]);
+  }, [currentIndex, unitRefs, setCurrentIndex]);
 }
 
 function useOnPrevious(
@@ -103,7 +103,7 @@ function useOnPrevious(
         block: "start",
       });
     }
-  }, [unitRefs.current, currentIndex]);
+  }, [unitRefs, currentIndex, setCurrentIndex]);
 }
 
 function exitFullScreen() {
@@ -163,7 +163,7 @@ function useObserveAll(
         }
       });
     };
-  }, [unitRefs]);
+  }, [unitRefs, setCurrentIndex]);
 }
 
 function useToggleFullScreen(

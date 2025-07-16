@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { CircleArrowUp } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type ScrollToTopButtonProps = {
   scrollThreshold?: number;
@@ -16,13 +16,13 @@ export default function ScrollToTopButton({
   const t = useTranslations("Messages");
 
   // Função para verificar a posição do scroll
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (window.scrollY > scrollThreshold) {
       setIsVisible(true); // Mostra o botão se o scroll for maior que scrollThreshold px
     } else {
       setIsVisible(false); // Oculta o botão se o scroll for menor ou igual a scrollThreshold px
     }
-  };
+  }, [scrollThreshold]);
 
   // Adiciona o listener de scroll ao montar o componente
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function ScrollToTopButton({
     return () => {
       window.removeEventListener("scroll", handleScroll); // Remove o listener ao desmontar o componente
     };
-  }, []);
+  }, [handleScroll]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
