@@ -13,7 +13,6 @@ import { ClientServiceUnit, ClientSong } from "@/prisma/models";
 import { ServiceUnitSchema } from "@/schemas/service-unit";
 import { XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { MouseEventHandler, useCallback, useMemo } from "react";
 
 type FormHeaderProps = {
@@ -64,12 +63,14 @@ export default function FormHeader({
 
         <div className="flex flex-row items-center gap-4 md:justify-end">
           {unit.arrangement.originalArrangementId && (
-            <Link
+            <a
+              target="_blank"
               className="text-xs sm:text-sm underline"
               href={`/songs/${unit.arrangement.song.id}/edit?arrangement=${unit.arrangement.originalArrangementId}`}
+              rel="noopener noreferrer"
             >
               {t("editOriginal")}
-            </Link>
+            </a>
           )}
           <ToggleEdit
             id={`${index}-${unit.arrangement.song.id}`}
