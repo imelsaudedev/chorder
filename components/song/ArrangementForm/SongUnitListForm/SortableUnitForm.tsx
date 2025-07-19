@@ -16,7 +16,7 @@ export default function SortableUnitForm({
   unit,
   fieldPrefix = "",
 }: SortableUnitFormProps) {
-  const { units, update, swap, remove, setValue } =
+  const { units, update, swap, remove, setValue, insert } =
     useArrangementUnitsFieldArray(fieldPrefix);
   const swapAndUpdateOrder = useSwapAndUpdateOrder(units, setValue, swap);
   const handleMoveUnitUp = useCallback(() => {
@@ -37,6 +37,13 @@ export default function SortableUnitForm({
     },
     [index, update]
   );
+  const handleDuplicateUnit = useCallback(() => {
+    const newUnit = { ...unit, order: unit.order + 1 };
+    for (let i = index + 1; i < units.length; i++) {
+      setValue(i, "order", units[i].order + 1);
+    }
+    insert(index + 1, newUnit);
+  }, [index, insert, setValue, unit, units]);
 
   return (
     <div className="flex">
@@ -49,6 +56,7 @@ export default function SortableUnitForm({
       <UnitForm
         unit={unit}
         removeUnit={handleRemoveUnit}
+        duplicateUnit={handleDuplicateUnit}
         onChangeUnit={handleChangeUnit}
         className="grow"
       />

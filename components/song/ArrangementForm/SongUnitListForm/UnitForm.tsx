@@ -5,13 +5,14 @@ import ChordProViewer from "@/components/song/ChordProViewer";
 import { unitColorClasses } from "@/components/song/unit-colors";
 import { Button } from "@/components/ui/button";
 import { ClientSongUnit, SongUnitType } from "@/prisma/models";
-import { XIcon } from "lucide-react";
+import { CopyIcon, TrashIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ChangeEvent, useCallback, useId, useMemo } from "react";
 
 type UnitFormProps = {
   unit: ClientSongUnit;
   removeUnit: () => void;
+  duplicateUnit: () => void;
   onChangeUnit: (unit: ClientSongUnit) => void;
   className?: string;
 };
@@ -19,6 +20,7 @@ type UnitFormProps = {
 export default function UnitForm({
   unit,
   removeUnit,
+  duplicateUnit,
   onChangeUnit,
   className,
 }: UnitFormProps) {
@@ -33,6 +35,14 @@ export default function UnitForm({
       removeUnit();
     },
     [removeUnit]
+  );
+
+  const handleDuplicateUnit = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      duplicateUnit();
+    },
+    [duplicateUnit]
   );
 
   const handleChangeUnitType = useCallback(
@@ -65,12 +75,6 @@ export default function UnitForm({
         colorClasses.background
       } rounded-lg p-2 md:p-4 mb-2 ${className || ""}`}
     >
-      <div className="flex justify-between items-center">
-        <Button onClick={handleRemoveUnit} variant="ghost" size="icon">
-          <XIcon />
-        </Button>
-      </div>
-
       <div className="mt-2">
         <BadgeSelector value={unit.type} onChange={handleChangeUnitType} />
       </div>
@@ -97,6 +101,15 @@ export default function UnitForm({
             <ChordProViewer chordpro={unit.content} density="compact" />
           )}
         </div>
+      </div>
+
+      <div className="flex justify-end items-center mt-4 gap-2">
+        <Button onClick={handleRemoveUnit} variant="ghost">
+          <TrashIcon /> {t("Messages.delete")}
+        </Button>
+        <Button onClick={handleDuplicateUnit} variant="outline">
+          <CopyIcon /> {t("Messages.duplicate")}
+        </Button>
       </div>
     </div>
   );

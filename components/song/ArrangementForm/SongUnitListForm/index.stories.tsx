@@ -27,7 +27,7 @@ export const Default: Story = {
     }
 
     return (
-      <div>
+      <div className="max-w-4xl">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <SongUnitListForm />

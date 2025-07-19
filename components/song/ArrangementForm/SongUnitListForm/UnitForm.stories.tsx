@@ -4,7 +4,7 @@ import { useState } from "react";
 import UnitForm from "./UnitForm";
 
 const meta = {
-  title: "song/SongUnitListForm/UnitForm",
+  title: "song/ArrangementForm/SongUnitListForm/UnitForm",
   component: UnitForm,
 } satisfies Meta<typeof UnitForm>;
 
@@ -27,6 +27,7 @@ export const Default: Story = {
       <UnitForm
         unit={unit}
         removeUnit={() => setUnit({ ...unit, content: "" })}
+        duplicateUnit={() => alert("Duplicate unit action")}
         onChangeUnit={(newUnit) => setUnit(newUnit)}
       />
     );
