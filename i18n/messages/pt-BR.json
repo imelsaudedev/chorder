@@ -16,6 +16,7 @@
     "hide": "Esconder",
     "save": "Salvar",
     "home": "Início",
+    "feedback": "Feedback",
     "scrollToTop": "Voltar ao topo",
     "newSong": "Nova música",
     "editSong": "Editar música",
@@ -112,5 +113,24 @@
     "noSongs": "Nenhuma música encontrada",
     "moveArrangement": "Mesclar arranjo",
     "cantBeEmpty": "Não pode ser vazio"
+  },
+  "Feedback": {
+    "title": "Feedback",
+    "contentBug": "Descreva o bug ou problema que você encontrou",
+    "contentFeature": "Descreva a funcionalidade que você gostaria de ver implementada",
+    "contentOther": "Compartilhe qualquer outro comentário, sugestão ou feedback geral",
+    "contentRequired": "O conteúdo é obrigatório",
+    "bug": "Bug",
+    "feature": "Funcionalidade",
+    "other": "Outro",
+    "nameLabel": "Nome",
+    "namePlaceholder": "Seu nome (opcional)",
+    "nameDescription": "Você pode se identificar para que possamos entrar em contato caso necessário.",
+    "submit": "Enviar",
+    "successTitle": "Obrigado pelo seu feedback!",
+    "successMessage": "Agradecemos por compartilhar suas ideias e sugestões",
+    "submitAnother": "Enviar outro feedback",
+    "invalidFeedback": "Feedback inválido.",
+    "serverError": "Erro no servidor. Por favor, tente novamente mais tarde."
   }
 }

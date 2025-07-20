@@ -16,6 +16,7 @@
     "hide": "Hide",
     "save": "Save",
     "home": "Home",
+    "feedback": "Feedback",
     "scrollToTop": "Scroll to top",
     "newSong": "New song",
     "editSong": "Edit song",
@@ -111,5 +112,24 @@
     "noSongs": "No songs found",
     "moveArrangement": "Move arrangement",
     "cantBeEmpty": "Cannot be empty"
+  },
+  "Feedback": {
+    "title": "Feedback",
+    "contentBug": "Describe the bug or issue you encountered",
+    "contentFeature": "Describe the feature you would like to see implemented",
+    "contentOther": "Share your thoughts",
+    "contentRequired": "Content is required",
+    "bug": "Bug",
+    "feature": "Feature",
+    "other": "Other",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your name (optional)",
+    "nameDescription": "You can identify yourself so we can contact you if necessary.",
+    "submit": "Submit",
+    "successTitle": "Thank you for your feedback!",
+    "successMessage": "We appreciate you sharing your ideas and suggestions",
+    "submitAnother": "Submit another feedback",
+    "invalidFeedback": "Invalid feedback.",
+    "serverError": "Server error. Please try again later."
   }
 }
