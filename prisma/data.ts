@@ -640,10 +640,12 @@ export async function createOrUpdateService(
     serviceUnits,
     newOrUpdatedService.id
   );
-  await deleteServiceUnitsNotIn(
-    service.id!,
-    unitsWithId.map((unit) => unit.id!)
-  );
+  if (service.id) {
+    await deleteServiceUnitsNotIn(
+      service.id!,
+      unitsWithId.map((unit) => unit.id!)
+    );
+  }
   const retService = await prisma.service.findUnique({
     where: { id: newOrUpdatedService.id },
     include: {
