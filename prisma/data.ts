@@ -642,7 +642,7 @@ export async function createOrUpdateService(
   );
   if (service.id) {
     await deleteServiceUnitsNotIn(
-      service.id!,
+      service.id,
       unitsWithId.map((unit) => unit.id!)
     );
   }
