@@ -102,7 +102,7 @@ function getServiceData(songs: ClientSong[]) {
           throw new Error(`Song with slug ${unit.songSlug} not found`);
         }
         const arrangement = song.arrangements![unit.arrangementId];
-        const unitsByInternalId = arrangement.units ? Object.fromEntries(
+        const unitsByInternalId = arrangement?.units ? Object.fromEntries(
           arrangement.units.map((unit) => [unit.order, unit])
         ) : {};
         unit.additionalSongUnits.forEach((additionalUnit) => {
