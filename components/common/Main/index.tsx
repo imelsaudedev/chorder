@@ -14,7 +14,7 @@ export default function Main({
     normal: "px-4 sm:px-6 lg:px-8",
   };
 
-  const classNames = [densityClasses[density]];
+  const classNames = ["mb-12", densityClasses[density]];
   if (className) {
     classNames.push(className);
   }
