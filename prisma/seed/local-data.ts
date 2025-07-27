@@ -101,8 +101,10 @@ function getServiceData(songs: ClientSong[]) {
         if (!song) {
           throw new Error(`Song with slug ${unit.songSlug} not found`);
         }
-        console.log(`Found song ${JSON.stringify(song)} with slug ${unit.songSlug}. Arrangement: ${unit.arrangementId}`);
         const arrangement = song.arrangements![unit.arrangementId];
+        if (!arrangement) {
+          return null;
+        }
         const unitsByInternalId = Object.fromEntries(
           arrangement.units!.map((unit) => [unit.order, unit])
         );
@@ -139,7 +141,7 @@ function getServiceData(songs: ClientSong[]) {
             },
           },
         };
-      }),
+      }).filter((unit): unit is NonNullable<typeof unit> => unit !== null),
     },
   }));
 }
