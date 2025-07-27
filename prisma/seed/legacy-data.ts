@@ -333,9 +333,6 @@ export async function addNewServices(prisma: PrismaClient) {
     .then((services) => {
       return services.map((service) => service.legacyId as number);
     });
-  console.log(
-    `Found ${JSON.stringify(slugs.sort())} existing services with legacyId.`
-  );
 
   playlists = playlists.filter((service) => {
     if (
