@@ -1,6 +1,4 @@
 .lyrics {
-  display: flex;
-
   &.lyricsConnection {
     &::after {
       $line-start: 56%;

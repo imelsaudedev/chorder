@@ -18,8 +18,10 @@ export default function StyledLine({
   mode,
   density,
 }: StyledLineProps) {
+  const containerClassName = mode === "chords" ? "flex flex-row flex-wrap" : "inline whitespace-pre-wrap";
+
   return (
-    <div className="flex flex-row flex-wrap">
+    <div className={containerClassName}>
       {items.length === 0 && <br />}
       {items.map((item, elementIdx) => (
         <Item

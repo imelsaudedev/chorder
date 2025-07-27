@@ -9,7 +9,7 @@ export default function TextLine({ items, ...props }: TextLineProps) {
   return (
     <>
       {items.length === 0 && <br />}
-      <div className="flex">
+      <div>
         {items.map((item, elementIdx) => (
           <Item
             key={`song-line-item-${elementIdx}`}
@@ -22,7 +22,7 @@ export default function TextLine({ items, ...props }: TextLineProps) {
           />
         ))}
       </div>
-      <div className="flex">
+      <div>
         {items.map((item, elementIdx) => (
           <Item
             key={`song-line-item-${elementIdx}`}

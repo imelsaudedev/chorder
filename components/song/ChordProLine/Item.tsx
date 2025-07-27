@@ -65,6 +65,7 @@ export default function Item({
   }
 
   const lyricsClasses = [
+    mode === "chords" ? "flex" : "inline whitespace-pre-wrap",
     density === "compact" ? "leading-tight" : "leading-none",
     styles.lyrics,
   ];
@@ -81,16 +82,26 @@ export default function Item({
     lyricsClasses.push("h-[1em]");
   }
 
-  return (
-    <div
-      className={`flex flex-col whitespace-pre-wrap ${
-        density === "compact" ? "mb-1" : "mb-2"
-      }`}
-    >
+  const content = (
+    <>
       {!hideChords && mode !== "lyrics" && (
         <span className={chordClasses.join(" ")}>{chords}</span>
       )}
       {!hideLyrics && <span className={lyricsClasses.join(" ")}>{lyrics}</span>}
-    </div>
+    </>
   );
+
+  if (mode === "chords") {
+      return (
+        <div
+          className={`flex flex-col whitespace-pre-wrap ${
+            density === "compact" ? "mb-1" : "mb-2"
+          }`}
+        >
+          {content}
+        </div>
+      );
+  }
+
+  return content;
 }
