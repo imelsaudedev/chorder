@@ -132,8 +132,8 @@ function getServiceData(songs: ClientSong[]) {
               units: {
                 create: unit.songMap.map((internalId, idx) => {
                   return {
-                    content: unitsByInternalId[internalId].content,
-                    type: unitsByInternalId[internalId].type as SongUnitType,
+                    content: unitsByInternalId[internalId]?.content ?? "",
+                    type: unitsByInternalId[internalId]?.type as SongUnitType ?? "BLOCK",
                     order: idx + 1,
                   };
                 }),
