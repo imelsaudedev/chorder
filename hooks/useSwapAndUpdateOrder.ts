@@ -7,10 +7,10 @@ export function useSwapAndUpdateOrder<T extends { order: number }>(
 ) {
   return useCallback(
     (fromIndex: number, toIndex: number) => {
-      const fromUnit = units[fromIndex];
-      const toUnit = units[toIndex];
-      setValue(fromIndex, "order", toUnit.order);
-      setValue(toIndex, "order", fromUnit.order);
+      const fromUnitOrder = units[fromIndex].order;
+      const toUnitOrder = units[toIndex].order;
+      setValue(fromIndex, "order", toUnitOrder);
+      setValue(toIndex, "order", fromUnitOrder);
       swap(fromIndex, toIndex);
     },
     [units, setValue, swap]
