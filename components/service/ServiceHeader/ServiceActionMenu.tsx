@@ -18,6 +18,7 @@ export default function ServiceActionMenu({ service }: ServiceActionMenuProps) {
     <ActionMenu
       editUrl={editUrl}
       isDeleting={isMutating}
+      isDuplicating={false}
       onDelete={deleteService}
       confirmDeleteTitle={t("ServiceForm.confirmDeleteTitle")}
       confirmDeleteDescription={t("ServiceForm.confirmDelete")}
