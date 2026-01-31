@@ -580,6 +580,44 @@ export async function deleteArrangement(
   return true;
 }
 
+export async function duplicateArrangement(
+  arrangementId: number
+): Promise<ClientArrangement> {
+  const arrangement = await retrieveArrangement(arrangementId, {
+    includeUnits: true,
+    includeSong: true,
+  });
+  if (!arrangement || !arrangement.song) {
+    throw new Error("Arrangement or song not found");
+  }
+
+  const duplicatedArrangement = await prisma.songArrangement.create({
+    data: {
+      name: arrangement.name ? `${arrangement.name} (Copy)` : null,
+      key: arrangement.key,
+      isDefault: false,
+      song: {
+        connect: { id: arrangement.song.id },
+      },
+      units: {
+        createMany: {
+          data:
+            arrangement.units?.map(({ arrangementId, id, ...unit }) => unit) ??
+            [],
+        },
+      },
+    },
+    include: {
+      song: true,
+      units: {
+        orderBy: { order: "asc" },
+      },
+    },
+  });
+
+  return duplicatedArrangement;
+}
+
 export async function retrieveService(
   slugOrId: string | number
 ): Promise<ClientService | null> {

@@ -15,14 +15,18 @@ import { useCallback } from "react";
 type ActionMenuProps = {
   editUrl: string;
   onDelete: () => void;
+  onDuplicate?: () => void;
+  isDuplicating: boolean;
   isDeleting: boolean;
   confirmDeleteTitle: string;
   confirmDeleteDescription: string;
 };
 export default function ActionMenu({
   editUrl,
+  isDuplicating,
   isDeleting,
   onDelete,
+  onDuplicate,
   confirmDeleteTitle,
   confirmDeleteDescription,
 }: ActionMenuProps) {
@@ -49,6 +53,14 @@ export default function ActionMenu({
                 {t("Messages.edit")}
               </Link>
             </DropdownMenuItem>
+            {onDuplicate && (
+              <DropdownMenuItem
+                onSelect={onDuplicate}
+                disabled={isDuplicating}
+              >
+                {t("Messages.duplicate")}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem asChild>
               <AlertDialogTrigger
                 className="w-full text-left"

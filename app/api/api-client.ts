@@ -216,6 +216,30 @@ export function useMakeArrangementDefault(arrangementId: number) {
   };
 }
 
+export function useDuplicateArrangement(arrangementId: number) {
+  async function duplicateArrangement(url: string) {
+    const response = await fetch(`${url}/duplicate`, {
+      method: "POST",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to duplicate arrangement");
+    }
+    return response.json();
+  }
+
+  const { trigger, isMutating, error, data } = useSWRMutation(
+    `/api/arrangements/${arrangementId}`,
+    duplicateArrangement
+  );
+
+  return {
+    duplicateArrangement: trigger,
+    isMutating,
+    isError: error,
+    duplicatedArrangement: data,
+  };
+}
+
 export function useFetchServices() {
   const { data, error, isLoading } = useSWR("/api/services", (...args) =>
     fetch(...args).then((res) => res.json())

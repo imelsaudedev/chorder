@@ -20,6 +20,9 @@ export const useFetchSongs = fn(actual.useFetchSongs).mockName("useFetchSongs");
 export const useMoveArrangement = fn(actual.useMoveArrangement).mockName(
   "useMoveArrangement"
 );
+export const useDuplicateArrangement = fn(
+  actual.useDuplicateArrangement
+).mockName("useDuplicateArrangement");
 export const useMakeArrangementDefault = fn(
   actual.useMakeArrangementDefault
 ).mockName("useMakeArrangementDefault");
