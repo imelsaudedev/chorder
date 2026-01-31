@@ -4,8 +4,10 @@ import SaveButtonSet from "@/components/common/SaveButtonSet";
 import { Form } from "@/components/ui/form";
 import { ClientService } from "@/prisma/models";
 import { serviceSchema, ServiceSchema } from "@/schemas/service";
+import { autoScrollWindowForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { useForm, useFormState } from "react-hook-form";
 import ServiceInfoForm from "./ServiceInfoForm";
 import ServiceUnitListForm from "./ServiceUnitListForm";
@@ -42,6 +44,11 @@ export default function ServiceForm({ service, onSaved }: ServiceFormProps) {
       onSaved(newOrUpdatedService);
     }
   }
+
+  useEffect(() => {
+    return autoScrollWindowForElements();
+  }, []);
+
   const isNew = !service?.id;
 
   return (

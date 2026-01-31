@@ -4,8 +4,10 @@ import SaveButtonSet from "@/components/common/SaveButtonSet";
 import { Form } from "@/components/ui/form";
 import { ClientArrangement } from "@/prisma/models";
 import { ArrangementSchema } from "@/schemas/arrangement";
+import { autoScrollWindowForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import ArrangementInfoForm from "./ArrangementInfoForm";
 import SongInfoForm from "./SongInfoForm";
@@ -42,6 +44,11 @@ export default function ArrangementForm({
       onSaved(newOrUpdatedArrangement);
     }
   }
+
+  useEffect(() => {
+    return autoScrollWindowForElements();
+  }, []);
+
   const isNew = !arrangement.id;
 
   return (

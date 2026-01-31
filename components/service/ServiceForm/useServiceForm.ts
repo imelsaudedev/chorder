@@ -39,7 +39,7 @@ export function initForm(
 }
 
 export function useServiceUnitsFieldArray() {
-  const { control, watch, setValue: globalSetValue } = useFormContext();
+  const { control, watch, setValue: globalSetValue, getValues: globalGetValues } = useFormContext();
   const setValue = (index: number, name: string, value: any) => {
     globalSetValue(`units.${index}.${name}`, value, {
       shouldDirty: true,
@@ -47,7 +47,7 @@ export function useServiceUnitsFieldArray() {
       shouldValidate: true,
     });
   };
-  const { fields: _, ...rest } = useFieldArray({
+  const { fields, ...rest } = useFieldArray({
     name: "units",
     control,
     rules: {
@@ -56,7 +56,9 @@ export function useServiceUnitsFieldArray() {
     },
   });
   return {
+    fields,
     units: watch("units") as ServiceUnitSchema[],
+    getValues: () => (globalGetValues("units") as ServiceUnitSchema[]) || [],
     setValue,
     ...rest,
   };

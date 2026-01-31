@@ -17,6 +17,7 @@ export const Default: Story = {
   args: {
     editUrl: "/edit",
     isDeleting: false,
+    isDuplicating: false,
     onDelete: () => {
       console.log("Delete action triggered");
     },

@@ -38,7 +38,7 @@ export function defaultArrangementValues(
 }
 
 export function useArrangementUnitsFieldArray(fieldPrefix: string = "") {
-  const { control, watch, setValue: globalSetValue } = useFormContext();
+  const { control, watch, setValue: globalSetValue, getValues: globalGetValues } = useFormContext();
   const setValue = (index: number, name: string, value: any) => {
     globalSetValue(`${fieldPrefix}units.${index}.${name}`, value, {
       shouldDirty: true,
@@ -46,7 +46,7 @@ export function useArrangementUnitsFieldArray(fieldPrefix: string = "") {
       shouldValidate: true,
     });
   };
-  const { fields: _, ...rest } = useFieldArray({
+  const { fields, ...rest } = useFieldArray({
     name: `${fieldPrefix}units`,
     control,
     rules: {
@@ -55,7 +55,9 @@ export function useArrangementUnitsFieldArray(fieldPrefix: string = "") {
     },
   });
   return {
+    fields,
     units: watch(`${fieldPrefix}units`) as ClientSongUnit[],
+    getValues: () => (globalGetValues(`${fieldPrefix}units`) as ClientSongUnit[]) || [],
     setValue,
     ...rest,
   };
