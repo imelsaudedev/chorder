@@ -1,4 +1,5 @@
 import { ChordProItem } from "@/chopro/music";
+import { MarkdownViewer } from "@/components/common/MarkdownViewer";
 import { Density, Mode } from "@/components/config/config";
 import ChordProLine from "@/components/song/ChordProLine";
 import { unitColorClasses } from "@/components/song/unit-colors";
@@ -48,7 +49,23 @@ export default function ColumnViewer({
           })}
         >
           {data.map((unit, unitIdx) => {
+            const isTextUnit = unit.unitType === "TEXT";
             const unitClasses = unitColorClasses[unit.unitType];
+
+            if (isTextUnit) {
+              return (
+                <div
+                  key={`unit-${unitIdx}`}
+                  className={clsx({
+                    "py-2": isTextMode,
+                    "bg-gray-100 dark:bg-zinc-800 rounded p-4": !isTextMode,
+                  })}
+                >
+                  <MarkdownViewer content={unit.content || ""} />
+                </div>
+              );
+            }
+
             return (
               <div
                 key={`unit-${unitIdx}`}

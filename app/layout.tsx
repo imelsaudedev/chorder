@@ -31,6 +31,7 @@ export default async function RootLayout({
       <head></head>
       <body
         className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${bricolageGrotesque.variable} font-sans pb-4 md:pb-6 lg:pb-8`}
+        suppressHydrationWarning
       >
         <NextIntlClientProvider
           messages={messages}

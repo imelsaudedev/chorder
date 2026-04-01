@@ -10,6 +10,7 @@ export const songUnitTypeSchema = z.union([
   z.literal("INTERLUDE"),
   z.literal("SOLO"),
   z.literal("ENDING"),
+  z.literal("TEXT"),
 ]);
 
 export const songUnitSchema = z.object({

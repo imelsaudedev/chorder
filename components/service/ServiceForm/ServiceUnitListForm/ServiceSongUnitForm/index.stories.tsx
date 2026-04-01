@@ -25,7 +25,7 @@ export const Default: Story = {
     form.watch();
 
     const index = 0;
-    const [unit, setUnit] = useState<ClientServiceUnit>(service.units[index]);
+    const [unit, setUnit] = useState<ClientServiceUnit>(service.units![index]);
     const handleRemove = () => {
       console.log("Remove unit");
     };

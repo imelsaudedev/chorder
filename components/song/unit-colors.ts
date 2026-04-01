@@ -62,4 +62,10 @@ export const unitColorClasses: {
     text: "text-zinc-600",
     border: "border-zinc-200",
   },
+  TEXT: {
+    circleBackground: "bg-slate-400",
+    background: "bg-slate-50",
+    text: "text-slate-600",
+    border: "border-slate-200",
+  },
 };

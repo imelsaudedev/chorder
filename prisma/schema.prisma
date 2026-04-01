@@ -49,7 +49,7 @@ model SongUnit {
   content   String
   type      SongUnitType
   order     Int
-
+  
   arrangement SongArrangement @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
 }
 
@@ -63,6 +63,7 @@ enum SongUnitType {
   INTERLUDE
   SOLO
   ENDING
+  TEXT
 }
 
 model Service {

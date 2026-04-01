@@ -6,6 +6,7 @@ type UnitData = {
   lines: Line[];
   unitType: SongUnitType;
   unitTypeIndex: number;
+  content?: string;
 };
 
 export function findBestDistribution(
@@ -14,12 +15,22 @@ export function findBestDistribution(
 ) {
   const unitTypeIndices: Record<string, number> = {};
   const unitData: UnitData[] = songUnitMap.map((unit) => {
+    unitTypeIndices[unit.type] = (unitTypeIndices[unit.type] || 0) + 1;
+
+    if (unit.type === "TEXT") {
+      return {
+        lines: [],
+        unitType: unit.type,
+        unitTypeIndex: unitTypeIndices[unit.type],
+        content: unit.content,
+      };
+    }
+
     const content = unit.content
       .split("\n")
       .map((line) => line.trim())
       .join("\n");
     const chordproHtml = parseChordPro(content);
-    unitTypeIndices[unit.type] = (unitTypeIndices[unit.type] || 0) + 1;
     return {
       lines: chordproHtml.lines,
       unitType: unit.type,
@@ -33,8 +44,12 @@ export function findBestDistribution(
 
 function getTotalHeight(columnData: UnitData[]) {
   return columnData
-    .map((unit) =>
-      unit.lines
+    .map((unit) => {
+      if (unit.unitType === "TEXT") {
+        const textLines = (unit.content || "").split("\n").length;
+        return textLines + 1;
+      }
+      return unit.lines
         .map((line) => {
           const hasLyrics = line.items.some((item) =>
             (item as any).lyrics?.trim()
@@ -51,8 +66,8 @@ function getTotalHeight(columnData: UnitData[]) {
           }
           return totalLines;
         })
-        .reduce((a, b) => a + b, 0)
-    )
+        .reduce((a, b) => a + b, 0);
+    })
     .reduce((a, b) => a + b, 0);
 }
 

@@ -1,4 +1,5 @@
 import { parseChordPro } from "@/chopro/music";
+import { MarkdownUnitForm } from "@/components/common/MarkdownUnitForm";
 import TextInput from "@/components/common/TextInput";
 import BadgeSelector from "@/components/song/BadgeSelector";
 import ChordProViewer from "@/components/song/ChordProViewer";
@@ -60,14 +61,23 @@ export default function UnitForm({
   );
 
   // Verifica se o conteúdo do ChordPro é válido
+  const isTextUnit = unit.type === "TEXT";
   const { hasError } = useMemo(() => {
+    if (isTextUnit) return { hasError: false };
     try {
       parseChordPro(unit.content);
       return { hasError: false };
     } catch {
       return { hasError: true };
     }
-  }, [unit.content]);
+  }, [unit.content, isTextUnit]);
+
+  const handleMarkdownChange = useCallback(
+    (content: string) => {
+      onChangeUnit({ ...unit, content });
+    },
+    [onChangeUnit, unit]
+  );
 
   return (
     <div
@@ -79,29 +89,38 @@ export default function UnitForm({
         <BadgeSelector value={unit.type} onChange={handleChangeUnitType} />
       </div>
 
-      <div className="flex flex-col md:grid md:grid-cols-2 gap-4 mt-4">
-        <div className="flex flex-col">
-          <TextInput
-            id={contentId}
-            className="resize-none grow bg-white font-mono"
-            placeholder={t("UnitData.contentPlaceholder")}
-            onChange={handleChangeChordpro}
-            value={unit.content}
-            minRows={1}
-            long
+      {isTextUnit ? (
+        <div className="mt-4">
+          <MarkdownUnitForm
+            initialContent={unit.content}
+            onChange={handleMarkdownChange}
           />
         </div>
+      ) : (
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-4 mt-4">
+          <div className="flex flex-col">
+            <TextInput
+              id={contentId}
+              className="resize-none grow bg-white font-mono"
+              placeholder={t("UnitData.contentPlaceholder")}
+              onChange={handleChangeChordpro}
+              value={unit.content}
+              minRows={1}
+              long
+            />
+          </div>
 
-        <div className="rounded-md bg-black/5 px-2 py-2">
-          {hasError ? (
-            <p className="text-red-500 text-sm">
-              {t("Messages.invalidChordPro")}
-            </p>
-          ) : (
-            <ChordProViewer chordpro={unit.content} density="compact" />
-          )}
+          <div className="rounded-md bg-black/5 px-2 py-2">
+            {hasError ? (
+              <p className="text-red-500 text-sm">
+                {t("Messages.invalidChordPro")}
+              </p>
+            ) : (
+              <ChordProViewer chordpro={unit.content} density="compact" />
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex justify-end items-center mt-4 gap-2">
         <Button onClick={handleRemoveUnit} variant="ghost">
