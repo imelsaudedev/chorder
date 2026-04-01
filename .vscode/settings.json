@@ -21,5 +21,8 @@
     }
   },
   "jest.jestCommandLine": "yarn test",
-  "jest.runMode": "on-demand"
+  "jest.runMode": "on-demand",
+  "remote.extensionKind": {
+    "google.antigravity-browser-launcher": ["workspace"]
+  }
 }

@@ -52,7 +52,8 @@ export namespace $Enums {
   BRIDGE: 'BRIDGE',
   INTERLUDE: 'INTERLUDE',
   SOLO: 'SOLO',
-  ENDING: 'ENDING'
+  ENDING: 'ENDING',
+  TEXT: 'TEXT'
 };
 
 export type SongUnitType = (typeof SongUnitType)[keyof typeof SongUnitType]

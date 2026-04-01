@@ -1,3 +1,5 @@
+import { ClientService } from "@/prisma/models";
+
 export default {
   id: 123,
   title: "Culto Matutino",
@@ -120,4 +122,4 @@ export default {
       },
     },
   ],
-};
+} as ClientService;

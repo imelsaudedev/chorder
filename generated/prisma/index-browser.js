@@ -191,7 +191,8 @@ exports.SongUnitType = exports.$Enums.SongUnitType = {
   BRIDGE: 'BRIDGE',
   INTERLUDE: 'INTERLUDE',
   SOLO: 'SOLO',
-  ENDING: 'ENDING'
+  ENDING: 'ENDING',
+  TEXT: 'TEXT'
 };
 
 exports.ServiceUnitType = exports.$Enums.ServiceUnitType = {

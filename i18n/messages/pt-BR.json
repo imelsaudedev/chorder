@@ -81,7 +81,11 @@
     "content": "Chordpro",
     "contentPlaceholder": "O conteúdo no formato chordpro vai aqui",
     "unitType": "Tipo da unidade",
-    "unitTypePlaceholder": "Selecione o tipo da unidade"
+    "unitTypePlaceholder": "Selecione o tipo da unidade",
+    "titleOptional": "Título (Opcional)",
+    "markdownTitlePlaceholder": "Ex: Leitura, Liturgia, etc.",
+    "markdownPlaceholder": "Digite o Markdown aqui...",
+    "markdownContent": "Conteúdo Markdown"
   },
   "UnitTypes": {
     "BLOCK": "Bloco",
@@ -92,7 +96,8 @@
     "BRIDGE": "Ponte",
     "INTERLUDE": "Interlúdio",
     "SOLO": "Solo",
-    "ENDING": "Saída"
+    "ENDING": "Saída",
+    "TEXT": "Texto"
   },
   "ServiceForm": {
     "editArrangement": "Editar arranjo",

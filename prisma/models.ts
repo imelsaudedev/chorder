@@ -1,10 +1,10 @@
 import {
-  Service,
-  ServiceUnit,
-  Song,
-  SongArrangement,
-  SongUnit,
-  SongUnitType,
+    Service,
+    ServiceUnit,
+    Song,
+    SongArrangement,
+    SongUnit,
+    SongUnitType,
 } from "@/generated/prisma";
 
 export type { ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType };
@@ -20,6 +20,7 @@ export const SONG_UNIT_TYPES = [
   "INTERLUDE",
   "SOLO",
   "ENDING",
+  "TEXT",
 ] as const;
 
 export type ClientSong = Omit<Song, "id" | "legacyId"> & {
