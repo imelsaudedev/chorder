@@ -10,7 +10,6 @@ export default {
   units: [
     {
       type: "SONG" as const,
-      songSlug: "gloria-e-forca",
       semitoneTranspose: 0,
       order: 1,
       arrangementId: 14,
@@ -66,7 +65,6 @@ export default {
     },
     {
       type: "SONG" as const,
-      songSlug: "gloria-e-forca",
       semitoneTranspose: 3,
       order: 2,
       arrangementId: 2,

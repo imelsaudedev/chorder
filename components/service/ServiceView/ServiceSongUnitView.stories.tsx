@@ -20,7 +20,7 @@ export const Default: Story = {
     layout: "centered",
   },
   args: {
-    unit: service.units[0] as ClientServiceUnit,
+    unit: service.units![0] as ClientServiceUnit,
   },
   render: ({ unit }) => {
     return (
