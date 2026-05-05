@@ -105,7 +105,14 @@ export async function retrieveSongs({
         },
       ],
     },
-    omit: { legacyId: true },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      lyrics: true,
+      artist: true,
+      isDeleted: true,
+    },
   });
   if (limitLines) {
     songs = songs.map((song) =>

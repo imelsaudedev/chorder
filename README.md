@@ -22,9 +22,22 @@ If you are running the server for the first time, setup the database with (if yo
 
 ## Running the tests
 
-To run the tests:
+### 1. Main Suite (Unit, Integration, Storybook)
+This suite verifies core logic, API integration, and component interactions.
+```bash
+yarn test
+```
 
-    yarn test
+### 2. End-to-End Visual Regression (Playwright)
+This suite verifies the application layout across different devices (Desktop, Tablet, Mobile).
+```bash
+yarn test:e2e
+```
+
+**Common Playwright Commands:**
+- **Show Report**: `npx playwright show-report` (View visual diffs after failures)
+- **Update Baselines**: `npx playwright test --update-snapshots` (Use when UI changes are intentional)
+- **Run Specific Project**: `npx playwright test --project=desktop-chromium` (Projects: `desktop-chromium`, `tablet-ipad`, `mobile-iphone`)
 
 ## Running Storybook
 

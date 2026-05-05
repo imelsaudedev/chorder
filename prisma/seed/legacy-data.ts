@@ -1,4 +1,4 @@
-import { PrismaClient } from "@/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { DateTime } from "luxon";
 import { getChords, getKeyFromChords, getLyrics } from "../../chopro/music";

@@ -39,7 +39,7 @@ export default function SortableUnitForm({
       onDragStart: () => setIsDragging(true),
       onDrop: () => setIsDragging(false),
     });
-  }, [index, unit]);
+  }, [index, unit, fieldPrefix]);
 
   useEffect(() => {
     const el = ref.current;
@@ -99,7 +99,7 @@ export default function SortableUnitForm({
         }
       },
     });
-  }, [index, move, getValues, setValue]);
+  }, [index, move, getValues, setValue, fieldPrefix]);
 
   const handleRemoveUnit = useCallback(() => {
     const currentUnits = getValues();

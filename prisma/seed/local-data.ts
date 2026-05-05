@@ -1,4 +1,4 @@
-import { PrismaClient } from "@/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { ClientSong, SongUnitType } from "../models";
 import baseServices from "./services.json";
 import baseSongs from "./songs.json";

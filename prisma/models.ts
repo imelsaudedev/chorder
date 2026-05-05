@@ -1,11 +1,11 @@
 import {
-    Service,
-    ServiceUnit,
-    Song,
-    SongArrangement,
-    SongUnit,
-    SongUnitType,
-} from "@/generated/prisma";
+  Service,
+  ServiceUnit,
+  Song,
+  SongArrangement,
+  SongUnit,
+  SongUnitType,
+} from "@prisma/client";
 
 export type { ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType };
 
