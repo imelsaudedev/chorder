@@ -1,42 +1,38 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import clsx from "clsx";
 import { Fragment } from "react";
 import InitialsNav from "./InitialsNav";
 
-export default function SongListSkeleton() {
-  const lineWidths = [
-    ["w-1/2", "w-1/3", "w-4/5", "w-3/4"],
-    ["w-1/4", "w-1/5", "w-3/4", "w-2/3"],
-    ["w-1/3", "w-1/4", "w-5/6", "w-1/2"],
-  ];
+const SKELETON_GROUPS = [
+  ["w-1/2", "w-1/3", "w-4/5", "w-2/3"],
+  ["w-1/3", "w-1/4", "w-3/4"],
+  ["w-2/3", "w-1/2", "w-5/6", "w-1/3"],
+];
 
+export default function SongListSkeleton() {
   return (
     <>
       <InitialsNav existingInitials={[]} />
-      <section className="grid grid-cols-[auto_1fr]">
-        {new Array(3).fill(0).map((_, idx) => (
-          <Fragment key={`skeleton-${idx}`}>
-            <Skeleton className="col-span-2 md:col-span-1 my-4 mr-4 pt-2 bg-secondary/50 size-10 md:size-20" />
-            <div className="col-span-2 md:col-span-1">
-              {lineWidths.map((widths, idx) => (
+      <section>
+        {SKELETON_GROUPS.map((widths, groupIdx) => (
+          <Fragment key={`group-${groupIdx}`}>
+            {/* Letter divider */}
+            <div className="flex items-center gap-3 pt-5 pb-1">
+              <Skeleton className="w-3 h-3 rounded" />
+              <Skeleton className="flex-1 h-px" />
+            </div>
+            {/* Song rows */}
+            <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-8">
+              {widths.map((titleWidth, idx) => (
                 <div
-                  className="flex flex-col items-start border-b border-zinc-100 py-4 sm:p-4 w-full sm:rounded-lg"
-                  key={`skeleton-${idx}`}
+                  key={`row-${idx}`}
+                  className="flex items-start gap-2 border-b border-zinc-100 py-3"
                 >
-                  <Skeleton
-                    className={clsx(widths[0], "h-6 bg-primary mb-1 sm:mb-2")}
-                  />
-                  <Skeleton
-                    className={clsx(widths[1], "h-4 bg-zinc-400 mb-2")}
-                  />
-                  <div className="flex flex-col gap-1 w-full">
-                    {widths.slice(2).map((width, idx) => (
-                      <Skeleton
-                        className={clsx("h-4 bg-zinc-200", width)}
-                        key={`line-${idx}`}
-                      />
-                    ))}
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className={`h-4 ${titleWidth} bg-zinc-200`} />
+                    <Skeleton className="h-3 w-1/4 bg-zinc-100" />
+                    <Skeleton className="h-3 w-3/5 bg-zinc-100" />
                   </div>
+                  <Skeleton className="h-8 w-8 rounded shrink-0 bg-zinc-100" />
                 </div>
               ))}
             </div>

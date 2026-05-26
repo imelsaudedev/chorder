@@ -1,4 +1,4 @@
-import { retrieveSong } from "@/prisma/data";
+import { archiveSong, retrieveSong } from "@/prisma/data";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -20,4 +20,17 @@ export async function GET(
       "Content-Type": "application/json",
     },
   });
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ slugOrId: string }> }
+) {
+  const { slugOrId } = await params;
+  const body = await request.json();
+  if (body.isDeleted === true) {
+    await archiveSong(slugOrId);
+    return Response.json({ success: true });
+  }
+  return new Response("Bad request", { status: 400 });
 }

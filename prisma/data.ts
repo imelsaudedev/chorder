@@ -112,6 +112,21 @@ export async function retrieveSongs({
       lyrics: true,
       artist: true,
       isDeleted: true,
+      arrangements: {
+        where: { isServiceArrangement: false, isDeleted: false },
+        select: {
+          id: true,
+          name: true,
+          key: true,
+          isDefault: true,
+          isDeleted: true,
+          isServiceArrangement: true,
+          originalArrangementId: true,
+          youtubeUrl: true,
+          audioUrl: true,
+        },
+        orderBy: [{ isDefault: "desc" }],
+      },
     },
   });
   if (limitLines) {
@@ -120,6 +135,13 @@ export async function retrieveSongs({
     );
   }
   return songs;
+}
+
+export async function archiveSong(slug: string) {
+  return prisma.song.update({
+    where: { slug },
+    data: { isDeleted: true },
+  });
 }
 
 export async function retrieveSong(

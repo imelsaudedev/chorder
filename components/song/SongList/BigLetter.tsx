@@ -1,30 +1,12 @@
-import clsx from "clsx";
+type BigLetterProps = { letter: string };
 
-type BigLetterProps = { letter: string; veryBig?: boolean };
-
-export default function BigLetter({ letter, veryBig = true }: BigLetterProps) {
-  const initialsTitleClassName = ["font-bricolage", "text-secondary"];
-  if (veryBig) {
-    initialsTitleClassName.push(
-      "text-4xl",
-      "md:text-8xl",
-      "pr-4",
-      "pt-2",
-      "font-light"
-    );
-  } else {
-    initialsTitleClassName.push(
-      "text-xl",
-      "md:text-4xl",
-      "py-2",
-      "font-bold",
-      "text-left"
-    );
-  }
-
+export default function BigLetter({ letter }: BigLetterProps) {
   return (
-    <span id={letter} className={clsx(initialsTitleClassName)}>
-      {letter.toUpperCase()}
-    </span>
+    <div id={letter} className="flex items-center gap-3 pt-5 pb-1">
+      <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+        {letter.toUpperCase()}
+      </span>
+      <div className="flex-1 border-t border-zinc-200" />
+    </div>
   );
 }

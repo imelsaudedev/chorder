@@ -324,3 +324,16 @@ export function useCreateOrUpdateService(
     isError: error,
   };
 }
+
+export function useArchiveSong(slug: string) {
+  const { trigger, isMutating } = useSWRMutation(
+    `/api/songs/${slug}`,
+    (url: string) =>
+      fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isDeleted: true }),
+      }).then((r) => r.json())
+  );
+  return { archiveSong: trigger, isArchiving: isMutating };
+}
