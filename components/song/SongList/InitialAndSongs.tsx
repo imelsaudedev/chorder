@@ -18,7 +18,7 @@ export default function InitialAndSongs({
   return (
     <div>
       <BigLetter letter={letter} />
-      <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-8">
+      <div>
         {songs.map((song) => (
           <SongListEntry
             key={`song-${song.slug}`}

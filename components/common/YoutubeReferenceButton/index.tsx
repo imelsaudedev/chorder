@@ -8,17 +8,19 @@ import { PlayCircle } from "lucide-react";
 type YoutubeReferenceButtonProps = {
   youtubeUrl: string;
   title?: string;
+  className?: string;
 };
 
 export default function YoutubeReferenceButton({
   youtubeUrl,
   title,
+  className,
 }: YoutubeReferenceButtonProps) {
   const { play } = useYoutubePlayer();
   const { close: closeAudio } = useAudioPlayer();
 
   return (
-    <Button type="button" variant="outline" size="icon" onClick={() => { closeAudio(); play(youtubeUrl, title); }}>
+    <Button type="button" variant="outline" size="icon" className={className} onClick={() => { closeAudio(); play(youtubeUrl, title); }}>
       <PlayCircle className="text-red-500" />
       <span className="sr-only">Reproduzir referência</span>
     </Button>

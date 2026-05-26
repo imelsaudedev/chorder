@@ -34,6 +34,13 @@ import { ChevronDown, MoreHorizontal, Plus } from "lucide-react";
 import Link from "next/link";
 import { useSWRConfig } from "swr";
 
+// Colunas: [título+artista] [letra] [arranjos] [mídia] [menu]
+// Mobile: 4 cols (letra oculta) | sm+: 5 cols
+const ROW_GRID =
+  "grid grid-cols-[minmax(0,1fr)_auto_auto_auto] sm:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_6rem_auto_auto] items-center gap-x-4";
+
+const BTN_SM = "h-7 w-7";
+
 type SongListEntryProps = {
   song: ClientSong;
   query?: string;
@@ -52,28 +59,30 @@ export default function SongListEntry({
     arrangements.find((a) => a.isDefault) ?? arrangements[0];
   const hasMultiple = arrangements.length > 1;
 
-  const lyrics = song.lyrics
+  const lyricsLines = song.lyrics
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
-  let previewLine = lyrics[0] ?? "";
+
+  // Na busca, se o match foi na letra e não no título/artista, mostra a linha com match
+  let previewLines = lyricsLines.slice(0, 2);
   if (
     query &&
     findKeyword(song.title, query) < 0 &&
     (!song.artist || findKeyword(song.artist, query) < 0)
   ) {
-    const matchLine = lyrics.find((l) => findKeyword(l, query) >= 0);
-    if (matchLine) previewLine = matchLine;
+    const matchLine = lyricsLines.find((l) => findKeyword(l, query) >= 0);
+    if (matchLine) previewLines = [lyricsLines[0], matchLine].filter(Boolean);
   }
 
   return (
     <Collapsible>
-      <div className="flex items-start gap-2 border-b border-zinc-100 py-3 hover:bg-zinc-50 transition-colors rounded-sm">
-        {/* Zona de conteúdo — navega para a música */}
-        <Link
-          href={`/songs/${song.slug}`}
-          className="flex-1 min-w-0 pr-1 block"
-        >
+      {/* Linha principal */}
+      <div
+        className={`${ROW_GRID} py-2.5 border-b border-zinc-100 hover:bg-zinc-50/60 transition-colors`}
+      >
+        {/* Col 1: Título + Artista — navega para a música */}
+        <Link href={`/songs/${song.slug}`} className="min-w-0 block">
           <p className="font-medium text-sm text-primary leading-snug truncate">
             <HighlightKeyword text={song.title} keyword={query} />
           </p>
@@ -82,46 +91,54 @@ export default function SongListEntry({
               <HighlightKeyword text={song.artist} keyword={query} />
             </p>
           )}
-          {/* Slot para badges de tema — renderiza vazio até temas serem adicionados */}
-          {previewLine && (
-            <p className="text-xs text-zinc-400 mt-1 truncate">
-              <HighlightKeyword text={previewLine} keyword={query} />
-            </p>
-          )}
         </Link>
 
-        {/* Zona de ações — não navega */}
-        <div className="shrink-0 flex items-center gap-0.5">
-          {/* Arranjo único: botões de mídia direto */}
-          {!hasMultiple && defaultArr?.youtubeUrl && (
-            <YoutubeReferenceButton
-              youtubeUrl={defaultArr.youtubeUrl}
-              title={song.title}
-            />
-          )}
-          {!hasMultiple && defaultArr?.audioUrl && (
-            <AudioReferenceButton
-              audioUrl={defaultArr.audioUrl}
-              title={song.title}
-            />
-          )}
+        {/* Col 2: Letra (oculta no mobile) */}
+        <div className="hidden sm:block min-w-0">
+          {previewLines.map((line, i) => (
+            <p key={i} className="text-xs text-zinc-400 truncate leading-relaxed">
+              <HighlightKeyword text={line} keyword={query} />
+            </p>
+          ))}
+        </div>
 
-          {/* Múltiplos arranjos: trigger de expand */}
+        {/* Col 3: Número de arranjos — só quando há mais de 1 */}
+        <div className="flex items-center">
           {hasMultiple && (
             <CollapsibleTrigger asChild>
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="h-8 px-2 text-xs text-zinc-500 gap-1 hover:text-zinc-700"
+                className="h-6 rounded-full px-2.5 text-xs gap-1 text-zinc-500 border-zinc-300 hover:border-zinc-400"
               >
                 {arrangements.length} arr.
                 <ChevronDown className="w-3 h-3" />
               </Button>
             </CollapsibleTrigger>
           )}
+        </div>
 
-          {/* Ação principal: adicionar ao service ou menu de ações */}
+        {/* Col 4: Mídia do arranjo padrão (só quando 1 arranjo) */}
+        <div className="flex items-center gap-0.5">
+          {!hasMultiple && defaultArr?.youtubeUrl && (
+            <YoutubeReferenceButton
+              youtubeUrl={defaultArr.youtubeUrl}
+              title={song.title}
+              className={BTN_SM}
+            />
+          )}
+          {!hasMultiple && defaultArr?.audioUrl && (
+            <AudioReferenceButton
+              audioUrl={defaultArr.audioUrl}
+              title={song.title}
+              className={BTN_SM}
+            />
+          )}
+        </div>
+
+        {/* Col 5: Ação principal */}
+        <div>
           {onSelected ? (
             <Button
               type="button"
@@ -139,14 +156,14 @@ export default function SongListEntry({
         </div>
       </div>
 
-      {/* Arranjos expandidos */}
+      {/* Linhas de arranjos expandidas */}
       {hasMultiple && (
         <CollapsibleContent>
-          <div className="border-b border-zinc-100 bg-zinc-50/60 px-3 py-1 space-y-0.5">
+          <div className="border-b border-zinc-100 bg-zinc-50/60">
             {arrangements.map((arr, idx) => (
               <div
                 key={arr.id ?? idx}
-                className="flex items-center gap-2 py-1.5"
+                className="flex items-center gap-3 py-1.5 pl-6 pr-3 border-t border-zinc-100 first:border-t-0"
               >
                 <span className="text-xs text-zinc-600 flex-1 min-w-0 truncate">
                   {arr.name ?? `Arranjo ${idx + 1}`}
@@ -155,13 +172,23 @@ export default function SongListEntry({
                   {arr.youtubeUrl && (
                     <YoutubeReferenceButton
                       youtubeUrl={arr.youtubeUrl}
-                      title={arr.name ? `${song.title} — ${arr.name}` : song.title}
+                      title={
+                        arr.name
+                          ? `${song.title} — ${arr.name}`
+                          : song.title
+                      }
+                      className={BTN_SM}
                     />
                   )}
                   {arr.audioUrl && (
                     <AudioReferenceButton
                       audioUrl={arr.audioUrl}
-                      title={arr.name ? `${song.title} — ${arr.name}` : song.title}
+                      title={
+                        arr.name
+                          ? `${song.title} — ${arr.name}`
+                          : song.title
+                      }
+                      className={BTN_SM}
                     />
                   )}
                 </div>
@@ -220,9 +247,9 @@ function SongActionsMenu({
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Arquivar "{songTitle}"?</AlertDialogTitle>
+          <AlertDialogTitle>Arquivar &ldquo;{songTitle}&rdquo;?</AlertDialogTitle>
           <AlertDialogDescription>
-            A música será removida da lista. Arranjos existentes em services não
+            A música será removida da lista. Arranjos em services existentes não
             são afetados.
           </AlertDialogDescription>
         </AlertDialogHeader>

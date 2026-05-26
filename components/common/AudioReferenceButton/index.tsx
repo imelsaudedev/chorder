@@ -8,11 +8,13 @@ import { Music } from "lucide-react";
 type AudioReferenceButtonProps = {
   audioUrl: string;
   title?: string;
+  className?: string;
 };
 
 export default function AudioReferenceButton({
   audioUrl,
   title,
+  className,
 }: AudioReferenceButtonProps) {
   const { play } = useAudioPlayer();
   const { close: closeYoutube } = useYoutubePlayer();
@@ -22,6 +24,7 @@ export default function AudioReferenceButton({
       type="button"
       variant="outline"
       size="icon"
+      className={className}
       onClick={() => { closeYoutube(); play(audioUrl, title); }}
     >
       <Music className="text-emerald-600" />
