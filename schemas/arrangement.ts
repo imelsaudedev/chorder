@@ -9,6 +9,7 @@ export const arrangementSchema = z
     songId: z.number().optional(),
     originalArrangementId: z.number().nullable(),
     key: z.string(),
+    youtubeUrl: z.string().url().nullable().optional().or(z.literal("")),
     isDefault: z.boolean(),
     isDeleted: z.boolean(),
     isServiceArrangement: z.boolean(),

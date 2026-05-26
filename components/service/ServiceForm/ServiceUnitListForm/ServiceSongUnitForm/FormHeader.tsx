@@ -1,4 +1,5 @@
 import Heading from "@/components/common/Heading";
+import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -62,6 +63,12 @@ export default function FormHeader({
         <TitleAndArtist song={unit.arrangement.song} />
 
         <div className="flex flex-row items-center gap-4 md:justify-end">
+          {unit.arrangement.youtubeUrl && (
+            <YoutubeReferenceButton
+              youtubeUrl={unit.arrangement.youtubeUrl}
+              title={unit.arrangement.song.title}
+            />
+          )}
           {unit.arrangement.originalArrangementId && (
             <a
               target="_blank"
