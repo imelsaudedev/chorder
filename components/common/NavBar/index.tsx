@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { ListMusic, MessageCircleHeartIcon, Music } from "lucide-react";
+import { ListMusic, Music } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -34,12 +34,6 @@ export default function NavBar() {
             label={t("songs")}
             active={currentPage === "songs"}
           />
-          <NavItem
-            href="/feedback"
-            icon={<MessageCircleHeartIcon size={24} />}
-            label={t("feedback")}
-            active={currentPage === "feedback"}
-          />
         </div>
       </nav>
 
@@ -62,12 +56,6 @@ export default function NavBar() {
             icon={<Music size={24} />}
             label={t("songs")}
             active={currentPage === "songs"}
-          />
-          <NavItem
-            href="/feedback"
-            icon={<MessageCircleHeartIcon size={24} />}
-            label={t("feedback")}
-            active={currentPage === "feedback"}
           />
         </div>
       </nav>
