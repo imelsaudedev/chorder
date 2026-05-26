@@ -1,3 +1,4 @@
+import AudioReferenceButton from "@/components/common/AudioReferenceButton";
 import Heading from "@/components/common/Heading";
 import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,12 @@ export default function FormHeader({
           {unit.arrangement.youtubeUrl && (
             <YoutubeReferenceButton
               youtubeUrl={unit.arrangement.youtubeUrl}
+              title={unit.arrangement.song.title}
+            />
+          )}
+          {unit.arrangement.audioUrl && (
+            <AudioReferenceButton
+              audioUrl={unit.arrangement.audioUrl}
               title={unit.arrangement.song.title}
             />
           )}

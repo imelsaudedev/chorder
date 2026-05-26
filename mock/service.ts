@@ -23,6 +23,7 @@ export default {
         isDeleted: false,
         isServiceArrangement: true,
         youtubeUrl: null,
+        audioUrl: null,
         song: {
           id: 53,
           title: "Glória e Força",
@@ -79,6 +80,7 @@ export default {
         isDeleted: false,
         isServiceArrangement: true,
         youtubeUrl: null,
+        audioUrl: null,
         song: {
           id: 108,
           title: "A Glória Pertence ao Senhor",

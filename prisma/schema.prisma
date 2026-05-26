@@ -37,6 +37,7 @@ model SongArrangement {
   isServiceArrangement Boolean @default(false)
 
   youtubeUrl   String?
+  audioUrl     String?
 
   song      Song @relation(fields: [songId], references: [id])
   originalArrangement SongArrangement? @relation("OriginalArrangement", fields: [originalArrangementId], references: [id])

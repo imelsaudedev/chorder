@@ -58,6 +58,7 @@
     "@types/node": "^20.19.5",
     "@types/react": "18.3.23",
     "@types/react-dom": "18.0.11",
+    "@vercel/blob": "^2.4.0",
     "chordsheetjs": "^8.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

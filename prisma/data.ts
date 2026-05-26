@@ -376,12 +376,14 @@ export async function updateArrangement(
     name?: string | null;
     key?: string;
     youtubeUrl?: string | null;
+    audioUrl?: string | null;
     units?: any;
   } = {
     id: arrangement.id,
     name: arrangement.name,
     key: arrangement.key,
     youtubeUrl: arrangement.youtubeUrl || null,
+    audioUrl: arrangement.audioUrl || null,
   };
 
   const song = arrangement.song ?? baseArrangement.song!;
@@ -646,7 +648,7 @@ export async function retrieveService(
             include: {
               song: true,
               units: { orderBy: { order: "asc" } },
-              originalArrangement: { select: { youtubeUrl: true } },
+              originalArrangement: { select: { youtubeUrl: true, audioUrl: true } },
             },
           },
         },
@@ -664,6 +666,10 @@ export async function retrieveService(
               youtubeUrl:
                 unit.arrangement.youtubeUrl ??
                 unit.arrangement.originalArrangement?.youtubeUrl ??
+                null,
+              audioUrl:
+                unit.arrangement.audioUrl ??
+                unit.arrangement.originalArrangement?.audioUrl ??
                 null,
             }
           : null,

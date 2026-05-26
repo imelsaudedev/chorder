@@ -4,6 +4,8 @@ import {
   ibmPlexSans,
   ibmPlexSerif,
 } from "@/app/fonts";
+import { AudioPlayerProvider } from "@/components/common/AudioPlayer/context";
+import AudioPlayerWidget from "@/components/common/AudioPlayer/Widget";
 import { YoutubePlayerProvider } from "@/components/common/YoutubePlayer/context";
 import YoutubePlayerWidget from "@/components/common/YoutubePlayer/Widget";
 import { Metadata } from "next";
@@ -32,7 +34,7 @@ export default async function RootLayout({
     <html lang="en">
       <head></head>
       <body
-        className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${bricolageGrotesque.variable} font-sans pb-4 md:pb-6 lg:pb-8`}
+        className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${bricolageGrotesque.variable} font-sans pb-14`}
         suppressHydrationWarning
       >
         <NextIntlClientProvider
@@ -40,8 +42,11 @@ export default async function RootLayout({
           timeZone="America/Sao_Paulo"
         >
           <YoutubePlayerProvider>
-            {children}
-            <YoutubePlayerWidget />
+            <AudioPlayerProvider>
+              {children}
+              <YoutubePlayerWidget />
+              <AudioPlayerWidget />
+            </AudioPlayerProvider>
           </YoutubePlayerProvider>
         </NextIntlClientProvider>
       </body>

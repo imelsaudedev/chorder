@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientArrangement } from "@/prisma/models";
+import AudioReferenceButton from "@/components/common/AudioReferenceButton";
 import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
 import { MoreVertical } from "lucide-react";
 
@@ -64,6 +65,12 @@ export default function ServiceArrangementHeader({
         {arrangement.youtubeUrl && (
           <YoutubeReferenceButton
             youtubeUrl={arrangement.youtubeUrl}
+            title={arrangement.song.title}
+          />
+        )}
+        {arrangement.audioUrl && (
+          <AudioReferenceButton
+            audioUrl={arrangement.audioUrl}
             title={arrangement.song.title}
           />
         )}

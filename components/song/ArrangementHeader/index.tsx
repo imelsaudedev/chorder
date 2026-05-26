@@ -8,6 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ClientArrangement, ClientSong } from "@/prisma/models";
+import AudioReferenceButton from "@/components/common/AudioReferenceButton";
 import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
 import { NotebookPen, Settings2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -40,6 +41,12 @@ export default function ArrangementHeader({
             {arrangement.youtubeUrl && (
               <YoutubeReferenceButton
                 youtubeUrl={arrangement.youtubeUrl}
+                title={arrangement.song!.title}
+              />
+            )}
+            {arrangement.audioUrl && (
+              <AudioReferenceButton
+                audioUrl={arrangement.audioUrl}
                 title={arrangement.song!.title}
               />
             )}
