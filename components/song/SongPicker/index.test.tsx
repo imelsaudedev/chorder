@@ -10,6 +10,10 @@ vi.mock('next-intl', () => ({
   useLocale: () => 'pt-BR',
 }));
 
+vi.mock('next/link', () => ({
+  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+}));
+
 // Mock the api-client
 vi.mock('#api-client', () => ({
   useFetchSongs: vi.fn(),
@@ -45,8 +49,8 @@ describe('SongPicker component', () => {
     const onSelected = vi.fn();
     render(<SongPicker onSelected={onSelected} />);
 
-    const addButtons = await screen.findAllByRole('button', { name: /adicionar ao service/i });
-    await user.click(addButtons[0]);
+    const addLabels = await screen.findAllByText('Adicionar ao service');
+    await user.click(addLabels[0].closest('button')!);
 
     expect(onSelected).toHaveBeenCalledTimes(1);
   });
