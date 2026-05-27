@@ -1,13 +1,9 @@
 import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useFormattedDate } from "@/hooks/useFormattedDate";
 import { ClientService } from "@/prisma/models";
-import { Calendar, MicVocal, Settings2 } from "lucide-react";
+import { Calendar, MicVocal, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import ServiceActionMenu from "./ServiceActionMenu";
 import ServiceConfig from "./ServiceConfig";
@@ -26,29 +22,29 @@ export default function ServiceHeader({ service }: ServiceHeaderProps) {
   }
 
   return (
-    <Collapsible>
+    <Popover>
       <PageHeader
         backLinkHref="/services"
         backLinkText={t("Messages.services")}
         title={serviceTitle}
         subtitle={<Subtitle service={service} />}
         actions={
-          <div className="flex gap-2 items-center md:self-end">
-            <ServiceActionMenu service={service} />
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Settings2 />
+          <div className="flex gap-2 items-center">
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <SlidersHorizontal />
                 <span className="sr-only">{t("Messages.toggleConfig")}</span>
               </Button>
-            </CollapsibleTrigger>
+            </PopoverTrigger>
+            <ServiceActionMenu service={service} />
           </div>
         }
       />
 
-      <CollapsibleContent>
+      <PopoverContent className="w-80" align="end">
         <ServiceConfig />
-      </CollapsibleContent>
-    </Collapsible>
+      </PopoverContent>
+    </Popover>
   );
 }
 

@@ -43,7 +43,7 @@ export const Default: Story = {
   render: ({ units }) => {
     return (
       <SongConfigProvider>
-        <SongConfig originalKey="C" />
+        <SongConfig />
         <Viewer units={units} />
       </SongConfigProvider>
     );
