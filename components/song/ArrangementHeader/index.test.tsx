@@ -30,6 +30,7 @@ describe('ArrangementHeader component', () => {
         isDefault: true,
         isDeleted: false,
         isServiceArrangement: false,
+        youtubeUrl: null,
         song: {
             id: 10,
             title: 'Amazing Grace',

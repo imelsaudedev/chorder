@@ -8,6 +8,7 @@ export default [
     isDefault: false,
     isDeleted: false,
     isServiceArrangement: false,
+    youtubeUrl: null,
     song: {
       id: 1,
       title: "A alegria está no coração",
@@ -57,6 +58,7 @@ export default [
     isDefault: true,
     isDeleted: false,
     isServiceArrangement: false,
+    youtubeUrl: null,
     song: {
       id: 1,
       title: "A alegria está no coração",
@@ -111,6 +113,7 @@ export default [
     isDefault: true,
     isDeleted: false,
     isServiceArrangement: false,
+    youtubeUrl: null,
     key: "A",
     units: [
       {

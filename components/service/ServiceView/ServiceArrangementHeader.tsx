@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientArrangement } from "@/prisma/models";
+import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
 import { MoreVertical } from "lucide-react";
 
 type ServiceArrangementHeaderProps = {
@@ -60,6 +61,12 @@ export default function ServiceArrangementHeader({
       </div>
 
       <div className="key-controls flex items-center gap-2 fullscreen-hidden">
+        {arrangement.youtubeUrl && (
+          <YoutubeReferenceButton
+            youtubeUrl={arrangement.youtubeUrl}
+            title={arrangement.song.title}
+          />
+        )}
         <div className="hidden md:flex">
           <KeyButtonSet
             originalKey={arrangement.key || ""}
