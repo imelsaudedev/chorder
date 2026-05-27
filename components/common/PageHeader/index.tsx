@@ -1,11 +1,11 @@
 import BackLink from "@/components/common/BackLink";
 import Heading from "@/components/common/Heading";
-import clsx from "clsx";
 
 type PageHeaderProps = {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   actions?: React.ReactNode;
+  contentActions?: React.ReactNode;
   backLinkHref?: string;
   backLinkText?: string;
   variant?: "default" | "edit";
@@ -15,40 +15,51 @@ const PageHeader = ({
   title,
   subtitle,
   actions,
+  contentActions,
   backLinkHref,
   backLinkText,
   variant = "default",
 }: PageHeaderProps) => {
-  return (
-    <div
-      className={clsx("flex flex-col md:flex-row grow justify-between gap-4", {
-        "p-4 sm:p-6 lg:p-8 bg-zinc-50 border-b border-zinc-100":
-          variant === "default",
-        "px-4 sm:px-6 lg:px-8 pt-8 sm:pt-16 pb-4 sm:pb-8 bg-indigo-50":
-          variant === "edit",
-      })}
-    >
-      <div className="flex flex-col min-w-0">
-        {backLinkHref && backLinkText && (
-          <BackLink href={backLinkHref} text={backLinkText} />
-        )}
-        <Heading
-          level={1}
-          className={clsx({
-            "font-semibold text-secondary leading-none mb-0":
-              variant === "edit",
-          })}
-        >
+  if (variant === "edit") {
+    return (
+      <div className="flex flex-row items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 pt-8 sm:pt-16 pb-4 sm:pb-8 bg-indigo-50">
+        <Heading level={1} className="font-semibold text-secondary leading-none mb-0">
           {title}
         </Heading>
-        {subtitle && (
-          <div className="text-base sm:text-lg text-zinc-600">{subtitle}</div>
+        {actions && (
+          <div className="flex gap-2 items-center shrink-0">{actions}</div>
         )}
       </div>
+    );
+  }
 
-      {/* Botões de Ação e Configuração */}
-      {actions && (
-        <div className="flex gap-2 items-center md:self-end">{actions}</div>
+  return (
+    <div className="flex flex-col p-4 sm:p-6 lg:p-8 bg-zinc-50 border-b border-zinc-100">
+      {/* Top bar: navegação (esq) + ações admin (dir) */}
+      {(backLinkHref || actions) && (
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            {backLinkHref && backLinkText && (
+              <BackLink href={backLinkHref} text={backLinkText} />
+            )}
+          </div>
+          {actions && (
+            <div className="flex gap-2 items-center">{actions}</div>
+          )}
+        </div>
+      )}
+
+      {/* Título em largura total */}
+      <Heading level={1}>{title}</Heading>
+
+      {/* Subtítulo */}
+      {subtitle && (
+        <div className="text-base sm:text-lg text-zinc-600">{subtitle}</div>
+      )}
+
+      {/* Ações de conteúdo: seletor de arranjo, youtube, etc. */}
+      {contentActions && (
+        <div className="flex flex-wrap gap-2 items-center mt-3">{contentActions}</div>
       )}
     </div>
   );
