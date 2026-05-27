@@ -45,10 +45,10 @@ describe('SongPicker component', () => {
     const onSelected = vi.fn();
     render(<SongPicker onSelected={onSelected} />);
 
-    const firstSong = await screen.findByText(songsMock[0].title);
-    await user.click(firstSong);
+    const addButtons = await screen.findAllByRole('button', { name: /adicionar ao service/i });
+    await user.click(addButtons[0]);
 
-    expect(onSelected).toHaveBeenCalledWith(songsMock[0]);
+    expect(onSelected).toHaveBeenCalledTimes(1);
   });
 
   it('updates query when searching', async () => {

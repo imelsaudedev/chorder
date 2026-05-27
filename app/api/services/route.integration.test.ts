@@ -53,6 +53,7 @@ describe('Services API integration', () => {
                         songId: song.id,
                         name: 'Service Version',
                         key: 'A',
+                        youtubeUrl: null,
                         isDefault: false,
                         isDeleted: false,
                         isServiceArrangement: true,
