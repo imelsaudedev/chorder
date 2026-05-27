@@ -112,6 +112,21 @@ export async function retrieveSongs({
       lyrics: true,
       artist: true,
       isDeleted: true,
+      arrangements: {
+        where: { isServiceArrangement: false, isDeleted: false },
+        select: {
+          id: true,
+          name: true,
+          key: true,
+          isDefault: true,
+          isDeleted: true,
+          isServiceArrangement: true,
+          originalArrangementId: true,
+          youtubeUrl: true,
+          // audioUrl: true, -- adicionar quando portarmos o upload de áudio
+        },
+        orderBy: [{ isDefault: "desc" }],
+      },
     },
   });
   if (limitLines) {
