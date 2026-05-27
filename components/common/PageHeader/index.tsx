@@ -28,7 +28,7 @@ const PageHeader = ({
           variant === "edit",
       })}
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col min-w-0">
         {backLinkHref && backLinkText && (
           <BackLink href={backLinkHref} text={backLinkText} />
         )}

@@ -38,6 +38,10 @@ export default function ArrangementHeader({
         subtitle={<Subtitle song={arrangement.song} />}
         actions={
           <div className="flex gap-2 md:self-end">
+            <ArrangementSelector
+              arrangements={arrangement.song!.arrangements!}
+              currentArrangementId={arrangement.id}
+            />
             {arrangement.youtubeUrl && (
               <YoutubeReferenceButton
                 youtubeUrl={arrangement.youtubeUrl}
@@ -50,10 +54,6 @@ export default function ArrangementHeader({
                 title={arrangement.song!.title}
               />
             )}
-            <ArrangementSelector
-              arrangements={arrangement.song!.arrangements!}
-              currentArrangementId={arrangement.id}
-            />
             <ArrangementActionMenu arrangement={arrangement} />
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="icon">
