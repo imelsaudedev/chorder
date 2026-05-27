@@ -51,7 +51,7 @@ export default function AudioPlayerWidget() {
   if (!isOpen || !url) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] h-14 bg-zinc-900 border-t border-zinc-700 flex items-center gap-3 px-4">
+    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-zinc-900 border-t border-zinc-700 px-4 py-2 md:h-14 md:flex md:items-center md:gap-3 md:py-0">
       <audio
         ref={audioRef}
         src={url}
@@ -60,8 +60,23 @@ export default function AudioPlayerWidget() {
         onEnded={() => setIsPlaying(false)}
       />
 
-      {/* Título */}
-      <div className="flex items-center gap-2 w-48 shrink-0">
+      {/* Mobile: título + fechar numa linha */}
+      <div className="flex items-center gap-2 mb-2 md:hidden">
+        <Music size={14} className="text-emerald-400 shrink-0" />
+        <span className="text-white text-xs font-medium truncate flex-1">
+          {title ?? "Referência de áudio"}
+        </span>
+        <button
+          type="button"
+          onClick={close}
+          className="text-zinc-400 hover:text-white transition-colors shrink-0"
+        >
+          <X size={16} />
+        </button>
+      </div>
+
+      {/* Desktop: título fixo */}
+      <div className="hidden md:flex items-center gap-2 w-48 shrink-0">
         <Music size={14} className="text-emerald-400 shrink-0" />
         <span className="text-white text-xs font-medium truncate">
           {title ?? "Referência de áudio"}
@@ -97,11 +112,11 @@ export default function AudioPlayerWidget() {
         </span>
       </div>
 
-      {/* Fechar */}
+      {/* Desktop: fechar */}
       <button
         type="button"
         onClick={close}
-        className="text-zinc-400 hover:text-white transition-colors shrink-0 ml-2"
+        className="hidden md:block text-zinc-400 hover:text-white transition-colors shrink-0 ml-2"
       >
         <X size={16} />
       </button>
