@@ -112,6 +112,21 @@ export async function retrieveSongs({
       lyrics: true,
       artist: true,
       isDeleted: true,
+      arrangements: {
+        where: { isServiceArrangement: false, isDeleted: false },
+        select: {
+          id: true,
+          name: true,
+          key: true,
+          isDefault: true,
+          isDeleted: true,
+          isServiceArrangement: true,
+          originalArrangementId: true,
+          youtubeUrl: true,
+          // audioUrl: true, -- adicionar quando portarmos o upload de áudio
+        },
+        orderBy: [{ isDefault: "desc" }],
+      },
     },
   });
   if (limitLines) {
@@ -375,11 +390,13 @@ export async function updateArrangement(
     id: number;
     name?: string | null;
     key?: string;
+    youtubeUrl?: string | null;
     units?: any;
   } = {
     id: arrangement.id,
     name: arrangement.name,
     key: arrangement.key,
+    youtubeUrl: arrangement.youtubeUrl || null,
   };
 
   const song = arrangement.song ?? baseArrangement.song!;
@@ -644,11 +661,29 @@ export async function retrieveService(
             include: {
               song: true,
               units: { orderBy: { order: "asc" } },
+              originalArrangement: { select: { youtubeUrl: true } },
             },
           },
         },
       },
     },
+  }).then((service) => {
+    if (!service) return null;
+    return {
+      ...service,
+      units: service.units.map((unit) => ({
+        ...unit,
+        arrangement: unit.arrangement
+          ? {
+              ...unit.arrangement,
+              youtubeUrl:
+                unit.arrangement.youtubeUrl ??
+                unit.arrangement.originalArrangement?.youtubeUrl ??
+                null,
+            }
+          : null,
+      })),
+    };
   });
 }
 

@@ -1,5 +1,4 @@
 import { ClientSong } from "@/prisma/models";
-import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import InitialAndSongs from "./InitialAndSongs";
 import InitialsNav from "./InitialsNav";
@@ -7,14 +6,12 @@ import InitialsNav from "./InitialsNav";
 type SongListProps = {
   songs: ClientSong[];
   query?: string;
-  initialsInSeparateRow?: boolean;
   onSelected?: (s: ClientSong) => void;
 };
 
 export default function SongList({
   songs,
   query = "",
-  initialsInSeparateRow = false,
   onSelected,
 }: SongListProps) {
   const t = useTranslations("SongForm");
@@ -27,11 +24,7 @@ export default function SongList({
   return (
     <>
       <InitialsNav existingInitials={existingInitials} />
-      <section
-        className={clsx("max-w-full", {
-          "md:grid md:grid-cols-[auto_1fr]": !initialsInSeparateRow,
-        })}
-      >
+      <section>
         {(!existingInitials || existingInitials.length === 0) && (
           <p className="text-muted text-center">{t("noSongs")}</p>
         )}
@@ -44,7 +37,6 @@ export default function SongList({
               letter={letter}
               query={query}
               onSelected={onSelected}
-              veryBigInitial={!initialsInSeparateRow}
               key={`${letter}--section`}
             />
           );
