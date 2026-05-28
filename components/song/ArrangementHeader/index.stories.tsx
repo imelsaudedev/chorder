@@ -59,7 +59,6 @@ function buildArrangement(
     key,
     isDeleted: false,
     isServiceArrangement: false,
-    youtubeUrl: null,
   };
 }
 

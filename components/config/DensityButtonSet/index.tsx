@@ -1,7 +1,7 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Density } from "@/components/config/config";
-import { Rows2, Rows3 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Dispatch, SetStateAction, useCallback } from "react";
+import { Density } from "@/components/config/config";
 
 type DensityButtonSetProps = {
   id?: string;
@@ -14,25 +14,31 @@ export default function DensityButtonSet({
   density,
   setDensity,
 }: DensityButtonSetProps) {
-  const handleChange = useCallback(
-    (value: string) => { if (value) setDensity(value as Density); },
+  const t = useTranslations("Messages");
+  const handleValueChange = useCallback(
+    (value: string) => {
+      if (value) setDensity(value as Density);
+    },
     [setDensity]
   );
 
   return (
-    <ToggleGroup
-      id={id}
-      type="single"
-      variant="outline"
-      value={density}
-      onValueChange={handleChange}
-    >
-      <ToggleGroupItem value="normal" aria-label="Normal">
-        <Rows2 />
-      </ToggleGroupItem>
-      <ToggleGroupItem value="compact" aria-label="Compacto">
-        <Rows3 />
-      </ToggleGroupItem>
-    </ToggleGroup>
+    <fieldset>
+      <legend className="sr-only">{t("density")}</legend>
+      <ToggleGroup
+        id={id}
+        variant="outline"
+        type="single"
+        onValueChange={handleValueChange}
+        value={density}
+      >
+        <ToggleGroupItem value="normal" aria-label={t("normal")}>
+          {t("normal")}
+        </ToggleGroupItem>
+        <ToggleGroupItem value="compact" aria-label={t("compact")}>
+          {t("compact")}
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </fieldset>
   );
 }

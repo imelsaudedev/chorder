@@ -7,7 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -46,12 +45,9 @@ export default function ActionMenu({
       <AlertDialog>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreVertical />
-              <span className="sr-only">{t("Messages.actions")}</span>
-            </Button>
+            <Button variant="outline">{t("Messages.actions")}</Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent>
             <DropdownMenuItem>
               <Link href={editUrl} className="w-full">
                 {t("Messages.edit")}

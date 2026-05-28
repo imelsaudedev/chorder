@@ -7,17 +7,7 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@/components/config/SongConfig', () => ({
-  useSongConfig: () => ({
-    transpose: 0,
-    setTranspose: vi.fn(),
-  }),
-}));
-
-vi.mock('@/components/config/KeyButtonSet', () => ({
-  default: () => <div data-testid="key-button-set" />,
-}));
-
+// Mock the sub-components to focus on ArrangementHeader logic
 vi.mock('./ArrangementSelector', () => ({
   default: () => <div data-testid="arrangement-selector" />,
 }));
@@ -31,30 +21,26 @@ vi.mock('./Skeleton', () => ({
   default: () => <div data-testid="skeleton" />,
 }));
 
-const mockArrangement: ClientArrangement = {
-  id: 1,
-  key: 'G',
-  name: 'Default',
-  originalArrangementId: null,
-  isDefault: true,
-  isDeleted: false,
-  isServiceArrangement: false,
-  youtubeUrl: null,
-  song: {
-    id: 10,
-    title: 'Amazing Grace',
-    artist: 'John Newton',
-    slug: 'amazing-grace',
-    lyrics: '...',
-    isDeleted: false,
-    arrangements: [
-      { id: 1, name: 'Default', key: 'G', isDefault: true, isDeleted: false, isServiceArrangement: false, originalArrangementId: null, youtubeUrl: null },
-      { id: 2, name: 'Alt', key: 'A', isDefault: false, isDeleted: false, isServiceArrangement: false, originalArrangementId: null, youtubeUrl: null },
-    ]
-  }
-};
-
 describe('ArrangementHeader component', () => {
+    const mockArrangement: ClientArrangement = {
+        id: 1,
+        key: 'G',
+        name: 'Default',
+        originalArrangementId: null,
+        isDefault: true,
+        isDeleted: false,
+        isServiceArrangement: false,
+        song: {
+            id: 10,
+            title: 'Amazing Grace',
+            artist: 'John Newton',
+            slug: 'amazing-grace',
+            lyrics: '...',
+            isDeleted: false,
+            arrangements: []
+        }
+    };
+
   it('renders skeleton when arrangement is null', () => {
     render(<ArrangementHeader arrangement={null} />);
     expect(screen.getByTestId('skeleton')).toBeDefined();

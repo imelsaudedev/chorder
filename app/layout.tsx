@@ -4,8 +4,6 @@ import {
   ibmPlexSans,
   ibmPlexSerif,
 } from "@/app/fonts";
-import { YoutubePlayerProvider } from "@/components/common/YoutubePlayer/context";
-import YoutubePlayerWidget from "@/components/common/YoutubePlayer/Widget";
 import { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
@@ -39,10 +37,7 @@ export default async function RootLayout({
           messages={messages}
           timeZone="America/Sao_Paulo"
         >
-          <YoutubePlayerProvider>
-            {children}
-            <YoutubePlayerWidget />
-          </YoutubePlayerProvider>
+          {children}
         </NextIntlClientProvider>
       </body>
     </html>

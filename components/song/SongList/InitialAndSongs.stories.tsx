@@ -20,6 +20,7 @@ export const Default: Story = {
     letter: "A",
     songs: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(mockSong),
     query: "song",
+    veryBigInitial: true,
   },
 };
 

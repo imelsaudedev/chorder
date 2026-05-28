@@ -87,16 +87,6 @@ export async function seedVisualBaseline() {
     }
   });
 
-  // Second arrangement so ArrangementSelector is visible (it only renders with 2+ arrangements)
-  await prisma.songArrangement.create({
-    data: {
-      songId: song.id,
-      key: 'A',
-      name: 'Alternative Arrangement',
-      isDefault: false,
-    }
-  });
-
   const defaultArrangement = arrangement;
 
   // Seed service with multiple units
