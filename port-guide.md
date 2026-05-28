@@ -7,7 +7,9 @@ Decisões e racional das melhorias implementadas neste fork. Use como referênci
 ## Índice
 
 - [Features novas (requerem schema)](#features-novas)
+- [Redesign do Header e configuração (Popover)](#redesign-do-header-e-configuração-popover)
 - [Redesign da lista de músicas](#redesign-da-lista-de-músicas)
+- [Padrões de teste](#padrões-de-teste)
 - [Bugs corrigidos (fácil port)](#bugs-corrigidos)
 
 ---
@@ -59,6 +61,118 @@ Nunca usar `.optional()` — quebra o split de tipos do react-hook-form com zodR
 - Mesmos pontos de exibição do YouTube
 
 **Dependência adicional:** `@vercel/blob` (só disponível no Vercel; para outros deploys, trocar a rota de upload).
+
+---
+
+## Redesign do Header e configuração (Popover)
+
+### PageHeader — top-bar pattern + contentActions
+
+**Problema:** título longo competia com botões de ação no mesmo `flex-row`. Em mobile, a linha partia em dois.
+
+**Solução:** separar em duas linhas fixas:
+1. Top bar: `backLink` (esq) + `actions` admin (dir) — sempre numa linha
+2. Título em largura total (`w-full`)
+3. Slot `contentActions` abaixo do subtítulo — para controles de conteúdo (seletor de arranjo, transposição, botões de mídia)
+
+```tsx
+// Nova prop em PageHeader:
+contentActions?: React.ReactNode;
+
+// Uso em ArrangementHeader:
+<PageHeader
+  contentActions={
+    <>
+      {hasMultipleArrangements && <ArrangementSelector ... />}
+      {originalKey && <KeyButtonSet ... />}
+      {arrangement.youtubeUrl && <YoutubeReferenceButton ... />}
+    </>
+  }
+/>
+```
+
+**chorder-alt:** inclui também `audioUrl && <AudioReferenceButton ... />` no `contentActions`.
+
+### ArrangementHeader / ServiceHeader — Collapsible → Popover
+
+**Problema:** o `Collapsible` empurrava o conteúdo da página para baixo ao abrir, causando layout shift. O painel de configuração ficava longo (muitos controles) e ocupava muito espaço vertical.
+
+**Solução:** substituir por `Popover` ancorado no botão de configuração. O painel flutua sobre o conteúdo sem causar reflow. Layout compacto: `flex-col gap-4` com labels simples (`text-xs text-zinc-500`) em vez de componente `<Label>`.
+
+**Ícone:** `SlidersHorizontal` (em vez de `Settings2`) + variant `ghost` (em vez de `outline`).
+
+**SongConfig (dentro do Popover):** remove a prop `originalKey` — `KeyButtonSet` sai do SongConfig e vai para `contentActions` do PageHeader. O SongConfig no Popover só contém: modo, colunas, fonte, densidade.
+
+**ServiceConfig:** mesmo padrão, sem `KeyButtonSet` (service não tem transposição por instrumento).
+
+**Arquivos tocados:**
+- `components/common/PageHeader/index.tsx` — nova prop `contentActions`, top-bar pattern
+- `components/song/ArrangementHeader/index.tsx` — Collapsible → Popover, useSongConfig, contentActions
+- `components/song/ArrangementHeader/SongConfig.tsx` — remover originalKey e KeyButtonSet, layout Popover
+- `components/service/ServiceHeader/index.tsx` — Collapsible → Popover
+- `components/service/ServiceHeader/ServiceConfig.tsx` — layout Popover
+
+**O que NÃO mudar no chorder-alt ao portar este redesign:**
+- O `chorder-alt` mantém `AudioReferenceButton` em `contentActions` (chorder não tem áudio)
+- A verificação `hasContentActions` inclui `arrangement.audioUrl`
+
+### DensityButtonSet — ícones em vez de texto
+
+**Motivação:** no contexto do Popover (espaço limitado), ícones ocupam menos espaço e comunicam visualmente "compacto vs. normal".
+
+**Fix:** substituir `ToggleGroupItem` com texto por ícones `Rows2` / `Rows3` da lucide-react.
+
+### ActionMenu — ícone MoreVertical
+
+**Motivação:** o botão de texto "Ações" ocupa espaço no top bar. Um ícone `MoreVertical` (três pontos verticais) é padrão de mercado e libera espaço para o título.
+
+**Fix:** `variant="ghost" size="icon"` + `<MoreVertical />` + `<span className="sr-only">` + `align="end"` no `DropdownMenuContent`.
+
+---
+
+## Padrões de teste
+
+### ArrangementHeader — mocks necessários
+
+Após a migração para Popover, o `ArrangementHeader` chama `useSongConfig()` diretamente. Sem mock, o teste falha com erro de contexto ausente:
+
+```tsx
+vi.mock('@/components/config/SongConfig', () => ({
+  useSongConfig: () => ({ transpose: 0, setTranspose: vi.fn() }),
+}));
+vi.mock('@/components/config/KeyButtonSet', () => ({
+  default: () => <div data-testid="key-button-set" />,
+}));
+```
+
+O `mockArrangement` deve ter **2+ itens em `song.arrangements`** para `ArrangementSelector` aparecer. No chorder-alt, cada arranjo no mock precisa incluir `audioUrl: null`.
+
+### SongPicker — clicar no botão de adicionar
+
+`SongListEntry` usa um `<Link>` overlay cobrindo toda a linha com `pointer-events-none` no título. Clicar no título **não aciona `onSelected`**. A abordagem correta:
+
+1. Mockar `next/link` (evita avisos de state update no JSDOM)
+2. Encontrar o botão pelo texto `sr-only`
+
+```tsx
+vi.mock('next/link', () => ({
+  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+}));
+
+const addLabels = await screen.findAllByText('Adicionar ao service');
+await user.click(addLabels[0].closest('button')!);
+expect(onSelected).toHaveBeenCalledTimes(1);
+```
+
+### E2E — ArrangementSelector exige 2+ arranjos no seed
+
+`ArrangementSelector` só é renderizado quando `hasMultipleArrangements` (song.arrangements.length > 1). Se o seed tiver apenas 1 arranjo, qualquer teste que verifique texto do seletor vai falhar. Adicionar sempre um segundo arranjo ao seed do `seedVisualBaseline`:
+
+```ts
+await prisma.songArrangement.create({
+  data: { songId: song.id, key: 'A', name: 'Alternative Arrangement', isDefault: false }
+});
+```
 
 ---
 
@@ -175,7 +289,9 @@ O título usa `pointer-events-none` porque o overlay já cobre o clique; isso ev
 
 ## O que NÃO vale portar
 
-- Configuração Neon/Vercel (`DATABASE_URL` + `DIRECT_URL`) — específica deste fork
-- Tema emerald — decisão visual desta comunidade
-- Remoção do feedback — decisão de produto desta comunidade
-- Scripts de seed com caminhos Windows absolutos
+- **Configuração Neon/Vercel** (`DATABASE_URL` + `DIRECT_URL`) — específica deste fork
+- **Tema emerald** — decisão visual desta comunidade
+- **Remoção do feedback** — decisão de produto desta comunidade
+- **Scripts de seed** com caminhos Windows absolutos
+- **Migrations** — os dois repos têm históricos de migrations divergentes (chorder-alt tem `youtubeUrl` via 3 migrations; chorder tem via 1 migration; chorder-alt tem `audioUrl` a mais). Nunca copiar migrations entre repos. Ao portar features de schema, criar nova migration no repo de destino com `npx prisma migrate dev`.
+- **`directUrl` no schema.prisma** — chorder-alt precisa para Neon; chorder usa Postgres direto e não tem pooler

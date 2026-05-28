@@ -5,8 +5,9 @@ Fork do [chorder](https://github.com/henriquefreitassouza/chorder) adaptado para
 ## O que é diferente do projeto original
 
 - Push direto em `main` (sem feature branches ou PRs)
-- Banco de dados: **Neon** (PostgreSQL serverless), não PostgreSQL local
 - Deploy: **Vercel**, automático a cada push em `main`
+- Banco de dados em **produção**: **Neon** (PostgreSQL serverless) com duas URLs (pooler + direta)
+- Banco de dados **local**: PostgreSQL local em `localhost:5432`, banco `chorder` — o mesmo que o projeto original usa. Ver seção abaixo sobre conflito de migrations.
 - Tema: emerald no lugar de azul
 - Sem mecanismo de feedback de usuário (removido do nav)
 
@@ -21,13 +22,29 @@ DIRECT_URL=    # URL direta sem "-pooler" (para prisma migrate deploy)
 
 O `schema.prisma` usa `directUrl = env("DIRECT_URL")`. O Vercel tem ambas configuradas.
 
+## Banco de dados local compartilhado com chorder
+
+O `chorder` e o `chorder-alt` apontam para o **mesmo banco PostgreSQL local** (`chorder`). Como cada repo tem seu próprio histórico de migrations (migrations com timestamps e nomes diferentes para as mesmas colunas), o banco pode ficar em estado inconsistente quando se trabalha nos dois repos no mesmo ambiente.
+
+**Diagnóstico:** `npx prisma migrate status` — mostra migrations pendentes e migrations no banco que não existem localmente.
+
+**Solução local:** usar `prisma db push` em vez de `prisma migrate deploy`. O `db push` sincroniza o schema sem tocar no histórico de migrations, adicionando colunas faltantes sem reclamar de conflitos:
+
+```bash
+npx prisma db push --skip-generate
+npx prisma generate          # se o dev server não estiver rodando
+```
+
+**Não usar `prisma migrate deploy` localmente** neste repo quando o banco tiver migrations do chorder — vai falhar por conflito de histórico. O `migrate deploy` é usado apenas no Vercel (via `DIRECT_URL`) onde o banco é exclusivo deste fork.
+
 ## Comandos essenciais
 
 ```bash
 yarn dev                    # dev server local
 npx tsc --noEmit           # checar TypeScript — rodar antes de todo push
-npx prisma migrate dev     # criar migration local
-npx prisma migrate deploy  # aplicar migrations no Neon (usar DIRECT_URL)
+npx prisma migrate dev     # criar nova migration (ambiente limpo ou devcontainer)
+npx prisma db push         # sincronizar schema no banco local (ambiente compartilhado com chorder)
+npx prisma migrate deploy  # aplicar migrations no Neon em prod (usar DIRECT_URL)
 ```
 
 ## Padrões obrigatórios

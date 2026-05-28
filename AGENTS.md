@@ -4,15 +4,16 @@ Welcome, Agent. This document outlines the critical architecture, workflow, and 
 
 ## 🚀 Development Workflow
 
-### 1. Branching Strategy (CRITICAL)
-Direct pushes to `main` are blocked by GitHub Rulesets.
-- **Rule**: Always create a feature branch for any changes.
-- **Command**: `git checkout -b feature/your-feature-name`
-- **Merge**: Changes must be submitted via Pull Request and pass all CI checks.
+### 1. Branching Strategy
+This fork uses **direct push to `main`** — no feature branches or PRs.
+- **Command**: `git add ... && git commit -m "..." && git push`
+- Vercel deploys automatically on every push to `main`.
+- Commit messages must be in **Portuguese (pt-BR)**.
 
 ### 2. Local Development
 - **Dev Server**: `yarn dev` (runs on port 3000).
-- **Database**: Uses the `postgres` database in the local PostgreSQL instance.
+- **Database**: Uses the `chorder` database in the local PostgreSQL instance (`localhost:5432`).
+- **Shared DB**: The local `chorder` database is shared with the original `chorder` repo. See CLAUDE.md for migration conflict handling.
 
 ---
 
@@ -41,6 +42,65 @@ npx prisma db push
 
 # Initialize E2E schema
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/chorder_test?schema=e2e" npx prisma db push
+```
+
+**Important:** If the dev server is running when you run `prisma generate`, it will fail with EPERM (DLL locked). Stop the server first, regenerate, then restart.
+
+---
+
+## 🧪 Test Patterns
+
+### ArrangementHeader (and any Popover-based header)
+
+The component calls `useSongConfig()` directly. Tests must mock it:
+
+```tsx
+vi.mock('@/components/config/SongConfig', () => ({
+  useSongConfig: () => ({ transpose: 0, setTranspose: vi.fn() }),
+}));
+
+vi.mock('@/components/config/KeyButtonSet', () => ({
+  default: () => <div data-testid="key-button-set" />,
+}));
+```
+
+The `ArrangementSelector` only renders when `song.arrangements.length > 1` (`hasMultipleArrangements`). The mock arrangement must have **2+ arrangements** for selector-related assertions to pass:
+
+```tsx
+const mockArrangement: ClientArrangement = {
+  // ...
+  song: {
+    arrangements: [
+      { id: 1, ..., audioUrl: null },  // ← chorder-alt includes audioUrl
+      { id: 2, ..., audioUrl: null },  // ← second one required
+    ]
+  }
+};
+```
+
+### SongPicker — clicking "add" button
+
+`SongListEntry` uses a `<Link>` overlay covering the entire row, with `pointer-events-none` on the title. Clicking the song title does **not** trigger `onSelected`. The add button must be found via its `sr-only` text:
+
+```tsx
+vi.mock('next/link', () => ({         // ← required: prevents JSDOM state update warnings
+  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+}));
+
+// In test:
+const addLabels = await screen.findAllByText('Adicionar ao service');
+await user.click(addLabels[0].closest('button')!);
+expect(onSelected).toHaveBeenCalledTimes(1);
+```
+
+### E2E seed — ArrangementSelector visibility
+
+`ArrangementSelector` only renders when `hasMultipleArrangements` (≥ 2 arrangements for the song). If a visual test checks for arrangement selector text, the seed **must** create a second arrangement:
+
+```ts
+await prisma.songArrangement.create({
+  data: { songId: song.id, key: 'A', name: 'Alternative Arrangement', isDefault: false }
+});
 ```
 
 ---
