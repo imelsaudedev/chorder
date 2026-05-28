@@ -98,26 +98,6 @@ export default function ArrangementInfoForm({
             </FormItem>
           )}
         />
-
-        <FormField
-          control={control}
-          name={`${fieldPrefix}youtubeUrl`}
-          render={({ field }) => (
-            <FormItem className="sm:col-span-2">
-              <FormLabel className="text-primary mb-2">
-                Link YouTube (referência)
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  {...field}
-                  value={field.value ?? ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       </div>
     </div>
   );

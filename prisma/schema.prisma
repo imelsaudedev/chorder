@@ -35,8 +35,6 @@ model SongArrangement {
   isDeleted Boolean @default(false)
   isServiceArrangement Boolean @default(false)
 
-  youtubeUrl   String?
-
   song      Song @relation(fields: [songId], references: [id])
   originalArrangement SongArrangement? @relation("OriginalArrangement", fields: [originalArrangementId], references: [id])
   childrenArrangements SongArrangement[] @relation("OriginalArrangement")

@@ -46,7 +46,7 @@ export default function NavBar() {
       {/* Menu inferior fixo (aparece apenas em telas pequenas) */}
       <nav
         className={clsx(
-          "sm:hidden fixed bottom-0 left-0 w-full z-40 bg-white/80 backdrop-blur-lg shadow-md border-t border-gray-100",
+          "sm:hidden fixed bottom-0 left-0 w-full bg-linear-to-t from-white to-white/50 backdrop-blur-lg shadow-md border-t border-gray-100",
           { hidden: isServicePage }
         )}
       >

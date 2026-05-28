@@ -40,6 +40,7 @@ export default function SongPicker({
         <SongList
           songs={songs}
           query={query}
+          initialsInSeparateRow={true}
           onSelected={handleSelected}
         />
       )}

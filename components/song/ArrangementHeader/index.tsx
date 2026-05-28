@@ -1,13 +1,14 @@
 "use client";
 
 import PageHeader from "@/components/common/PageHeader";
-import KeyButtonSet from "@/components/config/KeyButtonSet";
-import { useSongConfig } from "@/components/config/SongConfig";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { ClientArrangement, ClientSong } from "@/prisma/models";
-import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
-import { NotebookPen, SlidersHorizontal } from "lucide-react";
+import { NotebookPen, Settings2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import ArrangementActionMenu from "./ArrangementActionMenu";
 import ArrangementSelector from "./ArrangementSelector";
@@ -21,65 +22,39 @@ export default function ArrangementHeader({
   arrangement,
 }: ArrangementHeaderProps) {
   const t = useTranslations("Messages");
-  const { transpose, setTranspose } = useSongConfig();
 
   if (!arrangement) {
     return <Skeleton />;
   }
 
-  const originalKey = arrangement.key ?? "";
-  const hasMultipleArrangements = (arrangement.song?.arrangements?.length ?? 0) > 1;
-  const hasContentActions = hasMultipleArrangements || originalKey || arrangement.youtubeUrl;
-
   return (
-    <Popover>
+    <Collapsible>
       <PageHeader
         backLinkHref="/songs"
         backLinkText={t("songs")}
         title={arrangement.song!.title}
         subtitle={<Subtitle song={arrangement.song} />}
         actions={
-          <div className="flex gap-2 items-center">
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <SlidersHorizontal />
+          <div className="flex gap-2 md:self-end">
+            <ArrangementSelector
+              arrangements={arrangement.song!.arrangements!}
+              currentArrangementId={arrangement.id}
+            />
+            <ArrangementActionMenu arrangement={arrangement} />
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Settings2 />
                 <span className="sr-only">{t("toggleConfig")}</span>
               </Button>
-            </PopoverTrigger>
-            <ArrangementActionMenu arrangement={arrangement} />
+            </CollapsibleTrigger>
           </div>
-        }
-        contentActions={
-          hasContentActions ? (
-            <>
-              {hasMultipleArrangements && (
-                <ArrangementSelector
-                  arrangements={arrangement.song!.arrangements!}
-                  currentArrangementId={arrangement.id}
-                />
-              )}
-              {originalKey && (
-                <KeyButtonSet
-                  originalKey={originalKey}
-                  transpose={transpose}
-                  setTranspose={setTranspose}
-                />
-              )}
-              {arrangement.youtubeUrl && (
-                <YoutubeReferenceButton
-                  youtubeUrl={arrangement.youtubeUrl}
-                  title={arrangement.song!.title}
-                />
-              )}
-            </>
-          ) : undefined
         }
       />
 
-      <PopoverContent className="w-80" align="end">
-        <SongConfig />
-      </PopoverContent>
-    </Popover>
+      <CollapsibleContent>
+        <SongConfig originalKey={arrangement?.key ?? ""} />
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

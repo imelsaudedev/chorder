@@ -41,7 +41,7 @@ export default function ArrangementSelector({
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder={t("arrangement")} />
       </SelectTrigger>
-      <SelectContent align="end">
+      <SelectContent>
         <SelectGroup>
           {arrangementOptions.map((option) => (
             <SelectItem key={`option--${option.value}`} value={option.value}>
