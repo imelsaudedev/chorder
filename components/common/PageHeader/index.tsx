@@ -22,7 +22,7 @@ const PageHeader = ({
 }: PageHeaderProps) => {
   if (variant === "edit") {
     return (
-      <div className="flex flex-row items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 pt-8 sm:pt-16 pb-4 sm:pb-8 bg-indigo-50">
+      <div className="sticky top-0 z-10 flex flex-row items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 bg-indigo-50 border-b border-indigo-100 shadow-sm">
         <Heading level={1} className="font-semibold text-secondary leading-none mb-0">
           {title}
         </Heading>
