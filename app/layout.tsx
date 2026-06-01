@@ -6,6 +6,7 @@ import {
 } from "@/app/fonts";
 import { AudioPlayerProvider } from "@/components/common/AudioPlayer/context";
 import AudioPlayerWidget from "@/components/common/AudioPlayer/Widget";
+import { SongMetaModalProvider } from "@/components/song/SongMetaModal/context";
 import { YoutubePlayerProvider } from "@/components/common/YoutubePlayer/context";
 import YoutubePlayerWidget from "@/components/common/YoutubePlayer/Widget";
 import { Metadata } from "next";
@@ -34,7 +35,7 @@ export default async function RootLayout({
     <html lang="en">
       <head></head>
       <body
-        className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${bricolageGrotesque.variable} font-sans pb-14`}
+        className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${bricolageGrotesque.variable} font-sans`}
         suppressHydrationWarning
       >
         <NextIntlClientProvider
@@ -43,7 +44,9 @@ export default async function RootLayout({
         >
           <YoutubePlayerProvider>
             <AudioPlayerProvider>
-              {children}
+              <SongMetaModalProvider>
+                {children}
+              </SongMetaModalProvider>
               <YoutubePlayerWidget />
               <AudioPlayerWidget />
             </AudioPlayerProvider>
