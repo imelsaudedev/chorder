@@ -81,9 +81,7 @@ export default function UnitForm({
 
   return (
     <div
-      className={`border ${colorClasses.border} ${
-        colorClasses.background
-      } rounded-lg p-2 md:p-4 mb-2 ${className || ""}`}
+      className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg p-2 md:p-4 mb-2 ${className || ""}`}
     >
       <div className="mt-2">
         <BadgeSelector value={unit.type} onChange={handleChangeUnitType} />

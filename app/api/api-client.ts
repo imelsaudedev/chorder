@@ -337,3 +337,21 @@ export function useArchiveSong(slug: string) {
   );
   return { archiveSong: trigger, isArchiving: isMutating };
 }
+
+export function useUpdateSong(slug: string) {
+  async function updateSong(
+    url: string,
+    { arg }: { arg: { title?: string; artist?: string | null } }
+  ) {
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) throw new Error("Failed to update song");
+    return response.json();
+  }
+
+  const { trigger } = useSWRMutation(`/api/songs/${slug}`, updateSong);
+  return { updateSong: trigger };
+}

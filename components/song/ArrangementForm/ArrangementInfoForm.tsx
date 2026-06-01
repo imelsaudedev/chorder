@@ -1,6 +1,15 @@
-import { useMakeArrangementDefault } from "#api-client";
-import Heading from "@/components/common/Heading";
+"use client";
+
+import IncreaseDecreaseButtonSet from "@/components/common/IncreaseDecreaseButtonSet";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   FormControl,
   FormField,
@@ -9,158 +18,46 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Music, Trash2, Upload } from "lucide-react";
+import { Music, PlayCircle, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
-import MoveArrangementButton from "./MoveArrangementButton";
 
+const CHROMATIC_KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const ACCEPTED_AUDIO_TYPES = ".mp3,.m4a,.aac";
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
 type ArrangementInfoFormProps = {
   arrangementId?: number;
-  songSlug?: string;
-  isDefault: boolean;
   fieldPrefix?: string;
 };
+
 export default function ArrangementInfoForm({
   arrangementId,
-  songSlug,
-  isDefault,
   fieldPrefix = "",
 }: ArrangementInfoFormProps) {
-  const { control, setValue, watch } = useFormContext();
-  const { makeArrangementDefault } = useMakeArrangementDefault(
-    arrangementId || 0
-  );
-  const handleMakeArrangementDefault = () => {
-    makeArrangementDefault();
-  };
-
+  const { control } = useFormContext();
   const t = useTranslations();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const audioUrl = watch(`${fieldPrefix}audioUrl`) as string | null;
-
-  async function handleAudioFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > MAX_SIZE_BYTES) {
-      setUploadError("Arquivo muito grande. Limite de 5MB.");
-      return;
-    }
-
-    setUploadError(null);
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload-audio", { method: "POST", body: formData });
-      if (!res.ok) {
-        const msg = await res.text();
-        setUploadError(msg);
-        return;
-      }
-      const { url } = await res.json();
-      setValue(`${fieldPrefix}audioUrl`, url, { shouldDirty: true });
-    } catch {
-      setUploadError("Erro ao enviar arquivo.");
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  }
-
-  async function handleRemoveAudio() {
-    const url = watch(`${fieldPrefix}audioUrl`);
-    if (url) {
-      await fetch("/api/upload-audio", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      }).catch(() => {});
-    }
-    setValue(`${fieldPrefix}audioUrl`, "", { shouldDirty: true });
-  }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8 bg-zinc-50">
-      {/* Heading + Botões abaixo no mobile, à direita no sm */}
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <Heading level={2}>{t("SongData.arrangementSettings")}</Heading>
+    <div className="px-4 sm:px-6 lg:px-8 py-6 bg-white border-b border-zinc-200">
 
-        {/* Botões alinhados à esquerda no mobile e à direita no sm */}
-        <div className="flex flex-wrap gap-2 mt-4 sm:mt-0 sm:justify-end">
-          <Button
-            variant="outline"
-            onClick={handleMakeArrangementDefault}
-            disabled={isDefault}
-          >
-            {isDefault
-              ? t("SongData.alreadyDefault")
-              : t("SongData.makeDefault")}
-          </Button>
+      {/* Nome · Tom · | · YouTube · Áudio */}
+      <div className="flex flex-wrap gap-3 items-end justify-start">
 
-          {arrangementId && (
-            <MoveArrangementButton
-              arrangementId={arrangementId}
-              songSlug={songSlug}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Campos lado a lado a partir de sm */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+        {/* Nome */}
         <FormField
           control={control}
           name={`${fieldPrefix}name`}
           render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-primary mb-2">
+            <FormItem className="w-56 shrink-0">
+              <FormLabel className="text-primary">
                 {t("SongData.arrangementName")}
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder={`${t("Messages.arrangement")} ${arrangementId}`}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name={`${fieldPrefix}key`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-primary mb-2">
-                {t("SongData.defaultKey")}
-              </FormLabel>
-              <FormControl>
-                <Input placeholder={t("SongData.keyPlaceholder")} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name={`${fieldPrefix}youtubeUrl`}
-          render={({ field }) => (
-            <FormItem className="sm:col-span-2">
-              <FormLabel className="text-primary mb-2">
-                Link YouTube (referência)
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="https://www.youtube.com/watch?v=..."
+                  placeholder="Arranjo principal"
+                  autoFocus={!field.value}
                   {...field}
                   value={field.value ?? ""}
                 />
@@ -170,60 +67,227 @@ export default function ArrangementInfoForm({
           )}
         />
 
-        {/* Campo oculto que armazena a URL do áudio no form */}
-        <FormField
-          control={control}
-          name={`${fieldPrefix}audioUrl`}
-          render={() => <input type="hidden" />}
-        />
+        {/* Tom */}
+        <KeyField fieldPrefix={fieldPrefix} />
 
-        <div className="sm:col-span-2">
-          <p className="text-sm font-medium text-primary mb-2">
-            Áudio de referência
-          </p>
-          {audioUrl ? (
-            <div className="flex items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
-              <Music size={16} className="text-emerald-600 shrink-0" />
-              <span className="text-sm truncate flex-1 text-zinc-700">
-                Áudio carregado
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 shrink-0 text-zinc-500 hover:text-red-500"
-                onClick={handleRemoveAudio}
-              >
-                <Trash2 size={14} />
-                <span className="sr-only">Remover áudio</span>
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-1">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={ACCEPTED_AUDIO_TYPES}
-                className="hidden"
-                onChange={handleAudioFileChange}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isUploading}
-                onClick={() => fileInputRef.current?.click()}
-                className="w-fit gap-2"
-              >
-                <Upload size={14} />
-                {isUploading ? "Enviando..." : "Carregar áudio (MP3, M4A, AAC — máx. 5MB)"}
-              </Button>
-              {uploadError && (
-                <p className="text-sm text-red-500">{uploadError}</p>
-              )}
-            </div>
-          )}
+        {/* YouTube + Áudio */}
+        <div className="flex gap-3 items-end">
+          <YoutubeField fieldPrefix={fieldPrefix} arrangementId={arrangementId} />
+          <AudioField fieldPrefix={fieldPrefix} />
         </div>
+
       </div>
     </div>
+  );
+}
+
+/* ─── Tom ─────────────────────────────────────────────────────────────── */
+
+function KeyField({ fieldPrefix }: { fieldPrefix: string }) {
+  const { watch, setValue } = useFormContext();
+  const t = useTranslations();
+  const currentKey = (watch(`${fieldPrefix}key`) as string) || "C";
+  const idx = CHROMATIC_KEYS.indexOf(currentKey);
+  const safeIdx = idx === -1 ? 0 : idx;
+
+  const handleIncrease = () => {
+    setValue(`${fieldPrefix}key`, CHROMATIC_KEYS[(safeIdx + 1) % CHROMATIC_KEYS.length], { shouldDirty: true });
+  };
+
+  const handleDecrease = () => {
+    setValue(`${fieldPrefix}key`, CHROMATIC_KEYS[(safeIdx - 1 + CHROMATIC_KEYS.length) % CHROMATIC_KEYS.length], { shouldDirty: true });
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5 shrink-0">
+      <span className="text-sm font-medium text-primary leading-none">
+        {t("SongData.defaultKey")}
+      </span>
+      <IncreaseDecreaseButtonSet
+        stringValue={currentKey}
+        setStringValue={(v) => setValue(`${fieldPrefix}key`, v, { shouldDirty: true })}
+        increase={handleIncrease}
+        decrease={handleDecrease}
+        decreaseLabel="♭"
+        increaseLabel="♯"
+      />
+    </div>
+  );
+}
+
+/* ─── YouTube ─────────────────────────────────────────────────────────── */
+
+function YoutubeField({ fieldPrefix, arrangementId }: { fieldPrefix: string; arrangementId?: number }) {
+  const { watch, setValue } = useFormContext();
+  const t = useTranslations();
+  const youtubeUrl = (watch(`${fieldPrefix}youtubeUrl`) as string) || "";
+  const [draft, setDraft] = useState(youtubeUrl);
+  const [open, setOpen] = useState(false);
+
+  const hasUrl = Boolean(youtubeUrl);
+
+  function handleOpen(isOpen: boolean) {
+    if (isOpen) setDraft(youtubeUrl);
+    setOpen(isOpen);
+  }
+
+  function handleSave() {
+    setValue(`${fieldPrefix}youtubeUrl`, draft.trim(), { shouldDirty: true });
+    setOpen(false);
+  }
+
+  function handleRemove() {
+    setValue(`${fieldPrefix}youtubeUrl`, "", { shouldDirty: true });
+    setOpen(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpen}>
+      <DialogTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          className={`gap-2 ${hasUrl ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100" : ""}`}
+        >
+          <PlayCircle size={15} className={hasUrl ? "text-red-500" : "text-zinc-400"} />
+          YouTube
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Referência YouTube</DialogTitle>
+        </DialogHeader>
+        <Input
+          placeholder="https://youtube.com/watch?v=..."
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSave(); } }}
+          autoFocus
+        />
+        <DialogFooter className="flex-row justify-between sm:justify-between">
+          {hasUrl && (
+            <Button type="button" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleRemove}>
+              Remover
+            </Button>
+          )}
+          <div className="flex gap-2 ml-auto">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              {t("Messages.cancel")}
+            </Button>
+            <Button type="button" onClick={handleSave}>
+              {t("Messages.save")}
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ─── Áudio ───────────────────────────────────────────────────────────── */
+
+function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
+  const { watch, setValue, register } = useFormContext();
+  const t = useTranslations();
+  const audioUrl = (watch(`${fieldPrefix}audioUrl`) as string) || "";
+  const [open, setOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const hasAudio = Boolean(audioUrl);
+
+  async function handleAudioFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > MAX_SIZE_BYTES) { setUploadError("Máx. 5MB."); return; }
+    setUploadError(null);
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload-audio", { method: "POST", body: formData });
+      if (!res.ok) { setUploadError(await res.text()); return; }
+      const { url } = await res.json();
+      setValue(`${fieldPrefix}audioUrl`, url, { shouldDirty: true });
+      setOpen(false);
+    } catch {
+      setUploadError("Erro ao enviar arquivo.");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function handleRemove() {
+    if (audioUrl) {
+      await fetch("/api/upload-audio", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: audioUrl }),
+      }).catch(() => {});
+    }
+    setValue(`${fieldPrefix}audioUrl`, "", { shouldDirty: true });
+    setOpen(false);
+  }
+
+  return (
+    <>
+      <input type="hidden" {...register(`${fieldPrefix}audioUrl`)} />
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className={`gap-2 ${hasAudio ? "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100" : ""}`}
+          >
+            <Music size={15} className={hasAudio ? "text-emerald-600" : "text-zinc-400"} />
+            Áudio
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Áudio de referência</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            {hasAudio && (
+              <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <Music size={14} className="text-emerald-600 shrink-0" />
+                <span className="text-sm text-emerald-800 truncate flex-1">Áudio carregado</span>
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={ACCEPTED_AUDIO_TYPES}
+              className="hidden"
+              onChange={handleAudioFileChange}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isUploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="gap-2 w-fit"
+            >
+              <Upload size={14} />
+              {isUploading ? "Enviando…" : hasAudio ? "Substituir áudio" : "Carregar áudio (MP3, M4A, AAC — máx. 5MB)"}
+            </Button>
+            {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
+          </div>
+          <DialogFooter className="flex-row justify-between sm:justify-between">
+            {hasAudio && (
+              <Button type="button" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleRemove}>
+                Remover áudio
+              </Button>
+            )}
+            <Button type="button" variant="outline" className="ml-auto" onClick={() => setOpen(false)}>
+              {t("Messages.cancel")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -17,5 +17,6 @@ export const Default: Story = {
   },
   args: {
     arrangement: arrangements[1],
+    onEditSong: () => {},
   },
 };

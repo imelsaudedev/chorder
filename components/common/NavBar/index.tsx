@@ -10,12 +10,15 @@ export default function NavBar() {
   const t = useTranslations("Messages");
   const pathname = usePathname();
   const pathParts = pathname.split("/");
-  const currentPage = pathParts[1]; // Obtém a parte da URL após a barra inicial
+  const currentPage = pathParts[1];
+  const isEditPage = pathname.includes("/edit") || pathname.endsWith("/new");
   const isServicePage =
     currentPage === "services" &&
     pathParts.length > 2 &&
     pathParts[2] !== "new" &&
     pathParts[2] !== "edit";
+
+  if (isEditPage) return null;
 
   return (
     <>

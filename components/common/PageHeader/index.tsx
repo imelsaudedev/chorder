@@ -1,5 +1,6 @@
 import BackLink from "@/components/common/BackLink";
 import Heading from "@/components/common/Heading";
+import Text from "@/components/common/Text";
 
 type PageHeaderProps = {
   title: React.ReactNode;
@@ -22,10 +23,13 @@ const PageHeader = ({
 }: PageHeaderProps) => {
   if (variant === "edit") {
     return (
-      <div className="sticky top-0 z-10 flex flex-row items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 bg-indigo-50 border-b border-indigo-100 shadow-sm">
-        <Heading level={1} className="font-semibold text-secondary leading-none mb-0">
-          {title}
-        </Heading>
+      <div className="sticky top-0 z-10 flex flex-row items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 py-2 bg-white/80 backdrop-blur-lg border-b border-zinc-100">
+        <div className="flex flex-col min-w-0">
+          <Text variant="heading-sm" className="truncate">{title}</Text>
+          {subtitle && (
+            <Text variant="caption" className="truncate mt-0.5">{subtitle}</Text>
+          )}
+        </div>
         {actions && (
           <div className="flex gap-2 items-center shrink-0">{actions}</div>
         )}
@@ -35,7 +39,6 @@ const PageHeader = ({
 
   return (
     <div className="flex flex-col p-4 sm:p-6 lg:p-8 bg-zinc-50 border-b border-zinc-100">
-      {/* Top bar: navegação (esq) + ações admin (dir) */}
       {(backLinkHref || actions) && (
         <div className="flex items-center justify-between mb-2">
           <div>
@@ -49,15 +52,12 @@ const PageHeader = ({
         </div>
       )}
 
-      {/* Título em largura total */}
-      <Heading level={1}>{title}</Heading>
+      <Heading level={1} className="truncate mb-1 sm:mb-2">{title}</Heading>
 
-      {/* Subtítulo */}
       {subtitle && (
-        <div className="text-base sm:text-lg text-zinc-600">{subtitle}</div>
+        <Text variant="caption" className="text-base sm:text-lg">{subtitle}</Text>
       )}
 
-      {/* Ações de conteúdo: seletor de arranjo, youtube, etc. */}
       {contentActions && (
         <div className="flex flex-wrap gap-2 items-center mt-3">{contentActions}</div>
       )}

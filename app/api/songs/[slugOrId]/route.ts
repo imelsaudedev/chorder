@@ -1,4 +1,4 @@
-import { archiveSong, retrieveSong } from "@/prisma/data";
+import { archiveSong, retrieveSong, updateSongInfo } from "@/prisma/data";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -28,9 +28,19 @@ export async function PATCH(
 ) {
   const { slugOrId } = await params;
   const body = await request.json();
+
   if (body.isDeleted === true) {
     await archiveSong(slugOrId);
     return Response.json({ success: true });
   }
+
+  if (body.title !== undefined || "artist" in body) {
+    const data: { title?: string; artist?: string | null } = {};
+    if (body.title !== undefined) data.title = body.title;
+    if ("artist" in body) data.artist = body.artist ?? null;
+    await updateSongInfo(slugOrId, data);
+    return Response.json({ success: true });
+  }
+
   return new Response("Bad request", { status: 400 });
 }

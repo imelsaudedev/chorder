@@ -3,15 +3,19 @@
 import { useFetchService } from "@/app/api/api-client";
 import ServiceForm from "@/components/service/ServiceForm";
 import ServiceFormSkeleton from "@/components/service/ServiceForm/Skeleton";
+import { ServiceMeta } from "@/components/service/ServiceMetaModal";
 import { ClientService } from "@/prisma/models";
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 
 type ClientServiceFormPageProps = {
   serviceSlug: string | null;
+  defaultMeta?: ServiceMeta;
 };
+
 export default function ClientServiceFormPage({
   serviceSlug,
+  defaultMeta,
 }: ClientServiceFormPageProps) {
   const router = useRouter();
   const { service } = useFetchService(serviceSlug);
@@ -21,10 +25,17 @@ export default function ClientServiceFormPage({
   };
 
   const isLoading = !service && serviceSlug;
+
   return (
     <Suspense>
       {isLoading && <ServiceFormSkeleton />}
-      {!isLoading && <ServiceForm service={service} onSaved={handleSaved} />}
+      {!isLoading && (
+        <ServiceForm
+          service={service ?? null}
+          defaultMeta={defaultMeta}
+          onSaved={handleSaved}
+        />
+      )}
     </Suspense>
   );
 }

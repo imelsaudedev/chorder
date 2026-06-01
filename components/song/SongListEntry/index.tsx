@@ -103,8 +103,17 @@ export default function SongListEntry({
     // display:none removes children from grid flow, enabling correct column count per breakpoint
     <div className="relative grid grid-cols-[1fr_auto] md:grid-cols-[2fr_3fr_12rem] lg:grid-cols-[2fr_3fr_8rem_5rem] items-start gap-x-2 py-2.5 px-2 hover:bg-zinc-50 transition-colors group">
 
-      {/* Link overlay cobrindo toda a linha */}
-      <Link href={`/songs/${song.slug}`} className="absolute inset-0 z-0" aria-label={song.title} />
+      {/* Overlay: navega em modo lista, seleciona em modo picker */}
+      {onSelected ? (
+        <button
+          type="button"
+          className="absolute inset-0 z-0 w-full"
+          aria-label={song.title}
+          onClick={() => onSelected(song)}
+        />
+      ) : (
+        <Link href={`/songs/${song.slug}`} className="absolute inset-0 z-0" aria-label={song.title} />
+      )}
 
       {/* Col 1 — título e artista */}
       <div className="relative z-10 min-w-0 pointer-events-none">
@@ -162,16 +171,7 @@ export default function SongListEntry({
           />
         )}
         {onSelected && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 shrink-0 text-zinc-400 hover:text-primary"
-            onClick={() => onSelected(song)}
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="sr-only">Adicionar ao service</span>
-          </Button>
+          <Plus className="w-3.5 h-3.5 text-zinc-400 shrink-0 pointer-events-none" />
         )}
       </div>
     </div>

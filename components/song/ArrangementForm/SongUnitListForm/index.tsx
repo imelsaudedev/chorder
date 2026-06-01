@@ -20,9 +20,7 @@ export default function SongUnitListForm({
           fieldPrefix={fieldPrefix}
         />
       ))}
-      <div className="pl-10">
-        <AddUnitForm fieldPrefix={fieldPrefix} />
-      </div>
+      <AddUnitForm fieldPrefix={fieldPrefix} />
     </section>
   );
 }

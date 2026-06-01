@@ -1,17 +1,13 @@
-import FloatingAddLink from "@/components/common/FloatingAddLink";
 import Heading from "@/components/common/Heading";
 import Main from "@/components/common/Main";
 import ScrollToTopButton from "@/components/common/ScrollToTopButton";
 import UrlSearchBar from "@/components/common/SearchBar/UrlSearchBar";
-import ClientSongList from "@/components/song/SongList/ClientSongList";
 import { Music } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import ClientSongsPage from "./ClientSongsPage";
 
 type SongListPageProps = {
-  searchParams?: Promise<{
-    query?: string;
-    page?: string;
-  }>;
+  searchParams?: Promise<{ query?: string }>;
 };
 
 export default async function SongListPage(props: SongListPageProps) {
@@ -21,7 +17,7 @@ export default async function SongListPage(props: SongListPageProps) {
 
   return (
     <>
-      <div className="flex flex-col grow justify-between gap-4 px-4 sm:px-12 lg:px-16 pt-8 sm:pt-12 lg:pt-16 pb-4 sm:pb-6 lg:pb-8 max-w-full">
+      <div className="flex flex-col grow justify-between gap-4 px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 lg:pt-16 pb-4 sm:pb-6 lg:pb-8 max-w-full">
         <Heading level={1} className="flex items-center gap-2">
           <Music className="w-8 lg:w-10 h-8 lg:h-10" />
           {t("Messages.songs")}
@@ -32,10 +28,8 @@ export default async function SongListPage(props: SongListPageProps) {
         <div className="mb-4">
           <UrlSearchBar />
         </div>
-        <ClientSongList query={query} />
+        <ClientSongsPage query={query} />
       </Main>
-
-      <FloatingAddLink href="./songs/new" label={t("Messages.newSong")} />
 
       <ScrollToTopButton />
     </>

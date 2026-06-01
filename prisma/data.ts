@@ -144,6 +144,13 @@ export async function archiveSong(slug: string) {
   });
 }
 
+export async function updateSongInfo(
+  slug: string,
+  data: { title?: string; artist?: string | null }
+): Promise<void> {
+  await prisma.song.update({ where: { slug }, data });
+}
+
 export async function retrieveSong(
   slugOrId: string | number,
   {

@@ -1,13 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { cn } from "@/lib/utils";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { useState } from "react";
 
 type DatePickerProps = {
   buttonProps?: React.ComponentProps<typeof Button>;
@@ -22,6 +19,7 @@ export default function DatePicker({
   disabled = false,
   onChange,
 }: DatePickerProps) {
+  const [open, setOpen] = useState(false);
   const t = useTranslations("Messages");
   const format = useFormatter();
   const formattedDate = value ? (
@@ -35,30 +33,39 @@ export default function DatePicker({
   );
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
+      <PopoverPrimitive.Trigger asChild>
         <Button
           {...(buttonProps || {})}
-          variant={"outline"}
+          type="button"
+          variant="outline"
           className={cn(
             "w-[280px] justify-start text-left font-normal",
-            !value && "text-muted-foreground"
+            !value && "text-muted-foreground",
+            buttonProps?.className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {formattedDate}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
+      </PopoverPrimitive.Trigger>
+
+      {/* Sem portal — renderiza dentro da árvore DOM do pai (Dialog/Drawer/page) */}
+      <PopoverPrimitive.Content
+        sideOffset={4}
+        align="start"
+        className="z-50 w-auto rounded-md border bg-popover p-0 shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <Calendar
           defaultMonth={value}
           selected={value}
-          onSelect={onChange}
+          onSelect={(date) => { onChange?.(date); setOpen(false); }}
           mode="single"
           disabled={disabled}
           autoFocus
         />
-      </PopoverContent>
-    </Popover>
+      </PopoverPrimitive.Content>
+    </PopoverPrimitive.Root>
   );
 }
