@@ -24,6 +24,15 @@
     "songs": "Songs",
     "newService": "New service",
     "editService": "Edit service",
+    "deleteService": "Delete service",
+    "saveService": "Save service",
+    "editServiceData": "Edit details",
+    "discardChanges": "Discard changes",
+    "discardChangesDesc": "You'll lose all unsaved changes.",
+    "discard": "Discard",
+    "continue": "Continue",
+    "saveSong": "Save song",
+    "addUnitToSave": "Add at least one unit to save",
     "service": "Service",
     "services": "Services",
     "pickDate": "Pick a date",
@@ -74,7 +83,12 @@
     "lyrics": "Lyrics",
     "showLyrics": "Show lyrics",
     "editSong": "Edit song",
-    "editOriginal": "Edit original"
+    "editOriginal": "Edit original",
+    "editArrangement": "Edit arrangement",
+    "duplicateArrangement": "Duplicate arrangement",
+    "deleteArrangement": "Delete arrangement",
+    "audio": "Audio",
+    "moveArrangement": "Move arrangement"
   },
   "UnitData": {
     "content": "Chordpro",
@@ -111,7 +125,7 @@
   "SongForm": {
     "addExistingUnit": "Add existing unit",
     "addUnitWithLabel": "Add unit {label}",
-    "newUnit": "New unit",
+    "newUnit": "Add unit",
     "confirmDeleteTitle": "Are you sure you want to delete this arrangement?",
     "confirmDelete": "This action cannot be undone.",
     "noSongs": "No songs found",
