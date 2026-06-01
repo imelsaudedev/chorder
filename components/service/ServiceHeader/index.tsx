@@ -54,7 +54,7 @@ function Subtitle({ service }: SubtitleProps) {
   const t = useTranslations();
 
   return (
-    <div className="flex flex-row items-center gap-4 leading-tight">
+    <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-4 leading-tight">
       <span className="flex items-center gap-1">
         <Calendar className="w-4 h-4" />
         {formattedDate}
