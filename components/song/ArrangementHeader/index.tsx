@@ -7,6 +7,7 @@ import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
 import KeyButtonSet from "@/components/config/KeyButtonSet";
 import { useSongConfig } from "@/components/config/SongConfig";
 import { useSongMetaModal } from "@/components/song/SongMetaModal/context";
+import SongTags from "@/components/song/SongTags";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ClientArrangement } from "@/prisma/models";
@@ -35,10 +36,11 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
 
   const songTitle = arrangement.song!.title;
   const songArtist = arrangement.song!.artist ?? "";
+  const songTags = arrangement.song!.tags ?? [];
   const originalKey = arrangement.key ?? "";
   const hasMultipleArrangements = (arrangement.song?.arrangements?.length ?? 0) > 1;
   const hasContentActions =
-    hasMultipleArrangements || originalKey || arrangement.youtubeUrl || arrangement.audioUrl;
+    songTags.length > 0 || hasMultipleArrangements || originalKey || arrangement.youtubeUrl || arrangement.audioUrl;
 
   const handleEditSong = () => {
     openSongMetaModal({
@@ -91,6 +93,11 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
           contentActions={
             hasContentActions ? (
               <>
+                {songTags.length > 0 && (
+                  <div className="w-full">
+                    <SongTags tags={songTags} />
+                  </div>
+                )}
                 {hasMultipleArrangements && (
                   <ArrangementSelector
                     arrangements={arrangement.song!.arrangements!}

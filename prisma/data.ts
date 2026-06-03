@@ -280,6 +280,13 @@ export async function retrieveArrangement(
         song: includeSong
           ? {
               include: {
+                tags: {
+                  select: {
+                    id: true,
+                    name: true,
+                    group: { select: { id: true, name: true, color: true } },
+                  },
+                },
                 arrangements: {
                   where: { isDeleted: false, isServiceArrangement: false },
                 },
@@ -316,6 +323,13 @@ export async function retrieveArrangement(
       song: includeSong
         ? {
             include: {
+              tags: {
+                select: {
+                  id: true,
+                  name: true,
+                  group: { select: { id: true, name: true, color: true } },
+                },
+              },
               arrangements: {
                 where: { isDeleted: false, isServiceArrangement: false },
               },
