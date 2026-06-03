@@ -101,7 +101,7 @@ export default function SongListEntry({
     // Tablet: 3 cols [title | lyrics | (dropdown+icons)]
     // Desktop: 4 cols [title | lyrics | dropdown | icons]
     // display:none removes children from grid flow, enabling correct column count per breakpoint
-    <div className="relative grid grid-cols-[1fr_auto] md:grid-cols-[2fr_3fr_12rem] lg:grid-cols-[2fr_3fr_8rem_5rem] items-start gap-x-2 py-2.5 px-2 hover:bg-zinc-50 transition-colors group">
+    <div className="relative grid grid-cols-[1fr_auto] md:grid-cols-[2fr_3fr_12rem] lg:grid-cols-[2fr_3fr_1.5fr_8rem_5rem] items-start gap-x-2 py-2.5 px-2 hover:bg-zinc-50 transition-colors group">
 
       {/* Overlay: navega em modo lista, seleciona em modo picker */}
       {onSelected ? (
@@ -132,12 +132,25 @@ export default function SongListEntry({
             <HighlightKeyword text={song.artist} keyword={query} />
           </p>
         )}
+      </div>
+
+      {/* Col 2 — primeiras linhas da letra (oculto no mobile) */}
+      <div className="hidden md:block min-w-0">
+        {verse1Lines.slice(0, 2).map((line, i) => (
+          <p key={i} className="text-xs text-zinc-500 truncate leading-relaxed">
+            <HighlightKeyword text={line} keyword={query} />
+          </p>
+        ))}
+      </div>
+
+      {/* Col 3 — tags (apenas desktop) */}
+      <div className="hidden lg:block min-w-0">
         {song.tags && song.tags.length > 0 && (
-          <div className="flex gap-1 mt-1 overflow-hidden">
+          <div className="flex flex-wrap gap-1">
             {song.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="shrink-0 inline-flex items-center px-1.5 py-px rounded text-[10px] font-medium leading-4"
+                className="inline-flex items-center px-1.5 py-px rounded text-[10px] font-medium leading-4"
                 style={{
                   backgroundColor: `${tag.group.color}26`,
                   color: tag.group.color,
@@ -151,16 +164,7 @@ export default function SongListEntry({
         )}
       </div>
 
-      {/* Col 2 — primeiras linhas da letra (oculto no mobile) */}
-      <div className="hidden md:block min-w-0">
-        {verse1Lines.slice(0, 2).map((line, i) => (
-          <p key={i} className="text-xs text-zinc-500 truncate leading-relaxed">
-            <HighlightKeyword text={line} keyword={query} />
-          </p>
-        ))}
-      </div>
-
-      {/* Col 3 — seletor de arranjo standalone (apenas desktop) */}
+      {/* Col 4 — seletor de arranjo standalone (apenas desktop) */}
       <div className="hidden lg:block relative z-10">
         {arrangementDropdown}
       </div>
