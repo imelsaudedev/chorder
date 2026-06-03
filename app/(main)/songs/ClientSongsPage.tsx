@@ -37,7 +37,7 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
 
       <SongMetaModal
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={(open) => { if (!isNavigating) setModalOpen(open); }}
         loading={isNavigating}
         isNew
         onSave={(values) => {
@@ -45,7 +45,7 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
           params.set("title", values.title.trim());
           if (values.artist) params.set("artist", values.artist.trim());
           setIsNavigating(true);
-          router.push(`/songs/new?${params.toString()}`);
+          setTimeout(() => router.push(`/songs/new?${params.toString()}`), 0);
         }}
       />
     </>

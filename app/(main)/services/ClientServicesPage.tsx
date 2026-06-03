@@ -35,7 +35,7 @@ export default function ClientServicesPage() {
 
       <ServiceMetaModal
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={(open) => { if (!isNavigating) setModalOpen(open); }}
         loading={isNavigating}
         isNew
         onSave={(values) => {
@@ -44,7 +44,7 @@ export default function ClientServicesPage() {
           if (values.worshipLeader) params.set("worshipLeader", values.worshipLeader);
           params.set("date", values.date.toISOString());
           setIsNavigating(true);
-          router.push(`/services/new?${params.toString()}`);
+          setTimeout(() => router.push(`/services/new?${params.toString()}`), 0);
         }}
       />
     </>
