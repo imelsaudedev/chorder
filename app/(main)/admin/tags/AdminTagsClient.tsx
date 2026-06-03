@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
@@ -34,6 +43,7 @@ export default function AdminTagsClient({ initialGroups }: Props) {
   const [editingTagName, setEditingTagName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [blockingError, setBlockingError] = useState<string | null>(null);
 
   async function reload() {
     const res = await fetch("/api/admin/tag-groups");
@@ -80,7 +90,7 @@ export default function AdminTagsClient({ initialGroups }: Props) {
     const res = await fetch(`/api/admin/tag-groups/${id}`, { method: "DELETE" });
     if (!res.ok) {
       const { error } = await res.json();
-      setError(error);
+      setBlockingError(error);
     } else {
       await reload();
     }
@@ -126,7 +136,7 @@ export default function AdminTagsClient({ initialGroups }: Props) {
 
   async function deleteTag(id: number, songCount: number) {
     if (songCount > 0) {
-      setError(`Esta tag está associada a ${songCount} música${songCount > 1 ? "s" : ""} e não pode ser apagada.`);
+      setBlockingError(`Esta tag está associada a ${songCount} música${songCount > 1 ? "s" : ""} e não pode ser apagada.`);
       return;
     }
     if (!confirm("Apagar esta tag?")) return;
@@ -138,6 +148,19 @@ export default function AdminTagsClient({ initialGroups }: Props) {
 
   return (
     <div className="space-y-8">
+      {/* Dialog de erro bloqueante (ex: tag com músicas associadas) */}
+      <AlertDialog open={!!blockingError} onOpenChange={() => setBlockingError(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ação não permitida</AlertDialogTitle>
+            <AlertDialogDescription>{blockingError}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setBlockingError(null)}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {error && (
         <div className="flex items-start justify-between gap-2 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm">
           <span>{error}</span>
@@ -233,9 +256,9 @@ export default function AdminTagsClient({ initialGroups }: Props) {
                   <>
                     <span className="text-sm">{tag.name}</span>
                     <div className="flex items-center gap-2">
-                      {tag._count.songs > 0 && (
-                        <span className="text-xs text-muted-foreground">{tag._count.songs} músicas</span>
-                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {tag._count.songs} {tag._count.songs === 1 ? "música" : "músicas"}
+                      </span>
                       <Button type="button" variant="ghost" size="icon" className="w-6 h-6"
                         onClick={() => { setEditingTag(tag.id); setEditingTagName(tag.name); }}>
                         <Pencil className="w-3 h-3" />
