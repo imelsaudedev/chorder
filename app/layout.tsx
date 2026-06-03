@@ -6,6 +6,7 @@ import {
 } from "@/app/fonts";
 import { AudioPlayerProvider } from "@/components/common/AudioPlayer/context";
 import AudioPlayerWidget from "@/components/common/AudioPlayer/Widget";
+import { NavigationLoaderProvider } from "@/components/common/NavigationLoader";
 import { SongMetaModalProvider } from "@/components/song/SongMetaModal/context";
 import { YoutubePlayerProvider } from "@/components/common/YoutubePlayer/context";
 import YoutubePlayerWidget from "@/components/common/YoutubePlayer/Widget";
@@ -42,15 +43,17 @@ export default async function RootLayout({
           messages={messages}
           timeZone="America/Sao_Paulo"
         >
-          <YoutubePlayerProvider>
-            <AudioPlayerProvider>
-              <SongMetaModalProvider>
-                {children}
-              </SongMetaModalProvider>
-              <YoutubePlayerWidget />
-              <AudioPlayerWidget />
-            </AudioPlayerProvider>
-          </YoutubePlayerProvider>
+          <NavigationLoaderProvider>
+            <YoutubePlayerProvider>
+              <AudioPlayerProvider>
+                <SongMetaModalProvider>
+                  {children}
+                </SongMetaModalProvider>
+                <YoutubePlayerWidget />
+                <AudioPlayerWidget />
+              </AudioPlayerProvider>
+            </YoutubePlayerProvider>
+          </NavigationLoaderProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -75,6 +75,7 @@ export default function SongMetaModal({
   }, [open]);
 
   function handleSubmit(values: SongMeta) {
+    onOpenChange(false);
     onSave(values);
   }
 

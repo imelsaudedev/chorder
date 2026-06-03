@@ -1,17 +1,16 @@
 "use client";
 
+import { useNavigationLoader } from "@/components/common/NavigationLoader";
 import ServiceMetaModal from "@/components/service/ServiceMetaModal";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ClientServiceList from "./ClientServiceList";
 
 export default function ClientServicesPage() {
   const t = useTranslations("Messages");
-  const router = useRouter();
-  const [isNavigating, setIsNavigating] = useState(false);
+  const { navigateTo } = useNavigationLoader();
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -35,16 +34,14 @@ export default function ClientServicesPage() {
 
       <ServiceMetaModal
         open={modalOpen}
-        onOpenChange={(open) => { if (!isNavigating) setModalOpen(open); }}
-        loading={isNavigating}
+        onOpenChange={setModalOpen}
         isNew
         onSave={(values) => {
           const params = new URLSearchParams();
           if (values.title) params.set("title", values.title);
           if (values.worshipLeader) params.set("worshipLeader", values.worshipLeader);
           params.set("date", values.date.toISOString());
-          setIsNavigating(true);
-          setTimeout(() => router.push(`/services/new?${params.toString()}`), 0);
+          navigateTo(`/services/new?${params.toString()}`);
         }}
       />
     </>

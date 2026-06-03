@@ -80,6 +80,7 @@ export default function ServiceMetaModal({
   }, [open]);
 
   function handleSubmit(values: ServiceMeta) {
+    onOpenChange(false);
     onSave(values);
   }
 

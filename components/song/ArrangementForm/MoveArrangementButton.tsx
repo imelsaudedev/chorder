@@ -1,4 +1,5 @@
 import { useMoveArrangement } from "#api-client";
+import { useNavigationLoader } from "@/components/common/NavigationLoader";
 import SongPicker from "@/components/song/SongPicker";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +12,6 @@ import {
 import { ClientSong } from "@/prisma/models";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 type MoveArrangementButtonProps = {
   arrangementId: number;
@@ -25,16 +24,13 @@ export default function MoveArrangementButton({
 }: MoveArrangementButtonProps) {
   const excludedSongSlugs = songSlug ? [songSlug] : [];
   const t = useTranslations();
-  const router = useRouter();
-  const [isNavigating, setIsNavigating] = useState(false);
+  const { navigateTo } = useNavigationLoader();
 
   const { moveArrangement, isMutating } = useMoveArrangement(arrangementId);
-  const isLoading = isMutating || isNavigating;
 
   const moveArrangementTo = (destSong: ClientSong) => {
     moveArrangement(destSong.slug).then(() => {
-      setIsNavigating(true);
-      router.push(`/songs/${destSong.slug}?arrangement=${arrangementId}`);
+      navigateTo(`/songs/${destSong.slug}?arrangement=${arrangementId}`);
     });
   };
 
@@ -48,7 +44,7 @@ export default function MoveArrangementButton({
           <DrawerTitle>{t("ServiceForm.pickSong")}</DrawerTitle>
         </DrawerHeader>
         <div className="max-h-[80vh] overflow-auto p-4">
-          {isLoading ? (
+          {isMutating ? (
             <div className="flex justify-center items-center py-16">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
