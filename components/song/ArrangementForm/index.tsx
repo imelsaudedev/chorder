@@ -76,6 +76,7 @@ export default function ArrangementForm({
   function handleMetaSave({ title, artist }: SongMeta) {
     form.setValue("song.title", title, { shouldDirty: true });
     form.setValue("song.artist", artist ?? "", { shouldDirty: true });
+    setMetaModalOpen(false);
   }
 
   const closeButton = isDirty ? (

@@ -65,6 +65,7 @@ export default function ServiceForm({ service, defaultMeta, onSaved }: ServiceFo
     form.setValue("title", values.title, { shouldDirty: true });
     form.setValue("date", values.date, { shouldDirty: true });
     form.setValue("worshipLeader", values.worshipLeader, { shouldDirty: true });
+    setMetaModalOpen(false);
   }
 
   const formattedDate = watchedDate

@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useTransition, useState } from "react";
 
 type ClientSongsPageProps = { query: string };
 
 export default function ClientSongsPage({ query }: ClientSongsPageProps) {
   const t = useTranslations("Messages");
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -37,12 +38,15 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
       <SongMetaModal
         open={modalOpen}
         onOpenChange={setModalOpen}
+        loading={isPending}
         isNew
         onSave={(values) => {
           const params = new URLSearchParams();
           params.set("title", values.title.trim());
           if (values.artist) params.set("artist", values.artist.trim());
-          router.push(`/songs/new?${params.toString()}`);
+          startTransition(() => {
+            router.push(`/songs/new?${params.toString()}`);
+          });
         }}
       />
     </>
