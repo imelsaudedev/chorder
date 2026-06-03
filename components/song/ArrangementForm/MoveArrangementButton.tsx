@@ -12,7 +12,7 @@ import { ClientSong } from "@/prisma/models";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState } from "react";
 
 type MoveArrangementButtonProps = {
   arrangementId: number;
@@ -26,16 +26,15 @@ export default function MoveArrangementButton({
   const excludedSongSlugs = songSlug ? [songSlug] : [];
   const t = useTranslations();
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const { moveArrangement, isMutating } = useMoveArrangement(arrangementId);
-  const isLoading = isMutating || isPending;
+  const isLoading = isMutating || isNavigating;
 
   const moveArrangementTo = (destSong: ClientSong) => {
     moveArrangement(destSong.slug).then(() => {
-      startTransition(() => {
-        router.push(`/songs/${destSong.slug}?arrangement=${arrangementId}`);
-      });
+      setIsNavigating(true);
+      router.push(`/songs/${destSong.slug}?arrangement=${arrangementId}`);
     });
   };
 
