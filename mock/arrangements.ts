@@ -18,6 +18,7 @@ export default [
       lyrics:
         "A alegria está no coração\nDe quem já conhece a Jesus\nA verdadeira paz só tem aquele\nQue já conhece a Jesus\n\n\nO sentimento mais precioso\nQue vem do nosso Senhor\nÉ o amor   que só tem\nQuem já conhece a , Jesus\n\n\nAleluia!\nAleluia!\nAleluia!\nAleluia!\n\n\nO sentimento mais precioso\nQue vem do nosso Senhor\nÉ o amor   que só tem\nQuem já conhece a , Jesus\n\n\n Ah... Ah... Ah... Ah... Ah...!",
       isDeleted: false,
+      tags: [],
     },
     units: [
       {
@@ -69,6 +70,7 @@ export default [
       lyrics:
         "A alegria está no coração\nDe quem já conhece a Jesus\nA verdadeira paz só tem aquele\nQue já conhece a Jesus\n\n\nO sentimento mais precioso\nQue vem do nosso Senhor\nÉ o amor   que só tem\nQuem já conhece a , Jesus\n\n\nAleluia!\nAleluia!\nAleluia!\nAleluia!\n\n\nO sentimento mais precioso\nQue vem do nosso Senhor\nÉ o amor   que só tem\nQuem já conhece a , Jesus\n\n\n Ah... Ah... Ah... Ah... Ah...!",
       isDeleted: false,
+      tags: [],
     },
     units: [
       {
@@ -151,6 +153,7 @@ export default [
       lyrics:
         "Aquele que está feliz diga: amém!  \nAquele que está feliz grite: aleluia!  \nAquele que está feliz bata palmas  \nAquele que está feliz dance comigo assim\n\nCom Jesus no coração a gente é feliz , , , , , , , , , , , , , , , , , , , , , , , \nCom Jesus na condução tudo é muito bom!\n\nJesus é alegria, euforia                \nCompanhia todo dia!\n\nJesus é o motivo da nossa alegria!",
       isDeleted: false,
+      tags: [],
     },
   },
 ];

@@ -5,6 +5,7 @@ import {
   ClientService,
   ClientServiceUnit,
   ClientSong,
+  ClientTagGroup,
 } from "./models";
 
 export function retrieveSongSlugs() {
@@ -127,6 +128,13 @@ export async function retrieveSongs({
         },
         orderBy: [{ isDefault: "desc" }],
       },
+      tags: {
+        select: {
+          id: true,
+          name: true,
+          group: { select: { id: true, name: true, color: true } },
+        },
+      },
     },
   });
   if (limitLines) {
@@ -146,9 +154,18 @@ export async function archiveSong(slug: string) {
 
 export async function updateSongInfo(
   slug: string,
-  data: { title?: string; artist?: string | null }
+  data: { title?: string; artist?: string | null; tagIds?: number[] }
 ): Promise<void> {
-  await prisma.song.update({ where: { slug }, data });
+  const { tagIds, ...rest } = data;
+  await prisma.song.update({
+    where: { slug },
+    data: {
+      ...rest,
+      ...(tagIds !== undefined && {
+        tags: { set: tagIds.map((id) => ({ id })) },
+      }),
+    },
+  });
 }
 
 export async function retrieveSong(
@@ -170,6 +187,13 @@ export async function retrieveSong(
   return prisma.song.findFirst({
     where,
     include: {
+      tags: {
+        select: {
+          id: true,
+          name: true,
+          group: { select: { id: true, name: true, color: true } },
+        },
+      },
       arrangements: includeArrangements
         ? {
             where: {
@@ -965,4 +989,19 @@ function selectSlugOrId(slugOrId: string | number): {
   } else {
     return { slug: slugOrId };
   }
+}
+
+export async function retrieveTagGroups(): Promise<ClientTagGroup[]> {
+  return prisma.tagGroup.findMany({
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      color: true,
+      tags: {
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+      },
+    },
+  });
 }

@@ -5,9 +5,19 @@ import {
   SongArrangement,
   SongUnit,
   SongUnitType,
+  Tag,
+  TagGroup,
 } from "@prisma/client";
 
-export type { ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType };
+export type { ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType, Tag, TagGroup };
+
+export type ClientTag = Pick<Tag, "id" | "name"> & {
+  group: Pick<TagGroup, "id" | "name" | "color">;
+};
+
+export type ClientTagGroup = Pick<TagGroup, "id" | "name" | "color"> & {
+  tags: Pick<Tag, "id" | "name">[];
+};
 
 export const SERVICE_UNIT_TYPES = ["SONG"];
 export const SONG_UNIT_TYPES = [
@@ -26,6 +36,7 @@ export const SONG_UNIT_TYPES = [
 export type ClientSong = Omit<Song, "id" | "legacyId"> & {
   id?: number;
   arrangements?: ClientArrangement[];
+  tags?: ClientTag[];
 };
 export type ClientArrangement = Omit<
   SongArrangement,

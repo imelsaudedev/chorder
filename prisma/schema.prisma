@@ -25,6 +25,24 @@ model Song {
   isDeleted Boolean @default(false)
 
   arrangements SongArrangement[]
+  tags         Tag[]
+}
+
+model TagGroup {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  color String @default("#6b7280")
+  tags  Tag[]
+}
+
+model Tag {
+  id         Int      @id @default(autoincrement())
+  name       String
+  tagGroupId Int
+  group      TagGroup @relation(fields: [tagGroupId], references: [id])
+  songs      Song[]
+
+  @@unique([name, tagGroupId])
 }
 
 model SongArrangement {
