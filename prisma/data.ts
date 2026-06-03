@@ -1034,16 +1034,23 @@ function selectSlugOrId(slugOrId: string | number): {
 }
 
 export async function retrieveTagGroups(): Promise<ClientTagGroup[]> {
-  return prisma.tagGroup.findMany({
+  const groups = await prisma.tagGroup.findMany({
     orderBy: { name: "asc" },
     select: {
       id: true,
       name: true,
       color: true,
       tags: {
-        select: { id: true, name: true },
+        select: { id: true, name: true, _count: { select: { songs: true } } },
         orderBy: { name: "asc" },
       },
     },
   });
+  return groups.map((group) => ({
+    ...group,
+    tags: group.tags.map(({ _count, ...tag }) => ({
+      ...tag,
+      songCount: _count.songs,
+    })),
+  }));
 }

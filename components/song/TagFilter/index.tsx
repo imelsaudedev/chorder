@@ -71,12 +71,14 @@ export default function TagFilter({
                   className="w-full flex items-center justify-between px-3 py-1.5 text-sm rounded hover:bg-muted transition-colors"
                 >
                   <span>{tag.name}</span>
-                  {isSelected && (
-                    <Check
-                      className="w-3.5 h-3.5 shrink-0"
-                      style={{ color: group.color }}
-                    />
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {tag.songCount !== undefined && (
+                      <span className="text-xs text-muted-foreground">{tag.songCount}</span>
+                    )}
+                    {isSelected && (
+                      <Check className="w-3.5 h-3.5" style={{ color: group.color }} />
+                    )}
+                  </div>
                 </button>
               );
             })}

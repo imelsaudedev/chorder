@@ -16,7 +16,7 @@ export type ClientTag = Pick<Tag, "id" | "name"> & {
 };
 
 export type ClientTagGroup = Pick<TagGroup, "id" | "name" | "color"> & {
-  tags: Pick<Tag, "id" | "name">[];
+  tags: (Pick<Tag, "id" | "name"> & { songCount?: number })[];
 };
 
 export const SERVICE_UNIT_TYPES = ["SONG"];
