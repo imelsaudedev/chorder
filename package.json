@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0 --turbopack",
+    "dev": "DATABASE_URL='postgresql://postgres:postgres@localhost:5432/chorder?schema=public' DIRECT_URL='postgresql://postgres:postgres@localhost:5432/chorder?schema=public' next dev -H 0.0.0.0 --turbopack",
     "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start -H 0.0.0.0",
     "test": "vitest run",

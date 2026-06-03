@@ -5,7 +5,7 @@ import SongMetaModal, { SongMeta } from "./index";
 
 type OpenModalOptions = {
   defaultValues: Partial<SongMeta>;
-  onSave: (values: SongMeta) => void | Promise<void>;
+  onSave: (values: SongMeta) => void;
 };
 
 type SongMetaModalContextType = {
@@ -17,24 +17,13 @@ const SongMetaModalContext = createContext<SongMetaModalContextType | null>(null
 export function SongMetaModalProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [defaultValues, setDefaultValues] = useState<Partial<SongMeta>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const onSaveRef = useRef<(values: SongMeta) => void | Promise<void>>(() => {});
+  const onSaveRef = useRef<(values: SongMeta) => void>(() => {});
 
   const openSongMetaModal = useCallback(({ defaultValues, onSave }: OpenModalOptions) => {
     setDefaultValues(defaultValues);
     onSaveRef.current = onSave;
     setOpen(true);
   }, []);
-
-  const handleSave = async (values: SongMeta) => {
-    setIsLoading(true);
-    try {
-      await onSaveRef.current(values);
-    } finally {
-      setIsLoading(false);
-      setOpen(false);
-    }
-  };
 
   return (
     <SongMetaModalContext.Provider value={{ openSongMetaModal }}>
@@ -43,8 +32,9 @@ export function SongMetaModalProvider({ children }: { children: React.ReactNode 
         open={open}
         onOpenChange={setOpen}
         defaultValues={defaultValues}
-        loading={isLoading}
-        onSave={handleSave}
+        onSave={(values) => {
+          onSaveRef.current(values);
+        }}
       />
     </SongMetaModalContext.Provider>
   );

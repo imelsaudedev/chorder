@@ -3,7 +3,6 @@
 import ResponsiveModal from "@/components/common/ResponsiveModal";
 import DatePicker from "@/components/common/DatePicker";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { DrawerFooter } from "@/components/ui/drawer";
 import {
   Form,
@@ -43,7 +42,6 @@ type ServiceMetaModalProps = {
   defaultValues?: Partial<ServiceMeta>;
   onSave: (values: ServiceMeta) => void;
   isNew?: boolean;
-  loading?: boolean;
 };
 
 export default function ServiceMetaModal({
@@ -52,7 +50,6 @@ export default function ServiceMetaModal({
   defaultValues,
   onSave,
   isNew = false,
-  loading = false,
 }: ServiceMetaModalProps) {
   const t = useTranslations();
   const schema = useServiceMetaSchema();
@@ -150,8 +147,8 @@ export default function ServiceMetaModal({
           </div>
 
           <DrawerFooter>
-            <Button type="submit" variant="secondary" className="w-full" disabled={!isValid || loading}>
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : submitLabel}
+            <Button type="submit" variant="secondary" className="w-full" disabled={!isValid}>
+              {submitLabel}
             </Button>
           </DrawerFooter>
         </form>

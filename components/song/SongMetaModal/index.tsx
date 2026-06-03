@@ -2,7 +2,6 @@
 
 import ResponsiveModal from "@/components/common/ResponsiveModal";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { DrawerFooter } from "@/components/ui/drawer";
 import {
   Form,
@@ -40,7 +39,6 @@ type SongMetaModalProps = {
   defaultValues?: Partial<SongMeta>;
   onSave: (values: SongMeta) => void;
   isNew?: boolean;
-  loading?: boolean;
 };
 
 export default function SongMetaModal({
@@ -49,7 +47,6 @@ export default function SongMetaModal({
   defaultValues,
   onSave,
   isNew = false,
-  loading = false,
 }: SongMetaModalProps) {
   const t = useTranslations();
   const schema = useSongMetaSchema();
@@ -123,8 +120,8 @@ export default function SongMetaModal({
             />
           </div>
           <DrawerFooter>
-            <Button type="submit" variant="secondary" className="w-full" disabled={!isValid || loading}>
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : submitLabel}
+            <Button type="submit" variant="secondary" className="w-full" disabled={!isValid}>
+              {submitLabel}
             </Button>
           </DrawerFooter>
         </form>

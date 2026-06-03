@@ -1,5 +1,4 @@
 import { useMoveArrangement } from "#api-client";
-import { useNavigationLoader } from "@/components/common/NavigationLoader";
 import SongPicker from "@/components/song/SongPicker";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +11,7 @@ import {
 import { ClientSong } from "@/prisma/models";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 
 type MoveArrangementButtonProps = {
   arrangementId: number;
@@ -24,13 +24,13 @@ export default function MoveArrangementButton({
 }: MoveArrangementButtonProps) {
   const excludedSongSlugs = songSlug ? [songSlug] : [];
   const t = useTranslations();
-  const { navigateTo } = useNavigationLoader();
+  const router = useRouter();
 
   const { moveArrangement, isMutating } = useMoveArrangement(arrangementId);
 
   const moveArrangementTo = (destSong: ClientSong) => {
     moveArrangement(destSong.slug).then(() => {
-      navigateTo(`/songs/${destSong.slug}?arrangement=${arrangementId}`);
+      router.push(`/songs/${destSong.slug}?arrangement=${arrangementId}`);
     });
   };
 
