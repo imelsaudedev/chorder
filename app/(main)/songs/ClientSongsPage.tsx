@@ -8,12 +8,14 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+
 type ClientSongsPageProps = { query: string };
 
 export default function ClientSongsPage({ query }: ClientSongsPageProps) {
   const t = useTranslations("Messages");
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   return (
     <>
@@ -37,12 +39,15 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
       <SongMetaModal
         open={modalOpen}
         onOpenChange={setModalOpen}
+        loading={isNavigating}
         isNew
         onSave={(values) => {
           const params = new URLSearchParams();
           params.set("title", values.title.trim());
           if (values.artist) params.set("artist", values.artist.trim());
-          router.push(`/songs/new?${params.toString()}`);
+          setIsNavigating(true);
+          setTimeout(() => router.push(`/songs/new?${params.toString()}`), 0);
+          return false;
         }}
       />
     </>

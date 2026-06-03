@@ -3,6 +3,7 @@
 import ResponsiveModal from "@/components/common/ResponsiveModal";
 import { Button } from "@/components/ui/button";
 import { DrawerFooter } from "@/components/ui/drawer";
+import { Loader2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -37,8 +38,9 @@ type SongMetaModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultValues?: Partial<SongMeta>;
-  onSave: (values: SongMeta) => void;
+  onSave: (values: SongMeta) => void | false;
   isNew?: boolean;
+  loading?: boolean;
 };
 
 export default function SongMetaModal({
@@ -47,6 +49,7 @@ export default function SongMetaModal({
   defaultValues,
   onSave,
   isNew = false,
+  loading = false,
 }: SongMetaModalProps) {
   const t = useTranslations();
   const schema = useSongMetaSchema();
@@ -72,8 +75,8 @@ export default function SongMetaModal({
   }, [open]);
 
   function handleSubmit(values: SongMeta) {
-    onOpenChange(false);
-    onSave(values);
+    const result = onSave(values);
+    if (result !== false) onOpenChange(false);
   }
 
   const modalTitle = isNew ? t("Messages.newSong") : t("Messages.editSong");
@@ -120,8 +123,8 @@ export default function SongMetaModal({
             />
           </div>
           <DrawerFooter>
-            <Button type="submit" variant="secondary" className="w-full" disabled={!isValid}>
-              {submitLabel}
+            <Button type="submit" variant="secondary" className="w-full" disabled={!isValid || loading}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : submitLabel}
             </Button>
           </DrawerFooter>
         </form>

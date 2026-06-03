@@ -4,6 +4,7 @@ import ResponsiveModal from "@/components/common/ResponsiveModal";
 import DatePicker from "@/components/common/DatePicker";
 import { Button } from "@/components/ui/button";
 import { DrawerFooter } from "@/components/ui/drawer";
+import { Loader2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -40,8 +41,9 @@ type ServiceMetaModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultValues?: Partial<ServiceMeta>;
-  onSave: (values: ServiceMeta) => void;
+  onSave: (values: ServiceMeta) => void | false;
   isNew?: boolean;
+  loading?: boolean;
 };
 
 export default function ServiceMetaModal({
@@ -50,6 +52,7 @@ export default function ServiceMetaModal({
   defaultValues,
   onSave,
   isNew = false,
+  loading = false,
 }: ServiceMetaModalProps) {
   const t = useTranslations();
   const schema = useServiceMetaSchema();
@@ -77,8 +80,8 @@ export default function ServiceMetaModal({
   }, [open]);
 
   function handleSubmit(values: ServiceMeta) {
-    onOpenChange(false);
-    onSave(values);
+    const result = onSave(values);
+    if (result !== false) onOpenChange(false);
   }
 
   const modalTitle = isNew ? t("Messages.newService") : t("Messages.editServiceData");
@@ -147,8 +150,8 @@ export default function ServiceMetaModal({
           </div>
 
           <DrawerFooter>
-            <Button type="submit" variant="secondary" className="w-full" disabled={!isValid}>
-              {submitLabel}
+            <Button type="submit" variant="secondary" className="w-full" disabled={!isValid || loading}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : submitLabel}
             </Button>
           </DrawerFooter>
         </form>

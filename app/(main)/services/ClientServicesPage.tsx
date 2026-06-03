@@ -12,6 +12,7 @@ export default function ClientServicesPage() {
   const t = useTranslations("Messages");
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   return (
     <>
@@ -35,13 +36,16 @@ export default function ClientServicesPage() {
       <ServiceMetaModal
         open={modalOpen}
         onOpenChange={setModalOpen}
+        loading={isNavigating}
         isNew
         onSave={(values) => {
           const params = new URLSearchParams();
           if (values.title) params.set("title", values.title);
           if (values.worshipLeader) params.set("worshipLeader", values.worshipLeader);
           params.set("date", values.date.toISOString());
-          router.push(`/services/new?${params.toString()}`);
+          setIsNavigating(true);
+          setTimeout(() => router.push(`/services/new?${params.toString()}`), 0);
+          return false;
         }}
       />
     </>
