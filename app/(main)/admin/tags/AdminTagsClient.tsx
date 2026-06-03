@@ -29,6 +29,7 @@ export default function AdminTagsClient({ initialGroups }: Props) {
   const [newTagName, setNewTagName] = useState<Record<number, string>>({});
   const [editingGroup, setEditingGroup] = useState<number | null>(null);
   const [editingGroupName, setEditingGroupName] = useState("");
+  const [editingGroupColor, setEditingGroupColor] = useState("#6b7280");
   const [editingTag, setEditingTag] = useState<number | null>(null);
   const [editingTagName, setEditingTagName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -66,7 +67,7 @@ export default function AdminTagsClient({ initialGroups }: Props) {
     await fetch(`/api/admin/tag-groups/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: editingGroupName.trim() }),
+      body: JSON.stringify({ name: editingGroupName.trim(), color: editingGroupColor }),
     });
     setEditingGroup(null);
     await reload();
@@ -178,13 +179,20 @@ export default function AdminTagsClient({ initialGroups }: Props) {
             style={{ backgroundColor: `${group.color}18`, borderBottom: `2px solid ${group.color}40` }}
           >
             {editingGroup === group.id ? (
-              <div className="flex gap-2 flex-1">
+              <div className="flex gap-2 flex-1 items-center">
                 <Input
                   value={editingGroupName}
                   onChange={(e) => setEditingGroupName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && updateGroup(group.id)}
-                  className="h-7 text-sm"
+                  className="h-7 text-sm flex-1"
                   autoFocus
+                />
+                <input
+                  type="color"
+                  value={editingGroupColor}
+                  onChange={(e) => setEditingGroupColor(e.target.value)}
+                  className="w-7 h-7 rounded border cursor-pointer shrink-0"
+                  title="Cor do grupo"
                 />
                 <Button type="button" size="sm" onClick={() => updateGroup(group.id)} disabled={loading}>Salvar</Button>
                 <Button type="button" size="sm" variant="ghost" onClick={() => setEditingGroup(null)}>Cancelar</Button>
@@ -194,7 +202,7 @@ export default function AdminTagsClient({ initialGroups }: Props) {
                 <span className="font-semibold text-sm" style={{ color: group.color }}>{group.name}</span>
                 <div className="flex gap-1">
                   <Button type="button" variant="ghost" size="icon" className="w-7 h-7"
-                    onClick={() => { setEditingGroup(group.id); setEditingGroupName(group.name); }}>
+                    onClick={() => { setEditingGroup(group.id); setEditingGroupName(group.name); setEditingGroupColor(group.color); }}>
                     <Pencil className="w-3.5 h-3.5" />
                   </Button>
                   <Button type="button" variant="ghost" size="icon" className="w-7 h-7 text-destructive"
