@@ -9,8 +9,10 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { ClientSong } from "@/prisma/models";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 type MoveArrangementButtonProps = {
   arrangementId: number;
@@ -24,12 +26,16 @@ export default function MoveArrangementButton({
   const excludedSongSlugs = songSlug ? [songSlug] : [];
   const t = useTranslations();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  const { moveArrangement } = useMoveArrangement(arrangementId);
+  const { moveArrangement, isMutating } = useMoveArrangement(arrangementId);
+  const isLoading = isMutating || isPending;
 
   const moveArrangementTo = (destSong: ClientSong) => {
     moveArrangement(destSong.slug).then(() => {
-      router.push(`/songs/${destSong.slug}?arrangement=${arrangementId}`);
+      startTransition(() => {
+        router.push(`/songs/${destSong.slug}?arrangement=${arrangementId}`);
+      });
     });
   };
 
@@ -43,10 +49,16 @@ export default function MoveArrangementButton({
           <DrawerTitle>{t("ServiceForm.pickSong")}</DrawerTitle>
         </DrawerHeader>
         <div className="max-h-[80vh] overflow-auto p-4">
-          <SongPicker
-            onSelected={moveArrangementTo}
-            excludedSongSlugs={excludedSongSlugs}
-          />
+          {isLoading ? (
+            <div className="flex justify-center items-center py-16">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <SongPicker
+              onSelected={moveArrangementTo}
+              excludedSongSlugs={excludedSongSlugs}
+            />
+          )}
         </div>
       </DrawerContent>
     </Drawer>
