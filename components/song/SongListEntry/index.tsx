@@ -115,7 +115,7 @@ export default function SongListEntry({
         <Link href={`/songs/${song.slug}`} className="absolute inset-0 z-0" aria-label={song.title} />
       )}
 
-      {/* Col 1 — título e artista */}
+      {/* Col 1 — título, artista e tags */}
       <div className="relative z-10 min-w-0 pointer-events-none">
         <div className="flex items-center gap-1.5 min-w-0">
           <p className="font-medium text-base text-primary leading-snug truncate">
@@ -131,6 +131,23 @@ export default function SongListEntry({
           <p className="text-xs text-zinc-500 truncate mt-0.5">
             <HighlightKeyword text={song.artist} keyword={query} />
           </p>
+        )}
+        {song.tags && song.tags.length > 0 && (
+          <div className="flex gap-1 mt-1 overflow-hidden">
+            {song.tags.map((tag) => (
+              <span
+                key={tag.id}
+                className="shrink-0 inline-flex items-center px-1.5 py-px rounded text-[10px] font-medium leading-4"
+                style={{
+                  backgroundColor: `${tag.group.color}26`,
+                  color: tag.group.color,
+                  border: `1px solid ${tag.group.color}4d`,
+                }}
+              >
+                {tag.name}
+              </span>
+            ))}
+          </div>
         )}
       </div>
 
