@@ -45,13 +45,15 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
   const handleEditSong = () => {
     openSongMetaModal({
       defaultValues: { title: songTitle, artist: songArtist || null },
-      onSave: async ({ title, artist }) => {
+      defaultTags: songTags,
+      onSave: async ({ title, artist, tagIds }) => {
         const unchanged =
           title === arrangement.song!.title &&
-          (artist || null) === (arrangement.song!.artist || null);
+          (artist || null) === (arrangement.song!.artist || null) &&
+          tagIds === undefined;
         if (unchanged) return;
 
-        await updateSong({ title, artist });
+        await updateSong({ title, artist, tagIds });
         mutate(
           (key: unknown) =>
             Array.isArray(key) &&

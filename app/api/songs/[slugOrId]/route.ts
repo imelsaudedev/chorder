@@ -34,10 +34,11 @@ export async function PATCH(
     return Response.json({ success: true });
   }
 
-  if (body.title !== undefined || "artist" in body) {
-    const data: { title?: string; artist?: string | null } = {};
+  if (body.title !== undefined || "artist" in body || Array.isArray(body.tagIds)) {
+    const data: { title?: string; artist?: string | null; tagIds?: number[] } = {};
     if (body.title !== undefined) data.title = body.title;
     if ("artist" in body) data.artist = body.artist ?? null;
+    if (Array.isArray(body.tagIds)) data.tagIds = body.tagIds;
     await updateSongInfo(slugOrId, data);
     return Response.json({ success: true });
   }

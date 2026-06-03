@@ -1,9 +1,10 @@
 "use client";
 
+import { useFetchTagGroups } from "@/app/api/api-client";
 import ResponsiveModal from "@/components/common/ResponsiveModal";
+import TagSelect from "@/components/song/TagSelect";
 import { Button } from "@/components/ui/button";
 import { DrawerFooter } from "@/components/ui/drawer";
-import { Loader2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -13,9 +14,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { ClientTag } from "@/prisma/models";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -34,11 +37,14 @@ function useSongMetaSchema() {
   });
 }
 
+export type SongMetaSavePayload = SongMeta & { tagIds?: number[] };
+
 type SongMetaModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultValues?: Partial<SongMeta>;
-  onSave: (values: SongMeta) => void | false;
+  defaultTags?: ClientTag[];
+  onSave: (values: SongMetaSavePayload) => void | false;
   isNew?: boolean;
   loading?: boolean;
 };
@@ -47,12 +53,15 @@ export default function SongMetaModal({
   open,
   onOpenChange,
   defaultValues,
+  defaultTags,
   onSave,
   isNew = false,
   loading = false,
 }: SongMetaModalProps) {
   const t = useTranslations();
   const schema = useSongMetaSchema();
+  const { tagGroups } = useFetchTagGroups();
+  const [selectedTags, setSelectedTags] = useState<ClientTag[]>(defaultTags ?? []);
 
   const form = useForm<SongMeta>({
     mode: "onChange",
@@ -71,11 +80,16 @@ export default function SongMetaModal({
         title: defaultValues?.title ?? "",
         artist: defaultValues?.artist ?? "",
       });
+      setSelectedTags(defaultTags ?? []);
     }
   }, [open]);
 
   function handleSubmit(values: SongMeta) {
-    const result = onSave(values);
+    const payload: SongMetaSavePayload = {
+      ...values,
+      ...(isNew ? {} : { tagIds: selectedTags.map((t) => t.id) }),
+    };
+    const result = onSave(payload);
     if (result !== false) onOpenChange(false);
   }
 
@@ -121,6 +135,16 @@ export default function SongMetaModal({
                 </FormItem>
               )}
             />
+            {!isNew && tagGroups.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium leading-none">Tags</label>
+                <TagSelect
+                  value={selectedTags}
+                  tagGroups={tagGroups}
+                  onChange={setSelectedTags}
+                />
+              </div>
+            )}
           </div>
           <DrawerFooter>
             <Button type="submit" variant="secondary" className="w-full" disabled={!isValid || loading}>

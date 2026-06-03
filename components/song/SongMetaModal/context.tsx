@@ -1,11 +1,13 @@
 "use client";
 
+import { ClientTag } from "@/prisma/models";
 import { createContext, useCallback, useContext, useRef, useState } from "react";
-import SongMetaModal, { SongMeta } from "./index";
+import SongMetaModal, { SongMeta, SongMetaSavePayload } from "./index";
 
 type OpenModalOptions = {
   defaultValues: Partial<SongMeta>;
-  onSave: (values: SongMeta) => void;
+  defaultTags?: ClientTag[];
+  onSave: (values: SongMetaSavePayload) => void;
 };
 
 type SongMetaModalContextType = {
@@ -17,10 +19,12 @@ const SongMetaModalContext = createContext<SongMetaModalContextType | null>(null
 export function SongMetaModalProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [defaultValues, setDefaultValues] = useState<Partial<SongMeta>>({});
-  const onSaveRef = useRef<(values: SongMeta) => void>(() => {});
+  const [defaultTags, setDefaultTags] = useState<ClientTag[]>([]);
+  const onSaveRef = useRef<(values: SongMetaSavePayload) => void>(() => {});
 
-  const openSongMetaModal = useCallback(({ defaultValues, onSave }: OpenModalOptions) => {
+  const openSongMetaModal = useCallback(({ defaultValues, defaultTags, onSave }: OpenModalOptions) => {
     setDefaultValues(defaultValues);
+    setDefaultTags(defaultTags ?? []);
     onSaveRef.current = onSave;
     setOpen(true);
   }, []);
@@ -32,6 +36,7 @@ export function SongMetaModalProvider({ children }: { children: React.ReactNode 
         open={open}
         onOpenChange={setOpen}
         defaultValues={defaultValues}
+        defaultTags={defaultTags}
         onSave={(values) => {
           onSaveRef.current(values);
         }}

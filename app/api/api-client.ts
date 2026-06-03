@@ -1,6 +1,6 @@
 "use client";
 
-import { ClientArrangement, ClientSong } from "@/prisma/models";
+import { ClientArrangement, ClientSong, ClientTagGroup } from "@/prisma/models";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -341,7 +341,7 @@ export function useArchiveSong(slug: string) {
 export function useUpdateSong(slug: string) {
   async function updateSong(
     url: string,
-    { arg }: { arg: { title?: string; artist?: string | null } }
+    { arg }: { arg: { title?: string; artist?: string | null; tagIds?: number[] } }
   ) {
     const response = await fetch(url, {
       method: "PATCH",
@@ -354,4 +354,11 @@ export function useUpdateSong(slug: string) {
 
   const { trigger } = useSWRMutation(`/api/songs/${slug}`, updateSong);
   return { updateSong: trigger };
+}
+
+export function useFetchTagGroups() {
+  const { data, isLoading } = useSWR<ClientTagGroup[]>("/api/tags", (url: string) =>
+    fetch(url).then((res) => res.json())
+  );
+  return { tagGroups: data ?? [], isLoading };
 }
