@@ -1,5 +1,7 @@
 "use client";
 
+import { useFetchTagGroups } from "@/app/api/api-client";
+import TagFilter from "@/components/song/TagFilter";
 import SongMetaModal from "@/components/song/SongMetaModal";
 import ClientSongList from "@/components/song/SongList/ClientSongList";
 import { Button } from "@/components/ui/button";
@@ -8,7 +10,6 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-
 type ClientSongsPageProps = { query: string };
 
 export default function ClientSongsPage({ query }: ClientSongsPageProps) {
@@ -16,10 +17,21 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  const { tagGroups } = useFetchTagGroups();
 
   return (
     <>
-      <ClientSongList query={query} />
+      {tagGroups.length > 0 && (
+        <div className="mb-4">
+          <TagFilter
+            tagGroups={tagGroups}
+            selectedTagIds={selectedTagIds}
+            onChange={setSelectedTagIds}
+          />
+        </div>
+      )}
+      <ClientSongList query={query} tagIds={selectedTagIds} />
 
       <div className="fixed bottom-24 right-4 sm:bottom-8 sm:right-8">
         <Button

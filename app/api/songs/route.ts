@@ -13,12 +13,17 @@ export async function GET(request: NextRequest) {
     .split(",")
     .map((slug) => slug.trim())
     .filter(Boolean);
+  const tagIds = (request.nextUrl.searchParams.get("tagIds") || "")
+    .split(",")
+    .map((id) => parseInt(id))
+    .filter((id) => !isNaN(id));
 
   const songs = await retrieveSongs({
     query,
     limitLines: limitLinesNumber,
     forceIncludeFirstLine,
     excludedSongSlugs,
+    tagIds,
   });
   return Response.json(songs);
 }

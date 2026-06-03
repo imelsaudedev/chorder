@@ -68,23 +68,51 @@ export async function slugFor(original: string, slugs: string[]) {
   return newSlug;
 }
 
+async function buildTagFilter(tagIds: number[]) {
+  if (tagIds.length === 0) return {};
+  const tags = await prisma.tag.findMany({
+    where: { id: { in: tagIds } },
+    select: { id: true, tagGroupId: true },
+  });
+  const byGroup = new Map<number, number[]>();
+  for (const tag of tags) {
+    const group = byGroup.get(tag.tagGroupId) ?? [];
+    group.push(tag.id);
+    byGroup.set(tag.tagGroupId, group);
+  }
+  return {
+    AND: Array.from(byGroup.values()).map((ids) => ({
+      tags: { some: { id: { in: ids } } },
+    })),
+  };
+}
+
 export async function retrieveSongs({
   query = "",
   limitLines,
   forceIncludeFirstLine = true,
   excludedSongSlugs = [],
+  tagIds = [],
 }: {
   query?: string;
   limitLines?: number;
   forceIncludeFirstLine?: boolean;
   excludedSongSlugs?: string[];
+  tagIds?: number[];
 }): Promise<ClientSong[]> {
+  // OR dentro do mesmo grupo, AND entre grupos diferentes
+  const tagFilter: { AND: { tags: { some: { id: { in: number[] } } } }[] } | object =
+    tagIds.length > 0
+      ? await buildTagFilter(tagIds)
+      : {};
+
   let songs: ClientSong[] = await prisma.song.findMany({
     where: {
       isDeleted: false,
       slug: {
         notIn: excludedSongSlugs,
       },
+      ...tagFilter,
       OR: [
         {
           title: {
