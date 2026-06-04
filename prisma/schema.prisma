@@ -71,7 +71,8 @@ model SongUnit {
   content   String
   type      SongUnitType
   order     Int
-  
+  notes     String?
+
   arrangement SongArrangement @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
 }
 

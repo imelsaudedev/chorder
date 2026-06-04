@@ -31,11 +31,14 @@ export default function Item({
     if (hideLyrics) {
       return null;
     }
-    let className = "italic";
     if (mode === "text") {
-      className = `${className} text-mono`;
+      return <span className="italic font-mono">{item._value}</span>;
     }
-    return <span className={className}>{item._value}</span>;
+    return (
+      <span className="inline-block bg-amber-100 text-amber-800 border border-amber-300 rounded px-1.5 py-0 text-xs font-medium align-baseline mx-0.5 leading-5">
+        {item._value}
+      </span>
+    );
   }
 
   let lyrics = item.lyrics || " ";

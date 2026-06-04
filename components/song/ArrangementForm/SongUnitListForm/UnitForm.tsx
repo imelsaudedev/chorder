@@ -6,9 +6,9 @@ import ChordProViewer from "@/components/song/ChordProViewer";
 import { unitColorClasses } from "@/components/song/unit-colors";
 import { Button } from "@/components/ui/button";
 import { ClientSongUnit, SongUnitType } from "@/prisma/models";
-import { CopyIcon, TrashIcon } from "lucide-react";
+import { CopyIcon, MessageSquareIcon, TrashIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, useCallback, useId, useMemo } from "react";
+import { ChangeEvent, useCallback, useId, useMemo, useState } from "react";
 
 type UnitFormProps = {
   unit: ClientSongUnit;
@@ -29,6 +29,7 @@ export default function UnitForm({
 
   const colorClasses = unitColorClasses[unit.type];
   const contentId = useId();
+  const [notesExpanded, setNotesExpanded] = useState(!!unit.notes);
 
   const handleRemoveUnit = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -79,12 +80,51 @@ export default function UnitForm({
     [onChangeUnit, unit]
   );
 
+  const handleChangeNotes = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onChangeUnit({ ...unit, notes: event.target.value || null });
+    },
+    [onChangeUnit, unit]
+  );
+
+  const handleClearNotes = useCallback(() => {
+    onChangeUnit({ ...unit, notes: null });
+    setNotesExpanded(false);
+  }, [onChangeUnit, unit]);
+
   return (
     <div
       className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg p-2 md:p-4 mb-2 ${className || ""}`}
     >
       <div className="mt-2">
         <BadgeSelector value={unit.type} onChange={handleChangeUnitType} />
+      </div>
+
+      <div className="mt-2">
+        {notesExpanded ? (
+          <div className={`flex items-center gap-1 rounded px-2 py-1 ${colorClasses.background} border ${colorClasses.border}`}>
+            <MessageSquareIcon size={12} className={colorClasses.text} />
+            <input
+              type="text"
+              className={`flex-1 bg-transparent text-xs outline-none placeholder:opacity-50 ${colorClasses.text}`}
+              value={unit.notes ?? ""}
+              onChange={handleChangeNotes}
+              placeholder={t("UnitData.notesPlaceholder")}
+            />
+            <button type="button" onClick={handleClearNotes} className={`${colorClasses.text} opacity-60 hover:opacity-100`}>
+              <XIcon size={12} />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setNotesExpanded(true)}
+            className={`text-xs opacity-50 hover:opacity-80 flex items-center gap-1 ${colorClasses.text}`}
+          >
+            <MessageSquareIcon size={11} />
+            {t("UnitData.addNotes")}
+          </button>
+        )}
       </div>
 
       {isTextUnit ? (

@@ -21,6 +21,7 @@ export const Default: Story = {
       content:
         "[D]Twinkle, twinkle, [G]little [D]star,\n[G]How I [D]wonder [A]what you [D]are.",
       order: 0,
+      notes: null,
     });
 
     return (

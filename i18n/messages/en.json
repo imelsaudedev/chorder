@@ -98,7 +98,9 @@
     "titleOptional": "Title (Optional)",
     "markdownTitlePlaceholder": "e.g. Reading, Liturgy, etc.",
     "markdownPlaceholder": "Type markdown here...",
-    "markdownContent": "Markdown Content"
+    "markdownContent": "Markdown Content",
+    "addNotes": "Add instruction",
+    "notesPlaceholder": "e.g. Vocals only, no instruments"
   },
   "UnitTypes": {
     "INTRO": "Intro",

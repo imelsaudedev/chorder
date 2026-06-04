@@ -76,16 +76,23 @@ export default function ColumnViewer({
               >
                 <div
                   className={clsx(
-                    "text-xs uppercase tracking-wide select-none",
+                    "flex items-baseline justify-between gap-2 select-none",
                     unitClasses.text,
                     {
-                      "px-0 py-2 text-left text-base font-normal": isTextMode,
+                      "px-0 py-2": isTextMode,
                       "px-2 pt-1 pb-1": !isTextMode && isCompact,
                       "px-4 pt-2 pb-1": !isTextMode && !isCompact,
                     }
                   )}
                 >
-                  {t(unit.unitType)} {unit.unitTypeIndex}
+                  <span className={clsx("text-xs uppercase tracking-wide", { "text-base font-normal": isTextMode })}>
+                    {t(unit.unitType)} {unit.unitTypeIndex}
+                  </span>
+                  {unit.notes && (
+                    <span className="text-xs italic font-normal normal-case tracking-normal truncate text-right">
+                      {unit.notes}
+                    </span>
+                  )}
                 </div>
 
                 {unit.lines.map((line, idx) => (

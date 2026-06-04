@@ -17,6 +17,7 @@ export const songUnitSchema = z.object({
   content: z.string().min(1),
   type: songUnitTypeSchema,
   order: z.number().positive(),
+  notes: z.string().nullable(),
 });
 
 export type SongUnitSchema = z.infer<typeof songUnitSchema>;

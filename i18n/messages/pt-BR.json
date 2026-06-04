@@ -99,7 +99,9 @@
     "titleOptional": "Título (Opcional)",
     "markdownTitlePlaceholder": "Ex: Leitura, Liturgia, etc.",
     "markdownPlaceholder": "Digite o Markdown aqui...",
-    "markdownContent": "Conteúdo Markdown"
+    "markdownContent": "Conteúdo Markdown",
+    "addNotes": "Adicionar instrução",
+    "notesPlaceholder": "Ex: Só vozes, sem instrumentos"
   },
   "UnitTypes": {
     "BLOCK": "Bloco",
