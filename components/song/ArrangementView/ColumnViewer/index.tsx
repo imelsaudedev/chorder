@@ -76,7 +76,7 @@ export default function ColumnViewer({
               >
                 <div
                   className={clsx(
-                    "flex items-baseline justify-between gap-2 select-none",
+                    "flex items-baseline gap-2 select-none",
                     unitClasses.text,
                     {
                       "px-0 py-2": isTextMode,
@@ -85,13 +85,16 @@ export default function ColumnViewer({
                     }
                   )}
                 >
-                  <span className={clsx("text-xs uppercase tracking-wide", { "text-base font-normal": isTextMode })}>
+                  <span className={clsx("text-xs uppercase tracking-wide shrink-0", { "text-base font-normal": isTextMode })}>
                     {t(unit.unitType)} {unit.unitTypeIndex}
                   </span>
                   {unit.notes && (
-                    <span className="text-xs italic font-normal normal-case tracking-normal truncate text-right">
-                      {unit.notes}
-                    </span>
+                    <>
+                      <span className="text-xs opacity-40 shrink-0">·</span>
+                      <span className="text-xs italic font-normal normal-case tracking-normal truncate">
+                        {unit.notes}
+                      </span>
+                    </>
                   )}
                 </div>
 
