@@ -60,7 +60,8 @@ export default function Item({
     "text-black",
     "font-mono",
     "font-bold",
-    "mr-1",
+    "tracking-tight",
+    "pr-[0.5em]",
     "mb-0",
   ];
   if (mode === "text") {
