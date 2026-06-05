@@ -51,9 +51,9 @@ export default function Item({
 
   let lyrics = item.lyrics || " ";
   let chords =
-    transpose && originalKey
+    transpose && originalKey && item.chords
       ? transposeChord(item.chords, originalKey, transpose)
-      : item.chords;
+      : item.chords || "";
 
   const chordClasses = [
     "leading-none",

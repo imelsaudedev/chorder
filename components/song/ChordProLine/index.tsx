@@ -12,10 +12,10 @@ export default function ChordProLine({
   commentClass,
 }: ChordProLineProps) {
   const hasLyrics = items.some(
-    (item) => item._name !== "comment" && item.lyrics.trim()
+    (item) => item._name !== "comment" && item.lyrics?.trim()
   );
   const hasChords = items.some(
-    (item) => item._name !== "comment" && item.chords.trim()
+    (item) => item._name !== "comment" && item.chords?.trim()
   );
 
   const hasPairedComment = items.some(
