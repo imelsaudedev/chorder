@@ -76,36 +76,34 @@ export default function ServiceForm({ service, defaultMeta, onSaved }: ServiceFo
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-dvh">
 
-        {/* Header */}
-        <button
-          type="button"
-          onClick={() => setMetaModalOpen(true)}
-          className="shrink-0 text-left w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-5 bg-secondary/20 hover:bg-secondary/30 transition-colors"
-        >
-          <div className="flex items-center gap-2 min-w-0 mb-1">
-            <Text variant="heading-lg" className="truncate">
-              {watchedTitle || t("newService")}
-            </Text>
-            <Pencil className="w-4 h-4 shrink-0 text-muted-foreground" />
-          </div>
-          <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
-            {formattedDate && (
-              <Text variant="caption" className="flex items-center gap-1">
-                <Calendar className="w-3 h-3 shrink-0" />
-                {formattedDate}
-              </Text>
-            )}
-            {watchedLeader && (
-              <Text variant="caption" className="flex items-center gap-1 truncate">
-                <MicVocal className="w-3 h-3 shrink-0" />
-                {watchedLeader}
-              </Text>
-            )}
-          </div>
-        </button>
-
         {/* Conteúdo rolável */}
         <div className="flex-1 overflow-y-auto">
+          <button
+            type="button"
+            onClick={() => setMetaModalOpen(true)}
+            className="text-left w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-5 bg-zinc-200/60 hover:bg-zinc-200/80 transition-colors"
+          >
+            <div className="flex items-center gap-2 min-w-0 mb-1">
+              <Text variant="heading-lg" className="truncate">
+                {watchedTitle || t("newService")}
+              </Text>
+              <Pencil className="w-4 h-4 shrink-0 text-muted-foreground" />
+            </div>
+            <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
+              {formattedDate && (
+                <Text variant="caption" className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3 shrink-0" />
+                  {formattedDate}
+                </Text>
+              )}
+              {watchedLeader && (
+                <Text variant="caption" className="flex items-center gap-1 truncate">
+                  <MicVocal className="w-3 h-3 shrink-0" />
+                  {watchedLeader}
+                </Text>
+              )}
+            </div>
+          </button>
           <ServiceUnitListForm />
         </div>
 
