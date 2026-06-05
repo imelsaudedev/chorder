@@ -11,22 +11,23 @@ export default function BadgeSelector({ value, onChange }: BadgeSelectorProps) {
   const t = useTranslations();
 
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className="inline-flex flex-wrap gap-[1px] rounded bg-zinc-200 p-[1px]">
       {SONG_UNIT_TYPES.map((type) => {
         const colorClasses = unitColorClasses[type];
 
         return (
           <button
             key={type}
+            type="button"
             onClick={(e) => {
               e.preventDefault();
               onChange(type);
             }}
-            className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium cursor-pointer
+            className={`text-xs px-2 py-1 font-medium transition-colors rounded-sm cursor-pointer
               ${
                 type === value
-                  ? `${colorClasses.circleBackground} text-white` // Fundo da unit e texto branco
-                  : "bg-transparent text-primary border border-gray-300 border-dotted" // Fundo branco e texto cinza
+                  ? `${colorClasses.circleBackground} text-white`
+                  : "bg-white text-zinc-600 hover:bg-zinc-100"
               }`}
           >
             {t(`UnitTypes.${type}`)}

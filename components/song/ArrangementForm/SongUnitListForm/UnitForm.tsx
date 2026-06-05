@@ -1,14 +1,34 @@
 import { parseChordPro } from "@/chopro/music";
 import { MarkdownUnitForm } from "@/components/common/MarkdownUnitForm";
 import TextInput from "@/components/common/TextInput";
-import BadgeSelector from "@/components/song/BadgeSelector";
 import ChordProViewer from "@/components/song/ChordProViewer";
 import { unitColorClasses } from "@/components/song/unit-colors";
-import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ClientSongUnit, SongUnitType } from "@/prisma/models";
-import { CopyIcon, MessageSquareIcon, TrashIcon, XIcon } from "lucide-react";
+import { SONG_UNIT_TYPES } from "@/prisma/models";
+import {
+  ChevronDown,
+  CopyIcon,
+  MessageSquareIcon,
+  MoreVertical,
+  TrashIcon,
+  XIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useInstructionToolbar } from ".";
 
 type UnitFormProps = {
@@ -48,27 +68,14 @@ export default function UnitForm({
 
   const { setActiveInsert } = useInstructionToolbar();
   const stableInsert = useCallback((text: string) => insertRef.current(text), []);
-  const handleTextareaFocus = useCallback(() => setActiveInsert(stableInsert), [setActiveInsert, stableInsert]);
+  const handleTextareaFocus = useCallback(
+    () => setActiveInsert(stableInsert),
+    [setActiveInsert, stableInsert]
+  );
 
   useEffect(() => {
     return () => setActiveInsert(null);
   }, [setActiveInsert]);
-
-  const handleRemoveUnit = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      removeUnit();
-    },
-    [removeUnit]
-  );
-
-  const handleDuplicateUnit = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      duplicateUnit();
-    },
-    [duplicateUnit]
-  );
 
   const handleChangeUnitType = useCallback(
     (newValue: string) => {
@@ -84,7 +91,6 @@ export default function UnitForm({
     [onChangeUnit, unit]
   );
 
-  // Verifica se o conteúdo do ChordPro é válido
   const isTextUnit = unit.type === "TEXT";
   const { hasError } = useMemo(() => {
     if (isTextUnit) return { hasError: false };
@@ -119,35 +125,80 @@ export default function UnitForm({
     <div
       className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg p-2 md:p-4 mb-2 ${className || ""}`}
     >
-      <div className="mt-2">
-        <BadgeSelector value={unit.type} onChange={handleChangeUnitType} />
-      </div>
+      {/* Header: tipo | notas | ⋮ */}
+      <div className="flex items-center gap-2 mb-2">
+        <TypeDropdown value={unit.type} onChange={handleChangeUnitType} />
 
-      <div className="mt-2">
         {notesExpanded ? (
-          <div className={`flex items-center gap-1 rounded px-2 py-1 ${colorClasses.background} border ${colorClasses.border}`}>
-            <MessageSquareIcon size={12} className={colorClasses.text} />
-            <input
-              type="text"
-              className={`flex-1 bg-transparent text-xs outline-none placeholder:opacity-50 ${colorClasses.text}`}
-              value={unit.notes ?? ""}
-              onChange={handleChangeNotes}
-              placeholder={t("UnitData.notesPlaceholder")}
+          <div
+            className={`inline-flex items-center gap-1 rounded px-2 py-1 border ${colorClasses.border} bg-white`}
+          >
+            <MessageSquareIcon
+              size={11}
+              className={`shrink-0 ${colorClasses.text}`}
             />
-            <button type="button" onClick={handleClearNotes} className={`${colorClasses.text} opacity-60 hover:opacity-100`}>
-              <XIcon size={12} />
+            <span className="relative inline-flex items-center min-w-[4rem]">
+              {/* span oculto determina a largura conforme o texto */}
+              <span
+                className="invisible whitespace-pre text-xs pointer-events-none"
+                aria-hidden
+              >
+                {unit.notes || t("UnitData.notesPlaceholder")}
+              </span>
+              <input
+                type="text"
+                className={`absolute inset-0 w-full bg-transparent text-xs outline-none ${colorClasses.text} placeholder:opacity-50`}
+                value={unit.notes ?? ""}
+                onChange={handleChangeNotes}
+                placeholder={t("UnitData.notesPlaceholder")}
+              />
+            </span>
+            <button
+              type="button"
+              onClick={handleClearNotes}
+              className={`shrink-0 ${colorClasses.text} opacity-60 hover:opacity-100`}
+            >
+              <XIcon size={11} />
             </button>
           </div>
         ) : (
           <button
             type="button"
             onClick={() => setNotesExpanded(true)}
-            className={`text-xs opacity-50 hover:opacity-80 flex items-center gap-1 ${colorClasses.text}`}
+            className={`text-xs px-2 py-1 rounded border border-dashed ${colorClasses.border} flex items-center gap-1 ${colorClasses.text} hover:opacity-80 transition-opacity cursor-pointer`}
           >
             <MessageSquareIcon size={11} />
-            {t("UnitData.addNotes")}
+            <span className="hidden sm:inline">{t("UnitData.addNotes")}</span>
           </button>
         )}
+        <div className="flex-1" />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0"
+            >
+              <MoreVertical size={14} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={duplicateUnit}
+              className="text-xs cursor-pointer"
+            >
+              <CopyIcon size={13} className="mr-1.5" />
+              {t("Messages.duplicate")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={removeUnit}
+              className="text-xs cursor-pointer text-red-600 focus:text-red-600"
+            >
+              <TrashIcon size={13} className="mr-1.5" />
+              {t("Messages.delete")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {isTextUnit ? (
@@ -159,11 +210,11 @@ export default function UnitForm({
         </div>
       ) : (
         <div className="md:grid md:grid-cols-2 gap-4 flex flex-col mt-4">
-          <div onFocus={handleTextareaFocus}>
+          <div className="flex flex-col" onFocus={handleTextareaFocus}>
             <TextInput
               ref={textareaRef}
               id={contentId}
-              className="resize-none grow bg-white font-mono"
+              className="resize-none flex-1 bg-white font-mono"
               placeholder={t("UnitData.contentPlaceholder")}
               onChange={handleChangeChordpro}
               value={unit.content}
@@ -171,26 +222,72 @@ export default function UnitForm({
               long
             />
           </div>
-          <div className="rounded-md bg-black/5 px-2 py-2">
+          <div
+            className="rounded-md bg-black/5 px-2 py-2"
+            style={{
+              "--item-mb": "0.5em",
+              "--block-px": "0",
+              "--block-pt": "0",
+            } as React.CSSProperties}
+          >
             {hasError ? (
               <p className="text-red-500 text-sm">
                 {t("Messages.invalidChordPro")}
               </p>
             ) : (
-              <ChordProViewer chordpro={unit.content} density="compact" commentClass={colorClasses.comment} />
+              <ChordProViewer
+                chordpro={unit.content}
+                density="compact"
+                commentClass={colorClasses.comment}
+              />
             )}
           </div>
         </div>
       )}
-
-      <div className="flex justify-end items-center mt-4 gap-2">
-        <Button onClick={handleRemoveUnit} variant="ghost">
-          <TrashIcon /> {t("Messages.delete")}
-        </Button>
-        <Button onClick={handleDuplicateUnit} variant="outline">
-          <CopyIcon /> {t("Messages.duplicate")}
-        </Button>
-      </div>
     </div>
+  );
+}
+
+/* ─── TypeDropdown ─────────────────────────────────────────────────────────── */
+
+type TypeDropdownProps = {
+  value: SongUnitType;
+  onChange: (value: SongUnitType) => void;
+};
+
+function TypeDropdown({ value, onChange }: TypeDropdownProps) {
+  const t = useTranslations();
+  const colorClasses = unitColorClasses[value];
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex items-center gap-1.5 text-xs px-2 py-1 rounded-sm font-medium shrink-0 bg-white border border-zinc-200 shadow-xs text-zinc-700 hover:bg-zinc-50 transition-colors cursor-pointer"
+        >
+          <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${colorClasses.circleBackground}`} />
+          {t(`UnitTypes.${value}`)}
+          <ChevronDown size={10} className="text-zinc-400" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-fit">
+        {SONG_UNIT_TYPES.map((type) => {
+          const cc = unitColorClasses[type];
+          return (
+            <DropdownMenuItem
+              key={type}
+              onClick={() => onChange(type)}
+              className="text-xs cursor-pointer gap-2"
+            >
+              <span
+                className={`inline-block w-2 h-2 rounded-full shrink-0 ${cc.circleBackground}`}
+              />
+              {t(`UnitTypes.${type}`)}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

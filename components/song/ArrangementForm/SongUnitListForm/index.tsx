@@ -3,17 +3,22 @@ import { useFormContext } from "react-hook-form";
 import { useArrangementUnitsFieldArray } from "../useArrangementForm";
 import AddUnitForm from "./AddUnitForm";
 import ChordPickerPanel from "./ChordPickerPanel";
+import ChordSidebar from "./ChordSidebar";
 import SortableUnitForm from "./SortableUnitForm";
 
-const COMMENT_CHIPS = ["Pausa", "Forte", "Suave", "Crescendo", "Só voz", "Só base", "Rall."];
+const COMMENT_CHIPS = [
+  "Pausa", "Forte", "Suave", "Crescendo", "Só voz", "Só base", "Rall.",
+];
 
-type InsertFn = (text: string) => void;
+type InsertFn = (tag: string) => void;
 
 type InstructionToolbarContextValue = {
+  activeInsert: InsertFn | null;
   setActiveInsert: (fn: InsertFn | null) => void;
 };
 
 const InstructionToolbarContext = createContext<InstructionToolbarContextValue>({
+  activeInsert: null,
   setActiveInsert: () => {},
 });
 
@@ -41,21 +46,27 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
     setActiveInsertState(() => fn);
   }, []);
 
-  // Fecha o painel quando nenhuma textarea está ativa
+  // Fecha painel mobile quando nenhuma textarea está ativa
   const isActive = activeInsert !== null;
   useEffect(() => {
     if (!isActive) setActivePanel(null);
   }, [isActive]);
 
-  const handleInsert = useCallback((tag: string) => {
-    activeInsert?.(tag);
-    setCustomComment("");
-  }, [activeInsert]);
+  const handleInsert = useCallback(
+    (tag: string) => {
+      activeInsert?.(tag);
+      setCustomComment("");
+    },
+    [activeInsert]
+  );
 
-  const handleChordSelect = useCallback((chord: string) => {
-    activeInsert?.(`[${chord}]`);
-    setActivePanel(null);
-  }, [activeInsert]);
+  const handleChordSelect = useCallback(
+    (chord: string) => {
+      activeInsert?.(`[${chord}]`);
+      setActivePanel(null);
+    },
+    [activeInsert]
+  );
 
   const togglePanel = useCallback((panel: ActivePanel) => {
     setActivePanel((prev) => (prev === panel ? null : panel));
@@ -64,23 +75,24 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
   const hasUnits = units && units.length > 0;
 
   return (
-    <InstructionToolbarContext.Provider value={{ setActiveInsert }}>
+    <InstructionToolbarContext.Provider value={{ activeInsert, setActiveInsert }}>
+
+      {/* Toolbar mobile — oculta em md+ */}
       {hasUnits && (
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-100">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-100 md:hidden">
           <div
-            className={`flex flex-wrap items-center gap-2 px-4 sm:px-6 lg:px-8 py-2 transition-opacity ${
+            className={`flex flex-wrap items-center gap-2 px-4 py-2 transition-opacity ${
               isActive ? "opacity-100" : "opacity-30 pointer-events-none"
             }`}
           >
-            {/* Botões de modo */}
             <button
               type="button"
               onPointerDown={(e) => e.preventDefault()}
               onClick={() => togglePanel("chord")}
-              className={`text-xs px-2.5 py-0.5 rounded border transition-colors font-mono font-semibold ${
+              className={`text-xs px-2 py-1 rounded border transition-colors font-mono font-semibold ${
                 activePanel === "chord"
                   ? "bg-zinc-800 border-zinc-800 text-white"
-                  : "border-zinc-300 text-zinc-600 hover:bg-zinc-100"
+                  : "border-zinc-200 text-zinc-600 hover:bg-zinc-100"
               }`}
             >
               [Cifra]
@@ -89,16 +101,15 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
               type="button"
               onPointerDown={(e) => e.preventDefault()}
               onClick={() => togglePanel("instruction")}
-              className={`text-xs px-2.5 py-0.5 rounded border transition-colors ${
+              className={`text-xs px-2 py-1 rounded border transition-colors ${
                 activePanel === "instruction"
                   ? "bg-zinc-800 border-zinc-800 text-white"
-                  : "border-zinc-300 text-zinc-600 hover:bg-zinc-100"
+                  : "border-zinc-200 text-zinc-600 hover:bg-zinc-100"
               }`}
             >
               {"{Instrução}"}
             </button>
 
-            {/* Chips de instrução */}
             {activePanel === "instruction" && (
               <>
                 <div className="w-px h-4 bg-zinc-200" />
@@ -108,7 +119,7 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
                     type="button"
                     onPointerDown={(e) => e.preventDefault()}
                     onClick={() => handleInsert(`{c:${chip}}`)}
-                    className="text-xs px-2 py-0.5 rounded border border-gray-300 hover:bg-gray-100 transition-colors"
+                    className="text-xs px-2 py-1 rounded border border-zinc-200 hover:bg-zinc-100 transition-colors"
                   >
                     {chip}
                   </button>
@@ -119,12 +130,13 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
                     value={customComment}
                     onChange={(e) => setCustomComment(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && customComment.trim()) {
-                        handleInsert(`{c:${customComment.trim()}}`);
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (customComment.trim()) handleInsert(`{c:${customComment.trim()}}`);
                       }
                     }}
                     placeholder="Personalizado..."
-                    className="text-xs border border-gray-200 rounded px-2 py-0.5 outline-none focus:border-gray-400 w-28"
+                    className="text-xs border border-zinc-200 rounded px-2 py-1 outline-none focus:border-zinc-400 w-28"
                   />
                   <button
                     type="button"
@@ -133,7 +145,7 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
                       if (customComment.trim()) handleInsert(`{c:${customComment.trim()}}`);
                     }}
                     disabled={!customComment.trim()}
-                    className="text-xs px-2 py-0.5 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-100 transition-colors"
+                    className="text-xs px-2 py-1 rounded border border-zinc-200 disabled:opacity-40 hover:bg-zinc-100 transition-colors"
                   >
                     OK
                   </button>
@@ -144,21 +156,28 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
         </div>
       )}
 
-      <section className="px-4 sm:px-6 lg:px-8 py-8 space-y-2">
-        {units?.map((unit, index) => (
-          <SortableUnitForm
-            key={`${unit.id}--${index}`}
-            unit={unit}
-            index={index}
-            fieldPrefix={fieldPrefix}
-          />
-        ))}
-        <AddUnitForm fieldPrefix={fieldPrefix} />
+      {/* Conteúdo — sidebar à esquerda + units à direita, dentro do padding da página */}
+      <section className="px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-4 items-start">
+          {hasUnits && <ChordSidebar fieldPrefix={fieldPrefix} />}
+
+          <div className="flex-1 min-w-0 space-y-2">
+            {units?.map((unit, index) => (
+              <SortableUnitForm
+                key={`${unit.id}--${index}`}
+                unit={unit}
+                index={index}
+                fieldPrefix={fieldPrefix}
+              />
+            ))}
+            <AddUnitForm fieldPrefix={fieldPrefix} />
+          </div>
+        </div>
       </section>
 
-      {/* Painel de cifras — fixo na base da viewport */}
+      {/* Painel de cifras mobile — oculto em md+ */}
       {hasUnits && activePanel === "chord" && isActive && (
-        <div className="fixed bottom-0 left-0 right-0 z-50">
+        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
           <ChordPickerPanel
             currentKey={currentKey}
             onSelectChord={handleChordSelect}
@@ -166,6 +185,7 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
           />
         </div>
       )}
+
     </InstructionToolbarContext.Provider>
   );
 }
