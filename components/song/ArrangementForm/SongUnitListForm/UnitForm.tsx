@@ -35,9 +35,8 @@ export default function UnitForm({
   const insertRef = useRef<(text: string) => void>(() => {});
 
   // Atualiza ref a cada render para capturar unit/onChangeUnit frescos
-  insertRef.current = (text: string) => {
+  insertRef.current = (tag: string) => {
     const textarea = textareaRef.current;
-    const tag = `{c:${text}}`;
     const pos = textarea ? textarea.selectionStart : unit.content.length;
     const newContent = unit.content.slice(0, pos) + tag + unit.content.slice(pos);
     onChangeUnit({ ...unit, content: newContent });
