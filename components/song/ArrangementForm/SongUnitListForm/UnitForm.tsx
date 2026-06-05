@@ -7,11 +7,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ClientSongUnit, SongUnitType } from "@/prisma/models";
 import { SONG_UNIT_TYPES } from "@/prisma/models";
 import {
+  ArrowDown,
+  ArrowUp,
   ChevronDown,
   CopyIcon,
   MessageSquareIcon,
@@ -35,6 +38,8 @@ type UnitFormProps = {
   unit: ClientSongUnit;
   removeUnit: () => void;
   duplicateUnit: () => void;
+  insertBefore: () => void;
+  insertAfter: () => void;
   onChangeUnit: (unit: ClientSongUnit) => void;
   className?: string;
 };
@@ -43,6 +48,8 @@ export default function UnitForm({
   unit,
   removeUnit,
   duplicateUnit,
+  insertBefore,
+  insertAfter,
   onChangeUnit,
   className,
 }: UnitFormProps) {
@@ -183,6 +190,21 @@ export default function UnitForm({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={insertBefore}
+              className="text-xs cursor-pointer"
+            >
+              <ArrowUp size={13} className="mr-1.5" />
+              Inserir acima
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={insertAfter}
+              className="text-xs cursor-pointer"
+            >
+              <ArrowDown size={13} className="mr-1.5" />
+              Inserir abaixo
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={duplicateUnit}
               className="text-xs cursor-pointer"

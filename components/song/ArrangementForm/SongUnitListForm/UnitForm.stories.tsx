@@ -29,6 +29,8 @@ export const Default: Story = {
         unit={unit}
         removeUnit={() => setUnit({ ...unit, content: "" })}
         duplicateUnit={() => alert("Duplicate unit action")}
+        insertBefore={() => {}}
+        insertAfter={() => {}}
         onChangeUnit={(newUnit) => setUnit(newUnit)}
       />
     );
@@ -52,6 +54,8 @@ export const WithNotes: Story = {
         unit={unit}
         removeUnit={() => {}}
         duplicateUnit={() => {}}
+        insertBefore={() => {}}
+        insertAfter={() => {}}
         onChangeUnit={(newUnit) => setUnit(newUnit)}
       />
     );
@@ -76,6 +80,8 @@ export const WithInlineComment: Story = {
         unit={unit}
         removeUnit={() => {}}
         duplicateUnit={() => {}}
+        insertBefore={() => {}}
+        insertAfter={() => {}}
         onChangeUnit={(newUnit) => setUnit(newUnit)}
       />
     );
