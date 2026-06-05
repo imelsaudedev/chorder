@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { ClientSongUnit, SongUnitType } from "@/prisma/models";
 import { CopyIcon, MessageSquareIcon, TrashIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, useCallback, useId, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useId, useMemo, useRef, useState } from "react";
+import { useInstructionToolbar } from ".";
 
 type UnitFormProps = {
   unit: ClientSongUnit;
@@ -30,6 +31,25 @@ export default function UnitForm({
   const colorClasses = unitColorClasses[unit.type];
   const contentId = useId();
   const [notesExpanded, setNotesExpanded] = useState(!!unit.notes);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const insertRef = useRef<(text: string) => void>(() => {});
+
+  // Atualiza ref a cada render para capturar unit/onChangeUnit frescos
+  insertRef.current = (text: string) => {
+    const textarea = textareaRef.current;
+    const tag = `{c:${text}}`;
+    const pos = textarea ? textarea.selectionStart : unit.content.length;
+    const newContent = unit.content.slice(0, pos) + tag + unit.content.slice(pos);
+    onChangeUnit({ ...unit, content: newContent });
+    setTimeout(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(pos + tag.length, pos + tag.length);
+    }, 0);
+  };
+
+  const { setActiveInsert } = useInstructionToolbar();
+  const stableInsert = useCallback((text: string) => insertRef.current(text), []);
+  const handleTextareaFocus = useCallback(() => setActiveInsert(stableInsert), [setActiveInsert, stableInsert]);
 
   const handleRemoveUnit = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -135,9 +155,10 @@ export default function UnitForm({
           />
         </div>
       ) : (
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-4 mt-4">
-          <div className="flex flex-col">
+        <div className="md:grid md:grid-cols-2 gap-4 flex flex-col mt-4">
+          <div onFocus={handleTextareaFocus}>
             <TextInput
+              ref={textareaRef}
               id={contentId}
               className="resize-none grow bg-white font-mono"
               placeholder={t("UnitData.contentPlaceholder")}
@@ -147,7 +168,6 @@ export default function UnitForm({
               long
             />
           </div>
-
           <div className="rounded-md bg-black/5 px-2 py-2">
             {hasError ? (
               <p className="text-red-500 text-sm">

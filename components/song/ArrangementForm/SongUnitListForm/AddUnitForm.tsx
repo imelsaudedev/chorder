@@ -19,6 +19,7 @@ export default function AddUnitForm({ fieldPrefix = "" }: AddUnitFormProps) {
         type: "BLOCK",
         content: "",
         order: (units?.length ?? 0) + 1,
+        notes: null,
       });
     },
     [append, units?.length]
