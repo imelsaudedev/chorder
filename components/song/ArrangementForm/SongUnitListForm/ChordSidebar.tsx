@@ -2,6 +2,7 @@
 
 import { ChordVariant, buildChordGrid } from "@/chopro/chord-grid";
 import clsx from "clsx";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useInstructionToolbar } from ".";
@@ -19,6 +20,7 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
   const currentKey = (watch(`${fieldPrefix}key`) as string) || "C";
   const { activeInsert } = useInstructionToolbar();
 
+  const [expanded, setExpanded] = useState(true);
   const [flashCell, setFlashCell] = useState<string | null>(null);
   const [customComment, setCustomComment] = useState("");
 
@@ -47,7 +49,8 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
   return (
     <aside
       className={clsx(
-        "hidden md:flex flex-col shrink-0 w-72",
+        "hidden md:flex flex-col shrink-0 transition-[width] duration-200",
+        expanded ? "w-72" : "w-9",
         "sticky top-6 self-start",
         "max-h-[calc(100dvh-3rem)] overflow-hidden",
         "rounded-lg border border-zinc-200 bg-zinc-100",
@@ -55,7 +58,15 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
     >
       {/* Cabeçalho */}
       <div className="flex items-center px-3 py-2 border-b border-zinc-200 shrink-0">
-        <span className="text-xs font-medium text-zinc-500">Dicionário</span>
+        {expanded && <span className="text-xs font-medium text-zinc-500 flex-1">Dicionário</span>}
+        <button
+          type="button"
+          onPointerDown={(e) => e.preventDefault()}
+          onClick={() => setExpanded((v) => !v)}
+          className="text-zinc-400 hover:text-zinc-700 cursor-pointer transition-colors"
+        >
+          {expanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+        </button>
       </div>
 
       {/* Grid de acordes */}
@@ -70,8 +81,8 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
             <tr>
               <ColHeader>Tríade</ColHeader>
               <ColHeader>7ª</ColHeader>
-              <ColHeader>Inv.</ColHeader>
-              <ColHeader>Var.</ColHeader>
+              {expanded && <ColHeader>Inv.</ColHeader>}
+              {expanded && <ColHeader>Var.</ColHeader>}
             </tr>
           </thead>
           <tbody>
@@ -79,18 +90,22 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
               <tr key={i}>
                 <GridCell chord={row.triad} variant="normal" flash={flashCell} onSelect={handleChordSelect} />
                 <GridCell chord={row.seventh} variant="normal" flash={flashCell} onSelect={handleChordSelect} />
-                <GridCell
-                  chord={row.slash}
-                  variant={row.slash ? "slash" : "empty"}
-                  flash={flashCell}
-                  onSelect={handleChordSelect}
-                />
-                <GridCell
-                  chord={row.variante}
-                  variant={row.variante ? toVariant(row.varType) : "empty"}
-                  flash={flashCell}
-                  onSelect={handleChordSelect}
-                />
+                {expanded && (
+                  <GridCell
+                    chord={row.slash}
+                    variant={row.slash ? "slash" : "empty"}
+                    flash={flashCell}
+                    onSelect={handleChordSelect}
+                  />
+                )}
+                {expanded && (
+                  <GridCell
+                    chord={row.variante}
+                    variant={row.variante ? toVariant(row.varType) : "empty"}
+                    flash={flashCell}
+                    onSelect={handleChordSelect}
+                  />
+                )}
               </tr>
             ))}
           </tbody>
@@ -98,7 +113,7 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
       </div>
 
       {/* Instruções */}
-      <div
+      {expanded && <div
         className={clsx(
           "px-2 pt-3 pb-2 shrink-0 transition-opacity",
           !isActive && "opacity-35"
@@ -146,7 +161,7 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
             OK
           </button>
         </div>
-      </div>
+      </div>}
     </aside>
   );
 }
