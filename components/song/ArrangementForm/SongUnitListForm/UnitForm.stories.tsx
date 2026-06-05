@@ -34,3 +34,50 @@ export const Default: Story = {
     );
   },
 };
+
+export const WithNotes: Story = {
+  parameters: {
+    layout: "centered",
+  },
+  render: () => {
+    const [unit, setUnit] = useState<ClientSongUnit>({
+      type: "VERSE",
+      content: "[G]Terra boa\n[D]bem escondida",
+      order: 1,
+      notes: "Só voz — suave",
+    });
+
+    return (
+      <UnitForm
+        unit={unit}
+        removeUnit={() => {}}
+        duplicateUnit={() => {}}
+        onChangeUnit={(newUnit) => setUnit(newUnit)}
+      />
+    );
+  },
+};
+
+export const WithInlineComment: Story = {
+  parameters: {
+    layout: "centered",
+  },
+  render: () => {
+    const [unit, setUnit] = useState<ClientSongUnit>({
+      type: "CHORUS",
+      content:
+        "{c:Forte}\n[C]Santo, Santo, [G]Santo\n{c:Suave}\n[Am]é o [F]Senhor",
+      order: 2,
+      notes: null,
+    });
+
+    return (
+      <UnitForm
+        unit={unit}
+        removeUnit={() => {}}
+        duplicateUnit={() => {}}
+        onChangeUnit={(newUnit) => setUnit(newUnit)}
+      />
+    );
+  },
+};

@@ -57,8 +57,10 @@ describe('Services API integration', () => {
                         isDeleted: false,
                         isServiceArrangement: true,
                         originalArrangementId: arrangement.id,
+                        youtubeUrl: null,
+                        audioUrl: null,
                         units: [
-                            { content: 'Verse 1', type: 'VERSE', order: 1 }
+                            { content: 'Verse 1', type: 'VERSE', order: 1, notes: null }
                         ]
                     }
                 }

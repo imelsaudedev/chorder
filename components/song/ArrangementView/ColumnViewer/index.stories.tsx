@@ -17,6 +17,25 @@ type Story = StoryObj<{
   units: ClientSongUnit[];
 }>;
 
+export const WithNotes: Story = {
+  parameters: { layout: "centered" },
+  args: {
+    units: [
+      { content: "[C]This is a [G]test line with [Am]chords", type: "INTRO", order: 0, notes: "Só base" },
+      { content: "[F]Another line with [Dm]chords", type: "VERSE", order: 1, notes: "Suave — só voz" },
+      { content: "[G]Ending line with [C]chords", type: "CHORUS", order: 2, notes: null },
+    ],
+  },
+  render: ({ units }) => {
+    return (
+      <SongConfigProvider>
+        <SongConfig />
+        <Viewer units={units} />
+      </SongConfigProvider>
+    );
+  },
+};
+
 export const Default: Story = {
   parameters: {
     layout: "centered",

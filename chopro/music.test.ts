@@ -1,4 +1,4 @@
-import { harmonicIndex, keyFromChord, simplifyChord } from "./music";
+import { harmonicIndex, keyFromChord, simplifyChord, parseChordPro, getLyrics, getChords } from "./music";
 
 test("harmonic index", () => {
   expect(harmonicIndex("Cb")).toBe(11);
@@ -43,4 +43,55 @@ test("simplify chord", () => {
   expect(simplifyChord("F##dim7")).toEqual("F##dim");
   expect(simplifyChord("Gbm9")).toEqual("Gbm");
   expect(simplifyChord("F4")).toEqual("F");
+});
+
+test("{c:texto} é reconhecido como comment pelo parser", () => {
+  const song = parseChordPro("{c:Pausa}");
+  const item = song.lines[0].items[0] as any;
+  expect(item._name).toBe("comment");
+  expect(item._value).toBe("Pausa");
+});
+
+test("{comment:texto} também é reconhecido como comment", () => {
+  const song = parseChordPro("{comment:Forte}");
+  const item = song.lines[0].items[0] as any;
+  expect(item._name).toBe("comment");
+  expect(item._value).toBe("Forte");
+});
+
+test("{c:} e {comment:} produzem o mesmo resultado", () => {
+  const short = parseChordPro("{c:Pausa}");
+  const long = parseChordPro("{comment:Pausa}");
+  const shortItem = short.lines[0].items[0] as any;
+  const longItem = long.lines[0].items[0] as any;
+  expect(shortItem._name).toBe(longItem._name);
+  expect(shortItem._value).toBe(longItem._value);
+});
+
+test("getLyrics ignora tags {c:}", () => {
+  const input = "[D]Uma semente\n{c:Pausa}\n[G]está procurando";
+  const lyrics = getLyrics(input);
+  expect(lyrics).not.toContain("Pausa");
+  expect(lyrics).toContain("Uma semente");
+  expect(lyrics).toContain("está procurando");
+});
+
+test("getLyrics ignora tags {comment:}", () => {
+  const input = "[C]Terra {comment:Forte}boa";
+  const lyrics = getLyrics(input);
+  expect(lyrics).not.toContain("Forte");
+  expect(lyrics).toContain("Terra");
+});
+
+test("getChords ignora tags {c:}", () => {
+  const input = "[D]verso\n{c:Instrução}\n[G]refrão";
+  const chords = getChords(input);
+  expect(chords).toContain("D");
+  expect(chords).toContain("G");
+  expect(chords).not.toContain("Instrução");
+});
+
+test("getChords retorna array vazio para string vazia", () => {
+  expect(getChords("")).toEqual([]);
+  expect(getChords(undefined)).toEqual([]);
 });

@@ -20,3 +20,25 @@ export const Default: Story = {
     density: "normal",
   },
 };
+
+export const WithComments: Story = {
+  parameters: {
+    layout: "centered",
+  },
+  args: {
+    chordpro:
+      "{c:Suave}\n[D]Uma semente está [G]procurando\n{c:Forte}\n[A]um lugar pra [D]crescer",
+    density: "normal",
+  },
+};
+
+export const WithCommentsCompact: Story = {
+  parameters: {
+    layout: "centered",
+  },
+  args: {
+    chordpro:
+      "{c:Pausa}\n[G]Terra [D]boa\n{c:Só voz}\n[Em]bem escondida [C]até poder germinar",
+    density: "compact",
+  },
+};

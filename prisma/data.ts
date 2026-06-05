@@ -399,6 +399,8 @@ export async function createArrangementWithSong(
       name: arrangement.name,
       key: arrangement.key,
       isDefault: arrangement.isDefault,
+      youtubeUrl: arrangement.youtubeUrl ?? null,
+      audioUrl: arrangement.audioUrl ?? null,
       song: {
         connectOrCreate: {
           where: { slug: songSlug },
