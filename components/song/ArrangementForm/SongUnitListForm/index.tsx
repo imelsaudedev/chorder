@@ -1,8 +1,9 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { buildChordGrid } from "@/chopro/chord-grid";
+import clsx from "clsx";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useArrangementUnitsFieldArray } from "../useArrangementForm";
 import AddUnitForm from "./AddUnitForm";
-import ChordPickerPanel from "./ChordPickerPanel";
 import ChordSidebar from "./ChordSidebar";
 import SortableUnitForm from "./SortableUnitForm";
 
@@ -40,6 +41,9 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
   const [activeInsert, setActiveInsertState] = useState<InsertFn | null>(null);
   const [customComment, setCustomComment] = useState("");
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
+  const [flashCell, setFlashCell] = useState<string | null>(null);
+
+  const grid = useMemo(() => buildChordGrid(currentKey), [currentKey]);
 
   // useState trata funções como updaters — precisa envolver em callback
   const setActiveInsert = useCallback((fn: InsertFn | null) => {
@@ -62,8 +66,11 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
 
   const handleChordSelect = useCallback(
     (chord: string) => {
-      activeInsert?.(`[${chord}]`);
-      setActivePanel(null);
+      setFlashCell(chord);
+      setTimeout(() => {
+        setFlashCell(null);
+        activeInsert?.(`[${chord}]`);
+      }, 120);
     },
     [activeInsert]
   );
@@ -109,6 +116,28 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
             >
               {"{Instrução}"}
             </button>
+
+            {activePanel === "chord" && (
+              <>
+                <div className="w-px h-4 bg-zinc-200 shrink-0" />
+                {grid.flatMap((row) => [row.triad, row.seventh]).map((chord) => (
+                  <button
+                    key={chord}
+                    type="button"
+                    onPointerDown={(e) => e.preventDefault()}
+                    onClick={() => handleChordSelect(chord)}
+                    className={clsx(
+                      "text-xs px-2 py-1 rounded border font-mono font-semibold transition-colors",
+                      flashCell === chord
+                        ? "bg-zinc-400 text-white border-zinc-400"
+                        : "bg-white border-zinc-200 shadow-xs text-zinc-800 hover:bg-zinc-50"
+                    )}
+                  >
+                    {chord}
+                  </button>
+                ))}
+              </>
+            )}
 
             {activePanel === "instruction" && (
               <>
@@ -174,17 +203,6 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
           </div>
         </div>
       </section>
-
-      {/* Painel de cifras mobile — oculto em md+ */}
-      {hasUnits && activePanel === "chord" && isActive && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-          <ChordPickerPanel
-            currentKey={currentKey}
-            onSelectChord={handleChordSelect}
-            onClose={() => setActivePanel(null)}
-          />
-        </div>
-      )}
 
     </InstructionToolbarContext.Provider>
   );
