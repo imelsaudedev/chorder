@@ -3,7 +3,7 @@ import { useArrangementUnitsFieldArray } from "../useArrangementForm";
 import AddUnitForm from "./AddUnitForm";
 import SortableUnitForm from "./SortableUnitForm";
 
-export const COMMENT_CHIPS = ["Pausa", "Forte", "Suave", "Crescendo", "Só voz", "Só base", "Rall."];
+const COMMENT_CHIPS = ["Pausa", "Forte", "Suave", "Crescendo", "Só voz", "Só base", "Rall."];
 
 type InsertFn = (text: string) => void;
 

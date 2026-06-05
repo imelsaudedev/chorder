@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ClientSongUnit, SongUnitType } from "@/prisma/models";
 import { CopyIcon, MessageSquareIcon, TrashIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, useCallback, useId, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useInstructionToolbar } from ".";
 
 type UnitFormProps = {
@@ -50,6 +50,10 @@ export default function UnitForm({
   const { setActiveInsert } = useInstructionToolbar();
   const stableInsert = useCallback((text: string) => insertRef.current(text), []);
   const handleTextareaFocus = useCallback(() => setActiveInsert(stableInsert), [setActiveInsert, stableInsert]);
+
+  useEffect(() => {
+    return () => setActiveInsert(null);
+  }, [setActiveInsert]);
 
   const handleRemoveUnit = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {

@@ -22,8 +22,6 @@ const TextInput = forwardRef<HTMLTextAreaElement, TextInputProps>(function TextI
   long,
   minRows,
 }, forwardedRef) {
-  const Component = long ? TextareaAutosize : 'input';
-
   const position = useRef<{ beforeStart: number | null; beforeEnd: number | null }>({
     beforeStart: 0,
     beforeEnd: 0,
@@ -37,7 +35,7 @@ const TextInput = forwardRef<HTMLTextAreaElement, TextInputProps>(function TextI
     } else {
       (forwardedRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = internalRef.current;
     }
-  });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useLayoutEffect(() => {
     internalRef.current?.setSelectionRange(position.current.beforeStart, position.current.beforeEnd);
@@ -65,19 +63,30 @@ const TextInput = forwardRef<HTMLTextAreaElement, TextInputProps>(function TextI
   ];
   if (className) classNames.push(className);
 
-  const otherProps: { minRows?: number } = {};
-  if (minRows) otherProps.minRows = minRows;
+  if (long) {
+    return (
+      <TextareaAutosize
+        ref={internalRef}
+        id={id}
+        value={value}
+        defaultValue={defaultValue}
+        className={classNames.join(' ')}
+        onChange={handleChange}
+        placeholder={placeholder}
+        minRows={minRows}
+      />
+    );
+  }
 
   return (
-    <Component
-      ref={internalRef as React.RefObject<HTMLTextAreaElement & HTMLInputElement>}
+    <input
+      ref={internalRef as unknown as React.RefObject<HTMLInputElement>}
       id={id}
       value={value}
       defaultValue={defaultValue}
       className={classNames.join(' ')}
       onChange={handleChange}
       placeholder={placeholder}
-      {...otherProps}
     />
   );
 });
