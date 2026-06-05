@@ -98,28 +98,26 @@ export default function ArrangementForm({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-dvh">
 
-          {/* Header */}
-          <button
-            type="button"
-            onClick={() => setMetaModalOpen(true)}
-            className="shrink-0 text-left w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-5 bg-secondary/20 hover:bg-secondary/30 transition-colors"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <Text variant="heading-lg" className="truncate">
-                {watchedTitle || t("newSong")}
-              </Text>
-              <Pencil className="w-4 h-4 shrink-0 text-muted-foreground" />
-            </div>
-            {watchedArtist && (
-              <Text variant="caption" className="flex items-center gap-1 truncate">
-                <NotebookPen className="w-3 h-3 shrink-0" />
-                {watchedArtist}
-              </Text>
-            )}
-          </button>
-
           {/* Conteúdo rolável */}
           <div className="flex-1 overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setMetaModalOpen(true)}
+              className="text-left w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-5 bg-secondary/20 hover:bg-secondary/30 transition-colors"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <Text variant="heading-lg" className="truncate">
+                  {watchedTitle || t("newSong")}
+                </Text>
+                <Pencil className="w-4 h-4 shrink-0 text-muted-foreground" />
+              </div>
+              {watchedArtist && (
+                <Text variant="caption" className="flex items-center gap-1 truncate">
+                  <NotebookPen className="w-3 h-3 shrink-0" />
+                  {watchedArtist}
+                </Text>
+              )}
+            </button>
             <ArrangementInfoForm arrangementId={origArrangement?.id} />
             <SongUnitListForm />
           </div>
