@@ -30,7 +30,10 @@ export default function ServiceSongUnitForm({
       />
 
       {editArrangement && (
-        <SongUnitListForm fieldPrefix={`units[${index}].arrangement.`} />
+        <SongUnitListForm
+          fieldPrefix={`units[${index}].arrangement.`}
+          sectionClassName="pt-4 pb-2"
+        />
       )}
     </div>
   );

@@ -31,9 +31,10 @@ type ActivePanel = "chord" | "instruction" | null;
 
 type SongUnitListFormProps = {
   fieldPrefix?: string;
+  sectionClassName?: string;
 };
 
-export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormProps) {
+export default function SongUnitListForm({ fieldPrefix = "", sectionClassName }: SongUnitListFormProps) {
   const { units } = useArrangementUnitsFieldArray(fieldPrefix);
   const { watch } = useFormContext();
   const currentKey = (watch(`${fieldPrefix}key`) as string) || "C";
@@ -186,7 +187,7 @@ export default function SongUnitListForm({ fieldPrefix = "" }: SongUnitListFormP
       )}
 
       {/* Conteúdo — sidebar à esquerda + units à direita, dentro do padding da página */}
-      <section className="px-4 sm:px-6 lg:px-8 py-8">
+      <section className={sectionClassName ?? "px-4 sm:px-6 lg:px-8 py-8"}>
         <div className="flex gap-4 items-start">
           {hasUnits && <ChordSidebar fieldPrefix={fieldPrefix} />}
 
