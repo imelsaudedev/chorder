@@ -40,7 +40,7 @@ export default function ArrangementInfoForm({
   const t = useTranslations();
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 bg-white border-b border-zinc-200">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 bg-zinc-50 border-b border-zinc-200">
 
       {/* Nome · Tom · | · YouTube · Áudio */}
       <div className="flex flex-wrap gap-3 items-end justify-start">
