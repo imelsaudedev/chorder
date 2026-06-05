@@ -154,7 +154,7 @@ export default function UnitForm({
                 {t("Messages.invalidChordPro")}
               </p>
             ) : (
-              <ChordProViewer chordpro={unit.content} density="compact" />
+              <ChordProViewer chordpro={unit.content} density="compact" commentClass={colorClasses.comment} />
             )}
           </div>
         </div>

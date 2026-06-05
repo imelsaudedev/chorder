@@ -13,6 +13,8 @@ export type ItemProps = {
   hideLyrics?: boolean;
   item: ChordProItem;
   isConnection: boolean;
+  commentAbove?: string;
+  commentClass?: string;
 };
 
 export default function Item({
@@ -26,6 +28,8 @@ export default function Item({
   transpose,
   mode,
   density,
+  commentAbove,
+  commentClass = "text-zinc-600 border-zinc-600",
 }: ItemProps) {
   if (item._name === "comment") {
     if (hideLyrics) {
@@ -34,10 +38,14 @@ export default function Item({
     if (mode === "text") {
       return <span className="italic font-mono">{item._value}</span>;
     }
+    // standalone comment (not paired with a following item — handled by commentAbove)
     return (
-      <span className="inline-block bg-amber-100 text-amber-800 border border-amber-300 rounded px-1.5 py-0 text-xs font-medium align-baseline mx-0.5 leading-5">
-        {item._value}
-      </span>
+      <div className={`flex flex-col whitespace-pre-wrap ${density === "compact" ? "mb-1" : "mb-2"}`}>
+        <span className={`text-xs font-semibold leading-none my-2 self-start ${commentClass}`}>
+          {item._value}
+        </span>
+        {hasLyrics && <span className="invisible leading-none h-[1em]">&nbsp;</span>}
+      </div>
     );
   }
 
@@ -95,15 +103,23 @@ export default function Item({
   );
 
   if (mode === "chords") {
-      return (
-        <div
-          className={`flex flex-col whitespace-pre-wrap ${
-            density === "compact" ? "mb-1" : "mb-2"
-          }`}
-        >
-          {content}
-        </div>
-      );
+    return (
+      <div
+        className={`relative flex flex-col whitespace-pre-wrap ${
+          density === "compact" ? "mb-1" : "mb-2"
+        }${commentAbove ? " pl-[9px]" : ""}`}
+      >
+        {commentAbove && (
+          <>
+            <div className={`absolute -top-[18px] left-1 bottom-0 w-0 border-l border-dotted ${commentClass}`} />
+            <span className={`absolute -top-[22px] left-[9px] text-xs font-semibold whitespace-nowrap leading-5 ${commentClass}`}>
+              {commentAbove}
+            </span>
+          </>
+        )}
+        {content}
+      </div>
+    );
   }
 
   return content;

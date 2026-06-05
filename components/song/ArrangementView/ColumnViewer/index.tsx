@@ -76,12 +76,12 @@ export default function ColumnViewer({
               >
                 <div
                   className={clsx(
-                    "flex items-baseline gap-2 select-none",
+                    "flex items-baseline gap-1 select-none",
                     unitClasses.text,
                     {
                       "px-0 py-2": isTextMode,
-                      "px-2 pt-1 pb-1": !isTextMode && isCompact,
-                      "px-4 pt-2 pb-1": !isTextMode && !isCompact,
+                      "px-2 pt-1 pb-2": !isTextMode && isCompact,
+                      "px-4 pt-2 pb-2": !isTextMode && !isCompact,
                     }
                   )}
                 >
@@ -91,7 +91,7 @@ export default function ColumnViewer({
                   {unit.notes && (
                     <>
                       <span className="text-xs opacity-40 shrink-0">·</span>
-                      <span className="text-xs italic font-normal normal-case tracking-normal truncate">
+                      <span className="text-xs italic font-normal normal-case tracking-normal">
                         {unit.notes}
                       </span>
                     </>
@@ -106,6 +106,7 @@ export default function ColumnViewer({
                     transpose={transpose}
                     mode={mode}
                     density={density}
+                    commentClass={unitClasses.comment}
                   />
                 ))}
               </div>
