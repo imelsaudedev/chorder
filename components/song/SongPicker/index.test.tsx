@@ -49,8 +49,9 @@ describe('SongPicker component', () => {
     const onSelected = vi.fn();
     render(<SongPicker onSelected={onSelected} />);
 
-    const addLabels = await screen.findAllByText('Adicionar ao service');
-    await user.click(addLabels[0].closest('button')!);
+    // O SongListEntry usa um overlay <button aria-label={song.title}> — não há texto "Adicionar"
+    const songButton = await screen.findByRole('button', { name: songsMock[0].title });
+    await user.click(songButton);
 
     expect(onSelected).toHaveBeenCalledTimes(1);
   });

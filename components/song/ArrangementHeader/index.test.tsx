@@ -7,6 +7,10 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
+vi.mock('@/components/song/SongMetaModal/context', () => ({
+  useSongMetaModal: () => ({ openSongMetaModal: vi.fn() }),
+}));
+
 vi.mock('@/components/config/SongConfig', () => ({
   useSongConfig: () => ({
     transpose: 0,
