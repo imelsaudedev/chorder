@@ -29,6 +29,7 @@ export default function IncreaseDecreaseButtonSet({
   return (
     <div className="flex flex-row">
       <Button
+        type="button"
         variant="outline"
         className="rounded-l-md rounded-r-none"
         onClick={decrease}
@@ -44,6 +45,7 @@ export default function IncreaseDecreaseButtonSet({
         onChange={(e) => setStringValue(e.target.value)}
       />
       <Button
+        type="button"
         variant="outline"
         className="rounded-r-md rounded-l-none"
         onClick={increase}
