@@ -18,7 +18,7 @@ export default function ClientArrangementEditPage({
   const router = useRouter();
 
   const handleSaved = (arrangement: ClientArrangement) => {
-    if (!arrangement.song?.slug || !arrangement.id) {
+    if (!arrangement?.song?.slug || !arrangement?.id) {
       console.error("Arrangement or song slug is missing", arrangement);
       return;
     }

@@ -70,7 +70,7 @@ export default function ArrangementForm({
 
   async function onSubmit(arrangement: ArrangementSchema) {
     const newOrUpdatedArrangement = await createOrUpdateArrangement(arrangement);
-    if (onSaved) onSaved(newOrUpdatedArrangement);
+    if (onSaved && newOrUpdatedArrangement) onSaved(newOrUpdatedArrangement);
   }
 
   function handleMetaSave({ title, artist }: SongMeta) {
