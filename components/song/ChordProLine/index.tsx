@@ -22,9 +22,9 @@ export default function ChordProLine({
     (item, i) => item._name === "comment" && items[i + 1]?._name !== "comment" && items[i + 1] !== undefined
   );
 
-  let className = `flex flex-col relative ${
-    mode === "text" ? "px-0 py-0" : density === "compact" ? "px-2" : "px-4"
-  }${hasPairedComment && mode !== "text" ? " pt-[22px]" : ""}`;
+  const px = mode === "text" ? "px-0 py-0" : "px-[var(--block-px)]";
+  const pt = hasPairedComment && mode !== "text" ? " pt-[1.375em]" : "";
+  const className = `flex flex-col relative ${px}${pt}`;
 
   const props = {
     items,

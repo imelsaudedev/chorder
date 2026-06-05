@@ -31,22 +31,15 @@ export default function ColumnViewer({
   const { columns, columnData } = useColumnData(songUnits, columnConfig);
   const gridColsClass = getGridColumnClass(mode, columns);
   const isTextMode = mode === "text";
-  const isCompact = density === "compact";
 
   return (
     <div
-      className={clsx("grid", gridColsClass, {
-        "gap-2": isCompact,
-        "gap-4": !isCompact,
-      })}
+      className={clsx("grid", gridColsClass, "gap-[var(--block-gap)]")}
     >
       {columnData.map((data, idx) => (
         <div
           key={`col-${idx}`}
-          className={clsx("flex flex-col", {
-            "gap-2": isCompact,
-            "gap-4": !isCompact,
-          })}
+          className="flex flex-col gap-[var(--block-gap)]"
         >
           {data.map((unit, unitIdx) => {
             const isTextUnit = unit.unitType === "TEXT";
@@ -57,8 +50,8 @@ export default function ColumnViewer({
                 <div
                   key={`unit-${unitIdx}`}
                   className={clsx({
-                    "py-2": isTextMode,
-                    "bg-gray-100 dark:bg-zinc-800 rounded p-4": !isTextMode,
+                    "py-[0.5em]": isTextMode,
+                    "bg-gray-100 dark:bg-zinc-800 rounded p-[1em]": !isTextMode,
                   })}
                 >
                   <MarkdownViewer content={unit.content || ""} />
@@ -70,8 +63,8 @@ export default function ColumnViewer({
               <div
                 key={`unit-${unitIdx}`}
                 className={clsx(unitClasses.background, unitClasses.border, {
-                  "border-t bg-transparent mb-4": isTextMode,
-                  "border rounded pb-2": !isTextMode,
+                  "border-t bg-transparent mb-[1em]": isTextMode,
+                  "border rounded pb-[0.5em]": !isTextMode,
                 })}
               >
                 <div
@@ -79,19 +72,18 @@ export default function ColumnViewer({
                     "flex items-baseline gap-1 select-none",
                     unitClasses.text,
                     {
-                      "px-0 py-2": isTextMode,
-                      "px-2 pt-1 pb-2": !isTextMode && isCompact,
-                      "px-4 pt-2 pb-2": !isTextMode && !isCompact,
+                      "px-0 py-[0.5em]": isTextMode,
+                      "px-[var(--block-px)] pt-[var(--block-pt)] pb-[0.5em]": !isTextMode,
                     }
                   )}
                 >
-                  <span className={clsx("text-xs uppercase tracking-wide shrink-0", { "text-base font-normal": isTextMode })}>
+                  <span className={clsx("text-[0.75em] uppercase tracking-wide shrink-0", { "!text-[1em] font-normal": isTextMode })}>
                     {t(unit.unitType)} {unit.unitTypeIndex}
                   </span>
                   {unit.notes && (
                     <>
-                      <span className="text-xs opacity-40 shrink-0">·</span>
-                      <span className="text-xs italic font-normal normal-case tracking-normal">
+                      <span className="text-[0.75em] opacity-40 shrink-0">·</span>
+                      <span className="text-[0.75em] italic font-normal normal-case tracking-normal">
                         {unit.notes}
                       </span>
                     </>

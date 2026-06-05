@@ -40,8 +40,8 @@ export default function Item({
     }
     // standalone comment (not paired with a following item — handled by commentAbove)
     return (
-      <div className={`flex flex-col whitespace-pre-wrap ${density === "compact" ? "mb-1" : "mb-2"}`}>
-        <span className={`text-xs font-semibold leading-none my-2 self-start ${commentClass}`}>
+      <div className="flex flex-col whitespace-pre-wrap mb-[var(--item-mb)]">
+        <span className={`text-[0.75em] font-semibold leading-none my-[0.5em] self-start ${commentClass}`}>
           {item._value}
         </span>
         {hasLyrics && <span className="invisible leading-none h-[1em]">&nbsp;</span>}
@@ -64,12 +64,10 @@ export default function Item({
     "mb-0",
   ];
   if (mode === "text") {
-    chordClasses.push("text-[1em]", "font-mono");
+    chordClasses.push("font-mono");
     if (lyrics.length > chords.length) {
       chords = chords.padEnd(lyrics.length, " ");
     }
-  } else {
-    chordClasses.push(density === "compact" ? "" : "text-base");
   }
   if (hasChords) {
     chordClasses.push("h-[1em]");
@@ -105,14 +103,12 @@ export default function Item({
   if (mode === "chords") {
     return (
       <div
-        className={`relative flex flex-col whitespace-pre-wrap ${
-          density === "compact" ? "mb-1" : "mb-2"
-        }${commentAbove ? " pl-[9px]" : ""}`}
+        className={`relative flex flex-col whitespace-pre-wrap mb-[var(--item-mb)]${commentAbove ? " pl-[0.5625em]" : ""}`}
       >
         {commentAbove && (
           <>
-            <div className={`absolute -top-[18px] left-1 bottom-0 w-0 border-l border-dotted ${commentClass}`} />
-            <span className={`absolute -top-[22px] left-[9px] text-xs font-semibold whitespace-nowrap leading-5 ${commentClass}`}>
+            <div className={`absolute -top-[1.125em] left-[0.25em] bottom-0 w-0 border-l border-dotted ${commentClass}`} />
+            <span className={`absolute -top-[1.375em] left-[0.5625em] text-[0.75em] font-semibold whitespace-nowrap leading-none ${commentClass}`}>
               {commentAbove}
             </span>
           </>
