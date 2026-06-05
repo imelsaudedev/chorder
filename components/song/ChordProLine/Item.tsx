@@ -60,7 +60,7 @@ export default function Item({
     "text-black",
     "font-mono",
     "font-bold",
-    "tracking-tight",
+    "tracking-tighter",
     "pr-[0.5em]",
     "mb-0",
   ];
