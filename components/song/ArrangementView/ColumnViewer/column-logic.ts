@@ -8,6 +8,7 @@ type UnitData = {
   unitTypeIndex: number;
   content?: string;
   notes?: string | null;
+  repeatCount?: number;
 };
 
 export function findBestDistribution(
@@ -25,6 +26,7 @@ export function findBestDistribution(
         unitTypeIndex: unitTypeIndices[unit.type],
         content: unit.content,
         notes: unit.notes,
+        repeatCount: unit.repeatCount ?? 1,
       };
     }
 
@@ -38,6 +40,7 @@ export function findBestDistribution(
       unitType: unit.type,
       unitTypeIndex: unitTypeIndices[unit.type],
       notes: unit.notes,
+      repeatCount: unit.repeatCount ?? 1,
     };
   });
 

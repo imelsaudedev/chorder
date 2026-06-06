@@ -88,6 +88,14 @@ export default function ColumnViewer({
                       </span>
                     </>
                   )}
+                  {(unit.repeatCount ?? 1) > 1 && (
+                    <span className={clsx(
+                      "ml-auto text-[0.7em] font-semibold px-[0.4em] py-[0.1em] rounded shrink-0",
+                      unitClasses.repeatBadge
+                    )}>
+                      ×{unit.repeatCount}
+                    </span>
+                  )}
                 </div>
 
                 {unit.lines.map((line, idx) => (

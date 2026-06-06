@@ -20,6 +20,7 @@ export default function AddUnitForm({ fieldPrefix = "" }: AddUnitFormProps) {
         content: "",
         order: (units?.length ?? 0) + 1,
         notes: null,
+        repeatCount: 1,
       });
     },
     [append, units?.length]

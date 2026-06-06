@@ -130,7 +130,7 @@ export default function SortableUnitForm({
     for (let i = index; i < currentUnits.length; i++) {
       setValue(i, "order", currentUnits[i].order + 1);
     }
-    insert(index, { type: "BLOCK", content: "", notes: null, order: unit.order });
+    insert(index, { type: "BLOCK", content: "", notes: null, repeatCount: 1, order: unit.order });
   }, [index, insert, setValue, unit.order, getValues]);
 
   const handleInsertAfter = useCallback(() => {
@@ -138,7 +138,7 @@ export default function SortableUnitForm({
     for (let i = index + 1; i < currentUnits.length; i++) {
       setValue(i, "order", currentUnits[i].order + 1);
     }
-    insert(index + 1, { type: "BLOCK", content: "", notes: null, order: unit.order + 1 });
+    insert(index + 1, { type: "BLOCK", content: "", notes: null, repeatCount: 1, order: unit.order + 1 });
   }, [index, insert, setValue, unit.order, getValues]);
 
   return (

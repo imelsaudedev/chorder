@@ -3,7 +3,13 @@
     "allow": [
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(sudo apt-get update)",
+      "Bash(sudo apt-get install -y postgresql postgresql-contrib)",
+      "Bash(yarn --version)",
+      "Bash(rm -rf node_modules yarn.lock)",
+      "Bash(yarn install *)",
+      "Bash(sudo whoami)"
     ]
   }
 }

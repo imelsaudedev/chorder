@@ -130,6 +130,11 @@ export default function UnitForm({
     setNotesExpanded(false);
   }, [onChangeUnit, unit]);
 
+  const handleRepeatClick = useCallback(() => {
+    const next = (unit.repeatCount ?? 1) >= 8 ? 1 : (unit.repeatCount ?? 1) + 1;
+    onChangeUnit({ ...unit, repeatCount: next });
+  }, [onChangeUnit, unit]);
+
   return (
     <div
       className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg p-2 md:p-4 mb-2 ${className || ""}`}
@@ -181,6 +186,19 @@ export default function UnitForm({
           </button>
         )}
         <div className="flex-1" />
+
+        <button
+          type="button"
+          onClick={handleRepeatClick}
+          title="Clique para definir repetições"
+          className={`text-xs px-1.5 py-0.5 rounded font-semibold shrink-0 transition-colors ${
+            (unit.repeatCount ?? 1) > 1
+              ? `${colorClasses.repeatBadge}`
+              : "text-zinc-300 hover:text-zinc-400"
+          }`}
+        >
+          {(unit.repeatCount ?? 1) > 1 ? `×${unit.repeatCount}` : "×1"}
+        </button>
 
         <button
           type="button"

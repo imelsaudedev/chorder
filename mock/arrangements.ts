@@ -26,6 +26,7 @@ export default [
         content: "[||:] [G] [C] [D7] [:||]",
         order: 1,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "VERSE" as const,
@@ -33,6 +34,7 @@ export default [
           "[G]A alegria está no coração\nDe q[C]uem já conhece a Jes[G]us\n[G]A verdadeira [Em]paz só tem aquele\nQue [A7]já conhece a Jes[D]us",
         order: 2,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "VERSE" as const,
@@ -40,6 +42,7 @@ export default [
           "[G]O sentimento mais p[G7]recioso\nQue v[C]em do nosso Senh[A]or\nÉ o am[G]or [Em]  que só [Am]tem\nQuem já conh[D]ece a  Jes[G]us",
         order: 3,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "CHORUS" as const,
@@ -47,12 +50,14 @@ export default [
           "Ale[G]luia!\nAle[C]lui[G]a!\nAle[G]lui[Em]a!\nAle[A7]lui[D7]a!",
         order: 4,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "INTERLUDE" as const,
         content: "[D7] Ah... Ah... Ah... Ah... Ah...!",
         order: 5,
         notes: null,
+        repeatCount: 1,
       },
     ],
   },
@@ -83,6 +88,7 @@ export default [
         content: "[||:] [G] [C] [D7] [:||]",
         order: 1,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "VERSE" as const,
@@ -90,6 +96,7 @@ export default [
           "[G]A alegria está no coração\nDe q[C]uem já conhece a Jes[G]us\n[G]A verdadeira [Em]paz só tem aquele\nQue [A7]já conhece a Jes[D]us",
         order: 2,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "VERSE" as const,
@@ -97,6 +104,7 @@ export default [
           "[G]O sentimento mais p[G7]recioso\nQue v[C]em do nosso Senh[A]or\nÉ o am[G]or [Em]  que só [Am]tem\nQuem já conh[D]ece a  Jes[G]us",
         order: 3,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "CHORUS" as const,
@@ -104,6 +112,7 @@ export default [
           "Ale[G]luia!\nAle[C]lui[G]a!\nAle[G]lui[Em]a!\nAle[A7]lui[D7]a!",
         order: 4,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "VERSE" as const,
@@ -111,12 +120,14 @@ export default [
           "[G]O sentimento mais p[G7]recioso\nQue v[C]em do nosso Senh[A]or\nÉ o am[G]or [Em]  que só [Am]tem\nQuem já conh[D]ece a  Jes[G]us",
         order: 5,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "INTERLUDE" as const,
         content: "[D7] Ah... Ah... Ah... Ah... Ah...!",
         order: 6,
         notes: null,
+        repeatCount: 1,
       },
     ],
   },
@@ -138,6 +149,7 @@ export default [
           "[Tom no momento: A]                 \r\n[A]Aquele que es[D/A]tá fe[E/A]liz [D/A]diga: a[A]mém! [D/A][E/A] [D/A]\r\n[A]Aquele que es[D/A]tá fe[E/A]liz [D/A]grite: ale[A]luia! [D/A][E/A] [D/A]\r\n[A]Aquele que es[D/A]tá fe[E/A]liz [D/A]bata [A]palmas [D/A][E/A] [D/A]\r\n[A]Aquele que es[D/A]tá fe[E/A]liz [D/A]dance co[A]migo assim",
         order: 1,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "BLOCK" as const,
@@ -145,6 +157,7 @@ export default [
           "[F#m]Com Jesus no coração a gente [C#m]é feliz                        \r\n[D]Com Jesus na condu[Bm]ção tudo é muito [D/E]bom!",
         order: 2,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "BLOCK" as const,
@@ -152,12 +165,14 @@ export default [
           "Jesus é [A]alegria, [F#m]euforia                \r\n[D]Companhia [Bm]todo dia![E]",
         order: 3,
         notes: null,
+        repeatCount: 1,
       },
       {
         type: "BLOCK" as const,
         content: "Jesus é o motivo da nossa ale[A]gria!",
         order: 4,
         notes: null,
+        repeatCount: 1,
       },
     ],
     song: {
