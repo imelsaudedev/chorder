@@ -16,6 +16,7 @@ import {
   ArrowDown,
   ArrowUp,
   ChevronDown,
+  ChevronUp,
   CopyIcon,
   MessageSquareIcon,
   MoreVertical,
@@ -58,6 +59,7 @@ export default function UnitForm({
   const colorClasses = unitColorClasses[unit.type];
   const contentId = useId();
   const [notesExpanded, setNotesExpanded] = useState(!!unit.notes);
+  const [collapsed, setCollapsed] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const insertRef = useRef<(text: string) => void>(() => {});
 
@@ -133,7 +135,7 @@ export default function UnitForm({
       className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg p-2 md:p-4 mb-2 ${className || ""}`}
     >
       {/* Header: tipo | notas | ⋮ */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className={`flex items-center gap-2 ${collapsed ? "" : "mb-2"}`}>
         <TypeDropdown value={unit.type} onChange={handleChangeUnitType} />
 
         {notesExpanded ? (
@@ -180,6 +182,14 @@ export default function UnitForm({
         )}
         <div className="flex-1" />
 
+        <button
+          type="button"
+          onClick={() => setCollapsed((v) => !v)}
+          className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0"
+        >
+          {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+        </button>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -223,7 +233,7 @@ export default function UnitForm({
         </DropdownMenu>
       </div>
 
-      {isTextUnit ? (
+      {!collapsed && (isTextUnit ? (
         <div className="mt-4">
           <MarkdownUnitForm
             initialContent={unit.content}
@@ -265,7 +275,7 @@ export default function UnitForm({
             )}
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
