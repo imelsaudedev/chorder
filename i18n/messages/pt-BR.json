@@ -115,6 +115,14 @@
     "ENDING": "Saída",
     "TEXT": "Texto"
   },
+  "ServiceView": {
+    "editChords": "Editar cifras",
+    "saveScopeTitle": "Salvar alterações",
+    "serviceOnly": "Só neste culto",
+    "serviceAndOriginal": "Neste culto e no original",
+    "cancelEdit": "Cancelar edição",
+    "saveChanges": "Salvar"
+  },
   "ServiceForm": {
     "editArrangement": "Editar arranjo",
     "newSongUnit": "Adicionar música",

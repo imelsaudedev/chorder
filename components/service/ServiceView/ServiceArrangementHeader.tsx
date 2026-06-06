@@ -8,22 +8,30 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { ClientArrangement } from "@/prisma/models";
 import AudioReferenceButton from "@/components/common/AudioReferenceButton";
 import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
 import { MoreVertical } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type ServiceArrangementHeaderProps = {
   arrangement: ClientArrangement | null;
   order: number;
+  isEditing?: boolean;
+  onToggleEdit?: () => void;
 };
 
 export default function ServiceArrangementHeader({
   arrangement,
   order,
+  isEditing = false,
+  onToggleEdit,
 }: ServiceArrangementHeaderProps) {
   const { transpose, setTranspose, density } = useSongConfig();
+  const t = useTranslations("ServiceView");
 
   if (!arrangement) {
     return (
@@ -55,7 +63,6 @@ export default function ServiceArrangementHeader({
               density === "compact" ? "text-xs" : "text-sm sm:text-base"
             }`}
           >
-            {" "}
             {arrangement.song.artist}
           </span>
         )}
@@ -73,6 +80,21 @@ export default function ServiceArrangementHeader({
             audioUrl={arrangement.audioUrl}
             title={arrangement.song.title}
           />
+        )}
+        {onToggleEdit && (
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={isEditing}
+              onCheckedChange={onToggleEdit}
+              id={`edit-chords-${arrangement.id}`}
+            />
+            <Label
+              htmlFor={`edit-chords-${arrangement.id}`}
+              className="text-xs sm:text-sm cursor-pointer"
+            >
+              {t("editChords")}
+            </Label>
+          </div>
         )}
         <div className="hidden md:flex">
           <KeyButtonSet

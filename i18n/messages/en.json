@@ -114,6 +114,14 @@
     "BLOCK": "Block",
     "TEXT": "Text"
   },
+  "ServiceView": {
+    "editChords": "Edit chords",
+    "saveScopeTitle": "Save changes",
+    "serviceOnly": "This service only",
+    "serviceAndOriginal": "This service and the original",
+    "cancelEdit": "Cancel editing",
+    "saveChanges": "Save"
+  },
   "ServiceForm": {
     "editArrangement": "Edit arrangement",
     "newSongUnit": "Add song",

@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { ClientServiceUnit, ClientSong } from "@/prisma/models";
 import { ServiceUnitSchema } from "@/schemas/service-unit";
 import { XIcon } from "lucide-react";
@@ -22,8 +21,6 @@ type FormHeaderProps = {
   unit: ServiceUnitSchema;
   onChangeUnit: (unit: ServiceUnitSchema) => void;
   onRemoveUnit: () => void;
-  onToggleEdit: () => void;
-  isEditing: boolean;
 };
 
 export default function FormHeader({
@@ -31,8 +28,6 @@ export default function FormHeader({
   unit,
   onChangeUnit,
   onRemoveUnit,
-  onToggleEdit,
-  isEditing,
 }: FormHeaderProps) {
   const t = useTranslations("SongData");
 
@@ -59,7 +54,7 @@ export default function FormHeader({
 
   return (
     <div className="flex w-full flex-row justify-between items-start gap-4">
-      {/* Column 1: Group title, artist, switch and tone */}
+      {/* Column 1: title, artist, reference links and tone */}
       <div className="flex flex-col md:flex-row md:items-center flex-1 gap-2">
         <TitleAndArtist song={unit.arrangement.song} />
 
@@ -86,13 +81,9 @@ export default function FormHeader({
               {t("editOriginal")}
             </a>
           )}
-          <ToggleEdit
-            id={`${index}-${unit.arrangement.song.id}`}
-            isEditing={isEditing}
-            onToggleEdit={onToggleEdit}
-          />
           <ToneSelect
             unit={unit}
+            index={index}
             handleSemitoneTransposeChange={handleSemitoneTransposeChange}
           />
         </div>
@@ -123,31 +114,9 @@ function TitleAndArtist({ song }: TitleAndArtistProps) {
   );
 }
 
-type ToggleEditProps = {
-  id: string;
-  isEditing: boolean;
-  onToggleEdit: () => void;
-};
-
-function ToggleEdit({ id, isEditing, onToggleEdit }: ToggleEditProps) {
-  const t = useTranslations("SongData");
-
-  return (
-    <div className="flex items-center gap-2">
-      <Switch
-        id={`edit-switch-${id}`}
-        checked={isEditing}
-        onCheckedChange={onToggleEdit}
-      />
-      <Label htmlFor={`edit-switch-${id}`} className="text-xs sm:text-sm">
-        {t("editSong")}
-      </Label>
-    </div>
-  );
-}
-
 type ToneSelectProps = {
   unit: ClientServiceUnit;
+  index: number;
   handleSemitoneTransposeChange: (semitoneString: string) => void;
 };
 
@@ -179,21 +148,10 @@ function ToneSelect({ unit, handleSemitoneTransposeChange }: ToneSelectProps) {
 
 function useTranspositionKeys(unit: ClientServiceUnit) {
   return useMemo(() => {
-    // TODO: Move this to a more appropriate place, and use it in the other places where we need transposition keys
     const baseKey = unit.arrangement?.key || "C";
     const keys = [
-      "C",
-      "C#",
-      "D",
-      "D#",
-      "E",
-      "F",
-      "F#",
-      "G",
-      "G#",
-      "A",
-      "A#",
-      "B",
+      "C", "C#", "D", "D#", "E", "F",
+      "F#", "G", "G#", "A", "A#", "B",
     ];
     const baseKeyIndex = keys.indexOf(baseKey);
     return keys.map((key, index) => [key, index - baseKeyIndex] as const);
