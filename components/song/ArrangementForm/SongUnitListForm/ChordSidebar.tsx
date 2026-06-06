@@ -50,7 +50,7 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
     <aside
       className={clsx(
         "hidden md:flex flex-col shrink-0 transition-[width] duration-200",
-        expanded ? "w-72" : "w-9",
+        expanded ? "w-72" : "w-36",
         "sticky top-6 self-start",
         "max-h-[calc(100dvh-3rem)] overflow-hidden",
         "rounded-lg border border-zinc-200 bg-zinc-100",

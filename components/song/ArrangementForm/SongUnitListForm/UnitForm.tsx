@@ -231,12 +231,12 @@ export default function UnitForm({
           />
         </div>
       ) : (
-        <div className="md:grid md:grid-cols-2 gap-4 flex flex-col mt-4">
-          <div className="md:flex md:flex-col" onFocus={handleTextareaFocus}>
+        <div className="lg:grid lg:grid-cols-2 gap-4 flex flex-col mt-4">
+          <div className="lg:flex lg:flex-col" onFocus={handleTextareaFocus}>
             <TextInput
               ref={textareaRef}
               id={contentId}
-              className="resize-none md:flex-1 bg-white font-mono"
+              className="resize-none lg:flex-1 bg-white font-mono"
               placeholder={t("UnitData.contentPlaceholder")}
               onChange={handleChangeChordpro}
               value={unit.content}
