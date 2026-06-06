@@ -6,6 +6,7 @@ import { unitColorClasses } from "@/components/song/unit-colors";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ClientSongUnit } from "@/prisma/models";
 import clsx from "clsx";
+import { Repeat2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { findBestDistribution } from "./column-logic";
@@ -90,10 +91,11 @@ export default function ColumnViewer({
                   )}
                   {(unit.repeatCount ?? 1) > 1 && (
                     <span className={clsx(
-                      "ml-auto text-[0.7em] font-semibold px-[0.4em] py-[0.1em] rounded shrink-0",
+                      "ml-auto inline-flex items-center gap-[0.2em] text-[0.7em] font-semibold px-[0.4em] py-[0.1em] rounded shrink-0",
                       unitClasses.repeatBadge
                     )}>
-                      ×{unit.repeatCount}
+                      <Repeat2 size="1em" />
+                      {unit.repeatCount}
                     </span>
                   )}
                 </div>

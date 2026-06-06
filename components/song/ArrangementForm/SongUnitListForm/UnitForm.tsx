@@ -20,6 +20,7 @@ import {
   CopyIcon,
   MessageSquareIcon,
   MoreVertical,
+  Repeat2,
   TrashIcon,
   XIcon,
 } from "lucide-react";
@@ -131,7 +132,7 @@ export default function UnitForm({
   }, [onChangeUnit, unit]);
 
   const handleRepeatClick = useCallback(() => {
-    const next = (unit.repeatCount ?? 1) >= 8 ? 1 : (unit.repeatCount ?? 1) + 1;
+    const next = (unit.repeatCount ?? 1) > 1 ? 1 : 2;
     onChangeUnit({ ...unit, repeatCount: next });
   }, [onChangeUnit, unit]);
 
@@ -190,14 +191,17 @@ export default function UnitForm({
         <button
           type="button"
           onClick={handleRepeatClick}
-          title="Clique para definir repetições"
-          className={`text-xs px-1.5 py-0.5 rounded font-semibold shrink-0 transition-colors ${
+          title="Repetir bloco"
+          className={`flex items-center gap-0.5 p-1 rounded transition-colors shrink-0 ${
             (unit.repeatCount ?? 1) > 1
-              ? `${colorClasses.repeatBadge}`
+              ? colorClasses.text
               : "text-zinc-300 hover:text-zinc-400"
           }`}
         >
-          {(unit.repeatCount ?? 1) > 1 ? `×${unit.repeatCount}` : "×1"}
+          <Repeat2 size={14} />
+          {(unit.repeatCount ?? 1) > 1 && (
+            <span className="text-xs font-semibold leading-none">×{unit.repeatCount}</span>
+          )}
         </button>
 
         <button
