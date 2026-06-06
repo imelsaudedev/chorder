@@ -1,9 +1,17 @@
 "use client";
 
+import { useUpdateSong } from "#api-client";
 import AudioReferenceButton from "@/components/common/AudioReferenceButton";
 import HighlightKeyword from "@/components/common/HighlightKeyword";
 import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
+import SongMetaModal, { SongMetaSavePayload } from "@/components/song/SongMetaModal";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -12,9 +20,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ClientArrangement, ClientSong } from "@/prisma/models";
-import { Plus } from "lucide-react";
+import { MoreVertical, NotebookPen, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useSWRConfig } from "swr";
 
 const BTN_SM = "h-7 w-7";
 
@@ -70,6 +80,16 @@ export default function SongListEntry({
 
   const defaultIdx = Math.max(0, arrangements.findIndex((a) => a.isDefault));
   const [selectedIdx, setSelectedIdx] = useState(String(defaultIdx));
+  const [metaOpen, setMetaOpen] = useState(false);
+
+  const { updateSong } = useUpdateSong(song.slug);
+  const { mutate } = useSWRConfig();
+  const router = useRouter();
+
+  function handleMetaSave(payload: SongMetaSavePayload) {
+    updateSong({ title: payload.title, artist: payload.artist ?? null, tagIds: payload.tagIds })
+      .then(() => mutate((key) => Array.isArray(key) && key[0] === "/api/songs"));
+  }
 
   const selectedArr = arrangements[Number(selectedIdx)] ?? arrangements[0];
   const playTitle = selectedArr?.name?.trim()
@@ -191,10 +211,41 @@ export default function SongListEntry({
             className={BTN_SM}
           />
         )}
-        {onSelected && (
+        {onSelected ? (
           <Plus className="w-3.5 h-3.5 text-zinc-400 shrink-0 pointer-events-none" />
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className={BTN_SM}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical size={14} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setMetaOpen(true)}>
+                <Pencil size={14} className="mr-2" />
+                Editar dados
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => router.push(`/songs/${song.slug}/edit`)}>
+                <NotebookPen size={14} className="mr-2" />
+                Editar arranjo
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
+      <SongMetaModal
+        open={metaOpen}
+        onOpenChange={setMetaOpen}
+        isNew={false}
+        defaultValues={{ title: song.title, artist: song.artist ?? "" }}
+        onSave={handleMetaSave}
+      />
     </div>
   );
 }
