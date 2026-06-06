@@ -117,10 +117,11 @@ export default function SongListEntry({
     ) : null;
 
   return (
-    // Mobile: 2 cols [title | icons]
-    // Tablet: 3 cols [title | lyrics | (dropdown+icons)]
-    // Desktop: 4 cols [title | lyrics | dropdown | icons]
-    // display:none removes children from grid flow, enabling correct column count per breakpoint
+    <>
+    {/* Mobile: 2 cols [title | icons]
+        Tablet: 3 cols [title | lyrics | (dropdown+icons)]
+        Desktop: 4 cols [title | lyrics | dropdown | icons]
+        display:none removes children from grid flow, enabling correct column count per breakpoint */}
     <div className="relative grid grid-cols-[1fr_auto] md:grid-cols-[2fr_3fr_12rem] lg:grid-cols-[2fr_3fr_1.5fr_8rem_5rem] items-start gap-x-2 py-2.5 px-2 hover:bg-zinc-50 transition-colors group">
 
       {/* Overlay: navega em modo lista, seleciona em modo picker */}
@@ -239,13 +240,14 @@ export default function SongListEntry({
           </DropdownMenu>
         )}
       </div>
-      <SongMetaModal
-        open={metaOpen}
-        onOpenChange={setMetaOpen}
-        isNew={false}
-        defaultValues={{ title: song.title, artist: song.artist ?? "" }}
-        onSave={handleMetaSave}
-      />
     </div>
+    <SongMetaModal
+      open={metaOpen}
+      onOpenChange={setMetaOpen}
+      isNew={false}
+      defaultValues={{ title: song.title, artist: song.artist ?? "" }}
+      onSave={handleMetaSave}
+    />
+    </>
   );
 }
