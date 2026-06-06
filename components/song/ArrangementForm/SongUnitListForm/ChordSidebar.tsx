@@ -113,7 +113,7 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
       </div>
 
       {/* Instruções */}
-      {expanded && <div
+      <div
         className={clsx(
           "px-2 pt-3 pb-2 shrink-0 transition-opacity",
           !isActive && "opacity-35"
@@ -135,7 +135,7 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
             </button>
           ))}
         </div>
-        <div className="flex gap-1 mt-1.5 pb-1">
+        <div className={clsx("flex gap-1 mt-1.5 pb-1", !expanded && "flex-col")}>
           <input
             type="text"
             value={customComment}
@@ -161,7 +161,7 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
             OK
           </button>
         </div>
-      </div>}
+      </div>
     </aside>
   );
 }
