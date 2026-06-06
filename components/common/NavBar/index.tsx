@@ -1,6 +1,5 @@
 "use client";
 
-import clsx from "clsx";
 import { ListMusic, Music } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -12,57 +11,26 @@ export default function NavBar() {
   const pathParts = pathname.split("/");
   const currentPage = pathParts[1];
   const isEditPage = pathname.includes("/edit") || pathname.endsWith("/new");
-  const isServicePage =
-    currentPage === "services" &&
-    pathParts.length > 2 &&
-    pathParts[2] !== "new" &&
-    pathParts[2] !== "edit";
 
   if (isEditPage) return null;
 
   return (
-    <>
-      {/* Sidebar (visível em telas maiores) */}
-      <nav className="hidden sm:flex sm:flex-col sm:fixed sm:left-0 sm:top-0 sm:h-full sm:w-20 sm:bg-zinc-50 sm:border-r sm:border-zinc-100">
-        <div className="flex flex-col items-center sm:pt-12 lg:pt-16 gap-6">
-          <NavItem
-            href="/services"
-            icon={<ListMusic size={24} />}
-            label={t("services")}
-            active={currentPage === "services"}
-          />
-          <NavItem
-            href="/songs"
-            icon={<Music size={24} />}
-            label={t("songs")}
-            active={currentPage === "songs"}
-          />
-        </div>
-      </nav>
-
-      {/* Menu inferior fixo (aparece apenas em telas pequenas) */}
-      <nav
-        className={clsx(
-          "sm:hidden fixed bottom-0 left-0 w-full z-40 bg-white/80 backdrop-blur-lg shadow-md border-t border-gray-100",
-          { hidden: isServicePage }
-        )}
-      >
-        <div className="flex justify-around py-3">
-          <NavItem
-            href="/services"
-            icon={<ListMusic size={24} />}
-            label={t("services")}
-            active={currentPage === "services"}
-          />
-          <NavItem
-            href="/songs"
-            icon={<Music size={24} />}
-            label={t("songs")}
-            active={currentPage === "songs"}
-          />
-        </div>
-      </nav>
-    </>
+    <nav className="hidden lg:flex lg:flex-col lg:fixed lg:left-0 lg:top-0 lg:h-full lg:w-20 lg:bg-zinc-50 lg:border-r lg:border-zinc-100">
+      <div className="flex flex-col items-center pt-16 gap-6">
+        <NavItem
+          href="/services"
+          icon={<ListMusic size={24} />}
+          label={t("services")}
+          active={currentPage === "services"}
+        />
+        <NavItem
+          href="/songs"
+          icon={<Music size={24} />}
+          label={t("songs")}
+          active={currentPage === "songs"}
+        />
+      </div>
+    </nav>
   );
 }
 
