@@ -121,7 +121,8 @@
     "serviceOnly": "Só neste culto",
     "serviceAndOriginal": "Neste culto e no original",
     "cancelEdit": "Cancelar edição",
-    "saveChanges": "Salvar"
+    "saveChanges": "Salvar",
+    "saveError": "Erro ao salvar. Tente novamente."
   },
   "ServiceForm": {
     "editArrangement": "Editar arranjo",

@@ -120,7 +120,8 @@
     "serviceOnly": "This service only",
     "serviceAndOriginal": "This service and the original",
     "cancelEdit": "Cancel editing",
-    "saveChanges": "Save"
+    "saveChanges": "Save",
+    "saveError": "Error saving. Please try again."
   },
   "ServiceForm": {
     "editArrangement": "Edit arrangement",

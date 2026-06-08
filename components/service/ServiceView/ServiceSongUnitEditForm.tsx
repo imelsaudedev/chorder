@@ -8,6 +8,7 @@ import { Form } from "@/components/ui/form";
 import { ClientArrangement, ClientServiceUnit } from "@/prisma/models";
 import { ArrangementSchema, arrangementSchema } from "@/schemas/arrangement";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -39,6 +40,7 @@ export default function ServiceSongUnitEditForm({
 
   const [scopeDialogOpen, setScopeDialogOpen] = useState(false);
   const [pendingData, setPendingData] = useState<ArrangementSchema | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const { createOrUpdateArrangement: saveToService, isMutating: savingService } =
     useCreateOrUpdateArrangement(arrangement.id);
@@ -78,12 +80,21 @@ export default function ServiceSongUnitEditForm({
   }
 
   async function performSave(data: ArrangementSchema, scope: "service" | "both") {
-    await saveToService(buildServicePayload(data));
-    if (scope === "both") {
-      await saveToOriginal(buildOriginalPayload(data));
+    setSaveError(null);
+    try {
+      if (scope === "both") {
+        await Promise.all([
+          saveToService(buildServicePayload(data)),
+          saveToOriginal(buildOriginalPayload(data)),
+        ]);
+      } else {
+        await saveToService(buildServicePayload(data));
+      }
+      setScopeDialogOpen(false);
+      onSaved();
+    } catch {
+      setSaveError(t("saveError"));
     }
-    setScopeDialogOpen(false);
-    onSaved();
   }
 
   return (
@@ -91,23 +102,30 @@ export default function ServiceSongUnitEditForm({
       <Form {...form}>
         <div className="pt-4 pb-2">
           <SongUnitListForm fieldPrefix="" sectionClassName="" />
-          <div className="flex gap-2 pt-4 justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              data-testid="edit-form-cancel"
-            >
-              {tMessages("cancel")}
-            </Button>
-            <Button
-              type="button"
-              disabled={isSaving}
-              onClick={form.handleSubmit(handleSave)}
-              data-testid="edit-form-save"
-            >
-              {t("saveChanges")}
-            </Button>
+          <div className="flex flex-col gap-2 pt-4">
+            {saveError && (
+              <p className="text-sm text-red-500 text-right">{saveError}</p>
+            )}
+            <div className="flex gap-2 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isSaving}
+                data-testid="edit-form-cancel"
+              >
+                {tMessages("cancel")}
+              </Button>
+              <Button
+                type="button"
+                disabled={isSaving}
+                onClick={form.handleSubmit(handleSave)}
+                data-testid="edit-form-save"
+              >
+                {isSaving && <Loader2 size={14} className="mr-2 animate-spin" />}
+                {t("saveChanges")}
+              </Button>
+            </div>
           </div>
         </div>
       </Form>

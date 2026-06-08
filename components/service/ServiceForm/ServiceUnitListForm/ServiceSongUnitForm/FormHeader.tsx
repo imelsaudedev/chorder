@@ -83,7 +83,6 @@ export default function FormHeader({
           )}
           <ToneSelect
             unit={unit}
-            index={index}
             handleSemitoneTransposeChange={handleSemitoneTransposeChange}
           />
         </div>
@@ -116,7 +115,6 @@ function TitleAndArtist({ song }: TitleAndArtistProps) {
 
 type ToneSelectProps = {
   unit: ClientServiceUnit;
-  index: number;
   handleSemitoneTransposeChange: (semitoneString: string) => void;
 };
 
