@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { transposeChord } from "@/chopro/music";
+import { useSongConfig } from "@/components/config/SongConfig";
 import { cn } from "@/lib/utils";
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 
@@ -29,11 +30,13 @@ export default function KeyButtonSet({
   setTranspose,
   size = "default",
 }: KeyButtonSetProps) {
+  const { setEnharmonicPreference } = useSongConfig();
   const [songKey, setSongKey] = useState(() => transposeChord(originalKey, originalKey, transpose));
 
   useEffect(() => {
     setSongKey(transposeChord(originalKey, originalKey, transpose));
-  }, [transpose, originalKey]);
+    setEnharmonicPreference(null);
+  }, [transpose, originalKey, setEnharmonicPreference]);
 
   const handleIncrease = useCallback(() => setTranspose((prev) => prev + 1), [setTranspose]);
   const handleDecrease = useCallback(() => setTranspose((prev) => prev - 1), [setTranspose]);
@@ -65,7 +68,10 @@ export default function KeyButtonSet({
                 key={key}
                 type="button"
                 onPointerDown={(e) => e.preventDefault()}
-                onClick={() => setSongKey(key)}
+                onClick={() => {
+                  setSongKey(key);
+                  setEnharmonicPreference(key === pair[0] ? "sharp" : "flat");
+                }}
                 className={cn(
                   "flex-1 flex items-center justify-center font-semibold transition-colors border-r last:border-r-0 border-input",
                   midText,

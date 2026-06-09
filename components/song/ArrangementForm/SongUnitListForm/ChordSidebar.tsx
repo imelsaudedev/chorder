@@ -1,6 +1,6 @@
 "use client";
 
-import { ChordVariant, buildChordGrid } from "@/chopro/chord-grid";
+import { ChordVariant, applyEnharmonicToGrid, buildChordGrid } from "@/chopro/chord-grid";
 import { transposeChord } from "@/chopro/music";
 import { SongConfigContext } from "@/components/config/SongConfig";
 import KeyButtonSet from "@/components/config/KeyButtonSet";
@@ -29,7 +29,8 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
   const [flashCell, setFlashCell] = useState<string | null>(null);
   const [customComment, setCustomComment] = useState("");
 
-  const grid = useMemo(() => buildChordGrid(currentKey), [currentKey]);
+  const rawGrid = useMemo(() => buildChordGrid(currentKey), [currentKey]);
+  const grid = useMemo(() => applyEnharmonicToGrid(rawGrid, songConfig?.enharmonicPreference ?? null), [rawGrid, songConfig?.enharmonicPreference]);
   const isActive = activeInsert !== null;
 
   const handleChordSelect = useCallback(

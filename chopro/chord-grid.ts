@@ -1,4 +1,4 @@
-import { SongKey, harmonicIndex, transposeChord } from "./music";
+import { SongKey, applyEnharmonic, harmonicIndex, transposeChord } from "./music";
 
 export type ChordVariant = "secdom" | "aem" | null;
 
@@ -21,6 +21,18 @@ const C_GRID: ChordRow[] = [
   { triad: "Am",   seventh: "Am7",   slash: null,  variante: "E7", varType: "secdom", romanLabel: "VIm" },
   { triad: "Bdim", seventh: "Bm7b5", slash: "G/B", variante: null, varType: null,     romanLabel: "VIIdim" },
 ];
+
+export function applyEnharmonicToGrid(grid: ChordRow[], preference: "sharp" | "flat" | null): ChordRow[] {
+  if (!preference) return grid;
+  const preferSharp = preference === "sharp";
+  return grid.map((row) => ({
+    ...row,
+    triad:    applyEnharmonic(row.triad, preferSharp),
+    seventh:  applyEnharmonic(row.seventh, preferSharp),
+    slash:    row.slash    ? applyEnharmonic(row.slash, preferSharp)    : null,
+    variante: row.variante ? applyEnharmonic(row.variante, preferSharp) : null,
+  }));
+}
 
 export function buildChordGrid(key: string): ChordRow[] {
   if (!key || key === "C") return C_GRID;

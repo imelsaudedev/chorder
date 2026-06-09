@@ -1,4 +1,4 @@
-import { buildChordGrid } from "@/chopro/chord-grid";
+import { applyEnharmonicToGrid, buildChordGrid } from "@/chopro/chord-grid";
 import { transposeChord } from "@/chopro/music";
 import { SongConfigContext } from "@/components/config/SongConfig";
 import KeyButtonSet from "@/components/config/KeyButtonSet";
@@ -50,7 +50,8 @@ export default function SongUnitListForm({ fieldPrefix = "", sectionClassName, t
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
   const [flashCell, setFlashCell] = useState<string | null>(null);
 
-  const grid = useMemo(() => buildChordGrid(currentKey), [currentKey]);
+  const rawGrid = useMemo(() => buildChordGrid(currentKey), [currentKey]);
+  const grid = useMemo(() => applyEnharmonicToGrid(rawGrid, songConfig?.enharmonicPreference ?? null), [rawGrid, songConfig?.enharmonicPreference]);
 
   // useState trata funções como updaters — precisa envolver em callback
   const setActiveInsert = useCallback((fn: InsertFn | null) => {
