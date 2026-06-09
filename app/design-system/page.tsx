@@ -168,7 +168,7 @@ export default function DesignSystemPage() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   {[
                     { name: "IBM Plex Sans", cls: "font-sans", desc: "Corpo de texto, UI padrão" },
-                    { name: "Bricolage Grotesque", cls: "font-bricolage", desc: "Headings, display" },
+                    { name: "Space Grotesk", cls: "font-bricolage", desc: "Headings, display" },
                     { name: "IBM Plex Serif", cls: "font-serif", desc: "Texto editorial" },
                     { name: "IBM Plex Mono", cls: "font-mono", desc: "Código, valores técnicos" },
                   ].map((f) => (
