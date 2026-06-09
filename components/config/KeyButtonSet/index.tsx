@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { transposeChord } from "@/chopro/music";
 import { useSongConfig } from "@/components/config/SongConfig";
 import { cn } from "@/lib/utils";
+import { Minus, Plus } from "lucide-react";
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 
 // Par [sustenido, bemol] — ordem fixa no seletor
@@ -56,7 +57,7 @@ export default function KeyButtonSet({
         className="rounded-l-md rounded-r-none"
         onClick={handleDecrease}
       >
-        ♭
+        <Minus size={14} />
       </Button>
 
       {/* Slot central — largura fixa, não muda com enarmônico */}
@@ -98,7 +99,7 @@ export default function KeyButtonSet({
         className="rounded-r-md rounded-l-none"
         onClick={handleIncrease}
       >
-        ♯
+        <Plus size={14} />
       </Button>
     </div>
   );
