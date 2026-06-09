@@ -39,7 +39,7 @@ export default function NavBar() {
     <>
       {/* Sidebar — sempre visível em sm+ nas listas, só em lg+ nas views */}
       <nav className={clsx(
-        "flex-col fixed left-0 top-0 h-full w-20 bg-zinc-50 border-r border-zinc-100",
+        "flex-col fixed left-0 top-0 h-full w-20 bg-zinc-50 border-r border-border",
         isListPage ? "hidden sm:flex" : "hidden lg:flex"
       )}>
         <div className="flex flex-col items-center pt-12 lg:pt-16 gap-6">
@@ -71,7 +71,7 @@ function NavItem({ href, icon, label, active }: NavItemProps) {
     <Link
       href={href}
       className={`flex flex-col items-center text-sm ${
-        active ? "text-secondary font-semibold" : "text-gray-600"
+        active ? "text-secondary font-semibold" : "text-muted-foreground"
       }`}
     >
       {icon}

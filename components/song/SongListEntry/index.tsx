@@ -19,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Tag from "@/components/common/Tag";
+import Text from "@/components/common/Text";
 import { ClientArrangement, ClientSong } from "@/prisma/models";
 import { MoreVertical, NotebookPen, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
@@ -149,18 +151,18 @@ export default function SongListEntry({
           )}
         </div>
         {song.artist && (
-          <p className="text-xs text-zinc-500 truncate mt-0.5">
+          <Text variant="caption" as="p" className="text-xs md:text-sm truncate mt-0.5">
             <HighlightKeyword text={song.artist} keyword={query} />
-          </p>
+          </Text>
         )}
       </div>
 
       {/* Col 2 — primeiras linhas da letra (oculto no mobile) */}
       <div className="hidden md:block min-w-0">
         {verse1Lines.slice(0, 2).map((line, i) => (
-          <p key={i} className="text-xs text-zinc-500 truncate leading-relaxed">
+          <Text key={i} variant="caption" as="p" className="text-xs md:text-sm truncate leading-relaxed">
             <HighlightKeyword text={line} keyword={query} />
-          </p>
+          </Text>
         ))}
       </div>
 
@@ -169,17 +171,7 @@ export default function SongListEntry({
         {song.tags && song.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {song.tags.map((tag) => (
-              <span
-                key={tag.id}
-                className="inline-flex items-center px-1.5 py-px rounded text-[10px] font-medium leading-4"
-                style={{
-                  backgroundColor: `${tag.group.color}26`,
-                  color: tag.group.color,
-                  border: `1px solid ${tag.group.color}4d`,
-                }}
-              >
-                {tag.name}
-              </span>
+              <Tag key={tag.id} label={tag.name} color={tag.group.color} />
             ))}
           </div>
         )}

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import Tag from "@/components/common/Tag";
 import Text from "@/components/common/Text";
 import { cn } from "@/lib/utils";
 import {
@@ -72,6 +73,7 @@ const NAV = [
   { id: "cards", label: "Cards" },
   { id: "abas", label: "Abas" },
   { id: "feedback", label: "Feedback" },
+  { id: "tags", label: "Tags" },
   { id: "icones", label: "Ícones" },
 ];
 
@@ -498,6 +500,59 @@ export default function DesignSystemPage() {
                     <p className="text-xs text-zinc-400 mt-1">Adicione músicas ao repertório para começar.</p>
                   </div>
                   <Button size="sm" variant="outline" className="mt-1"><Plus size={13} />Adicionar música</Button>
+                </div>
+              </div>
+
+            </div>
+          </Section>
+
+          {/* ── Tags ───────────────────────────────────────────────── */}
+          <Section id="tags" title="Tags">
+            <div className="flex flex-col gap-8">
+
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-4">Variantes semânticas</p>
+                <div className="flex flex-wrap gap-3 items-center">
+                  {(["default", "success", "warning", "error", "info", "muted"] as const).map((v) => (
+                    <div key={v} className="flex flex-col items-start gap-1.5">
+                      <Tag label={v.charAt(0).toUpperCase() + v.slice(1)} variant={v} size="sm" />
+                      <code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">variant="{v}"</code>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-4">Tamanhos</p>
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-start gap-1.5">
+                    <Tag label="Pequena" variant="success" size="xs" />
+                    <code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">size="xs"</code>
+                  </div>
+                  <div className="flex flex-col items-start gap-1.5">
+                    <Tag label="Normal" variant="success" size="sm" />
+                    <code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">size="sm"</code>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-4">Cor dinâmica (vinda do banco)</p>
+                <div className="flex flex-wrap gap-2 items-center">
+                  {["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"].map((color) => (
+                    <Tag key={color} label="Adoração" color={color} />
+                  ))}
+                </div>
+                <p className="text-xs text-zinc-400 mt-2">Fundo, texto e borda gerados automaticamente com opacidade.</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-4">Uso em lista de músicas</p>
+                <div className="flex flex-wrap gap-1.5">
+                  <Tag label="Adoração" color="#10b981" />
+                  <Tag label="Louvor" color="#3b82f6" />
+                  <Tag label="Comunhão" color="#8b5cf6" />
+                  <Tag label="Páscoa" color="#f59e0b" />
                 </div>
               </div>
 

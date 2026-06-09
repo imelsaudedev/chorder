@@ -1,11 +1,10 @@
 "use client";
 
 import { useFetchTagGroups } from "@/app/api/api-client";
+import FloatingAddLink from "@/components/common/FloatingAddLink";
 import TagFilter from "@/components/song/TagFilter";
 import SongMetaModal from "@/components/song/SongMetaModal";
 import ClientSongList from "@/components/song/SongList/ClientSongList";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -33,20 +32,7 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
       )}
       <ClientSongList query={query} tagIds={selectedTagIds} />
 
-      <div className="fixed bottom-24 right-4 sm:bottom-8 sm:right-8">
-        <Button
-          variant="secondary"
-          size="lg"
-          className="rounded-full shadow-lg"
-          onClick={() => setModalOpen(true)}
-        >
-          <Plus className="hidden sm:inline" />
-          <span className="sm:hidden">
-            <Plus />
-          </span>
-          <span className="hidden sm:inline">{t("newSong")}</span>
-        </Button>
-      </div>
+      <FloatingAddLink label={t("newSong")} onClick={() => setModalOpen(true)} />
 
       <SongMetaModal
         open={modalOpen}

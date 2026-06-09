@@ -1,24 +1,34 @@
-import Link from "next/link";
-import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
 
 type FloatingAddLinkProps = {
-  href: string;
   label: string;
+  href?: string;
+  onClick?: () => void;
 };
-export default function FloatingAddLink({ href, label }: FloatingAddLinkProps) {
+
+export default function FloatingAddLink({ label, href, onClick }: FloatingAddLinkProps) {
+  const content = (
+    <>
+      <Plus size={20} className="sm:size-6" />
+      <span className="hidden sm:inline">{label}</span>
+    </>
+  );
+
   return (
-    <div className="fixed bottom-24 right-4 sm:bottom-8 sm:right-8">
-      <Button
-        asChild
-        variant="secondary"
-        className="rounded-full shadow-lg h-10 w-10 sm:h-12 sm:w-12 sm:px-6"
-      >
-        <Link href={href} className="flex items-center justify-center gap-2">
-          <Plus className="size-5 sm:size-6" />
-          <span className="hidden sm:inline">{label}</span>
-        </Link>
-      </Button>
+    <div className="fixed bottom-24 right-4 sm:bottom-8 sm:right-8 z-50">
+      {href ? (
+        <Button asChild variant="secondary" className="rounded-full shadow-lg h-10 w-10 sm:h-12 sm:w-auto sm:px-6">
+          <Link href={href} className="flex items-center justify-center gap-2">
+            {content}
+          </Link>
+        </Button>
+      ) : (
+        <Button variant="secondary" className="rounded-full shadow-lg h-10 w-10 sm:h-12 sm:w-auto sm:px-6" onClick={onClick}>
+          {content}
+        </Button>
+      )}
     </div>
   );
 }
