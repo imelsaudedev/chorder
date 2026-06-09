@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Music, PlayCircle, Upload } from "lucide-react";
+import { Music, Play, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -149,7 +149,7 @@ function YoutubeField({ fieldPrefix, arrangementId }: { fieldPrefix: string; arr
           variant="outline"
           className={`gap-2 ${hasUrl ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100" : ""}`}
         >
-          <PlayCircle size={15} className={hasUrl ? "text-red-500" : "text-zinc-400"} />
+          <Play size={15} className={hasUrl ? "text-red-500" : "text-zinc-400"} />
           YouTube
         </Button>
       </DialogTrigger>
