@@ -18,13 +18,12 @@ vi.mock('@/components/config/SongConfig', () => ({
 }));
 
 vi.mock('./ServiceArrangementHeader', () => ({
-  default: ({ onToggleEdit, isEditing }: any) => (
+  default: ({ onStartEdit, onCancel, isEditing, isSaving }: any) => (
     <div data-testid="service-arrangement-header">
-      {onToggleEdit && (
-        <button onClick={onToggleEdit} data-testid="edit-toggle">
-          {isEditing ? 'stop-editing' : 'start-editing'}
-        </button>
-      )}
+      <button onClick={onStartEdit} data-testid="start-edit">start editing</button>
+      <button onClick={onCancel} data-testid="cancel-edit">cancel</button>
+      {isEditing && <span data-testid="is-editing" />}
+      {isSaving && <span data-testid="is-saving" />}
     </div>
   ),
 }));
@@ -34,12 +33,10 @@ vi.mock('@/components/song/ArrangementView', () => ({
 }));
 
 vi.mock('./ServiceSongUnitEditForm', () => ({
-  default: ({ onSaved, onCancel }: any) => (
-    <div data-testid="service-song-unit-edit-form">
-      <button onClick={onSaved} data-testid="mock-saved-button">saved</button>
-      <button onClick={onCancel} data-testid="mock-cancel-button">cancel</button>
-    </div>
-  ),
+  default: ({ onSaved, onSavingChange, submitRef }: any) => {
+    submitRef.current = { submit: () => { onSavingChange(true); onSaved(); } };
+    return <div data-testid="edit-form"><button onClick={onSaved} data-testid="mock-saved">saved</button></div>;
+  },
 }));
 
 const mockUnit: ClientServiceUnit = {
@@ -68,15 +65,7 @@ const mockUnit: ClientServiceUnit = {
       lyrics: 'Gloria e força ao Senhor',
       isDeleted: false,
     },
-    units: [
-      {
-        type: 'VERSE' as const,
-        content: '[D]Cristo é Senhor',
-        order: 1,
-        notes: null,
-        repeatCount: 1,
-      },
-    ],
+    units: [{ type: 'VERSE' as const, content: '[D]Cristo é Senhor', order: 1, notes: null, repeatCount: 1 }],
   },
 };
 
@@ -86,40 +75,47 @@ describe('ServiceSongUnitView', () => {
     expect(screen.getByTestId('service-arrangement-header')).toBeDefined();
   });
 
-  it('renders ArrangementView when not editing', () => {
+  it('shows ArrangementView and hides edit form when not editing', () => {
     render(<ServiceSongUnitView unit={mockUnit} />);
     expect(screen.getByTestId('arrangement-view')).toBeDefined();
-    expect(screen.queryByTestId('service-song-unit-edit-form')).toBeNull();
+    expect(screen.queryByTestId('edit-form')).toBeNull();
   });
 
-  it('shows edit toggle button', () => {
+  it('passes isEditing=false to header initially', () => {
     render(<ServiceSongUnitView unit={mockUnit} />);
-    expect(screen.getByTestId('edit-toggle')).toBeDefined();
+    expect(screen.queryByTestId('is-editing')).toBeNull();
   });
 
-  it('switches to edit mode when toggle clicked', async () => {
+  it('switches to edit form and hides view when onStartEdit triggered', async () => {
     const user = userEvent.setup();
     render(<ServiceSongUnitView unit={mockUnit} />);
-    await user.click(screen.getByTestId('edit-toggle'));
-    expect(screen.getByTestId('service-song-unit-edit-form')).toBeDefined();
+    await user.click(screen.getByTestId('start-edit'));
+    expect(screen.getByTestId('edit-form')).toBeDefined();
     expect(screen.queryByTestId('arrangement-view')).toBeNull();
   });
 
-  it('returns to view mode after onSaved called', async () => {
+  it('passes isEditing=true to header during edit', async () => {
     const user = userEvent.setup();
     render(<ServiceSongUnitView unit={mockUnit} />);
-    await user.click(screen.getByTestId('edit-toggle'));
-    expect(screen.getByTestId('service-song-unit-edit-form')).toBeDefined();
-    await user.click(screen.getByTestId('mock-saved-button'));
-    expect(screen.getByTestId('arrangement-view')).toBeDefined();
-    expect(screen.queryByTestId('service-song-unit-edit-form')).toBeNull();
+    await user.click(screen.getByTestId('start-edit'));
+    expect(screen.getByTestId('is-editing')).toBeDefined();
   });
 
-  it('returns to view mode after onCancel called', async () => {
+  it('returns to view mode when onCancel triggered', async () => {
     const user = userEvent.setup();
     render(<ServiceSongUnitView unit={mockUnit} />);
-    await user.click(screen.getByTestId('edit-toggle'));
-    await user.click(screen.getByTestId('mock-cancel-button'));
+    await user.click(screen.getByTestId('start-edit'));
+    await user.click(screen.getByTestId('cancel-edit'));
     expect(screen.getByTestId('arrangement-view')).toBeDefined();
+    expect(screen.queryByTestId('edit-form')).toBeNull();
+  });
+
+  it('returns to view mode after onSaved called from edit form', async () => {
+    const user = userEvent.setup();
+    render(<ServiceSongUnitView unit={mockUnit} />);
+    await user.click(screen.getByTestId('start-edit'));
+    await user.click(screen.getByTestId('mock-saved'));
+    expect(screen.getByTestId('arrangement-view')).toBeDefined();
+    expect(screen.queryByTestId('edit-form')).toBeNull();
   });
 });

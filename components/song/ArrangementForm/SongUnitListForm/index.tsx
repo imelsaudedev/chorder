@@ -1,4 +1,7 @@
 import { buildChordGrid } from "@/chopro/chord-grid";
+import { transposeChord } from "@/chopro/music";
+import { SongConfigContext } from "@/components/config/SongConfig";
+import KeyButtonSet from "@/components/config/KeyButtonSet";
 import clsx from "clsx";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -32,12 +35,15 @@ type ActivePanel = "chord" | "instruction" | null;
 type SongUnitListFormProps = {
   fieldPrefix?: string;
   sectionClassName?: string;
+  toolbarClassName?: string;
 };
 
-export default function SongUnitListForm({ fieldPrefix = "", sectionClassName }: SongUnitListFormProps) {
+export default function SongUnitListForm({ fieldPrefix = "", sectionClassName, toolbarClassName = "px-4" }: SongUnitListFormProps) {
   const { units } = useArrangementUnitsFieldArray(fieldPrefix);
   const { watch } = useFormContext();
-  const currentKey = (watch(`${fieldPrefix}key`) as string) || "C";
+  const baseKey = (watch(`${fieldPrefix}key`) as string) || "C";
+  const songConfig = useContext(SongConfigContext);
+  const currentKey = transposeChord(baseKey, baseKey, songConfig?.transpose ?? 0);
 
   const [activeInsert, setActiveInsertState] = useState<InsertFn | null>(null);
   const [customComment, setCustomComment] = useState("");
@@ -85,14 +91,13 @@ export default function SongUnitListForm({ fieldPrefix = "", sectionClassName }:
   return (
     <InstructionToolbarContext.Provider value={{ activeInsert, setActiveInsert }}>
 
-      {/* Toolbar mobile — oculta em md+ */}
-      {hasUnits && (
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-100 md:hidden">
-          <div
-            className={`flex flex-wrap items-center gap-2 px-4 py-2 transition-opacity ${
-              isActive ? "opacity-100" : "opacity-30 pointer-events-none"
-            }`}
-          >
+      {/* Toolbar mobile — oculta em md+ e enquanto nenhum textarea estiver focado */}
+      {hasUnits && isActive && (
+        <div
+          className="sticky z-10 bg-white border-b border-gray-100 md:hidden"
+          style={{ top: "var(--song-header-h, 0px)" }}
+        >
+          <div className={`flex flex-wrap items-center gap-2 py-2 ${toolbarClassName}`}>
             <button
               type="button"
               onPointerDown={(e) => e.preventDefault()}
@@ -120,6 +125,15 @@ export default function SongUnitListForm({ fieldPrefix = "", sectionClassName }:
 
             {activePanel === "chord" && (
               <>
+                <div className="w-px h-4 bg-zinc-200 shrink-0" />
+                {songConfig && (
+                  <KeyButtonSet
+                    originalKey={baseKey}
+                    transpose={songConfig.transpose}
+                    setTranspose={songConfig.setTranspose}
+                    size="sm"
+                  />
+                )}
                 <div className="w-px h-4 bg-zinc-200 shrink-0" />
                 {grid.flatMap((row) => [row.triad, row.seventh]).map((chord) => (
                   <button

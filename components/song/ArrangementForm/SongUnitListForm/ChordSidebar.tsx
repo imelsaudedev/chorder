@@ -1,9 +1,12 @@
 "use client";
 
 import { ChordVariant, buildChordGrid } from "@/chopro/chord-grid";
+import { transposeChord } from "@/chopro/music";
+import { SongConfigContext } from "@/components/config/SongConfig";
+import KeyButtonSet from "@/components/config/KeyButtonSet";
 import clsx from "clsx";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useInstructionToolbar } from ".";
 
@@ -17,7 +20,9 @@ type ChordSidebarProps = {
 
 export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
   const { watch } = useFormContext();
-  const currentKey = (watch(`${fieldPrefix}key`) as string) || "C";
+  const baseKey = (watch(`${fieldPrefix}key`) as string) || "C";
+  const songConfig = useContext(SongConfigContext);
+  const currentKey = transposeChord(baseKey, baseKey, songConfig?.transpose ?? 0);
   const { activeInsert } = useInstructionToolbar();
 
   const [expanded, setExpanded] = useState(true);
@@ -57,8 +62,15 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
       )}
     >
       {/* Cabeçalho */}
-      <div className="flex items-center px-3 py-2 border-b border-zinc-200 shrink-0">
+      <div className="flex items-center px-3 py-2 border-b border-zinc-200 shrink-0 gap-2">
         {expanded && <span className="text-xs font-medium text-zinc-500 flex-1">Dicionário</span>}
+        {expanded && songConfig && (
+          <KeyButtonSet
+            originalKey={baseKey}
+            transpose={songConfig.transpose}
+            setTranspose={songConfig.setTranspose}
+          />
+        )}
         <button
           type="button"
           onPointerDown={(e) => e.preventDefault()}

@@ -118,8 +118,8 @@
   "ServiceView": {
     "editChords": "Editar cifras",
     "saveScopeTitle": "Salvar alterações",
-    "serviceOnly": "Só neste culto",
-    "serviceAndOriginal": "Neste culto e no original",
+    "serviceOnly": "Só nesta liturgia",
+    "serviceAndOriginal": "Na liturgia e no original",
     "cancelEdit": "Cancelar edição",
     "saveChanges": "Salvar",
     "saveError": "Erro ao salvar. Tente novamente."

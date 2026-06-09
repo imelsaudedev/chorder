@@ -17,12 +17,14 @@ type KeyButtonSetProps = {
   originalKey: string;
   transpose: number;
   setTranspose: Dispatch<SetStateAction<number>>;
+  size?: "default" | "sm";
 };
 
 export default function KeyButtonSet({
   originalKey,
   transpose,
   setTranspose,
+  size = "default",
 }: KeyButtonSetProps) {
   const [songKey, setSongKey] = useState<string>(originalKey);
   useEffect(() => {
@@ -57,6 +59,7 @@ export default function KeyButtonSet({
       decrease={handleDecrease}
       decreaseLabel="♭"
       increaseLabel="♯"
+      size={size}
     />
   );
 }

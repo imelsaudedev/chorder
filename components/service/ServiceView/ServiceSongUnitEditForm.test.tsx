@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import ServiceSongUnitEditForm from './ServiceSongUnitEditForm';
+import { MutableRefObject } from 'react';
+import ServiceSongUnitEditForm, { EditFormHandle } from './ServiceSongUnitEditForm';
 import { useCreateOrUpdateArrangement } from '#api-client';
 import { ClientServiceUnit } from '@/prisma/models';
 
@@ -15,28 +15,6 @@ vi.mock('#api-client', () => ({
 
 vi.mock('@/components/song/ArrangementForm/SongUnitListForm', () => ({
   default: () => <div data-testid="song-unit-list-form" />,
-}));
-
-vi.mock('./SaveScopeDialog', () => ({
-  default: ({ open, onSaveServiceOnly, onSaveWithOriginal, isSaving }: any) =>
-    open ? (
-      <div data-testid="save-scope-dialog">
-        <button
-          onClick={onSaveServiceOnly}
-          disabled={isSaving}
-          data-testid="dialog-save-service-only"
-        >
-          serviceOnly
-        </button>
-        <button
-          onClick={onSaveWithOriginal}
-          disabled={isSaving}
-          data-testid="dialog-save-with-original"
-        >
-          serviceAndOriginal
-        </button>
-      </div>
-    ) : null,
 }));
 
 const mockUnit: ClientServiceUnit = {
@@ -77,6 +55,10 @@ const mockUnit: ClientServiceUnit = {
   },
 };
 
+function makeSubmitRef(): MutableRefObject<EditFormHandle | null> {
+  return { current: null };
+}
+
 let mockSaveToService: ReturnType<typeof vi.fn>;
 let mockSaveToOriginal: ReturnType<typeof vi.fn>;
 
@@ -94,41 +76,32 @@ beforeEach(() => {
 
 describe('ServiceSongUnitEditForm', () => {
   it('renders SongUnitListForm', () => {
-    render(<ServiceSongUnitEditForm unit={mockUnit} onSaved={vi.fn()} onCancel={vi.fn()} />);
+    const submitRef = makeSubmitRef();
+    render(
+      <ServiceSongUnitEditForm
+        unit={mockUnit}
+        submitRef={submitRef}
+        onSavingChange={vi.fn()}
+        onSaved={vi.fn()}
+      />
+    );
     expect(screen.getByTestId('song-unit-list-form')).toBeDefined();
   });
 
-  it('renders save and cancel buttons', () => {
-    render(<ServiceSongUnitEditForm unit={mockUnit} onSaved={vi.fn()} onCancel={vi.fn()} />);
-    expect(screen.getByTestId('edit-form-cancel')).toBeDefined();
-    expect(screen.getByTestId('edit-form-save')).toBeDefined();
-  });
-
-  it('calls onCancel when cancel button clicked', async () => {
-    const user = userEvent.setup();
-    const onCancel = vi.fn();
-    render(<ServiceSongUnitEditForm unit={mockUnit} onSaved={vi.fn()} onCancel={onCancel} />);
-    await user.click(screen.getByTestId('edit-form-cancel'));
-    expect(onCancel).toHaveBeenCalledTimes(1);
-  });
-
-  it('opens SaveScopeDialog when save clicked and has originalArrangementId', async () => {
-    const user = userEvent.setup();
-    render(<ServiceSongUnitEditForm unit={mockUnit} onSaved={vi.fn()} onCancel={vi.fn()} />);
-    expect(screen.queryByTestId('save-scope-dialog')).toBeNull();
-    await user.click(screen.getByTestId('edit-form-save'));
-    await waitFor(() => {
-      expect(screen.getByTestId('save-scope-dialog')).toBeDefined();
-    });
-  });
-
-  it('saves only to service and calls onSaved when serviceOnly chosen', async () => {
-    const user = userEvent.setup();
+  it('saves only to service and calls onSaved when submit("service") called', async () => {
+    const submitRef = makeSubmitRef();
     const onSaved = vi.fn();
-    render(<ServiceSongUnitEditForm unit={mockUnit} onSaved={onSaved} onCancel={vi.fn()} />);
-    await user.click(screen.getByTestId('edit-form-save'));
-    await waitFor(() => screen.getByTestId('save-scope-dialog'));
-    await user.click(screen.getByTestId('dialog-save-service-only'));
+    render(
+      <ServiceSongUnitEditForm
+        unit={mockUnit}
+        submitRef={submitRef}
+        onSavingChange={vi.fn()}
+        onSaved={onSaved}
+      />
+    );
+    await act(async () => {
+      await submitRef.current?.submit('service');
+    });
     await waitFor(() => {
       expect(mockSaveToService).toHaveBeenCalledTimes(1);
       expect(mockSaveToOriginal).not.toHaveBeenCalled();
@@ -136,13 +109,20 @@ describe('ServiceSongUnitEditForm', () => {
     });
   });
 
-  it('saves to both service and original when serviceAndOriginal chosen', async () => {
-    const user = userEvent.setup();
+  it('saves to both service and original when submit("both") called', async () => {
+    const submitRef = makeSubmitRef();
     const onSaved = vi.fn();
-    render(<ServiceSongUnitEditForm unit={mockUnit} onSaved={onSaved} onCancel={vi.fn()} />);
-    await user.click(screen.getByTestId('edit-form-save'));
-    await waitFor(() => screen.getByTestId('save-scope-dialog'));
-    await user.click(screen.getByTestId('dialog-save-with-original'));
+    render(
+      <ServiceSongUnitEditForm
+        unit={mockUnit}
+        submitRef={submitRef}
+        onSavingChange={vi.fn()}
+        onSaved={onSaved}
+      />
+    );
+    await act(async () => {
+      await submitRef.current?.submit('both');
+    });
     await waitFor(() => {
       expect(mockSaveToService).toHaveBeenCalledTimes(1);
       expect(mockSaveToOriginal).toHaveBeenCalledTimes(1);
@@ -150,30 +130,43 @@ describe('ServiceSongUnitEditForm', () => {
     });
   });
 
-  it('saves directly to service without dialog when no originalArrangementId', async () => {
-    const user = userEvent.setup();
-    const onSaved = vi.fn();
+  it('saves only to service when no originalArrangementId even if scope is "both"', async () => {
     const unitWithoutOriginal: ClientServiceUnit = {
       ...mockUnit,
       arrangement: { ...mockUnit.arrangement!, originalArrangementId: null },
     };
+    const submitRef = makeSubmitRef();
+    const onSaved = vi.fn();
     render(
-      <ServiceSongUnitEditForm unit={unitWithoutOriginal} onSaved={onSaved} onCancel={vi.fn()} />
+      <ServiceSongUnitEditForm
+        unit={unitWithoutOriginal}
+        submitRef={submitRef}
+        onSavingChange={vi.fn()}
+        onSaved={onSaved}
+      />
     );
-    await user.click(screen.getByTestId('edit-form-save'));
+    await act(async () => {
+      await submitRef.current?.submit('both');
+    });
     await waitFor(() => {
-      expect(screen.queryByTestId('save-scope-dialog')).toBeNull();
       expect(mockSaveToService).toHaveBeenCalledTimes(1);
       expect(onSaved).toHaveBeenCalledTimes(1);
     });
   });
 
   it('original save data uses originalArrangementId as id', async () => {
-    const user = userEvent.setup();
-    render(<ServiceSongUnitEditForm unit={mockUnit} onSaved={vi.fn()} onCancel={vi.fn()} />);
-    await user.click(screen.getByTestId('edit-form-save'));
-    await waitFor(() => screen.getByTestId('save-scope-dialog'));
-    await user.click(screen.getByTestId('dialog-save-with-original'));
+    const submitRef = makeSubmitRef();
+    render(
+      <ServiceSongUnitEditForm
+        unit={mockUnit}
+        submitRef={submitRef}
+        onSavingChange={vi.fn()}
+        onSaved={vi.fn()}
+      />
+    );
+    await act(async () => {
+      await submitRef.current?.submit('both');
+    });
     await waitFor(() => {
       const originalCallArg = mockSaveToOriginal.mock.calls[0][0] as any;
       expect(originalCallArg.id).toBe(1);

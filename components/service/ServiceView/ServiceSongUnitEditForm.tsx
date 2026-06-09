@@ -3,30 +3,32 @@
 import { useCreateOrUpdateArrangement } from "#api-client";
 import { defaultArrangementValues } from "@/components/song/ArrangementForm/useArrangementForm";
 import SongUnitListForm from "@/components/song/ArrangementForm/SongUnitListForm";
-import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { ClientArrangement, ClientServiceUnit } from "@/prisma/models";
 import { ArrangementSchema, arrangementSchema } from "@/schemas/arrangement";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import SaveScopeDialog from "./SaveScopeDialog";
+
+export type EditFormHandle = {
+  submit: (scope: "service" | "both") => void;
+};
 
 type ServiceSongUnitEditFormProps = {
   unit: ClientServiceUnit;
+  submitRef: MutableRefObject<EditFormHandle | null>;
+  onSavingChange: (saving: boolean) => void;
   onSaved: () => void;
-  onCancel: () => void;
 };
 
 export default function ServiceSongUnitEditForm({
   unit,
+  submitRef,
+  onSavingChange,
   onSaved,
-  onCancel,
 }: ServiceSongUnitEditFormProps) {
   const t = useTranslations("ServiceView");
-  const tMessages = useTranslations("Messages");
 
   const arrangement = unit.arrangement!;
 
@@ -38,8 +40,6 @@ export default function ServiceSongUnitEditForm({
     },
   });
 
-  const [scopeDialogOpen, setScopeDialogOpen] = useState(false);
-  const [pendingData, setPendingData] = useState<ArrangementSchema | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const { createOrUpdateArrangement: saveToService, isMutating: savingService } =
@@ -48,6 +48,13 @@ export default function ServiceSongUnitEditForm({
     useCreateOrUpdateArrangement(arrangement.originalArrangementId ?? null);
 
   const isSaving = savingService || savingOriginal;
+
+  const onSavingChangeRef = useRef(onSavingChange);
+  onSavingChangeRef.current = onSavingChange;
+
+  useEffect(() => {
+    onSavingChangeRef.current(isSaving);
+  }, [isSaving]);
 
   function buildServicePayload(data: ArrangementSchema): ClientArrangement {
     return {
@@ -70,15 +77,6 @@ export default function ServiceSongUnitEditForm({
     } as ClientArrangement;
   }
 
-  function handleSave(data: ArrangementSchema) {
-    if (arrangement.originalArrangementId) {
-      setPendingData(data);
-      setScopeDialogOpen(true);
-    } else {
-      performSave(data, "service");
-    }
-  }
-
   async function performSave(data: ArrangementSchema, scope: "service" | "both") {
     setSaveError(null);
     try {
@@ -90,56 +88,24 @@ export default function ServiceSongUnitEditForm({
       } else {
         await saveToService(buildServicePayload(data));
       }
-      setScopeDialogOpen(false);
       onSaved();
     } catch {
       setSaveError(t("saveError"));
     }
   }
 
-  return (
-    <>
-      <Form {...form}>
-        <div className="pt-4 pb-2">
-          <SongUnitListForm fieldPrefix="" sectionClassName="" />
-          <div className="flex flex-col gap-2 pt-4">
-            {saveError && (
-              <p className="text-sm text-red-500 text-right">{saveError}</p>
-            )}
-            <div className="flex gap-2 justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-                disabled={isSaving}
-                data-testid="edit-form-cancel"
-              >
-                {tMessages("cancel")}
-              </Button>
-              <Button
-                type="button"
-                disabled={isSaving}
-                onClick={form.handleSubmit(handleSave)}
-                data-testid="edit-form-save"
-              >
-                {isSaving && <Loader2 size={14} className="mr-2 animate-spin" />}
-                {t("saveChanges")}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Form>
+  useEffect(() => {
+    submitRef.current = {
+      submit: (scope: "service" | "both") => form.handleSubmit((data) => performSave(data, scope))(),
+    };
+  });
 
-      {pendingData && (
-        <SaveScopeDialog
-          open={scopeDialogOpen}
-          onOpenChange={setScopeDialogOpen}
-          songTitle={arrangement.song?.title ?? ""}
-          isSaving={isSaving}
-          onSaveServiceOnly={() => performSave(pendingData, "service")}
-          onSaveWithOriginal={() => performSave(pendingData, "both")}
-        />
+  return (
+    <Form {...form}>
+      <SongUnitListForm fieldPrefix="" sectionClassName="" toolbarClassName="" />
+      {saveError && (
+        <p className="text-sm text-red-500 text-right py-2 px-2">{saveError}</p>
       )}
-    </>
+    </Form>
   );
 }
