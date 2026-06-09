@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { arrangementSchema } from "./arrangement";
 
-const baseUnit = { content: "Verso", type: "VERSE" as const, order: 1, notes: null };
+const baseUnit = { content: "Verso", type: "VERSE" as const, order: 1, notes: null, repeatCount: 1 };
 
 const baseArrangement = {
   key: "G",

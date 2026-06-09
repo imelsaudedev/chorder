@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { songUnitSchema } from "./song-unit";
 
-const baseUnit = { content: "[G]Verso", type: "VERSE" as const, order: 1, notes: null };
+const baseUnit = { content: "[G]Verso", type: "VERSE" as const, order: 1, notes: null, repeatCount: 1 };
 
 describe("songUnitSchema — notes", () => {
   it("aceita notes null", () => {

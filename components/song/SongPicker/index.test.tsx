@@ -14,9 +14,30 @@ vi.mock('next/link', () => ({
   default: ({ children, href }: any) => <a href={href}>{children}</a>,
 }));
 
-// Mock the api-client
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => '/',
+  useParams: () => ({}),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 vi.mock('#api-client', () => ({
   useFetchSongs: vi.fn(),
+  useFetchSong: vi.fn(() => ({})),
+  useFetchSongArrangements: vi.fn(() => ({})),
+  useFetchArrangement: vi.fn(() => ({})),
+  useCreateOrUpdateArrangement: vi.fn(() => ({})),
+  useDeleteArrangement: vi.fn(() => ({})),
+  useMoveArrangement: vi.fn(() => ({})),
+  useMakeArrangementDefault: vi.fn(() => ({})),
+  useDuplicateArrangement: vi.fn(() => ({})),
+  useFetchServices: vi.fn(() => ({})),
+  useFetchService: vi.fn(() => ({})),
+  useDeleteService: vi.fn(() => ({})),
+  useCreateOrUpdateService: vi.fn(() => ({})),
+  useArchiveSong: vi.fn(() => ({})),
+  useUpdateSong: vi.fn(() => ({ updateSong: vi.fn() })),
+  useFetchTagGroups: vi.fn(() => ({ tagGroups: [], isLoading: false, isError: null })),
 }));
 
 describe('SongPicker component', () => {
