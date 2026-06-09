@@ -1,7 +1,7 @@
 import { put, del } from "@vercel/blob";
 import { NextRequest } from "next/server";
 
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["audio/mpeg", "audio/mp4", "audio/aac", "audio/x-m4a"];
 
 export async function POST(request: NextRequest) {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (file.size > MAX_SIZE_BYTES) {
-    return new Response("Arquivo muito grande. Limite de 5MB.", { status: 400 });
+    return new Response("Arquivo muito grande. Limite de 10MB.", { status: 400 });
   }
 
   const blob = await put(`audio/${Date.now()}-${file.name}`, file, {

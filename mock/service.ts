@@ -23,7 +23,7 @@ export default {
         isDeleted: false,
         isServiceArrangement: true,
         youtubeUrl: null,
-        audioUrl: null,
+        audios: [],
         song: {
           id: 53,
           title: "Glória e Força",
@@ -38,29 +38,39 @@ export default {
             type: "INTRO" as const,
             content: "[D]  [Bb]  [Am]  [Gm]  [Am]  [G/B]",
             order: 1,
+            notes: null,
+            repeatCount: 1,
           },
           {
             type: "VERSE" as const,
             content:
               "[D]Cristo é Senhor\nVamos [G/D]sim, declarar\n[Em]Todos a uma [D]voz.\n[D]É sua vida\nO mo[G/B]tivo maior\n[Em7]Do nosso lou[D]vor.",
             order: 2,
+            notes: null,
+            repeatCount: 1,
           },
           {
             type: "VERSE" as const,
             content:
               "[F]Cristo deu sua [Bb/F]vida por nós\n[C/F]De todo mal veio [Bb/F]nos liber[F]tar\nSo[Bb]freu nossa dor pra nos [C]dar sua paz\n[Bb]Louvado [Am7]seja o Sen[Dm]hor! [C/E]\nLou[F]vado [G]seja o Sen[A4]hor! [A]",
             order: 3,
+            notes: null,
+            repeatCount: 1,
           },
           {
             type: "CHORUS" as const,
             content:
               "Bendi[D]remos [G/D]sempre ao Sen[D]hor\nViveremos [G/D]pra seu lou[D]vor [D/F#]\nGlória e [G]for[D/F#]ça [Em]a ti Sen[D]hor\nToda [G]hon[D/F#]ra, [Em]todo lou[A]vor\nGlória e [G]for[D/F#]ça [Em]a ti Sen[D]hor\nToda [G]hon[D/F#]ra, [Em]todo lou[D]vor",
             order: 4,
+            notes: null,
+            repeatCount: 1,
           },
           {
             type: "ENDING" as const,
             content: "[Bb7+]  [Am7]  [G]  [Em7]  [D]",
             order: 5,
+            notes: null,
+            repeatCount: 1,
           },
         ],
       },
@@ -80,7 +90,7 @@ export default {
         isDeleted: false,
         isServiceArrangement: true,
         youtubeUrl: null,
-        audioUrl: null,
+        audios: [],
         song: {
           id: 108,
           title: "A Glória Pertence ao Senhor",
@@ -95,30 +105,40 @@ export default {
             type: "INTRO" as const,
             content: "[E]   [F#m]   [E/G#]   [A]",
             order: 1,
+            notes: null,
+            repeatCount: 1,
           },
           {
             type: "VERSE" as const,
             content:
               "A [E]glória pertence ao Se[A/E]nhor\nQue é [E]digno de todo o louv[A/E]or\nCan[A]tar a can[B/A]ção de [G#7]adora[C#m]ção\nÉ o [F#m]que nós de[B7]vemos fa[E]zer[A/E].",
             order: 2,
+            notes: null,
+            repeatCount: 1,
           },
           {
             type: "VERSE" as const,
             content:
               "Pois [E]tem em Suas mãos o [A/E]poder\nA [E]força, a honra, o que[A/E]rer\nLou[A]vemos en[B/A]tão, com [G#7]o cora[C#m]ção\nLou[F#m]var é a [B7]nossa expres[E]são.",
             order: 3,
+            notes: null,
+            repeatCount: 1,
           },
           {
             type: "CHORUS" as const,
             content:
               "Pois [B]reina em [B/D#]toda a [E]terra\nE [B]traz sobre [Cº]nós Sua [C#m]paz\nO Es[A]pírito [B/A]Santo der[G#7]rama un[C#m]ção\nPra [F#m]sermos de [B]fato cris[E]tãos.",
             order: 4,
+            notes: null,
+            repeatCount: 1,
           },
           {
             type: "CHORUS" as const,
             content:
               "A [B]Glória per[B/D#]tence a [A/E]Cris[E]to\nQue é [B]digno de [Cº]todo o lou[C#m]vor\nQue c[A]resça em [B/A]nós o [G#7]Seu grande a[C#m]mor\nLou[F#m]vemos ao [B]nosso Sen[E]hor.",
             order: 5,
+            notes: null,
+            repeatCount: 1,
           },
         ],
       },

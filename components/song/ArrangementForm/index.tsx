@@ -39,7 +39,7 @@ export default function ArrangementForm({
     isServiceArrangement: false,
     originalArrangementId: null,
     youtubeUrl: null,
-    audioUrl: null,
+    audios: [],
     song: {
       title: defaultMeta.title,
       artist: defaultMeta.artist,

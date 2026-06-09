@@ -56,13 +56,22 @@ model SongArrangement {
   isServiceArrangement Boolean @default(false)
 
   youtubeUrl   String?
-  audioUrl     String?
 
   song      Song @relation(fields: [songId], references: [id])
   originalArrangement SongArrangement? @relation("OriginalArrangement", fields: [originalArrangementId], references: [id])
   childrenArrangements SongArrangement[] @relation("OriginalArrangement")
   serviceUnit ServiceUnit?
   units SongUnit[]
+  audios ArrangementAudio[]
+}
+
+model ArrangementAudio {
+  id            Int             @id @default(autoincrement())
+  arrangementId Int
+  arrangement   SongArrangement @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
+  url           String
+  label         String
+  order         Int             @default(0)
 }
 
 model SongUnit {

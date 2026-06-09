@@ -60,7 +60,7 @@ function buildArrangement(
     isDeleted: false,
     isServiceArrangement: false,
     youtubeUrl: null,
-    audioUrl: null,
+    audios: [],
   };
 }
 

@@ -152,7 +152,7 @@ export async function retrieveSongs({
           isServiceArrangement: true,
           originalArrangementId: true,
           youtubeUrl: true,
-          audioUrl: true,
+          audios: { select: { id: true, url: true, label: true, order: true }, orderBy: { order: "asc" } },
         },
         orderBy: [{ isDefault: "desc" }],
       },
@@ -236,11 +236,12 @@ export async function retrieveSong(
                     orderBy: { order: "asc" },
                   }
                 : false,
+              audios: { orderBy: { order: "asc" } },
             },
           }
         : false,
     },
-  });
+  }) as unknown as Promise<ClientSong | null>;
 }
 
 export async function retrieveSongArrangements(
@@ -263,11 +264,8 @@ export async function retrieveSongArrangements(
     },
     include: {
       song: includeSong,
-      units: includeUnits
-        ? {
-            orderBy: { order: "asc" },
-          }
-        : false,
+      units: includeUnits ? { orderBy: { order: "asc" } } : false,
+      audios: { orderBy: { order: "asc" } },
     },
   });
 }
@@ -300,11 +298,8 @@ export async function retrieveArrangement(
         isDeleted: false,
       },
       include: {
-        units: includeUnits
-          ? {
-              orderBy: { order: "asc" },
-            }
-          : false,
+        units: includeUnits ? { orderBy: { order: "asc" } } : false,
+        audios: { orderBy: { order: "asc" } },
         song: includeSong
           ? {
               include: {
@@ -343,11 +338,8 @@ export async function retrieveArrangement(
   return prisma.songArrangement.findFirst({
     where,
     include: {
-      units: includeUnits
-        ? {
-            orderBy: { order: "asc" },
-          }
-        : false,
+      units: includeUnits ? { orderBy: { order: "asc" } } : false,
+      audios: { orderBy: { order: "asc" } },
       song: includeSong
         ? {
             include: {
@@ -400,7 +392,6 @@ export async function createArrangementWithSong(
       key: arrangement.key,
       isDefault: arrangement.isDefault,
       youtubeUrl: arrangement.youtubeUrl ?? null,
-      audioUrl: arrangement.audioUrl ?? null,
       song: {
         connectOrCreate: {
           where: { slug: songSlug },
@@ -417,14 +408,14 @@ export async function createArrangementWithSong(
           data: arrangement.units,
         },
       },
+      audios: arrangement.audios?.length
+        ? { createMany: { data: arrangement.audios.map(({ id, ...a }) => a) } }
+        : undefined,
     },
     include: {
       song: true,
-      units: includeUnits
-        ? {
-            orderBy: { order: "asc" },
-          }
-        : false,
+      units: includeUnits ? { orderBy: { order: "asc" } } : false,
+      audios: { orderBy: { order: "asc" } },
     },
   });
   if (createdArrangement.song.isDeleted) {
@@ -473,14 +464,12 @@ export async function updateArrangement(
     name?: string | null;
     key?: string;
     youtubeUrl?: string | null;
-    audioUrl?: string | null;
     units?: any;
   } = {
     id: arrangement.id,
     name: arrangement.name,
     key: arrangement.key,
     youtubeUrl: arrangement.youtubeUrl || null,
-    audioUrl: arrangement.audioUrl || null,
   };
 
   const song = arrangement.song ?? baseArrangement.song!;
@@ -510,26 +499,36 @@ export async function updateArrangement(
     where: { slug: song.slug },
     data: songData,
   });
+  if (arrangement.audios !== undefined) {
+    const keptIds = arrangement.audios.filter((a) => a.id).map((a) => a.id!);
+    await prisma.arrangementAudio.deleteMany({
+      where: {
+        arrangementId: arrangement.id,
+        ...(keptIds.length > 0 ? { id: { notIn: keptIds } } : {}),
+      },
+    });
+    for (const audio of arrangement.audios) {
+      if (audio.id) {
+        await prisma.arrangementAudio.update({
+          where: { id: audio.id },
+          data: { label: audio.label, order: audio.order },
+        });
+      } else {
+        await prisma.arrangementAudio.create({
+          data: { arrangementId: arrangement.id!, url: audio.url, label: audio.label, order: audio.order },
+        });
+      }
+    }
+  }
   return prisma.songArrangement.update({
-    where: {
-      id: arrangement.id,
-    },
+    where: { id: arrangement.id },
     data: arrangementData,
     include: {
       song: includeSong
-        ? {
-            include: {
-              arrangements: {
-                where: { isDeleted: false },
-              },
-            },
-          }
+        ? { include: { arrangements: { where: { isDeleted: false } } } }
         : false,
-      units: includeUnits
-        ? {
-            orderBy: { order: "asc" },
-          }
-        : false,
+      units: includeUnits ? { orderBy: { order: "asc" } } : false,
+      audios: { orderBy: { order: "asc" } },
     },
   });
 }
@@ -714,12 +713,16 @@ export async function duplicateArrangement(
             [],
         },
       },
+      audios: arrangement.audios?.length
+        ? { createMany: { data: arrangement.audios.map(({ id, ...a }) => a) } }
+        : undefined,
     },
     include: {
       song: true,
       units: {
         orderBy: { order: "asc" },
       },
+      audios: { orderBy: { order: "asc" } },
     },
   });
 
@@ -745,7 +748,13 @@ export async function retrieveService(
             include: {
               song: true,
               units: { orderBy: { order: "asc" } },
-              originalArrangement: { select: { youtubeUrl: true, audioUrl: true } },
+              audios: { orderBy: { order: "asc" } },
+              originalArrangement: {
+                select: {
+                  youtubeUrl: true,
+                  audios: { orderBy: { order: "asc" } },
+                },
+              },
             },
           },
         },
@@ -764,10 +773,10 @@ export async function retrieveService(
                 unit.arrangement.youtubeUrl ??
                 unit.arrangement.originalArrangement?.youtubeUrl ??
                 null,
-              audioUrl:
-                unit.arrangement.audioUrl ??
-                unit.arrangement.originalArrangement?.audioUrl ??
-                null,
+              audios:
+                unit.arrangement.audios?.length
+                  ? unit.arrangement.audios
+                  : unit.arrangement.originalArrangement?.audios ?? [],
             }
           : null,
       })),
@@ -824,6 +833,7 @@ export async function createOrUpdateService(
             include: {
               song: true,
               units: { orderBy: { order: "asc" } },
+              audios: { orderBy: { order: "asc" } },
             },
           },
         },

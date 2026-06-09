@@ -34,7 +34,7 @@ const baseArrangement: ClientArrangement = {
   isDeleted: false,
   isServiceArrangement: true,
   youtubeUrl: null,
-  audioUrl: null,
+  audios: [],
   song: {
     id: 53,
     title: 'Glória e Força',
@@ -79,7 +79,11 @@ describe('ServiceArrangementHeader — view mode', () => {
     render(
       <ServiceArrangementHeader
         {...defaultProps}
-        arrangement={{ ...baseArrangement, youtubeUrl: 'https://yt.be/x', audioUrl: 'https://audio.mp3' }}
+        arrangement={{
+          ...baseArrangement,
+          youtubeUrl: 'https://yt.be/x',
+          audios: [{ id: 1, url: 'https://audio.mp3', label: 'Voz', order: 0 }],
+        }}
       />
     );
     expect(screen.getByTestId('youtube-btn')).toBeDefined();
@@ -91,7 +95,11 @@ describe('ServiceArrangementHeader — view mode', () => {
       <ServiceArrangementHeader
         {...defaultProps}
         isEditing
-        arrangement={{ ...baseArrangement, youtubeUrl: 'https://yt.be/x', audioUrl: 'https://audio.mp3' }}
+        arrangement={{
+          ...baseArrangement,
+          youtubeUrl: 'https://yt.be/x',
+          audios: [{ id: 1, url: 'https://audio.mp3', label: 'Voz', order: 0 }],
+        }}
       />
     );
     expect(screen.queryByTestId('youtube-btn')).toBeNull();

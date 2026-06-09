@@ -44,7 +44,7 @@ const mockArrangement: ClientArrangement = {
   isDeleted: false,
   isServiceArrangement: false,
   youtubeUrl: null,
-  audioUrl: null,
+  audios: [],
   song: {
     id: 10,
     title: 'Amazing Grace',
@@ -53,8 +53,8 @@ const mockArrangement: ClientArrangement = {
     lyrics: '...',
     isDeleted: false,
     arrangements: [
-      { id: 1, name: 'Default', key: 'G', isDefault: true, isDeleted: false, isServiceArrangement: false, originalArrangementId: null, youtubeUrl: null, audioUrl: null },
-      { id: 2, name: 'Alt', key: 'A', isDefault: false, isDeleted: false, isServiceArrangement: false, originalArrangementId: null, youtubeUrl: null, audioUrl: null },
+      { id: 1, name: 'Default', key: 'G', isDefault: true, isDeleted: false, isServiceArrangement: false, originalArrangementId: null, youtubeUrl: null, audios: [] },
+      { id: 2, name: 'Alt', key: 'A', isDefault: false, isDeleted: false, isServiceArrangement: false, originalArrangementId: null, youtubeUrl: null, audios: [] },
     ]
   }
 };

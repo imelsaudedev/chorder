@@ -98,7 +98,7 @@ export default function SongListEntry({
 
   const verse1Lines = getVerse1Lines(song.lyrics);
 
-  const hasAnyMedia = arrangements.some((a) => a.youtubeUrl || a.audioUrl);
+  const hasAnyMedia = arrangements.some((a) => a.youtubeUrl || (a.audios?.length ?? 0) > 0);
 
   const arrangementDropdown =
     arrangements.length > 1 && hasAnyMedia ? (
@@ -205,9 +205,9 @@ export default function SongListEntry({
             className={BTN_SM}
           />
         )}
-        {selectedArr?.audioUrl && (
+        {(selectedArr?.audios?.length ?? 0) > 0 && (
           <AudioReferenceButton
-            audioUrl={selectedArr.audioUrl}
+            audios={selectedArr!.audios!}
             title={playTitle}
             className={BTN_SM}
           />

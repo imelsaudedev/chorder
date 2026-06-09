@@ -11,7 +11,7 @@ const baseArrangement = {
   isDeleted: false,
   isServiceArrangement: false,
   youtubeUrl: null,
-  audioUrl: null,
+  audios: [],
   units: [baseUnit],
 };
 
@@ -57,35 +57,32 @@ describe("arrangementSchema — youtubeUrl", () => {
   });
 });
 
-describe("arrangementSchema — audioUrl", () => {
-  it("aceita URL válida", () => {
+describe("arrangementSchema — audios", () => {
+  it("aceita array vazio", () => {
+    const result = arrangementSchema.safeParse({ ...baseArrangement, audios: [] });
+    expect(result.success).toBe(true);
+  });
+
+  it("aceita array com um áudio válido", () => {
     const result = arrangementSchema.safeParse({
       ...baseArrangement,
-      audioUrl: "https://example.com/audio.mp3",
+      audios: [{ url: "https://example.com/audio.mp3", label: "Voz", order: 0 }],
     });
     expect(result.success).toBe(true);
   });
 
-  it("aceita string vazia", () => {
+  it("rejeita áudio sem label", () => {
     const result = arrangementSchema.safeParse({
       ...baseArrangement,
-      audioUrl: "",
+      audios: [{ url: "https://example.com/audio.mp3", label: "", order: 0 }],
     });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
-  it("aceita null", () => {
+  it("rejeita áudio com URL inválida", () => {
     const result = arrangementSchema.safeParse({
       ...baseArrangement,
-      audioUrl: null,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("rejeita URL inválida", () => {
-    const result = arrangementSchema.safeParse({
-      ...baseArrangement,
-      audioUrl: "arquivo-local.mp3",
+      audios: [{ url: "nao-e-url", label: "Voz", order: 0 }],
     });
     expect(result.success).toBe(false);
   });

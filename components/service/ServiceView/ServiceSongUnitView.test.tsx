@@ -56,7 +56,7 @@ const mockUnit: ClientServiceUnit = {
     isDeleted: false,
     isServiceArrangement: true,
     youtubeUrl: null,
-    audioUrl: null,
+    audios: [],
     song: {
       id: 53,
       title: 'Glória e Força',

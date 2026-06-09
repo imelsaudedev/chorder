@@ -65,9 +65,9 @@ export default function FormHeader({
               title={unit.arrangement.song.title}
             />
           )}
-          {unit.arrangement.audioUrl && (
+          {(unit.arrangement.audios?.length ?? 0) > 0 && (
             <AudioReferenceButton
-              audioUrl={unit.arrangement.audioUrl}
+              audios={unit.arrangement.audios!}
               title={unit.arrangement.song.title}
             />
           )}

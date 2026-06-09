@@ -1,4 +1,5 @@
 import {
+  ArrangementAudio,
   Service,
   ServiceUnit,
   Song,
@@ -9,7 +10,9 @@ import {
   TagGroup,
 } from "@prisma/client";
 
-export type { ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType, Tag, TagGroup };
+export type { ArrangementAudio, ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType, Tag, TagGroup };
+
+export type ClientArrangementAudio = Omit<Pick<ArrangementAudio, "id" | "url" | "label" | "order">, "id"> & { id?: number };
 
 export type ClientTag = Pick<Tag, "id" | "name"> & {
   group: Pick<TagGroup, "id" | "name" | "color">;
@@ -40,12 +43,13 @@ export type ClientSong = Omit<Song, "id" | "legacyId"> & {
 };
 export type ClientArrangement = Omit<
   SongArrangement,
-  "id" | "legacyId" | "songId"
+  "id" | "songId"
 > & {
   id?: number;
   songId?: number;
   song?: ClientSong;
   units?: ClientSongUnit[];
+  audios: ClientArrangementAudio[];
 };
 export type ClientSongUnit = Omit<SongUnit, "id" | "arrangementId"> & {
   id?: number;

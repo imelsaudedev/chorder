@@ -1,23 +1,25 @@
 "use client";
 
-import { useAudioPlayer } from "@/components/common/AudioPlayer/context";
+import { AudioItem, useAudioPlayer } from "@/components/common/AudioPlayer/context";
 import { useYoutubePlayer } from "@/components/common/YoutubePlayer/context";
 import { Button } from "@/components/ui/button";
 import { Music } from "lucide-react";
 
 type AudioReferenceButtonProps = {
-  audioUrl: string;
+  audios: AudioItem[];
   title?: string;
   className?: string;
 };
 
 export default function AudioReferenceButton({
-  audioUrl,
+  audios,
   title,
   className,
 }: AudioReferenceButtonProps) {
   const { play } = useAudioPlayer();
   const { close: closeYoutube } = useYoutubePlayer();
+
+  if (!audios.length) return null;
 
   return (
     <Button
@@ -25,7 +27,7 @@ export default function AudioReferenceButton({
       variant="outline"
       size="icon"
       className={className}
-      onClick={() => { closeYoutube(); play(audioUrl, title); }}
+      onClick={() => { closeYoutube(); play(audios, title); }}
     >
       <Music className="text-emerald-600" />
       <span className="sr-only">Reproduzir referência de áudio</span>

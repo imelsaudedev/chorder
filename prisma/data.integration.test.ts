@@ -125,18 +125,20 @@ describe('createArrangementWithSong', () => {
     expect(dbArrangement?.youtubeUrl).toBe('https://www.youtube.com/watch?v=test123');
   });
 
-  it('persiste audioUrl no arranjo', async () => {
+  it('persiste audios no arranjo', async () => {
     const created = await createArrangementWithSong(
       {
         name: 'Com Áudio', key: 'A', isDefault: true,
-        audioUrl: 'https://example.com/audio.mp3',
+        audios: [{ url: 'https://example.com/audio.mp3', label: 'Voz', order: 0 }],
         song: { title: 'Música com Áudio', artist: null } as any,
-        units: [{ content: '[A]Verso', type: 'VERSE', order: 1, notes: null }],
+        units: [{ content: '[A]Verso', type: 'VERSE', order: 1, notes: null, repeatCount: 1 }],
       } as any,
       {}
     );
 
-    const dbArrangement = await prisma.songArrangement.findUnique({ where: { id: created.id } });
-    expect(dbArrangement?.audioUrl).toBe('https://example.com/audio.mp3');
+    const dbAudios = await prisma.arrangementAudio.findMany({ where: { arrangementId: created.id } });
+    expect(dbAudios).toHaveLength(1);
+    expect(dbAudios[0].url).toBe('https://example.com/audio.mp3');
+    expect(dbAudios[0].label).toBe('Voz');
   });
 });

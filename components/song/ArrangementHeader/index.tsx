@@ -40,7 +40,7 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
   const originalKey = arrangement.key ?? "";
   const hasMultipleArrangements = (arrangement.song?.arrangements?.length ?? 0) > 1;
   const hasContentActions =
-    songTags.length > 0 || hasMultipleArrangements || originalKey || arrangement.youtubeUrl || arrangement.audioUrl;
+    songTags.length > 0 || hasMultipleArrangements || originalKey || arrangement.youtubeUrl || (arrangement.audios?.length ?? 0) > 0;
 
   const handleEditSong = () => {
     openSongMetaModal({
@@ -119,9 +119,9 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
                     title={songTitle}
                   />
                 )}
-                {arrangement.audioUrl && (
+                {(arrangement.audios?.length ?? 0) > 0 && (
                   <AudioReferenceButton
-                    audioUrl={arrangement.audioUrl}
+                    audios={arrangement.audios!}
                     title={songTitle}
                   />
                 )}

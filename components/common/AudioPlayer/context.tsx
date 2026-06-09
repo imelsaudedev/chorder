@@ -2,27 +2,40 @@
 
 import { createContext, useContext, useState } from "react";
 
+export type AudioItem = { url: string; label: string };
+
 type AudioPlayerState = {
-  url: string | null;
+  audios: AudioItem[];
+  currentIndex: number;
   title?: string;
   isOpen: boolean;
 };
 
 type AudioPlayerContextType = AudioPlayerState & {
-  play: (url: string, title?: string) => void;
+  play: (audios: AudioItem[], title?: string) => void;
+  switchTo: (index: number) => void;
   close: () => void;
 };
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | null>(null);
 
 export function AudioPlayerProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AudioPlayerState>({ url: null, isOpen: false });
+  const [state, setState] = useState<AudioPlayerState>({
+    audios: [],
+    currentIndex: 0,
+    isOpen: false,
+  });
 
-  const play = (url: string, title?: string) => setState({ url, title, isOpen: true });
+  const play = (audios: AudioItem[], title?: string) =>
+    setState({ audios, currentIndex: 0, title, isOpen: true });
+
+  const switchTo = (index: number) =>
+    setState((s) => ({ ...s, currentIndex: index }));
+
   const close = () => setState((s) => ({ ...s, isOpen: false }));
 
   return (
-    <AudioPlayerContext.Provider value={{ ...state, play, close }}>
+    <AudioPlayerContext.Provider value={{ ...state, play, switchTo, close }}>
       {children}
     </AudioPlayerContext.Provider>
   );

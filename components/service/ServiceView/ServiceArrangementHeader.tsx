@@ -93,9 +93,9 @@ function ServiceArrangementHeader({
             title={arrangement.song.title}
           />
         )}
-        {!isEditing && arrangement.audioUrl && (
+        {!isEditing && (arrangement.audios?.length ?? 0) > 0 && (
           <AudioReferenceButton
-            audioUrl={arrangement.audioUrl}
+            audios={arrangement.audios!}
             title={arrangement.song.title}
           />
         )}

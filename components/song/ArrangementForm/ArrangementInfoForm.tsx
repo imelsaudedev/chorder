@@ -18,14 +18,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Music, Play, Upload } from "lucide-react";
+import { Music, Play, Trash2, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 
 const CHROMATIC_KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const ACCEPTED_AUDIO_TYPES = ".mp3,.m4a,.aac";
-const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
 type ArrangementInfoFormProps = {
   arrangementId?: number;
@@ -187,20 +187,20 @@ function YoutubeField({ fieldPrefix, arrangementId }: { fieldPrefix: string; arr
 /* ─── Áudio ───────────────────────────────────────────────────────────── */
 
 function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
-  const { watch, setValue, register } = useFormContext();
+  const { control, setValue } = useFormContext();
   const t = useTranslations();
-  const audioUrl = (watch(`${fieldPrefix}audioUrl`) as string) || "";
+  const { fields, append, remove } = useFieldArray({ control, name: `${fieldPrefix}audios` });
   const [open, setOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const hasAudio = Boolean(audioUrl);
+  const hasAudios = fields.length > 0;
 
-  async function handleAudioFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > MAX_SIZE_BYTES) { setUploadError("Máx. 5MB."); return; }
+    if (file.size > MAX_SIZE_BYTES) { setUploadError("Máx. 10MB."); return; }
     setUploadError(null);
     setIsUploading(true);
     try {
@@ -209,8 +209,8 @@ function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
       const res = await fetch("/api/upload-audio", { method: "POST", body: formData });
       if (!res.ok) { setUploadError(await res.text()); return; }
       const { url } = await res.json();
-      setValue(`${fieldPrefix}audioUrl`, url, { shouldDirty: true });
-      setOpen(false);
+      const defaultLabel = file.name.replace(/\.[^.]+$/, "");
+      append({ url, label: defaultLabel, order: fields.length });
     } catch {
       setUploadError("Erro ao enviar arquivo.");
     } finally {
@@ -219,75 +219,83 @@ function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
     }
   }
 
-  async function handleRemove() {
-    if (audioUrl) {
+  async function handleRemove(index: number) {
+    const audio = fields[index] as any;
+    if (audio?.url) {
       await fetch("/api/upload-audio", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: audioUrl }),
+        body: JSON.stringify({ url: audio.url }),
       }).catch(() => {});
     }
-    setValue(`${fieldPrefix}audioUrl`, "", { shouldDirty: true });
-    setOpen(false);
+    remove(index);
   }
 
   return (
-    <>
-      <input type="hidden" {...register(`${fieldPrefix}audioUrl`)} />
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          className={`gap-2 ${hasAudios ? "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100" : ""}`}
+        >
+          <Music size={15} className={hasAudios ? "text-emerald-600" : "text-zinc-400"} />
+          Áudio{hasAudios ? ` (${fields.length})` : ""}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Áudios de referência</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-3">
+          {fields.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {fields.map((field, idx) => (
+                <div key={field.id} className="flex items-center gap-2">
+                  <Music size={14} className="text-emerald-600 shrink-0" />
+                  <Input
+                    className="h-8 text-sm"
+                    defaultValue={(field as any).label}
+                    onChange={(e) =>
+                      setValue(`${fieldPrefix}audios.${idx}.label`, e.target.value, { shouldDirty: true })
+                    }
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(idx)}
+                    className="text-zinc-400 hover:text-red-500 transition-colors shrink-0"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED_AUDIO_TYPES}
+            className="hidden"
+            onChange={handleFileChange}
+          />
           <Button
             type="button"
             variant="outline"
-            className={`gap-2 ${hasAudio ? "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100" : ""}`}
+            disabled={isUploading}
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-2 w-fit"
           >
-            <Music size={15} className={hasAudio ? "text-emerald-600" : "text-zinc-400"} />
-            Áudio
+            <Upload size={14} />
+            {isUploading ? "Enviando…" : "Adicionar áudio (MP3, M4A, AAC — máx. 10MB)"}
           </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Áudio de referência</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-3">
-            {hasAudio && (
-              <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2">
-                <Music size={14} className="text-emerald-600 shrink-0" />
-                <span className="text-sm text-emerald-800 truncate flex-1">Áudio carregado</span>
-              </div>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={ACCEPTED_AUDIO_TYPES}
-              className="hidden"
-              onChange={handleAudioFileChange}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isUploading}
-              onClick={() => fileInputRef.current?.click()}
-              className="gap-2 w-fit"
-            >
-              <Upload size={14} />
-              {isUploading ? "Enviando…" : hasAudio ? "Substituir áudio" : "Carregar áudio (MP3, M4A, AAC — máx. 5MB)"}
-            </Button>
-            {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
-          </div>
-          <DialogFooter className="flex-row justify-between sm:justify-between">
-            {hasAudio && (
-              <Button type="button" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleRemove}>
-                Remover áudio
-              </Button>
-            )}
-            <Button type="button" variant="outline" className="ml-auto" onClick={() => setOpen(false)}>
-              {t("Messages.cancel")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+          {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" className="ml-auto" onClick={() => setOpen(false)}>
+            Fechar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
