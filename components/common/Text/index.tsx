@@ -11,10 +11,10 @@ export type TextVariant =
   | "overline";    // letras iniciais, categorias em caps
 
 const styles: Record<TextVariant, string> = {
-  "heading-xl": "font-bricolage font-bold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-primary",
-  "heading-lg": "font-bricolage font-semibold text-xl sm:text-2xl lg:text-3xl tracking-tight leading-none text-primary",
-  "heading-md": "font-bricolage font-semibold text-lg lg:text-xl leading-tight text-primary",
-  "heading-sm": "font-bricolage font-semibold text-base leading-snug text-primary",
+  "heading-xl": "font-bricolage font-semibold text-3xl sm:text-4xl lg:text-5xl tracking-tighter text-primary",
+  "heading-lg": "font-bricolage font-semibold text-xl sm:text-2xl lg:text-3xl tracking-tighter leading-none text-primary",
+  "heading-md": "font-bricolage font-semibold text-lg lg:text-xl tracking-tight leading-tight text-primary",
+  "heading-sm": "font-bricolage font-semibold text-base tracking-tight leading-snug text-primary",
   "body":       "text-base text-foreground",
   "label":      "text-sm font-medium text-foreground",
   "caption":    "text-sm text-muted-foreground",

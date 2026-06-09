@@ -1,5 +1,5 @@
 import {
-  bricolageGrotesque,
+  spaceGrotesk,
   ibmPlexMono,
   ibmPlexSans,
   ibmPlexSerif,
@@ -35,7 +35,7 @@ export default async function RootLayout({
     <html lang="en">
       <head></head>
       <body
-        className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${bricolageGrotesque.variable} font-sans`}
+        className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} font-sans`}
         suppressHydrationWarning
       >
         <NextIntlClientProvider
