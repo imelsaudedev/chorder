@@ -7,6 +7,7 @@ export default function ChordProLine({
   items,
   originalKey,
   transpose,
+  enharmonicPreference,
   mode,
   density,
   commentClass,
@@ -32,6 +33,7 @@ export default function ChordProLine({
     hasLyrics,
     hasChords,
     transpose,
+    enharmonicPreference,
     density,
     commentClass,
   };

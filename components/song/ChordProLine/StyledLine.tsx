@@ -15,6 +15,7 @@ export default function StyledLine({
   hasChords,
   originalKey,
   transpose,
+  enharmonicPreference,
   mode,
   density,
   commentClass,
@@ -44,6 +45,7 @@ export default function StyledLine({
             hasChords={hasChords}
             originalKey={originalKey}
             transpose={transpose}
+            enharmonicPreference={enharmonicPreference}
             mode={mode}
             isConnection={isConnection(items, elementIdx)}
             density={density}

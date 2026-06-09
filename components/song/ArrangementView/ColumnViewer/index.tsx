@@ -16,6 +16,7 @@ type ColumnViewerProps = {
   songUnits: ClientSongUnit[];
   transpose: number;
   originalKey?: string;
+  enharmonicPreference?: "sharp" | "flat" | null;
   mode: Mode;
   density: Density;
 };
@@ -25,6 +26,7 @@ export default function ColumnViewer({
   songUnits,
   transpose,
   originalKey,
+  enharmonicPreference,
   mode,
   density,
 }: ColumnViewerProps) {
@@ -106,6 +108,7 @@ export default function ColumnViewer({
                     items={line.items as ChordProItem[]}
                     originalKey={originalKey}
                     transpose={transpose}
+                    enharmonicPreference={enharmonicPreference}
                     mode={mode}
                     density={density}
                     commentClass={unitClasses.comment}

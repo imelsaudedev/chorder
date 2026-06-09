@@ -7,7 +7,7 @@ type ArrangementViewProps = {
   arrangement: ClientArrangement | null;
 };
 export default function ArrangementView({ arrangement }: ArrangementViewProps) {
-  const { density, fontSize, columns, transpose, mode } = useSongConfig();
+  const { density, fontSize, columns, transpose, mode, enharmonicPreference } = useSongConfig();
 
   if (!arrangement) {
     return <Skeleton density={density} />;
@@ -30,6 +30,7 @@ export default function ArrangementView({ arrangement }: ArrangementViewProps) {
         songUnits={arrangement.units!}
         transpose={transpose}
         originalKey={arrangement.key}
+        enharmonicPreference={enharmonicPreference}
         mode={mode}
         density={density}
       />

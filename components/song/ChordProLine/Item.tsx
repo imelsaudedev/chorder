@@ -1,14 +1,11 @@
-"use client";
-
 import { ChordProItem, applyEnharmonic, transposeChord } from "@/chopro/music";
-import { SongConfigContext } from "@/components/config/SongConfig";
 import { Density, Mode } from "@/components/config/config";
-import { useContext } from "react";
 import styles from "./styles.module.scss";
 
 export type ItemProps = {
   originalKey?: string;
   transpose?: number;
+  enharmonicPreference?: "sharp" | "flat" | null;
   mode: Mode;
   density: Density;
   hasLyrics: boolean;
@@ -30,13 +27,12 @@ export default function Item({
   item,
   isConnection,
   transpose,
+  enharmonicPreference,
   mode,
   density,
   commentAbove,
   commentClass = "text-zinc-600 border-zinc-600",
 }: ItemProps) {
-  const songConfig = useContext(SongConfigContext);
-
   if (item._name === "comment") {
     if (hideLyrics) {
       return null;
@@ -59,8 +55,8 @@ export default function Item({
   let chords = item.chords || "";
   if (originalKey && item.chords) {
     chords = transposeChord(item.chords, originalKey, transpose ?? 0);
-    if (songConfig?.enharmonicPreference) {
-      chords = applyEnharmonic(chords, songConfig.enharmonicPreference === "sharp");
+    if (enharmonicPreference) {
+      chords = applyEnharmonic(chords, enharmonicPreference === "sharp");
     }
   }
 
