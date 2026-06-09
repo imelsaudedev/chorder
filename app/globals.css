@@ -166,3 +166,51 @@
 :fullscreen .fullscreen-hidden {
   display: none;
 }
+
+/* ── react-h5-audio-player dark theme ────────────────────────────────── */
+.audio-player-dark .rhap_container {
+  background-color: #18181b;
+  box-shadow: none;
+  border-top: 1px solid #3f3f46;
+  padding: 10px 16px 8px;
+}
+.audio-player-dark .rhap_header {
+  margin-bottom: 4px;
+}
+.audio-player-dark .rhap_time {
+  color: #a1a1aa;
+  font-size: 11px;
+}
+.audio-player-dark .rhap_progress-bar {
+  background-color: #3f3f46;
+  height: 4px;
+}
+.audio-player-dark .rhap_progress-filled {
+  background-color: #10b981;
+}
+.audio-player-dark .rhap_download-progress {
+  background-color: #3f3f46;
+}
+.audio-player-dark .rhap_progress-indicator {
+  background-color: #10b981;
+  width: 12px;
+  height: 12px;
+  top: -4px;
+}
+.audio-player-dark .rhap_controls-section svg,
+.audio-player-dark .rhap_main-controls-button svg,
+.audio-player-dark .rhap_volume-button svg {
+  color: #e4e4e7;
+}
+.audio-player-dark .rhap_play-pause-button svg {
+  color: #ffffff;
+}
+.audio-player-dark .rhap_volume-bar {
+  background-color: #3f3f46;
+}
+.audio-player-dark .rhap_volume-indicator {
+  background-color: #10b981;
+}
+.audio-player-dark .rhap_volume-filled {
+  background-color: #10b981;
+}
