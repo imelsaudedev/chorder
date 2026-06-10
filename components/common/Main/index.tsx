@@ -11,7 +11,7 @@ export default function Main({
 }) {
   const densityClasses = {
     compact: "px-2 sm:px-2 lg:px-4",
-    normal: "px-4 sm:px-6 lg:px-8",
+    normal: "px-5 sm:px-8 lg:px-14",
   };
 
   const classNames = ["mb-12", densityClasses[density]];
