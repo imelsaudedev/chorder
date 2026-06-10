@@ -69,3 +69,11 @@ export type ClientService = Omit<Service, "id" | "legacyId"> & {
   prevService?: ServiceRef | null;
   nextService?: ServiceRef | null;
 };
+
+export type RecentServiceEntry = {
+  slug: string;
+  title: string | null;
+  date: Date;
+  worshipLeader: string | null;
+  songs: string[];
+};

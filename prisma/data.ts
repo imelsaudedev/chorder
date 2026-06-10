@@ -6,6 +6,7 @@ import {
   ClientServiceUnit,
   ClientSong,
   ClientTagGroup,
+  RecentServiceEntry,
 } from "./models";
 
 export function retrieveSongSlugs() {
@@ -831,6 +832,40 @@ export async function retrieveService(
         : null,
     })),
   };
+}
+
+export async function retrieveRecentServices(limit = 8): Promise<RecentServiceEntry[]> {
+  const services = await prisma.service.findMany({
+    where: { isDeleted: false },
+    orderBy: { date: "desc" },
+    take: limit,
+    select: {
+      slug: true,
+      title: true,
+      date: true,
+      worshipLeader: true,
+      units: {
+        orderBy: { order: "asc" },
+        select: {
+          arrangement: {
+            select: {
+              song: { select: { title: true } },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return services.map((service) => ({
+    slug: service.slug,
+    title: service.title,
+    date: service.date,
+    worshipLeader: service.worshipLeader,
+    songs: service.units
+      .map((u) => u.arrangement?.song?.title)
+      .filter((t): t is string => t != null),
+  }));
 }
 
 export async function retrieveServices(): Promise<ClientService[]> {

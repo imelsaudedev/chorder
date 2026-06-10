@@ -1,5 +1,6 @@
 import { defaultArrangementValues } from "@/components/song/ArrangementForm/useArrangementForm";
 import ArrangementPicker from "@/components/song/ArrangementPicker";
+import RecentServicesPanel from "@/components/song/SongPicker/RecentServicesPanel";
 import SongPicker from "@/components/song/SongPicker";
 import { Button } from "@/components/ui/button";
 import {
@@ -85,14 +86,24 @@ export default function AddUnitForm() {
                 <DrawerTitle>{t("pickSong")}</DrawerTitle>
               )}
             </DrawerHeader>
-            <div className="max-h-[80vh] min-h-[50vh] overflow-y-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 pt-3 pb-8">
-              {song ? (
-                <ArrangementPicker
-                  songSlug={song.slug}
-                  onSelected={setArrangement}
-                />
-              ) : (
-                <SongPicker onSelected={handleSongSelected} />
+            <div className="flex min-h-[50vh] max-h-[80vh]">
+              {/* Conteúdo principal */}
+              <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 pt-3 pb-8">
+                {song ? (
+                  <ArrangementPicker
+                    songSlug={song.slug}
+                    onSelected={setArrangement}
+                  />
+                ) : (
+                  <SongPicker onSelected={handleSongSelected} />
+                )}
+              </div>
+
+              {/* Sidebar histórico — visível só no step 1, a partir de md */}
+              {!song && (
+                <aside className="hidden md:flex flex-col w-52 shrink-0 border-l border-border overflow-hidden">
+                  <RecentServicesPanel />
+                </aside>
               )}
             </div>
           </DrawerContent>
