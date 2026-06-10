@@ -516,7 +516,7 @@ export default function DesignSystemPage() {
                   {(["default", "success", "warning", "error", "info", "muted"] as const).map((v) => (
                     <div key={v} className="flex flex-col items-start gap-1.5">
                       <Tag label={v.charAt(0).toUpperCase() + v.slice(1)} variant={v} size="sm" />
-                      <code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">variant="{v}"</code>
+                      <code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">variant=&quot;{v}&quot;</code>
                     </div>
                   ))}
                 </div>
@@ -527,11 +527,11 @@ export default function DesignSystemPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex flex-col items-start gap-1.5">
                     <Tag label="Pequena" variant="success" size="xs" />
-                    <code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">size="xs"</code>
+                    <code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">size=&quot;xs&quot;</code>
                   </div>
                   <div className="flex flex-col items-start gap-1.5">
                     <Tag label="Normal" variant="success" size="sm" />
-                    <code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">size="sm"</code>
+                    <code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">size=&quot;sm&quot;</code>
                   </div>
                 </div>
               </div>
