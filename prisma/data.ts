@@ -732,7 +732,7 @@ export async function duplicateArrangement(
 export async function retrieveService(
   slugOrId: string | number
 ): Promise<ClientService | null> {
-  return prisma.service.findFirst({
+  const service = await prisma.service.findFirst({
     where: {
       ...selectSlugOrId(slugOrId),
       isDeleted: false,
@@ -760,28 +760,45 @@ export async function retrieveService(
         },
       },
     },
-  }).then((service) => {
-    if (!service) return null;
-    return {
-      ...service,
-      units: service.units.map((unit) => ({
-        ...unit,
-        arrangement: unit.arrangement
-          ? {
-              ...unit.arrangement,
-              youtubeUrl:
-                unit.arrangement.youtubeUrl ??
-                unit.arrangement.originalArrangement?.youtubeUrl ??
-                null,
-              audios:
-                unit.arrangement.audios?.length
-                  ? unit.arrangement.audios
-                  : unit.arrangement.originalArrangement?.audios ?? [],
-            }
-          : null,
-      })),
-    };
   });
+
+  if (!service) return null;
+
+  const adjacentSelect = { select: { slug: true, title: true, date: true } } as const;
+  const [prevService, nextService] = await Promise.all([
+    prisma.service.findFirst({
+      where: { isDeleted: false, date: { lt: service.date } },
+      orderBy: { date: "desc" },
+      ...adjacentSelect,
+    }),
+    prisma.service.findFirst({
+      where: { isDeleted: false, date: { gt: service.date } },
+      orderBy: { date: "asc" },
+      ...adjacentSelect,
+    }),
+  ]);
+
+  return {
+    ...service,
+    prevService: prevService ?? null,
+    nextService: nextService ?? null,
+    units: service.units.map((unit) => ({
+      ...unit,
+      arrangement: unit.arrangement
+        ? {
+            ...unit.arrangement,
+            youtubeUrl:
+              unit.arrangement.youtubeUrl ??
+              unit.arrangement.originalArrangement?.youtubeUrl ??
+              null,
+            audios:
+              unit.arrangement.audios?.length
+                ? unit.arrangement.audios
+                : unit.arrangement.originalArrangement?.audios ?? [],
+          }
+        : null,
+    })),
+  };
 }
 
 export async function retrieveServices(): Promise<ClientService[]> {

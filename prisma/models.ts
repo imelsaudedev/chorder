@@ -60,7 +60,11 @@ export type ClientServiceUnit = Omit<ServiceUnit, "id" | "serviceId"> & {
   arrangement?: ClientArrangement | null;
   serviceId?: number;
 };
+export type ServiceRef = Pick<Service, "slug" | "title" | "date">;
+
 export type ClientService = Omit<Service, "id" | "legacyId"> & {
   id?: number;
   units?: ClientServiceUnit[];
+  prevService?: ServiceRef | null;
+  nextService?: ServiceRef | null;
 };
