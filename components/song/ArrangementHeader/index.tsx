@@ -73,7 +73,7 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
           subtitle={
             songArtist ? (
               <span className="flex items-center gap-1">
-                <NotebookPen className="w-4 h-4 shrink-0" />
+                <NotebookPen size={16} className="shrink-0" />
                 {songArtist}
               </span>
             ) : undefined

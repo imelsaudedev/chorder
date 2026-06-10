@@ -58,8 +58,8 @@ function ServiceArrangementHeader({
 
   if (!arrangement) {
     return (
-      <div ref={ref} className={`sticky top-0 bg-white z-10 flex w-full flex-row justify-between items-center py-2 md:py-2 lg:py-4 ${isStuck ? "border-b border-zinc-200" : ""}`}>
-        <Skeleton className="w-1/3 h-12 bg-gray-500" />
+      <div ref={ref} className={`sticky top-0 bg-background z-10 flex w-full flex-row justify-between items-center py-2 md:py-2 lg:py-4 ${isStuck ? "border-b border-border" : ""}`}>
+        <Skeleton className="w-1/3 h-12 bg-muted" />
         <Skeleton className="w-16 h-12 bg-gray-200" />
       </div>
     );
@@ -74,12 +74,12 @@ function ServiceArrangementHeader({
   return (
     <div
       ref={ref}
-      className={`sticky top-0 bg-white z-10 flex w-full flex-row justify-between items-center ${isStuck ? "border-b border-zinc-200" : ""} ${
+      className={`sticky top-0 bg-background z-10 flex w-full flex-row justify-between items-center ${isStuck ? "border-b border-border" : ""} ${
         density === "compact" ? "py-2 md:py-1 lg:py-2" : "py-2 md:py-2 lg:py-4"
       }`}
     >
       <div className="flex flex-col min-w-0 flex-1 mr-2">
-        <Heading level={3} className="truncate">
+        <Heading level={2} className="truncate">
           <span>{order}. </span>
           {arrangement.song.title}
         </Heading>

@@ -54,7 +54,7 @@ export default function ColumnViewer({
                   key={`unit-${unitIdx}`}
                   className={clsx({
                     "py-[0.5em]": isTextMode,
-                    "bg-gray-100 dark:bg-zinc-800 rounded p-[1em]": !isTextMode,
+                    "bg-muted rounded-lg p-[1em]": !isTextMode,
                   })}
                 >
                   <MarkdownViewer content={unit.content || ""} />
@@ -67,7 +67,7 @@ export default function ColumnViewer({
                 key={`unit-${unitIdx}`}
                 className={clsx(unitClasses.background, unitClasses.border, {
                   "border-t bg-transparent mb-[1em]": isTextMode,
-                  "border rounded pb-[0.5em]": !isTextMode,
+                  "border rounded-lg pb-[0.5em]": !isTextMode,
                 })}
               >
                 <div
@@ -112,6 +112,7 @@ export default function ColumnViewer({
                     mode={mode}
                     density={density}
                     commentClass={unitClasses.comment}
+
                   />
                 ))}
               </div>

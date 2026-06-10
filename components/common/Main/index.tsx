@@ -1,4 +1,5 @@
 import { Density } from "@/components/config/config";
+import { cn } from "@/lib/utils";
 
 export default function Main({
   className,
@@ -14,10 +15,9 @@ export default function Main({
     normal: "px-5 sm:px-8 lg:px-14",
   };
 
-  const classNames = ["mb-12", densityClasses[density]];
-  if (className) {
-    classNames.push(className);
-  }
-
-  return <main className={classNames.join(" ")}>{children}</main>;
+  return (
+    <main className={cn("mb-12", densityClasses[density], className)}>
+      {children}
+    </main>
+  );
 }

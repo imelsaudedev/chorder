@@ -62,7 +62,7 @@ export default function Item({
 
   const chordClasses = [
     "leading-none",
-    "text-black",
+    "text-foreground",
     "font-mono",
     "font-bold",
     "tracking-tighter",

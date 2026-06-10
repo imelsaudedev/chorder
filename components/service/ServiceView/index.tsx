@@ -26,9 +26,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
   return (
     <>
       <section
-        className={`flex flex-col mx-auto ${
-          density === "compact" ? "gap-2 text-sm" : "gap-8 text-base"
-        }`}
+        className={density === "compact" ? "flex flex-col mx-auto gap-4" : "flex flex-col mx-auto gap-10"}
         style={{ fontSize: `${fontSize}px` }}
       >
         {service.units.map((unit, index) => (

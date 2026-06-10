@@ -1,3 +1,4 @@
+import Tag from "@/components/common/Tag";
 import { ClientTag } from "@/prisma/models";
 
 type SongTagsProps = {
@@ -10,17 +11,7 @@ export default function SongTags({ tags }: SongTagsProps) {
   return (
     <div className="flex flex-wrap gap-1">
       {tags.map((tag) => (
-        <span
-          key={tag.id}
-          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-          style={{
-            backgroundColor: `${tag.group.color}26`,
-            color: tag.group.color,
-            border: `1px solid ${tag.group.color}4d`,
-          }}
-        >
-          {tag.name}
-        </span>
+        <Tag key={tag.id} label={tag.name} color={tag.group.color} size="xs" />
       ))}
     </div>
   );

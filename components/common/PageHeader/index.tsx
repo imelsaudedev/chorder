@@ -23,7 +23,7 @@ const PageHeader = ({
 }: PageHeaderProps) => {
   if (variant === "edit") {
     return (
-      <div className="sticky top-0 z-10 flex flex-row items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 py-2 bg-white/80 backdrop-blur-lg border-b border-zinc-100">
+      <div className="sticky top-0 z-10 flex flex-row items-center justify-between gap-2 px-4 sm:px-5 lg:px-8 py-2 bg-white/80 backdrop-blur-lg border-b border-border">
         <div className="flex flex-col min-w-0">
           <Text variant="heading-sm" className="truncate">{title}</Text>
           {subtitle && (
@@ -38,9 +38,9 @@ const PageHeader = ({
   }
 
   return (
-    <div className="flex flex-col p-4 sm:p-6 lg:p-8 bg-zinc-50 border-b border-zinc-100">
+    <div className="flex flex-col px-4 sm:px-5 lg:px-8 py-4 sm:py-5 bg-zinc-50 border-b border-border">
       {(backLinkHref || actions) && (
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
           <div>
             {backLinkHref && backLinkText && (
               <BackLink href={backLinkHref} text={backLinkText} />
@@ -52,14 +52,15 @@ const PageHeader = ({
         </div>
       )}
 
-      <Heading level={1} className="truncate mb-1 sm:mb-2">{title}</Heading>
-
-      {subtitle && (
-        <Text variant="caption" className="text-base sm:text-lg">{subtitle}</Text>
-      )}
+      <div className="flex flex-col gap-1">
+        <Heading level={1} className="truncate">{title}</Heading>
+        {subtitle && (
+          <Text variant="caption" className="text-base sm:text-lg">{subtitle}</Text>
+        )}
+      </div>
 
       {contentActions && (
-        <div className="flex flex-wrap gap-2 items-center mt-3">{contentActions}</div>
+        <div className="flex flex-wrap gap-2 items-center mt-3 sm:mt-4">{contentActions}</div>
       )}
     </div>
   );
