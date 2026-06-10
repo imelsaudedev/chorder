@@ -167,6 +167,17 @@
   display: none;
 }
 
+:fullscreen main {
+  padding: 0;
+  margin-bottom: 0;
+}
+
+/* Remove a margem esquerda do ContentWrapper (reservada para a NavBar) em fullscreen */
+:fullscreen .lg\:ml-20,
+:fullscreen .sm\:ml-20 {
+  margin-left: 0;
+}
+
 /* ── react-h5-audio-player dark theme ────────────────────────────────── */
 .audio-player-dark .rhap_container {
   background-color: #18181b;
