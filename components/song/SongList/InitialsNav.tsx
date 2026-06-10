@@ -15,7 +15,7 @@ export default function InitialsNav({ existingInitials }: InitialsNavProps) {
   return (
     <nav className="flex flex-wrap mb-4">
       {allInitials.map((initial) => {
-        const baseClass = "font-display font-semibold text-lg px-2";
+        const baseClass = "font-display font-semibold text-lg px-1";
         if (existingInitialsLower.indexOf(initial) < 0)
           return (
             <span

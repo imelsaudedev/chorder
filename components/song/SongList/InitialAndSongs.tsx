@@ -18,7 +18,7 @@ export default function InitialAndSongs({
   return (
     <div>
       <BigLetter letter={letter} />
-      <div className="divide-y divide-zinc-100">
+      <div className="divide-y divide-border">
         {songs.map((song) => (
           <SongListEntry
             key={`song-${song.slug}`}

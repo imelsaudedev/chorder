@@ -85,7 +85,7 @@ export default function AddUnitForm() {
                 <DrawerTitle>{t("pickSong")}</DrawerTitle>
               )}
             </DrawerHeader>
-            <div className="max-h-[80vh] min-h-[50vh] overflow-auto p-4">
+            <div className="max-h-[80vh] min-h-[50vh] overflow-y-auto overflow-x-hidden px-4 pt-4 pb-8">
               {song ? (
                 <ArrangementPicker
                   songSlug={song.slug}

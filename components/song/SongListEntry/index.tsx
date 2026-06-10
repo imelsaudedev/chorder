@@ -22,7 +22,7 @@ import {
 import Tag, { TagVariant } from "@/components/common/Tag";
 import Text from "@/components/common/Text";
 import { ClientArrangement, ClientSong } from "@/prisma/models";
-import { MoreVertical, NotebookPen, Pencil, Plus } from "lucide-react";
+import { MoreVertical, NotebookPen, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -226,9 +226,7 @@ export default function SongListEntry({
             className={BTN_SM}
           />
         )}
-        {onSelected ? (
-          <Plus className="w-3.5 h-3.5 text-muted-foreground shrink-0 pointer-events-none" />
-        ) : (
+        {onSelected ? null : (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

@@ -35,7 +35,9 @@ export default function SongPicker({
   const isReady = songs && !isLoading;
   return (
     <div>
-      <SearchBar defaultValue={query} onSearch={handleSearch} />
+      <div className="mb-3">
+        <SearchBar defaultValue={query} onSearch={handleSearch} />
+      </div>
       {!isReady && <SongListSkeleton />}
       {isReady && (
         <SongList
