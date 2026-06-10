@@ -31,7 +31,7 @@ export default function ResponsiveModal({
     >
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DrawerTitle className="font-bricolage font-semibold text-base text-primary leading-snug">
+          <DrawerTitle className="font-display font-semibold text-base text-primary leading-snug">
             {title}
           </DrawerTitle>
         </DrawerHeader>

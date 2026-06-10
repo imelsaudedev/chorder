@@ -24,7 +24,7 @@ import {
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="scroll-mt-8 py-10 border-b border-zinc-100 last:border-0">
-      <h2 className="font-bricolage font-semibold text-xl text-zinc-900 mb-6 flex items-center gap-2">
+      <h2 className="font-display font-semibold text-xl text-zinc-900 mb-6 flex items-center gap-2">
         <span className="w-1 h-5 rounded-full bg-secondary inline-block" />
         {title}
       </h2>
@@ -87,7 +87,7 @@ export default function DesignSystemPage() {
       <header className="border-b border-zinc-100 bg-white sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="font-bricolage font-bold text-lg text-zinc-900">Design System</span>
+            <span className="font-display font-bold text-lg text-zinc-900">Design System</span>
             <span className="text-xs bg-secondary/10 text-secondary font-medium px-2 py-0.5 rounded-full">chorder-alt</span>
           </div>
           <span className="text-xs text-zinc-400 font-mono">Tailwind v4 · shadcn/ui · Lucide</span>
@@ -170,7 +170,7 @@ export default function DesignSystemPage() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   {[
                     { name: "IBM Plex Sans", cls: "font-sans", desc: "Corpo de texto, UI padrão" },
-                    { name: "Space Grotesk", cls: "font-bricolage", desc: "Headings, display" },
+                    { name: "Space Grotesk", cls: "font-display", desc: "Headings, display" },
                     { name: "IBM Plex Serif", cls: "font-serif", desc: "Texto editorial" },
                     { name: "IBM Plex Mono", cls: "font-mono", desc: "Código, valores técnicos" },
                   ].map((f) => (

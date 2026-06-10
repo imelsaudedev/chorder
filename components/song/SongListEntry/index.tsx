@@ -141,7 +141,7 @@ export default function SongListEntry({
       {/* Col 1 — título, artista e tags */}
       <div className="relative z-10 min-w-0 pointer-events-none">
         <div className="flex items-center gap-1.5 min-w-0">
-          <p className="font-bricolage font-semibold text-base lg:text-lg tracking-tight leading-snug lg:leading-tight text-primary truncate">
+          <p className="font-display font-semibold text-base lg:text-lg tracking-tight leading-snug lg:leading-tight text-primary truncate">
             <HighlightKeyword text={song.title} keyword={query} />
           </p>
           {arrangements.length > 1 && (

@@ -24,10 +24,10 @@ const sizeClass: Record<TextSize, string> = {
 
 // Classes sem o tamanho, para que o prop `size` possa sobrepor
 const stylesNoSize: Record<TextVariant, string> = {
-  "heading-xl": "font-bricolage font-semibold tracking-tighter text-primary",
-  "heading-lg": "font-bricolage font-semibold tracking-tighter leading-none text-primary",
-  "heading-md": "font-bricolage font-semibold tracking-tight leading-tight text-primary",
-  "heading-sm": "font-bricolage font-semibold tracking-tight leading-snug text-primary",
+  "heading-xl": "font-display font-semibold tracking-tighter text-primary",
+  "heading-lg": "font-display font-semibold tracking-tighter leading-none text-primary",
+  "heading-md": "font-display font-semibold tracking-tight leading-tight text-primary",
+  "heading-sm": "font-display font-semibold tracking-tight leading-snug text-primary",
   "body":       "text-foreground",
   "label":      "font-medium text-foreground",
   "caption":    "text-muted-foreground",

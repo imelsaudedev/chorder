@@ -16,7 +16,7 @@ export default async function AdminTagsPage() {
   return (
     <Main>
       <div className="max-w-2xl mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bricolage font-semibold mb-6">Administração de Tags</h1>
+        <h1 className="text-2xl font-display font-semibold mb-6">Administração de Tags</h1>
         <AdminTagsClient initialGroups={groups} />
       </div>
     </Main>

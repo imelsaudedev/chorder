@@ -1,8 +1,7 @@
 "use client";
 
+import FloatingAddLink from "@/components/common/FloatingAddLink";
 import ServiceMetaModal from "@/components/service/ServiceMetaModal";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -18,20 +17,7 @@ export default function ClientServicesPage() {
     <>
       <ClientServiceList />
 
-      <div className="fixed bottom-24 right-4 sm:bottom-8 sm:right-8">
-        <Button
-          variant="secondary"
-          size="lg"
-          className="rounded-full shadow-lg"
-          onClick={() => setModalOpen(true)}
-        >
-          <Plus className="hidden sm:inline" />
-          <span className="sm:hidden">
-            <Plus />
-          </span>
-          <span className="hidden sm:inline">{t("newService")}</span>
-        </Button>
-      </div>
+      <FloatingAddLink label={t("newService")} onClick={() => setModalOpen(true)} />
 
       <ServiceMetaModal
         open={modalOpen}

@@ -20,7 +20,7 @@ export default function ServiceList({
     <div className="space-y-6">
       {futureServices.length > 0 && (
         <section className="bg-zinc-50 p-4 sm:p-6 lg:p-8 mb-4 sm:mb-8 rounded-lg border border-zinc-100">
-          <span className="font-bricolage text-base sm:text-lg text-secondary">
+          <span className="font-display text-base sm:text-lg text-secondary">
             {t("Service.nextService")}
           </span>
           <ul>
@@ -35,7 +35,7 @@ export default function ServiceList({
         <section className="px-0 sm:px-6 lg:px-8">
           {pastServicesByMonth.map(([month, services]) => (
             <div key={month} className="mb-8">
-              <span className="font-bricolage text-base sm:text-lg text-zinc-400">
+              <span className="font-display text-base sm:text-lg text-zinc-400">
                 {DateTime.fromISO(month)
                   .setLocale(locale)
                   .toLocaleString({ month: "long", year: "numeric" })
