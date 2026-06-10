@@ -64,7 +64,7 @@ export default function AddUnitForm() {
             <Button variant="outline">{t("newSongUnit")}</Button>
           </DrawerTrigger>
           <DrawerContent>
-            <DrawerHeader className="flex flex-row items-center gap-2 px-4 py-3 border-b border-border">
+            <DrawerHeader className="flex flex-row items-center gap-2 px-4 py-3 border-b border-border text-left">
               {song ? (
                 <>
                   <Button

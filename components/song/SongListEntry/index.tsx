@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Tag from "@/components/common/Tag";
+import Tag, { TagVariant } from "@/components/common/Tag";
 import Text from "@/components/common/Text";
 import { ClientArrangement, ClientSong } from "@/prisma/models";
 import { MoreVertical, NotebookPen, Pencil, Plus } from "lucide-react";
@@ -55,18 +55,23 @@ function getVerse1Lines(lyrics: string): string[] {
   return result;
 }
 
-function formatLastUsed(date: Date | string): string {
+function formatLastUsed(date: Date | string): { label: string; variant: TagVariant } {
   const d = typeof date === "string" ? new Date(date) : date;
   const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
-  if (days === 0) return "usada hoje";
-  if (days === 1) return "usada ontem";
-  if (days < 7) return `usada há ${days} dias`;
+  if (days === 0) return { label: "hoje", variant: "warning" };
+  if (days === 1) return { label: "ontem", variant: "warning" };
+  if (days < 7) return { label: `há ${days} dias`, variant: "warning" };
   const weeks = Math.floor(days / 7);
-  if (weeks === 1) return "usada há 1 semana";
-  if (weeks < 5) return `usada há ${weeks} semanas`;
+  if (weeks === 1) return { label: "há 1 semana", variant: "warning" };
+  if (weeks < 3) return { label: `há ${weeks} semanas`, variant: "warning" };
   const months = Math.floor(days / 30);
-  if (months === 1) return "usada há 1 mês";
-  return `usada há ${months} meses`;
+  if (months === 1) return { label: "há 1 mês", variant: "muted" };
+  return { label: `há ${months} meses`, variant: "muted" };
+}
+
+function LastUsedTag({ date }: { date: Date | string }) {
+  const { label, variant } = formatLastUsed(date);
+  return <Tag variant={variant} size="xs" label={label} />;
 }
 
 function getArrangementLabel(
@@ -155,24 +160,22 @@ export default function SongListEntry({
       {/* Col 1 — título, artista e tags */}
       <div className="relative z-10 min-w-0 pointer-events-none">
         <div className="flex items-center gap-1.5 min-w-0">
-          <p className="font-display font-semibold text-base lg:text-lg tracking-tight leading-snug lg:leading-tight text-primary truncate">
+          <Text variant="heading-sm" as="p" className="truncate min-w-0 shrink lg:text-lg">
             <HighlightKeyword text={song.title} keyword={query} />
-          </p>
-          {arrangements.length > 1 && (
-            <span className="shrink-0 text-[10px] font-medium text-muted-foreground bg-muted rounded px-1 leading-5">
-              {arrangements.length}
-            </span>
-          )}
+          </Text>
+          <div className="flex items-center gap-1 shrink-0">
+            {arrangements.length > 1 && (
+              <Tag variant="muted" size="xs" label={String(arrangements.length)} />
+            )}
+            {onSelected && song.lastUsedAt && (
+              <LastUsedTag date={song.lastUsedAt} />
+            )}
+          </div>
         </div>
         {song.artist && (
           <Text variant="caption" as="p" className="text-xs md:text-sm truncate mt-0.5">
             <HighlightKeyword text={song.artist} keyword={query} />
           </Text>
-        )}
-        {onSelected && song.lastUsedAt && (
-          <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">
-            {formatLastUsed(song.lastUsedAt)}
-          </p>
         )}
       </div>
 
@@ -224,7 +227,7 @@ export default function SongListEntry({
           />
         )}
         {onSelected ? (
-          <Plus className="w-3.5 h-3.5 text-zinc-400 shrink-0 pointer-events-none" />
+          <Plus className="w-3.5 h-3.5 text-muted-foreground shrink-0 pointer-events-none" />
         ) : (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -4,12 +4,12 @@ export type TagVariant = "default" | "success" | "warning" | "error" | "info" | 
 export type TagSize = "xs" | "sm";
 
 const variantClasses: Record<TagVariant, string> = {
-  default: "bg-zinc-100 text-zinc-600 border-zinc-200",
+  default: "bg-muted text-foreground border-border",
   success: "bg-emerald-50 text-emerald-700 border-emerald-200",
   warning: "bg-amber-50 text-amber-700 border-amber-200",
   error:   "bg-red-50 text-red-700 border-red-200",
   info:    "bg-blue-50 text-blue-700 border-blue-200",
-  muted:   "bg-zinc-50 text-zinc-400 border-zinc-100",
+  muted:   "bg-muted/60 text-muted-foreground border-border/60",
 };
 
 const sizeClasses: Record<TagSize, string> = {
