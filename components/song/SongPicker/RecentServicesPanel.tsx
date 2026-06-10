@@ -28,8 +28,11 @@ export default function RecentServicesPanel() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Busca */}
+      {/* Título + Busca */}
       <div className="px-3 pt-3 pb-2 shrink-0">
+        <Text variant="overline" as="p" className="mb-2 uppercase tracking-widest text-[10px]">
+          Últimas liturgias
+        </Text>
         <div className="relative">
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <Input

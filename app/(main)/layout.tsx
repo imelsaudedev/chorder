@@ -6,7 +6,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <TooltipProvider>
       <div className="max-w-100vw flex">
-        <NavBar />
+        <div className="fullscreen-hidden"><NavBar /></div>
         <ContentWrapper>{children}</ContentWrapper>
       </div>
     </TooltipProvider>

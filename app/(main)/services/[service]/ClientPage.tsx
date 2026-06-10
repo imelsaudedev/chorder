@@ -14,7 +14,7 @@ export default function ClientPage({ serviceSlug }: ClientPageProps) {
 
   return (
     <ServiceConfigProvider>
-      <ServiceHeader service={service} />
+      <div className="fullscreen-hidden"><ServiceHeader service={service} /></div>
       <MainWithDensity>
         <ServiceView service={service} />
       </MainWithDensity>
