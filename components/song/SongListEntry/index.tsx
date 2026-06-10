@@ -143,7 +143,7 @@ export default function SongListEntry({
         Tablet: 3 cols [title | lyrics | (dropdown+icons)]
         Desktop: 4 cols [title | lyrics | dropdown | icons]
         display:none removes children from grid flow, enabling correct column count per breakpoint */}
-    <div className="relative grid grid-cols-[1fr_auto] md:grid-cols-[2fr_3fr_12rem] lg:grid-cols-[2fr_3fr_1.5fr_8rem_6rem] items-start gap-x-2 py-2.5 px-2 -mx-2 rounded-md hover:bg-accent/50 transition-colors group">
+    <div className="relative grid grid-cols-[1fr_auto] md:grid-cols-[2fr_3fr_12rem] lg:grid-cols-[2fr_3fr_1.5fr_8rem_6rem] items-start gap-x-2 py-2.5 px-2 -mx-2 rounded-md hover:bg-muted/50 transition-colors group">
 
       {/* Overlay: navega em modo lista, seleciona em modo picker */}
       {onSelected ? (

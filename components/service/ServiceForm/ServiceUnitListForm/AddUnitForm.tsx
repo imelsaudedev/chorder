@@ -64,7 +64,7 @@ export default function AddUnitForm() {
             <Button variant="outline">{t("newSongUnit")}</Button>
           </DrawerTrigger>
           <DrawerContent>
-            <DrawerHeader className="flex flex-row items-center gap-2 px-4 py-3 border-b border-border text-left">
+            <DrawerHeader className="flex flex-row items-center gap-2 px-4 sm:px-6 lg:px-8 py-3 border-b border-border text-left">
               {song ? (
                 <>
                   <Button
@@ -85,7 +85,7 @@ export default function AddUnitForm() {
                 <DrawerTitle>{t("pickSong")}</DrawerTitle>
               )}
             </DrawerHeader>
-            <div className="max-h-[80vh] min-h-[50vh] overflow-y-auto overflow-x-hidden px-4 pt-4 pb-8">
+            <div className="max-h-[80vh] min-h-[50vh] overflow-y-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 pt-3 pb-8">
               {song ? (
                 <ArrangementPicker
                   songSlug={song.slug}
