@@ -40,6 +40,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
 
   const songUnits = service.units.filter((u): u is ClientServiceUnit => u?.type === "SONG");
   const total = songUnits.length;
+  const currentTitle = (songUnits[currentIndex]?.arrangement as { song?: { title?: string } } | undefined)?.song?.title ?? "";
   const sectionClass = density === "compact" ? "flex flex-col mx-auto gap-4" : "flex flex-col mx-auto gap-10";
 
   const handleToggle = () => {
@@ -53,7 +54,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
   return (
     <>
       {isFullScreen ? (
-        <div className="h-dvh overflow-y-auto pt-12" style={{ fontSize: `${fontSize}px` }}>
+        <div className="h-dvh overflow-y-auto pt-16 pb-8 px-4 sm:px-6 lg:px-8" style={{ fontSize: `${fontSize}px` }}>
           {songUnits[currentIndex] && (
             <ServiceSongUnitView unit={songUnits[currentIndex]} />
           )}
@@ -74,6 +75,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
         isFullScreen={isFullScreen}
         currentIndex={currentIndex}
         total={total}
+        currentTitle={currentTitle}
         onPrev={() => setCurrentIndex((i) => Math.max(i - 1, 0))}
         onNext={() => setCurrentIndex((i) => Math.min(i + 1, total - 1))}
         onToggle={handleToggle}
