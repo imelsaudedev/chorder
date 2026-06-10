@@ -1,3 +1,4 @@
+import Tag from "@/components/common/Tag";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Maximize, Minimize } from "lucide-react";
 
@@ -30,9 +31,7 @@ export default function FullScreenToggle({
         <Button variant="ghost" size="icon" onClick={onNext} disabled={currentIndex >= total - 1} className="shrink-0">
           <ChevronRight size={20} />
         </Button>
-        <span className="text-sm text-muted-foreground tabular-nums select-none shrink-0 px-1">
-          {currentIndex + 1}/{total}
-        </span>
+        <Tag variant="muted" size="xs" label={`${currentIndex + 1}/${total}`} className="shrink-0 tabular-nums select-none" />
         {currentTitle && (
           <span className="text-sm font-medium truncate">{currentTitle}</span>
         )}
