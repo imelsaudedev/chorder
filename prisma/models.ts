@@ -40,6 +40,7 @@ export type ClientSong = Omit<Song, "id" | "legacyId"> & {
   id?: number;
   arrangements?: ClientArrangement[];
   tags?: ClientTag[];
+  lastUsedAt?: Date | null;
 };
 export type ClientArrangement = Omit<
   SongArrangement,

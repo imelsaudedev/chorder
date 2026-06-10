@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
     .split(",")
     .map((id) => parseInt(id))
     .filter((id) => !isNaN(id));
+  const withUsageStats = request.nextUrl.searchParams.get("withUsageStats") === "true";
 
   const songs = await retrieveSongs({
     query,
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
     forceIncludeFirstLine,
     excludedSongSlugs,
     tagIds,
+    withUsageStats,
   });
   return Response.json(songs);
 }

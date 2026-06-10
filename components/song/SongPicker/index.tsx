@@ -20,6 +20,7 @@ export default function SongPicker({
     limitLines: 3,
     forceIncludeFirstLine: true,
     excludedSongSlugs,
+    withUsageStats: true,
   });
   const handleSelected = useCallback(
     (song: ClientSong) => {

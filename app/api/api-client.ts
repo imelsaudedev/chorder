@@ -10,6 +10,7 @@ type FetchSongsArgs = {
   forceIncludeFirstLine?: boolean;
   excludedSongSlugs?: string[];
   tagIds?: number[];
+  withUsageStats?: boolean;
 };
 export function useFetchSongs({
   query,
@@ -17,6 +18,7 @@ export function useFetchSongs({
   forceIncludeFirstLine,
   excludedSongSlugs,
   tagIds,
+  withUsageStats,
 }: FetchSongsArgs) {
   const params = new URLSearchParams();
   if (query) {
@@ -33,6 +35,9 @@ export function useFetchSongs({
   }
   if (tagIds && tagIds.length > 0) {
     params.set("tagIds", tagIds.join(","));
+  }
+  if (withUsageStats) {
+    params.set("withUsageStats", "true");
   }
   const queryString = params.toString();
   const { data, error, isLoading } = useSWR(

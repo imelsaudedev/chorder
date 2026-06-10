@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/drawer";
 import { ClientArrangement, ClientSong } from "@/prisma/models";
 import { ArrangementSchema } from "@/schemas/arrangement";
+import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { useServiceUnitsFieldArray } from "../useServiceForm";
@@ -56,22 +57,33 @@ export default function AddUnitForm() {
   }, []);
 
   return (
-    <div
-      className={`rounded-lg break-inside-avoid p-4 mb-2 border border-zinc-200 border-dashed bg-zinc-100`}
-    >
+    <div className="rounded-lg break-inside-avoid p-4 mb-2 border border-border border-dashed bg-muted/40">
       <div className="group flex items-center gap-2 w-full cursor-pointer">
         <Drawer open={songPopoverOpen} onOpenChange={handlePopoverOpen}>
           <DrawerTrigger asChild>
             <Button variant="outline">{t("newSongUnit")}</Button>
           </DrawerTrigger>
           <DrawerContent>
-            <DrawerHeader>
-              <DrawerTitle className="flex justify-between items-center">
-                <span>{song ? t("pickArrangement") : t("pickSong")}</span>
-                <Button onClick={handleAddSongUnit} disabled={!song}>
-                  {t("add")}
-                </Button>
-              </DrawerTitle>
+            <DrawerHeader className="flex flex-row items-center gap-2 px-4 py-3 border-b border-border">
+              {song ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0 -ml-1"
+                    onClick={() => { setSong(null); setArrangement(null); }}
+                  >
+                    <ChevronLeft size={18} />
+                  </Button>
+                  <DrawerTitle className="flex-1 text-left truncate">{song.title}</DrawerTitle>
+                  <Button type="button" onClick={handleAddSongUnit} disabled={!arrangement} size="sm">
+                    {t("add")}
+                  </Button>
+                </>
+              ) : (
+                <DrawerTitle>{t("pickSong")}</DrawerTitle>
+              )}
             </DrawerHeader>
             <div className="max-h-[80vh] min-h-[50vh] overflow-auto p-4">
               {song ? (
@@ -94,7 +106,7 @@ export function AddUnitFormSkeleton() {
   const t = useTranslations("Messages");
 
   return (
-    <div className="rounded-lg break-inside-avoid p-4 mb-2 border border-zinc-200 border-dashed bg-zinc-100">
+    <div className="rounded-lg break-inside-avoid p-4 mb-2 border border-border border-dashed bg-muted/40">
       <div className="group flex items-center gap-2 w-full cursor-pointer">
         <Button variant="outline" disabled>
           {t("loading")}

@@ -93,12 +93,14 @@ export async function retrieveSongs({
   forceIncludeFirstLine = true,
   excludedSongSlugs = [],
   tagIds = [],
+  withUsageStats = false,
 }: {
   query?: string;
   limitLines?: number;
   forceIncludeFirstLine?: boolean;
   excludedSongSlugs?: string[];
   tagIds?: number[];
+  withUsageStats?: boolean;
 }): Promise<ClientSong[]> {
   // OR dentro do mesmo grupo, AND entre grupos diferentes
   const tagFilter: { AND: { tags: { some: { id: { in: number[] } } } }[] } | object =
@@ -170,6 +172,36 @@ export async function retrieveSongs({
       limitLyrics(song, limitLines, forceIncludeFirstLine, query)
     );
   }
+
+  if (withUsageStats) {
+    const songIds = songs.map((s) => s.id).filter((id): id is number => id !== undefined);
+    if (songIds.length > 0) {
+      const serviceArrangements = await prisma.songArrangement.findMany({
+        where: {
+          songId: { in: songIds },
+          isServiceArrangement: true,
+          isDeleted: false,
+          serviceUnit: { service: { isDeleted: false } },
+        },
+        select: {
+          songId: true,
+          serviceUnit: { select: { service: { select: { date: true } } } },
+        },
+      });
+      const lastUsedMap = new Map<number, Date>();
+      for (const sa of serviceArrangements) {
+        const date = sa.serviceUnit?.service?.date;
+        if (!date) continue;
+        const existing = lastUsedMap.get(sa.songId);
+        if (!existing || date > existing) lastUsedMap.set(sa.songId, date);
+      }
+      songs = songs.map((song) => ({
+        ...song,
+        lastUsedAt: (song.id !== undefined ? lastUsedMap.get(song.id) : undefined) ?? null,
+      }));
+    }
+  }
+
   return songs;
 }
 

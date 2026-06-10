@@ -55,6 +55,20 @@ function getVerse1Lines(lyrics: string): string[] {
   return result;
 }
 
+function formatLastUsed(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
+  if (days === 0) return "usada hoje";
+  if (days === 1) return "usada ontem";
+  if (days < 7) return `usada há ${days} dias`;
+  const weeks = Math.floor(days / 7);
+  if (weeks === 1) return "usada há 1 semana";
+  if (weeks < 5) return `usada há ${weeks} semanas`;
+  const months = Math.floor(days / 30);
+  if (months === 1) return "usada há 1 mês";
+  return `usada há ${months} meses`;
+}
+
 function getArrangementLabel(
   arr: ClientArrangement,
   index: number,
@@ -105,7 +119,7 @@ export default function SongListEntry({
   const arrangementDropdown =
     arrangements.length > 1 && hasAnyMedia ? (
       <Select value={selectedIdx} onValueChange={setSelectedIdx}>
-        <SelectTrigger size="compact" className="w-full border-zinc-200">
+        <SelectTrigger size="compact" className="w-full border-border">
           <SelectValue />
         </SelectTrigger>
         <SelectContent align="end">
@@ -124,7 +138,7 @@ export default function SongListEntry({
         Tablet: 3 cols [title | lyrics | (dropdown+icons)]
         Desktop: 4 cols [title | lyrics | dropdown | icons]
         display:none removes children from grid flow, enabling correct column count per breakpoint */}
-    <div className="relative grid grid-cols-[1fr_auto] md:grid-cols-[2fr_3fr_12rem] lg:grid-cols-[2fr_3fr_1.5fr_8rem_6rem] items-start gap-x-2 py-2.5 px-2 -mx-2 rounded-md hover:bg-zinc-50 transition-colors group">
+    <div className="relative grid grid-cols-[1fr_auto] md:grid-cols-[2fr_3fr_12rem] lg:grid-cols-[2fr_3fr_1.5fr_8rem_6rem] items-start gap-x-2 py-2.5 px-2 -mx-2 rounded-md hover:bg-accent/50 transition-colors group">
 
       {/* Overlay: navega em modo lista, seleciona em modo picker */}
       {onSelected ? (
@@ -145,7 +159,7 @@ export default function SongListEntry({
             <HighlightKeyword text={song.title} keyword={query} />
           </p>
           {arrangements.length > 1 && (
-            <span className="shrink-0 text-[10px] font-medium text-zinc-400 bg-zinc-100 rounded px-1 leading-5">
+            <span className="shrink-0 text-[10px] font-medium text-muted-foreground bg-muted rounded px-1 leading-5">
               {arrangements.length}
             </span>
           )}
@@ -154,6 +168,11 @@ export default function SongListEntry({
           <Text variant="caption" as="p" className="text-xs md:text-sm truncate mt-0.5">
             <HighlightKeyword text={song.artist} keyword={query} />
           </Text>
+        )}
+        {onSelected && song.lastUsedAt && (
+          <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">
+            {formatLastUsed(song.lastUsedAt)}
+          </p>
         )}
       </div>
 
