@@ -22,7 +22,7 @@ export default async function AdminCatalogoPage() {
       },
     }),
     prisma.tagGroup.findMany({
-      orderBy: { name: "asc" },
+      orderBy: { order: "asc" },
       select: {
         id: true,
         name: true,

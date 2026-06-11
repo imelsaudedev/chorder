@@ -1184,7 +1184,7 @@ export async function retrieveStats(): Promise<StatsData> {
 
 export async function retrieveTagGroups(): Promise<ClientTagGroup[]> {
   const groups = await prisma.tagGroup.findMany({
-    orderBy: { name: "asc" },
+    orderBy: { order: "asc" },
     select: {
       id: true,
       name: true,

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 
 type TagWithCount = {
@@ -82,6 +82,23 @@ export default function AdminTagsClient({ initialGroups }: Props) {
     setEditingGroup(null);
     await reload();
     setLoading(false);
+  }
+
+  async function moveGroup(id: number, direction: "up" | "down") {
+    const idx = groups.findIndex((g) => g.id === id);
+    if (idx === -1) return;
+    const newIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (newIdx < 0 || newIdx >= groups.length) return;
+
+    const reordered = [...groups];
+    [reordered[idx], reordered[newIdx]] = [reordered[newIdx], reordered[idx]];
+    setGroups(reordered);
+
+    await fetch("/api/admin/tag-groups/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: reordered.map((g) => g.id) }),
+    });
   }
 
   async function deleteGroup(id: number) {
@@ -224,6 +241,16 @@ export default function AdminTagsClient({ initialGroups }: Props) {
               <>
                 <span className="font-semibold text-sm" style={{ color: group.color }}>{group.name}</span>
                 <div className="flex gap-1">
+                  <Button type="button" variant="ghost" size="icon" className="w-7 h-7"
+                    disabled={groups.indexOf(group) === 0}
+                    onClick={() => moveGroup(group.id, "up")}>
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="w-7 h-7"
+                    disabled={groups.indexOf(group) === groups.length - 1}
+                    onClick={() => moveGroup(group.id, "down")}>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </Button>
                   <Button type="button" variant="ghost" size="icon" className="w-7 h-7"
                     onClick={() => { setEditingGroup(group.id); setEditingGroupName(group.name); setEditingGroupColor(group.color); }}>
                     <Pencil className="w-3.5 h-3.5" />

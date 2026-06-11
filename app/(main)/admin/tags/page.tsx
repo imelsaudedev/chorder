@@ -4,7 +4,7 @@ import prisma from "@/prisma/client";
 
 export default async function AdminTagsPage() {
   const groups = await prisma.tagGroup.findMany({
-    orderBy: { name: "asc" },
+    orderBy: { order: "asc" },
     include: {
       tags: {
         orderBy: { name: "asc" },
