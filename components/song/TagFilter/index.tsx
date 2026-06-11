@@ -62,7 +62,7 @@ export default function TagFilter({
               <ChevronDown className="w-3 h-3" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-48 p-1" align="start">
+          <PopoverContent className="w-56 p-1" align="start">
             {group.tags.map((tag) => {
               const isSelected = selectedSet.has(tag.id);
               return (
@@ -70,10 +70,10 @@ export default function TagFilter({
                   key={tag.id}
                   type="button"
                   onClick={() => toggleTag(tag.id)}
-                  className="w-full flex items-center justify-between px-3 py-1.5 text-sm rounded hover:bg-muted transition-colors"
+                  className="w-full flex items-center justify-between gap-2 px-3 py-1.5 text-sm rounded hover:bg-muted transition-colors"
                 >
-                  <span>{tag.name}</span>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <span className="truncate">{tag.name}</span>
+                  <div className="flex items-center gap-1.5 shrink-0">
                     {tag.songCount !== undefined && (
                       <span className="text-xs text-muted-foreground">{tag.songCount}</span>
                     )}
