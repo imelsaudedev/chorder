@@ -30,7 +30,7 @@ export default function Tag({ label, color, variant = "default", size = "xs", cl
   if (color) {
     return (
       <span
-        className={cn("inline-flex items-center rounded font-medium border", sizeClasses[size], className)}
+        className={cn("inline-flex items-center rounded-md font-medium border", sizeClasses[size], className)}
         style={{
           backgroundColor: `${color}26`,
           color,
@@ -43,7 +43,7 @@ export default function Tag({ label, color, variant = "default", size = "xs", cl
   }
 
   return (
-    <span className={cn("inline-flex items-center rounded font-medium border", variantClasses[variant], sizeClasses[size], className)}>
+    <span className={cn("inline-flex items-center rounded-md font-medium border", variantClasses[variant], sizeClasses[size], className)}>
       {label}
     </span>
   );

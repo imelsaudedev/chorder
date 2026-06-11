@@ -91,7 +91,7 @@ export default function TagFilter({
       {activeChips.map((tag) => (
         <span
           key={tag.id}
-          className="inline-flex items-center gap-1 h-7 px-2 rounded text-xs font-medium"
+          className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium"
           style={{
             backgroundColor: `${tag.group.color}26`,
             color: tag.group.color,
