@@ -77,3 +77,21 @@ export type RecentServiceEntry = {
   worshipLeader: string | null;
   songs: string[];
 };
+
+export type SongStat = {
+  slug: string;
+  title: string;
+  count: number;
+};
+
+export type LeaderStat = {
+  name: string;
+  totalServices: number;
+  topSongs: SongStat[];
+};
+
+export type StatsData = {
+  totalSongs: number;
+  topSongs: SongStat[];
+  byLeader: LeaderStat[];
+};

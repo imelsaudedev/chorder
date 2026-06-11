@@ -6,7 +6,10 @@ import {
   ClientServiceUnit,
   ClientSong,
   ClientTagGroup,
+  LeaderStat,
   RecentServiceEntry,
+  SongStat,
+  StatsData,
 } from "./models";
 
 export function retrieveSongSlugs() {
@@ -1127,6 +1130,56 @@ function selectSlugOrId(slugOrId: string | number): {
   } else {
     return { slug: slugOrId };
   }
+}
+
+export async function retrieveStats(): Promise<StatsData> {
+  const [totalSongs, units] = await Promise.all([
+    prisma.song.count({ where: { isDeleted: false } }),
+    prisma.serviceUnit.findMany({
+      where: { type: "SONG", service: { isDeleted: false } },
+      select: {
+        arrangement: {
+          select: { song: { select: { slug: true, title: true } } },
+        },
+        service: { select: { slug: true, worshipLeader: true } },
+      },
+    }),
+  ]);
+
+  const songMap = new Map<string, SongStat>();
+  const leaderMap = new Map<string, { services: Set<string>; songs: Map<string, SongStat> }>();
+
+  for (const unit of units) {
+    const song = unit.arrangement?.song;
+    if (!song) continue;
+
+    // Global ranking
+    const global = songMap.get(song.slug);
+    if (global) global.count++;
+    else songMap.set(song.slug, { slug: song.slug, title: song.title, count: 1 });
+
+    // By leader
+    const leaderName = unit.service?.worshipLeader?.trim() || "Sem dirigente";
+    const serviceSlug = unit.service?.slug;
+    if (!leaderMap.has(leaderName)) leaderMap.set(leaderName, { services: new Set(), songs: new Map() });
+    const leader = leaderMap.get(leaderName)!;
+    if (serviceSlug) leader.services.add(serviceSlug);
+    const leaderSong = leader.songs.get(song.slug);
+    if (leaderSong) leaderSong.count++;
+    else leader.songs.set(song.slug, { slug: song.slug, title: song.title, count: 1 });
+  }
+
+  const topSongs = [...songMap.values()].sort((a, b) => b.count - a.count).slice(0, 30);
+
+  const byLeader: LeaderStat[] = [...leaderMap.entries()]
+    .map(([name, { services, songs }]) => ({
+      name,
+      totalServices: services.size,
+      topSongs: [...songs.values()].sort((a, b) => b.count - a.count).slice(0, 10),
+    }))
+    .sort((a, b) => b.totalServices - a.totalServices);
+
+  return { totalSongs, topSongs, byLeader };
 }
 
 export async function retrieveTagGroups(): Promise<ClientTagGroup[]> {
