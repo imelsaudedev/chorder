@@ -1,6 +1,6 @@
 "use client";
 
-import { useFetchTagGroups } from "@/app/api/api-client";
+import { useFetchSongs, useFetchTagGroups } from "@/app/api/api-client";
 import FloatingAddLink from "@/components/common/FloatingAddLink";
 import TagFilter from "@/components/song/TagFilter";
 import SongMetaModal from "@/components/song/SongMetaModal";
@@ -18,6 +18,8 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
   const [isNavigating, setIsNavigating] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const { tagGroups } = useFetchTagGroups();
+  const { songs } = useFetchSongs({ query, tagIds: selectedTagIds, limitLines: 3, forceIncludeFirstLine: true });
+  const songCount = songs?.length ?? null;
 
   return (
     <>
@@ -27,6 +29,7 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
             tagGroups={tagGroups}
             selectedTagIds={selectedTagIds}
             onChange={setSelectedTagIds}
+            songCount={songCount}
           />
         </div>
       )}

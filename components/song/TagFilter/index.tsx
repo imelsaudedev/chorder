@@ -13,12 +13,14 @@ type TagFilterProps = {
   tagGroups: ClientTagGroup[];
   selectedTagIds: number[];
   onChange: (tagIds: number[]) => void;
+  songCount?: number | null;
 };
 
 export default function TagFilter({
   tagGroups,
   selectedTagIds,
   onChange,
+  songCount,
 }: TagFilterProps) {
   if (tagGroups.length === 0) return null;
 
@@ -117,6 +119,12 @@ export default function TagFilter({
         >
           Limpar filtros
         </Button>
+      )}
+
+      {songCount != null && (
+        <span className="inline-flex items-center h-7 px-2.5 rounded-md border border-border bg-background text-xs text-muted-foreground select-none tabular-nums ml-auto">
+          {songCount} música{songCount !== 1 ? "s" : ""}
+        </span>
       )}
     </div>
   );
