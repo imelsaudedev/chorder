@@ -1,13 +1,18 @@
 import Tag from "@/components/common/Tag";
 import Text from "@/components/common/Text";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Maximize, Minimize } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize, Minimize, ZoomIn, ZoomOut } from "lucide-react";
+
+const FONT_MIN = 10;
+const FONT_MAX = 32;
 
 type FullScreenToggleProps = {
   isFullScreen: boolean;
   currentIndex: number;
   total: number;
   currentTitle?: string;
+  fontSize?: number;
+  onFontSizeChange?: (size: number) => void;
   onPrev: () => void;
   onNext: () => void;
   onToggle: () => void;
@@ -18,6 +23,8 @@ export default function FullScreenToggle({
   currentIndex,
   total,
   currentTitle,
+  fontSize,
+  onFontSizeChange,
   onPrev,
   onNext,
   onToggle,
@@ -37,10 +44,32 @@ export default function FullScreenToggle({
           <Text variant="heading-sm" as="span" className="truncate ml-2">{currentTitle}</Text>
         )}
 
-        {/* Minimize — à direita */}
-        <Button variant="ghost" size="icon" onClick={onToggle} className="shrink-0 ml-auto">
-          <Minimize size={18} />
-        </Button>
+        {/* Fonte + Minimize — à direita */}
+        <div className="flex items-center shrink-0 ml-auto">
+          {onFontSizeChange && fontSize !== undefined && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onFontSizeChange(Math.max(FONT_MIN, fontSize - 1))}
+                disabled={fontSize <= FONT_MIN}
+              >
+                <ZoomOut size={18} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onFontSizeChange(Math.min(FONT_MAX, fontSize + 1))}
+                disabled={fontSize >= FONT_MAX}
+              >
+                <ZoomIn size={18} />
+              </Button>
+            </>
+          )}
+          <Button variant="ghost" size="icon" onClick={onToggle}>
+            <Minimize size={18} />
+          </Button>
+        </div>
       </div>
     );
   }

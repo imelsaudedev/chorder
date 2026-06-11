@@ -10,7 +10,7 @@ type ServiceViewProps = {
   service: ClientService | null;
 };
 export default function ServiceView({ service }: ServiceViewProps) {
-  const { density, fontSize } = useServiceConfig();
+  const { density, fontSize, setFontSize } = useServiceConfig();
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -76,6 +76,8 @@ export default function ServiceView({ service }: ServiceViewProps) {
         currentIndex={currentIndex}
         total={total}
         currentTitle={currentTitle}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
         onPrev={() => setCurrentIndex((i) => Math.max(i - 1, 0))}
         onNext={() => setCurrentIndex((i) => Math.min(i + 1, total - 1))}
         onToggle={handleToggle}
