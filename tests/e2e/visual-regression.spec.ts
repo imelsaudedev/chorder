@@ -23,6 +23,8 @@ test.describe('Visual Regression Suite', () => {
     await expect(page.getByText('Internal Server Error')).not.toBeVisible();
     // Wait for the app to be ready: list/view pages have h1, edit pages have form
     await page.waitForSelector('h1, form', { state: 'visible', timeout: 30000 });
+    // Second networkidle wait catches SWR fetches triggered after React hydration
+    await page.waitForLoadState('networkidle');
   }
 
   test('Home page visual check', async ({ page }) => {
