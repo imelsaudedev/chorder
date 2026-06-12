@@ -50,7 +50,7 @@ jobs:
           # Push to public schema for integration tests
           npx prisma db push
           # Push to e2e schema for Playwright tests
-          DATABASE_URL="postgresql://postgres:postgres@localhost:5432/chorder_test?schema=e2e" npx prisma db push --accept-data-loss
+          DATABASE_URL="postgresql://postgres:postgres@localhost:5432/chorder_test?schema=e2e" DIRECT_URL="postgresql://postgres:postgres@localhost:5432/chorder_test?schema=e2e" npx prisma db push --accept-data-loss
 
       - name: Run Vitest (Unit/Integration)
         run: yarn test
