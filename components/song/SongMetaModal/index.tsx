@@ -87,7 +87,7 @@ export default function SongMetaModal({
   function handleSubmit(values: SongMeta) {
     const payload: SongMetaSavePayload = {
       ...values,
-      ...(isNew ? {} : { tagIds: selectedTags.map((t) => t.id) }),
+      tagIds: selectedTags.map((t) => t.id),
     };
     const result = onSave(payload);
     if (result !== false) onOpenChange(false);
@@ -135,7 +135,7 @@ export default function SongMetaModal({
                 </FormItem>
               )}
             />
-            {!isNew && tagGroups.length > 0 && (
+            {tagGroups.length > 0 && (
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium leading-none">Tags</label>
                 <TagSelect

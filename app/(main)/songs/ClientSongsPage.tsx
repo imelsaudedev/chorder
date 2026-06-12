@@ -46,6 +46,7 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
           const params = new URLSearchParams();
           params.set("title", values.title.trim());
           if (values.artist) params.set("artist", values.artist.trim());
+          if (values.tagIds?.length) params.set("tagIds", values.tagIds.join(","));
           setIsNavigating(true);
           setTimeout(() => router.push(`/songs/new?${params.toString()}`), 0);
           return false;
