@@ -1,36 +1,27 @@
-import { put, del } from "@vercel/blob";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { del } from "@vercel/blob";
 import { NextRequest } from "next/server";
 
-const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["audio/mpeg", "audio/mp4", "audio/aac", "audio/x-m4a"];
+const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: NextRequest) {
-  const formData = await request.formData();
-  const file = formData.get("file") as File | null;
+  const body = (await request.json()) as HandleUploadBody;
 
-  if (!file) {
-    return new Response("Arquivo não encontrado", { status: 400 });
-  }
-
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return new Response("Formato inválido. Use MP3, M4A ou AAC.", {
-      status: 400,
+  try {
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async () => ({
+        allowedContentTypes: ALLOWED_TYPES,
+        maximumSizeInBytes: MAX_SIZE_BYTES,
+      }),
+      onUploadCompleted: async () => {},
     });
+    return Response.json(jsonResponse);
+  } catch (error) {
+    return new Response(String(error), { status: 400 });
   }
-
-  if (file.size > MAX_SIZE_BYTES) {
-    return new Response("Arquivo muito grande. Limite de 10MB.", { status: 400 });
-  }
-
-  const blob = await put(`audio/${Date.now()}-${file.name}`, file, {
-    access: "public",
-    contentType: file.type,
-  });
-
-  return new Response(JSON.stringify({ url: blob.url }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
 }
 
 export async function DELETE(request: NextRequest) {

@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { upload } from "@vercel/blob/client";
 import { Music, Play, Trash2, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
@@ -204,13 +205,12 @@ function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
     setUploadError(null);
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload-audio", { method: "POST", body: formData });
-      if (!res.ok) { setUploadError(await res.text()); return; }
-      const { url } = await res.json();
+      const blob = await upload(`audio/${Date.now()}-${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/upload-audio",
+      });
       const defaultLabel = file.name.replace(/\.[^.]+$/, "");
-      append({ url, label: defaultLabel, order: fields.length });
+      append({ url: blob.url, label: defaultLabel, order: fields.length });
     } catch {
       setUploadError("Erro ao enviar arquivo.");
     } finally {
