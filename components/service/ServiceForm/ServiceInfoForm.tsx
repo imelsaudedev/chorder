@@ -12,32 +12,31 @@ import { useFormContext } from "react-hook-form";
 
 export default function ServiceInfoForm() {
   const t = useTranslations("ServiceData");
-
   const { control } = useFormContext();
 
   return (
-    <div className="grow space-y-4 px-4 sm:px-6 lg:px-8 py-8 bg-indigo-50">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-4 bg-secondary/10 border-b border-secondary/20">
       <FormField
         control={control}
         name="title"
         render={({ field }) => (
-          <FormItem className="flex flex-col space-y-0">
-            <FormLabel className="text-primary mb-2">{t("title")}</FormLabel>
+          <FormItem>
+            <FormLabel>{t("title")}</FormLabel>
             <FormControl>
-              <Input placeholder={t("titlePlaceholder")} {...field} />
+              <Input placeholder={t("titlePlaceholder")} {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
 
-      <div className="flex flex-col md:flex-row gap-4 justify-start">
+      <div className="flex flex-col md:flex-row gap-4">
         <FormField
           control={control}
           name="date"
           render={({ field }) => (
-            <FormItem className="flex flex-col space-y-0 w-full md:w-72">
-              <FormLabel className="text-primary mb-2">{t("date")}</FormLabel>
+            <FormItem className="w-full md:w-72">
+              <FormLabel>{t("date")}</FormLabel>
               <FormControl>
                 <DatePicker
                   buttonProps={{ className: "w-full" }}
@@ -50,17 +49,15 @@ export default function ServiceInfoForm() {
             </FormItem>
           )}
         />
+
         <FormField
           control={control}
           name="worshipLeader"
           render={({ field }) => (
-            <FormItem className="flex flex-col space-y-0 w-full md:w-64">
-              {" "}
-              <FormLabel className="text-primary mb-2">
-                {t("worshipLeader")}
-              </FormLabel>
+            <FormItem className="w-full md:w-64">
+              <FormLabel>{t("worshipLeader")}</FormLabel>
               <FormControl>
-                <Input placeholder={t("worshipLeaderPlaceholder")} {...field} />
+                <Input placeholder={t("worshipLeaderPlaceholder")} {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>

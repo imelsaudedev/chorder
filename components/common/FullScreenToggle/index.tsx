@@ -1,181 +1,86 @@
+import Tag from "@/components/common/Tag";
+import Text from "@/components/common/Text";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Maximize, Minimize } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Maximize, Minimize, ZoomIn, ZoomOut } from "lucide-react";
+
+const FONT_MIN = 10;
+const FONT_MAX = 32;
 
 type FullScreenToggleProps = {
-  unitRefs: React.RefObject<(HTMLDivElement | null)[]>;
-  onCurrentIndexChanged?: (index: number) => void;
+  isFullScreen: boolean;
+  currentIndex: number;
+  total: number;
+  currentTitle?: string;
+  fontSize?: number;
+  onFontSizeChange?: (size: number) => void;
+  onPrev: () => void;
+  onNext: () => void;
+  onToggle: () => void;
 };
 
 export default function FullScreenToggle({
-  unitRefs,
-  onCurrentIndexChanged,
+  isFullScreen,
+  currentIndex,
+  total,
+  currentTitle,
+  fontSize,
+  onFontSizeChange,
+  onPrev,
+  onNext,
+  onToggle,
 }: FullScreenToggleProps) {
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  if (isFullScreen) {
+    return (
+      <div className="fixed top-0 inset-x-0 h-12 z-50 flex items-center px-2 gap-1 bg-background/90 backdrop-blur-sm border-b border-border">
+        {/* Controles + contador + título — tudo à esquerda */}
+        <Button variant="ghost" size="icon" aria-label="Anterior" onClick={onPrev} disabled={currentIndex === 0} className="shrink-0">
+          <ChevronLeft size={20} />
+        </Button>
+        <Button variant="ghost" size="icon" aria-label="Próxima" onClick={onNext} disabled={currentIndex >= total - 1} className="shrink-0">
+          <ChevronRight size={20} />
+        </Button>
+        <Tag variant="muted" size="xs" label={`${currentIndex + 1}/${total}`} className="shrink-0 tabular-nums select-none" />
+        {currentTitle && (
+          <Text variant="heading-sm" as="span" className="truncate ml-2">{currentTitle}</Text>
+        )}
 
-  useFullScreen(setIsFullScreen);
-  useObserveAll(unitRefs, setCurrentIndex);
-  useCurrentIndexChanged(onCurrentIndexChanged, currentIndex);
-
-  const onPrevious = useOnPrevious(unitRefs, currentIndex, setCurrentIndex);
-  const onNext = useOnNext(unitRefs, currentIndex, setCurrentIndex);
-  const toggleFullScreen = useToggleFullScreen(setIsFullScreen);
-
-  return (
-    <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 flex items-center gap-2 z-50">
-      {isFullScreen && (
-        <div className="flex gap-2">
-          <Button variant="default" size="icon" onClick={onPrevious}>
-            <ChevronUp size={24} />
-          </Button>
-          <Button variant="default" size="icon" onClick={onNext}>
-            <ChevronDown size={24} />
+        {/* Fonte + Minimize — à direita */}
+        <div className="flex items-center shrink-0 ml-auto">
+          {onFontSizeChange && fontSize !== undefined && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Diminuir fonte"
+                onClick={() => onFontSizeChange(Math.max(FONT_MIN, fontSize - 1))}
+                disabled={fontSize <= FONT_MIN}
+              >
+                <ZoomOut size={18} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Aumentar fonte"
+                onClick={() => onFontSizeChange(Math.min(FONT_MAX, fontSize + 1))}
+                disabled={fontSize >= FONT_MAX}
+              >
+                <ZoomIn size={18} />
+              </Button>
+            </>
+          )}
+          <Button variant="ghost" size="icon" aria-label="Sair do modo tela cheia" onClick={onToggle}>
+            <Minimize size={18} />
           </Button>
         </div>
-      )}
-      <Button
-        variant="secondary"
-        onClick={toggleFullScreen}
-        className="shadow-md rounded-full"
-      >
-        {isFullScreen ? <Minimize size={24} /> : <Maximize size={24} />}
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50">
+      <Button variant="secondary" aria-label="Entrar em modo tela cheia" onClick={onToggle} className="shadow-md rounded-full">
+        <Maximize size={20} />
       </Button>
     </div>
   );
-}
-
-function useCurrentIndexChanged(
-  onCurrentIndexChanged: ((index: number) => void) | undefined,
-  currentIndex: number
-) {
-  useEffect(() => {
-    if (onCurrentIndexChanged) {
-      onCurrentIndexChanged(currentIndex);
-    }
-  }, [currentIndex, onCurrentIndexChanged]);
-}
-
-function useFullScreen(
-  setIsFullScreen: React.Dispatch<React.SetStateAction<boolean>>
-) {
-  useEffect(() => {
-    const handleFullScreenChange = () => {
-      setIsFullScreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullScreenChange);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullScreenChange);
-    };
-  }, [setIsFullScreen]);
-}
-
-function useOnNext(
-  unitRefs: React.RefObject<(HTMLDivElement | null)[]>,
-  currentIndex: number,
-  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>
-) {
-  return useCallback(() => {
-    if (unitRefs.current && currentIndex < unitRefs.current.length - 1) {
-      const newIndex = currentIndex + 1;
-      setCurrentIndex(newIndex);
-      unitRefs.current[newIndex]?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  }, [currentIndex, unitRefs, setCurrentIndex]);
-}
-
-function useOnPrevious(
-  unitRefs: React.RefObject<(HTMLDivElement | null)[]>,
-  currentIndex: number,
-  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>
-) {
-  return useCallback(() => {
-    if (unitRefs.current && currentIndex > 0) {
-      const newIndex = currentIndex - 1;
-      setCurrentIndex(newIndex);
-      unitRefs.current[newIndex]?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  }, [unitRefs, currentIndex, setCurrentIndex]);
-}
-
-function exitFullScreen() {
-  document.exitFullscreen().catch((err) => {
-    console.error(`Error attempting to exit full-screen mode: ${err.message}`);
-  });
-}
-
-function enterFullScreen() {
-  document.documentElement.requestFullscreen().catch((err) => {
-    console.error(
-      `Error attempting to enable full-screen mode: ${err.message}`
-    );
-  });
-}
-
-function createObserver(
-  unitRefs: React.RefObject<(HTMLDivElement | null)[]>,
-  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>
-): IntersectionObserver {
-  return new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const index = unitRefs.current?.indexOf(
-            entry.target as HTMLDivElement
-          );
-          if (index !== undefined && index !== -1) {
-            setCurrentIndex(index);
-          }
-        }
-      });
-    },
-    {
-      root: null, // Use the viewport as the root
-      threshold: 0.6,
-    }
-  );
-}
-
-function useObserveAll(
-  unitRefs: React.RefObject<(HTMLDivElement | null)[]>,
-  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>
-) {
-  useEffect(() => {
-    const observer = createObserver(unitRefs, setCurrentIndex);
-    const units = unitRefs.current || [];
-    units.forEach((unit) => {
-      if (unit) {
-        observer.observe(unit);
-      }
-    });
-    return () => {
-      units.forEach((unit) => {
-        if (unit) {
-          observer.unobserve(unit);
-        }
-      });
-    };
-  }, [unitRefs, setCurrentIndex]);
-}
-
-function useToggleFullScreen(
-  setIsFullScreen: React.Dispatch<React.SetStateAction<boolean>>
-) {
-  return () => {
-    if (!document.fullscreenElement) {
-      enterFullScreen();
-      setIsFullScreen(true);
-    } else {
-      exitFullScreen();
-      setIsFullScreen(false);
-    }
-  };
 }

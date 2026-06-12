@@ -1,5 +1,5 @@
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 type BackLinkProps = {
   href: string;
@@ -7,14 +7,10 @@ type BackLinkProps = {
 };
 
 const BackLink = ({ href, text }: BackLinkProps) => (
-  <div className="cursor-pointer items-center flex flex-row gap-1 mb-4 text-zinc-400">
-    <Link href={href}>
-      <div className="flex items-center gap-1">
-        <ArrowLeft className="w-4 h-4" strokeWidth={3} />
-        <span>{text}</span>
-      </div>
-    </Link>
-  </div>
+  <Link href={href} className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors text-sm">
+    <ArrowLeft size={14} strokeWidth={2.5} />
+    <span>{text}</span>
+  </Link>
 );
 
 export default BackLink;

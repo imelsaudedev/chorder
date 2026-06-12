@@ -14,9 +14,7 @@ export default function ServiceUnitListForm() {
           index={index}
         />
       ))}
-      <div className="pl-10">
-        <AddUnitForm />
-      </div>
+      <AddUnitForm />
     </section>
   );
 }

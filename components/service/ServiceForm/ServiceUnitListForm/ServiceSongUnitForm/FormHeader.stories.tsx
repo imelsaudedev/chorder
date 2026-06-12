@@ -20,13 +20,8 @@ export const Default: Story = {
     const [unit, setUnit] = useState<ServiceUnitSchema>(
       service.units![0] as unknown as ServiceUnitSchema
     );
-    const [isEditing, setIsEditing] = useState(true);
     const handleRemove = () => {
       console.log("Remove unit");
-    };
-    const handleToggleEdit = () => {
-      setIsEditing((prev) => !prev);
-      console.log("Toggle edit mode");
     };
 
     return (
@@ -36,8 +31,6 @@ export const Default: Story = {
           unit={unit}
           onChangeUnit={setUnit}
           onRemoveUnit={handleRemove}
-          onToggleEdit={handleToggleEdit}
-          isEditing={isEditing}
         />
 
         <div className="mt-4">

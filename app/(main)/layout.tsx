@@ -1,15 +1,14 @@
 import NavBar from "@/components/common/NavBar";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import ContentWrapper from "./ContentWrapper";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="max-w-100vw flex">
-      {/* Sidebar fixa */}
-      <NavBar />
-
-      {/* Conteúdo principal com deslocamento para a direita em telas grandes */}
-      <div className="flex flex-col grow ml-0 sm:ml-20 max-w-full">
-        {children}
+    <TooltipProvider>
+      <div className="max-w-100vw flex">
+        <div className="fullscreen-hidden"><NavBar /></div>
+        <ContentWrapper>{children}</ContentWrapper>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

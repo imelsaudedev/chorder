@@ -17,9 +17,11 @@ export default function ServiceActionMenu({ service }: ServiceActionMenuProps) {
   return (
     <ActionMenu
       editUrl={editUrl}
+      editLabel={t("Messages.editService")}
       isDeleting={isMutating}
       isDuplicating={false}
       onDelete={deleteService}
+      deleteLabel={t("Messages.deleteService")}
       confirmDeleteTitle={t("ServiceForm.confirmDeleteTitle")}
       confirmDeleteDescription={t("ServiceForm.confirmDelete")}
     />

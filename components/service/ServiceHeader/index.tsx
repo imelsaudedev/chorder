@@ -1,13 +1,11 @@
 import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useFormattedDate } from "@/hooks/useFormattedDate";
-import { ClientService } from "@/prisma/models";
-import { Calendar, MicVocal, Settings2 } from "lucide-react";
+import { ClientService, ServiceRef } from "@/prisma/models";
+import { Calendar, ChevronLeft, ChevronRight, MicVocal, SlidersHorizontal } from "lucide-react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import ServiceActionMenu from "./ServiceActionMenu";
 import ServiceConfig from "./ServiceConfig";
@@ -26,29 +24,66 @@ export default function ServiceHeader({ service }: ServiceHeaderProps) {
   }
 
   return (
-    <Collapsible>
+    <Popover>
       <PageHeader
         backLinkHref="/services"
         backLinkText={t("Messages.services")}
         title={serviceTitle}
         subtitle={<Subtitle service={service} />}
         actions={
-          <div className="flex gap-2 items-center md:self-end">
-            <ServiceActionMenu service={service} />
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Settings2 />
+          <div className="flex gap-1 items-center">
+            <ServiceNavButton dir="prev" serviceRef={service.prevService} />
+            <ServiceNavButton dir="next" serviceRef={service.nextService} />
+            <div className="w-px h-5 bg-border mx-1" />
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <SlidersHorizontal />
                 <span className="sr-only">{t("Messages.toggleConfig")}</span>
               </Button>
-            </CollapsibleTrigger>
+            </PopoverTrigger>
+            <ServiceActionMenu service={service} />
           </div>
         }
       />
 
-      <CollapsibleContent>
+      <PopoverContent className="w-80" align="end">
         <ServiceConfig />
-      </CollapsibleContent>
-    </Collapsible>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+type ServiceNavButtonProps = {
+  dir: "prev" | "next";
+  serviceRef?: ServiceRef | null;
+};
+
+function ServiceNavButton({ dir, serviceRef }: ServiceNavButtonProps) {
+  const formattedDate = useFormattedDate(serviceRef?.date ?? new Date());
+  const Icon = dir === "prev" ? ChevronLeft : ChevronRight;
+
+  if (!serviceRef) {
+    return (
+      <Button variant="ghost" size="icon" disabled>
+        <Icon size={18} />
+      </Button>
+    );
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon" asChild>
+          <Link href={`/services/${serviceRef.slug}`}>
+            <Icon size={18} />
+          </Link>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">
+        <p className="font-medium">{serviceRef.title || formattedDate}</p>
+        {serviceRef.title && <p className="text-muted-foreground text-xs">{formattedDate}</p>}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -58,7 +93,7 @@ function Subtitle({ service }: SubtitleProps) {
   const t = useTranslations();
 
   return (
-    <div className="flex flex-row items-center gap-4 leading-tight">
+    <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-4 leading-tight">
       <span className="flex items-center gap-1">
         <Calendar className="w-4 h-4" />
         {formattedDate}

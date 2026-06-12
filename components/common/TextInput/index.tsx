@@ -1,16 +1,7 @@
-import { ChangeEventHandler, useLayoutEffect, useRef } from 'react';
+import { ChangeEventHandler, forwardRef, useLayoutEffect, useRef } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 
-export default function TextInput({
-  className,
-  id,
-  value,
-  defaultValue,
-  onChange,
-  placeholder,
-  long,
-  minRows,
-}: {
+type TextInputProps = {
   className?: string;
   id?: string;
   value?: string;
@@ -19,38 +10,40 @@ export default function TextInput({
   placeholder?: string;
   long?: boolean;
   minRows?: number;
-}) {
-  let Component;
-  if (long) {
-    Component = TextareaAutosize;
-  } else {
-    Component = 'input';
-  }
+};
 
-  // https://giacomocerquone.com/keep-input-cursor-still/
-  const position = useRef<{
-    beforeStart: number | null;
-    beforeEnd: number | null;
-  }>({
+const TextInput = forwardRef<HTMLTextAreaElement, TextInputProps>(function TextInput({
+  className,
+  id,
+  value,
+  defaultValue,
+  onChange,
+  placeholder,
+  long,
+  minRows,
+}, forwardedRef) {
+  const position = useRef<{ beforeStart: number | null; beforeEnd: number | null }>({
     beforeStart: 0,
     beforeEnd: 0,
   });
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const internalRef = useRef<HTMLTextAreaElement>(null);
 
   useLayoutEffect(() => {
-    inputRef.current?.setSelectionRange(position.current.beforeStart, position.current.beforeEnd);
+    if (!forwardedRef) return;
+    if (typeof forwardedRef === 'function') {
+      forwardedRef(internalRef.current);
+    } else {
+      (forwardedRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = internalRef.current;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useLayoutEffect(() => {
+    internalRef.current?.setSelectionRange(position.current.beforeStart, position.current.beforeEnd);
   }, [value]);
 
   const handleChange: ChangeEventHandler = (e) => {
     const target = e.target as HTMLInputElement;
-    const beforeStart = target.selectionStart;
-    const beforeEnd = target.selectionEnd;
-
-    position.current = {
-      beforeStart,
-      beforeEnd,
-    };
-
+    position.current = { beforeStart: target.selectionStart, beforeEnd: target.selectionEnd };
     onChange?.(e);
   };
 
@@ -68,25 +61,34 @@ export default function TextInput({
     'w-full',
     'p-2',
   ];
-  if (className) {
-    classNames.push(className);
-  }
+  if (className) classNames.push(className);
 
-  const otherProps: { minRows?: number } = {};
-  if (minRows) {
-    otherProps.minRows = minRows;
+  if (long) {
+    return (
+      <TextareaAutosize
+        ref={internalRef}
+        id={id}
+        value={value}
+        defaultValue={defaultValue}
+        className={classNames.join(' ')}
+        onChange={handleChange}
+        placeholder={placeholder}
+        minRows={minRows}
+      />
+    );
   }
 
   return (
-    <Component
-      ref={inputRef}
+    <input
+      ref={internalRef as unknown as React.RefObject<HTMLInputElement>}
       id={id}
       value={value}
       defaultValue={defaultValue}
       className={classNames.join(' ')}
       onChange={handleChange}
       placeholder={placeholder}
-      {...otherProps}
     />
   );
-}
+});
+
+export default TextInput;

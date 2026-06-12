@@ -22,6 +22,8 @@ export function defaultArrangementValues(
     songId: arrangement?.songId,
     originalArrangementId: arrangement?.originalArrangementId ?? null,
     key: arrangement?.key ?? "C",
+    youtubeUrl: arrangement?.youtubeUrl ?? "",
+    audios: arrangement?.audios ?? [],
     isDefault: arrangement?.songId ? arrangement.isDefault : true,
     isDeleted: false,
     isServiceArrangement: arrangement?.isServiceArrangement ?? false,

@@ -7,19 +7,25 @@ export default function ChordProLine({
   items,
   originalKey,
   transpose,
+  enharmonicPreference,
   mode,
   density,
+  commentClass,
 }: ChordProLineProps) {
   const hasLyrics = items.some(
-    (item) => item._name !== "comment" && item.lyrics.trim()
+    (item) => item._name !== "comment" && item.lyrics?.trim()
   );
   const hasChords = items.some(
-    (item) => item._name !== "comment" && item.chords.trim()
+    (item) => item._name !== "comment" && item.chords?.trim()
   );
 
-  let className = `flex flex-col relative ${
-    mode === "text" ? "px-0 py-0" : density === "compact" ? "px-2" : "px-4"
-  }`;
+  const hasPairedComment = items.some(
+    (item, i) => item._name === "comment" && items[i + 1]?._name !== "comment" && items[i + 1] !== undefined
+  );
+
+  const px = mode === "text" ? "px-0 py-0" : "px-[var(--block-px)]";
+  const pt = hasPairedComment && mode !== "text" ? " pt-[1.375em]" : "";
+  const className = `flex flex-col relative ${px}${pt}`;
 
   const props = {
     items,
@@ -27,7 +33,9 @@ export default function ChordProLine({
     hasLyrics,
     hasChords,
     transpose,
+    enharmonicPreference,
     density,
+    commentClass,
   };
 
   return (

@@ -6,6 +6,7 @@ import { unitColorClasses } from "@/components/song/unit-colors";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ClientSongUnit } from "@/prisma/models";
 import clsx from "clsx";
+import { Repeat2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { findBestDistribution } from "./column-logic";
@@ -15,6 +16,7 @@ type ColumnViewerProps = {
   songUnits: ClientSongUnit[];
   transpose: number;
   originalKey?: string;
+  enharmonicPreference?: "sharp" | "flat" | null;
   mode: Mode;
   density: Density;
 };
@@ -24,6 +26,7 @@ export default function ColumnViewer({
   songUnits,
   transpose,
   originalKey,
+  enharmonicPreference,
   mode,
   density,
 }: ColumnViewerProps) {
@@ -31,22 +34,15 @@ export default function ColumnViewer({
   const { columns, columnData } = useColumnData(songUnits, columnConfig);
   const gridColsClass = getGridColumnClass(mode, columns);
   const isTextMode = mode === "text";
-  const isCompact = density === "compact";
 
   return (
     <div
-      className={clsx("grid", gridColsClass, {
-        "gap-2": isCompact,
-        "gap-4": !isCompact,
-      })}
+      className={clsx("grid", gridColsClass, "gap-[var(--block-gap)]")}
     >
       {columnData.map((data, idx) => (
         <div
           key={`col-${idx}`}
-          className={clsx("flex flex-col", {
-            "gap-2": isCompact,
-            "gap-4": !isCompact,
-          })}
+          className="flex flex-col gap-[var(--block-gap)]"
         >
           {data.map((unit, unitIdx) => {
             const isTextUnit = unit.unitType === "TEXT";
@@ -57,8 +53,8 @@ export default function ColumnViewer({
                 <div
                   key={`unit-${unitIdx}`}
                   className={clsx({
-                    "py-2": isTextMode,
-                    "bg-gray-100 dark:bg-zinc-800 rounded p-4": !isTextMode,
+                    "py-[0.5em]": isTextMode,
+                    "bg-muted rounded-lg p-[1em]": !isTextMode,
                   })}
                 >
                   <MarkdownViewer content={unit.content || ""} />
@@ -70,22 +66,40 @@ export default function ColumnViewer({
               <div
                 key={`unit-${unitIdx}`}
                 className={clsx(unitClasses.background, unitClasses.border, {
-                  "border-t bg-transparent mb-4": isTextMode,
-                  "border rounded pb-2": !isTextMode,
+                  "border-t bg-transparent mb-[1em]": isTextMode,
+                  "border rounded-lg pb-[0.5em]": !isTextMode,
                 })}
               >
                 <div
                   className={clsx(
-                    "text-xs uppercase tracking-wide select-none",
+                    "flex items-baseline gap-1 select-none",
                     unitClasses.text,
                     {
-                      "px-0 py-2 text-left text-base font-normal": isTextMode,
-                      "px-2 pt-1 pb-1": !isTextMode && isCompact,
-                      "px-4 pt-2 pb-1": !isTextMode && !isCompact,
+                      "px-0 py-[0.5em]": isTextMode,
+                      "px-[var(--block-px)] pt-[var(--block-pt)] pb-[0.5em]": !isTextMode,
                     }
                   )}
                 >
-                  {t(unit.unitType)} {unit.unitTypeIndex}
+                  <span className={clsx("text-[0.75em] uppercase tracking-wide shrink-0", { "!text-[1em] font-normal": isTextMode })}>
+                    {t(unit.unitType)} {unit.unitTypeIndex}
+                  </span>
+                  {unit.notes && (
+                    <>
+                      <span className="text-[0.75em] opacity-40 shrink-0">·</span>
+                      <span className="text-[0.75em] italic font-normal normal-case tracking-normal">
+                        {unit.notes}
+                      </span>
+                    </>
+                  )}
+                  {(unit.repeatCount ?? 1) > 1 && (
+                    <span className={clsx(
+                      "ml-auto inline-flex items-center gap-[0.2em] text-[0.7em] font-semibold px-[0.4em] py-[0.1em] rounded shrink-0",
+                      unitClasses.repeatBadge
+                    )}>
+                      <Repeat2 size="1em" />
+                      {unit.repeatCount}
+                    </span>
+                  )}
                 </div>
 
                 {unit.lines.map((line, idx) => (
@@ -94,8 +108,11 @@ export default function ColumnViewer({
                     items={line.items as ChordProItem[]}
                     originalKey={originalKey}
                     transpose={transpose}
+                    enharmonicPreference={enharmonicPreference}
                     mode={mode}
                     density={density}
+                    commentClass={unitClasses.comment}
+
                   />
                 ))}
               </div>

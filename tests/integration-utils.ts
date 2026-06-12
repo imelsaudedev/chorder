@@ -1,29 +1,6 @@
 import prisma from "@/prisma/client";
 
-/**
- * Clears all data from the test database.
- * Use this in beforeAll/beforeEach for integration tests.
- */
 export async function clearDatabase() {
-  const tablenames = await prisma.$queryRaw<
-    Array<{ tablename: string }>
-  >`SELECT tablename FROM pg_tables WHERE schemaname='public'`;
-
-  if (tablenames.length === 0) {
-    return;
-  }
-
-  const tables = tablenames
-    .map(({ tablename }) => tablename)
-    .filter((name) => name !== "_prisma_migrations")
-    .map((name) => `"public"."${name}"`)
-    .join(", ");
-
-  if (!tables) {
-    return;
-  }
-
-  // CRITICAL SAFETY CHECK: Prevent truncating non-test databases
   const dbUrl = process.env.DATABASE_URL || "";
   if (!dbUrl.includes("chorder_test")) {
     throw new Error(
@@ -31,9 +8,14 @@ export async function clearDatabase() {
     );
   }
 
-  try {
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${tables} RESTART IDENTITY CASCADE;`);
-  } catch (error) {
-    console.log({ error });
-  }
+  // Delete in FK-safe order. SongArrangement has a self-referential FK (originalArrangementId)
+  // with RESTRICT — null it out first to avoid constraint violations.
+  await prisma.songUnit.deleteMany({});
+  await prisma.serviceUnit.deleteMany({});
+  await prisma.songArrangement.updateMany({ data: { originalArrangementId: null } });
+  await prisma.songArrangement.deleteMany({});
+  await prisma.service.deleteMany({});
+  await prisma.song.deleteMany({});
+  await prisma.tag.deleteMany({});
+  await prisma.tagGroup.deleteMany({});
 }

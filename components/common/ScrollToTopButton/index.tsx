@@ -44,7 +44,7 @@ export default function ScrollToTopButton({
       }`}
       onClick={scrollToTop}
     >
-      <CircleArrowUp className="w-5 h-5" />
+      <CircleArrowUp size={20} />
       <span>{t("scrollToTop")}</span>
     </Button>
   );
