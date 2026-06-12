@@ -52,11 +52,7 @@ describe('SongPicker component', () => {
     render(<SongPicker onSelected={onSelected} />);
 
     expect(screen.getByRole('searchbox')).toBeDefined();
-    
-    // Check if some song title is present
-    await waitFor(() => {
-        expect(screen.getByText(songsMock[0].title)).toBeDefined();
-    });
+    expect(await screen.findByRole('button', { name: songsMock[0].title })).toBeDefined();
   });
 
   it('calls onSelected when a song is clicked', async () => {
