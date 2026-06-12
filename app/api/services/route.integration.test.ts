@@ -59,6 +59,7 @@ describe('Services API integration', () => {
                         originalArrangementId: arrangement.id,
                         youtubeUrl: null,
                         audioUrl: null,
+                        audios: [],
                         units: [
                             { content: 'Verse 1', type: 'VERSE', order: 1, notes: null }
                         ]

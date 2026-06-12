@@ -56,6 +56,9 @@ export default defineConfig({
         plugins: [
           storybookTest({ configDir: path.join(dirname, '.storybook') }),
         ],
+        optimizeDeps: {
+          exclude: ['@mdx-js/react', 'markdown-to-jsx'],
+        },
         test: {
           name: 'storybook',
           globals: true,
