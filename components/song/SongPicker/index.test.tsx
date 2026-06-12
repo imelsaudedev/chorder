@@ -21,8 +21,10 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-vi.mock('@/app/api/api-client', () => ({
-  useFetchTagGroups: vi.fn(() => ({ tagGroups: [], isLoading: false })),
+vi.mock('@/components/song/SongListEntry', () => ({
+  default: ({ song, onSelected }: { song: any; onSelected?: (s: any) => void }) => (
+    <button aria-label={song.title} onClick={() => onSelected?.(song)} />
+  ),
 }));
 
 vi.mock('#api-client', () => ({
