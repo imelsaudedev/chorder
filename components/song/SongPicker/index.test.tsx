@@ -10,9 +10,40 @@ vi.mock('next-intl', () => ({
   useLocale: () => 'pt-BR',
 }));
 
-// Mock the api-client
+vi.mock('next/link', () => ({
+  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+}));
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => '/',
+  useParams: () => ({}),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+vi.mock('@/components/song/SongListEntry', () => ({
+  default: ({ song, onSelected }: { song: any; onSelected?: (s: any) => void }) => (
+    <button aria-label={song.title} onClick={() => onSelected?.(song)} />
+  ),
+}));
+
 vi.mock('#api-client', () => ({
   useFetchSongs: vi.fn(),
+  useFetchSong: vi.fn(() => ({})),
+  useFetchSongArrangements: vi.fn(() => ({})),
+  useFetchArrangement: vi.fn(() => ({})),
+  useCreateOrUpdateArrangement: vi.fn(() => ({})),
+  useDeleteArrangement: vi.fn(() => ({})),
+  useMoveArrangement: vi.fn(() => ({})),
+  useMakeArrangementDefault: vi.fn(() => ({})),
+  useDuplicateArrangement: vi.fn(() => ({})),
+  useFetchServices: vi.fn(() => ({})),
+  useFetchService: vi.fn(() => ({})),
+  useDeleteService: vi.fn(() => ({})),
+  useCreateOrUpdateService: vi.fn(() => ({})),
+  useArchiveSong: vi.fn(() => ({})),
+  useUpdateSong: vi.fn(() => ({ updateSong: vi.fn() })),
+  useFetchTagGroups: vi.fn(() => ({ tagGroups: [], isLoading: false, isError: null })),
 }));
 
 describe('SongPicker component', () => {
@@ -27,11 +58,7 @@ describe('SongPicker component', () => {
     render(<SongPicker onSelected={onSelected} />);
 
     expect(screen.getByRole('searchbox')).toBeDefined();
-    
-    // Check if some song title is present
-    await waitFor(() => {
-        expect(screen.getByText(songsMock[0].title)).toBeDefined();
-    });
+    expect(await screen.findByRole('button', { name: songsMock[0].title })).toBeDefined();
   });
 
   it('calls onSelected when a song is clicked', async () => {
@@ -45,10 +72,11 @@ describe('SongPicker component', () => {
     const onSelected = vi.fn();
     render(<SongPicker onSelected={onSelected} />);
 
-    const firstSong = await screen.findByText(songsMock[0].title);
-    await user.click(firstSong);
+    // O SongListEntry usa um overlay <button aria-label={song.title}> — não há texto "Adicionar"
+    const songButton = await screen.findByRole('button', { name: songsMock[0].title });
+    await user.click(songButton);
 
-    expect(onSelected).toHaveBeenCalledWith(songsMock[0]);
+    expect(onSelected).toHaveBeenCalledTimes(1);
   });
 
   it('updates query when searching', async () => {

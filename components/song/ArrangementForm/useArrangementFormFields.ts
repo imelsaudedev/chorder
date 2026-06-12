@@ -68,6 +68,8 @@ function useCreateUnit(
       order: units.length,
       type: "BLOCK",
       content: "",
+      notes: null,
+      repeatCount: 1,
     });
   }, [appendSongUnit, units]);
 }
@@ -84,6 +86,8 @@ function useAddExistingUnit(
         type: newBlockType,
         content: originalUnit?.content || "",
         order: units.length,
+        notes: null,
+        repeatCount: 1,
       });
     },
     [appendSongUnit, units]

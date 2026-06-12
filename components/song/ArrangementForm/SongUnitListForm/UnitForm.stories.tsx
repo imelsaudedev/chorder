@@ -21,6 +21,8 @@ export const Default: Story = {
       content:
         "[D]Twinkle, twinkle, [G]little [D]star,\n[G]How I [D]wonder [A]what you [D]are.",
       order: 0,
+      notes: null,
+      repeatCount: 1,
     });
 
     return (
@@ -28,6 +30,61 @@ export const Default: Story = {
         unit={unit}
         removeUnit={() => setUnit({ ...unit, content: "" })}
         duplicateUnit={() => alert("Duplicate unit action")}
+        insertBefore={() => {}}
+        insertAfter={() => {}}
+        onChangeUnit={(newUnit) => setUnit(newUnit)}
+      />
+    );
+  },
+};
+
+export const WithNotes: Story = {
+  parameters: {
+    layout: "centered",
+  },
+  render: () => {
+    const [unit, setUnit] = useState<ClientSongUnit>({
+      type: "VERSE",
+      content: "[G]Terra boa\n[D]bem escondida",
+      order: 1,
+      notes: "Só voz — suave",
+      repeatCount: 1,
+    });
+
+    return (
+      <UnitForm
+        unit={unit}
+        removeUnit={() => {}}
+        duplicateUnit={() => {}}
+        insertBefore={() => {}}
+        insertAfter={() => {}}
+        onChangeUnit={(newUnit) => setUnit(newUnit)}
+      />
+    );
+  },
+};
+
+export const WithInlineComment: Story = {
+  parameters: {
+    layout: "centered",
+  },
+  render: () => {
+    const [unit, setUnit] = useState<ClientSongUnit>({
+      type: "CHORUS",
+      content:
+        "{c:Forte}\n[C]Santo, Santo, [G]Santo\n{c:Suave}\n[Am]é o [F]Senhor",
+      order: 2,
+      notes: null,
+      repeatCount: 1,
+    });
+
+    return (
+      <UnitForm
+        unit={unit}
+        removeUnit={() => {}}
+        duplicateUnit={() => {}}
+        insertBefore={() => {}}
+        insertAfter={() => {}}
         onChangeUnit={(newUnit) => setUnit(newUnit)}
       />
     );

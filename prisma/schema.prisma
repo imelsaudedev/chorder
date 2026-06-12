@@ -5,12 +5,14 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Song {
@@ -23,6 +25,25 @@ model Song {
   isDeleted Boolean @default(false)
 
   arrangements SongArrangement[]
+  tags         Tag[]
+}
+
+model TagGroup {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  color String @default("#6b7280")
+  order Int    @default(0)
+  tags  Tag[]
+}
+
+model Tag {
+  id         Int      @id @default(autoincrement())
+  name       String
+  tagGroupId Int
+  group      TagGroup @relation(fields: [tagGroupId], references: [id])
+  songs      Song[]
+
+  @@unique([name, tagGroupId])
 }
 
 model SongArrangement {
@@ -35,11 +56,23 @@ model SongArrangement {
   isDeleted Boolean @default(false)
   isServiceArrangement Boolean @default(false)
 
+  youtubeUrl   String?
+
   song      Song @relation(fields: [songId], references: [id])
   originalArrangement SongArrangement? @relation("OriginalArrangement", fields: [originalArrangementId], references: [id])
   childrenArrangements SongArrangement[] @relation("OriginalArrangement")
   serviceUnit ServiceUnit?
   units SongUnit[]
+  audios ArrangementAudio[]
+}
+
+model ArrangementAudio {
+  id            Int             @id @default(autoincrement())
+  arrangementId Int
+  arrangement   SongArrangement @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
+  url           String
+  label         String
+  order         Int             @default(0)
 }
 
 model SongUnit {
@@ -48,7 +81,9 @@ model SongUnit {
   content   String
   type      SongUnitType
   order     Int
-  
+  notes       String?
+  repeatCount Int     @default(1)
+
   arrangement SongArrangement @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
 }
 

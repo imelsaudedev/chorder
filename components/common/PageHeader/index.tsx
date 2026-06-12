@@ -1,11 +1,12 @@
 import BackLink from "@/components/common/BackLink";
 import Heading from "@/components/common/Heading";
-import clsx from "clsx";
+import Text from "@/components/common/Text";
 
 type PageHeaderProps = {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   actions?: React.ReactNode;
+  contentActions?: React.ReactNode;
   backLinkHref?: string;
   backLinkText?: string;
   variant?: "default" | "edit";
@@ -15,40 +16,51 @@ const PageHeader = ({
   title,
   subtitle,
   actions,
+  contentActions,
   backLinkHref,
   backLinkText,
   variant = "default",
 }: PageHeaderProps) => {
-  return (
-    <div
-      className={clsx("flex flex-col md:flex-row grow justify-between gap-4", {
-        "p-4 sm:p-6 lg:p-8 bg-zinc-50 border-b border-zinc-100":
-          variant === "default",
-        "px-4 sm:px-6 lg:px-8 pt-8 sm:pt-16 pb-4 sm:pb-8 bg-indigo-50":
-          variant === "edit",
-      })}
-    >
-      <div className="flex flex-col">
-        {backLinkHref && backLinkText && (
-          <BackLink href={backLinkHref} text={backLinkText} />
+  if (variant === "edit") {
+    return (
+      <div className="sticky top-0 z-10 flex flex-row items-center justify-between gap-2 px-4 sm:px-5 lg:px-8 py-2 bg-white/80 backdrop-blur-lg border-b border-border">
+        <div className="flex flex-col min-w-0">
+          <Text variant="heading-sm" className="truncate">{title}</Text>
+          {subtitle && (
+            <Text variant="caption" className="truncate mt-0.5">{subtitle}</Text>
+          )}
+        </div>
+        {actions && (
+          <div className="flex gap-2 items-center shrink-0">{actions}</div>
         )}
-        <Heading
-          level={1}
-          className={clsx({
-            "font-semibold text-secondary leading-none mb-0":
-              variant === "edit",
-          })}
-        >
-          {title}
-        </Heading>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col px-4 sm:px-5 lg:px-8 py-4 sm:py-5 bg-zinc-50 border-b border-border">
+      {(backLinkHref || actions) && (
+        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+          <div>
+            {backLinkHref && backLinkText && (
+              <BackLink href={backLinkHref} text={backLinkText} />
+            )}
+          </div>
+          {actions && (
+            <div className="flex gap-2 items-center">{actions}</div>
+          )}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-1">
+        <Heading level={1} className="truncate">{title}</Heading>
         {subtitle && (
-          <div className="text-base sm:text-lg text-zinc-600">{subtitle}</div>
+          <Text variant="caption" className="text-base sm:text-lg">{subtitle}</Text>
         )}
       </div>
 
-      {/* Botões de Ação e Configuração */}
-      {actions && (
-        <div className="flex gap-2 items-center md:self-end">{actions}</div>
+      {contentActions && (
+        <div className="flex flex-wrap gap-2 items-center mt-2">{contentActions}</div>
       )}
     </div>
   );

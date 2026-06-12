@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { useState } from "react";
+import SongConfigProvider from "@/components/config/SongConfig";
 import KeyButtonSet from "./index";
 
 const meta = {
@@ -18,11 +19,13 @@ export const Default: Story = {
   render: () => {
     const [transpose, setTranspose] = useState(0);
     return (
-      <KeyButtonSet
-        originalKey="C"
-        transpose={transpose}
-        setTranspose={setTranspose}
-      />
+      <SongConfigProvider>
+        <KeyButtonSet
+          originalKey="C"
+          transpose={transpose}
+          setTranspose={setTranspose}
+        />
+      </SongConfigProvider>
     );
   },
 };

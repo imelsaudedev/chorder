@@ -1,3 +1,5 @@
+import Text from "@/components/common/Text";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ClientService } from "@/prisma/models";
 import { DateTime } from "luxon";
 import { useLocale, useTranslations } from "next-intl";
@@ -8,9 +10,7 @@ type ServiceListProps = {
   services: ClientService[];
 };
 
-export default function ServiceList({
-  services: allServices,
-}: ServiceListProps) {
+export default function ServiceList({ services: allServices }: ServiceListProps) {
   const t = useTranslations();
   const locale = useLocale();
   const [pastServices, futureServices] = usePastAndFutureServices(allServices);
@@ -19,29 +19,31 @@ export default function ServiceList({
   return (
     <div className="space-y-6">
       {futureServices.length > 0 && (
-        <section className="bg-zinc-50 p-4 sm:p-6 lg:p-8 mb-4 sm:mb-8 rounded-lg border border-zinc-100">
-          <span className="font-bricolage text-base sm:text-lg text-secondary">
-            {t("Service.nextService")}
-          </span>
-          <ul>
-            {futureServices.map((service) => (
-              <ServiceListEntry key={service.slug} service={service} />
-            ))}
-          </ul>
-        </section>
+        <Card className="border-secondary/30 bg-secondary/5 mb-4 sm:mb-8 gap-3">
+          <CardHeader>
+            <Text variant="overline" as="p">{t("Service.nextService")}</Text>
+          </CardHeader>
+          <CardContent className="pb-2">
+            <ul className="divide-y divide-secondary/10">
+              {futureServices.map((service) => (
+                <ServiceListEntry key={service.slug} service={service} variant="card" />
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       )}
 
       {Object.keys(pastServicesByMonth).length > 0 && (
-        <section className="px-0 sm:px-6 lg:px-8">
+        <section>
           {pastServicesByMonth.map(([month, services]) => (
             <div key={month} className="mb-8">
-              <span className="font-bricolage text-base sm:text-lg text-zinc-400">
+              <Text variant="overline" as="p" className="mb-2">
                 {DateTime.fromISO(month)
                   .setLocale(locale)
                   .toLocaleString({ month: "long", year: "numeric" })
                   .toUpperCase()}
-              </span>
-              <ul>
+              </Text>
+              <ul className="divide-y divide-zinc-100">
                 {services.map((service) => (
                   <ServiceListEntry key={service.slug} service={service} />
                 ))}

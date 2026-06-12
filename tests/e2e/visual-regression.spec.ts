@@ -21,8 +21,10 @@ test.describe('Visual Regression Suite', () => {
     await expect(page.locator('html')).not.toHaveId('__next_error__');
     await expect(page.getByText('This page could not be found')).not.toBeVisible();
     await expect(page.getByText('Internal Server Error')).not.toBeVisible();
-    // Wait for the heading to be visible (h1 is present on all test pages)
-    await page.waitForSelector('h1', { state: 'visible', timeout: 10000 });
+    // Wait for the app to be ready: list/view pages have h1, edit pages have form
+    await page.waitForSelector('h1, form', { state: 'visible', timeout: 30000 });
+    // Second networkidle wait catches SWR fetches triggered after React hydration
+    await page.waitForLoadState('networkidle');
   }
 
   test('Home page visual check', async ({ page }) => {
@@ -75,7 +77,8 @@ test.describe('Visual Regression Suite', () => {
   test('Service Edit/Planning visual check', async ({ page }) => {
     await page.goto(`/services/${seededIds.serviceSlug}/edit`);
     await ensureAppReady(page);
-    await expect(page.getByLabel('Título')).toHaveValue('Visual Baseline Service');
+    // Title is displayed in an h2 heading inside the metadata button (no inline form field)
+    await expect(page.getByRole('heading', { name: 'Visual Baseline Service' })).toBeVisible();
     // Wait for the 3 seeded units to appear (they show the song title)
     await expect(page.getByText('Visual Baseline Song')).toHaveCount(3);
     await expect(page).toHaveScreenshot('service-edit.png', { fullPage: true });

@@ -13,6 +13,8 @@ import { Density, Mode } from "./config";
 type SongConfigContextType = {
   transpose: number;
   setTranspose: Dispatch<SetStateAction<number>>;
+  enharmonicPreference: "sharp" | "flat" | null;
+  setEnharmonicPreference: Dispatch<SetStateAction<"sharp" | "flat" | null>>;
   columns: number;
   setColumns: Dispatch<SetStateAction<number>>;
   fontSize: number;
@@ -45,6 +47,7 @@ export default function SongConfigProvider({
   children,
 }: SongConfigContextProps) {
   const [transpose, setTranspose] = useState(initialTranspose ?? 0);
+  const [enharmonicPreference, setEnharmonicPreference] = useState<"sharp" | "flat" | null>(null);
   const [columns, setColumns, setUntouchedColumns, columnsTouched] =
     useTouchedState(initialColumns ?? 0);
   const [fontSize, setFontSize, setUntouchedFontSize, fontSizeTouched] =
@@ -84,6 +87,8 @@ export default function SongConfigProvider({
       value={{
         transpose,
         setTranspose,
+        enharmonicPreference,
+        setEnharmonicPreference,
         columns,
         setColumns,
         fontSize,

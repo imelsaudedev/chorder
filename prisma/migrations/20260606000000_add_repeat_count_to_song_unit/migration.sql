@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "SongUnit" ADD COLUMN "repeatCount" INTEGER NOT NULL DEFAULT 1;

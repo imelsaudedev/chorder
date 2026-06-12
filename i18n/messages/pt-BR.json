@@ -1,6 +1,6 @@
 {
   "Metadata": {
-    "title": "IMeL Saúde",
+    "title": "Liturgias | Missão 2026 - Amanhar",
     "siteDescription": "Uma ferramenta de gerenciamento de liturgias"
   },
   "Messages": {
@@ -19,11 +19,21 @@
     "feedback": "Feedback",
     "scrollToTop": "Voltar ao topo",
     "newSong": "Nova música",
-    "editSong": "Editar música",
+    "editSong": "Editar dados",
     "song": "Música",
     "songs": "Músicas",
+    "stats": "Stats",
     "newService": "Nova liturgia",
     "editService": "Editar liturgia",
+    "deleteService": "Apagar liturgia",
+    "saveService": "Salvar liturgia",
+    "editServiceData": "Editar dados",
+    "discardChanges": "Descartar alterações",
+    "discardChangesDesc": "Você perderá todas as alterações não salvas.",
+    "discard": "Descartar",
+    "continue": "Continuar",
+    "saveSong": "Salvar música",
+    "addUnitToSave": "Adicione ao menos uma unidade para salvar",
     "service": "Liturgia",
     "services": "Liturgias",
     "pickDate": "Escolha a data",
@@ -68,14 +78,19 @@
     "arrangementNamePlaceholder": "Dê um nome para este arranjo (opcional)",
     "arrangementSettings": "Configurações do arranjo",
     "alreadyDefault": "Já é o principal",
-    "makeDefault": "Tornar principal",
+    "makeDefault": "Tornar padrão",
     "unit": "Unidade",
     "chords": "Cifra",
     "lyrics": "Letra",
     "showLyrics": "Mostrar letra",
     "editSong": "Editar ChordPro",
     "editOriginal": "Editar original",
-    "stopEditing": "Sair da edição"
+    "stopEditing": "Sair da edição",
+    "editArrangement": "Editar arranjo",
+    "duplicateArrangement": "Duplicar arranjo",
+    "deleteArrangement": "Apagar arranjo",
+    "audio": "Áudio",
+    "moveArrangement": "Mover arranjo"
   },
   "UnitData": {
     "content": "Chordpro",
@@ -85,7 +100,9 @@
     "titleOptional": "Título (Opcional)",
     "markdownTitlePlaceholder": "Ex: Leitura, Liturgia, etc.",
     "markdownPlaceholder": "Digite o Markdown aqui...",
-    "markdownContent": "Conteúdo Markdown"
+    "markdownContent": "Conteúdo Markdown",
+    "addNotes": "Adicionar instrução",
+    "notesPlaceholder": "Ex: Só vozes, sem instrumentos"
   },
   "UnitTypes": {
     "BLOCK": "Bloco",
@@ -98,6 +115,15 @@
     "SOLO": "Solo",
     "ENDING": "Saída",
     "TEXT": "Texto"
+  },
+  "ServiceView": {
+    "editChords": "Editar cifras",
+    "saveScopeTitle": "Salvar alterações",
+    "serviceOnly": "Só nesta liturgia",
+    "serviceAndOriginal": "Na liturgia e no original",
+    "cancelEdit": "Cancelar edição",
+    "saveChanges": "Salvar",
+    "saveError": "Erro ao salvar. Tente novamente."
   },
   "ServiceForm": {
     "editArrangement": "Editar arranjo",
@@ -112,7 +138,7 @@
   "SongForm": {
     "addExistingUnit": "Adicionar unidade existente",
     "addUnitWithLabel": "Adicionar unidade {label}",
-    "newUnit": "Nova unidade",
+    "newUnit": "Adicionar unidade",
     "confirmDeleteTitle": "Você tem certeza que deseja deletar este arranjo?",
     "confirmDelete": "Esta ação não pode ser desfeita.",
     "noSongs": "Nenhuma música encontrada",

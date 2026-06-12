@@ -20,9 +20,8 @@ export const Default: Story = {
   args: {
     songs: ["A song", "Another song", "Music", "Random Title"].map(mockSong),
     query: "song",
-    initialsInSeparateRow: false,
   },
-  render: ({ songs, query, initialsInSeparateRow }) => {
+  render: ({ songs, query }) => {
     const [selectedSong, setSelectedSong] = useState<ClientSong | null>(null);
 
     return (
@@ -34,7 +33,6 @@ export const Default: Story = {
           <SongList
             songs={songs}
             query={query}
-            initialsInSeparateRow={initialsInSeparateRow}
             onSelected={setSelectedSong}
           />
         </div>

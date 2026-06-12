@@ -12,19 +12,20 @@ import { useFormContext } from "react-hook-form";
 type InfoFormProps = {
   fieldPrefix?: string;
 };
-export default function InfoForm({ fieldPrefix = "" }: InfoFormProps) {
+
+export default function SongInfoForm({ fieldPrefix = "" }: InfoFormProps) {
   const t = useTranslations("SongData");
   const { control } = useFormContext();
 
   return (
-    <div className="grow px-4 sm:px-6 lg:px-8 py-8 bg-indigo-50">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 space-y-4 bg-secondary/10 border-b border-secondary/20">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={control}
           name={`${fieldPrefix}song.title`}
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel className="text-primary mb-2">{t("title")}</FormLabel>
+            <FormItem>
+              <FormLabel>{t("title")}</FormLabel>
               <FormControl>
                 <Input placeholder={t("titlePlaceholder")} {...field} />
               </FormControl>
@@ -36,10 +37,10 @@ export default function InfoForm({ fieldPrefix = "" }: InfoFormProps) {
           control={control}
           name={`${fieldPrefix}song.artist`}
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel className="text-primary mb-2">{t("artist")}</FormLabel>
+            <FormItem>
+              <FormLabel>{t("artist")}</FormLabel>
               <FormControl>
-                <Input placeholder={t("artistPlaceholder")} {...field} />
+                <Input placeholder={t("artistPlaceholder")} {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>

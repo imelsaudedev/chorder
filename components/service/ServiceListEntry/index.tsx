@@ -1,12 +1,14 @@
-import Heading from "@/components/common/Heading";
+import Text from "@/components/common/Text";
 import { ClientService } from "@/prisma/models";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 type ServiceListEntryProps = {
   service: ClientService;
+  variant?: "default" | "card";
 };
-export default function ServiceListEntry({ service }: ServiceListEntryProps) {
+
+export default function ServiceListEntry({ service, variant = "default" }: ServiceListEntryProps) {
   const t = useTranslations();
   const locale = useLocale();
 
@@ -26,16 +28,27 @@ export default function ServiceListEntry({ service }: ServiceListEntryProps) {
     [locale, service.date]
   );
 
+  const linkClass =
+    variant === "card"
+      ? "flex flex-col py-2.5 px-2 -mx-2 rounded-md hover:bg-secondary/10 transition-colors"
+      : "flex flex-col py-2.5 px-2 -mx-2 rounded-md hover:bg-zinc-50 transition-colors";
+
   return (
-    <li className="pt-2">
-      <a href={`/services/${service.slug}`} className="block">
-        <Heading level={3}>{serviceTitle}</Heading>
-        <div className="text-sm flex flex-row sm:justify-start sm:items-center text-zinc-600 gap-1">
-          <div className="flex items-center gap-1">{serviceDate}</div>
+    <li>
+      <a href={`/services/${service.slug}`} className={linkClass}>
+        <p className="font-display font-semibold text-base lg:text-lg tracking-tight leading-snug lg:leading-tight text-primary truncate">
+          {serviceTitle}
+        </p>
+        <div className="flex items-center gap-1 mt-0.5">
+          <Text variant="caption" as="span" className="text-xs md:text-sm">
+            {serviceDate}
+          </Text>
           {service.worshipLeader && (
             <>
-              <span>·</span>
-              <div>{service.worshipLeader}</div>
+              <Text variant="caption" as="span" className="text-xs md:text-sm">·</Text>
+              <Text variant="caption" as="span" className="text-xs md:text-sm">
+                {service.worshipLeader}
+              </Text>
             </>
           )}
         </div>

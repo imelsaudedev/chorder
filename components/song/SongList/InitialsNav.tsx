@@ -15,12 +15,12 @@ export default function InitialsNav({ existingInitials }: InitialsNavProps) {
   return (
     <nav className="flex flex-wrap mb-4">
       {allInitials.map((initial) => {
-        const className = "font-bricolage text-xl px-2";
+        const baseClass = "font-display font-semibold text-lg px-2";
         if (existingInitialsLower.indexOf(initial) < 0)
           return (
             <span
               key={`link-to--${initial}`}
-              className={`${className} text-muted`}
+              className={`${baseClass} text-muted-foreground/30`}
             >
               {initial.toUpperCase()}
             </span>
@@ -29,7 +29,7 @@ export default function InitialsNav({ existingInitials }: InitialsNavProps) {
           <a
             href={`#${initial}`}
             key={`link-to--${initial}`}
-            className={`${className} text-secondary`}
+            className={`${baseClass} text-secondary`}
           >
             {initial.toUpperCase()}
           </a>

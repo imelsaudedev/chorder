@@ -1,6 +1,6 @@
 "use client";
 
-import { ClientArrangement, ClientSong } from "@/prisma/models";
+import { ClientArrangement, ClientSong, ClientTagGroup, RecentServiceEntry } from "@/prisma/models";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -9,12 +9,16 @@ type FetchSongsArgs = {
   limitLines?: number;
   forceIncludeFirstLine?: boolean;
   excludedSongSlugs?: string[];
+  tagIds?: number[];
+  withUsageStats?: boolean;
 };
 export function useFetchSongs({
   query,
   limitLines,
   forceIncludeFirstLine,
   excludedSongSlugs,
+  tagIds,
+  withUsageStats,
 }: FetchSongsArgs) {
   const params = new URLSearchParams();
   if (query) {
@@ -28,6 +32,12 @@ export function useFetchSongs({
   }
   if (excludedSongSlugs && excludedSongSlugs.length > 0) {
     params.set("excludedSongSlugs", excludedSongSlugs.join(","));
+  }
+  if (tagIds && tagIds.length > 0) {
+    params.set("tagIds", tagIds.join(","));
+  }
+  if (withUsageStats) {
+    params.set("withUsageStats", "true");
   }
   const queryString = params.toString();
   const { data, error, isLoading } = useSWR(
@@ -321,6 +331,56 @@ export function useCreateOrUpdateService(
   return {
     createOrUpdateService: trigger,
     isMutating,
+    isError: error,
+  };
+}
+
+export function useArchiveSong(slug: string) {
+  const { trigger, isMutating } = useSWRMutation(
+    `/api/songs/${slug}`,
+    (url: string) =>
+      fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isDeleted: true }),
+      }).then((r) => r.json())
+  );
+  return { archiveSong: trigger, isArchiving: isMutating };
+}
+
+export function useUpdateSong(slug: string) {
+  async function updateSong(
+    url: string,
+    { arg }: { arg: { title?: string; artist?: string | null; tagIds?: number[] } }
+  ) {
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) throw new Error("Failed to update song");
+    return response.json();
+  }
+
+  const { trigger } = useSWRMutation(`/api/songs/${slug}`, updateSong);
+  return { updateSong: trigger };
+}
+
+export function useFetchTagGroups() {
+  const { data, isLoading } = useSWR<ClientTagGroup[]>("/api/tags", (url: string) =>
+    fetch(url).then((res) => res.json())
+  );
+  return { tagGroups: data ?? [], isLoading };
+}
+
+export function useFetchRecentServices() {
+  const { data, error, isLoading } = useSWR<RecentServiceEntry[]>(
+    "/api/services/recent",
+    (url: string) => fetch(url).then((res) => res.json())
+  );
+  return {
+    services: data ?? [],
+    isLoading,
     isError: error,
   };
 }

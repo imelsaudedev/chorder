@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { arrangementAudioSchema } from "./arrangement-audio";
 import { songSchema } from "./song";
 import { songUnitSchema } from "./song-unit";
 
@@ -9,6 +10,8 @@ export const arrangementSchema = z
     songId: z.number().optional(),
     originalArrangementId: z.number().nullable(),
     key: z.string(),
+    youtubeUrl: z.string().url().or(z.literal("")).nullable(),
+    audios: z.array(arrangementAudioSchema),
     isDefault: z.boolean(),
     isDeleted: z.boolean(),
     isServiceArrangement: z.boolean(),

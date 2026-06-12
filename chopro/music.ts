@@ -209,6 +209,22 @@ export const harmonicIndex = (key: SongKey) => {
   }
 };
 
+const FLAT_TO_SHARP: Record<string, string> = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#" };
+const SHARP_TO_FLAT: Record<string, string> = { "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab", "A#": "Bb" };
+
+export function applyEnharmonic(chord: string, preferSharp: boolean): string {
+  if (!chord) return chord;
+  const table = preferSharp ? FLAT_TO_SHARP : SHARP_TO_FLAT;
+  const chordKey = keyFromChord(chord);
+  if (!chordKey || !table[chordKey]) return chord;
+  let result = table[chordKey] + chord.substring(chordKey.length);
+  const slashIdx = result.indexOf("/");
+  if (slashIdx >= 0) {
+    result = result.substring(0, slashIdx + 1) + applyEnharmonic(result.substring(slashIdx + 1), preferSharp);
+  }
+  return result;
+}
+
 export const transposeChord = (
   chord: string,
   originalKey: string,

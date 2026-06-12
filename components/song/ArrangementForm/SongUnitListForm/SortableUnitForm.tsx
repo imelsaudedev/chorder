@@ -125,6 +125,22 @@ export default function SortableUnitForm({
     insert(index + 1, newUnit);
   }, [index, insert, setValue, unit, getValues]);
 
+  const handleInsertBefore = useCallback(() => {
+    const currentUnits = getValues();
+    for (let i = index; i < currentUnits.length; i++) {
+      setValue(i, "order", currentUnits[i].order + 1);
+    }
+    insert(index, { type: "BLOCK", content: "", notes: null, repeatCount: 1, order: unit.order });
+  }, [index, insert, setValue, unit.order, getValues]);
+
+  const handleInsertAfter = useCallback(() => {
+    const currentUnits = getValues();
+    for (let i = index + 1; i < currentUnits.length; i++) {
+      setValue(i, "order", currentUnits[i].order + 1);
+    }
+    insert(index + 1, { type: "BLOCK", content: "", notes: null, repeatCount: 1, order: unit.order + 1 });
+  }, [index, insert, setValue, unit.order, getValues]);
+
   return (
     <div
       ref={ref}
@@ -134,6 +150,8 @@ export default function SortableUnitForm({
         unit={unit}
         removeUnit={handleRemoveUnit}
         duplicateUnit={handleDuplicateUnit}
+        insertBefore={handleInsertBefore}
+        insertAfter={handleInsertAfter}
         onChangeUnit={handleChangeUnit}
         className="grow"
       />

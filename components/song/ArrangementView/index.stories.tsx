@@ -26,7 +26,7 @@ export const Default: Story = {
   render: ({ arrangement }) => {
     return (
       <SongConfigProvider>
-        <SongConfig originalKey={arrangement.key} />
+        <SongConfig />
         <ArrangementView arrangement={arrangement} />
       </SongConfigProvider>
     );

@@ -28,7 +28,7 @@ export default defineConfig({
           environment: 'jsdom',
           setupFiles: ['vitest.setup.ts'],
           include: [
-            '(components|lib|hooks|app|chopro)/**/*.{test,spec}.{ts,tsx}',
+            '(components|lib|hooks|app|chopro|schemas)/**/*.{test,spec}.{ts,tsx}',
             '*.{test,spec}.{ts,tsx}'
           ],
           exclude: ['**/node_modules/**', '**/*.integration.test.ts'],
@@ -43,9 +43,10 @@ export default defineConfig({
           environment: 'node',
           setupFiles: ['tests/setup-env.ts', 'vitest.setup.integration.ts'],
           include: ['**/*.integration.test.ts'],
+          pool: 'forks',
           poolOptions: {
-            threads: {
-              singleThread: true,
+            forks: {
+              singleFork: true,
             },
           },
         },

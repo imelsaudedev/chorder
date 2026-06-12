@@ -5,8 +5,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MoreVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -14,6 +16,9 @@ import { useCallback } from "react";
 
 type ActionMenuProps = {
   editUrl: string;
+  editLabel?: string;
+  duplicateLabel?: string;
+  deleteLabel?: string;
   onDelete: () => void;
   onDuplicate?: () => void;
   isDuplicating: boolean;
@@ -23,6 +28,9 @@ type ActionMenuProps = {
 };
 export default function ActionMenu({
   editUrl,
+  editLabel,
+  duplicateLabel,
+  deleteLabel,
   isDuplicating,
   isDeleting,
   onDelete,
@@ -45,12 +53,15 @@ export default function ActionMenu({
       <AlertDialog>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">{t("Messages.actions")}</Button>
+            <Button variant="ghost" size="icon">
+              <MoreVertical />
+              <span className="sr-only">{t("Messages.actions")}</span>
+            </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent align="end">
             <DropdownMenuItem>
               <Link href={editUrl} className="w-full">
-                {t("Messages.edit")}
+                {editLabel ?? t("Messages.edit")}
               </Link>
             </DropdownMenuItem>
             {onDuplicate && (
@@ -58,15 +69,16 @@ export default function ActionMenu({
                 onSelect={onDuplicate}
                 disabled={isDuplicating}
               >
-                {t("Messages.duplicate")}
+                {duplicateLabel ?? t("Messages.duplicate")}
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem asChild>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild className="text-red-600 focus:text-red-600 focus:bg-red-50">
               <AlertDialogTrigger
                 className="w-full text-left"
                 disabled={isDeleting}
               >
-                <span>{t("Messages.delete")}</span>
+                <span>{deleteLabel ?? t("Messages.delete")}</span>
               </AlertDialogTrigger>
             </DropdownMenuItem>
           </DropdownMenuContent>

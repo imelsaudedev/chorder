@@ -2,6 +2,7 @@ import { ClientArrangement, ClientSong } from "@/prisma/models";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import SongConfigProvider from "@/components/config/SongConfig";
+import { SongMetaModalProvider } from "@/components/song/SongMetaModal/context";
 import ArrangementHeader from "./index";
 
 const meta = {
@@ -37,9 +38,11 @@ export const Default: Story = {
   render: (args) => {
     return (
       <div className="w-6xl">
-        <SongConfigProvider>
-          <ArrangementHeader {...args} />
-        </SongConfigProvider>
+        <SongMetaModalProvider>
+          <SongConfigProvider>
+            <ArrangementHeader {...args} />
+          </SongConfigProvider>
+        </SongMetaModalProvider>
       </div>
     );
   },
@@ -59,6 +62,8 @@ function buildArrangement(
     key,
     isDeleted: false,
     isServiceArrangement: false,
+    youtubeUrl: null,
+    audios: [],
   };
 }
 
