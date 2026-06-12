@@ -48,7 +48,7 @@ export default function NavBar() {
         "flex-col fixed left-0 top-0 h-full w-20 bg-zinc-50 border-r border-border",
         isListPage ? "hidden sm:flex" : "hidden lg:flex"
       )}>
-        <div className="flex flex-col items-center pt-12 lg:pt-16 gap-6">
+        <div className="flex flex-col items-center pt-6 sm:pt-8 gap-6">
           {items}
         </div>
       </nav>
