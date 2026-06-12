@@ -61,7 +61,7 @@ describe('Services API integration', () => {
                         audioUrl: null,
                         audios: [],
                         units: [
-                            { content: 'Verse 1', type: 'VERSE', order: 1, notes: null }
+                            { content: 'Verse 1', type: 'VERSE', order: 1, notes: null, repeatCount: 1 }
                         ]
                     }
                 }
