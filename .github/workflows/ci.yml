@@ -32,6 +32,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chorder_test?schema=public
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/chorder_test?schema=public
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
@@ -63,21 +64,13 @@ jobs:
 
       - name: Run Playwright (E2E)
         run: |
-          # --update-snapshots gera/atualiza os PNGs de regressão visual sem
-          # falhar por diff — falhas funcionais (toBeVisible, toHaveValue etc.)
-          # ainda causam erro normalmente.
+          # --update-snapshots aceita diffs visuais sem falhar.
+          # Falhas funcionais (toBeVisible, toHaveValue etc.) ainda causam erro.
+          # Snapshots são commitados manualmente quando necessário.
           npx playwright test --update-snapshots
-          # Commita snapshots atualizados de volta ao branch (se houver mudança)
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tests/e2e/visual-regression.spec.ts-snapshots/
-          if ! git diff --staged --quiet; then
-            git commit -m "chore: atualizar snapshots visuais [skip ci]"
-            git push origin HEAD
-          fi
         env:
-          # E2E uses port 3001 as configured in playwright.config.ts
           PORT: 3001
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
