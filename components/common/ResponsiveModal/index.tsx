@@ -28,6 +28,7 @@ export default function ResponsiveModal({
       open={open}
       onOpenChange={onOpenChange}
       direction={isDesktop ? "right" : "bottom"}
+      shouldScaleBackground={false}
     >
       <DrawerContent>
         <DrawerHeader className="text-left">
