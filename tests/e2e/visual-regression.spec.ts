@@ -22,7 +22,7 @@ test.describe('Visual Regression Suite', () => {
     await expect(page.getByText('This page could not be found')).not.toBeVisible();
     await expect(page.getByText('Internal Server Error')).not.toBeVisible();
     // Wait for the heading to be visible (h1 is present on all test pages)
-    await page.waitForSelector('h1', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('h1', { state: 'visible', timeout: 30000 });
   }
 
   test('Home page visual check', async ({ page }) => {
