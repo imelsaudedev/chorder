@@ -2,11 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { ClientTag, ClientTagGroup } from "@/prisma/models";
 import { Check, ChevronDown, X } from "lucide-react";
 import { useState } from "react";
@@ -71,18 +66,18 @@ export default function TagSelect({ value, tagGroups, onChange }: TagSelectProps
         </div>
       )}
 
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full justify-between font-normal text-muted-foreground"
-          >
-            {value.length === 0 ? "Adicionar tags..." : `${value.length} tag${value.length > 1 ? "s" : ""} selecionada${value.length > 1 ? "s" : ""}`}
-            <ChevronDown className="w-4 h-4 shrink-0" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-72 p-0" align="start">
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full justify-between font-normal text-muted-foreground"
+        onClick={() => setOpen((o) => !o)}
+      >
+        {value.length === 0 ? "Adicionar tags..." : `${value.length} tag${value.length > 1 ? "s" : ""} selecionada${value.length > 1 ? "s" : ""}`}
+        <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+      </Button>
+
+      {open && (
+        <div className="border rounded-md overflow-hidden">
           <div className="p-2 border-b">
             <Input
               placeholder="Filtrar tags..."
@@ -91,7 +86,7 @@ export default function TagSelect({ value, tagGroups, onChange }: TagSelectProps
               className="h-8 text-sm"
             />
           </div>
-          <div className="max-h-60 overflow-y-auto">
+          <div className="max-h-48 overflow-y-auto">
             {filteredGroups.length === 0 ? (
               <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma tag encontrada.</p>
             ) : (
@@ -123,8 +118,8 @@ export default function TagSelect({ value, tagGroups, onChange }: TagSelectProps
               ))
             )}
           </div>
-        </PopoverContent>
-      </Popover>
+        </div>
+      )}
     </div>
   );
 }
