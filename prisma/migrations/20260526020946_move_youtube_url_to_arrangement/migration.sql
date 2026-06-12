@@ -5,7 +5,7 @@
 
 */
 -- AlterTable
-ALTER TABLE "Song" DROP COLUMN "youtubeUrl";
+ALTER TABLE "Song" DROP COLUMN IF EXISTS "youtubeUrl";
 
 -- AlterTable
-ALTER TABLE "SongArrangement" ADD COLUMN     "youtubeUrl" TEXT;
+ALTER TABLE "SongArrangement" ADD COLUMN IF NOT EXISTS "youtubeUrl" TEXT;
