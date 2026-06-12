@@ -1,7 +1,6 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
-import type { InlineConfig } from "vite";
 
-import { dirname, join, resolve } from "path";
+import { dirname, join } from "path";
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -28,16 +27,5 @@ const config: StorybookConfig = {
     options: {},
   },
   staticDirs: ["../public"],
-  viteFinal: async (config: InlineConfig) => {
-    config.resolve = {
-      ...config.resolve,
-      alias: {
-        ...(config.resolve?.alias as Record<string, string> | undefined),
-        'next/font/google': resolve(__dirname, './mocks/next-font.ts'),
-        'next/font/local': resolve(__dirname, './mocks/next-font.ts'),
-      },
-    };
-    return config;
-  },
 };
 export default config;

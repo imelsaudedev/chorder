@@ -5,7 +5,7 @@ import {
   ibmPlexMono,
   ibmPlexSans,
   ibmPlexSerif,
-} from "../app/fonts";
+} from "./fonts";
 import "../app/globals.css";
 import en from "../i18n/messages/en.json";
 import pt from "../i18n/messages/pt-BR.json";
