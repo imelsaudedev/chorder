@@ -58,6 +58,9 @@ export default defineConfig({
         ],
         optimizeDeps: {
           exclude: ['@mdx-js/react', 'markdown-to-jsx'],
+          esbuildOptions: {
+            external: ['next/font/google', 'next/font/local'],
+          },
         },
         test: {
           name: 'storybook',
