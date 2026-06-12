@@ -30,6 +30,7 @@ está na prática idêntico ao fork point. O chorder-alt é um superconjunto.
 |---|---|
 | `.github/workflows/` | CI/CD com GitHub Actions + Playwright E2E |
 | `AGENTS.md` | Guia de arquitetura do chorder (branching, testes, devcontainer) |
+| `app/(main)/feedback/` | Feature de feedback via GitHub Issues + Gemini (removida do chorder-alt) |
 
 ---
 
@@ -83,7 +84,22 @@ que `prisma migrate deploy` funcione com o Neon (que usa pooler por padrão).
 
 **Confirmar com o usuário:** "A variável DIRECT_URL está nas env vars do chorder no Vercel?"
 
-### 3. Branching no chorder
+### 3. Variáveis de ambiente do feedback (OBRIGATÓRIO para a feature funcionar)
+
+O chorder tem uma feature de feedback que cria GitHub Issues automaticamente com
+título gerado por IA (Gemini). Ela exige duas variáveis de ambiente no Vercel:
+
+| Variável | O que é | Onde obter |
+|---|---|---|
+| `GITHUB_ISSUES_TOKEN` | Personal Access Token com escopo `issues: write` no repo `imelsaudedev/chorder` | GitHub → Settings → Developer settings → Tokens |
+| `GEMINI_API_KEY` | Chave da Google AI Studio (Gemini) | [aistudio.google.com](https://aistudio.google.com) |
+
+> ⚠️ Sem `GITHUB_ISSUES_TOKEN`, o submit do formulário retorna erro 500.
+> Sem `GEMINI_API_KEY`, o título do issue é gerado como fallback (primeiros 50 chars) — não quebra, mas degrada.
+
+**Confirmar com o usuário:** "O GITHUB_ISSUES_TOKEN e o GEMINI_API_KEY estão nas env vars do Vercel do chorder?"
+
+### 4. Branching no chorder
 
 O chorder tem GitHub Rulesets que **bloqueiam push direto em `main`**.
 A migração deve ser feita via branch + PR.
@@ -156,6 +172,7 @@ rsync -av --dry-run \
   --exclude='.git/' \
   --exclude='.github/' \
   --exclude='AGENTS.md' \
+  --exclude='app/(main)/feedback/' \
   --exclude='node_modules/' \
   --exclude='.next/' \
   --exclude='.env' \
@@ -172,6 +189,7 @@ rsync -av \
   --exclude='.git/' \
   --exclude='.github/' \
   --exclude='AGENTS.md' \
+  --exclude='app/(main)/feedback/' \
   --exclude='node_modules/' \
   --exclude='.next/' \
   --exclude='.env' \
@@ -197,6 +215,91 @@ Se necessário ajustar:
 - `components/common/LogoHeader/` — logo da organização
 
 **Perguntar ao usuário:** "Manter o branding do chorder-alt ou restaurar o título genérico?"
+
+---
+
+### Passo 4.5 — Restaurar a feature de feedback
+
+O rsync excluiu `app/(main)/feedback/` — ela continua intacta no chorder. Mas
+três integrações adicionais precisam ser restauradas manualmente:
+
+#### 4.5.1 — Adicionar dependências ao package.json
+
+O chorder-alt não tem `@google/genai` nem `@octokit`. Adicionar ao `package.json`
+do chorder (checar versões atuais no chorder antes de copiar):
+
+```bash
+# Verificar versões atuais no chorder original
+node -e "const p=require('/mnt/c/Repositorios/chorder/package.json'); console.log(p.dependencies['@google/genai'], p.dependencies['@octokit/core'], p.dependencies['@octokit/types'])"
+```
+
+Adicionar manualmente no `package.json` do chorder (já copiado pelo rsync com
+as deps do chorder-alt), na seção `dependencies`:
+
+```json
+"@google/genai": "^1.10.0",
+"@octokit/core": "^7.0.3",
+"@octokit/types": "^14.1.0"
+```
+
+Depois rodar `yarn install` novamente.
+
+#### 4.5.2 — Adicionar o link no NavBar
+
+O NavBar do chorder-alt não tem o link para `/feedback`. Localizar onde os links
+de navegação estão definidos no NavBar do chorder-alt (agora copiado para o chorder):
+
+```bash
+grep -n "songs\|services\|href" /mnt/c/Repositorios/chorder/components/common/NavBar/index.tsx
+```
+
+Adicionar o link de feedback na mesma posição em que estava no NavBar original
+do chorder (mobile e desktop). O link original era:
+
+```tsx
+href="/feedback"
+label={t("feedback")}
+active={currentPage === "feedback"}
+```
+
+Verificar a estrutura exata do NavBar copiado para saber como inserir.
+
+#### 4.5.3 — Restaurar as chaves i18n do Feedback
+
+O chorder-alt sobrescreveu os arquivos de mensagens. Adicionar o namespace
+`Feedback` de volta em `i18n/messages/pt-BR.json`:
+
+```json
+"Feedback": {
+  "title": "Feedback",
+  "contentBug": "Descreva o bug ou problema que você encontrou",
+  "contentFeature": "Descreva a funcionalidade que você gostaria de ver implementada",
+  "contentOther": "Compartilhe qualquer outro comentário, sugestão ou feedback geral",
+  "contentRequired": "O conteúdo é obrigatório",
+  "bug": "Bug",
+  "feature": "Funcionalidade",
+  "other": "Outro",
+  "nameLabel": "Nome",
+  "namePlaceholder": "Seu nome (opcional)",
+  "nameDescription": "Você pode se identificar para que possamos entrar em contato caso necessário.",
+  "submit": "Enviar",
+  "successTitle": "Obrigado pelo seu feedback!",
+  "successMessage": "Agradecemos por compartilhar suas ideias e sugestões",
+  "submitAnother": "Enviar outro feedback",
+  "invalidFeedback": "Feedback inválido.",
+  "serverError": "Erro no servidor. Por favor, tente novamente mais tarde."
+}
+```
+
+E em `i18n/messages/en.json` verificar se o namespace `Feedback` também precisa
+ser adicionado (o chorder pode ter a versão em inglês).
+
+```bash
+# Checar se en.json do chorder tinha Feedback
+node -e "const j=require('/mnt/c/Repositorios/chorder/i18n/messages/en.json'); console.log(JSON.stringify(j.Feedback, null, 2))" 2>/dev/null
+```
+
+> ⚠️ Sem essas chaves, a página `/feedback` quebra com erro de tradução faltando.
 
 ---
 
@@ -354,8 +457,13 @@ os arquivos `mock/*.ts` e `**/*.stories.tsx` e `**/*.test.tsx` que constroem `Cl
 ```
 [ ] Vercel Blob criado e BLOB_READ_WRITE_TOKEN configurado
 [ ] DIRECT_URL configurada nas env vars do Vercel
+[ ] GITHUB_ISSUES_TOKEN configurado nas env vars do Vercel
+[ ] GEMINI_API_KEY configurado nas env vars do Vercel
 [ ] Branch feat/migrar-chorder-alt criada
-[ ] rsync executado (excluindo .github/, AGENTS.md)
+[ ] rsync executado (excluindo .github/, AGENTS.md, app/(main)/feedback/)
+[ ] Dependências do feedback adicionadas ao package.json (@google/genai, @octokit/core, @octokit/types)
+[ ] Link /feedback restaurado no NavBar (mobile + desktop)
+[ ] Namespace Feedback adicionado ao pt-BR.json e en.json
 [ ] Branding revisado com o usuário
 [ ] yarn install sem erros
 [ ] npx tsc --noEmit com zero erros
@@ -363,6 +471,7 @@ os arquivos `mock/*.ts` e `**/*.stories.tsx` e `**/*.test.tsx` que constroem `Cl
 [ ] Commit e PR criados
 [ ] CI do GitHub Actions passou
 [ ] Preview deploy do Vercel funcionando
+[ ] Testar /feedback no preview: submit cria issue no GitHub com título gerado pelo Gemini
 [ ] PR aprovado e mergeado
 [ ] Deploy em produção verificado
 [ ] Tags criadas via /admin/tags (opcional)
