@@ -75,7 +75,8 @@ test.describe('Visual Regression Suite', () => {
   test('Service Edit/Planning visual check', async ({ page }) => {
     await page.goto(`/services/${seededIds.serviceSlug}/edit`);
     await ensureAppReady(page);
-    await expect(page.getByLabel('Título')).toHaveValue('Visual Baseline Service');
+    // Title is displayed in an h2 heading inside the metadata button (no inline form field)
+    await expect(page.getByRole('heading', { name: 'Visual Baseline Service' })).toBeVisible();
     // Wait for the 3 seeded units to appear (they show the song title)
     await expect(page.getByText('Visual Baseline Song')).toHaveCount(3);
     await expect(page).toHaveScreenshot('service-edit.png', { fullPage: true });
