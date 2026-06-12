@@ -40,9 +40,20 @@ type SongUnitListFormProps = {
 
 export default function SongUnitListForm({ fieldPrefix = "", sectionClassName, toolbarClassName = "px-4" }: SongUnitListFormProps) {
   const { units } = useArrangementUnitsFieldArray(fieldPrefix);
-  const { watch } = useFormContext();
+  const { watch, setValue } = useFormContext();
   const baseKey = (watch(`${fieldPrefix}key`) as string) || "C";
   const songConfig = useContext(SongConfigContext);
+
+  const handleSetTranspose = useCallback(
+    (updater: ((prev: number) => number) | number) => {
+      const currentTranspose = songConfig?.transpose ?? 0;
+      const newTranspose = typeof updater === "function" ? updater(currentTranspose) : updater;
+      const newKey = transposeChord(baseKey, baseKey, newTranspose);
+      setValue(`${fieldPrefix}key`, newKey, { shouldDirty: true });
+      songConfig?.setTranspose(0);
+    },
+    [baseKey, fieldPrefix, setValue, songConfig]
+  );
   const currentKey = transposeChord(baseKey, baseKey, songConfig?.transpose ?? 0);
 
   const [activeInsert, setActiveInsertState] = useState<InsertFn | null>(null);
@@ -131,7 +142,7 @@ export default function SongUnitListForm({ fieldPrefix = "", sectionClassName, t
                   <KeyButtonSet
                     originalKey={baseKey}
                     transpose={songConfig.transpose}
-                    setTranspose={songConfig.setTranspose}
+                    setTranspose={handleSetTranspose}
                     size="sm"
                   />
                 )}

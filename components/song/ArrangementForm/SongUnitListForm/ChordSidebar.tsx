@@ -19,11 +19,22 @@ type ChordSidebarProps = {
 };
 
 export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
-  const { watch } = useFormContext();
+  const { watch, setValue } = useFormContext();
   const baseKey = (watch(`${fieldPrefix}key`) as string) || "C";
   const songConfig = useContext(SongConfigContext);
   const currentKey = transposeChord(baseKey, baseKey, songConfig?.transpose ?? 0);
   const { activeInsert } = useInstructionToolbar();
+
+  const handleSetTranspose = useCallback(
+    (updater: ((prev: number) => number) | number) => {
+      const currentTranspose = songConfig?.transpose ?? 0;
+      const newTranspose = typeof updater === "function" ? updater(currentTranspose) : updater;
+      const newKey = transposeChord(baseKey, baseKey, newTranspose);
+      setValue(`${fieldPrefix}key`, newKey, { shouldDirty: true });
+      songConfig?.setTranspose(0);
+    },
+    [baseKey, fieldPrefix, setValue, songConfig]
+  );
 
   const [expanded, setExpanded] = useState(true);
   const [flashCell, setFlashCell] = useState<string | null>(null);
@@ -69,7 +80,7 @@ export default function ChordSidebar({ fieldPrefix = "" }: ChordSidebarProps) {
           <KeyButtonSet
             originalKey={baseKey}
             transpose={songConfig.transpose}
-            setTranspose={songConfig.setTranspose}
+            setTranspose={handleSetTranspose}
           />
         )}
         <button
