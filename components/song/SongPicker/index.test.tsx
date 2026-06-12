@@ -21,6 +21,10 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+vi.mock('@/app/api/api-client', () => ({
+  useFetchTagGroups: vi.fn(() => ({ tagGroups: [], isLoading: false })),
+}));
+
 vi.mock('#api-client', () => ({
   useFetchSongs: vi.fn(),
   useFetchSong: vi.fn(() => ({})),

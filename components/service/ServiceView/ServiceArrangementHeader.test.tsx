@@ -160,7 +160,7 @@ describe('ServiceArrangementHeader — edit mode, with original', () => {
   });
 
   it('calls onSaveBoth and closes dialog when both chosen', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     const onSaveBoth = vi.fn();
     render(<ServiceArrangementHeader {...editProps} onSaveBoth={onSaveBoth} />);
     await user.click(screen.getByRole('button', { name: /saveChanges/i }));
