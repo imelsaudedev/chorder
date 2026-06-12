@@ -244,7 +244,10 @@ export default function SongListEntry({
                 <Pencil size={14} className="mr-2" />
                 Editar dados
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => router.push(`/songs/${song.slug}/edit`)}>
+              <DropdownMenuItem onSelect={() => {
+                const arr = arrangements[parseInt(selectedIdx)];
+                router.push(`/songs/${song.slug}/edit?arrangement=${arr?.id}`);
+              }}>
                 <NotebookPen size={14} className="mr-2" />
                 Editar arranjo
               </DropdownMenuItem>
