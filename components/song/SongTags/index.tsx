@@ -11,7 +11,7 @@ export default function SongTags({ tags }: SongTagsProps) {
   return (
     <div className="flex flex-wrap gap-1">
       {tags.map((tag) => (
-        <Tag key={tag.id} label={tag.name} color={tag.group.color} size="xs" />
+        <Tag key={tag.id} label={tag.name} color={tag.group.color} size="sm" />
       ))}
     </div>
   );

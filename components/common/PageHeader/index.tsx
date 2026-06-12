@@ -40,7 +40,7 @@ const PageHeader = ({
   return (
     <div className="flex flex-col px-4 sm:px-5 lg:px-8 py-4 sm:py-5 bg-zinc-50 border-b border-border">
       {(backLinkHref || actions) && (
-        <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
           <div>
             {backLinkHref && backLinkText && (
               <BackLink href={backLinkHref} text={backLinkText} />
@@ -60,7 +60,7 @@ const PageHeader = ({
       </div>
 
       {contentActions && (
-        <div className="flex flex-wrap gap-2 items-center mt-3 sm:mt-4">{contentActions}</div>
+        <div className="flex flex-wrap gap-2 items-center mt-2">{contentActions}</div>
       )}
     </div>
   );
