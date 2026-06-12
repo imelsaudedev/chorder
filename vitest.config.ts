@@ -10,6 +10,12 @@ const dirname =
   typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  optimizeDeps: {
+    exclude: ['@mdx-js/react', 'markdown-to-jsx'],
+    esbuildOptions: {
+      external: ['next/font/google', 'next/font/local'],
+    },
+  },
   test: {
     globals: true,
     coverage: {
@@ -56,12 +62,6 @@ export default defineConfig({
         plugins: [
           storybookTest({ configDir: path.join(dirname, '.storybook') }),
         ],
-        optimizeDeps: {
-          exclude: ['@mdx-js/react', 'markdown-to-jsx'],
-          esbuildOptions: {
-            external: ['next/font/google', 'next/font/local'],
-          },
-        },
         test: {
           name: 'storybook',
           globals: true,
