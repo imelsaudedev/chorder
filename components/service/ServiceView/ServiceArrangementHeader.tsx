@@ -20,6 +20,7 @@ import { ClientArrangement } from "@/prisma/models";
 import AudioReferenceButton from "@/components/common/AudioReferenceButton";
 import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
 import { transposeChord } from "@/chopro/music";
+import ServiceMediaButtons from "./ServiceMediaButtons";
 import { Check, Loader2, MoreVertical, Pencil, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { forwardRef, useState } from "react";
@@ -147,6 +148,13 @@ function ServiceArrangementHeader({
           </Button>
         ) : (
           <>
+            {hasOriginal && (
+              <ServiceMediaButtons
+                originalArrangementId={arrangement.originalArrangementId!}
+                youtubeUrl={arrangement.youtubeUrl ?? null}
+                audios={arrangement.audios ?? []}
+              />
+            )}
             <Button
               type="button"
               size="icon"
