@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Heading from "@/components/common/Heading";
 import Main from "@/components/common/Main";
 import prisma from "@/prisma/client";
