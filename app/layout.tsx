@@ -19,10 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "Metadata" });
 
   return {
-    title: {
-      template: `%s | ${t("siteName")}`,
-      default: t("siteName"),
-    },
+    title: t("title"),
     description: t("siteDescription"),
   };
 }
