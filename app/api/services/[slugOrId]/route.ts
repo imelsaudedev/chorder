@@ -55,7 +55,7 @@ export async function PATCH(
   if ("date" in body) data.date = new Date(body.date);
 
   await import("@/prisma/client").then(({ default: prisma }) =>
-    prisma.service.update({ where: { slug: slugOrId }, data })
+    prisma.service.update({ where: { id: service.id }, data })
   );
 
   return Response.json({ success: true });

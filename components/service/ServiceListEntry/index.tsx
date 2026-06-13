@@ -12,7 +12,7 @@ import {
 import { ClientService } from "@/prisma/models";
 import { MoreVertical, Pencil } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSWRConfig } from "swr";
 
 type ServiceListEntryProps = {
@@ -26,6 +26,8 @@ export default function ServiceListEntry({ service, variant = "default" }: Servi
   const [metaOpen, setMetaOpen] = useState(false);
   const [localService, setLocalService] = useState(service);
   const { mutate } = useSWRConfig();
+
+  useEffect(() => { setLocalService(service); }, [service]);
 
   const serviceTitle = useMemo(
     () => localService.title?.trim() || t("Service.noTitle"),
@@ -43,7 +45,7 @@ export default function ServiceListEntry({ service, variant = "default" }: Servi
     [locale, localService.date]
   );
 
-  function handleMetaSave(values: ServiceMeta) {
+  function handleMetaSave(values: ServiceMeta): false {
     fetch(`/api/services/${localService.slug}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -51,8 +53,10 @@ export default function ServiceListEntry({ service, variant = "default" }: Servi
     }).then((res) => {
       if (!res.ok) return;
       setLocalService((prev) => ({ ...prev, ...values }));
+      setMetaOpen(false);
       mutate((key) => typeof key === "string" && key.startsWith("/api/services"));
-    });
+    }).catch(() => {});
+    return false;
   }
 
   const hoverClass =

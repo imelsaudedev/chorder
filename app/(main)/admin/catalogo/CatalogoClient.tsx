@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { getLyrics } from "@/chopro/music";
 import { ChevronDown, ChevronRight, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -31,16 +32,6 @@ function focusCell(row: number, col: number) {
   input?.focus();
 }
 
-function stripChords(lyrics: string): string {
-  // Remove ChordPro inline chords like [Am], [G/B], [C#m7], etc.
-  return lyrics
-    .replace(/\[[^\]]*\]/g, "")
-    .replace(/\{[^}]*\}/g, "")  // remove directives like {start_of_chorus}
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0)
-    .join("\n");
-}
 
 export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props) {
   const [songs, setSongs] = useState<CatalogSong[]>(initialSongs);
@@ -125,16 +116,18 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
 
   async function bulkDelete() {
     const slugs = [...selected].filter((s) => filtered.some((f) => f.slug === s));
-    await Promise.all(
-      slugs.map((slug) =>
-        fetch(`/api/songs/${slug}`, {
+    const results = await Promise.all(
+      slugs.map(async (slug) => {
+        const res = await fetch(`/api/songs/${slug}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ isDeleted: true }),
-        })
-      )
+        });
+        return { slug, ok: res.ok };
+      })
     );
-    setSongs((prev) => prev.filter((s) => !slugs.includes(s.slug)));
+    const deleted = results.filter((r) => r.ok).map((r) => r.slug);
+    setSongs((prev) => prev.filter((s) => !deleted.includes(s.slug)));
     setSelected(new Set());
     setConfirmDelete(false);
   }
@@ -371,7 +364,7 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
                     <td />
                     <td colSpan={2 + tagGroups.length + 1} className="px-4 py-3">
                       <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed max-h-48 overflow-y-auto">
-                        {stripChords(song.lyrics) || "Sem letra"}
+                        {getLyrics(song.lyrics) || "Sem letra"}
                       </pre>
                     </td>
                   </tr>
