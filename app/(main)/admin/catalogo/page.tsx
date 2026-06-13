@@ -9,9 +9,12 @@ export default async function AdminCatalogoPage() {
       where: { isDeleted: false },
       orderBy: { title: "asc" },
       select: {
+        id: true,
         slug: true,
         title: true,
         artist: true,
+        lyrics: true,
+        legacyId: true,
         tags: {
           select: {
             id: true,
