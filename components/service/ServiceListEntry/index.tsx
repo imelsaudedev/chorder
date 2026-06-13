@@ -25,6 +25,7 @@ export default function ServiceListEntry({ service, variant = "default" }: Servi
   const locale = useLocale();
   const [metaOpen, setMetaOpen] = useState(false);
   const [localService, setLocalService] = useState(service);
+  const [saving, setSaving] = useState(false);
   const { mutate } = useSWRConfig();
 
   useEffect(() => { setLocalService(service); }, [service]);
@@ -46,6 +47,7 @@ export default function ServiceListEntry({ service, variant = "default" }: Servi
   );
 
   function handleMetaSave(values: ServiceMeta): false {
+    setSaving(true);
     fetch(`/api/services/${localService.slug}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -55,7 +57,7 @@ export default function ServiceListEntry({ service, variant = "default" }: Servi
       setLocalService((prev) => ({ ...prev, ...values }));
       setMetaOpen(false);
       mutate((key) => typeof key === "string" && key.startsWith("/api/services"));
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setSaving(false));
     return false;
   }
 
@@ -126,6 +128,7 @@ export default function ServiceListEntry({ service, variant = "default" }: Servi
           date: localService.date instanceof Date ? localService.date : new Date(String(localService.date)),
         }}
         onSave={handleMetaSave}
+        loading={saving}
       />
     </li>
   );

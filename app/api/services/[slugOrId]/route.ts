@@ -51,7 +51,7 @@ export async function PATCH(
 
   const data: { title?: string | null; worshipLeader?: string | null; date?: Date } = {};
   if ("title" in body) data.title = body.title ?? null;
-  if ("worshipLeader" in body) data.worshipLeader = body.worshipLeader ?? null;
+  if ("worshipLeader" in body) data.worshipLeader = body.worshipLeader || null;
   if ("date" in body) data.date = new Date(body.date);
 
   await import("@/prisma/client").then(({ default: prisma }) =>

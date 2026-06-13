@@ -1,11 +1,11 @@
 "use client";
 
+import { getLyrics } from "@/chopro/music";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { getLyrics } from "@/chopro/music";
-import { ChevronDown, ChevronRight, Trash2, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronUp, Trash2, X } from "lucide-react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 type Tag = { id: number; name: string; group: { id: number; name: string; color: string } };
 type TagGroup = { id: number; name: string; color: string; tags: { id: number; name: string }[] };
@@ -16,13 +16,15 @@ type CatalogSong = {
   artist: string | null;
   lyrics: string;
   legacyId: number | null;
+  serviceCount: number;
   tags: Tag[];
 };
 type Props = { songs: CatalogSong[]; tagGroups: TagGroup[] };
+type SortKey = "title" | "artist" | "legacyId" | "serviceCount";
 
+// Colunas navegáveis pelo teclado: título + compositor + tags
 function colCount(tagGroups: TagGroup[]) {
-  // checkbox + título + compositor + tagGroups + expand
-  return 3 + tagGroups.length;
+  return 2 + tagGroups.length;
 }
 
 function focusCell(row: number, col: number) {
@@ -32,7 +34,6 @@ function focusCell(row: number, col: number) {
   input?.focus();
 }
 
-
 export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props) {
   const [songs, setSongs] = useState<CatalogSong[]>(initialSongs);
   const [search, setSearch] = useState("");
@@ -40,6 +41,8 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [bulkTagGroupId, setBulkTagGroupId] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   const filtered = search
     ? songs.filter(
@@ -48,6 +51,32 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
           s.artist?.toLowerCase().includes(search.toLowerCase())
       )
     : songs;
+
+  const displayed = useMemo(() => {
+    if (!sortKey) return filtered;
+    return [...filtered].sort((a, b) => {
+      let av: string | number;
+      let bv: string | number;
+      if (sortKey === "legacyId") {
+        av = a.legacyId ?? Infinity;
+        bv = b.legacyId ?? Infinity;
+      } else if (sortKey === "serviceCount") {
+        av = a.serviceCount;
+        bv = b.serviceCount;
+      } else {
+        av = (a[sortKey] ?? "").toLowerCase();
+        bv = (b[sortKey] ?? "").toLowerCase();
+      }
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filtered, sortKey, sortDir]);
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortKey(key); setSortDir("asc"); }
+  }
 
   const allSelected = filtered.length > 0 && filtered.every((s) => selected.has(s.slug));
   const someSelected = selected.size > 0;
@@ -174,6 +203,15 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
   }
 
   const selectedCount = [...selected].filter((s) => filtered.some((f) => f.slug === s)).length;
+  // Colunas visuais totais: checkbox + título + ID + liturgias + compositor + tags
+  const totalCols = 5 + tagGroups.length;
+
+  function SortIcon({ k }: { k: SortKey }) {
+    if (sortKey !== k) return <span className="opacity-20 ml-0.5">↕</span>;
+    return sortDir === "asc"
+      ? <ChevronUp size={10} className="inline ml-0.5" />
+      : <ChevronDown size={10} className="inline ml-0.5" />;
+  }
 
   return (
     <div className="pb-16">
@@ -281,7 +319,8 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-muted/50 border-b border-border text-xs text-muted-foreground uppercase tracking-wide">
-              <th className="px-3 py-2.5 w-8">
+              {/* Checkbox — largura mínima */}
+              <th className="px-3 py-2.5 w-px">
                 <input
                   type="checkbox"
                   checked={allSelected}
@@ -289,30 +328,51 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
                   className="rounded"
                 />
               </th>
-              <th className="px-4 py-2.5 text-left font-medium w-[25%]">Título</th>
-              <th className="px-4 py-2.5 text-left font-medium w-[18%]">Compositor</th>
+              {/* Título — auto */}
+              <th className="px-4 py-2.5 text-left font-medium">
+                <button type="button" onClick={() => handleSort("title")} className="flex items-center gap-0.5 hover:text-foreground transition-colors">
+                  Título <SortIcon k="title" />
+                </button>
+              </th>
+              {/* ID — fixo */}
+              <th className="px-3 py-2.5 text-right font-medium w-16 whitespace-nowrap">
+                <button type="button" onClick={() => handleSort("legacyId")} className="flex items-center gap-0.5 ml-auto hover:text-foreground transition-colors">
+                  ID <SortIcon k="legacyId" />
+                </button>
+              </th>
+              {/* Liturgias — fixo */}
+              <th className="px-3 py-2.5 text-right font-medium w-20 whitespace-nowrap">
+                <button type="button" onClick={() => handleSort("serviceCount")} className="flex items-center gap-0.5 ml-auto hover:text-foreground transition-colors">
+                  Liturgias <SortIcon k="serviceCount" />
+                </button>
+              </th>
+              {/* Compositor — auto */}
+              <th className="px-4 py-2.5 text-left font-medium">
+                <button type="button" onClick={() => handleSort("artist")} className="flex items-center gap-0.5 hover:text-foreground transition-colors">
+                  Compositor <SortIcon k="artist" />
+                </button>
+              </th>
               {tagGroups.map((g) => (
                 <th key={g.id} className="px-4 py-2.5 text-left font-medium whitespace-nowrap">
                   <span style={{ color: g.color }}>{g.name}</span>
                 </th>
               ))}
-              <th className="w-8" />
             </tr>
           </thead>
           <tbody
             className="divide-y divide-border"
-            onKeyDown={(e) => handleTableKeyDown(e, filtered.length)}
+            onKeyDown={(e) => handleTableKeyDown(e, displayed.length)}
           >
-            {filtered.map((song, rowIdx) => (
-              <>
+            {displayed.map((song, rowIdx) => (
+              <Fragment key={song.slug}>
                 <tr
-                  key={song.slug}
                   className={cn(
                     "hover:bg-muted/20 transition-colors",
                     selected.has(song.slug) && "bg-secondary/5"
                   )}
                 >
-                  <td className="px-3 py-1.5">
+                  {/* Checkbox */}
+                  <td className="px-3 py-1.5 w-px">
                     <input
                       type="checkbox"
                       checked={selected.has(song.slug)}
@@ -320,15 +380,42 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
                       className="rounded"
                     />
                   </td>
+                  {/* Título com accordion à esquerda */}
                   <td data-row={rowIdx} data-col={0} className="px-4 py-1.5">
-                    <TextCell
-                      value={song.title}
-                      onSave={(v) => patchSong(song.slug, { title: v })}
-                    />
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        onClick={() => toggleExpand(song.slug)}
+                        className="shrink-0 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                        aria-label={expanded.has(song.slug) ? "Fechar letra" : "Ver letra"}
+                      >
+                        {expanded.has(song.slug)
+                          ? <ChevronUp size={13} />
+                          : <ChevronDown size={13} />
+                        }
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <TextCell
+                          value={song.title}
+                          onSave={(v) => patchSong(song.slug, { title: v })}
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  {/* ID */}
+                  <td className="px-3 py-1.5 w-16 text-right">
                     {song.legacyId !== null && (
                       <span className="text-[10px] text-muted-foreground/60 font-mono">#{song.legacyId}</span>
                     )}
                   </td>
+                  {/* Liturgias */}
+                  <td className="px-3 py-1.5 w-20 text-right">
+                    {song.serviceCount > 0 && (
+                      <span className="text-xs text-muted-foreground font-mono">{song.serviceCount}</span>
+                    )}
+                  </td>
+                  {/* Compositor */}
                   <td data-row={rowIdx} data-col={1} className="px-4 py-1.5">
                     <TextCell
                       value={song.artist ?? ""}
@@ -345,36 +432,23 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
                       />
                     </td>
                   ))}
-                  <td className="px-2 py-1.5">
-                    <button
-                      type="button"
-                      onClick={() => toggleExpand(song.slug)}
-                      className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
-                      aria-label={expanded.has(song.slug) ? "Fechar letra" : "Ver letra"}
-                    >
-                      {expanded.has(song.slug)
-                        ? <ChevronDown size={14} />
-                        : <ChevronRight size={14} />
-                      }
-                    </button>
-                  </td>
                 </tr>
                 {expanded.has(song.slug) && (
-                  <tr key={`${song.slug}-lyrics`} className="bg-muted/10">
+                  <tr className="bg-muted/10">
                     <td />
-                    <td colSpan={2 + tagGroups.length + 1} className="px-4 py-3">
+                    <td colSpan={totalCols - 1} className="px-4 py-3 pl-10">
                       <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed max-h-48 overflow-y-auto">
                         {getLyrics(song.lyrics) || "Sem letra"}
                       </pre>
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
-            {filtered.length === 0 && (
+            {displayed.length === 0 && (
               <tr>
                 <td
-                  colSpan={3 + tagGroups.length + 1}
+                  colSpan={totalCols}
                   className="px-4 py-8 text-center text-sm text-muted-foreground"
                 >
                   Nenhuma música encontrada.
