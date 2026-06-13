@@ -161,10 +161,14 @@ function AudioButton({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { mutate } = useSWRConfig();
 
-  const hasAudios = audios.length > 0;
+  const hasAudios = currentAudios.length > 0;
+  const [pendingDeletes, setPendingDeletes] = useState<string[]>([]);
 
   function handleOpen(isOpen: boolean) {
-    if (isOpen) setAudios(currentAudios);
+    if (isOpen) {
+      setAudios(currentAudios);
+      setPendingDeletes([]);
+    }
     setOpen(isOpen);
   }
 
@@ -189,15 +193,9 @@ function AudioButton({
     }
   }
 
-  async function handleRemove(index: number) {
+  function handleRemove(index: number) {
     const audio = audios[index];
-    if (audio?.url) {
-      await fetch("/api/upload-audio", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: audio.url }),
-      }).catch(() => {});
-    }
+    if (audio?.url) setPendingDeletes((prev) => [...prev, audio.url]);
     setAudios((prev) => prev.filter((_, i) => i !== index));
   }
 
@@ -205,6 +203,15 @@ function AudioButton({
     setSaving(true);
     try {
       await patchArrangementMedia(originalArrangementId, { audios });
+      await Promise.all(
+        pendingDeletes.map((url) =>
+          fetch("/api/upload-audio", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
+          }).catch(() => {})
+        )
+      );
       mutate((key) => typeof key === "string" && key.startsWith("/api/services"));
       setOpen(false);
     } finally {
@@ -220,7 +227,7 @@ function AudioButton({
         size="icon"
         className={`h-8 w-8 md:size-9 ${hasAudios ? "border-secondary/30 text-secondary bg-secondary/10 hover:bg-secondary/20" : ""}`}
         onClick={() => setOpen(true)}
-        title={`Áudio${hasAudios ? ` (${audios.length})` : ""}`}
+        title={`Áudio${hasAudios ? ` (${currentAudios.length})` : ""}`}
       >
         <Music size={15} className={hasAudios ? "text-secondary" : "text-zinc-400"} />
       </Button>
