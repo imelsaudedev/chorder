@@ -46,7 +46,7 @@ test.describe('Visual Regression Suite', () => {
   test('Song View visual check', async ({ page }) => {
     await page.goto(`/songs/${seededIds.songSlug}`);
     await ensureAppReady(page);
-    await expect(page.getByText('Visual Baseline Song')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Visual Baseline Song' })).toBeVisible();
     await expect(page.getByText('Standard Arrangement')).toBeVisible();
     await expect(page).toHaveScreenshot('song-view.png', { fullPage: true });
   });
@@ -70,7 +70,7 @@ test.describe('Visual Regression Suite', () => {
   test('Service View visual check', async ({ page }) => {
     await page.goto(`/services/${seededIds.serviceSlug}`);
     await ensureAppReady(page);
-    await expect(page.getByText('Visual Baseline Service')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Visual Baseline Service' })).toBeVisible();
     await expect(page).toHaveScreenshot('service-view.png', { fullPage: true });
   });
 
