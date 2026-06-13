@@ -3,7 +3,13 @@ import Main from "@/components/common/Main";
 import ScrollToTopButton from "@/components/common/ScrollToTopButton";
 import UrlSearchBar from "@/components/common/SearchBar/UrlSearchBar";
 import { getTranslations } from "next-intl/server";
+import { Metadata } from "next";
 import ClientSongsPage from "./ClientSongsPage";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Messages");
+  return { title: t("songs") };
+}
 
 type SongListPageProps = {
   searchParams?: Promise<{ query?: string }>;

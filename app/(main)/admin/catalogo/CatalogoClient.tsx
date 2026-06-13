@@ -1,18 +1,27 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type Tag = { id: number; name: string; group: { id: number; name: string; color: string } };
 type TagGroup = { id: number; name: string; color: string; tags: { id: number; name: string }[] };
-type CatalogSong = { slug: string; title: string; artist: string | null; tags: Tag[] };
+type CatalogSong = {
+  id: number;
+  slug: string;
+  title: string;
+  artist: string | null;
+  lyrics: string;
+  legacyId: number | null;
+  tags: Tag[];
+};
 type Props = { songs: CatalogSong[]; tagGroups: TagGroup[] };
 
-// Total de colunas = 2 (título, compositor) + tagGroups.length
 function colCount(tagGroups: TagGroup[]) {
-  return 2 + tagGroups.length;
+  // checkbox + título + compositor + tagGroups + expand
+  return 3 + tagGroups.length;
 }
 
 function focusCell(row: number, col: number) {
@@ -22,9 +31,24 @@ function focusCell(row: number, col: number) {
   input?.focus();
 }
 
+function stripChords(lyrics: string): string {
+  // Remove ChordPro inline chords like [Am], [G/B], [C#m7], etc.
+  return lyrics
+    .replace(/\[[^\]]*\]/g, "")
+    .replace(/\{[^}]*\}/g, "")  // remove directives like {start_of_chorus}
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0)
+    .join("\n");
+}
+
 export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props) {
   const [songs, setSongs] = useState<CatalogSong[]>(initialSongs);
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [bulkTagGroupId, setBulkTagGroupId] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const filtered = search
     ? songs.filter(
@@ -33,6 +57,41 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
           s.artist?.toLowerCase().includes(search.toLowerCase())
       )
     : songs;
+
+  const allSelected = filtered.length > 0 && filtered.every((s) => selected.has(s.slug));
+  const someSelected = selected.size > 0;
+
+  function toggleAll() {
+    if (allSelected) {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((s) => next.delete(s.slug));
+        return next;
+      });
+    } else {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((s) => next.add(s.slug));
+        return next;
+      });
+    }
+  }
+
+  function toggleOne(slug: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(slug) ? next.delete(slug) : next.add(slug);
+      return next;
+    });
+  }
+
+  function toggleExpand(slug: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      next.has(slug) ? next.delete(slug) : next.add(slug);
+      return next;
+    });
+  }
 
   async function patchSong(slug: string, data: { title?: string; artist?: string | null; tagIds?: number[] }) {
     const res = await fetch(`/api/songs/${slug}`, {
@@ -48,7 +107,6 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
         if (data.title !== undefined) next.title = data.title;
         if (data.artist !== undefined) next.artist = data.artist;
         if (data.tagIds !== undefined) {
-          // Reconstruir tags a partir dos ids
           const tagMap = new Map<number, Tag>();
           for (const g of tagGroups)
             for (const t of g.tags)
@@ -65,7 +123,39 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
     patchSong(song.slug, { tagIds: [...otherTagIds, ...newGroupTagIds] });
   }
 
-  // Navegação tipo planilha — capturada na tabela para não interferir com cells
+  async function bulkDelete() {
+    const slugs = [...selected].filter((s) => filtered.some((f) => f.slug === s));
+    await Promise.all(
+      slugs.map((slug) =>
+        fetch(`/api/songs/${slug}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isDeleted: true }),
+        })
+      )
+    );
+    setSongs((prev) => prev.filter((s) => !slugs.includes(s.slug)));
+    setSelected(new Set());
+    setConfirmDelete(false);
+  }
+
+  async function bulkSetTag(groupId: number, tagId: number | null) {
+    const slugs = [...selected].filter((s) => filtered.some((f) => f.slug === s));
+    const group = tagGroups.find((g) => g.id === groupId);
+    if (!group) return;
+
+    await Promise.all(
+      slugs.map((slug) => {
+        const song = songs.find((s) => s.slug === slug);
+        if (!song) return;
+        const otherTagIds = song.tags.filter((t) => t.group.id !== groupId).map((t) => t.id);
+        const newIds = tagId ? [...otherTagIds, tagId] : otherTagIds;
+        return patchSong(slug, { tagIds: newIds });
+      })
+    );
+    setBulkTagGroupId(null);
+  }
+
   function handleTableKeyDown(e: React.KeyboardEvent, totalRows: number) {
     const td = (e.target as HTMLElement).closest("td[data-row]") as HTMLElement | null;
     if (!td) return;
@@ -85,27 +175,127 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
       const prevRow = col - 1 >= 0 ? row : row - 1;
       if (prevRow >= 0) focusCell(prevRow, prevCol);
     } else if (e.key === "Enter") {
-      // Enter só desce linha se não há sugestão sendo selecionada (stopPropagation nos cells)
       e.preventDefault();
       if (row + 1 < totalRows) focusCell(row + 1, col);
     }
   }
 
+  const selectedCount = [...selected].filter((s) => filtered.some((f) => f.slug === s)).length;
+
   return (
     <div className="pb-16">
-      <div className="mb-4 max-w-sm">
+      {/* Toolbar */}
+      <div className="mb-4 flex items-center gap-3 flex-wrap">
         <Input
           placeholder="Filtrar por título ou compositor…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-8 text-sm"
+          className="h-8 text-sm max-w-sm"
         />
+
+        {someSelected && (
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-xs text-muted-foreground">{selectedCount} selecionada{selectedCount !== 1 ? "s" : ""}</span>
+
+            {/* Bulk tag */}
+            <div className="relative">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => setBulkTagGroupId(bulkTagGroupId ? null : tagGroups[0]?.id ?? null)}
+              >
+                Alterar tag
+              </Button>
+              {bulkTagGroupId !== null && (
+                <div className="absolute top-full right-0 mt-1 z-50 bg-background border border-border rounded-md shadow-lg p-3 min-w-[220px]">
+                  <div className="flex gap-1 mb-2 flex-wrap">
+                    {tagGroups.map((g) => (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onClick={() => setBulkTagGroupId(g.id)}
+                        className={cn(
+                          "px-2 py-0.5 rounded text-xs font-medium border transition-colors",
+                          bulkTagGroupId === g.id
+                            ? "text-white"
+                            : "text-muted-foreground border-transparent"
+                        )}
+                        style={bulkTagGroupId === g.id ? { backgroundColor: g.color, borderColor: g.color } : {}}
+                      >
+                        {g.name}
+                      </button>
+                    ))}
+                  </div>
+                  {(() => {
+                    const g = tagGroups.find((x) => x.id === bulkTagGroupId);
+                    if (!g) return null;
+                    return (
+                      <div className="space-y-0.5">
+                        <button
+                          type="button"
+                          onClick={() => bulkSetTag(g.id, null)}
+                          className="w-full text-left px-2 py-1 text-xs text-muted-foreground hover:bg-muted rounded"
+                        >
+                          Remover tag
+                        </button>
+                        {g.tags.map((t) => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => bulkSetTag(g.id, t.id)}
+                            className="w-full text-left px-2 py-1 text-xs hover:bg-muted rounded"
+                          >
+                            {t.name}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+
+            {/* Bulk delete */}
+            {confirmDelete ? (
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-destructive">Confirmar exclusão?</span>
+                <Button type="button" variant="destructive" size="sm" className="h-7 text-xs" onClick={bulkDelete}>
+                  Excluir
+                </Button>
+                <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setConfirmDelete(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => setConfirmDelete(true)}
+              >
+                <Trash2 size={13} className="mr-1" />
+                Excluir
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="rounded-lg border border-border overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-muted/50 border-b border-border text-xs text-muted-foreground uppercase tracking-wide">
+              <th className="px-3 py-2.5 w-8">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleAll}
+                  className="rounded"
+                />
+              </th>
               <th className="px-4 py-2.5 text-left font-medium w-[25%]">Título</th>
               <th className="px-4 py-2.5 text-left font-medium w-[18%]">Compositor</th>
               {tagGroups.map((g) => (
@@ -113,6 +303,7 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
                   <span style={{ color: g.color }}>{g.name}</span>
                 </th>
               ))}
+              <th className="w-8" />
             </tr>
           </thead>
           <tbody
@@ -120,35 +311,77 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
             onKeyDown={(e) => handleTableKeyDown(e, filtered.length)}
           >
             {filtered.map((song, rowIdx) => (
-              <tr key={song.slug} className="hover:bg-muted/20 transition-colors">
-                <td data-row={rowIdx} data-col={0} className="px-4 py-1.5">
-                  <TextCell
-                    value={song.title}
-                    onSave={(v) => patchSong(song.slug, { title: v })}
-                  />
-                </td>
-                <td data-row={rowIdx} data-col={1} className="px-4 py-1.5">
-                  <TextCell
-                    value={song.artist ?? ""}
-                    placeholder="—"
-                    onSave={(v) => patchSong(song.slug, { artist: v || null })}
-                  />
-                </td>
-                {tagGroups.map((group, gIdx) => (
-                  <td key={group.id} data-row={rowIdx} data-col={2 + gIdx} className="px-4 py-1.5">
-                    <TagGroupCell
-                      selectedTags={song.tags.filter((t) => t.group.id === group.id)}
-                      group={group}
-                      onUpdate={(ids) => handleTagGroupUpdate(song, group.id, ids)}
+              <>
+                <tr
+                  key={song.slug}
+                  className={cn(
+                    "hover:bg-muted/20 transition-colors",
+                    selected.has(song.slug) && "bg-secondary/5"
+                  )}
+                >
+                  <td className="px-3 py-1.5">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(song.slug)}
+                      onChange={() => toggleOne(song.slug)}
+                      className="rounded"
                     />
                   </td>
-                ))}
-              </tr>
+                  <td data-row={rowIdx} data-col={0} className="px-4 py-1.5">
+                    <TextCell
+                      value={song.title}
+                      onSave={(v) => patchSong(song.slug, { title: v })}
+                    />
+                    {song.legacyId !== null && (
+                      <span className="text-[10px] text-muted-foreground/60 font-mono">#{song.legacyId}</span>
+                    )}
+                  </td>
+                  <td data-row={rowIdx} data-col={1} className="px-4 py-1.5">
+                    <TextCell
+                      value={song.artist ?? ""}
+                      placeholder="—"
+                      onSave={(v) => patchSong(song.slug, { artist: v || null })}
+                    />
+                  </td>
+                  {tagGroups.map((group, gIdx) => (
+                    <td key={group.id} data-row={rowIdx} data-col={2 + gIdx} className="px-4 py-1.5">
+                      <TagGroupCell
+                        selectedTags={song.tags.filter((t) => t.group.id === group.id)}
+                        group={group}
+                        onUpdate={(ids) => handleTagGroupUpdate(song, group.id, ids)}
+                      />
+                    </td>
+                  ))}
+                  <td className="px-2 py-1.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(song.slug)}
+                      className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                      aria-label={expanded.has(song.slug) ? "Fechar letra" : "Ver letra"}
+                    >
+                      {expanded.has(song.slug)
+                        ? <ChevronDown size={14} />
+                        : <ChevronRight size={14} />
+                      }
+                    </button>
+                  </td>
+                </tr>
+                {expanded.has(song.slug) && (
+                  <tr key={`${song.slug}-lyrics`} className="bg-muted/10">
+                    <td />
+                    <td colSpan={2 + tagGroups.length + 1} className="px-4 py-3">
+                      <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed max-h-48 overflow-y-auto">
+                        {stripChords(song.lyrics) || "Sem letra"}
+                      </pre>
+                    </td>
+                  </tr>
+                )}
+              </>
             ))}
             {filtered.length === 0 && (
               <tr>
                 <td
-                  colSpan={2 + tagGroups.length}
+                  colSpan={3 + tagGroups.length + 1}
                   className="px-4 py-8 text-center text-sm text-muted-foreground"
                 >
                   Nenhuma música encontrada.
@@ -175,16 +408,14 @@ function TextCell({
 }) {
   const [draft, setDraft] = useState(value);
 
-  // Sincronizar quando o valor externo muda (atualização otimista)
   useEffect(() => setDraft(value), [value]);
 
   function handleBlur() {
     if (draft.trim() !== value) onSave(draft.trim());
   }
 
-  // Enter e Tab são capturados na tabela — aqui só impedimos o submit default
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter") e.preventDefault(); // deixa subir para o handler da tabela
+    if (e.key === "Enter") e.preventDefault();
   }
 
   return (
@@ -247,10 +478,9 @@ function TagGroupCell({
     } else if (e.key === "Enter") {
       if (open && suggestions[highlighted]) {
         e.preventDefault();
-        e.stopPropagation(); // não deixa subir para o handler de linha
+        e.stopPropagation();
         addTag(suggestions[highlighted].id);
       }
-      // se não há sugestão visível, Enter sobe para o handler da tabela
     } else if (e.key === "Escape") {
       e.stopPropagation();
       setOpen(false);
@@ -258,7 +488,6 @@ function TagGroupCell({
     } else if (e.key === "Backspace" && !query && selectedTags.length > 0) {
       removeTag(selectedTags[selectedTags.length - 1].id);
     }
-    // Tab sobe para o handler da tabela (muda de coluna)
   }
 
   return (
