@@ -2,8 +2,14 @@ import Heading from "@/components/common/Heading";
 import Main from "@/components/common/Main";
 import ScrollToTopButton from "@/components/common/ScrollToTopButton";
 import { getTranslations } from "next-intl/server";
+import { Metadata } from "next";
 import Image from "next/image";
 import ClientServicesPage from "./ClientServicesPage";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Messages");
+  return { title: t("services") };
+}
 
 export default async function ServiceListPage() {
   const t = await getTranslations();
