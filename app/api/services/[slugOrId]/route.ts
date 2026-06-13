@@ -39,6 +39,28 @@ export async function DELETE(
   return new Response(null, { status: 204 });
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ slugOrId: string }> }
+) {
+  const { slugOrId } = await params;
+  const body = await request.json();
+
+  const service = await retrieveService(slugOrId);
+  if (!service) return new Response("Service not found", { status: 404 });
+
+  const data: { title?: string | null; worshipLeader?: string | null; date?: Date } = {};
+  if ("title" in body) data.title = body.title ?? null;
+  if ("worshipLeader" in body) data.worshipLeader = body.worshipLeader || null;
+  if ("date" in body) data.date = new Date(body.date);
+
+  await import("@/prisma/client").then(({ default: prisma }) =>
+    prisma.service.update({ where: { id: service.id }, data })
+  );
+
+  return Response.json({ success: true });
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slugOrId: string }> }
