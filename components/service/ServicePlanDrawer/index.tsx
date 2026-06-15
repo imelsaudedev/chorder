@@ -21,9 +21,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { ClientServiceSection, ClientServiceTemplate } from "@/prisma/models";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ChevronRight, Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Check, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -74,6 +77,10 @@ function combineDateAndTime(date: Date, time: string): Date {
   return result;
 }
 
+function suggestTitle(date: Date): string {
+  return "Culto - " + format(date, "EEE, d MMM", { locale: ptBR });
+}
+
 export default function ServicePlanDrawer({
   open,
   onOpenChange,
@@ -89,7 +96,7 @@ export default function ServicePlanDrawer({
     mode: "onChange",
     resolver: zodResolver(schema),
     defaultValues: {
-      title: defaultValues?.title ?? "",
+      title: isNew ? suggestTitle(baseDate) : (defaultValues?.title ?? ""),
       worshipLeader: defaultValues?.worshipLeader ?? "",
       preacher: defaultValues?.preacher ?? "",
       date: baseDate,
@@ -97,28 +104,60 @@ export default function ServicePlanDrawer({
     },
   });
 
-  const [selectedTemplate, setSelectedTemplate] = useState<ClientServiceTemplate | null>(null);
+  // undefined = user hasn't interacted yet (nothing highlighted)
+  // null     = explicitly chose "sem template"
+  // template = chose a specific template
+  const [selectedTemplate, setSelectedTemplate] = useState<
+    ClientServiceTemplate | null | undefined
+  >(undefined);
 
+  // Tracks whether the user manually edited the title (suppresses auto-suggest)
+  const isTitleDirty = useRef(false);
+
+  // Reset on open
   useEffect(() => {
     if (open) {
       const d = defaultValues?.date ?? new Date();
+      isTitleDirty.current = false;
       form.reset({
-        title: defaultValues?.title ?? "",
+        title: isNew ? suggestTitle(d) : (defaultValues?.title ?? ""),
         worshipLeader: defaultValues?.worshipLeader ?? "",
         preacher: defaultValues?.preacher ?? "",
         date: d,
         startTime: timeFromDate(d),
       });
-      setSelectedTemplate(null);
+      setSelectedTemplate(undefined);
     }
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-suggest title when date changes (only in creation mode, only if not dirty)
+  const dateValue = form.watch("date");
+  useEffect(() => {
+    if (!isNew || isTitleDirty.current) return;
+    if (dateValue) {
+      form.setValue("title", suggestTitle(new Date(dateValue)), {
+        shouldValidate: true,
+      });
+    }
+  }, [dateValue, isNew]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-fill startTime from template's defaultStartTime
+  function handleTemplateSelect(tmpl: ClientServiceTemplate | null) {
+    setSelectedTemplate(tmpl);
+    if (tmpl) {
+      const items = tmpl.items as { defaultStartTime?: string } | null;
+      if (items?.defaultStartTime) {
+        form.setValue("startTime", items.defaultStartTime, {
+          shouldValidate: true,
+        });
+      }
+    }
+  }
+
   function handleSubmit(values: FormValues) {
     const date = combineDateAndTime(values.date, values.startTime);
-
-    const templateSections = selectedTemplate
-      ? buildSectionsFromTemplate(selectedTemplate)
-      : null;
+    const templateSections =
+      selectedTemplate ? buildSectionsFromTemplate(selectedTemplate) : null;
 
     const result = onSave({
       title: values.title,
@@ -132,14 +171,16 @@ export default function ServicePlanDrawer({
   }
 
   const { isValid } = form.formState;
-  const title = isNew ? t("Messages.newService") : t("Messages.editServiceData");
+  const drawerTitle = isNew
+    ? t("Messages.newService")
+    : t("Messages.editServiceData");
   const submitLabel = isNew ? t("Messages.continue") : t("Messages.save");
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerContent className="flex flex-col max-w-sm overflow-y-auto">
         <DrawerHeader>
-          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerTitle>{drawerTitle}</DrawerTitle>
         </DrawerHeader>
 
         <Form {...form}>
@@ -147,102 +188,19 @@ export default function ServicePlanDrawer({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="flex flex-col flex-1"
           >
-            <div className="px-4 space-y-4 pb-2 flex-1">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("ServiceData.title")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("ServiceData.titlePlaceholder")}
-                        autoFocus
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("ServiceData.date")}</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        buttonProps={{ className: "w-full" }}
-                        disabled={field.disabled}
-                        onChange={field.onChange}
-                        value={field.value}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="startTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hora de início</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} className="w-32" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="worshipLeader"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("ServiceData.worshipLeader")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("ServiceData.worshipLeaderPlaceholder")}
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="preacher"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pregador</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Nome do pregador"
-                        {...field}
-                        value={field.value ?? ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Template */}
-              <div>
-                <p className="text-sm font-medium mb-2">Template</p>
-                <TemplateSelector
-                  selected={selectedTemplate}
-                  onSelect={setSelectedTemplate}
+            <div className="px-4 pb-2 flex-1 flex flex-col gap-5">
+              {isNew ? (
+                <CreationFields
+                  form={form}
+                  selectedTemplate={selectedTemplate}
+                  onSelectTemplate={handleTemplateSelect}
+                  onTitleChange={() => {
+                    isTitleDirty.current = true;
+                  }}
                 />
-              </div>
+              ) : (
+                <EditFields form={form} />
+              )}
             </div>
 
             <DrawerFooter>
@@ -266,10 +224,222 @@ export default function ServicePlanDrawer({
   );
 }
 
-// --- Template selector ---
+// ---------------------------------------------------------------------------
+// Creation fields: data → template → hora → título → dirigente
+// ---------------------------------------------------------------------------
+
+type CreationFieldsProps = {
+  form: ReturnType<typeof useForm<FormValues>>;
+  selectedTemplate: ClientServiceTemplate | null | undefined;
+  onSelectTemplate: (t: ClientServiceTemplate | null) => void;
+  onTitleChange: () => void;
+};
+
+function CreationFields({
+  form,
+  selectedTemplate,
+  onSelectTemplate,
+  onTitleChange,
+}: CreationFieldsProps) {
+  const t = useTranslations();
+  return (
+    <>
+      {/* 1. Data */}
+      <FormField
+        control={form.control}
+        name="date"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t("ServiceData.date")}</FormLabel>
+            <FormControl>
+              <DatePicker
+                buttonProps={{ className: "w-full" }}
+                disabled={field.disabled}
+                onChange={field.onChange}
+                value={field.value}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* 2. Template */}
+      <div>
+        <p className="text-sm font-medium mb-2">Template</p>
+        <TemplateSelector
+          selected={selectedTemplate}
+          onSelect={onSelectTemplate}
+        />
+      </div>
+
+      {/* 3. Hora de início */}
+      <FormField
+        control={form.control}
+        name="startTime"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Hora de início</FormLabel>
+            <FormControl>
+              <Input type="time" {...field} className="w-32" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* 4. Título (auto-sugerido) */}
+      <FormField
+        control={form.control}
+        name="title"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t("ServiceData.title")}</FormLabel>
+            <FormControl>
+              <Input
+                placeholder={t("ServiceData.titlePlaceholder")}
+                {...field}
+                onChange={(e) => {
+                  onTitleChange();
+                  field.onChange(e);
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* 5. Dirigente */}
+      <FormField
+        control={form.control}
+        name="worshipLeader"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t("ServiceData.worshipLeader")}</FormLabel>
+            <FormControl>
+              <Input
+                placeholder={t("ServiceData.worshipLeaderPlaceholder")}
+                {...field}
+                value={field.value ?? ""}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Edit fields: título → data → hora → dirigente → pregador
+// ---------------------------------------------------------------------------
+
+type EditFieldsProps = {
+  form: ReturnType<typeof useForm<FormValues>>;
+};
+
+function EditFields({ form }: EditFieldsProps) {
+  const t = useTranslations();
+  return (
+    <>
+      <FormField
+        control={form.control}
+        name="title"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t("ServiceData.title")}</FormLabel>
+            <FormControl>
+              <Input
+                placeholder={t("ServiceData.titlePlaceholder")}
+                autoFocus
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="date"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t("ServiceData.date")}</FormLabel>
+            <FormControl>
+              <DatePicker
+                buttonProps={{ className: "w-full" }}
+                disabled={field.disabled}
+                onChange={field.onChange}
+                value={field.value}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="startTime"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Hora de início</FormLabel>
+            <FormControl>
+              <Input type="time" {...field} className="w-32" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="worshipLeader"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t("ServiceData.worshipLeader")}</FormLabel>
+            <FormControl>
+              <Input
+                placeholder={t("ServiceData.worshipLeaderPlaceholder")}
+                {...field}
+                value={field.value ?? ""}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="preacher"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Pregador</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Nome do pregador"
+                {...field}
+                value={field.value ?? ""}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Template selector
+// ---------------------------------------------------------------------------
 
 type TemplateSelectorProps = {
-  selected: ClientServiceTemplate | null;
+  selected: ClientServiceTemplate | null | undefined;
   onSelect: (t: ClientServiceTemplate | null) => void;
 };
 
@@ -286,54 +456,79 @@ function TemplateSelector({ selected, onSelect }: TemplateSelectorProps) {
 
   return (
     <div className="flex flex-col gap-1.5">
+      {templates.map((tmpl) => {
+        const isSelected = selected?.id === tmpl.id;
+        return (
+          <button
+            key={tmpl.id}
+            type="button"
+            onClick={() => onSelect(tmpl)}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-md border text-sm transition-colors text-left ${
+              isSelected
+                ? "border-emerald-500 bg-emerald-50"
+                : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+            }`}
+          >
+            <div
+              className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                isSelected
+                  ? "border-emerald-500 bg-emerald-500"
+                  : "border-zinc-300"
+              }`}
+            >
+              {isSelected && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={`font-medium ${isSelected ? "text-emerald-700" : "text-zinc-800"}`}>
+                {tmpl.name}
+              </p>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {templateSummary(tmpl)}
+              </p>
+            </div>
+          </button>
+        );
+      })}
+
       <button
         type="button"
         onClick={() => onSelect(null)}
-        className={`flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-colors ${
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-md border text-sm transition-colors ${
           selected === null
-            ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-            : "border-zinc-200 hover:border-zinc-300"
+            ? "border-zinc-400 bg-zinc-50"
+            : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
         }`}
       >
-        <span>Sem template</span>
-        {selected === null && <Check className="w-4 h-4" />}
-      </button>
-
-      {templates.map((tmpl) => (
-        <button
-          key={tmpl.id}
-          type="button"
-          onClick={() => onSelect(tmpl)}
-          className={`flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-colors ${
-            selected?.id === tmpl.id
-              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-              : "border-zinc-200 hover:border-zinc-300"
+        <div
+          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+            selected === null ? "border-zinc-500 bg-zinc-500" : "border-zinc-300"
           }`}
         >
-          <div className="text-left">
-            <p className="font-medium">{tmpl.name}</p>
-            <p className="text-xs text-zinc-400">
-              {templateSummary(tmpl)}
-            </p>
-          </div>
-          {selected?.id === tmpl.id ? (
-            <Check className="w-4 h-4 shrink-0" />
-          ) : (
-            <ChevronRight className="w-4 h-4 shrink-0 text-zinc-300" />
+          {selected === null && (
+            <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
           )}
-        </button>
-      ))}
+        </div>
+        <span className={selected === null ? "text-zinc-700" : "text-zinc-500"}>
+          Sem template
+        </span>
+      </button>
     </div>
   );
 }
 
 function templateSummary(tmpl: ClientServiceTemplate): string {
-  const items = tmpl.items as { sections?: unknown[] } | null;
+  const items = tmpl.items as {
+    sections?: unknown[];
+    defaultStartTime?: string;
+  } | null;
   const sections = items?.sections ?? [];
-  return `${sections.length} seções`;
+  const time = items?.defaultStartTime ? ` · ${items.defaultStartTime}` : "";
+  return `${sections.length} seções${time}`;
 }
 
-// --- Template → sections mapping ---
+// ---------------------------------------------------------------------------
+// Template → sections
+// ---------------------------------------------------------------------------
 
 type RawUnit = {
   type: string;
