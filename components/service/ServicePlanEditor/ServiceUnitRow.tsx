@@ -29,6 +29,11 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
         ? unit.arrangement?.song?.title ?? "Música (sem seleção)"
         : unit.label ?? config?.label ?? unit.type;
 
+    const falaSpeaker =
+      unit.type === "FALA"
+        ? (unit.metadata as { speaker?: string | null } | null)?.speaker ?? null
+        : null;
+
     return (
       <div
         ref={ref}
@@ -62,9 +67,12 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
             <button
               type="button"
               onClick={onEditDetails}
-              className="text-sm text-left w-full truncate hover:underline decoration-dashed underline-offset-2"
+              className="text-sm text-left w-full hover:underline decoration-dashed underline-offset-2 leading-tight"
             >
-              {displayLabel}
+              <span className="truncate block">{displayLabel}</span>
+              {falaSpeaker && (
+                <span className="text-xs text-zinc-400 block truncate">{falaSpeaker}</span>
+              )}
             </button>
           ) : (
             <InlineLabel

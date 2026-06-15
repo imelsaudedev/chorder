@@ -25,11 +25,11 @@ const TEMPLATE_ITEMS = {
     order: 2,
     units: [
       {
-        type: "ABERTURA",
+        type: "FALA",
         label: "Boas-vindas",
         order: 1,
         durationMin: 3,
-        metadata: null,
+        metadata: { speaker: null },
       },
       {
         type: "SONG",

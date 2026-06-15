@@ -29,7 +29,7 @@ export type ClientTagGroup = Pick<TagGroup, "id" | "name" | "color"> & {
 export const SERVICE_UNIT_TYPES = [
   "SONG",
   "PRELUDIO",
-  "ABERTURA",
+  "FALA",
   "LEITURA",
   "ORACAO",
   "AVISOS",

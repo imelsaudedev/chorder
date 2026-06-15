@@ -4,7 +4,7 @@ import { arrangementSchema } from "./arrangement";
 export const serviceUnitTypeSchema = z.enum([
   "SONG",
   "PRELUDIO",
-  "ABERTURA",
+  "FALA",
   "LEITURA",
   "ORACAO",
   "AVISOS",

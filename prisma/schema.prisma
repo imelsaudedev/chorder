@@ -152,7 +152,7 @@ model ServiceUnit {
 enum ServiceUnitType {
   SONG
   PRELUDIO
-  ABERTURA
+  FALA
   LEITURA
   ORACAO
   AVISOS

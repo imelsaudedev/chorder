@@ -1,6 +1,7 @@
 "use client";
 
 import { useFetchTemplates } from "@/app/api/api-client";
+import { buildSectionsFromTemplate } from "@/lib/template-utils";
 import SongPicker from "@/components/song/SongPicker";
 import {
   Drawer,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/drawer";
 import { ClientServiceSection, ClientServiceTemplate, ClientServiceUnit } from "@/prisma/models";
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DrawerState } from "../hooks/usePlanEditor";
 import { UNIT_CONFIG, ServiceUnitTypeValue } from "../unitConfig";
 
@@ -27,7 +28,8 @@ type DrawerView =
   | { screen: "menu" }
   | { screen: "template" }
   | { screen: "song-picker"; sectionIndex: number }
-  | { screen: "unit-form"; sectionIndex: number; unitType: ServiceUnitTypeValue };
+  | { screen: "unit-form"; sectionIndex: number; unitType: ServiceUnitTypeValue }
+  | { screen: "fala-form"; sectionIndex: number; unitIndex?: number };
 
 export default function ServiceItemDrawer({
   drawerState,
@@ -45,6 +47,24 @@ export default function ServiceItemDrawer({
 
   const [view, setView] = useState<DrawerView>({ screen: "menu" });
 
+  // Route edit-unit to the appropriate form
+  useEffect(() => {
+    if (drawerState.type === "edit-unit") {
+      const unit = sections[drawerState.sectionIndex]?.units?.[drawerState.unitIndex];
+      if (unit?.type === "FALA") {
+        setView({
+          screen: "fala-form",
+          sectionIndex: drawerState.sectionIndex,
+          unitIndex: drawerState.unitIndex,
+        });
+        return;
+      }
+    }
+    if (drawerState.type !== "closed") {
+      setView({ screen: "menu" });
+    }
+  }, [drawerState]); // eslint-disable-line react-hooks/exhaustive-deps
+
   function handleOpenChange(open: boolean) {
     if (!open) {
       onClose();
@@ -55,6 +75,8 @@ export default function ServiceItemDrawer({
   function handleSelectType(type: ServiceUnitTypeValue) {
     if (type === "SONG") {
       setView({ screen: "song-picker", sectionIndex });
+    } else if (type === "FALA") {
+      setView({ screen: "fala-form", sectionIndex });
     } else {
       setView({ screen: "unit-form", sectionIndex, unitType: type });
     }
@@ -94,8 +116,7 @@ export default function ServiceItemDrawer({
     label: string,
     durationMin: number | null
   ) {
-    const si =
-      view.screen === "unit-form" ? view.sectionIndex : sectionIndex;
+    const si = view.screen === "unit-form" ? view.sectionIndex : sectionIndex;
     onAddUnit(si, {
       type,
       arrangementId: null,
@@ -109,11 +130,25 @@ export default function ServiceItemDrawer({
     setView({ screen: "menu" });
   }
 
+  function handleFalaDone() {
+    onClose();
+    setView({ screen: "menu" });
+  }
+
+  const currentUnit =
+    view.screen === "fala-form" && view.unitIndex !== undefined
+      ? sections[view.sectionIndex]?.units?.[view.unitIndex]
+      : undefined;
+
   const drawerTitle =
     view.screen === "template"
       ? "Usar template"
       : view.screen === "song-picker"
       ? "Adicionar música"
+      : view.screen === "fala-form"
+      ? view.unitIndex !== undefined
+        ? "Editar fala"
+        : "Adicionar fala"
       : view.screen === "unit-form"
       ? `Adicionar ${UNIT_CONFIG[view.unitType]?.label ?? view.unitType}`
       : sections.length === 0
@@ -162,6 +197,16 @@ export default function ServiceItemDrawer({
             <SimpleUnitForm
               unitType={view.unitType}
               onAdd={handleSimpleUnitAdd}
+            />
+          )}
+          {view.screen === "fala-form" && (
+            <FalaUnitForm
+              sectionIndex={view.sectionIndex}
+              unitIndex={view.unitIndex}
+              existingUnit={currentUnit}
+              onAdd={onAddUnit}
+              onUpdate={onUpdateUnit}
+              onDone={handleFalaDone}
             />
           )}
         </div>
@@ -289,25 +334,6 @@ function TemplateCard({
   const sections = items?.sections ?? [];
   const defaultTime = items?.defaultStartTime;
 
-  function handleLoad() {
-    const mapped: ClientServiceSection[] = sections.map((s, i) => ({
-      ...s,
-      id: undefined,
-      serviceId: undefined,
-      order: i + 1,
-      units: (s.units ?? []).map((u, j) => ({
-        ...u,
-        id: undefined,
-        serviceId: undefined,
-        arrangementId: null,
-        semitoneTranspose: null,
-        sectionId: null,
-        order: j + 1,
-      })),
-    }));
-    onLoad(mapped, startTime);
-  }
-
   return (
     <div className="border border-zinc-200 rounded-lg p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -330,10 +356,108 @@ function TemplateCard({
       </div>
       <button
         type="button"
-        onClick={handleLoad}
+        onClick={() => onLoad(buildSectionsFromTemplate(template), startTime)}
         className="w-full py-2 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
       >
         Usar este template
+      </button>
+    </div>
+  );
+}
+
+// --- Fala unit form ---
+
+function FalaUnitForm({
+  sectionIndex,
+  unitIndex,
+  existingUnit,
+  onAdd,
+  onUpdate,
+  onDone,
+}: {
+  sectionIndex: number;
+  unitIndex?: number;
+  existingUnit?: ClientServiceUnit;
+  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
+  onDone: () => void;
+}) {
+  const existingMeta = existingUnit?.metadata as { speaker?: string | null } | null;
+
+  const [label, setLabel] = useState(existingUnit?.label ?? "");
+  const [speaker, setSpeaker] = useState(existingMeta?.speaker ?? "");
+  const [duration, setDuration] = useState(
+    existingUnit?.durationMin != null ? String(existingUnit.durationMin) : ""
+  );
+
+  function handleSave() {
+    const durationMin = duration ? parseFloat(duration) : null;
+    const metadata = { speaker: speaker.trim() || null };
+
+    if (unitIndex !== undefined) {
+      onUpdate(sectionIndex, unitIndex, {
+        label: label.trim() || null,
+        metadata,
+        durationMin,
+      });
+    } else {
+      onAdd(sectionIndex, {
+        type: "FALA",
+        arrangementId: null,
+        semitoneTranspose: null,
+        sectionId: null,
+        label: label.trim() || null,
+        metadata,
+        durationMin,
+      });
+    }
+    onDone();
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Título</label>
+        <input
+          type="text"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder="Ex: Boas-vindas, Apresentação dos visitantes..."
+          autoFocus
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Quem faz</label>
+        <input
+          type="text"
+          value={speaker}
+          onChange={(e) => setSpeaker(e.target.value)}
+          placeholder="Ex: Dirigente, Pastor João..."
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
+        <input
+          type="number"
+          min={0}
+          step={0.5}
+          value={duration}
+          onChange={(e) => setDuration(e.target.value)}
+          placeholder="—"
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={handleSave}
+        className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
+      >
+        {unitIndex !== undefined ? "Salvar" : "Adicionar"}
       </button>
     </div>
   );
@@ -355,7 +479,7 @@ function SimpleUnitForm({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs text-zinc-500">Label</label>
+        <label className="text-xs font-medium text-zinc-500">Label</label>
         <input
           type="text"
           value={label}
@@ -366,7 +490,7 @@ function SimpleUnitForm({
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs text-zinc-500">Duração (min)</label>
+        <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
         <input
           type="number"
           min={0}

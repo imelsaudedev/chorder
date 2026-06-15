@@ -14,7 +14,7 @@ import {
 export type ServiceUnitTypeValue =
   | "SONG"
   | "PRELUDIO"
-  | "ABERTURA"
+  | "FALA"
   | "LEITURA"
   | "ORACAO"
   | "AVISOS"
@@ -42,11 +42,11 @@ export const UNIT_CONFIG: Record<ServiceUnitTypeValue, UnitConfig> = {
     color: "text-zinc-400",
     isComplex: false,
   },
-  ABERTURA: {
-    label: "Abertura",
+  FALA: {
+    label: "Fala",
     icon: Mic2,
     color: "text-blue-500",
-    isComplex: false,
+    isComplex: true,
   },
   LEITURA: {
     label: "Leitura",
