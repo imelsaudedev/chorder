@@ -1,3 +1,5 @@
+import { buildSectionsFromTemplate } from "@/lib/template-utils";
+import { retrieveTemplate } from "@/prisma/data";
 import ClientServiceFormPage from "../ClientServiceFormPage";
 
 export default async function NewServicePage({
@@ -8,9 +10,18 @@ export default async function NewServicePage({
     worshipLeader?: string;
     preacher?: string;
     date?: string;
+    templateId?: string;
   }>;
 }) {
-  const { title, worshipLeader, preacher, date } = await searchParams;
+  const { title, worshipLeader, preacher, date, templateId } =
+    await searchParams;
+
+  const template =
+    templateId ? await retrieveTemplate(Number(templateId)) : null;
+
+  const defaultSections = template
+    ? buildSectionsFromTemplate(template)
+    : undefined;
 
   return (
     <ClientServiceFormPage
@@ -20,6 +31,7 @@ export default async function NewServicePage({
         worshipLeader: worshipLeader ?? "",
         preacher: preacher ?? "",
         date: date ? new Date(date) : new Date(),
+        sections: defaultSections,
       }}
     />
   );

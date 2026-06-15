@@ -20,6 +20,7 @@ export default function ClientServicesPage() {
     if (config.title) params.set("title", config.title);
     if (config.worshipLeader) params.set("worshipLeader", config.worshipLeader);
     if (config.preacher) params.set("preacher", config.preacher);
+    if (config.templateId) params.set("templateId", String(config.templateId));
     params.set("date", config.date.toISOString());
     setIsNavigating(true);
     setTimeout(() => router.push(`/services/new?${params.toString()}`), 0);

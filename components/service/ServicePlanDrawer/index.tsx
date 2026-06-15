@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { buildSectionsFromTemplate, getTemplateDefaultStartTime } from "@/lib/template-utils";
 import { ClientServiceSection, ClientServiceTemplate } from "@/prisma/models";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -45,6 +46,7 @@ export type ServicePlanConfig = {
   worshipLeader: string | null;
   preacher: string | null;
   date: Date;
+  templateId: number | null;
   templateSections: ClientServiceSection[] | null;
 };
 
@@ -145,26 +147,25 @@ export default function ServicePlanDrawer({
   function handleTemplateSelect(tmpl: ClientServiceTemplate | null) {
     setSelectedTemplate(tmpl);
     if (tmpl) {
-      const items = tmpl.items as { defaultStartTime?: string } | null;
-      if (items?.defaultStartTime) {
-        form.setValue("startTime", items.defaultStartTime, {
-          shouldValidate: true,
-        });
+      const defaultTime = getTemplateDefaultStartTime(tmpl);
+      if (defaultTime) {
+        form.setValue("startTime", defaultTime, { shouldValidate: true });
       }
     }
   }
 
   function handleSubmit(values: FormValues) {
     const date = combineDateAndTime(values.date, values.startTime);
-    const templateSections =
-      selectedTemplate ? buildSectionsFromTemplate(selectedTemplate) : null;
 
     const result = onSave({
       title: values.title,
       worshipLeader: values.worshipLeader || null,
       preacher: values.preacher || null,
       date,
-      templateSections,
+      templateId: selectedTemplate?.id ?? null,
+      templateSections: selectedTemplate
+        ? buildSectionsFromTemplate(selectedTemplate)
+        : null,
     });
 
     if (result !== false) onOpenChange(false);
@@ -526,50 +527,3 @@ function templateSummary(tmpl: ClientServiceTemplate): string {
   return `${sections.length} seções${time}`;
 }
 
-// ---------------------------------------------------------------------------
-// Template → sections
-// ---------------------------------------------------------------------------
-
-type RawUnit = {
-  type: string;
-  label?: string | null;
-  order?: number;
-  durationMin?: number | null;
-  metadata?: unknown;
-};
-
-type RawSection = {
-  type: string;
-  label: string;
-  order?: number;
-  units?: RawUnit[];
-};
-
-type TemplateItems = {
-  sections?: RawSection[];
-};
-
-function buildSectionsFromTemplate(
-  template: ClientServiceTemplate
-): ClientServiceSection[] {
-  const items = template.items as TemplateItems | null;
-  return (items?.sections ?? []).map((s, i) => ({
-    id: undefined,
-    serviceId: undefined,
-    type: s.type as ClientServiceSection["type"],
-    label: s.label,
-    order: i + 1,
-    units: (s.units ?? []).map((u, j) => ({
-      id: undefined,
-      serviceId: undefined,
-      type: u.type as import("@/prisma/models").ClientServiceUnit["type"],
-      label: u.label ?? null,
-      order: j + 1,
-      durationMin: u.durationMin ?? null,
-      metadata: u.metadata ?? null,
-      arrangementId: null,
-      semitoneTranspose: null,
-      sectionId: null,
-    })),
-  }));
-}
