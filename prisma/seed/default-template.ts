@@ -29,7 +29,7 @@ const TEMPLATE_ITEMS = {
         label: "Boas-vindas",
         order: 1,
         durationMin: 3,
-        metadata: { speaker: null },
+        metadata: { speaker: null, description: null },
       },
       {
         type: "SONG",

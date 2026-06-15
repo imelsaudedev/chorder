@@ -1,10 +1,10 @@
 "use client";
 
 import { ClientServiceUnit } from "@/prisma/models";
-import { GripVertical, Trash2 } from "lucide-react";
-import { forwardRef } from "react";
-import { UNIT_CONFIG, ServiceUnitTypeValue } from "./unitConfig";
+import { ChevronDown, GripVertical, Trash2 } from "lucide-react";
+import { forwardRef, useState } from "react";
 import { UnitTiming, formatTime } from "./hooks/useServiceTimeline";
+import { UNIT_CONFIG, ServiceUnitTypeValue } from "./unitConfig";
 
 type ServiceUnitRowProps = {
   unit: ClientServiceUnit;
@@ -16,11 +16,15 @@ type ServiceUnitRowProps = {
   dragHandleRef?: React.RefObject<HTMLDivElement>;
 };
 
+type FalaMeta = { speaker?: string | null; description?: string | null };
+
 const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
   function ServiceUnitRow(
     { unit, timing, isDragging, onUpdate, onRemove, onEditDetails, dragHandleRef },
     ref
   ) {
+    const [descExpanded, setDescExpanded] = useState(false);
+
     const config = UNIT_CONFIG[unit.type as ServiceUnitTypeValue];
     const Icon = config?.icon;
 
@@ -29,75 +33,107 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
         ? unit.arrangement?.song?.title ?? "Música (sem seleção)"
         : unit.label ?? config?.label ?? unit.type;
 
-    const falaSpeaker =
+    const falaMeta =
       unit.type === "FALA"
-        ? (unit.metadata as { speaker?: string | null } | null)?.speaker ?? null
+        ? (unit.metadata as FalaMeta | null)
         : null;
+    const falaSpeaker = falaMeta?.speaker ?? null;
+    const falaDescription = falaMeta?.description ?? null;
 
     return (
       <div
         ref={ref}
-        className={`group flex items-center gap-2 px-3 py-2 rounded-md hover:bg-zinc-50 transition-colors ${
+        className={`group rounded-md hover:bg-zinc-50 transition-colors ${
           isDragging ? "opacity-40" : ""
         }`}
       >
-        {/* Drag handle */}
-        <div
-          ref={dragHandleRef}
-          className="cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-400 shrink-0 touch-none"
-        >
-          <GripVertical className="w-4 h-4" />
-        </div>
+        {/* Main row */}
+        <div className="flex items-center gap-2 px-3 py-2">
+          {/* Drag handle */}
+          <div
+            ref={dragHandleRef}
+            className="cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-400 shrink-0 touch-none"
+          >
+            <GripVertical className="w-4 h-4" />
+          </div>
 
-        {/* Type icon */}
-        <div className={`shrink-0 ${config?.color ?? "text-zinc-400"}`}>
-          {Icon && <Icon className="w-4 h-4" />}
-        </div>
+          {/* Type icon */}
+          <div className={`shrink-0 ${config?.color ?? "text-zinc-400"}`}>
+            {Icon && <Icon className="w-4 h-4" />}
+          </div>
 
-        {/* Time */}
-        {timing && (
-          <span className="text-xs text-zinc-400 font-mono w-10 shrink-0">
-            {formatTime(timing.startTime)}
-          </span>
-        )}
+          {/* Time */}
+          {timing && (
+            <span className="text-xs text-zinc-400 font-mono w-10 shrink-0">
+              {formatTime(timing.startTime)}
+            </span>
+          )}
 
-        {/* Label — inline edit para tipos simples, botão para complexos */}
-        <div className="flex-1 min-w-0">
-          {config?.isComplex ? (
+          {/* Label */}
+          <div className="flex-1 min-w-0">
+            {config?.isComplex ? (
+              <button
+                type="button"
+                onClick={onEditDetails}
+                className="text-sm text-left w-full hover:underline decoration-dashed underline-offset-2 leading-tight"
+              >
+                <span className="truncate block">{displayLabel}</span>
+                {falaSpeaker && (
+                  <span className="text-xs text-zinc-400 block truncate">
+                    {falaSpeaker}
+                  </span>
+                )}
+              </button>
+            ) : (
+              <InlineLabel
+                value={unit.label ?? ""}
+                placeholder={config?.label ?? unit.type}
+                onChange={(v) => onUpdate({ label: v || null })}
+              />
+            )}
+          </div>
+
+          {/* Description toggle — só FALA com descrição */}
+          {falaDescription ? (
             <button
               type="button"
-              onClick={onEditDetails}
-              className="text-sm text-left w-full hover:underline decoration-dashed underline-offset-2 leading-tight"
+              onClick={() => setDescExpanded((v) => !v)}
+              className="shrink-0 text-zinc-300 hover:text-zinc-500 transition-colors"
+              aria-label={descExpanded ? "Recolher descrição" : "Ver descrição"}
             >
-              <span className="truncate block">{displayLabel}</span>
-              {falaSpeaker && (
-                <span className="text-xs text-zinc-400 block truncate">{falaSpeaker}</span>
-              )}
+              <ChevronDown
+                className={`w-4 h-4 transition-transform duration-150 ${
+                  descExpanded ? "rotate-180" : ""
+                }`}
+              />
             </button>
-          ) : (
-            <InlineLabel
-              value={unit.label ?? ""}
-              placeholder={config?.label ?? unit.type}
-              onChange={(v) => onUpdate({ label: v || null })}
-            />
-          )}
+          ) : null}
+
+          {/* Duration */}
+          <InlineDuration
+            value={unit.durationMin ?? null}
+            onChange={(v) => onUpdate({ durationMin: v })}
+          />
+
+          {/* Remove */}
+          <button
+            type="button"
+            onClick={onRemove}
+            className="shrink-0 text-zinc-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+            aria-label="Remover"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Duration */}
-        <InlineDuration
-          value={unit.durationMin ?? null}
-          onChange={(v) => onUpdate({ durationMin: v })}
-        />
-
-        {/* Remove */}
-        <button
-          type="button"
-          onClick={onRemove}
-          className="shrink-0 text-zinc-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-          aria-label="Remover"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        {/* Description accordion */}
+        {falaDescription && descExpanded && (
+          <div className="px-3 pb-3">
+            <p className="text-xs text-zinc-500 whitespace-pre-wrap leading-relaxed pl-14 border-l-2 border-zinc-100 ml-14">
+              {falaDescription}
+            </p>
+          </div>
+        )}
       </div>
     );
   }

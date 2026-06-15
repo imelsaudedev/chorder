@@ -382,17 +382,24 @@ function FalaUnitForm({
   onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onDone: () => void;
 }) {
-  const existingMeta = existingUnit?.metadata as { speaker?: string | null } | null;
+  const existingMeta = existingUnit?.metadata as {
+    speaker?: string | null;
+    description?: string | null;
+  } | null;
 
   const [label, setLabel] = useState(existingUnit?.label ?? "");
   const [speaker, setSpeaker] = useState(existingMeta?.speaker ?? "");
+  const [description, setDescription] = useState(existingMeta?.description ?? "");
   const [duration, setDuration] = useState(
     existingUnit?.durationMin != null ? String(existingUnit.durationMin) : ""
   );
 
   function handleSave() {
     const durationMin = duration ? parseFloat(duration) : null;
-    const metadata = { speaker: speaker.trim() || null };
+    const metadata = {
+      speaker: speaker.trim() || null,
+      description: description.trim() || null,
+    };
 
     if (unitIndex !== undefined) {
       onUpdate(sectionIndex, unitIndex, {
@@ -436,6 +443,17 @@ function FalaUnitForm({
           onChange={(e) => setSpeaker(e.target.value)}
           placeholder="Ex: Dirigente, Pastor João..."
           className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Descrição</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Roteiro, orientações ou observações para este momento..."
+          rows={4}
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 resize-none"
         />
       </div>
 
