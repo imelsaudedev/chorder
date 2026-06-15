@@ -1,15 +1,22 @@
 "use client";
 
 import { useFetchTemplates } from "@/app/api/api-client";
-import { buildSectionsFromTemplate } from "@/lib/template-utils";
+import ArrangementPicker from "@/components/song/ArrangementPicker";
 import SongPicker from "@/components/song/SongPicker";
+import { buildSectionsFromTemplate } from "@/lib/template-utils";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { ClientServiceSection, ClientServiceTemplate, ClientServiceUnit } from "@/prisma/models";
+import {
+  ClientArrangement,
+  ClientServiceSection,
+  ClientServiceTemplate,
+  ClientServiceUnit,
+  ClientSong,
+} from "@/prisma/models";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DrawerState } from "../hooks/usePlanEditor";
@@ -28,6 +35,7 @@ type DrawerView =
   | { screen: "menu" }
   | { screen: "template" }
   | { screen: "song-picker"; sectionIndex: number; unitIndex?: number }
+  | { screen: "arrangement-picker"; sectionIndex: number; unitIndex?: number; song: ClientSong }
   | { screen: "unit-form"; sectionIndex: number; unitType: ServiceUnitTypeValue }
   | { screen: "fala-form"; sectionIndex: number; unitIndex?: number };
 
@@ -90,23 +98,26 @@ export default function ServiceItemDrawer({
     }
   }
 
-  function handleSongSelected(song: import("@/prisma/models").ClientSong) {
-    const si = view.screen === "song-picker" ? view.sectionIndex : sectionIndex;
-    const ui = view.screen === "song-picker" ? view.unitIndex : undefined;
-
+  // Commit a song unit (add or update), using a resolved source arrangement
+  function commitSongUnit(
+    si: number,
+    ui: number | undefined,
+    song: ClientSong,
+    source: ClientArrangement | null
+  ) {
     const arrangement = {
       id: undefined,
       songId: song.id,
-      originalArrangementId: null,
-      key: song.arrangements?.[0]?.key ?? "C",
+      originalArrangementId: source?.id ?? null,
+      key: source?.key ?? "C",
       name: null,
       isDefault: false,
       isDeleted: false,
       isServiceArrangement: true,
-      youtubeUrl: null,
-      audios: [],
+      youtubeUrl: source?.youtubeUrl ?? null,
+      audios: source?.audios ?? [],
       song,
-      units: song.arrangements?.[0]?.units,
+      units: source?.units,
     };
 
     if (ui !== undefined) {
@@ -125,6 +136,30 @@ export default function ServiceItemDrawer({
     }
     onClose();
     setView({ screen: "menu" });
+  }
+
+  function handleSongSelected(song: ClientSong) {
+    const si = view.screen === "song-picker" ? view.sectionIndex : sectionIndex;
+    const ui = view.screen === "song-picker" ? view.unitIndex : undefined;
+
+    const arrangements = song.arrangements ?? [];
+
+    // Multiple arrangements → let the user pick
+    if (arrangements.length > 1) {
+      setView({ screen: "arrangement-picker", sectionIndex: si, unitIndex: ui, song });
+      return;
+    }
+
+    // Single or zero: prefer default, fall back to first
+    const source =
+      arrangements.find((a) => a.isDefault) ?? arrangements[0] ?? null;
+    commitSongUnit(si, ui, song, source);
+  }
+
+  function handleArrangementSelected(arrangement: ClientArrangement) {
+    if (view.screen !== "arrangement-picker") return;
+    const song = arrangement.song ?? view.song;
+    commitSongUnit(view.sectionIndex, view.unitIndex, song, arrangement);
   }
 
   function handleSimpleUnitAdd(
@@ -151,20 +186,37 @@ export default function ServiceItemDrawer({
     setView({ screen: "menu" });
   }
 
-  const currentUnit =
+  function handleBack() {
+    // arrangement-picker → back to song-picker (not menu)
+    if (view.screen === "arrangement-picker") {
+      setView({
+        screen: "song-picker",
+        sectionIndex: view.sectionIndex,
+        unitIndex: view.unitIndex,
+      });
+      return;
+    }
+    setView({ screen: "menu" });
+  }
+
+  const currentFalaUnit =
     view.screen === "fala-form" && view.unitIndex !== undefined
       ? sections[view.sectionIndex]?.units?.[view.unitIndex]
       : undefined;
+
+  const isEditing =
+    (view.screen === "song-picker" || view.screen === "arrangement-picker") &&
+    view.unitIndex !== undefined;
 
   const drawerTitle =
     view.screen === "template"
       ? "Usar template"
       : view.screen === "song-picker"
-      ? view.unitIndex !== undefined ? "Trocar música" : "Adicionar música"
+      ? isEditing ? "Trocar música" : "Adicionar música"
+      : view.screen === "arrangement-picker"
+      ? isEditing ? "Escolher arranjo" : "Escolher arranjo"
       : view.screen === "fala-form"
-      ? view.unitIndex !== undefined
-        ? "Editar fala"
-        : "Adicionar fala"
+      ? view.unitIndex !== undefined ? "Editar fala" : "Adicionar fala"
       : view.screen === "unit-form"
       ? `Adicionar ${UNIT_CONFIG[view.unitType]?.label ?? view.unitType}`
       : sections.length === 0
@@ -178,7 +230,7 @@ export default function ServiceItemDrawer({
           {view.screen !== "menu" && (
             <button
               type="button"
-              onClick={() => setView({ screen: "menu" })}
+              onClick={handleBack}
               className="text-zinc-400 hover:text-zinc-700"
               aria-label="Voltar"
             >
@@ -209,6 +261,13 @@ export default function ServiceItemDrawer({
           {view.screen === "song-picker" && (
             <SongPicker onSelected={handleSongSelected} />
           )}
+          {view.screen === "arrangement-picker" && (
+            <ArrangementPickerScreen
+              song={view.song}
+              isEditing={isEditing}
+              onConfirm={handleArrangementSelected}
+            />
+          )}
           {view.screen === "unit-form" && (
             <SimpleUnitForm
               unitType={view.unitType}
@@ -219,7 +278,7 @@ export default function ServiceItemDrawer({
             <FalaUnitForm
               sectionIndex={view.sectionIndex}
               unitIndex={view.unitIndex}
-              existingUnit={currentUnit}
+              existingUnit={currentFalaUnit}
               onAdd={onAddUnit}
               onUpdate={onUpdateUnit}
               onDone={handleFalaDone}
@@ -376,6 +435,34 @@ function TemplateCard({
         className="w-full py-2 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
       >
         Usar este template
+      </button>
+    </div>
+  );
+}
+
+// --- Arrangement picker screen ---
+
+function ArrangementPickerScreen({
+  song,
+  isEditing,
+  onConfirm,
+}: {
+  song: ClientSong;
+  isEditing: boolean;
+  onConfirm: (arrangement: ClientArrangement) => void;
+}) {
+  const [selected, setSelected] = useState<ClientArrangement | null>(null);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <ArrangementPicker songSlug={song.slug} onSelected={setSelected} />
+      <button
+        type="button"
+        disabled={!selected}
+        onClick={() => selected && onConfirm(selected)}
+        className="w-full py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-40"
+      >
+        {isEditing ? "Trocar para este arranjo" : "Usar este arranjo"}
       </button>
     </div>
   );
