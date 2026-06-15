@@ -100,8 +100,8 @@ export default function SortableServiceUnitForm({
   }, [index, remove, setValue, getValues]);
 
   const handleChangeUnit = useCallback(
-    (unit: ServiceUnitSchema) => {
-      update(index, unit);
+    (unit: ClientServiceUnit) => {
+      update(index, unit as unknown as ServiceUnitSchema);
     },
     [index, update]
   );

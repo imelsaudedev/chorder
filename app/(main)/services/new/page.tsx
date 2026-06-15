@@ -3,9 +3,14 @@ import ClientServiceFormPage from "../ClientServiceFormPage";
 export default async function NewServicePage({
   searchParams,
 }: {
-  searchParams: Promise<{ title?: string; worshipLeader?: string; date?: string }>;
+  searchParams: Promise<{
+    title?: string;
+    worshipLeader?: string;
+    preacher?: string;
+    date?: string;
+  }>;
 }) {
-  const { title, worshipLeader, date } = await searchParams;
+  const { title, worshipLeader, preacher, date } = await searchParams;
 
   return (
     <ClientServiceFormPage
@@ -13,6 +18,7 @@ export default async function NewServicePage({
       defaultMeta={{
         title: title ?? "",
         worshipLeader: worshipLeader ?? "",
+        preacher: preacher ?? "",
         date: date ? new Date(date) : new Date(),
       }}
     />

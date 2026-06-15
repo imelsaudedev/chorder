@@ -1,16 +1,22 @@
 "use client";
 
 import { useFetchService } from "@/app/api/api-client";
-import ServiceForm from "@/components/service/ServiceForm";
 import ServiceFormSkeleton from "@/components/service/ServiceForm/Skeleton";
-import { ServiceMeta } from "@/components/service/ServiceMetaModal";
+import ServicePlanEditor from "@/components/service/ServicePlanEditor";
 import { ClientService } from "@/prisma/models";
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 
+export type ServiceDefaultMeta = {
+  title: string;
+  worshipLeader: string | null;
+  preacher?: string | null;
+  date: Date;
+};
+
 type ClientServiceFormPageProps = {
   serviceSlug: string | null;
-  defaultMeta?: ServiceMeta;
+  defaultMeta?: ServiceDefaultMeta;
 };
 
 export default function ClientServiceFormPage({
@@ -20,21 +26,28 @@ export default function ClientServiceFormPage({
   const router = useRouter();
   const { service } = useFetchService(serviceSlug);
 
-  const handleSaved = (service: ClientService) => {
-    router.push(`/services/${service.slug}`);
+  const handleSaved = (saved: ClientService) => {
+    router.push(`/services/${saved.slug}`);
   };
 
   const isLoading = !service && serviceSlug;
 
+  const initialService: ClientService | null = service ?? (defaultMeta ? {
+    slug: "",
+    title: defaultMeta.title,
+    worshipLeader: defaultMeta.worshipLeader,
+    preacher: defaultMeta.preacher ?? null,
+    date: defaultMeta.date,
+    isDeleted: false,
+    sections: [],
+    units: [],
+  } : null);
+
   return (
     <Suspense>
       {isLoading && <ServiceFormSkeleton />}
-      {!isLoading && (
-        <ServiceForm
-          service={service ?? null}
-          defaultMeta={defaultMeta}
-          onSaved={handleSaved}
-        />
+      {!isLoading && initialService && (
+        <ServicePlanEditor service={initialService} onSaved={handleSaved} />
       )}
     </Suspense>
   );

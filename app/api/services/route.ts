@@ -9,7 +9,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const service = serviceSchema.parse(await request.json());
 
-  if (!service || !service.units?.length) {
+  if (!service || (!service.units?.length && !service.sections?.length)) {
     return new Response(
       `Invalid service data ${JSON.stringify(service, null, 2)}`,
       { status: 400 }

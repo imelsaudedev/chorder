@@ -18,8 +18,8 @@ import { MouseEventHandler, useCallback, useMemo } from "react";
 
 type FormHeaderProps = {
   index: number;
-  unit: ServiceUnitSchema;
-  onChangeUnit: (unit: ServiceUnitSchema) => void;
+  unit: ClientServiceUnit;
+  onChangeUnit: (unit: ClientServiceUnit) => void;
   onRemoveUnit: () => void;
 };
 

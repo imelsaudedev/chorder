@@ -1,8 +1,11 @@
+import { Prisma } from "@prisma/client";
 import { getLyrics } from "@/chopro/music";
 import prisma from "./client";
 import {
   ClientArrangement,
   ClientService,
+  ClientServiceSection,
+  ClientServiceTemplate,
   ClientServiceUnit,
   ClientSong,
   ClientTagGroup,
@@ -765,6 +768,40 @@ export async function duplicateArrangement(
   return duplicatedArrangement;
 }
 
+const arrangementInclude = {
+  where: { isDeleted: false },
+  include: {
+    song: true,
+    units: { orderBy: { order: "asc" } },
+    audios: { orderBy: { order: "asc" } },
+    originalArrangement: {
+      select: {
+        youtubeUrl: true,
+        audios: { orderBy: { order: "asc" } },
+      },
+    },
+  },
+} as const;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapUnit(unit: any): ClientServiceUnit {
+  return {
+    ...unit,
+    arrangement: unit.arrangement
+      ? {
+          ...unit.arrangement,
+          youtubeUrl:
+            unit.arrangement.youtubeUrl ??
+            unit.arrangement.originalArrangement?.youtubeUrl ??
+            null,
+          audios: unit.arrangement.audios?.length
+            ? unit.arrangement.audios
+            : unit.arrangement.originalArrangement?.audios ?? [],
+        }
+      : null,
+  };
+}
+
 export async function retrieveService(
   slugOrId: string | number
 ): Promise<ClientService | null> {
@@ -776,22 +813,14 @@ export async function retrieveService(
     include: {
       units: {
         orderBy: { order: "asc" },
+        include: { arrangement: arrangementInclude },
+      },
+      sections: {
+        orderBy: { order: "asc" },
         include: {
-          arrangement: {
-            where: {
-              isDeleted: false,
-            },
-            include: {
-              song: true,
-              units: { orderBy: { order: "asc" } },
-              audios: { orderBy: { order: "asc" } },
-              originalArrangement: {
-                select: {
-                  youtubeUrl: true,
-                  audios: { orderBy: { order: "asc" } },
-                },
-              },
-            },
+          units: {
+            orderBy: { order: "asc" },
+            include: { arrangement: arrangementInclude },
           },
         },
       },
@@ -818,23 +847,12 @@ export async function retrieveService(
     ...service,
     prevService: prevService ?? null,
     nextService: nextService ?? null,
-    units: service.units.map((unit) => ({
-      ...unit,
-      arrangement: unit.arrangement
-        ? {
-            ...unit.arrangement,
-            youtubeUrl:
-              unit.arrangement.youtubeUrl ??
-              unit.arrangement.originalArrangement?.youtubeUrl ??
-              null,
-            audios:
-              unit.arrangement.audios?.length
-                ? unit.arrangement.audios
-                : unit.arrangement.originalArrangement?.audios ?? [],
-          }
-        : null,
+    units: service.units.map(mapUnit),
+    sections: service.sections.map((section) => ({
+      ...section,
+      units: section.units.map(mapUnit),
     })),
-  };
+  } as ClientService;
 }
 
 export async function retrieveRecentServices(limit = 8): Promise<RecentServiceEntry[]> {
@@ -890,46 +908,45 @@ export async function createOrUpdateService(
     slug: serviceSlug,
     worshipLeader: service.worshipLeader,
     date: service.date,
+    preacher: service.preacher ?? null,
+    sermonTheme: service.sermonTheme ?? null,
+    sermonReference: service.sermonReference ?? null,
   };
   const newOrUpdatedService = await prisma.service.upsert({
-    where: {
-      slug: serviceSlug,
-    },
+    where: { slug: serviceSlug },
     update: data,
     create: data,
   });
 
-  const serviceUnits = await createOrUpdateServiceArrangements(service.units!);
-  const unitsWithId = await createOrUpdateServiceUnits(
-    serviceUnits,
-    newOrUpdatedService.id
-  );
-  if (service.id) {
-    await deleteServiceUnitsNotIn(
-      service.id,
-      unitsWithId.map((unit) => unit.id!)
+  if (service.sections?.length) {
+    const savedSections = await createOrUpdateServiceSections(
+      service.sections,
+      newOrUpdatedService.id
     );
+    if (service.id) {
+      await deleteServiceSectionsNotIn(
+        service.id,
+        savedSections.map((s) => s.id)
+      );
+      const allUnitIds = savedSections.flatMap((s) => s.unitIds);
+      await deleteServiceUnitsNotIn(service.id, allUnitIds);
+    }
+  } else if (service.units?.length) {
+    const serviceUnits = await createOrUpdateServiceArrangements(service.units);
+    const unitsWithId = await createOrUpdateServiceUnits(
+      serviceUnits,
+      newOrUpdatedService.id
+    );
+    if (service.id) {
+      await deleteServiceUnitsNotIn(
+        service.id,
+        unitsWithId.map((unit) => unit.id!)
+      );
+    }
   }
-  const retService = await prisma.service.findUnique({
-    where: { id: newOrUpdatedService.id },
-    include: {
-      units: {
-        orderBy: { order: "asc" },
-        include: {
-          arrangement: {
-            include: {
-              song: true,
-              units: { orderBy: { order: "asc" } },
-              audios: { orderBy: { order: "asc" } },
-            },
-          },
-        },
-      },
-    },
-  });
-  if (!retService) {
-    throw new Error("Service not found after creation or update");
-  }
+
+  const retService = await retrieveService(newOrUpdatedService.id);
+  if (!retService) throw new Error("Service not found after creation or update");
   return retService;
 }
 
@@ -988,15 +1005,20 @@ async function createOrUpdateServiceArrangements(units: ClientServiceUnit[]) {
 
 async function createOrUpdateServiceUnits(
   units: ClientServiceUnit[],
-  serviceId: number
+  serviceId: number,
+  sectionId?: number
 ): Promise<ClientServiceUnit[]> {
   const unitPromises = units.map(async (unit) => {
     const data = {
       serviceId,
       type: unit.type,
-      arrangementId: unit.arrangementId,
-      semitoneTranspose: unit.semitoneTranspose,
+      arrangementId: unit.arrangementId ?? null,
+      semitoneTranspose: unit.semitoneTranspose ?? null,
       order: unit.order,
+      sectionId: sectionId ?? unit.sectionId ?? null,
+      durationMin: unit.durationMin ?? null,
+      label: unit.label ?? null,
+      metadata: unit.metadata ?? Prisma.DbNull,
     };
     return prisma.serviceUnit.upsert({
       where: { id: unit.id ?? -1 },
@@ -1005,6 +1027,58 @@ async function createOrUpdateServiceUnits(
     });
   });
   return await Promise.all(unitPromises);
+}
+
+async function createOrUpdateServiceSections(
+  sections: ClientServiceSection[],
+  serviceId: number
+): Promise<{ id: number; unitIds: number[] }[]> {
+  const results: { id: number; unitIds: number[] }[] = [];
+
+  for (const section of sections) {
+    const sectionData = {
+      serviceId,
+      type: section.type,
+      label: section.label,
+      order: section.order,
+    };
+    const savedSection = await prisma.serviceSection.upsert({
+      where: { id: section.id ?? -1 },
+      update: sectionData,
+      create: sectionData,
+    });
+
+    let unitIds: number[] = [];
+    if (section.units?.length) {
+      const unitsWithArrangements = await createOrUpdateServiceArrangements(section.units);
+      const savedUnits = await createOrUpdateServiceUnits(
+        unitsWithArrangements,
+        serviceId,
+        savedSection.id
+      );
+      unitIds = savedUnits.map((u) => u.id!);
+    }
+
+    results.push({ id: savedSection.id, unitIds });
+  }
+
+  return results;
+}
+
+async function deleteServiceSectionsNotIn(serviceId: number, sectionIds: number[]) {
+  return prisma.serviceSection
+    .deleteMany({
+      where: {
+        serviceId,
+        id: { notIn: sectionIds },
+      },
+    })
+    .catch((error) => {
+      console.error(
+        `Error deleting service sections not in provided list for service ID ${serviceId}:`,
+        error
+      );
+    });
 }
 
 async function deleteServiceUnitsNotIn(id: number, unitIds: number[]) {
@@ -1059,6 +1133,29 @@ export async function deleteService(
     where: { id: service.id },
     data: { isDeleted: true },
   });
+  return true;
+}
+
+export async function retrieveTemplates(): Promise<ClientServiceTemplate[]> {
+  return prisma.serviceTemplate.findMany({ orderBy: { name: "asc" } });
+}
+
+export async function retrieveTemplate(id: number): Promise<ClientServiceTemplate | null> {
+  return prisma.serviceTemplate.findUnique({ where: { id } });
+}
+
+export async function createOrUpdateTemplate(
+  template: ClientServiceTemplate
+): Promise<ClientServiceTemplate> {
+  const data = { name: template.name, items: template.items as Prisma.InputJsonValue };
+  if (template.id) {
+    return prisma.serviceTemplate.update({ where: { id: template.id }, data });
+  }
+  return prisma.serviceTemplate.create({ data });
+}
+
+export async function deleteTemplate(id: number): Promise<boolean> {
+  await prisma.serviceTemplate.delete({ where: { id } }).catch(() => false);
   return true;
 }
 

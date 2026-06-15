@@ -1,6 +1,6 @@
 "use client";
 
-import { ClientArrangement, ClientSong, ClientTagGroup, RecentServiceEntry } from "@/prisma/models";
+import { ClientArrangement, ClientServiceTemplate, ClientSong, ClientTagGroup, RecentServiceEntry } from "@/prisma/models";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -371,6 +371,14 @@ export function useFetchTagGroups() {
     fetch(url).then((res) => res.json())
   );
   return { tagGroups: data ?? [], isLoading };
+}
+
+export function useFetchTemplates() {
+  const { data, isLoading } = useSWR<ClientServiceTemplate[]>(
+    "/api/templates",
+    (url: string) => fetch(url).then((res) => res.json())
+  );
+  return { templates: data ?? [], isLoading };
 }
 
 export function useFetchRecentServices() {

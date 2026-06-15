@@ -1,5 +1,5 @@
 import service from "@/mock/service";
-import { ServiceUnitSchema } from "@/schemas/service-unit";
+import { ClientServiceUnit } from "@/prisma/models";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import FormHeader from "./FormHeader";
@@ -17,8 +17,8 @@ export const Default: Story = {
     layout: "centered",
   },
   render: () => {
-    const [unit, setUnit] = useState<ServiceUnitSchema>(
-      service.units![0] as unknown as ServiceUnitSchema
+    const [unit, setUnit] = useState<ClientServiceUnit>(
+      service.units![0]
     );
     const handleRemove = () => {
       console.log("Remove unit");
