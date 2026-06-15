@@ -110,7 +110,7 @@ export default function ServiceItemDrawer({
       songId: song.id,
       originalArrangementId: source?.id ?? null,
       key: source?.key ?? "C",
-      name: null,
+      name: source?.name ?? null,
       isDefault: false,
       isDeleted: false,
       isServiceArrangement: true,

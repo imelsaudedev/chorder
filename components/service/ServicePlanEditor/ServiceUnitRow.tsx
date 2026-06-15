@@ -78,6 +78,11 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
                 className="text-sm text-left w-full hover:underline decoration-dashed underline-offset-2 leading-tight"
               >
                 <span className="truncate block">{displayLabel}</span>
+                {unit.type === "SONG" && unit.arrangement?.name && (
+                  <span className="text-xs text-zinc-400 block truncate">
+                    {unit.arrangement.name}
+                  </span>
+                )}
                 {falaSpeaker && (
                   <span className="text-xs text-zinc-400 block truncate">
                     {falaSpeaker}
