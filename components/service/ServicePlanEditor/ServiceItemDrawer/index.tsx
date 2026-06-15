@@ -27,7 +27,7 @@ type ServiceItemDrawerProps = {
 type DrawerView =
   | { screen: "menu" }
   | { screen: "template" }
-  | { screen: "song-picker"; sectionIndex: number }
+  | { screen: "song-picker"; sectionIndex: number; unitIndex?: number }
   | { screen: "unit-form"; sectionIndex: number; unitType: ServiceUnitTypeValue }
   | { screen: "fala-form"; sectionIndex: number; unitIndex?: number };
 
@@ -51,6 +51,14 @@ export default function ServiceItemDrawer({
   useEffect(() => {
     if (drawerState.type === "edit-unit") {
       const unit = sections[drawerState.sectionIndex]?.units?.[drawerState.unitIndex];
+      if (unit?.type === "SONG") {
+        setView({
+          screen: "song-picker",
+          sectionIndex: drawerState.sectionIndex,
+          unitIndex: drawerState.unitIndex,
+        });
+        return;
+      }
       if (unit?.type === "FALA") {
         setView({
           screen: "fala-form",
@@ -84,29 +92,37 @@ export default function ServiceItemDrawer({
 
   function handleSongSelected(song: import("@/prisma/models").ClientSong) {
     const si = view.screen === "song-picker" ? view.sectionIndex : sectionIndex;
-    onAddUnit(si, {
-      type: "SONG",
-      arrangementId: null,
-      semitoneTranspose: 0,
-      sectionId: null,
-      durationMin: 5,
-      label: null,
-      metadata: null,
-      arrangement: {
-        id: undefined,
-        songId: song.id,
-        originalArrangementId: null,
-        key: song.arrangements?.[0]?.key ?? "C",
-        name: null,
-        isDefault: false,
-        isDeleted: false,
-        isServiceArrangement: true,
-        youtubeUrl: null,
-        audios: [],
-        song,
-        units: song.arrangements?.[0]?.units,
-      },
-    });
+    const ui = view.screen === "song-picker" ? view.unitIndex : undefined;
+
+    const arrangement = {
+      id: undefined,
+      songId: song.id,
+      originalArrangementId: null,
+      key: song.arrangements?.[0]?.key ?? "C",
+      name: null,
+      isDefault: false,
+      isDeleted: false,
+      isServiceArrangement: true,
+      youtubeUrl: null,
+      audios: [],
+      song,
+      units: song.arrangements?.[0]?.units,
+    };
+
+    if (ui !== undefined) {
+      onUpdateUnit(si, ui, { arrangementId: null, semitoneTranspose: 0, arrangement });
+    } else {
+      onAddUnit(si, {
+        type: "SONG",
+        arrangementId: null,
+        semitoneTranspose: 0,
+        sectionId: null,
+        durationMin: 5,
+        label: null,
+        metadata: null,
+        arrangement,
+      });
+    }
     onClose();
     setView({ screen: "menu" });
   }
@@ -144,7 +160,7 @@ export default function ServiceItemDrawer({
     view.screen === "template"
       ? "Usar template"
       : view.screen === "song-picker"
-      ? "Adicionar música"
+      ? view.unitIndex !== undefined ? "Trocar música" : "Adicionar música"
       : view.screen === "fala-form"
       ? view.unitIndex !== undefined
         ? "Editar fala"
