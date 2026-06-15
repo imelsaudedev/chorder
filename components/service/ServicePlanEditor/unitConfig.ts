@@ -58,7 +58,7 @@ export const UNIT_CONFIG: Record<ServiceUnitTypeValue, UnitConfig> = {
     label: "Oração",
     icon: Heart,
     color: "text-pink-500",
-    isComplex: false,
+    isComplex: true,
   },
   AVISOS: {
     label: "Avisos",

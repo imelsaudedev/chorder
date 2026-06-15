@@ -34,7 +34,7 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
         : unit.label ?? config?.label ?? unit.type;
 
     const falaMeta =
-      unit.type === "FALA"
+      unit.type === "FALA" || unit.type === "ORACAO"
         ? (unit.metadata as FalaMeta | null)
         : null;
     const falaSpeaker = falaMeta?.speaker ?? null;
@@ -99,7 +99,7 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
           </div>
 
           {/* Description toggle — só FALA com descrição */}
-          {falaDescription ? (
+          {(unit.type === "FALA" || unit.type === "ORACAO") && falaDescription ? (
             <button
               type="button"
               onClick={() => setDescExpanded((v) => !v)}
@@ -132,7 +132,7 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
         </div>
 
         {/* Description accordion */}
-        {falaDescription && descExpanded && (
+        {(unit.type === "FALA" || unit.type === "ORACAO") && falaDescription && descExpanded && (
           <div className="px-3 pb-3">
             <p className="text-xs text-zinc-500 whitespace-pre-wrap leading-relaxed pl-14 border-l-2 border-zinc-100 ml-14">
               {falaDescription}

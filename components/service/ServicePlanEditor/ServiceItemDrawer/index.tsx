@@ -37,7 +37,7 @@ type DrawerView =
   | { screen: "song-picker"; sectionIndex: number; unitIndex?: number }
   | { screen: "arrangement-picker"; sectionIndex: number; unitIndex?: number; song: ClientSong }
   | { screen: "unit-form"; sectionIndex: number; unitType: ServiceUnitTypeValue }
-  | { screen: "fala-form"; sectionIndex: number; unitIndex?: number };
+  | { screen: "fala-form"; sectionIndex: number; unitIndex?: number; unitType: "FALA" | "ORACAO" };
 
 export default function ServiceItemDrawer({
   drawerState,
@@ -67,11 +67,12 @@ export default function ServiceItemDrawer({
         });
         return;
       }
-      if (unit?.type === "FALA") {
+      if (unit?.type === "FALA" || unit?.type === "ORACAO") {
         setView({
           screen: "fala-form",
           sectionIndex: drawerState.sectionIndex,
           unitIndex: drawerState.unitIndex,
+          unitType: unit.type,
         });
         return;
       }
@@ -91,8 +92,8 @@ export default function ServiceItemDrawer({
   function handleSelectType(type: ServiceUnitTypeValue) {
     if (type === "SONG") {
       setView({ screen: "song-picker", sectionIndex });
-    } else if (type === "FALA") {
-      setView({ screen: "fala-form", sectionIndex });
+    } else if (type === "FALA" || type === "ORACAO") {
+      setView({ screen: "fala-form", sectionIndex, unitType: type });
     } else {
       setView({ screen: "unit-form", sectionIndex, unitType: type });
     }
@@ -216,7 +217,7 @@ export default function ServiceItemDrawer({
       : view.screen === "arrangement-picker"
       ? isEditing ? "Escolher arranjo" : "Escolher arranjo"
       : view.screen === "fala-form"
-      ? view.unitIndex !== undefined ? "Editar fala" : "Adicionar fala"
+      ? `${view.unitIndex !== undefined ? "Editar" : "Adicionar"} ${UNIT_CONFIG[view.unitType]?.label.toLowerCase()}`
       : view.screen === "unit-form"
       ? `Adicionar ${UNIT_CONFIG[view.unitType]?.label ?? view.unitType}`
       : sections.length === 0
@@ -278,6 +279,7 @@ export default function ServiceItemDrawer({
             <FalaUnitForm
               sectionIndex={view.sectionIndex}
               unitIndex={view.unitIndex}
+              unitType={view.unitType}
               existingUnit={currentFalaUnit}
               onAdd={onAddUnit}
               onUpdate={onUpdateUnit}
@@ -473,6 +475,7 @@ function ArrangementPickerScreen({
 function FalaUnitForm({
   sectionIndex,
   unitIndex,
+  unitType,
   existingUnit,
   onAdd,
   onUpdate,
@@ -480,6 +483,7 @@ function FalaUnitForm({
 }: {
   sectionIndex: number;
   unitIndex?: number;
+  unitType: "FALA" | "ORACAO";
   existingUnit?: ClientServiceUnit;
   onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
   onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
@@ -512,7 +516,7 @@ function FalaUnitForm({
       });
     } else {
       onAdd(sectionIndex, {
-        type: "FALA",
+        type: unitType,
         arrangementId: null,
         semitoneTranspose: null,
         sectionId: null,
