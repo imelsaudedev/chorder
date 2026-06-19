@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { serviceSectionSchema } from "./service-section";
+import { servicePlanSchema } from "./service-section";
 import { serviceUnitSchema } from "./service-unit";
 
 export const serviceSchema = z.object({
@@ -9,7 +9,7 @@ export const serviceSchema = z.object({
   worshipLeader: z.string().nullable(),
   date: z.coerce.date(),
   units: z.array(serviceUnitSchema).optional(),
-  sections: z.array(serviceSectionSchema).optional(),
+  plan: servicePlanSchema.nullable(),
   preacher: z.string().nullable(),
   sermonTheme: z.string().nullable(),
   sermonReference: z.string().nullable(),

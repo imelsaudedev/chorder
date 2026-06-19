@@ -1,9 +1,10 @@
 "use client";
 
+import Text from "@/components/common/Text";
 import { ClientService } from "@/prisma/models";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, Clock, Mic2, MicVocal, Pencil } from "lucide-react";
+import { Calendar, Mic2, MicVocal, Pencil } from "lucide-react";
 
 type ServicePlanHeaderProps = {
   service: ClientService;
@@ -12,49 +13,36 @@ type ServicePlanHeaderProps = {
 
 export default function ServicePlanHeader({ service, onEdit }: ServicePlanHeaderProps) {
   const date = new Date(service.date);
-  const dateStr = format(date, "d 'de' MMM. yyyy", { locale: ptBR });
-  const timeStr = format(date, "HH:mm");
+  const dateStr = format(date, "d 'de' MMM. yyyy · HH:mm", { locale: ptBR });
 
   return (
     <button
       type="button"
       onClick={onEdit}
-      className="group w-full text-left px-4 sm:px-6 lg:px-8 py-4 sm:py-5 bg-zinc-100/60 border-b border-zinc-200 hover:bg-zinc-100 transition-colors"
+      className="text-left w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-5 bg-zinc-200/60 hover:bg-zinc-200/80 transition-colors"
     >
-      {/* Title row */}
-      <div className="flex items-center gap-2 mb-2">
-        <span className="flex-1 text-lg sm:text-xl font-semibold text-zinc-800 truncate">
-          {service.title ?? (
-            <span className="text-zinc-400 font-normal">Sem título</span>
-          )}
-        </span>
-        <Pencil className="w-4 h-4 text-zinc-400 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="flex items-center gap-2 min-w-0 mb-1">
+        <Text variant="heading-lg" className="truncate">
+          {service.title ?? "Sem título"}
+        </Text>
+        <Pencil className="w-4 h-4 shrink-0 text-muted-foreground" />
       </div>
-
-      {/* Meta row */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500">
-        <span className="flex items-center gap-1.5">
-          <Calendar className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+      <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
+        <Text variant="caption" className="flex items-center gap-1">
+          <Calendar className="w-3 h-3 shrink-0" />
           {dateStr}
-        </span>
-
-        <span className="flex items-center gap-1.5">
-          <Clock className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
-          {timeStr}
-        </span>
-
+        </Text>
         {service.worshipLeader && (
-          <span className="flex items-center gap-1.5">
-            <MicVocal className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+          <Text variant="caption" className="flex items-center gap-1 truncate">
+            <MicVocal className="w-3 h-3 shrink-0" />
             {service.worshipLeader}
-          </span>
+          </Text>
         )}
-
         {service.preacher && (
-          <span className="flex items-center gap-1.5">
-            <Mic2 className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+          <Text variant="caption" className="flex items-center gap-1 truncate">
+            <Mic2 className="w-3 h-3 shrink-0" />
             {service.preacher}
-          </span>
+          </Text>
         )}
       </div>
     </button>

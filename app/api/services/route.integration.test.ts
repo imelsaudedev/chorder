@@ -9,7 +9,7 @@ describe('Services API integration', () => {
                 title: 'Sunday Service',
                 slug: 'sunday-service',
                 date: new Date('2026-04-05T10:00:00Z'),
-                isDeleted: false
+                isDeleted: false,
             }
         });
 
@@ -21,15 +21,21 @@ describe('Services API integration', () => {
         expect(data[0].title).toBe('Sunday Service');
     });
 
-    it('creates a new service via POST', async () => {
-        // We need an existing song and arrangement to create a service unit
+    it('creates a new service with plan via POST', async () => {
         const song = await prisma.song.create({
             data: {
                 title: 'Service Song',
                 slug: 'service-song',
                 lyrics: '...',
                 arrangements: {
-                    create: { key: 'G', isDefault: true, name: 'Default', isDeleted: false, isServiceArrangement: false, originalArrangementId: null }
+                    create: {
+                        key: 'G',
+                        isDefault: true,
+                        name: 'Default',
+                        isDeleted: false,
+                        isServiceArrangement: false,
+                        originalArrangementId: null,
+                    }
                 }
             },
             include: { arrangements: true }
@@ -42,30 +48,42 @@ describe('Services API integration', () => {
             date: '2026-04-08T19:00:00Z',
             worshipLeader: null,
             isDeleted: false,
-            units: [
-                {
-                    type: 'SONG',
-                    order: 1,
-                    semitoneTranspose: 0,
-                    arrangementId: arrangement.id,
-                    arrangement: {
-                        id: arrangement.id,
-                        songId: song.id,
-                        name: 'Service Version',
-                        key: 'A',
-                        isDefault: false,
-                        isDeleted: false,
-                        isServiceArrangement: true,
-                        originalArrangementId: arrangement.id,
-                        youtubeUrl: null,
-                        audioUrl: null,
-                        audios: [],
+            plan: {
+                startTime: '19:00',
+                sections: [
+                    {
+                        type: 'CULTO',
+                        label: 'Culto',
+                        order: 1,
                         units: [
-                            { content: 'Verse 1', type: 'VERSE', order: 1, notes: null, repeatCount: 1 }
+                            {
+                                type: 'SONG',
+                                order: 1,
+                                semitoneTranspose: 0,
+                                arrangementId: arrangement.id,
+                                durationMin: 4,
+                                label: null,
+                                metadata: null,
+                                arrangement: {
+                                    id: arrangement.id,
+                                    songId: song.id,
+                                    name: 'Service Version',
+                                    key: 'A',
+                                    isDefault: false,
+                                    isDeleted: false,
+                                    isServiceArrangement: true,
+                                    originalArrangementId: arrangement.id,
+                                    youtubeUrl: null,
+                                    audios: [],
+                                    units: [
+                                        { content: 'Verse 1', type: 'VERSE', order: 1, notes: null, repeatCount: 1 }
+                                    ]
+                                }
+                            }
                         ]
                     }
-                }
-            ]
+                ]
+            }
         };
 
         const req = new Request('http://localhost/api/services', {
@@ -78,7 +96,27 @@ describe('Services API integration', () => {
 
         expect(response.status).toBe(200);
         expect(data.title).toBe('New Wednesday Service');
-        expect(data.units).toHaveLength(1);
-        expect(data.units[0].arrangement.key).toBe('A');
+        expect(data.plan).toBeTruthy();
+        expect(data.plan.sections).toHaveLength(1);
+        expect(data.plan.sections[0].units).toHaveLength(1);
+        expect(data.plan.sections[0].units[0].type).toBe('SONG');
+    });
+
+    it('rejects service without plan or units', async () => {
+        const serviceData = {
+            title: 'Empty Service',
+            slug: 'empty-service',
+            date: '2026-04-08T19:00:00Z',
+            worshipLeader: null,
+            isDeleted: false,
+        };
+
+        const req = new Request('http://localhost/api/services', {
+            method: 'POST',
+            body: JSON.stringify(serviceData)
+        });
+
+        const response = await POST(req);
+        expect(response.status).toBe(400);
     });
 });

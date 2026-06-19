@@ -17,6 +17,8 @@ type ServiceUnitRowProps = {
 };
 
 type FalaMeta = { speaker?: string | null; description?: string | null };
+type LeituraMeta = { version?: string | null; text?: string | null };
+type SermaoMeta = { preacher?: string | null; reference?: string | null; description?: string | null };
 
 const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
   function ServiceUnitRow(
@@ -28,9 +30,10 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
     const config = UNIT_CONFIG[unit.type as ServiceUnitTypeValue];
     const Icon = config?.icon;
 
+    const songTitle = unit.type === "SONG" ? (unit.arrangement?.song?.title ?? null) : null;
     const displayLabel =
       unit.type === "SONG"
-        ? unit.arrangement?.song?.title ?? "Música (sem seleção)"
+        ? songTitle
         : unit.label ?? config?.label ?? unit.type;
 
     const falaMeta =
@@ -40,6 +43,16 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
     const falaSpeaker = falaMeta?.speaker ?? null;
     const falaDescription = falaMeta?.description ?? null;
 
+    const leituraMeta =
+      unit.type === "LEITURA" ? (unit.metadata as LeituraMeta | null) : null;
+    const leituraVersion = leituraMeta?.version ?? null;
+    const leituraText = leituraMeta?.text ?? null;
+
+    const sermaoMeta =
+      unit.type === "SERMAO" ? (unit.metadata as SermaoMeta | null) : null;
+    const sermaoPreacher = sermaoMeta?.preacher ?? null;
+    const sermaoDescription = sermaoMeta?.description ?? null;
+
     return (
       <div
         ref={ref}
@@ -47,9 +60,9 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
           isDragging ? "opacity-40" : ""
         }`}
       >
-        {/* Main row */}
-        <div className="flex items-center gap-2 px-3 py-2">
-          {/* Drag handle */}
+        {/* Main row — items-center alinha tudo com a linha do título */}
+        <div className="flex items-center gap-2 px-1 py-1">
+          {/* 1. Drag handle */}
           <div
             ref={dragHandleRef}
             className="cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-400 shrink-0 touch-none"
@@ -57,85 +70,126 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
             <GripVertical className="w-4 h-4" />
           </div>
 
-          {/* Type icon */}
+          {/* 2. Type icon as bullet */}
           <div className={`shrink-0 ${config?.color ?? "text-zinc-400"}`}>
             {Icon && <Icon className="w-4 h-4" />}
           </div>
 
-          {/* Time */}
-          {timing && (
-            <span className="text-xs text-zinc-400 font-mono w-10 shrink-0">
-              {formatTime(timing.startTime)}
-            </span>
-          )}
-
-          {/* Label */}
+          {/* 3. Label + sub inline */}
           <div className="flex-1 min-w-0">
             {config?.isComplex ? (
-              <button
-                type="button"
-                onClick={onEditDetails}
-                className="text-sm text-left w-full hover:underline decoration-dashed underline-offset-2 leading-tight"
-              >
-                <span className="truncate block">{displayLabel}</span>
-                {unit.type === "SONG" && unit.arrangement?.name && (
-                  <span className="text-xs text-zinc-400 block truncate">
-                    {unit.arrangement.name}
-                  </span>
+              <div className="flex items-center gap-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={onEditDetails}
+                  className="text-sm text-left hover:underline decoration-dashed underline-offset-2 leading-tight truncate min-w-0"
+                >
+                  {unit.type === "SONG" ? (
+                    songTitle
+                      ? <>{songTitle}{unit.arrangement?.name && <span className="text-zinc-400"> · {unit.arrangement.name}</span>}</>
+                      : <span className="text-zinc-400">Adicione uma música</span>
+                  ) : unit.type === "FALA" ? (
+                    falaSpeaker
+                      ? <>{displayLabel}<span className="text-zinc-400"> · {falaSpeaker}</span></>
+                      : <span className="text-zinc-400">Adicione uma fala</span>
+                  ) : unit.type === "ORACAO" ? (
+                    falaSpeaker
+                      ? <>{displayLabel}<span className="text-zinc-400"> · {falaSpeaker}</span></>
+                      : <span className="text-zinc-400">Adicione uma oração</span>
+                  ) : unit.type === "LEITURA" ? (
+                    leituraVersion
+                      ? <>{displayLabel}<span className="text-zinc-400"> · {leituraVersion}</span></>
+                      : <span className="text-zinc-400">Adicione uma leitura</span>
+                  ) : unit.type === "SERMAO" ? (
+                    sermaoPreacher
+                      ? <>{displayLabel}<span className="text-zinc-400"> · {sermaoPreacher}</span></>
+                      : <span className="text-zinc-400">Adicione um sermão</span>
+                  ) : displayLabel}
+                </button>
+                {(falaDescription || leituraText || sermaoDescription) && (
+                  <button
+                    type="button"
+                    onClick={() => setDescExpanded((v) => !v)}
+                    className="shrink-0 text-zinc-300 hover:text-zinc-500 transition-colors"
+                    aria-label={descExpanded ? "Ocultar descrição" : "Ver descrição"}
+                  >
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${descExpanded ? "rotate-180" : ""}`} />
+                  </button>
                 )}
-                {falaSpeaker && (
-                  <span className="text-xs text-zinc-400 block truncate">
-                    {falaSpeaker}
-                  </span>
-                )}
-              </button>
+              </div>
             ) : (
-              <InlineLabel
-                value={unit.label ?? ""}
-                placeholder={config?.label ?? unit.type}
-                onChange={(v) => onUpdate({ label: v || null })}
-              />
+              <span className="text-sm text-zinc-700 leading-tight">
+                {unit.label || config?.label || unit.type}
+              </span>
             )}
           </div>
 
-          {/* Description toggle — só FALA com descrição */}
-          {(unit.type === "FALA" || unit.type === "ORACAO") && falaDescription ? (
-            <button
-              type="button"
-              onClick={() => setDescExpanded((v) => !v)}
-              className="shrink-0 text-zinc-300 hover:text-zinc-500 transition-colors"
-              aria-label={descExpanded ? "Recolher descrição" : "Ver descrição"}
-            >
-              <ChevronDown
-                className={`w-4 h-4 transition-transform duration-150 ${
-                  descExpanded ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-          ) : null}
+          {/* 4. Duration + time right-aligned — desktop apenas */}
+          {(unit.durationMin || timing) && (
+            <div className="hidden sm:flex items-center gap-1.5 shrink-0 text-xs text-zinc-400">
+              {unit.durationMin && <span>{unit.durationMin} min</span>}
+              {timing && (
+                <>
+                  {unit.durationMin && <span>·</span>}
+                  <span>{formatTime(timing.startTime)}</span>
+                </>
+              )}
+            </div>
+          )}
 
-          {/* Duration */}
-          <InlineDuration
-            value={unit.durationMin ?? null}
-            onChange={(v) => onUpdate({ durationMin: v })}
-          />
-
-          {/* Remove */}
+          {/* Remove — sempre visível em mobile, hover em desktop */}
           <button
             type="button"
             onClick={onRemove}
-            className="shrink-0 text-zinc-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="shrink-0 text-zinc-300 hover:text-red-400 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
             aria-label="Remover"
           >
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Description accordion */}
-        {(unit.type === "FALA" || unit.type === "ORACAO") && falaDescription && descExpanded && (
-          <div className="px-3 pb-3">
-            <p className="text-xs text-zinc-500 whitespace-pre-wrap leading-relaxed pl-14 border-l-2 border-zinc-100 ml-14">
+        {/* Mobile: duração + horário — linha separada com spacers para alinhar com o label */}
+        {(unit.durationMin || timing) && (
+          <div className="flex gap-2 px-1 pb-1 sm:hidden">
+            <div className="w-4 shrink-0" />
+            <div className="w-4 shrink-0" />
+            <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+              {unit.durationMin && <span>{unit.durationMin} min</span>}
+              {timing && (
+                <>
+                  {unit.durationMin && <span>·</span>}
+                  <span>{formatTime(timing.startTime)}</span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Descrição expandida — linha separada com spacers para alinhar com o label */}
+        {descExpanded && (unit.type === "FALA" || unit.type === "ORACAO") && falaDescription && (
+          <div className="flex gap-2 px-1 pb-1">
+            <div className="w-4 shrink-0" />
+            <div className="w-4 shrink-0" />
+            <p className="text-xs text-zinc-400 whitespace-pre-wrap leading-relaxed">
               {falaDescription}
+            </p>
+          </div>
+        )}
+        {descExpanded && unit.type === "LEITURA" && leituraText && (
+          <div className="flex gap-2 px-1 pb-1">
+            <div className="w-4 shrink-0" />
+            <div className="w-4 shrink-0" />
+            <p className="text-xs text-zinc-400 whitespace-pre-wrap leading-relaxed">
+              {leituraText}
+            </p>
+          </div>
+        )}
+        {descExpanded && unit.type === "SERMAO" && sermaoDescription && (
+          <div className="flex gap-2 px-1 pb-1">
+            <div className="w-4 shrink-0" />
+            <div className="w-4 shrink-0" />
+            <p className="text-xs text-zinc-400 whitespace-pre-wrap leading-relaxed">
+              {sermaoDescription}
             </p>
           </div>
         )}
@@ -146,50 +200,4 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
 
 export default ServiceUnitRow;
 
-// --- Inline editors ---
 
-function InlineLabel({
-  value,
-  placeholder,
-  onChange,
-}: {
-  value: string;
-  placeholder: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full text-sm bg-transparent outline-none placeholder:text-zinc-400 cursor-text"
-    />
-  );
-}
-
-function InlineDuration({
-  value,
-  onChange,
-}: {
-  value: number | null;
-  onChange: (v: number | null) => void;
-}) {
-  return (
-    <div className="flex items-center gap-0.5 shrink-0">
-      <input
-        type="number"
-        min={0}
-        max={999}
-        value={value ?? ""}
-        onChange={(e) => {
-          const n = parseInt(e.target.value);
-          onChange(isNaN(n) ? null : n);
-        }}
-        placeholder="—"
-        className="w-10 text-xs text-right bg-transparent outline-none text-zinc-500 placeholder:text-zinc-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-      />
-      <span className="text-xs text-zinc-400">min</span>
-    </div>
-  );
-}

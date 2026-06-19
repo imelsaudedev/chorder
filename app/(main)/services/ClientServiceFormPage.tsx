@@ -3,7 +3,7 @@
 import { useFetchService } from "@/app/api/api-client";
 import ServiceFormSkeleton from "@/components/service/ServiceForm/Skeleton";
 import ServicePlanEditor from "@/components/service/ServicePlanEditor";
-import { ClientService, ClientServiceSection } from "@/prisma/models";
+import { ClientService, ClientServiceSection, ServicePlan } from "@/prisma/models";
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 
@@ -33,6 +33,12 @@ export default function ClientServiceFormPage({
 
   const isLoading = !service && serviceSlug;
 
+  const defaultSections: ClientServiceSection[] = defaultMeta?.sections?.length
+    ? defaultMeta.sections
+    : [{ type: "CULTO", label: "Culto", order: 1, units: [] }];
+
+  const defaultPlan: ServicePlan = { startTime: null, sections: defaultSections };
+
   const initialService: ClientService | null = service ?? (defaultMeta ? {
     slug: "",
     title: defaultMeta.title,
@@ -40,9 +46,10 @@ export default function ClientServiceFormPage({
     preacher: defaultMeta.preacher ?? null,
     date: defaultMeta.date,
     isDeleted: false,
-    sections: defaultMeta.sections ?? [],
     units: [],
+    plan: defaultPlan,
   } : null);
+
 
   return (
     <Suspense>

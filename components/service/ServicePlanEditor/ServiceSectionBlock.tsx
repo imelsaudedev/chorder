@@ -11,9 +11,23 @@ import {
   draggable,
   dropTargetForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { UNIT_CONFIG, ServiceUnitTypeValue } from "./unitConfig";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatTime, SectionTiming } from "./hooks/useServiceTimeline";
+
+function formatDuration(min: number): string {
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, "0")}`;
+}
 import { DrawerState } from "./hooks/usePlanEditor";
 import ServiceUnitRow from "./ServiceUnitRow";
 
@@ -21,8 +35,10 @@ type ServiceSectionBlockProps = {
   section: ClientServiceSection;
   sectionIndex: number;
   timing?: SectionTiming;
+  dragHandleRef?: React.RefObject<HTMLDivElement>;
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: () => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
   onUpdateUnit: (unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
@@ -39,12 +55,16 @@ function isDragData(data: Record<string, unknown>): data is DragData {
   return data.type === "service-unit";
 }
 
+const COMPLEX_TYPES: ServiceUnitTypeValue[] = ["SONG", "FALA", "ORACAO", "LEITURA", "SERMAO"];
+
 export default function ServiceSectionBlock({
   section,
   sectionIndex,
   timing,
+  dragHandleRef,
   onUpdateSection,
   onRemoveSection,
+  onAddUnit,
   onUpdateUnit,
   onRemoveUnit,
   onMoveUnit,
@@ -55,7 +75,16 @@ export default function ServiceSectionBlock({
   return (
     <div className="mb-6">
       {/* Section header */}
-      <div className="flex items-center gap-2 mb-1 px-1">
+      <div className="flex items-center gap-2 mb-1 px-1 py-1">
+        {/* Drag handle da seção */}
+        <div
+          ref={dragHandleRef}
+          className="cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-400 shrink-0 touch-none"
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
+
+        {/* Label */}
         <input
           type="text"
           value={section.label}
@@ -63,20 +92,41 @@ export default function ServiceSectionBlock({
           className="flex-1 text-xs font-semibold uppercase tracking-widest text-zinc-500 bg-transparent outline-none placeholder:text-zinc-300"
           placeholder="Nome da seção"
         />
+
+        {/* Duration + time — desktop apenas */}
         {timing && (
-          <span className="text-xs font-mono text-zinc-400">
-            {formatTime(timing.startTime)}
+          <span className="hidden sm:inline text-xs text-zinc-400  shrink-0">
+            {[
+              formatDuration(Math.round((timing.endTime.getTime() - timing.startTime.getTime()) / 60000)),
+              formatTime(timing.startTime),
+            ].join(" · ")}
           </span>
         )}
+
         <button
           type="button"
           onClick={onRemoveSection}
-          className="text-zinc-300 hover:text-red-400 transition-colors"
+          disabled={units.length > 0}
+          title={units.length > 0 ? "Remova os itens antes de deletar a seção" : undefined}
+          className="text-zinc-300 hover:text-red-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-zinc-300"
           aria-label="Remover seção"
         >
-          <Trash2 className="w-3.5 h-3.5" />
+          <Trash2 className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Mobile: duration + time abaixo do label, alinhado com ele */}
+      {timing && (
+        <div className="flex gap-2 px-1 mb-1 sm:hidden">
+          <div className="w-4 shrink-0" />
+          <span className="text-xs text-zinc-400 ">
+            {[
+              formatDuration(Math.round((timing.endTime.getTime() - timing.startTime.getTime()) / 60000)),
+              formatTime(timing.startTime),
+            ].join(" · ")}
+          </span>
+        </div>
+      )}
 
       {/* Divider */}
       <div className="h-px bg-zinc-200 mb-2" />
@@ -100,15 +150,48 @@ export default function ServiceSectionBlock({
         ))}
       </div>
 
-      {/* Add unit */}
-      <button
-        type="button"
-        onClick={() => onOpenDrawer({ type: "add-unit", sectionIndex })}
-        className="flex items-center gap-1.5 mt-2 ml-8 text-xs text-zinc-400 hover:text-emerald-600 transition-colors"
-      >
-        <Plus className="w-3.5 h-3.5" />
-        Adicionar item
-      </button>
+      {/* Add unit — dropdown alinhado com o ícone dos itens */}
+      <div className="flex items-center gap-2 mt-2 px-1">
+        <div className="w-4 shrink-0" />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex items-center gap-1.5 text-xs text-zinc-500 border border-zinc-200 rounded-md px-2.5 py-1 hover:border-zinc-400 hover:text-zinc-700 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Adicionar item
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-44">
+            {(Object.entries(UNIT_CONFIG) as [ServiceUnitTypeValue, typeof UNIT_CONFIG[ServiceUnitTypeValue]][]).map(([type, config]) => {
+              const Icon = config.icon;
+              return (
+                <DropdownMenuItem
+                  key={type}
+                  onClick={() => {
+                    if (COMPLEX_TYPES.includes(type)) {
+                      onOpenDrawer({ type: "add-unit", sectionIndex, unitType: type });
+                    } else {
+                      onAddUnit(sectionIndex, {
+                        type,
+                        arrangementId: null,
+                        semitoneTranspose: null,
+                        durationMin: null,
+                        label: null,
+                        metadata: null,
+                      });
+                    }
+                  }}
+                >
+                  <Icon className={`w-4 h-4 ${config.color}`} />
+                  {config.label}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }

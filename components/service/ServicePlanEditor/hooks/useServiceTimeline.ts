@@ -14,7 +14,7 @@ export type SectionTiming = {
 
 export function useServiceTimeline(service: ClientService): SectionTiming[] {
   return useMemo(() => {
-    const sections = service.sections ?? [];
+    const sections = service.plan?.sections ?? [];
     const result: SectionTiming[] = [];
     let cursor = new Date(service.date);
 
@@ -37,7 +37,7 @@ export function useServiceTimeline(service: ClientService): SectionTiming[] {
     }
 
     return result;
-  }, [service.date, service.sections]);
+  }, [service.date, service.plan?.sections]);
 }
 
 export function formatTime(date: Date): string {

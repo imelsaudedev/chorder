@@ -1,4 +1,4 @@
-import { ClientServiceSection, ClientServiceTemplate, ClientServiceUnit } from "@/prisma/models";
+import { ClientServiceSection, ClientServiceTemplate, ClientServiceUnit, ServiceSectionType } from "@/prisma/models";
 
 type RawUnit = {
   type: string;
@@ -23,14 +23,10 @@ export function buildSectionsFromTemplate(
 ): ClientServiceSection[] {
   const items = template.items as TemplateItems | null;
   return (items?.sections ?? []).map((s, i) => ({
-    id: undefined,
-    serviceId: undefined,
-    type: s.type as ClientServiceSection["type"],
+    type: s.type as ServiceSectionType,
     label: s.label,
     order: i + 1,
     units: (s.units ?? []).map((u, j) => ({
-      id: undefined,
-      serviceId: undefined,
       type: u.type as ClientServiceUnit["type"],
       label: u.label ?? null,
       order: j + 1,
@@ -38,7 +34,6 @@ export function buildSectionsFromTemplate(
       metadata: u.metadata ?? null,
       arrangementId: null,
       semitoneTranspose: null,
-      sectionId: null,
     })),
   }));
 }

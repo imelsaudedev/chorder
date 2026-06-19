@@ -3,20 +3,22 @@ import { serviceUnitSchema } from "./service-unit";
 
 export const serviceSectionTypeSchema = z.enum([
   "PRE_CULTO",
-  "LOUVOR",
-  "AVISOS",
-  "ORACAO_COMUNITARIA",
-  "MENSAGEM",
+  "CULTO",
+  "POS_CULTO",
   "ESPECIAL",
-  "ENCERRAMENTO",
 ]);
 
 export const serviceSectionSchema = z.object({
-  id: z.number().optional(),
   type: serviceSectionTypeSchema,
   label: z.string(),
   order: z.number(),
-  units: z.array(serviceUnitSchema).optional(),
+  units: z.array(serviceUnitSchema),
+});
+
+export const servicePlanSchema = z.object({
+  startTime: z.string().nullable(),
+  sections: z.array(serviceSectionSchema),
 });
 
 export type ServiceSectionSchema = z.infer<typeof serviceSectionSchema>;
+export type ServicePlanSchema = z.infer<typeof servicePlanSchema>;

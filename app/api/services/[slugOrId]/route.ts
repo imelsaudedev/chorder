@@ -85,7 +85,9 @@ export async function POST(
       { status: 400 }
     );
   }
-  if (!service?.id || (!service?.units?.length && !service?.sections?.length)) {
+  const hasContent =
+    (service.plan?.sections?.length ?? 0) > 0 || (service.units?.length ?? 0) > 0;
+  if (!service?.id || !hasContent) {
     return new Response("Invalid service data", { status: 400 });
   }
 

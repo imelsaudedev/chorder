@@ -3,13 +3,11 @@ import { arrangementSchema } from "./arrangement";
 
 export const serviceUnitTypeSchema = z.enum([
   "SONG",
-  "PRELUDIO",
   "FALA",
   "LEITURA",
   "ORACAO",
   "AVISOS",
   "SERMAO",
-  "ESPECIAL",
   "ENCERRAMENTO",
 ]);
 
@@ -20,11 +18,10 @@ export const serviceUnitSchema = z.object({
   arrangementId: z.number().nullable(),
   arrangement: arrangementSchema.optional().nullable(),
   order: z.number().positive(),
-  sectionId: z.number().nullable(),
-  durationMin: z.number().nullable(),
-  label: z.string().nullable(),
+  durationMin: z.number().nullable().optional(),
+  label: z.string().nullable().optional(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: z.any().nullable(),
+  metadata: z.any().nullable().optional(),
 });
 
 export type ServiceUnitSchema = z.infer<typeof serviceUnitSchema>;

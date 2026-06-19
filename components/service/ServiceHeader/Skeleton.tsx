@@ -11,6 +11,7 @@ export default function ServiceHeaderSkeleton() {
       backLinkText={t("services")}
       title={<Skeleton className="h-10 w-72 my-2 bg-primary" />}
       subtitle={<Skeleton className="h-6 w-1/3 bg-zinc-500" />}
+      noBorder
     />
   );
 }

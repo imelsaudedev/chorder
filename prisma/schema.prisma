@@ -101,29 +101,19 @@ enum SongUnitType {
 }
 
 model Service {
-  id              Int     @id @default(autoincrement())
-  legacyId        Int?    @unique
+  id              Int      @id @default(autoincrement())
+  legacyId        Int?     @unique
   title           String?
-  slug            String  @unique
+  slug            String   @unique
   worshipLeader   String?
   date            DateTime
-  isDeleted       Boolean @default(false)
+  isDeleted       Boolean  @default(false)
   preacher        String?
   sermonTheme     String?
   sermonReference String?
+  plan            Json?
 
-  units    ServiceUnit[]
-  sections ServiceSection[]
-}
-
-model ServiceSection {
-  id        Int                @id @default(autoincrement())
-  serviceId Int
-  service   Service            @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  type      ServiceSectionType
-  label     String
-  order     Int
-  units     ServiceUnit[]
+  units ServiceUnit[]
 }
 
 model ServiceTemplate {
@@ -133,40 +123,24 @@ model ServiceTemplate {
 }
 
 model ServiceUnit {
-  id                Int              @id @default(autoincrement())
+  id                Int             @id @default(autoincrement())
   serviceId         Int
   type              ServiceUnitType
-  arrangementId     Int?             @unique
-  semitoneTranspose Int?             @default(0)
+  arrangementId     Int?            @unique
+  semitoneTranspose Int?            @default(0)
   order             Int
-  sectionId         Int?
-  durationMin       Float?
-  label             String?
-  metadata          Json?
 
-  service     Service         @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  service     Service          @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   arrangement SongArrangement? @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
-  section     ServiceSection?  @relation(fields: [sectionId], references: [id], onDelete: SetNull)
 }
 
 enum ServiceUnitType {
   SONG
-  PRELUDIO
   FALA
   LEITURA
   ORACAO
   AVISOS
   SERMAO
-  ESPECIAL
   ENCERRAMENTO
 }
 
-enum ServiceSectionType {
-  PRE_CULTO
-  LOUVOR
-  AVISOS
-  ORACAO_COMUNITARIA
-  MENSAGEM
-  ESPECIAL
-  ENCERRAMENTO
-}

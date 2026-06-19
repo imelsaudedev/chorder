@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { ListMusic, MessageCircleHeart, Music } from "lucide-react";
+import { LayoutTemplate, ListMusic, MessageCircleHeart, Music } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,7 +11,8 @@ export default function NavBar() {
   const pathname = usePathname();
   const pathParts = pathname.split("/");
   const currentPage = pathParts[1];
-  const isEditPage = pathname.includes("/edit") || pathname.endsWith("/new");
+  const isEditPage = pathname.includes("/edit") || pathname.endsWith("/new") ||
+    (pathname.startsWith("/admin/templates/") && pathParts.length > 3);
 
   // Página de lista: /songs ou /services (sem slug)
   const isListPage = pathParts.length === 2;
@@ -37,6 +38,12 @@ export default function NavBar() {
         icon={<MessageCircleHeart size={24} />}
         label={t("feedback")}
         active={currentPage === "feedback"}
+      />
+      <NavItem
+        href="/admin/templates"
+        icon={<LayoutTemplate size={24} />}
+        label="Templates"
+        active={currentPage === "admin"}
       />
     </>
   );

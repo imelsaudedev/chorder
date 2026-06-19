@@ -12,6 +12,7 @@ import YoutubePlayerWidget from "@/components/common/YoutubePlayer/Widget";
 import { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -50,6 +51,7 @@ export default async function RootLayout({
               <SongMetaModalProvider>
                 {children}
               </SongMetaModalProvider>
+              <Toaster position="bottom-center" richColors />
               <YoutubePlayerWidget />
               <AudioPlayerWidget />
             </AudioPlayerProvider>

@@ -2,8 +2,6 @@ import {
   ArrangementAudio,
   Prisma,
   Service,
-  ServiceSection,
-  ServiceSectionType,
   ServiceTemplate,
   ServiceUnit,
   Song,
@@ -14,7 +12,7 @@ import {
   TagGroup,
 } from "@prisma/client";
 
-export type { ArrangementAudio, ServiceSection, ServiceSectionType, ServiceTemplate, ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType, Tag, TagGroup };
+export type { ArrangementAudio, ServiceTemplate, ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType, Tag, TagGroup };
 
 export type ClientArrangementAudio = Omit<Pick<ArrangementAudio, "id" | "url" | "label" | "order">, "id"> & { id?: number };
 
@@ -28,25 +26,22 @@ export type ClientTagGroup = Pick<TagGroup, "id" | "name" | "color"> & {
 
 export const SERVICE_UNIT_TYPES = [
   "SONG",
-  "PRELUDIO",
   "FALA",
   "LEITURA",
   "ORACAO",
   "AVISOS",
   "SERMAO",
-  "ESPECIAL",
   "ENCERRAMENTO",
 ] as const;
 
 export const SERVICE_SECTION_TYPES = [
   "PRE_CULTO",
-  "LOUVOR",
-  "AVISOS",
-  "ORACAO_COMUNITARIA",
-  "MENSAGEM",
+  "CULTO",
+  "POS_CULTO",
   "ESPECIAL",
-  "ENCERRAMENTO",
 ] as const;
+
+export type ServiceSectionType = typeof SERVICE_SECTION_TYPES[number];
 
 export const SONG_UNIT_TYPES = [
   "BLOCK",
@@ -83,21 +78,21 @@ export type ClientSongUnit = Omit<SongUnit, "id" | "arrangementId"> & {
 };
 export type ClientServiceUnit = Omit<
   ServiceUnit,
-  "id" | "serviceId" | "sectionId" | "durationMin" | "label" | "metadata"
+  "id" | "serviceId"
 > & {
   id?: number;
   arrangement?: ClientArrangement | null;
   serviceId?: number;
-  sectionId?: number | null;
   durationMin?: number | null;
   label?: string | null;
   metadata?: Prisma.JsonValue;
 };
 
-export type ClientServiceSection = Omit<ServiceSection, "id" | "serviceId"> & {
-  id?: number;
-  serviceId?: number;
-  units?: ClientServiceUnit[];
+export type ClientServiceSection = {
+  type: ServiceSectionType;
+  label: string;
+  order: number;
+  units: ClientServiceUnit[];
 };
 
 export type ClientServiceTemplate = Omit<ServiceTemplate, "id"> & {
@@ -106,13 +101,18 @@ export type ClientServiceTemplate = Omit<ServiceTemplate, "id"> & {
 
 export type ServiceRef = Pick<Service, "slug" | "title" | "date">;
 
+export type ServicePlan = {
+  startTime?: string | null;
+  sections: ClientServiceSection[];
+};
+
 export type ClientService = Omit<
   Service,
-  "id" | "legacyId" | "preacher" | "sermonTheme" | "sermonReference"
+  "id" | "legacyId" | "preacher" | "sermonTheme" | "sermonReference" | "plan"
 > & {
   id?: number;
   units?: ClientServiceUnit[];
-  sections?: ClientServiceSection[];
+  plan?: ServicePlan | null;
   prevService?: ServiceRef | null;
   nextService?: ServiceRef | null;
   preacher?: string | null;

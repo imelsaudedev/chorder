@@ -30,6 +30,7 @@ export default function ServiceHeader({ service }: ServiceHeaderProps) {
         backLinkText={t("Messages.services")}
         title={serviceTitle}
         subtitle={<Subtitle service={service} />}
+        noBorder
         actions={
           <div className="flex gap-1 items-center">
             <ServiceNavButton dir="prev" serviceRef={service.prevService} />

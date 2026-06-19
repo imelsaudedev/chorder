@@ -381,6 +381,57 @@ export function useFetchTemplates() {
   return { templates: data ?? [], isLoading };
 }
 
+export function useFetchTemplate(id: number | null) {
+  const { data, isLoading } = useSWR<ClientServiceTemplate>(
+    id ? `/api/templates/${id}` : null,
+    (url: string) => fetch(url).then((res) => res.json())
+  );
+  return { template: data, isLoading };
+}
+
+export function useCreateTemplate() {
+  async function createTemplate(
+    url: string,
+    { arg }: { arg: { name: string; items: object } }
+  ) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) throw new Error("Falha ao criar template");
+    return response.json() as Promise<ClientServiceTemplate>;
+  }
+  const { trigger, isMutating } = useSWRMutation("/api/templates", createTemplate);
+  return { createTemplate: trigger, isCreating: isMutating };
+}
+
+export function useUpdateTemplate(id: number) {
+  async function updateTemplate(
+    url: string,
+    { arg }: { arg: { name: string; items: object } }
+  ) {
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) throw new Error("Falha ao atualizar template");
+    return response.json() as Promise<ClientServiceTemplate>;
+  }
+  const { trigger, isMutating } = useSWRMutation(`/api/templates/${id}`, updateTemplate);
+  return { updateTemplate: trigger, isUpdating: isMutating };
+}
+
+export function useDeleteTemplate(id: number) {
+  async function deleteTemplate(url: string) {
+    const response = await fetch(url, { method: "DELETE" });
+    if (!response.ok) throw new Error("Falha ao deletar template");
+  }
+  const { trigger, isMutating } = useSWRMutation(`/api/templates/${id}`, deleteTemplate);
+  return { deleteTemplate: trigger, isDeleting: isMutating };
+}
+
 export function useFetchRecentServices() {
   const { data, error, isLoading } = useSWR<RecentServiceEntry[]>(
     "/api/services/recent",

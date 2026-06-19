@@ -1,9 +1,7 @@
 "use client";
 
-import { useFetchTemplates } from "@/app/api/api-client";
 import ArrangementPicker from "@/components/song/ArrangementPicker";
 import SongPicker from "@/components/song/SongPicker";
-import { buildSectionsFromTemplate } from "@/lib/template-utils";
 import {
   Drawer,
   DrawerContent,
@@ -13,7 +11,6 @@ import {
 import {
   ClientArrangement,
   ClientServiceSection,
-  ClientServiceTemplate,
   ClientServiceUnit,
   ClientSong,
 } from "@/prisma/models";
@@ -33,11 +30,12 @@ type ServiceItemDrawerProps = {
 
 type DrawerView =
   | { screen: "menu" }
-  | { screen: "template" }
   | { screen: "song-picker"; sectionIndex: number; unitIndex?: number }
   | { screen: "arrangement-picker"; sectionIndex: number; unitIndex?: number; song: ClientSong }
   | { screen: "unit-form"; sectionIndex: number; unitType: ServiceUnitTypeValue }
-  | { screen: "fala-form"; sectionIndex: number; unitIndex?: number; unitType: "FALA" | "ORACAO" };
+  | { screen: "fala-form"; sectionIndex: number; unitIndex?: number; unitType: "FALA" | "ORACAO" }
+  | { screen: "leitura-form"; sectionIndex: number; unitIndex?: number }
+  | { screen: "sermao-form"; sectionIndex: number; unitIndex?: number };
 
 export default function ServiceItemDrawer({
   drawerState,
@@ -60,22 +58,28 @@ export default function ServiceItemDrawer({
     if (drawerState.type === "edit-unit") {
       const unit = sections[drawerState.sectionIndex]?.units?.[drawerState.unitIndex];
       if (unit?.type === "SONG") {
-        setView({
-          screen: "song-picker",
-          sectionIndex: drawerState.sectionIndex,
-          unitIndex: drawerState.unitIndex,
-        });
+        setView({ screen: "song-picker", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex });
         return;
       }
       if (unit?.type === "FALA" || unit?.type === "ORACAO") {
-        setView({
-          screen: "fala-form",
-          sectionIndex: drawerState.sectionIndex,
-          unitIndex: drawerState.unitIndex,
-          unitType: unit.type,
-        });
+        setView({ screen: "fala-form", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex, unitType: unit.type });
         return;
       }
+      if (unit?.type === "LEITURA") {
+        setView({ screen: "leitura-form", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex });
+        return;
+      }
+      if (unit?.type === "SERMAO") {
+        setView({ screen: "sermao-form", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex });
+        return;
+      }
+    }
+    if (drawerState.type === "add-unit" && drawerState.unitType) {
+      const { sectionIndex: si, unitType } = drawerState;
+      if (unitType === "SONG") { setView({ screen: "song-picker", sectionIndex: si }); return; }
+      if (unitType === "FALA" || unitType === "ORACAO") { setView({ screen: "fala-form", sectionIndex: si, unitType }); return; }
+      if (unitType === "LEITURA") { setView({ screen: "leitura-form", sectionIndex: si }); return; }
+      if (unitType === "SERMAO") { setView({ screen: "sermao-form", sectionIndex: si }); return; }
     }
     if (drawerState.type !== "closed") {
       setView({ screen: "menu" });
@@ -94,6 +98,8 @@ export default function ServiceItemDrawer({
       setView({ screen: "song-picker", sectionIndex });
     } else if (type === "FALA" || type === "ORACAO") {
       setView({ screen: "fala-form", sectionIndex, unitType: type });
+    } else if (type === "LEITURA") {
+      setView({ screen: "leitura-form", sectionIndex });
     } else {
       setView({ screen: "unit-form", sectionIndex, unitType: type });
     }
@@ -128,7 +134,7 @@ export default function ServiceItemDrawer({
         type: "SONG",
         arrangementId: null,
         semitoneTranspose: 0,
-        sectionId: null,
+
         durationMin: 5,
         label: null,
         metadata: null,
@@ -173,7 +179,6 @@ export default function ServiceItemDrawer({
       type,
       arrangementId: null,
       semitoneTranspose: null,
-      sectionId: null,
       durationMin,
       label: label || null,
       metadata: null,
@@ -183,6 +188,16 @@ export default function ServiceItemDrawer({
   }
 
   function handleFalaDone() {
+    onClose();
+    setView({ screen: "menu" });
+  }
+
+  function handleLeituraDone() {
+    onClose();
+    setView({ screen: "menu" });
+  }
+
+  function handleSermaoDone() {
     onClose();
     setView({ screen: "menu" });
   }
@@ -205,17 +220,32 @@ export default function ServiceItemDrawer({
       ? sections[view.sectionIndex]?.units?.[view.unitIndex]
       : undefined;
 
+  const currentLeituraUnit =
+    view.screen === "leitura-form" && view.unitIndex !== undefined
+      ? sections[view.sectionIndex]?.units?.[view.unitIndex]
+      : undefined;
+
+  const currentSermaoUnit =
+    view.screen === "sermao-form" && view.unitIndex !== undefined
+      ? sections[view.sectionIndex]?.units?.[view.unitIndex]
+      : undefined;
+
   const isEditing =
     (view.screen === "song-picker" || view.screen === "arrangement-picker") &&
     view.unitIndex !== undefined;
 
+  const isSongView =
+    view.screen === "song-picker" || view.screen === "arrangement-picker";
+
   const drawerTitle =
-    view.screen === "template"
-      ? "Usar template"
-      : view.screen === "song-picker"
+    view.screen === "song-picker"
       ? isEditing ? "Trocar música" : "Adicionar música"
       : view.screen === "arrangement-picker"
-      ? isEditing ? "Escolher arranjo" : "Escolher arranjo"
+      ? "Escolher arranjo"
+      : view.screen === "leitura-form"
+      ? view.unitIndex !== undefined ? "Editar leitura" : "Adicionar leitura"
+      : view.screen === "sermao-form"
+      ? view.unitIndex !== undefined ? "Editar sermão" : "Adicionar sermão"
       : view.screen === "fala-form"
       ? `${view.unitIndex !== undefined ? "Editar" : "Adicionar"} ${UNIT_CONFIG[view.unitType]?.label.toLowerCase()}`
       : view.screen === "unit-form"
@@ -225,8 +255,12 @@ export default function ServiceItemDrawer({
       : "Adicionar item";
 
   return (
-    <Drawer open={isOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent className="max-h-[85dvh]">
+    <Drawer
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      direction={isSongView ? "bottom" : "right"}
+    >
+      <DrawerContent className={isSongView ? "max-h-[85dvh]" : "overflow-y-auto"}>
         <DrawerHeader className="flex items-center gap-2">
           {view.screen !== "menu" && (
             <button
@@ -241,22 +275,10 @@ export default function ServiceItemDrawer({
           <DrawerTitle>{drawerTitle}</DrawerTitle>
         </DrawerHeader>
 
-        <div className="overflow-y-auto px-4 pb-6">
+        <div className="px-4 pb-6">
           {view.screen === "menu" && (
             <MenuScreen
-              isEmpty={sections.length === 0}
-              sectionIndex={sectionIndex}
               onSelectType={handleSelectType}
-              onShowTemplate={() => setView({ screen: "template" })}
-            />
-          )}
-          {view.screen === "template" && (
-            <TemplateScreen
-              onLoad={(sections, startTime) => {
-                onLoadTemplate(sections, startTime);
-                onClose();
-                setView({ screen: "menu" });
-              }}
             />
           )}
           {view.screen === "song-picker" && (
@@ -275,6 +297,16 @@ export default function ServiceItemDrawer({
               onAdd={handleSimpleUnitAdd}
             />
           )}
+          {view.screen === "leitura-form" && (
+            <LeituraUnitForm
+              sectionIndex={view.sectionIndex}
+              unitIndex={view.unitIndex}
+              existingUnit={currentLeituraUnit}
+              onAdd={onAddUnit}
+              onUpdate={onUpdateUnit}
+              onDone={handleLeituraDone}
+            />
+          )}
           {view.screen === "fala-form" && (
             <FalaUnitForm
               sectionIndex={view.sectionIndex}
@@ -286,6 +318,16 @@ export default function ServiceItemDrawer({
               onDone={handleFalaDone}
             />
           )}
+          {view.screen === "sermao-form" && (
+            <SermaoUnitForm
+              sectionIndex={view.sectionIndex}
+              unitIndex={view.unitIndex}
+              existingUnit={currentSermaoUnit}
+              onAdd={onAddUnit}
+              onUpdate={onUpdateUnit}
+              onDone={handleSermaoDone}
+            />
+          )}
         </div>
       </DrawerContent>
     </Drawer>
@@ -295,149 +337,28 @@ export default function ServiceItemDrawer({
 // --- Menu screen ---
 
 function MenuScreen({
-  isEmpty,
   onSelectType,
-  onShowTemplate,
 }: {
-  isEmpty: boolean;
-  sectionIndex: number;
   onSelectType: (type: ServiceUnitTypeValue) => void;
-  onShowTemplate: () => void;
 }) {
   const types = Object.entries(UNIT_CONFIG) as [ServiceUnitTypeValue, (typeof UNIT_CONFIG)[ServiceUnitTypeValue]][];
 
   return (
-    <div className="flex flex-col gap-3">
-      {isEmpty && (
-        <button
-          type="button"
-          onClick={onShowTemplate}
-          className="w-full py-3 rounded-lg border-2 border-dashed border-emerald-300 text-emerald-600 font-medium hover:bg-emerald-50 transition-colors"
-        >
-          Usar template
-        </button>
-      )}
-      <div className="grid grid-cols-2 gap-2">
-        {types.map(([type, config]) => {
-          const Icon = config.icon;
-          return (
-            <button
-              key={type}
-              type="button"
-              onClick={() => onSelectType(type)}
-              className="flex items-center gap-2 px-3 py-3 rounded-lg border border-zinc-200 hover:border-emerald-300 hover:bg-zinc-50 transition-colors text-left"
-            >
-              <Icon className={`w-4 h-4 shrink-0 ${config.color}`} />
-              <span className="text-sm">{config.label}</span>
-            </button>
-          );
-        })}
-      </div>
-      {!isEmpty && (
-        <button
-          type="button"
-          onClick={onShowTemplate}
-          className="text-xs text-zinc-400 underline text-center mt-1"
-        >
-          Usar template (substitui a liturgia atual)
-        </button>
-      )}
-    </div>
-  );
-}
-
-// --- Template screen ---
-
-type TemplateItems = {
-  defaultStartTime?: string;
-  sections: Omit<ClientServiceSection, "id" | "serviceId">[];
-};
-
-function TemplateScreen({
-  onLoad,
-}: {
-  onLoad: (sections: ClientServiceSection[], startTime?: string) => void;
-}) {
-  const { templates, isLoading } = useFetchTemplates();
-  const [startTime, setStartTime] = useState("10:15");
-
-  if (isLoading) {
-    return <p className="text-sm text-zinc-400 py-4 text-center">Carregando...</p>;
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <label className="text-sm text-zinc-600 shrink-0">Hora de início</label>
-        <input
-          type="time"
-          value={startTime}
-          onChange={(e) => setStartTime(e.target.value)}
-          className="border border-zinc-300 rounded-md px-2 py-1 text-sm"
-        />
-      </div>
-
-      {templates.map((template) => (
-        <TemplateCard
-          key={template.id}
-          template={template}
-          startTime={startTime}
-          onSetStartTime={setStartTime}
-          onLoad={onLoad}
-        />
-      ))}
-
-      {templates.length === 0 && (
-        <p className="text-sm text-zinc-400 text-center py-4">
-          Nenhum template cadastrado.
-        </p>
-      )}
-    </div>
-  );
-}
-
-function TemplateCard({
-  template,
-  startTime,
-  onSetStartTime,
-  onLoad,
-}: {
-  template: ClientServiceTemplate;
-  startTime: string;
-  onSetStartTime: (t: string) => void;
-  onLoad: (sections: ClientServiceSection[], startTime?: string) => void;
-}) {
-  const items = template.items as TemplateItems | null;
-  const sections = items?.sections ?? [];
-  const defaultTime = items?.defaultStartTime;
-
-  return (
-    <div className="border border-zinc-200 rounded-lg p-4 flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="font-medium text-sm">{template.name}</p>
-          <p className="text-xs text-zinc-400">
-            {sections.length} seções ·{" "}
-            {sections.reduce((s, sec) => s + (sec.units?.length ?? 0), 0)} itens
-          </p>
-        </div>
-        {defaultTime && (
+    <div className="grid grid-cols-2 gap-2">
+      {types.map(([type, config]) => {
+        const Icon = config.icon;
+        return (
           <button
+            key={type}
             type="button"
-            onClick={() => onSetStartTime(defaultTime)}
-            className="text-xs text-zinc-400 underline"
+            onClick={() => onSelectType(type)}
+            className="flex items-center gap-2 px-3 py-3 rounded-lg border border-zinc-200 hover:border-emerald-300 hover:bg-zinc-50 transition-colors text-left"
           >
-            {defaultTime}
+            <Icon className={`w-4 h-4 shrink-0 ${config.color}`} />
+            <span className="text-sm">{config.label}</span>
           </button>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={() => onLoad(buildSectionsFromTemplate(template), startTime)}
-        className="w-full py-2 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
-      >
-        Usar este template
-      </button>
+        );
+      })}
     </div>
   );
 }
@@ -519,7 +440,7 @@ function FalaUnitForm({
         type: unitType,
         arrangementId: null,
         semitoneTranspose: null,
-        sectionId: null,
+
         label: label.trim() || null,
         metadata,
         durationMin,
@@ -559,6 +480,247 @@ function FalaUnitForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Roteiro, orientações ou observações para este momento..."
+          rows={4}
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 resize-none"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
+        <input
+          type="number"
+          min={0}
+          step={0.5}
+          value={duration}
+          onChange={(e) => setDuration(e.target.value)}
+          placeholder="—"
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={handleSave}
+        className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
+      >
+        {unitIndex !== undefined ? "Salvar" : "Adicionar"}
+      </button>
+    </div>
+  );
+}
+
+// --- Leitura unit form ---
+
+function LeituraUnitForm({
+  sectionIndex,
+  unitIndex,
+  existingUnit,
+  onAdd,
+  onUpdate,
+  onDone,
+}: {
+  sectionIndex: number;
+  unitIndex?: number;
+  existingUnit?: ClientServiceUnit;
+  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
+  onDone: () => void;
+}) {
+  const existingMeta = existingUnit?.metadata as {
+    version?: string | null;
+    text?: string | null;
+  } | null;
+
+  const [label, setLabel] = useState(existingUnit?.label ?? "");
+  const [version, setVersion] = useState(existingMeta?.version ?? "");
+  const [text, setText] = useState(existingMeta?.text ?? "");
+  const [duration, setDuration] = useState(
+    existingUnit?.durationMin != null ? String(existingUnit.durationMin) : ""
+  );
+
+  function handleSave() {
+    const durationMin = duration ? parseFloat(duration) : null;
+    const metadata = {
+      version: version.trim() || null,
+      text: text.trim() || null,
+    };
+
+    if (unitIndex !== undefined) {
+      onUpdate(sectionIndex, unitIndex, {
+        label: label.trim() || null,
+        metadata,
+        durationMin,
+      });
+    } else {
+      onAdd(sectionIndex, {
+        type: "LEITURA",
+        arrangementId: null,
+        semitoneTranspose: null,
+
+        label: label.trim() || null,
+        metadata,
+        durationMin,
+      });
+    }
+    onDone();
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Referência</label>
+        <input
+          type="text"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder="Ex: João 3:16, Salmo 23..."
+          autoFocus
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Versão</label>
+        <input
+          type="text"
+          value={version}
+          onChange={(e) => setVersion(e.target.value)}
+          placeholder="Ex: NVI, ARA, NTLH..."
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Texto</label>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Cole o texto da passagem aqui..."
+          rows={6}
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 resize-none"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
+        <input
+          type="number"
+          min={0}
+          step={0.5}
+          value={duration}
+          onChange={(e) => setDuration(e.target.value)}
+          placeholder="—"
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={handleSave}
+        className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
+      >
+        {unitIndex !== undefined ? "Salvar" : "Adicionar"}
+      </button>
+    </div>
+  );
+}
+
+// --- Sermao unit form ---
+
+function SermaoUnitForm({
+  sectionIndex,
+  unitIndex,
+  existingUnit,
+  onAdd,
+  onUpdate,
+  onDone,
+}: {
+  sectionIndex: number;
+  unitIndex?: number;
+  existingUnit?: ClientServiceUnit;
+  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
+  onDone: () => void;
+}) {
+  const existingMeta = existingUnit?.metadata as {
+    preacher?: string | null;
+    reference?: string | null;
+    description?: string | null;
+  } | null;
+
+  const [label, setLabel] = useState(existingUnit?.label ?? "");
+  const [preacher, setPreacher] = useState(existingMeta?.preacher ?? "");
+  const [reference, setReference] = useState(existingMeta?.reference ?? "");
+  const [description, setDescription] = useState(existingMeta?.description ?? "");
+  const [duration, setDuration] = useState(
+    existingUnit?.durationMin != null ? String(existingUnit.durationMin) : ""
+  );
+
+  function handleSave() {
+    const durationMin = duration ? parseFloat(duration) : null;
+    const metadata = {
+      preacher: preacher.trim() || null,
+      reference: reference.trim() || null,
+      description: description.trim() || null,
+    };
+
+    if (unitIndex !== undefined) {
+      onUpdate(sectionIndex, unitIndex, { label: label.trim() || null, metadata, durationMin });
+    } else {
+      onAdd(sectionIndex, {
+        type: "SERMAO",
+        arrangementId: null,
+        semitoneTranspose: null,
+        label: label.trim() || null,
+        metadata,
+        durationMin,
+      });
+    }
+    onDone();
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Tema</label>
+        <input
+          type="text"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder="Ex: A graça que transforma..."
+          autoFocus
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Pregador</label>
+        <input
+          type="text"
+          value={preacher}
+          onChange={(e) => setPreacher(e.target.value)}
+          placeholder="Ex: Pastor João..."
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Referência bíblica</label>
+        <input
+          type="text"
+          value={reference}
+          onChange={(e) => setReference(e.target.value)}
+          placeholder="Ex: João 3:16, Rm 8:28..."
+          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-zinc-500">Notas</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Observações ou roteiro..."
           rows={4}
           className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 resize-none"
         />
