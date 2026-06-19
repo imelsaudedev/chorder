@@ -19,7 +19,7 @@ export default function SongList({
   const songsByFirstLetter = groupSongsByFirstLetter(songs);
   songsByFirstLetter.forEach(sortByTitle);
   const existingInitials = Array.from(songsByFirstLetter.keys());
-  existingInitials.sort();
+  existingInitials.sort((a, b) => a.localeCompare(b, "pt-BR"));
 
   return (
     <>
@@ -47,9 +47,7 @@ export default function SongList({
 }
 
 function sortByTitle(songs: { title: string }[]) {
-  songs.sort((a, b) =>
-    a.title.toLocaleLowerCase().localeCompare(b.title.toLocaleLowerCase())
-  );
+  songs.sort((a, b) => a.title.localeCompare(b.title, "pt-BR"));
 }
 
 function groupSongsByFirstLetter(

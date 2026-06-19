@@ -43,7 +43,7 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [bulkTagGroupId, setBulkTagGroupId] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey | null>("title");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [filters, setFilters] = useState<FilterState>({});
   const [openFilterGroupId, setOpenFilterGroupId] = useState<number | null>(null);
@@ -75,21 +75,18 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
   const displayed = useMemo(() => {
     if (!sortKey) return filtered;
     return [...filtered].sort((a, b) => {
-      let av: string | number;
-      let bv: string | number;
       if (sortKey === "legacyId") {
-        av = a.legacyId ?? Infinity;
-        bv = b.legacyId ?? Infinity;
-      } else if (sortKey === "serviceCount") {
-        av = a.serviceCount;
-        bv = b.serviceCount;
-      } else {
-        av = (a[sortKey] ?? "").toLowerCase();
-        bv = (b[sortKey] ?? "").toLowerCase();
+        const av = a.legacyId ?? Infinity;
+        const bv = b.legacyId ?? Infinity;
+        return sortDir === "asc" ? (av < bv ? -1 : av > bv ? 1 : 0) : (bv < av ? -1 : bv > av ? 1 : 0);
       }
-      if (av < bv) return sortDir === "asc" ? -1 : 1;
-      if (av > bv) return sortDir === "asc" ? 1 : -1;
-      return 0;
+      if (sortKey === "serviceCount") {
+        const diff = a.serviceCount - b.serviceCount;
+        return sortDir === "asc" ? diff : -diff;
+      }
+      return sortDir === "asc"
+        ? (a[sortKey] ?? "").localeCompare(b[sortKey] ?? "", "pt-BR")
+        : (b[sortKey] ?? "").localeCompare(a[sortKey] ?? "", "pt-BR");
     });
   }, [filtered, sortKey, sortDir]);
 
