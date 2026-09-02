@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "WATCHPACK_POLLING=true DATABASE_URL='postgresql://postgres:postgres@localhost:5432/chorder?schema=public' DIRECT_URL='postgresql://postgres:postgres@localhost:5432/chorder?schema=public' next dev -H 0.0.0.0 --turbopack",
-    "build": "prisma generate && (prisma migrate resolve --rolled-back 20260526020946_move_youtube_url_to_arrangement || true) && prisma migrate deploy && next build",
+    "build": "rm -rf node_modules/.prisma .next/cache && prisma generate && (prisma migrate resolve --rolled-back 20260526020946_move_youtube_url_to_arrangement || true) && prisma migrate deploy && next build",
     "start": "next start -H 0.0.0.0",
     "test": "vitest run",
     "test:watch": "vitest watch",
