@@ -19,6 +19,7 @@ vi.mock('@/components/song/ArrangementForm/SongUnitListForm', () => ({
 
 const mockUnit: ClientServiceUnit = {
   id: 1,
+  clientId: 'mock-unit-1',
   type: 'SONG',
   semitoneTranspose: 0,
   order: 1,

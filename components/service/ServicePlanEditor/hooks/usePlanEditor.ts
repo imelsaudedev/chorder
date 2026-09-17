@@ -46,10 +46,13 @@ export function usePlanEditor(initialService: ClientService) {
   // --- Sections ---
 
   const addSection = useCallback(
-    (section: Omit<ClientServiceSection, "order">) => {
+    (section: Omit<ClientServiceSection, "order" | "id">) => {
       mutate((s) => {
         const sections = getSections(s);
-        return setPlan(s, [...sections, { ...section, order: sections.length + 1, units: [] }]);
+        return setPlan(s, [
+          ...sections,
+          { ...section, id: crypto.randomUUID(), order: sections.length + 1, units: [] },
+        ]);
       });
     },
     [mutate]
@@ -85,12 +88,15 @@ export function usePlanEditor(initialService: ClientService) {
   // --- Units ---
 
   const addUnit = useCallback(
-    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => {
+    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => {
       mutate((s) => {
         const sections = [...getSections(s)];
         const current = sections[sectionIndex];
         const units = current.units ?? [];
-        sections[sectionIndex] = { ...current, units: [...units, { ...unit, order: units.length + 1 }] };
+        sections[sectionIndex] = {
+          ...current,
+          units: [...units, { ...unit, clientId: crypto.randomUUID(), order: units.length + 1 }],
+        };
         return setPlan(s, sections);
       });
     },

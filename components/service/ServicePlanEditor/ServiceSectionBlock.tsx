@@ -38,7 +38,7 @@ type ServiceSectionBlockProps = {
   dragHandleRef?: React.RefObject<HTMLDivElement>;
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: () => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
   onUpdateUnit: (unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
@@ -135,7 +135,7 @@ export default function ServiceSectionBlock({
       <div className="flex flex-col">
         {units.map((unit, unitIndex) => (
           <SortableUnitRow
-            key={unit.id ?? `new-${sectionIndex}-${unitIndex}`}
+            key={unit.clientId}
             unit={unit}
             sectionIndex={sectionIndex}
             unitIndex={unitIndex}

@@ -9,6 +9,7 @@ export const serviceSectionTypeSchema = z.enum([
 ]);
 
 export const serviceSectionSchema = z.object({
+  id: z.string(),
   type: serviceSectionTypeSchema,
   label: z.string(),
   order: z.number(),

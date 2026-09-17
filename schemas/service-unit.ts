@@ -13,6 +13,7 @@ export const serviceUnitTypeSchema = z.enum([
 
 export const serviceUnitSchema = z.object({
   id: z.number().optional(),
+  clientId: z.string(),
   type: serviceUnitTypeSchema,
   semitoneTranspose: z.number().nullable(),
   arrangementId: z.number().nullable(),

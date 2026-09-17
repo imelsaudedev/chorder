@@ -37,8 +37,8 @@ export function useTemplateEditor(initial: {
   }, []);
 
   const addSection = useCallback(
-    (section: Omit<ClientServiceSection, "order">) => {
-      mutate((s) => [...s, { ...section, order: s.length + 1, units: [] }]);
+    (section: Omit<ClientServiceSection, "order" | "id">) => {
+      mutate((s) => [...s, { ...section, id: crypto.randomUUID(), order: s.length + 1, units: [] }]);
     },
     [mutate]
   );
@@ -69,12 +69,15 @@ export function useTemplateEditor(initial: {
   );
 
   const addUnit = useCallback(
-    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => {
+    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => {
       mutate((s) => {
         const next = [...s];
         const current = next[sectionIndex];
         const units = current.units ?? [];
-        next[sectionIndex] = { ...current, units: [...units, { ...unit, order: units.length + 1 }] };
+        next[sectionIndex] = {
+          ...current,
+          units: [...units, { ...unit, clientId: crypto.randomUUID(), order: units.length + 1 }],
+        };
         return next;
       });
     },

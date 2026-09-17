@@ -850,12 +850,17 @@ export async function retrieveService(
     ? {
         ...rawPlan,
         sections: rawPlan.sections.map((section) => ({
+          // Planos salvos antes da introdução de ids estáveis não têm `id`/`clientId`
+          // gravados no JSON — preenchemos aqui pra que todo plano lido tenha ids
+          // completos a partir de agora (persistidos de volta no próximo save).
           ...section,
+          id: section.id ?? crypto.randomUUID(),
           units: section.units.map((unit) => {
-            if (unit.type === "SONG" && unit.arrangementId) {
-              return { ...unit, arrangement: arrangementById.get(unit.arrangementId) ?? null };
+            const withClientId = unit.clientId ? unit : { ...unit, clientId: crypto.randomUUID() };
+            if (withClientId.type === "SONG" && withClientId.arrangementId) {
+              return { ...withClientId, arrangement: arrangementById.get(withClientId.arrangementId) ?? null };
             }
-            return unit;
+            return withClientId;
           }),
         })),
       }

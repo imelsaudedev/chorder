@@ -35,7 +35,7 @@ export default function ClientServiceFormPage({
 
   const defaultSections: ClientServiceSection[] = defaultMeta?.sections?.length
     ? defaultMeta.sections
-    : [{ type: "CULTO", label: "Culto", order: 1, units: [] }];
+    : [{ id: crypto.randomUUID(), type: "CULTO", label: "Culto", order: 1, units: [] }];
 
   const defaultPlan: ServicePlan = { startTime: null, sections: defaultSections };
 

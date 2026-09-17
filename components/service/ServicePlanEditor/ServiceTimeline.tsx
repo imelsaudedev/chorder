@@ -19,11 +19,11 @@ import ServiceSectionBlock from "./ServiceSectionBlock";
 
 type ServiceTimelineProps = {
   service: ClientService;
-  onAddSection: (section: Omit<ClientServiceSection, "order">) => void;
+  onAddSection: (section: Omit<ClientServiceSection, "order" | "id">) => void;
   onUpdateSection: (sectionIndex: number, changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: (sectionIndex: number) => void;
   onMoveSection: (from: number, to: number) => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
   onUpdateUnit: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (sectionIndex: number, unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
@@ -65,7 +65,7 @@ export default function ServiceTimeline({
 
       {sections.map((section, sectionIndex) => (
         <SortableSectionBlock
-          key={`section-${sectionIndex}`}
+          key={section.id}
           section={section}
           sectionIndex={sectionIndex}
           timing={timings[sectionIndex]}
@@ -95,7 +95,7 @@ type SortableSectionBlockProps = {
   timing?: ReturnType<typeof useServiceTimeline>[number];
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: () => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
   onUpdateUnit: (unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;

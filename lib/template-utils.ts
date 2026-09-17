@@ -23,10 +23,12 @@ export function buildSectionsFromTemplate(
 ): ClientServiceSection[] {
   const items = template.items as TemplateItems | null;
   return (items?.sections ?? []).map((s, i) => ({
+    id: crypto.randomUUID(),
     type: s.type as ServiceSectionType,
     label: s.label,
     order: i + 1,
     units: (s.units ?? []).map((u, j) => ({
+      clientId: crypto.randomUUID(),
       type: u.type as ClientServiceUnit["type"],
       label: u.label ?? null,
       order: j + 1,

@@ -91,7 +91,7 @@ export default function ServiceLiturgyView({
         if (visibleUnits.length === 0) return null;
 
         return (
-          <div key={si}>
+          <div key={section.id}>
             {/* Section header */}
             <div className="flex items-center gap-2 mb-1">
               <span className="flex-1 text-xs font-semibold uppercase tracking-widest text-zinc-500">
@@ -141,7 +141,7 @@ export default function ServiceLiturgyView({
               ].filter(Boolean).join(" · ");
 
               return (
-                <div key={originalIndex} className="flex items-center gap-2 py-1.5 rounded-md hover:bg-zinc-50 transition-colors">
+                <div key={unit.clientId} className="flex items-center gap-2 py-1.5 rounded-md hover:bg-zinc-50 transition-colors">
                   {/* Icon as bullet */}
                   <div className={`shrink-0 ${config?.color ?? "text-zinc-400"}`}>
                     {Icon && <Icon className="w-4 h-4" />}

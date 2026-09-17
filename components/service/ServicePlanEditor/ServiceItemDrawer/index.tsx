@@ -23,7 +23,7 @@ type ServiceItemDrawerProps = {
   drawerState: DrawerState;
   sections: ClientServiceSection[];
   onClose: () => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
   onUpdateUnit: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onLoadTemplate: (sections: ClientServiceSection[], startTime?: string) => void;
 };
@@ -406,7 +406,7 @@ function FalaUnitForm({
   unitIndex?: number;
   unitType: "FALA" | "ORACAO";
   existingUnit?: ClientServiceUnit;
-  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
   onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onDone: () => void;
 }) {
@@ -522,7 +522,7 @@ function LeituraUnitForm({
   sectionIndex: number;
   unitIndex?: number;
   existingUnit?: ClientServiceUnit;
-  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
   onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onDone: () => void;
 }) {
@@ -638,7 +638,7 @@ function SermaoUnitForm({
   sectionIndex: number;
   unitIndex?: number;
   existingUnit?: ClientServiceUnit;
-  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
   onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onDone: () => void;
 }) {

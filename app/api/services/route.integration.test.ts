@@ -52,11 +52,13 @@ describe('Services API integration', () => {
                 startTime: '19:00',
                 sections: [
                     {
+                        id: 'section-1',
                         type: 'CULTO',
                         label: 'Culto',
                         order: 1,
                         units: [
                             {
+                                clientId: 'unit-1',
                                 type: 'SONG',
                                 order: 1,
                                 semitoneTranspose: 0,

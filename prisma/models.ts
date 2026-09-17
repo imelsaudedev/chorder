@@ -82,6 +82,10 @@ export type ClientServiceUnit = Omit<
   "id" | "serviceId"
 > & {
   id?: number;
+  // Id estável gerado no client, não muda mesmo quando arrangementId muda
+  // (ex: ao trocar a música de um item). Usado pra diffar o plano no save
+  // e como key de reconciliação no editor.
+  clientId: string;
   arrangement?: ClientArrangement | null;
   serviceId?: number;
   durationMin?: number | null;
@@ -90,6 +94,7 @@ export type ClientServiceUnit = Omit<
 };
 
 export type ClientServiceSection = {
+  id: string;
   type: ServiceSectionType;
   label: string;
   order: number;
