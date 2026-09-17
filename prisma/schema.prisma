@@ -119,6 +119,7 @@ model Service {
   sermonTheme     String?
   sermonReference String?
   plan            Json?
+  updatedAt       DateTime @default(now()) @updatedAt
 
   units ServiceUnit[]
 }

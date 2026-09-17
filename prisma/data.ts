@@ -923,6 +923,15 @@ export async function retrieveServices(): Promise<ClientService[]> {
   return services as unknown as ClientService[];
 }
 
+// Lançado quando o culto foi salvo por outra pessoa entre o momento em que o
+// client carregou e o momento em que tentou salvar — ver createOrUpdateService.
+export class ServiceConflictError extends Error {
+  constructor() {
+    super("Service was updated by someone else since it was loaded");
+    this.name = "ServiceConflictError";
+  }
+}
+
 export async function createOrUpdateService(
   service: ClientService
 ): Promise<ClientService> {
@@ -931,39 +940,51 @@ export async function createOrUpdateService(
   const serviceId = await prisma.$transaction(async (tx) => {
     const existing = await tx.service.findUnique({
       where: { slug: serviceSlug },
-      select: { plan: true },
+      select: { plan: true, updatedAt: true },
     });
+
+    // Culto já existente: o client precisa ter carregado a versão mais recente.
+    // A checagem aqui é só pra falhar cedo sem gastar trabalho de sincronizar
+    // arranjos — a garantia de verdade, atômica, é o updateMany mais abaixo.
+    if (existing && service.updatedAt && existing.updatedAt.getTime() !== new Date(service.updatedAt).getTime()) {
+      throw new ServiceConflictError();
+    }
+
     const previousPlan = (existing?.plan as ServicePlan | null) ?? null;
 
     const resolvedPlan = service.plan
       ? await syncPlanArrangements(tx, service.plan, previousPlan)
       : null;
 
-    const upserted = await tx.service.upsert({
-      where: { slug: serviceSlug },
-      update: {
-        title: service.title,
-        worshipLeader: service.worshipLeader,
-        date: service.date,
-        preacher: service.preacher ?? null,
-        sermonTheme: service.sermonTheme ?? null,
-        sermonReference: service.sermonReference ?? null,
-        plan: (resolvedPlan as object) ?? Prisma.DbNull,
-      },
-      create: {
-        title: service.title,
-        slug: serviceSlug,
-        worshipLeader: service.worshipLeader,
-        date: service.date,
-        preacher: service.preacher ?? null,
-        sermonTheme: service.sermonTheme ?? null,
-        sermonReference: service.sermonReference ?? null,
-        isDeleted: false,
-        plan: (resolvedPlan as object) ?? Prisma.DbNull,
-      },
-    });
+    const data = {
+      title: service.title,
+      worshipLeader: service.worshipLeader,
+      date: service.date,
+      preacher: service.preacher ?? null,
+      sermonTheme: service.sermonTheme ?? null,
+      sermonReference: service.sermonReference ?? null,
+      plan: (resolvedPlan as object) ?? Prisma.DbNull,
+    };
 
-    return upserted.id;
+    if (!existing) {
+      const created = await tx.service.create({ data: { ...data, slug: serviceSlug, isDeleted: false } });
+      return created.id;
+    }
+
+    // updateMany com `updatedAt` na condição é o que torna a checagem de
+    // conflito atômica: se outra transação já commitou uma mudança entre a
+    // leitura acima e este update, a condição não bate mais e count vem 0 —
+    // sem essa segunda checagem, duas transações concorrentes que leram o
+    // mesmo updatedAt poderiam as duas passar pela checagem acima e a segunda
+    // sobrescrever a primeira sem avisar ninguém.
+    const result = await tx.service.updateMany({
+      where: { slug: serviceSlug, updatedAt: existing.updatedAt },
+      data,
+    });
+    if (result.count === 0) throw new ServiceConflictError();
+
+    const current = await tx.service.findUniqueOrThrow({ where: { slug: serviceSlug }, select: { id: true } });
+    return current.id;
   });
 
   const retService = await retrieveService(serviceId);

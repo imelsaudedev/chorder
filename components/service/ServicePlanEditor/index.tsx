@@ -1,5 +1,6 @@
 "use client";
 
+import { ServiceSaveError } from "@/app/api/api-client";
 import ConfirmDiscardDialog from "@/components/common/ConfirmDiscardDialog";
 import FormFooter from "@/components/common/FormFooter";
 import ServicePlanDrawer, { ServicePlanConfig } from "@/components/service/ServicePlanDrawer";
@@ -44,8 +45,21 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
       );
       return;
     }
-    const saved = await editor.save();
-    if (onSaved) onSaved(saved);
+    try {
+      const saved = await editor.save();
+      if (onSaved) onSaved(saved);
+    } catch (err) {
+      if (err instanceof ServiceSaveError && err.status === 409) {
+        toast.error("Este culto foi atualizado por outra pessoa enquanto você editava.", {
+          action: {
+            label: "Recarregar",
+            onClick: () => window.location.reload(),
+          },
+        });
+        return;
+      }
+      toast.error("Não foi possível salvar o culto. Tente novamente.");
+    }
   }
 
   function handleMetaSave(config: ServicePlanConfig) {

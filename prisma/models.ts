@@ -114,7 +114,7 @@ export type ServicePlan = {
 
 export type ClientService = Omit<
   Service,
-  "id" | "legacyId" | "preacher" | "sermonTheme" | "sermonReference" | "plan"
+  "id" | "legacyId" | "preacher" | "sermonTheme" | "sermonReference" | "plan" | "updatedAt"
 > & {
   id?: number;
   units?: ClientServiceUnit[];
@@ -124,6 +124,10 @@ export type ClientService = Omit<
   preacher?: string | null;
   sermonTheme?: string | null;
   sermonReference?: string | null;
+  // Presente em cultos já salvos — o client manda de volta o valor que carregou
+  // pra detectar se alguém mais salvou o mesmo culto nesse meio tempo (ver
+  // syncPlanArrangements/createOrUpdateService em prisma/data.ts).
+  updatedAt?: Date;
 };
 
 export type RecentServiceEntry = {

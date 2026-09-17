@@ -298,6 +298,15 @@ export function useDeleteService(slugOrId: string | number) {
   };
 }
 
+export class ServiceSaveError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ServiceSaveError";
+    this.status = status;
+  }
+}
+
 export function useCreateOrUpdateService(
   serviceIdOrSlug: string | number | null
 ) {
@@ -310,10 +319,10 @@ export function useCreateOrUpdateService(
       body: JSON.stringify(arg),
     });
     if (!response.ok) {
-      throw new Error(
-        `Failed to create or update service. Status: ${response.status}. ${
-          response.body ? await response.text() : ""
-        }`
+      const message = response.body ? await response.text() : "";
+      throw new ServiceSaveError(
+        response.status,
+        message || `Failed to create or update service. Status: ${response.status}`
       );
     }
     return response.json();

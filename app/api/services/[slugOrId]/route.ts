@@ -2,6 +2,7 @@ import {
   createOrUpdateService,
   deleteService,
   retrieveService,
+  ServiceConflictError,
 } from "@/prisma/data";
 import { serviceSchema } from "@/schemas/service";
 import { NextRequest } from "next/server";
@@ -91,10 +92,19 @@ export async function POST(
     return new Response("Invalid service data", { status: 400 });
   }
 
-  const updatedService = await createOrUpdateService(service);
-
-  return new Response(JSON.stringify(updatedService), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  try {
+    const updatedService = await createOrUpdateService(service);
+    return new Response(JSON.stringify(updatedService), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    if (err instanceof ServiceConflictError) {
+      return new Response(
+        "Este culto foi atualizado por outra pessoa enquanto você editava. Recarregue a página antes de salvar novamente.",
+        { status: 409 }
+      );
+    }
+    throw err;
+  }
 }

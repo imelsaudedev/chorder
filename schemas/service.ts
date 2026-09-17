@@ -14,6 +14,7 @@ export const serviceSchema = z.object({
   sermonTheme: z.string().nullable(),
   sermonReference: z.string().nullable(),
   isDeleted: z.boolean(),
+  updatedAt: z.coerce.date().optional(),
 });
 
 export type ServiceSchema = z.infer<typeof serviceSchema>;
