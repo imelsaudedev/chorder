@@ -1,7 +1,10 @@
 // Script único: constrói `Service.plan` para cultos antigos que só têm
-// `ServiceUnit` (criados antes do editor de liturgia). Roda uma vez, antes
-// de remover a tabela ServiceUnit (Fase 3 do plano em docs/arquitetura-plano-culto.md).
-// Idempotente: só toca serviços com plan: null, seguro rodar mais de uma vez.
+// `ServiceUnit` (criados antes do editor de liturgia). Idempotente: só toca
+// serviços com plan: null, seguro rodar mais de uma vez.
+//
+// IMPORTANTE: precisa rodar contra o Neon de produção (DIRECT_URL de prod)
+// e confirmar 0 cultos sem plan ANTES de qualquer migration que apague a
+// tabela ServiceUnit — ver "O que NÃO foi feito" em docs/arquitetura-plano-culto.md.
 //
 // Uso: npx tsx prisma/seed/backfill-legacy-plan.ts
 import { ServicePlan } from "../models";

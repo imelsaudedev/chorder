@@ -769,37 +769,24 @@ export async function duplicateArrangement(
   return duplicatedArrangement;
 }
 
-const arrangementInclude = {
-  where: { isDeleted: false },
-  include: {
-    song: true,
-    units: { orderBy: { order: "asc" } },
-    audios: { orderBy: { order: "asc" } },
-    originalArrangement: {
-      select: {
-        youtubeUrl: true,
-        audios: { orderBy: { order: "asc" } },
-      },
+const arrangementIncludeFields = {
+  song: true,
+  units: { orderBy: { order: "asc" } },
+  audios: { orderBy: { order: "asc" } },
+  originalArrangement: {
+    select: {
+      youtubeUrl: true,
+      audios: { orderBy: { order: "asc" } },
     },
   },
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapUnit(unit: any): ClientServiceUnit {
+function hydrateArrangement(row: any): ClientArrangement {
   return {
-    ...unit,
-    arrangement: unit.arrangement
-      ? {
-          ...unit.arrangement,
-          youtubeUrl:
-            unit.arrangement.youtubeUrl ??
-            unit.arrangement.originalArrangement?.youtubeUrl ??
-            null,
-          audios: unit.arrangement.audios?.length
-            ? unit.arrangement.audios
-            : unit.arrangement.originalArrangement?.audios ?? [],
-        }
-      : null,
+    ...row,
+    youtubeUrl: row.youtubeUrl ?? row.originalArrangement?.youtubeUrl ?? null,
+    audios: row.audios?.length ? row.audios : row.originalArrangement?.audios ?? [],
   };
 }
 
@@ -810,12 +797,6 @@ export async function retrieveService(
     where: {
       ...selectSlugOrId(slugOrId),
       isDeleted: false,
-    },
-    include: {
-      units: {
-        orderBy: { order: "asc" },
-        include: { arrangement: arrangementInclude },
-      },
     },
   });
 
@@ -835,17 +816,27 @@ export async function retrieveService(
     }),
   ]);
 
-  const flatUnits = service.units.map(mapUnit);
+  const rawPlan = service.plan as ServicePlan | null;
 
-  // Build arrangement lookup from flat units so plan sections can be hydrated
-  const arrangementById = new Map<number, ClientArrangement>();
-  for (const unit of flatUnits) {
-    if (unit.arrangement && unit.arrangementId) {
-      arrangementById.set(unit.arrangementId, unit.arrangement);
+  // Toda música do plano referencia um SongArrangement real por id — resolvemos
+  // todos de uma vez (em vez de por uma relação de tabela) pra hidratar o plano.
+  const arrangementIds = new Set<number>();
+  for (const section of rawPlan?.sections ?? []) {
+    for (const unit of section.units) {
+      if (unit.type === "SONG" && unit.arrangementId != null) arrangementIds.add(unit.arrangementId);
     }
   }
 
-  const rawPlan = service.plan as ServicePlan | null;
+  const arrangementRows = arrangementIds.size
+    ? await prisma.songArrangement.findMany({
+        where: { id: { in: [...arrangementIds] }, isDeleted: false },
+        include: arrangementIncludeFields,
+      })
+    : [];
+  const arrangementById = new Map<number, ClientArrangement>(
+    arrangementRows.map((row) => [row.id, hydrateArrangement(row)])
+  );
+
   const plan: ServicePlan | null = rawPlan
     ? {
         ...rawPlan,
@@ -866,6 +857,15 @@ export async function retrieveService(
       }
     : null;
 
+  // `units` continua existindo como projeção derivada do plano (só as músicas, em
+  // ordem sequencial) pra não quebrar quem ainda lê isso — ex: HolyricsSetlistButton
+  // e a aba Cifras. Não é mais uma tabela à parte, é sempre recalculada na leitura.
+  let order = 1;
+  const flatUnits: ClientServiceUnit[] = (plan?.sections ?? [])
+    .flatMap((section) => section.units)
+    .filter((unit) => unit.type === "SONG" && unit.arrangement != null)
+    .map((unit) => ({ ...unit, order: order++ }));
+
   return {
     ...service,
     prevService: prevService ?? null,
@@ -880,33 +880,42 @@ export async function retrieveRecentServices(limit = 8): Promise<RecentServiceEn
     where: { isDeleted: false },
     orderBy: { date: "desc" },
     take: limit,
-    select: {
-      slug: true,
-      title: true,
-      date: true,
-      worshipLeader: true,
-      units: {
-        orderBy: { order: "asc" },
-        select: {
-          arrangement: {
-            select: {
-              song: { select: { title: true } },
-            },
-          },
-        },
-      },
-    },
+    select: { slug: true, title: true, date: true, worshipLeader: true, plan: true },
   });
 
-  return services.map((service) => ({
-    slug: service.slug,
-    title: service.title,
-    date: service.date,
-    worshipLeader: service.worshipLeader,
-    songs: service.units
-      .map((u) => u.arrangement?.song?.title)
-      .filter((t): t is string => t != null),
-  }));
+  const arrangementIds = new Set<number>();
+  for (const service of services) {
+    const plan = service.plan as ServicePlan | null;
+    for (const section of plan?.sections ?? []) {
+      for (const unit of section.units) {
+        if (unit.type === "SONG" && unit.arrangementId != null) arrangementIds.add(unit.arrangementId);
+      }
+    }
+  }
+  const arrangements = arrangementIds.size
+    ? await prisma.songArrangement.findMany({
+        where: { id: { in: [...arrangementIds] } },
+        select: { id: true, song: { select: { title: true } } },
+      })
+    : [];
+  const titleByArrangementId = new Map(arrangements.map((a) => [a.id, a.song?.title]));
+
+  return services.map((service) => {
+    const plan = service.plan as ServicePlan | null;
+    const songs = (plan?.sections ?? [])
+      .flatMap((section) => section.units)
+      .filter((unit) => unit.type === "SONG" && unit.arrangementId != null)
+      .map((unit) => titleByArrangementId.get(unit.arrangementId!))
+      .filter((title): title is string => title != null);
+
+    return {
+      slug: service.slug,
+      title: service.title,
+      date: service.date,
+      worshipLeader: service.worshipLeader,
+      songs,
+    };
+  });
 }
 
 export async function retrieveServices(): Promise<ClientService[]> {
@@ -919,126 +928,166 @@ export async function createOrUpdateService(
 ): Promise<ClientService> {
   const serviceSlug = service.slug?.length ? service.slug : await slugForService();
 
-  const newOrUpdatedService = await prisma.service.upsert({
-    where: { slug: serviceSlug },
-    update: {
-      title: service.title,
-      worshipLeader: service.worshipLeader,
-      date: service.date,
-      preacher: service.preacher ?? null,
-      sermonTheme: service.sermonTheme ?? null,
-      sermonReference: service.sermonReference ?? null,
-      plan: (service.plan as object) ?? Prisma.DbNull,
-    },
-    create: {
-      title: service.title,
-      slug: serviceSlug,
-      worshipLeader: service.worshipLeader,
-      date: service.date,
-      preacher: service.preacher ?? null,
-      sermonTheme: service.sermonTheme ?? null,
-      sermonReference: service.sermonReference ?? null,
-      isDeleted: false,
-      plan: (service.plan as object) ?? Prisma.DbNull,
-    },
+  const serviceId = await prisma.$transaction(async (tx) => {
+    const existing = await tx.service.findUnique({
+      where: { slug: serviceSlug },
+      select: { plan: true },
+    });
+    const previousPlan = (existing?.plan as ServicePlan | null) ?? null;
+
+    const resolvedPlan = service.plan
+      ? await syncPlanArrangements(tx, service.plan, previousPlan)
+      : null;
+
+    const upserted = await tx.service.upsert({
+      where: { slug: serviceSlug },
+      update: {
+        title: service.title,
+        worshipLeader: service.worshipLeader,
+        date: service.date,
+        preacher: service.preacher ?? null,
+        sermonTheme: service.sermonTheme ?? null,
+        sermonReference: service.sermonReference ?? null,
+        plan: (resolvedPlan as object) ?? Prisma.DbNull,
+      },
+      create: {
+        title: service.title,
+        slug: serviceSlug,
+        worshipLeader: service.worshipLeader,
+        date: service.date,
+        preacher: service.preacher ?? null,
+        sermonTheme: service.sermonTheme ?? null,
+        sermonReference: service.sermonReference ?? null,
+        isDeleted: false,
+        plan: (resolvedPlan as object) ?? Prisma.DbNull,
+      },
+    });
+
+    return upserted.id;
   });
 
-  // Sync flat ServiceUnit records for SONG units only (used by chord view)
-  if (service.plan) {
-    const songUnits = service.plan.sections.flatMap((s) => s.units).filter((u) => u.type === "SONG");
-    const synced = await syncSongUnits(songUnits, newOrUpdatedService.id);
-    await deleteServiceUnitsNotIn(newOrUpdatedService.id, synced.map((u) => u.id!));
-  }
-
-  const retService = await retrieveService(newOrUpdatedService.id);
+  const retService = await retrieveService(serviceId);
   if (!retService) throw new Error("Service not found after creation or update");
   return retService;
 }
 
-// Upserts service arrangements for SONG units and returns units with resolved arrangementIds.
-async function syncSongUnits(
-  units: ClientServiceUnit[],
-  serviceId: number
-): Promise<ClientServiceUnit[]> {
-  let globalOrder = 1;
-  const results: ClientServiceUnit[] = [];
+// O JSON do plano guarda só a "forma" do item (ids, tipo, arrangementId, duração, etc.)
+// — o conteúdo de arranjo/música em si nunca é lido de volta do JSON, é sempre resolvido
+// do banco em retrieveService(), pra nunca correr o risco de ficar dessincronizado.
+function stripUnitForPersistence(unit: ClientServiceUnit) {
+  return {
+    clientId: unit.clientId,
+    type: unit.type,
+    arrangementId: unit.arrangementId ?? null,
+    semitoneTranspose: unit.semitoneTranspose ?? null,
+    order: unit.order,
+    durationMin: unit.durationMin ?? null,
+    label: unit.label ?? null,
+    metadata: unit.metadata ?? null,
+  };
+}
 
-  for (const unit of units) {
-    if (unit.type !== "SONG") continue;
+// Diffa o plano sendo salvo contra o plano anteriormente persistido (casando unidades
+// pelo `clientId` estável, não por posição) pra decidir quais cópias de arranjo criar,
+// reaproveitar ou apagar — em vez de recriar tudo a cada save. Devolve o plano com
+// `arrangementId` resolvido em cada unidade SONG e sem o objeto `arrangement` pesado.
+async function syncPlanArrangements(
+  tx: Prisma.TransactionClient,
+  newPlan: ServicePlan,
+  previousPlan: ServicePlan | null
+): Promise<ServicePlan> {
+  const previousArrangementIdByClientId = new Map<string, number>();
+  const previousArrangementIds = new Set<number>();
+  for (const section of previousPlan?.sections ?? []) {
+    for (const unit of section.units) {
+      if (unit.type === "SONG" && unit.arrangementId != null) {
+        previousArrangementIdByClientId.set(unit.clientId, unit.arrangementId);
+        previousArrangementIds.add(unit.arrangementId);
+      }
+    }
+  }
 
-    let arrangementId = unit.arrangementId ?? null;
+  // Só reaproveitamos uma cópia existente se a música não mudou — pra isso, precisamos
+  // saber a que música cada cópia anterior pertencia de fato.
+  const songIdByArrangementId = new Map<number, number>();
+  if (previousArrangementIds.size > 0) {
+    const rows = await tx.songArrangement.findMany({
+      where: { id: { in: [...previousArrangementIds] } },
+      select: { id: true, songId: true },
+    });
+    for (const row of rows) songIdByArrangementId.set(row.id, row.songId);
+  }
 
-    if (unit.arrangement?.songId) {
-      const originalArrangementId = unit.arrangement.originalArrangementId;
+  const keptArrangementIds = new Set<number>();
 
-      // Units to copy when creating a new service arrangement.
-      // The song list query doesn't include units, so we fetch from DB when needed.
-      let unitsToCopy = unit.arrangement.units?.map(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ({ id: _id, arrangementId: _aId, ...u }) => u
-      );
-      if (!unitsToCopy?.length && originalArrangementId != null && arrangementId == null) {
-        const original = await prisma.songArrangement.findUnique({
-          where: { id: originalArrangementId },
-          select: { units: { orderBy: { order: "asc" } } },
+  const sections = [];
+  for (const section of newPlan.sections) {
+    const units = [];
+    for (const unit of section.units) {
+      if (unit.type !== "SONG" || !unit.arrangement?.songId) {
+        units.push(stripUnitForPersistence(unit));
+        continue;
+      }
+
+      const previousArrangementId = previousArrangementIdByClientId.get(unit.clientId) ?? null;
+      const sameSong =
+        previousArrangementId != null &&
+        songIdByArrangementId.get(previousArrangementId) === unit.arrangement.songId;
+
+      let arrangementId: number;
+      if (sameSong && previousArrangementId != null) {
+        await tx.songArrangement.update({
+          where: { id: previousArrangementId },
+          data: { name: unit.arrangement.name, key: unit.arrangement.key },
         });
-        unitsToCopy = original?.units?.map(
+        arrangementId = previousArrangementId;
+      } else {
+        const originalArrangementId = unit.arrangement.originalArrangementId ?? null;
+
+        let unitsToCopy = unit.arrangement.units?.map(
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           ({ id: _id, arrangementId: _aId, ...u }) => u
         );
+        if (!unitsToCopy?.length && originalArrangementId != null) {
+          const original = await tx.songArrangement.findUnique({
+            where: { id: originalArrangementId },
+            select: { units: { orderBy: { order: "asc" } } },
+          });
+          unitsToCopy = original?.units?.map(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            ({ id: _id, arrangementId: _aId, ...u }) => u
+          );
+        }
+
+        const created = await tx.songArrangement.create({
+          data: {
+            name: unit.arrangement.name,
+            key: unit.arrangement.key,
+            isServiceArrangement: true,
+            song: { connect: { id: unit.arrangement.songId } },
+            ...(originalArrangementId != null && {
+              originalArrangement: { connect: { id: originalArrangementId } },
+            }),
+            ...(unitsToCopy?.length ? { units: { createMany: { data: unitsToCopy } } } : {}),
+          },
+        });
+        arrangementId = created.id;
       }
 
-      const saved = await prisma.songArrangement.upsert({
-        where: { id: arrangementId ?? -1, isServiceArrangement: true },
-        update: { name: unit.arrangement.name, key: unit.arrangement.key },
-        create: {
-          name: unit.arrangement.name,
-          key: unit.arrangement.key,
-          isServiceArrangement: true,
-          song: { connect: { id: unit.arrangement.songId } },
-          ...(originalArrangementId != null && {
-            originalArrangement: { connect: { id: originalArrangementId } },
-          }),
-          ...(unitsToCopy?.length
-            ? { units: { createMany: { data: unitsToCopy } } }
-            : {}),
-        },
-      });
-      arrangementId = saved.id;
+      keptArrangementIds.add(arrangementId);
+      units.push({ ...stripUnitForPersistence(unit), arrangementId });
     }
-
-    const where =
-      unit.id != null
-        ? { id: unit.id }
-        : arrangementId != null
-        ? { arrangementId }
-        : { id: -1 };
-
-    const serviceUnit = await prisma.serviceUnit.upsert({
-      where,
-      update: { arrangementId, semitoneTranspose: unit.semitoneTranspose ?? null, order: globalOrder },
-      create: { serviceId, type: "SONG", arrangementId, semitoneTranspose: unit.semitoneTranspose ?? null, order: globalOrder },
-    });
-
-    results.push({ ...unit, id: serviceUnit.id, arrangementId });
-    globalOrder++;
+    sections.push({ ...section, units });
   }
 
-  return results;
-}
+  // Cópias que existiam antes mas não sobraram referenciadas por nenhuma unidade agora
+  // (música removida, ou trocada por outra no mesmo item) — órfãs, podem ser apagadas.
+  const orphanIds = [...previousArrangementIds].filter((id) => !keptArrangementIds.has(id));
+  if (orphanIds.length > 0) {
+    await tx.songArrangement.deleteMany({ where: { id: { in: orphanIds } } });
+  }
 
-async function deleteServiceUnitsNotIn(serviceId: number, unitIds: number[]) {
-  await prisma.songArrangement
-    .deleteMany({
-      where: { serviceUnit: { serviceId, id: { notIn: unitIds } } },
-    })
-    .catch((err) => console.error("Error deleting orphaned arrangements:", err));
-
-  await prisma.serviceUnit
-    .deleteMany({
-      where: { serviceId, id: { notIn: unitIds } },
-    })
-    .catch((err) => console.error("Error deleting orphaned service units:", err));
+  return { ...newPlan, sections };
 }
 
 export async function deleteService(
@@ -1155,40 +1204,58 @@ function selectSlugOrId(slugOrId: string | number): {
 }
 
 export async function retrieveStats(): Promise<StatsData> {
-  const [totalSongs, units] = await Promise.all([
+  const [totalSongs, services] = await Promise.all([
     prisma.song.count({ where: { isDeleted: false } }),
-    prisma.serviceUnit.findMany({
-      where: { type: "SONG", service: { isDeleted: false } },
-      select: {
-        arrangement: {
-          select: { song: { select: { slug: true, title: true } } },
-        },
-        service: { select: { slug: true, worshipLeader: true } },
-      },
+    prisma.service.findMany({
+      where: { isDeleted: false },
+      select: { slug: true, worshipLeader: true, plan: true },
     }),
   ]);
+
+  const arrangementIds = new Set<number>();
+  for (const service of services) {
+    const plan = service.plan as ServicePlan | null;
+    for (const section of plan?.sections ?? []) {
+      for (const unit of section.units) {
+        if (unit.type === "SONG" && unit.arrangementId != null) arrangementIds.add(unit.arrangementId);
+      }
+    }
+  }
+  const arrangements = arrangementIds.size
+    ? await prisma.songArrangement.findMany({
+        where: { id: { in: [...arrangementIds] } },
+        select: { id: true, song: { select: { slug: true, title: true } } },
+      })
+    : [];
+  const songByArrangementId = new Map(arrangements.map((a) => [a.id, a.song]));
 
   const songMap = new Map<string, SongStat>();
   const leaderMap = new Map<string, { services: Set<string>; songs: Map<string, SongStat> }>();
 
-  for (const unit of units) {
-    const song = unit.arrangement?.song;
-    if (!song) continue;
+  for (const service of services) {
+    const plan = service.plan as ServicePlan | null;
+    const leaderName = service.worshipLeader?.trim() || "Sem dirigente";
 
-    // Global ranking
-    const global = songMap.get(song.slug);
-    if (global) global.count++;
-    else songMap.set(song.slug, { slug: song.slug, title: song.title, count: 1 });
+    for (const section of plan?.sections ?? []) {
+      for (const unit of section.units) {
+        if (unit.type !== "SONG" || unit.arrangementId == null) continue;
+        const song = songByArrangementId.get(unit.arrangementId);
+        if (!song) continue;
 
-    // By leader
-    const leaderName = unit.service?.worshipLeader?.trim() || "Sem dirigente";
-    const serviceSlug = unit.service?.slug;
-    if (!leaderMap.has(leaderName)) leaderMap.set(leaderName, { services: new Set(), songs: new Map() });
-    const leader = leaderMap.get(leaderName)!;
-    if (serviceSlug) leader.services.add(serviceSlug);
-    const leaderSong = leader.songs.get(song.slug);
-    if (leaderSong) leaderSong.count++;
-    else leader.songs.set(song.slug, { slug: song.slug, title: song.title, count: 1 });
+        // Global ranking
+        const global = songMap.get(song.slug);
+        if (global) global.count++;
+        else songMap.set(song.slug, { slug: song.slug, title: song.title, count: 1 });
+
+        // By leader
+        if (!leaderMap.has(leaderName)) leaderMap.set(leaderName, { services: new Set(), songs: new Map() });
+        const leader = leaderMap.get(leaderName)!;
+        leader.services.add(service.slug);
+        const leaderSong = leader.songs.get(song.slug);
+        if (leaderSong) leaderSong.count++;
+        else leader.songs.set(song.slug, { slug: song.slug, title: song.title, count: 1 });
+      }
+    }
   }
 
   const topSongs = [...songMap.values()].sort((a, b) => b.count - a.count).slice(0, 30);

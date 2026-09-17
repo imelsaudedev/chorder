@@ -3,7 +3,6 @@ import {
   Prisma,
   Service,
   ServiceTemplate,
-  ServiceUnit,
   Song,
   SongArrangement,
   SongUnit,
@@ -12,7 +11,7 @@ import {
   TagGroup,
 } from "@prisma/client";
 
-export type { ArrangementAudio, ServiceTemplate, ServiceUnit, Song, SongArrangement, SongUnit, SongUnitType, Tag, TagGroup };
+export type { ArrangementAudio, ServiceTemplate, Song, SongArrangement, SongUnit, SongUnitType, Tag, TagGroup };
 
 export type ClientArrangementAudio = Omit<Pick<ArrangementAudio, "id" | "url" | "label" | "order">, "id"> & { id?: number };
 
@@ -77,15 +76,16 @@ export type ClientSongUnit = Omit<SongUnit, "id" | "arrangementId"> & {
   id?: number;
   arrangementId?: number;
 };
-export type ClientServiceUnit = Omit<
-  ServiceUnit,
-  "id" | "serviceId"
-> & {
+export type ClientServiceUnit = {
   id?: number;
   // Id estável gerado no client, não muda mesmo quando arrangementId muda
   // (ex: ao trocar a música de um item). Usado pra diffar o plano no save
   // e como key de reconciliação no editor.
   clientId: string;
+  type: (typeof SERVICE_UNIT_TYPES)[number];
+  arrangementId: number | null;
+  semitoneTranspose: number | null;
+  order: number;
   arrangement?: ClientArrangement | null;
   serviceId?: number;
   durationMin?: number | null;

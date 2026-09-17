@@ -11,7 +11,6 @@ export async function clearDatabase() {
   // Delete in FK-safe order. SongArrangement has a self-referential FK (originalArrangementId)
   // with RESTRICT — null it out first to avoid constraint violations.
   await prisma.songUnit.deleteMany({});
-  await prisma.serviceUnit.deleteMany({});
   await prisma.songArrangement.updateMany({ data: { originalArrangementId: null } });
   await prisma.songArrangement.deleteMany({});
   await prisma.service.deleteMany({});
