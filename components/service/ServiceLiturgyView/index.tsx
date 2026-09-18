@@ -15,14 +15,6 @@ type FalaMeta = { speaker?: string | null };
 type LeituraMeta = { version?: string | null };
 type SermaoMeta = { preacher?: string | null };
 
-function isIncomplete(unit: { type: string; arrangement?: { song?: unknown } | null; metadata?: unknown }): boolean {
-  if (unit.type === "SONG") return !unit.arrangement?.song;
-  if (unit.type === "FALA" || unit.type === "ORACAO") return !(unit.metadata as FalaMeta | null)?.speaker;
-  if (unit.type === "LEITURA") return !(unit.metadata as LeituraMeta | null)?.version;
-  if (unit.type === "SERMAO") return !(unit.metadata as SermaoMeta | null)?.preacher;
-  return false;
-}
-
 function formatDuration(min: number): string {
   if (min < 60) return `${min} min`;
   const h = Math.floor(min / 60);
@@ -85,9 +77,7 @@ export default function ServiceLiturgyView({
           : null;
 
         const allUnits = section.units ?? [];
-        const visibleUnits = allUnits
-          .map((u, originalIndex) => ({ unit: u, originalIndex }))
-          .filter(({ unit: u }) => !isIncomplete(u));
+        const visibleUnits = allUnits.map((unit, originalIndex) => ({ unit, originalIndex }));
         if (visibleUnits.length === 0) return null;
 
         return (
@@ -108,7 +98,7 @@ export default function ServiceLiturgyView({
             </div>
             <div className="h-px bg-zinc-200 mb-1" />
 
-            {/* Unit rows — apenas itens preenchidos */}
+            {/* Unit rows — itens vazios aparecem com placeholder, não são escondidos */}
             {visibleUnits.map(({ unit, originalIndex }) => {
               const unitTiming = timing?.units[originalIndex];
               const config = UNIT_CONFIG[unit.type as ServiceUnitTypeValue];

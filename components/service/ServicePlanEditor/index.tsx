@@ -5,7 +5,7 @@ import ConfirmDiscardDialog from "@/components/common/ConfirmDiscardDialog";
 import FormFooter from "@/components/common/FormFooter";
 import ServicePlanDrawer, { ServicePlanConfig } from "@/components/service/ServicePlanDrawer";
 import { Button } from "@/components/ui/button";
-import { ClientService, ClientServiceUnit } from "@/prisma/models";
+import { ClientService } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,14 +14,6 @@ import { usePlanEditor } from "./hooks/usePlanEditor";
 import ServiceItemDrawer from "./ServiceItemDrawer";
 import ServicePlanHeader from "./ServicePlanHeader";
 import ServiceTimeline from "./ServiceTimeline";
-
-function isIncomplete(unit: ClientServiceUnit): boolean {
-  if (unit.type === "SONG") return !unit.arrangement?.song;
-  if (unit.type === "FALA" || unit.type === "ORACAO") return !(unit.metadata as { speaker?: string | null } | null)?.speaker;
-  if (unit.type === "LEITURA") return !(unit.metadata as { version?: string | null } | null)?.version;
-  if (unit.type === "SERMAO") return !(unit.metadata as { preacher?: string | null } | null)?.preacher;
-  return false;
-}
 
 type ServicePlanEditorProps = {
   service: ClientService;
@@ -37,14 +29,6 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
   const [metaDrawerOpen, setMetaDrawerOpen] = useState(false);
 
   async function handleSave() {
-    const sections = editor.service.plan?.sections ?? [];
-    const incomplete = sections.flatMap(s => s.units ?? []).filter(isIncomplete);
-    if (incomplete.length > 0) {
-      toast.warning(
-        `${incomplete.length} ${incomplete.length === 1 ? "item precisa" : "itens precisam"} ser preenchido ou removido antes de salvar.`
-      );
-      return;
-    }
     try {
       const saved = await editor.save();
       if (onSaved) onSaved(saved);
