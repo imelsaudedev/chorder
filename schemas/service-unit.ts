@@ -8,7 +8,6 @@ export const serviceUnitTypeSchema = z.enum([
   "ORACAO",
   "AVISOS",
   "SERMAO",
-  "ENCERRAMENTO",
 ]);
 
 export const serviceUnitSchema = z.object({

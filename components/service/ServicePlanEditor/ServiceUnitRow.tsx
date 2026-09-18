@@ -19,6 +19,7 @@ type ServiceUnitRowProps = {
 type FalaMeta = { speaker?: string | null; description?: string | null };
 type LeituraMeta = { version?: string | null; text?: string | null };
 type SermaoMeta = { preacher?: string | null; reference?: string | null; description?: string | null };
+type AvisosMeta = { items?: { id: string; text: string }[] };
 
 const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
   function ServiceUnitRow(
@@ -53,6 +54,9 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
     const sermaoPreacher = sermaoMeta?.preacher ?? null;
     const sermaoDescription = sermaoMeta?.description ?? null;
 
+    const avisosItems =
+      unit.type === "AVISOS" ? (unit.metadata as AvisosMeta | null)?.items ?? [] : [];
+
     return (
       <div
         ref={ref}
@@ -77,51 +81,49 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
 
           {/* 3. Label + sub inline */}
           <div className="flex-1 min-w-0">
-            {config?.isComplex ? (
-              <div className="flex items-center gap-1 min-w-0">
+            <div className="flex items-center gap-1 min-w-0">
+              <button
+                type="button"
+                onClick={onEditDetails}
+                className="text-sm text-left hover:underline decoration-dashed underline-offset-2 leading-tight truncate min-w-0"
+              >
+                {unit.type === "SONG" ? (
+                  songTitle
+                    ? <>{songTitle}{unit.arrangement?.name && <span className="text-zinc-400"> · {unit.arrangement.name}</span>}</>
+                    : <span className="text-zinc-400">Adicione uma música</span>
+                ) : unit.type === "FALA" ? (
+                  falaSpeaker
+                    ? <>{displayLabel}<span className="text-zinc-400"> · {falaSpeaker}</span></>
+                    : <span className="text-zinc-400">Adicione uma fala</span>
+                ) : unit.type === "ORACAO" ? (
+                  falaSpeaker
+                    ? <>{displayLabel}<span className="text-zinc-400"> · {falaSpeaker}</span></>
+                    : <span className="text-zinc-400">Adicione uma oração</span>
+                ) : unit.type === "LEITURA" ? (
+                  leituraVersion
+                    ? <>{displayLabel}<span className="text-zinc-400"> · {leituraVersion}</span></>
+                    : <span className="text-zinc-400">Adicione uma leitura</span>
+                ) : unit.type === "SERMAO" ? (
+                  sermaoPreacher
+                    ? <>{displayLabel}<span className="text-zinc-400"> · {sermaoPreacher}</span></>
+                    : <span className="text-zinc-400">Adicione um sermão</span>
+                ) : unit.type === "AVISOS" ? (
+                  avisosItems.length > 0
+                    ? <>Avisos<span className="text-zinc-400"> · {avisosItems.length} {avisosItems.length === 1 ? "item" : "itens"}</span></>
+                    : <span className="text-zinc-400">Adicione avisos</span>
+                ) : displayLabel}
+              </button>
+              {(falaDescription || leituraText || sermaoDescription || avisosItems.length > 0) && (
                 <button
                   type="button"
-                  onClick={onEditDetails}
-                  className="text-sm text-left hover:underline decoration-dashed underline-offset-2 leading-tight truncate min-w-0"
+                  onClick={() => setDescExpanded((v) => !v)}
+                  className="shrink-0 text-zinc-300 hover:text-zinc-500 transition-colors"
+                  aria-label={descExpanded ? "Ocultar descrição" : "Ver descrição"}
                 >
-                  {unit.type === "SONG" ? (
-                    songTitle
-                      ? <>{songTitle}{unit.arrangement?.name && <span className="text-zinc-400"> · {unit.arrangement.name}</span>}</>
-                      : <span className="text-zinc-400">Adicione uma música</span>
-                  ) : unit.type === "FALA" ? (
-                    falaSpeaker
-                      ? <>{displayLabel}<span className="text-zinc-400"> · {falaSpeaker}</span></>
-                      : <span className="text-zinc-400">Adicione uma fala</span>
-                  ) : unit.type === "ORACAO" ? (
-                    falaSpeaker
-                      ? <>{displayLabel}<span className="text-zinc-400"> · {falaSpeaker}</span></>
-                      : <span className="text-zinc-400">Adicione uma oração</span>
-                  ) : unit.type === "LEITURA" ? (
-                    leituraVersion
-                      ? <>{displayLabel}<span className="text-zinc-400"> · {leituraVersion}</span></>
-                      : <span className="text-zinc-400">Adicione uma leitura</span>
-                  ) : unit.type === "SERMAO" ? (
-                    sermaoPreacher
-                      ? <>{displayLabel}<span className="text-zinc-400"> · {sermaoPreacher}</span></>
-                      : <span className="text-zinc-400">Adicione um sermão</span>
-                  ) : displayLabel}
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${descExpanded ? "rotate-180" : ""}`} />
                 </button>
-                {(falaDescription || leituraText || sermaoDescription) && (
-                  <button
-                    type="button"
-                    onClick={() => setDescExpanded((v) => !v)}
-                    className="shrink-0 text-zinc-300 hover:text-zinc-500 transition-colors"
-                    aria-label={descExpanded ? "Ocultar descrição" : "Ver descrição"}
-                  >
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${descExpanded ? "rotate-180" : ""}`} />
-                  </button>
-                )}
-              </div>
-            ) : (
-              <span className="text-sm text-zinc-700 leading-tight">
-                {unit.label || config?.label || unit.type}
-              </span>
-            )}
+              )}
+            </div>
           </div>
 
           {/* 4. Duration + time right-aligned — desktop apenas */}
@@ -191,6 +193,17 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
             <p className="text-xs text-zinc-400 whitespace-pre-wrap leading-relaxed">
               {sermaoDescription}
             </p>
+          </div>
+        )}
+        {descExpanded && unit.type === "AVISOS" && avisosItems.length > 0 && (
+          <div className="flex gap-2 px-1 pb-1">
+            <div className="w-4 shrink-0" />
+            <div className="w-4 shrink-0" />
+            <ul className="text-xs text-zinc-400 list-disc list-inside space-y-0.5">
+              {avisosItems.map((item) => (
+                <li key={item.id}>{item.text}</li>
+              ))}
+            </ul>
           </div>
         )}
       </div>

@@ -60,10 +60,10 @@ const TEMPLATE_ITEMS = {
       },
       {
         type: "AVISOS",
-        label: "Avisos",
+        label: null,
         order: 7,
         durationMin: 10,
-        metadata: null,
+        metadata: { items: [] },
       },
       {
         type: "SONG",

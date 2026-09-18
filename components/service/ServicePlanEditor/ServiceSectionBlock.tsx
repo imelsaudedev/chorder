@@ -38,7 +38,6 @@ type ServiceSectionBlockProps = {
   dragHandleRef?: React.RefObject<HTMLDivElement>;
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: () => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
   onUpdateUnit: (unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
@@ -55,8 +54,6 @@ function isDragData(data: Record<string, unknown>): data is DragData {
   return data.type === "service-unit";
 }
 
-const COMPLEX_TYPES: ServiceUnitTypeValue[] = ["SONG", "FALA", "ORACAO", "LEITURA", "SERMAO"];
-
 export default function ServiceSectionBlock({
   section,
   sectionIndex,
@@ -64,7 +61,6 @@ export default function ServiceSectionBlock({
   dragHandleRef,
   onUpdateSection,
   onRemoveSection,
-  onAddUnit,
   onUpdateUnit,
   onRemoveUnit,
   onMoveUnit,
@@ -169,20 +165,7 @@ export default function ServiceSectionBlock({
               return (
                 <DropdownMenuItem
                   key={type}
-                  onClick={() => {
-                    if (COMPLEX_TYPES.includes(type)) {
-                      onOpenDrawer({ type: "add-unit", sectionIndex, unitType: type });
-                    } else {
-                      onAddUnit(sectionIndex, {
-                        type,
-                        arrangementId: null,
-                        semitoneTranspose: null,
-                        durationMin: null,
-                        label: null,
-                        metadata: null,
-                      });
-                    }
-                  }}
+                  onClick={() => onOpenDrawer({ type: "add-unit", sectionIndex, unitType: type })}
                 >
                   <Icon className={`w-4 h-4 ${config.color}`} />
                   {config.label}

@@ -14,7 +14,7 @@ import {
   ClientServiceUnit,
   ClientSong,
 } from "@/prisma/models";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DrawerState } from "../hooks/usePlanEditor";
 import { UNIT_CONFIG, ServiceUnitTypeValue } from "../unitConfig";
@@ -32,10 +32,10 @@ type DrawerView =
   | { screen: "menu" }
   | { screen: "song-picker"; sectionIndex: number; unitIndex?: number }
   | { screen: "arrangement-picker"; sectionIndex: number; unitIndex?: number; song: ClientSong }
-  | { screen: "unit-form"; sectionIndex: number; unitType: ServiceUnitTypeValue }
   | { screen: "fala-form"; sectionIndex: number; unitIndex?: number; unitType: "FALA" | "ORACAO" }
   | { screen: "leitura-form"; sectionIndex: number; unitIndex?: number }
-  | { screen: "sermao-form"; sectionIndex: number; unitIndex?: number };
+  | { screen: "sermao-form"; sectionIndex: number; unitIndex?: number }
+  | { screen: "avisos-form"; sectionIndex: number; unitIndex?: number };
 
 export default function ServiceItemDrawer({
   drawerState,
@@ -73,6 +73,10 @@ export default function ServiceItemDrawer({
         setView({ screen: "sermao-form", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex });
         return;
       }
+      if (unit?.type === "AVISOS") {
+        setView({ screen: "avisos-form", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex });
+        return;
+      }
     }
     if (drawerState.type === "add-unit" && drawerState.unitType) {
       const { sectionIndex: si, unitType } = drawerState;
@@ -80,6 +84,7 @@ export default function ServiceItemDrawer({
       if (unitType === "FALA" || unitType === "ORACAO") { setView({ screen: "fala-form", sectionIndex: si, unitType }); return; }
       if (unitType === "LEITURA") { setView({ screen: "leitura-form", sectionIndex: si }); return; }
       if (unitType === "SERMAO") { setView({ screen: "sermao-form", sectionIndex: si }); return; }
+      if (unitType === "AVISOS") { setView({ screen: "avisos-form", sectionIndex: si }); return; }
     }
     if (drawerState.type !== "closed") {
       setView({ screen: "menu" });
@@ -100,8 +105,10 @@ export default function ServiceItemDrawer({
       setView({ screen: "fala-form", sectionIndex, unitType: type });
     } else if (type === "LEITURA") {
       setView({ screen: "leitura-form", sectionIndex });
-    } else {
-      setView({ screen: "unit-form", sectionIndex, unitType: type });
+    } else if (type === "SERMAO") {
+      setView({ screen: "sermao-form", sectionIndex });
+    } else if (type === "AVISOS") {
+      setView({ screen: "avisos-form", sectionIndex });
     }
   }
 
@@ -169,24 +176,6 @@ export default function ServiceItemDrawer({
     commitSongUnit(view.sectionIndex, view.unitIndex, song, arrangement);
   }
 
-  function handleSimpleUnitAdd(
-    type: ServiceUnitTypeValue,
-    label: string,
-    durationMin: number | null
-  ) {
-    const si = view.screen === "unit-form" ? view.sectionIndex : sectionIndex;
-    onAddUnit(si, {
-      type,
-      arrangementId: null,
-      semitoneTranspose: null,
-      durationMin,
-      label: label || null,
-      metadata: null,
-    });
-    onClose();
-    setView({ screen: "menu" });
-  }
-
   function handleFalaDone() {
     onClose();
     setView({ screen: "menu" });
@@ -198,6 +187,11 @@ export default function ServiceItemDrawer({
   }
 
   function handleSermaoDone() {
+    onClose();
+    setView({ screen: "menu" });
+  }
+
+  function handleAvisosDone() {
     onClose();
     setView({ screen: "menu" });
   }
@@ -230,6 +224,11 @@ export default function ServiceItemDrawer({
       ? sections[view.sectionIndex]?.units?.[view.unitIndex]
       : undefined;
 
+  const currentAvisosUnit =
+    view.screen === "avisos-form" && view.unitIndex !== undefined
+      ? sections[view.sectionIndex]?.units?.[view.unitIndex]
+      : undefined;
+
   const isEditing =
     (view.screen === "song-picker" || view.screen === "arrangement-picker") &&
     view.unitIndex !== undefined;
@@ -246,10 +245,10 @@ export default function ServiceItemDrawer({
       ? view.unitIndex !== undefined ? "Editar leitura" : "Adicionar leitura"
       : view.screen === "sermao-form"
       ? view.unitIndex !== undefined ? "Editar sermão" : "Adicionar sermão"
+      : view.screen === "avisos-form"
+      ? view.unitIndex !== undefined ? "Editar avisos" : "Adicionar avisos"
       : view.screen === "fala-form"
       ? `${view.unitIndex !== undefined ? "Editar" : "Adicionar"} ${UNIT_CONFIG[view.unitType]?.label.toLowerCase()}`
-      : view.screen === "unit-form"
-      ? `Adicionar ${UNIT_CONFIG[view.unitType]?.label ?? view.unitType}`
       : sections.length === 0
       ? "Montar liturgia"
       : "Adicionar item";
@@ -291,12 +290,6 @@ export default function ServiceItemDrawer({
               onConfirm={handleArrangementSelected}
             />
           )}
-          {view.screen === "unit-form" && (
-            <SimpleUnitForm
-              unitType={view.unitType}
-              onAdd={handleSimpleUnitAdd}
-            />
-          )}
           {view.screen === "leitura-form" && (
             <LeituraUnitForm
               sectionIndex={view.sectionIndex}
@@ -326,6 +319,16 @@ export default function ServiceItemDrawer({
               onAdd={onAddUnit}
               onUpdate={onUpdateUnit}
               onDone={handleSermaoDone}
+            />
+          )}
+          {view.screen === "avisos-form" && (
+            <AvisosUnitForm
+              sectionIndex={view.sectionIndex}
+              unitIndex={view.unitIndex}
+              existingUnit={currentAvisosUnit}
+              onAdd={onAddUnit}
+              onUpdate={onUpdateUnit}
+              onDone={handleAvisosDone}
             />
           )}
         </div>
@@ -750,51 +753,124 @@ function SermaoUnitForm({
   );
 }
 
-// --- Simple unit form ---
+// --- Avisos unit form ---
 
-function SimpleUnitForm({
-  unitType,
+type AvisosItem = { id: string; text: string };
+
+function AvisosUnitForm({
+  sectionIndex,
+  unitIndex,
+  existingUnit,
   onAdd,
+  onUpdate,
+  onDone,
 }: {
-  unitType: ServiceUnitTypeValue;
-  onAdd: (type: ServiceUnitTypeValue, label: string, durationMin: number | null) => void;
+  sectionIndex: number;
+  unitIndex?: number;
+  existingUnit?: ClientServiceUnit;
+  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
+  onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
+  onDone: () => void;
 }) {
-  const config = UNIT_CONFIG[unitType];
-  const [label, setLabel] = useState("");
-  const [duration, setDuration] = useState<string>("");
+  const existingMeta = existingUnit?.metadata as { items?: AvisosItem[] } | null;
+  const existingItems = existingMeta?.items ?? [];
+
+  const [items, setItems] = useState<AvisosItem[]>(
+    existingItems.length ? existingItems : [{ id: crypto.randomUUID(), text: "" }]
+  );
+  const [duration, setDuration] = useState(
+    existingUnit?.durationMin != null ? String(existingUnit.durationMin) : ""
+  );
+
+  function updateItemText(id: string, text: string) {
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, text } : item)));
+  }
+
+  function removeItem(id: string) {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  }
+
+  function addItem() {
+    setItems((prev) => [...prev, { id: crypto.randomUUID(), text: "" }]);
+  }
+
+  function handleSave() {
+    const durationMin = duration ? parseFloat(duration) : null;
+    const cleanItems = items
+      .map((item) => ({ ...item, text: item.text.trim() }))
+      .filter((item) => item.text);
+    const metadata = { items: cleanItems };
+
+    if (unitIndex !== undefined) {
+      onUpdate(sectionIndex, unitIndex, { label: null, metadata, durationMin });
+    } else {
+      onAdd(sectionIndex, {
+        type: "AVISOS",
+        arrangementId: null,
+        semitoneTranspose: null,
+        label: null,
+        metadata,
+        durationMin,
+      });
+    }
+    onDone();
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Label</label>
-        <input
-          type="text"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder={config?.label ?? unitType}
-          autoFocus
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-        />
+        <label className="text-xs font-medium text-zinc-500">Avisos</label>
+        <div className="flex flex-col gap-2">
+          {items.map((item, i) => (
+            <div key={item.id} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={item.text}
+                onChange={(e) => updateItemText(item.id, e.target.value)}
+                placeholder={`Aviso ${i + 1}`}
+                autoFocus={i === 0}
+                className="flex-1 border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
+              />
+              <button
+                type="button"
+                onClick={() => removeItem(item.id)}
+                className="shrink-0 text-zinc-300 hover:text-red-400 transition-colors"
+                aria-label="Remover aviso"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={addItem}
+          className="self-start flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Adicionar aviso
+        </button>
       </div>
+
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
         <input
           type="number"
           min={0}
+          step={0.5}
           value={duration}
           onChange={(e) => setDuration(e.target.value)}
           placeholder="—"
           className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
         />
       </div>
+
       <button
         type="button"
-        onClick={() =>
-          onAdd(unitType, label, duration ? parseInt(duration) : null)
-        }
+        onClick={handleSave}
         className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
       >
-        Adicionar
+        {unitIndex !== undefined ? "Salvar" : "Adicionar"}
       </button>
     </div>
   );

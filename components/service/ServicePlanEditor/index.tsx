@@ -74,7 +74,6 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
           onUpdateSection={editor.updateSection}
           onRemoveSection={editor.removeSection}
           onMoveSection={editor.moveSection}
-          onAddUnit={editor.addUnit}
           onUpdateUnit={editor.updateUnit}
           onRemoveUnit={editor.removeUnit}
           onMoveUnit={editor.moveUnit}

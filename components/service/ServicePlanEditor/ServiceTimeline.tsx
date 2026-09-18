@@ -14,7 +14,7 @@ import {
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DrawerState } from "./hooks/usePlanEditor";
-import { useServiceTimeline } from "./hooks/useServiceTimeline";
+import { formatTime, useServiceTimeline } from "./hooks/useServiceTimeline";
 import ServiceSectionBlock from "./ServiceSectionBlock";
 
 type ServiceTimelineProps = {
@@ -23,7 +23,6 @@ type ServiceTimelineProps = {
   onUpdateSection: (sectionIndex: number, changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: (sectionIndex: number) => void;
   onMoveSection: (from: number, to: number) => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
   onUpdateUnit: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (sectionIndex: number, unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
@@ -46,7 +45,6 @@ export default function ServiceTimeline({
   onUpdateSection,
   onRemoveSection,
   onMoveSection,
-  onAddUnit,
   onUpdateUnit,
   onRemoveUnit,
   onMoveUnit,
@@ -54,6 +52,7 @@ export default function ServiceTimeline({
 }: ServiceTimelineProps) {
   const sections = service.plan?.sections ?? [];
   const timings = useServiceTimeline(service);
+  const finalTiming = timings[timings.length - 1];
 
   return (
     <div className="py-4">
@@ -71,7 +70,6 @@ export default function ServiceTimeline({
           timing={timings[sectionIndex]}
           onUpdateSection={(changes) => onUpdateSection(sectionIndex, changes)}
           onRemoveSection={() => onRemoveSection(sectionIndex)}
-          onAddUnit={onAddUnit}
           onUpdateUnit={(unitIndex, changes) => onUpdateUnit(sectionIndex, unitIndex, changes)}
           onRemoveUnit={(unitIndex) => onRemoveUnit(sectionIndex, unitIndex)}
           onMoveUnit={onMoveUnit}
@@ -79,6 +77,12 @@ export default function ServiceTimeline({
           onOpenDrawer={onOpenDrawer}
         />
       ))}
+
+      {finalTiming && (
+        <div className="flex items-center gap-2 px-1 py-1.5 mt-1 text-xs text-zinc-400">
+          Término previsto: {formatTime(finalTiming.endTime)}
+        </div>
+      )}
 
       <AddSectionMenu
         onAdd={(type, label) => onAddSection({ type, label, units: [] })}
@@ -95,7 +99,6 @@ type SortableSectionBlockProps = {
   timing?: ReturnType<typeof useServiceTimeline>[number];
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: () => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
   onUpdateUnit: (unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
@@ -109,7 +112,6 @@ function SortableSectionBlock({
   timing,
   onUpdateSection,
   onRemoveSection,
-  onAddUnit,
   onUpdateUnit,
   onRemoveUnit,
   onMoveUnit,
@@ -178,7 +180,6 @@ function SortableSectionBlock({
         dragHandleRef={dragHandleRef}
         onUpdateSection={onUpdateSection}
         onRemoveSection={onRemoveSection}
-        onAddUnit={onAddUnit}
         onUpdateUnit={onUpdateUnit}
         onRemoveUnit={onRemoveUnit}
         onMoveUnit={onMoveUnit}

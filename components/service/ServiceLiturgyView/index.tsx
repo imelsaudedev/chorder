@@ -10,10 +10,12 @@ import {
 } from "@/components/service/ServicePlanEditor/unitConfig";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientService } from "@/prisma/models";
+import { Fragment } from "react";
 
 type FalaMeta = { speaker?: string | null };
 type LeituraMeta = { version?: string | null };
 type SermaoMeta = { preacher?: string | null };
+type AvisosMeta = { items?: { id: string; text: string }[] };
 
 function formatDuration(min: number): string {
   if (min < 60) return `${min} min`;
@@ -65,6 +67,7 @@ export default function ServiceLiturgyView({
   if (!service?.plan) return null;
 
   const sections = service.plan.sections;
+  const finalTiming = timings[timings.length - 1];
 
   return (
     <div className="flex flex-col gap-8">
@@ -125,55 +128,81 @@ export default function ServiceLiturgyView({
                   ? ((unit.metadata as SermaoMeta | null)?.preacher ?? null)
                   : null;
 
+              const avisosItems =
+                unit.type === "AVISOS"
+                  ? ((unit.metadata as AvisosMeta | null)?.items ?? [])
+                  : [];
+
               const timeMeta = [
                 unit.durationMin ? formatDuration(unit.durationMin) : null,
                 unitTiming ? formatTime(unitTiming.startTime) : null,
               ].filter(Boolean).join(" · ");
 
               return (
-                <div key={unit.clientId} className="flex items-center gap-2 py-1.5 rounded-md hover:bg-zinc-50 transition-colors">
-                  {/* Icon as bullet */}
-                  <div className={`shrink-0 ${config?.color ?? "text-zinc-400"}`}>
-                    {Icon && <Icon className="w-4 h-4" />}
+                <Fragment key={unit.clientId}>
+                  <div className="flex items-center gap-2 py-1.5 rounded-md hover:bg-zinc-50 transition-colors">
+                    {/* Icon as bullet */}
+                    <div className={`shrink-0 ${config?.color ?? "text-zinc-400"}`}>
+                      {Icon && <Icon className="w-4 h-4" />}
+                    </div>
+
+                    {/* Title + sub inline */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm leading-tight truncate">
+                        {unit.type === "SONG" ? (
+                          songTitle
+                            ? <>{songTitle}{unit.arrangement?.name && <span className="text-zinc-400"> · {unit.arrangement.name}</span>}</>
+                            : <span className="text-zinc-400">Adicione uma música</span>
+                        ) : unit.type === "FALA" ? (
+                          falaSpeaker
+                            ? <>{label}<span className="text-zinc-400"> · {falaSpeaker}</span></>
+                            : <span className="text-zinc-400">Adicione uma fala</span>
+                        ) : unit.type === "ORACAO" ? (
+                          falaSpeaker
+                            ? <>{label}<span className="text-zinc-400"> · {falaSpeaker}</span></>
+                            : <span className="text-zinc-400">Adicione uma oração</span>
+                        ) : unit.type === "LEITURA" ? (
+                          leituraVersion
+                            ? <>{label}<span className="text-zinc-400"> · {leituraVersion}</span></>
+                            : <span className="text-zinc-400">Adicione uma leitura</span>
+                        ) : unit.type === "SERMAO" ? (
+                          sermaoPreacher
+                            ? <>{label}<span className="text-zinc-400"> · {sermaoPreacher}</span></>
+                            : <span className="text-zinc-400">Adicione um sermão</span>
+                        ) : unit.type === "AVISOS" ? (
+                          avisosItems.length > 0
+                            ? label
+                            : <span className="text-zinc-400">Adicione avisos</span>
+                        ) : label}
+                      </p>
+                    </div>
+
+                    {/* Time + duration right-aligned */}
+                    {timeMeta && (
+                      <span className="text-xs text-zinc-400 shrink-0">{timeMeta}</span>
+                    )}
                   </div>
 
-                  {/* Title + sub inline */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm leading-tight truncate">
-                      {unit.type === "SONG" ? (
-                        songTitle
-                          ? <>{songTitle}{unit.arrangement?.name && <span className="text-zinc-400"> · {unit.arrangement.name}</span>}</>
-                          : <span className="text-zinc-400">Adicione uma música</span>
-                      ) : unit.type === "FALA" ? (
-                        falaSpeaker
-                          ? <>{label}<span className="text-zinc-400"> · {falaSpeaker}</span></>
-                          : <span className="text-zinc-400">Adicione uma fala</span>
-                      ) : unit.type === "ORACAO" ? (
-                        falaSpeaker
-                          ? <>{label}<span className="text-zinc-400"> · {falaSpeaker}</span></>
-                          : <span className="text-zinc-400">Adicione uma oração</span>
-                      ) : unit.type === "LEITURA" ? (
-                        leituraVersion
-                          ? <>{label}<span className="text-zinc-400"> · {leituraVersion}</span></>
-                          : <span className="text-zinc-400">Adicione uma leitura</span>
-                      ) : unit.type === "SERMAO" ? (
-                        sermaoPreacher
-                          ? <>{label}<span className="text-zinc-400"> · {sermaoPreacher}</span></>
-                          : <span className="text-zinc-400">Adicione um sermão</span>
-                      ) : label}
-                    </p>
-                  </div>
-
-                  {/* Time + duration right-aligned */}
-                  {timeMeta && (
-                    <span className="text-xs text-zinc-400 shrink-0">{timeMeta}</span>
+                  {/* Avisos — lista de sub-itens, sempre visível (sem interação de expandir aqui) */}
+                  {unit.type === "AVISOS" && avisosItems.length > 0 && (
+                    <ul className="pl-6 pb-1 text-xs text-zinc-400 list-disc list-inside space-y-0.5">
+                      {avisosItems.map((item) => (
+                        <li key={item.id}>{item.text}</li>
+                      ))}
+                    </ul>
                   )}
-                </div>
+                </Fragment>
               );
             })}
           </div>
         );
       })}
+
+      {finalTiming && (
+        <div className="text-xs text-zinc-400">
+          Término previsto: {formatTime(finalTiming.endTime)}
+        </div>
+      )}
     </div>
   );
 }

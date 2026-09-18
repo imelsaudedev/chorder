@@ -30,7 +30,6 @@ export const SERVICE_UNIT_TYPES = [
   "ORACAO",
   "AVISOS",
   "SERMAO",
-  "ENCERRAMENTO",
 ] as const;
 
 export const SERVICE_SECTION_TYPES = [
