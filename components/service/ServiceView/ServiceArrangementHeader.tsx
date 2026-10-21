@@ -86,7 +86,7 @@ function ServiceArrangementHeader({
         </Heading>
       </div>
 
-      <div className="key-controls flex items-center gap-1 md:gap-2 fullscreen-hidden">
+      <div className="key-controls flex items-center gap-1 md:gap-2">
         {/* Media buttons — só fora do modo edição */}
         {!isEditing && arrangement.youtubeUrl && (
           <YoutubeReferenceButton

@@ -163,18 +163,21 @@
   }
 }
 
-:fullscreen .fullscreen-hidden {
+/* Modo Palco: ocultação de NavBar/ServiceHeader, acionada via classe JS em
+   <html> (components/service/StageMode), não pela API Fullscreen nativa —
+   ela não é suportada de forma consistente em todos os navegadores-alvo. */
+html.stage-mode-active .stage-mode-hidden {
   display: none;
 }
 
-:fullscreen main {
+html.stage-mode-active main {
   padding: 0;
   margin-bottom: 0;
 }
 
-/* Remove a margem esquerda do ContentWrapper (reservada para a NavBar) em fullscreen */
-:fullscreen .lg\:ml-20,
-:fullscreen .sm\:ml-20 {
+/* Remove a margem esquerda do ContentWrapper (reservada para a NavBar) no Modo Palco */
+html.stage-mode-active .lg\:ml-20,
+html.stage-mode-active .sm\:ml-20 {
   margin-left: 0;
 }
 
