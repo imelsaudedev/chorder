@@ -4,6 +4,7 @@ import SongConfigProvider from "@/components/config/SongConfig";
 import ArrangementView from "@/components/song/ArrangementView";
 import { readStorage, useLocalStorageState, writeStorage } from "@/hooks/useLocalStorageState";
 import { ClientServiceUnit } from "@/prisma/models";
+import { X } from "lucide-react";
 import { SetStateAction, useEffect, useLayoutEffect, useRef, useState } from "react";
 import StageModeControls, { FONT_MAX, FONT_MIN, TOP_BAR_HEIGHT_PX } from "./StageModeControls";
 import {
@@ -15,6 +16,7 @@ import {
   useAutoScroll,
 } from "./useAutoScroll";
 import { requestStageModeExit, useStageModeBack } from "./useStageModeHistory";
+import { useWakeLock } from "./useWakeLock";
 
 type StageModeProps = {
   units: ClientServiceUnit[];
@@ -86,6 +88,10 @@ export default function StageMode({ units, initialIndex, initialFontSize, onExit
       nextStopPosition(getSongStarts(), scrollTop, Number.POSITIVE_INFINITY),
     onReachEnd: () => setIsScrollEnabled(false),
   });
+
+  // Tela sempre ligada; se o aparelho não suporta, só avisa (discreto).
+  const { isUnavailable: isWakeLockUnavailable } = useWakeLock();
+  const [isWakeLockNoticeDismissed, setIsWakeLockNoticeDismissed] = useState(false);
 
   // Botão voltar do aparelho e botão de sair seguem o mesmo caminho: o
   // histórico volta uma entrada e o popstate fecha o modo.
@@ -159,6 +165,17 @@ export default function StageMode({ units, initialIndex, initialFontSize, onExit
           })}
         </div>
       </div>
+
+      {isWakeLockUnavailable && !isWakeLockNoticeDismissed && (
+        <button
+          type="button"
+          onClick={() => setIsWakeLockNoticeDismissed(true)}
+          className="fixed top-16 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 rounded-full border border-border bg-background/90 px-3 py-1 text-xs text-muted-foreground shadow-sm backdrop-blur-sm"
+        >
+          A tela pode apagar neste aparelho
+          <X size={12} />
+        </button>
+      )}
 
       {/* StageModeControls renderiza KeyButtonSet, que precisa de um
           SongConfigProvider ancestral — o da música atual. */}
