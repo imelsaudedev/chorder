@@ -14,6 +14,7 @@ import {
   stepScrollSpeed,
   useAutoScroll,
 } from "./useAutoScroll";
+import { requestStageModeExit, useStageModeBack } from "./useStageModeHistory";
 
 type StageModeProps = {
   units: ClientServiceUnit[];
@@ -47,6 +48,8 @@ export default function StageMode({ units, initialIndex, initialFontSize, onExit
   const contentRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const currentIndexRef = useRef(currentIndex);
+  currentIndexRef.current = currentIndex;
   // Rolagem automática sempre começa desligada ao entrar, por segurança
   // (nunca liga sozinha).
   const [isScrollEnabled, setIsScrollEnabled] = useState(false);
@@ -83,6 +86,10 @@ export default function StageMode({ units, initialIndex, initialFontSize, onExit
       nextStopPosition(getSongStarts(), scrollTop, Number.POSITIVE_INFINITY),
     onReachEnd: () => setIsScrollEnabled(false),
   });
+
+  // Botão voltar do aparelho e botão de sair seguem o mesmo caminho: o
+  // histórico volta uma entrada e o popstate fecha o modo.
+  useStageModeBack(() => onExit(currentIndexRef.current));
 
   // Abre na música que estava visível na tela normal.
   useLayoutEffect(() => {
@@ -177,7 +184,7 @@ export default function StageMode({ units, initialIndex, initialFontSize, onExit
           onTogglePlayback={() => setIsScrollEnabled((enabled) => !enabled)}
           onSlower={() => changeCurrentScrollSpeed(-1)}
           onFaster={() => changeCurrentScrollSpeed(1)}
-          onExit={() => onExit(currentIndex)}
+          onExit={() => requestStageModeExit(() => onExit(currentIndex))}
         />
       </SongConfigProvider>
     </div>

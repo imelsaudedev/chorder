@@ -5,6 +5,7 @@ import { useServiceConfig } from "@/components/config/ServiceConfig";
 import { ClientService, ClientServiceUnit } from "@/prisma/models";
 import { Button } from "@/components/ui/button";
 import { Mic2 } from "lucide-react";
+import { pushStageModeEntry } from "@/components/service/StageMode/useStageModeHistory";
 import { useEffect, useRef, useState } from "react";
 import ServiceSongUnitView from "./ServiceSongUnitView";
 
@@ -35,6 +36,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
     // Primeira música cujo fim ainda está na tela.
     const visibleIndex = songRefs.current.findIndex((el) => el && el.getBoundingClientRect().bottom > 0);
     setStageIndex(Math.max(0, visibleIndex));
+    pushStageModeEntry();
     setIsStageMode(true);
   }
 
