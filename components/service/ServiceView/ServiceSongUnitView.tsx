@@ -53,20 +53,18 @@ export default function ServiceSongUnitView({ unit }: ServiceSongUnitViewProps) 
         mode={mode}
         density={density}
       >
-        <div className="fullscreen-hidden">
-          <ServiceArrangementHeader
-            ref={headerRef}
-            arrangement={arrangement}
-            order={unit.order}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            isStuck={isHeaderStuck}
-            onStartEdit={() => setIsEditing(true)}
-            onCancel={() => setIsEditing(false)}
-            onSaveServiceOnly={() => submitRef.current?.submit("service")}
-            onSaveBoth={() => submitRef.current?.submit("both")}
-          />
-        </div>
+        <ServiceArrangementHeader
+          ref={headerRef}
+          arrangement={arrangement}
+          order={unit.order}
+          isEditing={isEditing}
+          isSaving={isSaving}
+          isStuck={isHeaderStuck}
+          onStartEdit={() => setIsEditing(true)}
+          onCancel={() => setIsEditing(false)}
+          onSaveServiceOnly={() => submitRef.current?.submit("service")}
+          onSaveBoth={() => submitRef.current?.submit("both")}
+        />
         {isEditing ? (
           <ServiceSongUnitEditForm
             unit={unit}

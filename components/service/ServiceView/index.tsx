@@ -1,87 +1,88 @@
 "use client";
 
-import FullScreenToggle from "@/components/common/FullScreenToggle";
+import StageMode from "@/components/service/StageMode";
 import { useServiceConfig } from "@/components/config/ServiceConfig";
 import { ClientService, ClientServiceUnit } from "@/prisma/models";
-import { Fragment, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Mic2 } from "lucide-react";
+import { pushStageModeEntry } from "@/components/service/StageMode/useStageModeHistory";
+import { useEffect, useRef, useState } from "react";
 import ServiceSongUnitView from "./ServiceSongUnitView";
 
 type ServiceViewProps = {
   service: ClientService | null;
 };
 export default function ServiceView({ service }: ServiceViewProps) {
-  const { density, fontSize, setFontSize } = useServiceConfig();
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const { density, fontSize } = useServiceConfig();
+  const [isStageMode, setIsStageMode] = useState(false);
+  // Música em que o Modo Palco abre e, ao sair, onde a tela normal volta.
+  const [stageIndex, setStageIndex] = useState(0);
+  const songRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const shouldRestoreScroll = useRef(false);
 
   useEffect(() => {
-    const handleFSChange = () => setIsFullScreen(!!document.fullscreenElement);
-    document.addEventListener("fullscreenchange", handleFSChange);
-    return () => document.removeEventListener("fullscreenchange", handleFSChange);
-  }, []);
-
-  useEffect(() => {
-    if (!isFullScreen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      const total = songUnits.length;
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-        setCurrentIndex((i) => Math.min(i + 1, total - 1));
-      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-        setCurrentIndex((i) => Math.max(i - 1, 0));
-      }
-    };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isFullScreen]);
+    if (isStageMode || !shouldRestoreScroll.current) return;
+    shouldRestoreScroll.current = false;
+    songRefs.current[stageIndex]?.scrollIntoView({ block: "start" });
+  }, [isStageMode, stageIndex]);
 
   if (!service) return null;
   if (!service.units) throw new Error("Service units are not available");
 
   const songUnits = service.units.filter((u): u is ClientServiceUnit => u?.type === "SONG");
-  const total = songUnits.length;
-  const currentTitle = (songUnits[currentIndex]?.arrangement as { song?: { title?: string } } | undefined)?.song?.title ?? "";
   const sectionClass = density === "compact" ? "flex flex-col mx-auto gap-4" : "flex flex-col mx-auto gap-10";
 
-  const handleToggle = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
-  };
+  function enterStageMode() {
+    // Primeira música cujo fim ainda está na tela.
+    const visibleIndex = songRefs.current.findIndex((el) => el && el.getBoundingClientRect().bottom > 0);
+    setStageIndex(Math.max(0, visibleIndex));
+    pushStageModeEntry();
+    setIsStageMode(true);
+  }
+
+  if (isStageMode) {
+    return (
+      <StageMode
+        units={songUnits}
+        initialIndex={stageIndex}
+        initialFontSize={fontSize}
+        onExit={(index) => {
+          setStageIndex(index);
+          shouldRestoreScroll.current = true;
+          setIsStageMode(false);
+        }}
+      />
+    );
+  }
 
   return (
     <>
-      {isFullScreen ? (
-        <div className="h-dvh overflow-y-auto pt-16 pb-8 px-4 sm:px-6 lg:px-8" style={{ fontSize: `${fontSize}px` }}>
-          {songUnits[currentIndex] && (
-            <ServiceSongUnitView unit={songUnits[currentIndex]} />
-          )}
-        </div>
-      ) : (
-        <section className={sectionClass} style={{ fontSize: `${fontSize}px` }}>
-          {service.units.map((unit, index) => (
-            <Fragment key={index}>
-              {unit?.type === "SONG" && (
-                <ServiceSongUnitView unit={unit as ClientServiceUnit} />
-              )}
-            </Fragment>
-          ))}
-        </section>
-      )}
+      <section className={sectionClass} style={{ fontSize: `${fontSize}px` }}>
+        {songUnits.map((unit, index) => (
+          <div
+            key={index}
+            ref={(el) => {
+              songRefs.current[index] = el;
+            }}
+          >
+            <ServiceSongUnitView unit={unit} />
+          </div>
+        ))}
+      </section>
 
-      <FullScreenToggle
-        isFullScreen={isFullScreen}
-        currentIndex={currentIndex}
-        total={total}
-        currentTitle={currentTitle}
-        fontSize={fontSize}
-        onFontSizeChange={setFontSize}
-        onPrev={() => setCurrentIndex((i) => Math.max(i - 1, 0))}
-        onNext={() => setCurrentIndex((i) => Math.min(i + 1, total - 1))}
-        onToggle={handleToggle}
-      />
+      {songUnits.length > 0 && (
+        <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50">
+          <Button
+            variant="secondary"
+            aria-label="Entrar no Modo Palco"
+            onClick={enterStageMode}
+            className="shadow-md rounded-full gap-1.5"
+          >
+            <Mic2 size={18} />
+            Palco
+          </Button>
+        </div>
+      )}
     </>
   );
 }
