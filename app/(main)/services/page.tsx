@@ -4,6 +4,7 @@ import ScrollToTopButton from "@/components/common/ScrollToTopButton";
 import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
 import ClientServicesPage from "./ClientServicesPage";
+import ServicesPageMenu from "./ServicesPageMenu";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Messages");
@@ -15,10 +16,11 @@ export default async function ServiceListPage() {
 
   return (
     <>
-      <div className="px-5 sm:px-8 lg:px-14 pt-6 sm:pt-8 pb-4 sm:pb-6 lg:pb-8">
+      <div className="flex items-start justify-between gap-4 px-5 sm:px-8 lg:px-14 pt-6 sm:pt-8 pb-4 sm:pb-6 lg:pb-8">
         <Heading level={1}>
           {t("Messages.services")}
         </Heading>
+        <ServicesPageMenu />
       </div>
 
       <Main>

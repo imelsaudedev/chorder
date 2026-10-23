@@ -1,77 +1,158 @@
 "use client";
 
 import { useDeleteTemplate, useFetchTemplates } from "@/app/api/api-client";
+import FloatingAddLink from "@/components/common/FloatingAddLink";
+import Text from "@/components/common/Text";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
+import { summarizeTemplate } from "@/lib/template-utils";
 import { ClientServiceTemplate } from "@/prisma/models";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
-import Link from "next/link";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { mutate } from "swr";
 
-function TemplateEntry({ template }: { template: ClientServiceTemplate & { id: number } }) {
+type TemplateWithId = ClientServiceTemplate & { id: number };
+
+// Mesmo desenho de uma linha da lista de liturgias: título, uma linha de resumo,
+// link em toda a área da linha e menu ⋮ com as ações.
+function TemplateEntry({ template }: { template: TemplateWithId }) {
+  const router = useRouter();
   const { deleteTemplate, isDeleting } = useDeleteTemplate(template.id);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const href = `/admin/templates/${template.id}`;
 
   async function handleDelete() {
-    if (!confirm(`Deletar o template "${template.name}"?`)) return;
     await deleteTemplate();
     mutate("/api/templates");
+    setConfirmOpen(false);
   }
 
   return (
-    <div className="flex items-center gap-3 py-3 border-b border-border last:border-0">
-      <span className="flex-1 text-sm font-medium text-zinc-800">{template.name}</span>
-      <Link href={`/admin/templates/${template.id}`}>
-        <Button type="button" variant="ghost" size="sm" className="text-zinc-500 hover:text-zinc-800">
-          <Pencil className="w-4 h-4" />
-        </Button>
-      </Link>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={handleDelete}
-        disabled={isDeleting}
-        className="text-zinc-400 hover:text-red-500"
-      >
-        {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-      </Button>
-    </div>
+    <li className="group relative -mx-2 flex items-center gap-1 rounded-md px-2 py-2.5 transition-colors hover:bg-muted/50">
+      {/* Link sobre a linha inteira; o menu fica acima dele */}
+      <a href={href} className="absolute inset-0 z-0 cursor-pointer" aria-label={template.name} />
+
+      <div className="pointer-events-none relative z-10 min-w-0 flex-1">
+        <p className="truncate font-display text-base font-semibold leading-snug tracking-tight text-primary lg:text-lg lg:leading-tight">
+          {template.name}
+        </p>
+        <Text variant="caption" as="p" className="mt-0.5 truncate text-xs md:text-sm">
+          {summarizeTemplate(template)}
+        </Text>
+      </div>
+
+      {/* Em telas de toque não há hover, então o menu fica sempre visível */}
+      <div className="relative z-10 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-11 cursor-pointer"
+              aria-label={`Ações do modelo ${template.name}`}
+            >
+              <MoreVertical size={16} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem className="min-h-11 cursor-pointer" onSelect={() => router.push(href)}>
+              <Pencil size={14} className="mr-2" />
+              Editar modelo
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              className="min-h-11 cursor-pointer"
+              onSelect={() => setConfirmOpen(true)}
+            >
+              <Trash2 size={14} className="mr-2" />
+              Apagar modelo
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar o modelo “{template.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Os cultos já criados a partir dele não mudam. Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isDeleting}
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              className="cursor-pointer"
+            >
+              {isDeleting ? "Apagando…" : "Apagar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </li>
+  );
+}
+
+function ListSkeleton() {
+  return (
+    <ul className="divide-y divide-border" aria-hidden="true">
+      {[55, 40, 65].map((width, i) => (
+        <li key={i} className="flex flex-col gap-2 py-3.5">
+          <Skeleton className="h-5" style={{ width: `${width}%` }} />
+          <Skeleton className="h-4 w-1/3" />
+        </li>
+      ))}
+    </ul>
   );
 }
 
 export default function ClientPage() {
   const { templates, isLoading } = useFetchTemplates();
+  const list = (templates ?? []) as TemplateWithId[];
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-display font-semibold">Templates</h1>
-        <Link href="/admin/templates/new">
-          <Button type="button" variant="secondary" size="sm">
-            <Plus className="w-4 h-4 mr-1" />
-            Novo template
-          </Button>
-        </Link>
-      </div>
+    <>
+      {isLoading && <ListSkeleton />}
 
-      {isLoading && (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
-        </div>
-      )}
-
-      {!isLoading && templates.length === 0 && (
-        <p className="text-sm text-zinc-400 py-12 text-center">
-          Nenhum template criado ainda.
+      {!isLoading && list.length === 0 && (
+        <p className="py-12 text-center text-sm text-muted-foreground">
+          Nenhum modelo criado ainda. Um modelo é um esqueleto de culto (seções, itens e
+          durações) para começar uma liturgia nova mais rápido.
         </p>
       )}
 
-      {!isLoading && templates.length > 0 && (
-        <div className="rounded-lg border border-border px-4">
-          {(templates as (ClientServiceTemplate & { id: number })[]).map((t) => (
-            <TemplateEntry key={t.id} template={t} />
+      {!isLoading && list.length > 0 && (
+        <ul className="divide-y divide-border">
+          {list.map((template) => (
+            <TemplateEntry key={template.id} template={template} />
           ))}
-        </div>
+        </ul>
       )}
-    </div>
+
+      <FloatingAddLink label="Novo modelo" href="/admin/templates/new" />
+    </>
   );
 }

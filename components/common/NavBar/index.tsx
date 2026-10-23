@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { LayoutTemplate, ListMusic, MessageCircleHeart, Music } from "lucide-react";
+import { ListMusic, MessageCircleHeart, Music } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -25,7 +25,8 @@ export default function NavBar() {
         href="/services"
         icon={<ListMusic size={24} />}
         label={t("services")}
-        active={currentPage === "services"}
+        // Os modelos são acessados pelo menu da lista de liturgias, então ficam sob "Liturgias".
+        active={currentPage === "services" || pathname.startsWith("/admin/templates")}
       />
       <NavItem
         href="/songs"
@@ -38,12 +39,6 @@ export default function NavBar() {
         icon={<MessageCircleHeart size={24} />}
         label={t("feedback")}
         active={currentPage === "feedback"}
-      />
-      <NavItem
-        href="/admin/templates"
-        icon={<LayoutTemplate size={24} />}
-        label="Templates"
-        active={currentPage === "admin"}
       />
     </>
   );

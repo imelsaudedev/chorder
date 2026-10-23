@@ -408,7 +408,7 @@ export function useCreateTemplate() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(arg),
     });
-    if (!response.ok) throw new Error("Falha ao criar template");
+    if (!response.ok) throw new Error("Falha ao criar modelo");
     return response.json() as Promise<ClientServiceTemplate>;
   }
   const { trigger, isMutating } = useSWRMutation("/api/templates", createTemplate);
@@ -425,7 +425,7 @@ export function useUpdateTemplate(id: number) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(arg),
     });
-    if (!response.ok) throw new Error("Falha ao atualizar template");
+    if (!response.ok) throw new Error("Falha ao atualizar modelo");
     return response.json() as Promise<ClientServiceTemplate>;
   }
   const { trigger, isMutating } = useSWRMutation(`/api/templates/${id}`, updateTemplate);
@@ -435,7 +435,7 @@ export function useUpdateTemplate(id: number) {
 export function useDeleteTemplate(id: number) {
   async function deleteTemplate(url: string) {
     const response = await fetch(url, { method: "DELETE" });
-    if (!response.ok) throw new Error("Falha ao deletar template");
+    if (!response.ok) throw new Error("Falha ao apagar modelo");
   }
   const { trigger, isMutating } = useSWRMutation(`/api/templates/${id}`, deleteTemplate);
   return { deleteTemplate: trigger, isDeleting: isMutating };

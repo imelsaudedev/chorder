@@ -19,7 +19,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { buildSectionsFromTemplate, getTemplateDefaultStartTime } from "@/lib/template-utils";
+import {
+  buildSectionsFromTemplate,
+  getTemplateDefaultStartTime,
+  summarizeTemplate,
+} from "@/lib/template-utils";
 import { ClientServiceSection, ClientServiceTemplate } from "@/prisma/models";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -267,7 +271,7 @@ function CreationFields({
 
       {/* 2. Template */}
       <div>
-        <p className="text-sm font-medium mb-2">Template</p>
+        <p className="text-sm font-medium mb-2">Modelo</p>
         <TemplateSelector
           selected={selectedTemplate}
           onSelect={onSelectTemplate}
@@ -448,11 +452,11 @@ function TemplateSelector({ selected, onSelect }: TemplateSelectorProps) {
   const { templates, isLoading } = useFetchTemplates();
 
   if (isLoading) {
-    return <p className="text-xs text-muted-foreground">Carregando templates...</p>;
+    return <p className="text-xs text-muted-foreground">Carregando modelos...</p>;
   }
 
   if (templates.length === 0) {
-    return <p className="text-xs text-muted-foreground">Nenhum template cadastrado.</p>;
+    return <p className="text-xs text-muted-foreground">Nenhum modelo cadastrado.</p>;
   }
 
   return (
@@ -484,7 +488,7 @@ function TemplateSelector({ selected, onSelect }: TemplateSelectorProps) {
                 {tmpl.name}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {templateSummary(tmpl)}
+                {summarizeTemplate(tmpl)}
               </p>
             </div>
           </button>
@@ -510,20 +514,11 @@ function TemplateSelector({ selected, onSelect }: TemplateSelectorProps) {
           )}
         </div>
         <span className={selected === null ? "text-foreground" : "text-muted-foreground"}>
-          Sem template
+          Sem modelo
         </span>
       </button>
     </div>
   );
 }
 
-function templateSummary(tmpl: ClientServiceTemplate): string {
-  const items = tmpl.items as {
-    sections?: unknown[];
-    defaultStartTime?: string;
-  } | null;
-  const sections = items?.sections ?? [];
-  const time = items?.defaultStartTime ? ` · ${items.defaultStartTime}` : "";
-  return `${sections.length} seções${time}`;
-}
 
