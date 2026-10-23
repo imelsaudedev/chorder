@@ -108,29 +108,47 @@ enum SongUnitType {
 }
 
 model Service {
-  id          Int     @id @default(autoincrement())
-  legacyId  Int? @unique
-  title       String?
-  slug        String  @unique
-  worshipLeader String?
-  date        DateTime
-  isDeleted   Boolean @default(false)
+  id              Int      @id @default(autoincrement())
+  legacyId        Int?     @unique
+  title           String?
+  slug            String   @unique
+  worshipLeader   String?
+  date            DateTime
+  isDeleted       Boolean  @default(false)
+  preacher        String?
+  sermonTheme     String?
+  sermonReference String?
+  plan            Json?
+  updatedAt       DateTime @default(now()) @updatedAt
 
-  units      ServiceUnit[]
+  units ServiceUnit[]
+}
+
+model ServiceTemplate {
+  id    Int    @id @default(autoincrement())
+  name  String
+  items Json
 }
 
 model ServiceUnit {
-  id        Int     @id @default(autoincrement())
-  serviceId Int
-  type      ServiceUnitType
-  arrangementId Int? @unique
-  semitoneTranspose Int? @default(0)
-  order     Int
+  id                Int             @id @default(autoincrement())
+  serviceId         Int
+  type              ServiceUnitType
+  arrangementId     Int?            @unique
+  semitoneTranspose Int?            @default(0)
+  order             Int
 
-  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  arrangement  SongArrangement? @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
+  service     Service          @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  arrangement SongArrangement? @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
 }
 
 enum ServiceUnitType {
   SONG
+  FALA
+  LEITURA
+  ORACAO
+  AVISOS
+  SERMAO
+  ENCERRAMENTO
 }
+

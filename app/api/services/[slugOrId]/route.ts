@@ -2,6 +2,7 @@ import {
   createOrUpdateService,
   deleteService,
   retrieveService,
+  ServiceConflictError,
 } from "@/prisma/data";
 import { serviceSchema } from "@/schemas/service";
 import { NextRequest } from "next/server";
@@ -49,10 +50,20 @@ export async function PATCH(
   const service = await retrieveService(slugOrId);
   if (!service) return new Response("Service not found", { status: 404 });
 
-  const data: { title?: string | null; worshipLeader?: string | null; date?: Date } = {};
+  const data: {
+    title?: string | null;
+    worshipLeader?: string | null;
+    date?: Date;
+    preacher?: string | null;
+    sermonTheme?: string | null;
+    sermonReference?: string | null;
+  } = {};
   if ("title" in body) data.title = body.title ?? null;
   if ("worshipLeader" in body) data.worshipLeader = body.worshipLeader || null;
   if ("date" in body) data.date = new Date(body.date);
+  if ("preacher" in body) data.preacher = body.preacher ?? null;
+  if ("sermonTheme" in body) data.sermonTheme = body.sermonTheme ?? null;
+  if ("sermonReference" in body) data.sermonReference = body.sermonReference ?? null;
 
   await import("@/prisma/client").then(({ default: prisma }) =>
     prisma.service.update({ where: { id: service.id }, data })
@@ -75,14 +86,25 @@ export async function POST(
       { status: 400 }
     );
   }
-  if (!service?.id || !service?.units?.length) {
+  const hasContent =
+    (service.plan?.sections?.length ?? 0) > 0 || (service.units?.length ?? 0) > 0;
+  if (!service?.id || !hasContent) {
     return new Response("Invalid service data", { status: 400 });
   }
 
-  const updatedService = await createOrUpdateService(service);
-
-  return new Response(JSON.stringify(updatedService), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  try {
+    const updatedService = await createOrUpdateService(service);
+    return new Response(JSON.stringify(updatedService), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    if (err instanceof ServiceConflictError) {
+      return new Response(
+        "Este culto foi atualizado por outra pessoa enquanto você editava. Recarregue a página antes de salvar novamente.",
+        { status: 409 }
+      );
+    }
+    throw err;
+  }
 }

@@ -9,7 +9,6 @@ Fork do [chorder](https://github.com/henriquefreitassouza/chorder) adaptado para
 - Banco de dados em **produção**: **Neon** (PostgreSQL serverless) com duas URLs (pooler + direta)
 - Banco de dados **local**: PostgreSQL local em `localhost:5432`, banco `chorder` — o mesmo que o projeto original usa. Ver seção abaixo sobre conflito de migrations.
 - Tema: emerald no lugar de azul
-- Sem mecanismo de feedback de usuário (removido do nav)
 
 ## Variáveis de ambiente
 

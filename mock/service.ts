@@ -9,6 +9,7 @@ export default {
   isDeleted: false,
   units: [
     {
+      clientId: "mock-unit-1",
       type: "SONG" as const,
       semitoneTranspose: 0,
       order: 1,
@@ -76,6 +77,7 @@ export default {
       },
     },
     {
+      clientId: "mock-unit-2",
       type: "SONG" as const,
       semitoneTranspose: 3,
       order: 2,

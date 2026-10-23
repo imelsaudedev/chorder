@@ -10,6 +10,7 @@ type PageHeaderProps = {
   backLinkHref?: string;
   backLinkText?: string;
   variant?: "default" | "edit";
+  noBorder?: boolean;
 };
 
 const PageHeader = ({
@@ -20,6 +21,7 @@ const PageHeader = ({
   backLinkHref,
   backLinkText,
   variant = "default",
+  noBorder = false,
 }: PageHeaderProps) => {
   if (variant === "edit") {
     return (
@@ -38,7 +40,7 @@ const PageHeader = ({
   }
 
   return (
-    <div className="flex flex-col px-4 sm:px-5 lg:px-8 py-4 sm:py-5 bg-zinc-50 border-b border-border">
+    <div className={`flex flex-col px-4 sm:px-5 lg:px-8 py-4 sm:py-5 bg-zinc-50${noBorder ? "" : " border-b border-border"}`}>
       {(backLinkHref || actions) && (
         <div className="flex items-center justify-between mb-1.5 sm:mb-2">
           <div>

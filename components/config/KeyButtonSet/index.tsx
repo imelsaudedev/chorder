@@ -56,6 +56,7 @@ export default function KeyButtonSet({
         size={size}
         className="rounded-l-md rounded-r-none"
         onClick={handleDecrease}
+        aria-label="Diminuir o tom em um semitom"
       >
         <CircleMinus size={14} />
       </Button>
@@ -98,6 +99,7 @@ export default function KeyButtonSet({
         size={size}
         className="rounded-r-md rounded-l-none"
         onClick={handleIncrease}
+        aria-label="Aumentar o tom em um semitom"
       >
         <CirclePlus size={14} />
       </Button>

@@ -19,8 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Tag, { TagVariant } from "@/components/common/Tag";
+import Tag, { TagSize, TagVariant } from "@/components/common/Tag";
 import Text from "@/components/common/Text";
+import { formatTimeAgo } from "@/lib/relative-time";
 import { ClientArrangement, ClientSong } from "@/prisma/models";
 import { MoreVertical, NotebookPen, Pencil } from "lucide-react";
 import Link from "next/link";
@@ -36,7 +37,7 @@ function isSectionMarker(line: string): boolean {
   return false;
 }
 
-function getVerse1Lines(lyrics: string): string[] {
+export function getVerse1Lines(lyrics: string): string[] {
   const result: string[] = [];
   let started = false;
   for (const raw of lyrics.split("\n")) {
@@ -58,20 +59,13 @@ function getVerse1Lines(lyrics: string): string[] {
 function formatLastUsed(date: Date | string): { label: string; variant: TagVariant } {
   const d = typeof date === "string" ? new Date(date) : date;
   const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
-  if (days === 0) return { label: "hoje", variant: "warning" };
-  if (days === 1) return { label: "ontem", variant: "warning" };
-  if (days < 7) return { label: `há ${days} dias`, variant: "warning" };
-  const weeks = Math.floor(days / 7);
-  if (weeks === 1) return { label: "há 1 semana", variant: "warning" };
-  if (weeks < 3) return { label: `há ${weeks} semanas`, variant: "warning" };
-  const months = Math.floor(days / 30);
-  if (months === 1) return { label: "há 1 mês", variant: "muted" };
-  return { label: `há ${months} meses`, variant: "muted" };
+  // Uso recente (menos de 3 semanas) em destaque; o resto fica discreto.
+  return { label: formatTimeAgo(d), variant: days < 21 ? "warning" : "muted" };
 }
 
-function LastUsedTag({ date }: { date: Date | string }) {
+export function LastUsedTag({ date, size = "xs" }: { date: Date | string; size?: TagSize }) {
   const { label, variant } = formatLastUsed(date);
-  return <Tag variant={variant} size="xs" label={label} />;
+  return <Tag variant={variant} size={size} label={label} />;
 }
 
 function getArrangementLabel(

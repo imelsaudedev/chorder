@@ -18,8 +18,9 @@ export const arrangementSchema = z
     song: songSchema.optional(),
     units: z.array(songUnitSchema).optional(),
   })
-  .refine((data) => data.units && data.units.length > 0, {
-    message: "An arrangement must have at least one unit.",
-  });
+  .refine(
+    (data) => data.isServiceArrangement || (data.units && data.units.length > 0),
+    { message: "An arrangement must have at least one unit." }
+  );
 
 export type ArrangementSchema = z.infer<typeof arrangementSchema>;

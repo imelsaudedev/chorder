@@ -1,4 +1,4 @@
-import { createOrUpdateService, retrieveServices } from "@/prisma/data";
+import { createOrUpdateService, retrieveServices, ServiceConflictError } from "@/prisma/data";
 import { serviceSchema } from "@/schemas/service";
 
 export async function GET() {
@@ -7,18 +7,34 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const service = serviceSchema.parse(await request.json());
+  const body = await request.json();
+  const service = serviceSchema.parse({
+    sermonTheme: null,
+    sermonReference: null,
+    preacher: null,
+    plan: null,
+    ...body,
+  });
 
-  if (!service || !service.units?.length) {
-    return new Response(
-      `Invalid service data ${JSON.stringify(service, null, 2)}`,
-      { status: 400 }
-    );
+  const hasContent =
+    (service.plan?.sections?.length ?? 0) > 0 || (service.units?.length ?? 0) > 0;
+  if (!hasContent) {
+    return new Response("Service must have at least one section or unit", { status: 400 });
   }
 
-  const createdService = await createOrUpdateService(service);
-  return new Response(JSON.stringify(createdService), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  try {
+    const createdService = await createOrUpdateService(service);
+    return new Response(JSON.stringify(createdService), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    if (err instanceof ServiceConflictError) {
+      return new Response(
+        "Este culto foi atualizado por outra pessoa enquanto você editava. Recarregue a página antes de salvar novamente.",
+        { status: 409 }
+      );
+    }
+    throw err;
+  }
 }

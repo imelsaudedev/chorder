@@ -1,6 +1,6 @@
 "use client";
 
-import { ClientArrangement, ClientSong, ClientTagGroup, RecentServiceEntry } from "@/prisma/models";
+import { ClientArrangement, ClientServiceTemplate, ClientSong, ClientTagGroup, RecentServiceEntry } from "@/prisma/models";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -298,6 +298,15 @@ export function useDeleteService(slugOrId: string | number) {
   };
 }
 
+export class ServiceSaveError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ServiceSaveError";
+    this.status = status;
+  }
+}
+
 export function useCreateOrUpdateService(
   serviceIdOrSlug: string | number | null
 ) {
@@ -310,10 +319,10 @@ export function useCreateOrUpdateService(
       body: JSON.stringify(arg),
     });
     if (!response.ok) {
-      throw new Error(
-        `Failed to create or update service. Status: ${response.status}. ${
-          response.body ? await response.text() : ""
-        }`
+      const message = response.body ? await response.text() : "";
+      throw new ServiceSaveError(
+        response.status,
+        message || `Failed to create or update service. Status: ${response.status}`
       );
     }
     return response.json();
@@ -371,6 +380,65 @@ export function useFetchTagGroups() {
     fetch(url).then((res) => res.json())
   );
   return { tagGroups: data ?? [], isLoading };
+}
+
+export function useFetchTemplates() {
+  const { data, isLoading } = useSWR<ClientServiceTemplate[]>(
+    "/api/templates",
+    (url: string) => fetch(url).then((res) => res.json())
+  );
+  return { templates: data ?? [], isLoading };
+}
+
+export function useFetchTemplate(id: number | null) {
+  const { data, isLoading } = useSWR<ClientServiceTemplate>(
+    id ? `/api/templates/${id}` : null,
+    (url: string) => fetch(url).then((res) => res.json())
+  );
+  return { template: data, isLoading };
+}
+
+export function useCreateTemplate() {
+  async function createTemplate(
+    url: string,
+    { arg }: { arg: { name: string; items: object } }
+  ) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) throw new Error("Falha ao criar template");
+    return response.json() as Promise<ClientServiceTemplate>;
+  }
+  const { trigger, isMutating } = useSWRMutation("/api/templates", createTemplate);
+  return { createTemplate: trigger, isCreating: isMutating };
+}
+
+export function useUpdateTemplate(id: number) {
+  async function updateTemplate(
+    url: string,
+    { arg }: { arg: { name: string; items: object } }
+  ) {
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) throw new Error("Falha ao atualizar template");
+    return response.json() as Promise<ClientServiceTemplate>;
+  }
+  const { trigger, isMutating } = useSWRMutation(`/api/templates/${id}`, updateTemplate);
+  return { updateTemplate: trigger, isUpdating: isMutating };
+}
+
+export function useDeleteTemplate(id: number) {
+  async function deleteTemplate(url: string) {
+    const response = await fetch(url, { method: "DELETE" });
+    if (!response.ok) throw new Error("Falha ao deletar template");
+  }
+  const { trigger, isMutating } = useSWRMutation(`/api/templates/${id}`, deleteTemplate);
+  return { deleteTemplate: trigger, isDeleting: isMutating };
 }
 
 export function useFetchRecentServices() {
