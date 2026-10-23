@@ -114,9 +114,27 @@ script de build), e cultos antigos que ainda não tiverem `plan` construído
 a tabela sumisse antes do backfill rodar contra o banco de produção (Neon).
 
 Ela fica como uma rede de segurança dos dados antigos até uma limpeza
-deliberada e futura: rodar o backfill contra o Neon de produção, confirmar
-zero cultos sem `plan`, só então gerar a migration que remove `ServiceUnit`.
-Não faça essa migration sem ter confirmado o backfill em produção primeiro.
+deliberada e futura: confirmar zero cultos sem `plan`, só então gerar a
+migration que remove `ServiceUnit`.
+
+**Backfill em produção: executado em 23/10/2026.** O script
+`prisma/seed/backfill-legacy-plan.ts` rodou contra o Neon de produção e
+atualizou 309 cultos (300 ativos + 9 apagados), cada um com uma seção "Culto"
+e as músicas na ordem original. As durações ficaram em branco, porque os cultos
+antigos não tinham duração por item. A etapa foi esquecida no deploy do PR #57
+(a migration que cria `Service.plan` foi aplicada, mas o `plan` dos cultos
+existentes ficou vazio e as liturgias apareciam sem itens), e foi corrigida
+logo depois rodando o script.
+
+**Lição para futuras migrations de dados:** quando uma migration cria uma coluna
+que passa a ser a fonte de leitura, o backfill dos dados existentes faz parte do
+deploy. Rode-o contra produção (ou deixe-o dentro da própria migration) antes de
+considerar a entrega concluída, e confirme com
+`SELECT count(*) FROM "Service" WHERE plan IS NULL;` (esperado: 0).
+
+Mesmo com o backfill feito, **não remova a tabela `ServiceUnit` sem decisão
+deliberada**: ela continua sendo a única cópia dos dados originais dos cultos
+antigos.
 
 ## Ponteiros
 
