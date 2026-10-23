@@ -10,17 +10,28 @@ export type SermaoMeta = {
 };
 export type AvisosMeta = { items?: { id: string; text: string }[] };
 
+/**
+ * "plan": culto de verdade — um item só está completo quando tem o conteúdo que o
+ * torna útil (música escolhida, quem faz, versão...).
+ * "template": esqueleto — título e duração já são o conteúdo; nada é "pendente".
+ */
+export type PlanMode = "plan" | "template";
+
 export type UnitSummary = {
-  /** Texto principal (título da música, rótulo do tipo...). Nulo quando o item está pendente. */
+  /** Texto principal (título da música, rótulo do item...). Nulo quando não há nada a mostrar. */
   title: string | null;
-  /** Complemento ao lado do título: arranjo, quem faz, versão... */
+  /** Complemento abaixo do título: arranjo e tom, quem faz, versão... */
   subtitle: string | null;
   /** Texto de apoio (descrição, texto da leitura). */
   detail: string | null;
   /** Sub-itens de avisos. */
   bullets: string[];
-  /** Chamada exibida quando o item ainda não foi preenchido. */
+  /** Chamada exibida quando não há título. */
   placeholder: string;
+  /** O item ainda precisa de algo para ficar completo (só no modo "plan"). */
+  pending: boolean;
+  /** O que falta, quando já há título mas o item continua pendente. */
+  hint: string | null;
 };
 
 const PLACEHOLDER: Record<string, string> = {
@@ -32,12 +43,23 @@ const PLACEHOLDER: Record<string, string> = {
   AVISOS: "Adicione avisos",
 };
 
-export function summarizeUnit(unit: ClientServiceUnit, typeLabel: string): UnitSummary {
+export function summarizeUnit(
+  unit: ClientServiceUnit,
+  typeLabel: string,
+  mode: PlanMode = "plan"
+): UnitSummary {
   const placeholder = PLACEHOLDER[unit.type] ?? "Preencher item";
-  const label = unit.label ?? typeLabel;
+  const typedLabel = unit.label?.trim() || null;
+  const isTemplate = mode === "template";
+
+  const base = { detail: null, bullets: [] as string[], placeholder, pending: false, hint: null };
 
   switch (unit.type) {
     case "SONG": {
+      if (isTemplate) {
+        // No template a música é só um espaço (com título opcional); nada é escolhido.
+        return { ...base, title: typedLabel ?? typeLabel, subtitle: null };
+      }
       const title = unit.arrangement?.song?.title ?? null;
       // Sublinha: arranjo (quando tem nome) e tom, já com a transposição do plano.
       const arrangement = unit.arrangement;
@@ -48,64 +70,72 @@ export function summarizeUnit(unit: ClientServiceUnit, typeLabel: string): UnitS
         .filter(Boolean)
         .join(" · ");
       return {
+        ...base,
         title,
         subtitle: title && subtitle ? subtitle : null,
-        detail: null,
-        bullets: [],
-        placeholder,
+        // Espaço vindo de um template com título ("Música de abertura"): mostra o título na chamada.
+        placeholder: !title && typedLabel ? `${placeholder} · ${typedLabel}` : placeholder,
+        pending: !title,
       };
     }
     case "FALA":
     case "ORACAO": {
       const meta = unit.metadata as FalaMeta | null;
-      const speaker = meta?.speaker ?? null;
+      const speaker = meta?.speaker?.trim() || null;
+      const missing = !speaker && !isTemplate;
       return {
-        title: speaker ? label : null,
+        ...base,
+        title: typedLabel ?? (speaker || isTemplate ? typeLabel : null),
         subtitle: speaker,
         detail: meta?.description ?? null,
-        bullets: [],
-        placeholder,
+        pending: missing,
+        hint: missing && typedLabel ? "Falta definir quem faz" : null,
       };
     }
     case "LEITURA": {
       const meta = unit.metadata as LeituraMeta | null;
-      const version = meta?.version ?? null;
+      const version = meta?.version?.trim() || null;
+      const missing = !version && !isTemplate;
       return {
-        title: version ? label : null,
+        ...base,
+        title: typedLabel ?? (version || isTemplate ? typeLabel : null),
         subtitle: version,
         detail: meta?.text ?? null,
-        bullets: [],
-        placeholder,
+        pending: missing,
+        hint: missing && typedLabel ? "Falta definir a versão" : null,
       };
     }
     case "SERMAO": {
       const meta = unit.metadata as SermaoMeta | null;
-      const preacher = meta?.preacher ?? null;
+      const preacher = meta?.preacher?.trim() || null;
+      const missing = !preacher && !isTemplate;
       return {
-        title: preacher ? label : null,
+        ...base,
+        title: typedLabel ?? (preacher || isTemplate ? typeLabel : null),
         subtitle: preacher,
         detail: meta?.description ?? null,
-        bullets: [],
-        placeholder,
+        pending: missing,
+        hint: missing && typedLabel ? "Falta definir o pregador" : null,
       };
     }
     case "AVISOS": {
       const items = ((unit.metadata as AvisosMeta | null)?.items ?? []).filter((i) => i.text.trim());
+      const hasItems = items.length > 0;
       return {
-        title: items.length > 0 ? "Avisos" : null,
-        subtitle: items.length > 0 ? `${items.length} ${items.length === 1 ? "item" : "itens"}` : null,
-        detail: null,
+        ...base,
+        title: hasItems || isTemplate ? "Avisos" : null,
+        subtitle: hasItems ? `${items.length} ${items.length === 1 ? "item" : "itens"}` : null,
         bullets: items.map((i) => i.text),
-        placeholder,
+        pending: !hasItems && !isTemplate,
       };
     }
     default:
-      return { title: label, subtitle: null, detail: null, bullets: [], placeholder };
+      return { ...base, title: typedLabel ?? typeLabel, subtitle: null };
   }
 }
 
 export function isUnitPending(unit: ClientServiceUnit): boolean {
-  return summarizeUnit(unit, "").title === null;
+  return summarizeUnit(unit, "").pending;
 }
 
 export function countPlanProgress(sections: ClientServiceSection[]): { filled: number; total: number } {

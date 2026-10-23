@@ -24,6 +24,7 @@ import {
 } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
+import { DurationField } from "./ServiceItemForms";
 import { PanelShell } from "./ServiceItemPanel";
 
 // Fluxo de Música: buscar → escolher arranjo (com prévia da cifra, áudio e
@@ -229,25 +230,7 @@ function SongCard({
             Trocar arranjo
           </Button>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="song-duration" className="text-xs font-medium text-muted-foreground">
-            Duração
-          </Label>
-          <div className="flex items-center gap-2">
-            <Input
-              id="song-duration"
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step={0.5}
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              placeholder="—"
-              className="h-11 w-28"
-            />
-            <span className="text-sm text-muted-foreground">min</span>
-          </div>
-        </div>
+        <DurationField value={duration} onChange={setDuration} />
       </div>
       <div className="shrink-0 border-t border-border bg-background px-4 py-3">
         <Button type="submit" variant="secondary" className="h-11 w-full">

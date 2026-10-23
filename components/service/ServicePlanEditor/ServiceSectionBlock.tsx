@@ -20,12 +20,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { UNIT_CONFIG, ServiceUnitTypeValue } from "./unitConfig";
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { formatTime, SectionTiming } from "./hooks/useServiceTimeline";
 import { DrawerState } from "./hooks/usePlanEditor";
 import SectionDialog from "./SectionDialog";
 import ServiceUnitRow from "./ServiceUnitRow";
-import { isUnitPending, summarizeUnit } from "./unitSummary";
+import { usePlanMode } from "./planMode";
+import { summarizeUnit } from "./unitSummary";
 
 function formatDuration(min: number): string {
   if (min < 60) return `${min} min`;
@@ -50,7 +51,7 @@ type ServiceSectionBlockProps = {
   onAnnounce: (message: string) => void;
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: () => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">, index?: number) => void;
   onUpdateUnit: (unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
@@ -66,7 +67,7 @@ function buildBlankUnit(type: ServiceUnitTypeValue): Omit<ClientServiceUnit, "or
     type,
     arrangementId: null,
     semitoneTranspose: null,
-    durationMin: null,
+    durationMin: type === "SONG" ? 5 : null,
     label: null,
     metadata: null,
   };
@@ -101,7 +102,21 @@ export default function ServiceSectionBlock({
 }: ServiceSectionBlockProps) {
   const units = section.units ?? [];
   const [editOpen, setEditOpen] = useState(false);
-  const pendingCount = units.filter(isUnitPending).length;
+
+  // Cria um item em branco do tipo escolhido (ou abre o fluxo de música) na posição
+  // `index` da seção; sem `index`, no fim.
+  function addItemOfType(type: ServiceUnitTypeValue, index?: number) {
+    // No template Música é só um espaço (com título opcional e duração), sem escolher música.
+    if (type === "SONG" && mode === "plan") {
+      onOpenDrawer({ type: "add-song", sectionIndex, index });
+      return;
+    }
+    const unit = buildBlankUnit(type);
+    onAddUnit(sectionIndex, unit, index);
+    onOpenDrawer({ type: "edit-unit", clientId: unit.clientId, isNew: true });
+  }
+  const mode = usePlanMode();
+  const pendingCount = units.filter((u) => summarizeUnit(u, "", mode).pending).length;
   const totalLabel = timing
     ? [
         formatTime(timing.startTime),
@@ -172,30 +187,48 @@ export default function ServiceSectionBlock({
         </button>
       </div>
 
-      {/* Units */}
+      {/* Units — com um ⊕ sobre o fio da linha do tempo entre os itens, para inserir
+          no meio sem precisar adicionar no fim e arrastar */}
       <div className="flex flex-col">
-        {units.map((unit, unitIndex) => (
-          <SortableUnitRow
-            key={unit.clientId}
-            unit={unit}
-            sectionIndex={sectionIndex}
-            unitIndex={unitIndex}
-            unitCount={units.length}
-            adjacent={adjacent}
-            timing={timing?.units[unitIndex]}
-            isActive={unit.clientId === activeClientId}
-            onUpdate={(changes) => onUpdateUnit(unitIndex, changes)}
-            onRemove={() => onRemoveUnit(unitIndex)}
-            onEditDetails={() =>
-              onOpenDrawer({ type: "edit-unit", clientId: unit.clientId })
-            }
-            onMoveUnit={onMoveUnit}
-            onAnnounce={onAnnounce}
-          />
-        ))}
+        {units.map((unit, unitIndex) => {
+          const unitSummary = summarizeUnit(
+            unit,
+            UNIT_CONFIG[unit.type as ServiceUnitTypeValue]?.label ?? unit.type,
+            mode
+          );
+          const unitName = unitSummary.title ?? unitSummary.placeholder;
+          return (
+            <Fragment key={unit.clientId}>
+              <InsertSlot
+                label={
+                  unitIndex === 0
+                    ? "Inserir item no início da seção"
+                    : `Inserir item antes de ${unitName}`
+                }
+                onPick={(type) => addItemOfType(type, unitIndex)}
+              />
+              <SortableUnitRow
+                unit={unit}
+                sectionIndex={sectionIndex}
+                unitIndex={unitIndex}
+                unitCount={units.length}
+                adjacent={adjacent}
+                timing={timing?.units[unitIndex]}
+                isActive={unit.clientId === activeClientId}
+                onUpdate={(changes) => onUpdateUnit(unitIndex, changes)}
+                onRemove={() => onRemoveUnit(unitIndex)}
+                onEditDetails={() =>
+                  onOpenDrawer({ type: "edit-unit", clientId: unit.clientId })
+                }
+                onMoveUnit={onMoveUnit}
+                onAnnounce={onAnnounce}
+              />
+            </Fragment>
+          );
+        })}
       </div>
 
-      {/* Adicionar item */}
+      {/* Adicionar item no fim da seção */}
       <div className="mt-2 pl-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -207,29 +240,7 @@ export default function ServiceSectionBlock({
               Adicionar item
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
-            {(Object.entries(UNIT_CONFIG) as [ServiceUnitTypeValue, typeof UNIT_CONFIG[ServiceUnitTypeValue]][]).map(([type, config]) => {
-              const Icon = config.icon;
-              return (
-                <DropdownMenuItem
-                  key={type}
-                  className="min-h-11 cursor-pointer"
-                  onClick={() => {
-                    if (type === "SONG") {
-                      onOpenDrawer({ type: "add-song", sectionIndex });
-                      return;
-                    }
-                    const unit = buildBlankUnit(type);
-                    onAddUnit(sectionIndex, unit);
-                    onOpenDrawer({ type: "edit-unit", clientId: unit.clientId, isNew: true });
-                  }}
-                >
-                  <Icon className={`w-4 h-4 ${config.color}`} />
-                  {config.label}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
+          <ItemTypeMenuContent onPick={(type) => addItemOfType(type)} />
         </DropdownMenu>
       </div>
 
@@ -274,6 +285,7 @@ function SortableUnitRow({
   onMoveUnit,
   onAnnounce,
 }: SortableUnitRowProps) {
+  const mode = usePlanMode();
   const rowRef = useRef<HTMLDivElement>(null);
   const dragHandleRef = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
   const [isDragging, setIsDragging] = useState(false);
@@ -331,7 +343,7 @@ function SortableUnitRow({
   // Reordenar pelo teclado: dentro da seção, e passando para a seção vizinha nas pontas.
   function handleKeyboardMove(direction: -1 | 1) {
     const config = UNIT_CONFIG[unit.type as ServiceUnitTypeValue];
-    const summary = summarizeUnit(unit, config?.label ?? unit.type);
+    const summary = summarizeUnit(unit, config?.label ?? unit.type, mode);
     const name = summary.title ?? summary.placeholder;
 
     if (direction === -1) {
@@ -381,6 +393,59 @@ function SortableUnitRow({
         dragHandleRef={dragHandleRef}
       />
       {closestEdge && <DropIndicator edge={closestEdge} gap="0px" />}
+    </div>
+  );
+}
+
+// --- Inserir no meio ---
+
+// Menu com os tipos de item (usado pelo "Adicionar item" do fim e pelo ⊕ entre itens).
+function ItemTypeMenuContent({ onPick }: { onPick: (type: ServiceUnitTypeValue) => void }) {
+  return (
+    <DropdownMenuContent align="start" className="w-48">
+      {(Object.entries(UNIT_CONFIG) as [ServiceUnitTypeValue, (typeof UNIT_CONFIG)[ServiceUnitTypeValue]][]).map(
+        ([type, config]) => {
+          const Icon = config.icon;
+          return (
+            <DropdownMenuItem key={type} className="min-h-11 cursor-pointer" onClick={() => onPick(type)}>
+              <Icon className={`w-4 h-4 ${config.color}`} />
+              {config.label}
+            </DropdownMenuItem>
+          );
+        }
+      )}
+    </DropdownMenuContent>
+  );
+}
+
+// ⊕ sobre o fio da linha do tempo, no vão entre dois itens. No desktop aparece ao
+// chegar perto do fio (ou ao focar com o teclado); em telas sem hover (toque) fica
+// sempre visível, discreto. A área de toque tem 44px mesmo com o botão de 24px.
+// A posição horizontal (108px) é o centro da coluna do ícone na linha do item:
+// alça (40) + horário (48) + metade da coluna do ícone (20).
+function InsertSlot({
+  label,
+  onPick,
+}: {
+  label: string;
+  onPick: (type: ServiceUnitTypeValue) => void;
+}) {
+  return (
+    <div className="relative z-[2] h-0">
+      <div className="group/slot absolute -top-3 left-[86px] flex h-6 w-11 items-center justify-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label={label}
+              className="cursor-pointer relative flex size-6 items-center justify-center rounded-full border border-input bg-background text-muted-foreground opacity-0 shadow-xs transition-opacity before:absolute before:-inset-2.5 before:content-[''] hover:border-ring hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 group-hover/slot:opacity-100 data-[state=open]:opacity-100 [@media(hover:none)]:opacity-70"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <ItemTypeMenuContent onPick={onPick} />
+        </DropdownMenu>
+      </div>
     </div>
   );
 }

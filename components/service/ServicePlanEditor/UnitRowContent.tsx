@@ -1,7 +1,10 @@
+"use client";
+
 import { ClientServiceUnit } from "@/prisma/models";
 import { Flag } from "lucide-react";
 import { formatTime } from "./hooks/useServiceTimeline";
 import { UNIT_CONFIG, ServiceUnitTypeValue } from "./unitConfig";
+import { usePlanMode } from "./planMode";
 import { summarizeUnit } from "./unitSummary";
 
 // Miolo visual de uma linha da liturgia (horário | ícone na linha do tempo |
@@ -30,8 +33,10 @@ export default function UnitRowContent({
 }: UnitRowContentProps) {
   const config = UNIT_CONFIG[unit.type as ServiceUnitTypeValue];
   const Icon = config?.icon;
-  const summary = summarizeUnit(unit, config?.label ?? unit.type);
-  const isPending = summary.title === null;
+  const mode = usePlanMode();
+  const summary = summarizeUnit(unit, config?.label ?? unit.type, mode);
+  const isPending = summary.pending;
+  const hasTitle = summary.title !== null;
   const description =
     summary.detail ?? (summary.bullets.length > 0 ? summary.bullets.map((b) => `• ${b}`).join("\n") : null);
 
@@ -77,13 +82,15 @@ export default function UnitRowContent({
       <span className="flex min-w-0 flex-1 flex-col py-2.5 pb-3 pr-2">
         <span
           className={`${TITLE_FONT} break-words ${
-            isPending ? "font-normal text-muted-foreground" : "text-foreground"
+            hasTitle ? "text-foreground" : "font-normal text-muted-foreground"
           }`}
         >
-          {isPending ? summary.placeholder : summary.title}
+          {hasTitle ? summary.title : summary.placeholder}
         </span>
-        {!isPending && summary.subtitle && (
-          <span className="break-words text-sm leading-5 text-muted-foreground">{summary.subtitle}</span>
+        {(summary.subtitle || summary.hint) && (
+          <span className="break-words text-sm leading-5 text-muted-foreground">
+            {summary.subtitle ?? summary.hint}
+          </span>
         )}
         {description && (
           <span

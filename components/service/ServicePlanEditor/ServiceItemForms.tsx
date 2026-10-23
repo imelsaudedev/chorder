@@ -1,12 +1,23 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ClientServiceUnit } from "@/prisma/models";
-import { Plus, Trash2 } from "lucide-react";
-import { forwardRef, useId, useImperativeHandle, useRef, useState } from "react";
+import {
+  attachClosestEdge,
+  Edge,
+  extractClosestEdge,
+} from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+import { DropIndicator } from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box";
+import {
+  draggable,
+  dropTargetForElements,
+} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { GripVertical, Minus, Plus, Trash2 } from "lucide-react";
+import { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import { AvisosMeta, FalaMeta, LeituraMeta, SermaoMeta } from "./unitSummary";
 
 // Formulários de edição por tipo de item (exceto Música, que tem fluxo
@@ -142,26 +153,77 @@ function AreaField({
   );
 }
 
-function DurationField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+// Duração como stepper (− 5 min +): números redondos são o caso comum, então os
+// botões são mais rápidos que digitar; o campo no meio ainda aceita digitar
+// (inclusive meio minuto). Compacto o bastante para dividir a linha com outro campo.
+export function DurationField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const current = value === "" ? 0 : parseFloat(value) || 0;
+  const change = (delta: number) =>
+    onChange(String(Math.max(0, Math.round((current + delta) * 10) / 10)));
+
   return (
     <Field label="Duração">
       {(id) => (
-        <div className="flex items-center gap-2">
-          <Input
-            id={id}
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step={0.5}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="—"
-            className="h-11 w-28"
-          />
-          <span className="text-sm text-muted-foreground">min</span>
-        </div>
+        <ButtonGroup>
+          <Button
+            type="button"
+            variant="outline"
+            className="size-11 cursor-pointer"
+            aria-label="Diminuir a duração em 1 minuto"
+            disabled={current <= 0}
+            onClick={() => change(-1)}
+          >
+            <Minus className="w-4 h-4" />
+          </Button>
+          <div className="relative">
+            <Input
+              id={id}
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step={0.5}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="—"
+              className="h-11 w-20 rounded-none pr-9 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground"
+            >
+              min
+            </span>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="size-11 cursor-pointer"
+            aria-label="Aumentar a duração em 1 minuto"
+            onClick={() => change(1)}
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </ButtonGroup>
       )}
     </Field>
+  );
+}
+
+// Linha com um campo de texto e, ao lado, a duração.
+function FieldWithDuration({
+  children,
+  duration,
+  onDurationChange,
+}: {
+  children: React.ReactNode;
+  duration: string;
+  onDurationChange: (value: string) => void;
+}) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+      {children}
+      <DurationField value={duration} onChange={onDurationChange} />
+    </div>
   );
 }
 
@@ -212,12 +274,14 @@ export const FalaUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps & { uni
           placeholder="Ex: Boas-vindas, Apresentação dos visitantes..."
           autoFocus
         />
-        <TextField
+        <FieldWithDuration duration={duration} onDurationChange={setDuration}>
+          <TextField
           label="Quem faz"
           value={speaker}
           onChange={setSpeaker}
           placeholder="Ex: Dirigente, Pastor João..."
         />
+        </FieldWithDuration>
         <AreaField
           label="Descrição"
           value={description}
@@ -229,7 +293,6 @@ export const FalaUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps & { uni
           }
           rows={9}
         />
-        <DurationField value={duration} onChange={setDuration} />
       </FormShell>
     );
   }
@@ -276,12 +339,14 @@ export const LeituraUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
           placeholder="Ex: João 3:16, Salmo 23..."
           autoFocus
         />
-        <TextField
+        <FieldWithDuration duration={duration} onDurationChange={setDuration}>
+          <TextField
           label="Versão"
           value={version}
           onChange={setVersion}
           placeholder="Ex: NVI, ARA, NTLH..."
         />
+        </FieldWithDuration>
         <AreaField
           label="Texto"
           value={text}
@@ -289,7 +354,6 @@ export const LeituraUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
           placeholder="Cole o texto da passagem aqui..."
           rows={9}
         />
-        <DurationField value={duration} onChange={setDuration} />
       </FormShell>
     );
   }
@@ -339,12 +403,14 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
           placeholder="Ex: A graça que transforma..."
           autoFocus
         />
-        <TextField
+        <FieldWithDuration duration={duration} onDurationChange={setDuration}>
+          <TextField
           label="Pregador"
           value={preacher}
           onChange={setPreacher}
           placeholder="Ex: Pastor João..."
         />
+        </FieldWithDuration>
         <TextField
           label="Referência bíblica"
           value={reference}
@@ -358,7 +424,6 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
           placeholder="Pontos principais do sermão, ilustrações ou observações..."
           rows={9}
         />
-        <DurationField value={duration} onChange={setDuration} />
       </FormShell>
     );
   }
@@ -381,6 +446,9 @@ export const AvisosUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
     );
     const [saved, setSaved] = useState(false);
     const listRef = useRef<HTMLDivElement>(null);
+    const formId = useId();
+    // Mensagem para leitores de tela ao reordenar pelo teclado.
+    const [announcement, setAnnouncement] = useState("");
 
     useImperativeHandle(ref, () => ({
       discardIfBlank: () => {
@@ -397,6 +465,15 @@ export const AvisosUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
     function removeItem(id: string) {
       setItems((prev) => prev.filter((item) => item.id !== id));
     }
+
+    const moveItem = useCallback((from: number, to: number) => {
+      setItems((prev) => {
+        const next = [...prev];
+        const [moved] = next.splice(from, 1);
+        next.splice(to, 0, moved);
+        return next;
+      });
+    }, []);
 
     function addItem() {
       setItems((prev) => [...prev, { id: crypto.randomUUID(), text: "" }]);
@@ -418,30 +495,25 @@ export const AvisosUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
 
     return (
       <FormShell onSubmit={handleSave}>
+        <DurationField value={duration} onChange={setDuration} />
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">Avisos</span>
+          <div role="status" aria-live="polite" className="sr-only">
+            {announcement}
+          </div>
           <div ref={listRef} className="flex flex-col gap-2">
             {items.map((item, i) => (
-              <div key={item.id} className="flex items-center gap-1">
-                <Input
-                  type="text"
-                  value={item.text}
-                  onChange={(e) => updateItemText(item.id, e.target.value)}
-                  placeholder={`Aviso ${i + 1}`}
-                  aria-label={`Aviso ${i + 1}`}
-                  autoFocus={i === 0}
-                  autoComplete="off"
-                  className="h-11 flex-1"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeItem(item.id)}
-                  className="cursor-pointer flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-destructive focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                  aria-label={`Remover aviso ${i + 1}`}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+              <SortableAvisoRow
+                key={item.id}
+                item={item}
+                index={i}
+                count={items.length}
+                formId={formId}
+                onChange={(text) => updateItemText(item.id, text)}
+                onRemove={() => removeItem(item.id)}
+                onMove={moveItem}
+                onAnnounce={setAnnouncement}
+              />
             ))}
           </div>
           <Button type="button" variant="ghost" onClick={addItem} className="h-11 self-start gap-1 px-2">
@@ -449,7 +521,171 @@ export const AvisosUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
             Adicionar aviso
           </Button>
         </div>
-        <DurationField value={duration} onChange={setDuration} />
+      </FormShell>
+    );
+  }
+);
+
+// --- Aviso reordenável ---
+
+type AvisoDragData = { type: "aviso"; formId: string; index: number };
+
+function isAvisoDragData(data: Record<string, unknown>, formId: string): data is AvisoDragData {
+  return data.type === "aviso" && data.formId === formId;
+}
+
+// Linha de um aviso: alça de reordenar (arrastar ou setas do teclado, como nos itens
+// da liturgia), campo de texto e remover.
+function SortableAvisoRow({
+  item,
+  index,
+  count,
+  formId,
+  onChange,
+  onRemove,
+  onMove,
+  onAnnounce,
+}: {
+  item: { id: string; text: string };
+  index: number;
+  count: number;
+  formId: string;
+  onChange: (text: string) => void;
+  onRemove: () => void;
+  onMove: (from: number, to: number) => void;
+  onAnnounce: (message: string) => void;
+}) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
+
+  useEffect(() => {
+    const el = rowRef.current;
+    const handle = handleRef.current;
+    if (!el || !handle) return;
+    return draggable({
+      element: el,
+      dragHandle: handle,
+      getInitialData: () => ({ type: "aviso", formId, index }) satisfies AvisoDragData,
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
+  }, [formId, index]);
+
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    return dropTargetForElements({
+      element: el,
+      canDrop: ({ source }) => isAvisoDragData(source.data as Record<string, unknown>, formId),
+      getData: ({ input, element }) =>
+        attachClosestEdge(
+          { type: "aviso", formId, index } satisfies AvisoDragData,
+          { input, element, allowedEdges: ["top", "bottom"] }
+        ),
+      onDrag: ({ self }) => setClosestEdge(extractClosestEdge(self.data)),
+      onDragLeave: () => setClosestEdge(null),
+      onDrop: ({ self, source }) => {
+        setClosestEdge(null);
+        const drag = source.data as AvisoDragData;
+        if (!isAvisoDragData(drag, formId)) return;
+        const edge = extractClosestEdge(self.data);
+        const destIndex = edge === "bottom" ? index + 1 : index;
+        const adjustedDest = drag.index < index ? destIndex - 1 : destIndex;
+        if (drag.index === adjustedDest) return;
+        onMove(drag.index, adjustedDest);
+      },
+    });
+  }, [formId, index, onMove]);
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+    e.preventDefault();
+    const to = e.key === "ArrowUp" ? index - 1 : index + 1;
+    if (to < 0 || to >= count) return;
+    onMove(index, to);
+    onAnnounce(`Aviso ${to + 1} de ${count}.`);
+    // A linha pode ser remontada ao reordenar; devolve o foco para a alça.
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>(`[data-aviso-handle="${item.id}"]`)?.focus();
+    });
+  }
+
+  return (
+    <div ref={rowRef} className={`relative flex items-center ${isDragging ? "opacity-40" : ""}`}>
+      <div
+        ref={handleRef}
+        role="button"
+        tabIndex={0}
+        data-aviso-handle={item.id}
+        aria-label={`Reordenar o aviso ${index + 1}. Use as setas para cima e para baixo para mover.`}
+        onKeyDown={handleKeyDown}
+        className="grid h-11 w-8 shrink-0 cursor-grab place-items-center rounded-md text-muted-foreground touch-none active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      >
+        <GripVertical className="w-5 h-5" />
+      </div>
+      <Input
+        type="text"
+        value={item.text}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={`Aviso ${index + 1}`}
+        aria-label={`Aviso ${index + 1}`}
+        autoFocus={index === 0}
+        autoComplete="off"
+        className="h-11 flex-1"
+      />
+      <button
+        type="button"
+        onClick={onRemove}
+        className="cursor-pointer flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-destructive focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        aria-label={`Remover aviso ${index + 1}`}
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+      {closestEdge && <DropIndicator edge={closestEdge} gap="0px" />}
+    </div>
+  );
+}
+
+// --- Música (espaço no template) ---
+
+// No template Música não escolhe uma música: é um espaço com título opcional
+// ("Música de abertura") e duração, que o culto preenche depois.
+export const SongSlotForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
+  function SongSlotForm({ unit, isNew, onUpdate, onDiscard, onDone }, ref) {
+    const initialDuration = unit.durationMin != null ? String(unit.durationMin) : "";
+    const [label, setLabel] = useState(unit.label ?? "");
+    const [duration, setDuration] = useState(initialDuration);
+    const [saved, setSaved] = useState(false);
+
+    useImperativeHandle(ref, () => ({
+      discardIfBlank: () => {
+        if (!isNew || saved) return;
+        if (!label.trim() && duration === initialDuration) onDiscard();
+      },
+    }));
+
+    function handleSave() {
+      setSaved(true);
+      onUpdate({ label: label.trim() || null, durationMin: parseDuration(duration) });
+      onDone();
+    }
+
+    return (
+      <FormShell onSubmit={handleSave}>
+        <FieldWithDuration duration={duration} onDurationChange={setDuration}>
+          <TextField
+            label="Título (opcional)"
+            value={label}
+            onChange={setLabel}
+            placeholder="Ex: Música de abertura"
+            autoFocus
+          />
+        </FieldWithDuration>
+        <p className="text-sm text-muted-foreground">
+          No modelo a música é só um espaço. Quem montar o culto escolhe a música e o arranjo.
+        </p>
       </FormShell>
     );
   }

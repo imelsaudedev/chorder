@@ -10,6 +10,7 @@ import {
   FalaUnitForm,
   LeituraUnitForm,
   SermaoUnitForm,
+  SongSlotForm,
   UnitFormHandle,
 } from "./ServiceItemForms";
 
@@ -120,6 +121,16 @@ const ServiceItemPanel = forwardRef<UnitFormHandle, ServiceItemPanelProps>(funct
       variant={variant}
       onClose={onClose}
     >
+      {unit.type === "SONG" && (
+        <SongSlotForm
+          ref={formRef}
+          unit={unit}
+          isNew={isNew}
+          onUpdate={onUpdate}
+          onDiscard={onDiscard}
+          onDone={onClose}
+        />
+      )}
       {(unit.type === "FALA" || unit.type === "ORACAO") && (
         <FalaUnitForm
           ref={formRef}

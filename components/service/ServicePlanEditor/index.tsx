@@ -147,11 +147,13 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
           <aside className="flex shrink-0 py-4 pr-4 sm:pr-6 lg:pr-8">
             {editor.drawer.type === "add-song" && (
               <SongFlow
-                key={`add-${editor.drawer.sectionIndex}`}
+                key={`add-${editor.drawer.sectionIndex}-${editor.drawer.index ?? "fim"}`}
                 tagIds={songTagIds}
                 onTagIdsChange={setSongTagIds}
                 onAdd={(unit) => {
-                  if (editor.drawer.type === "add-song") editor.addUnit(editor.drawer.sectionIndex, unit);
+                  if (editor.drawer.type === "add-song") {
+                    editor.addUnit(editor.drawer.sectionIndex, unit, editor.drawer.index);
+                  }
                 }}
                 onUpdate={() => {}}
                 onClose={() => openDrawer({ type: "closed" })}

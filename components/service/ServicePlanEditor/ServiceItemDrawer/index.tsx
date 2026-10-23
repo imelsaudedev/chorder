@@ -6,13 +6,14 @@ import { useRef } from "react";
 import { DrawerState, findUnitByClientId } from "../hooks/usePlanEditor";
 import ServiceItemPanel from "../ServiceItemPanel";
 import { UnitFormHandle } from "../ServiceItemForms";
+import { usePlanMode } from "../planMode";
 import SongFlow from "../SongFlow";
 
 type ServiceItemDrawerProps = {
   drawerState: DrawerState;
   sections: ClientServiceSection[];
   onClose: () => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">, index?: number) => void;
   onUpdateUnit: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (sectionIndex: number, unitIndex: number) => void;
   /** Filtros por tag do seletor de músicas (opcional; sem isso valem só enquanto o seletor estiver aberto). */
@@ -34,12 +35,15 @@ export default function ServiceItemDrawer({
   songTagIds,
   onSongTagIdsChange,
 }: ServiceItemDrawerProps) {
+  const mode = usePlanMode();
   const formRef = useRef<UnitFormHandle>(null);
 
   const found =
     drawerState.type === "edit-unit" ? findUnitByClientId(sections, drawerState.clientId) : null;
   const isAddSong = drawerState.type === "add-song";
-  const isSong = isAddSong || found?.unit.type === "SONG";
+  // No template Música é só um espaço: usa o mesmo formulário simples dos outros itens.
+  const isSongFlow = mode === "plan" && found?.unit.type === "SONG";
+  const isSong = isAddSong || isSongFlow;
   const isOpen = isAddSong || !!found;
   const isNew = drawerState.type === "edit-unit" && !!drawerState.isNew;
 
@@ -68,16 +72,16 @@ export default function ServiceItemDrawer({
       >
         {isAddSong && drawerState.type === "add-song" && (
           <SongFlow
-            key={`add-${drawerState.sectionIndex}`}
+            key={`add-${drawerState.sectionIndex}-${drawerState.index ?? "fim"}`}
             variant="drawer"
             tagIds={songTagIds}
             onTagIdsChange={onSongTagIdsChange}
-            onAdd={(unit) => onAddUnit(drawerState.sectionIndex, unit)}
+            onAdd={(unit) => onAddUnit(drawerState.sectionIndex, unit, drawerState.index)}
             onUpdate={() => {}}
             onClose={onClose}
           />
         )}
-        {found && found.unit.type === "SONG" && (
+        {found && isSongFlow && found.unit.type === "SONG" && (
           <SongFlow
             key={found.unit.clientId}
             variant="drawer"
@@ -89,7 +93,7 @@ export default function ServiceItemDrawer({
             onClose={onClose}
           />
         )}
-        {found && found.unit.type !== "SONG" && (
+        {found && !isSongFlow && (
           <ServiceItemPanel
             ref={formRef}
             key={found.unit.clientId}
