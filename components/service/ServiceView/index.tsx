@@ -1,147 +1,127 @@
 "use client";
 
-import FullScreenToggle from "@/components/common/FullScreenToggle";
+import StageMode from "@/components/service/StageMode";
 import { useServiceConfig } from "@/components/config/ServiceConfig";
 import {
   UNIT_CONFIG,
   ServiceUnitTypeValue,
 } from "@/components/service/ServicePlanEditor/unitConfig";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ClientService, ClientServiceUnit } from "@/prisma/models";
-import { Fragment, useEffect, useState } from "react";
+import { Mic2 } from "lucide-react";
+import { pushStageModeEntry } from "@/components/service/StageMode/useStageModeHistory";
+import { useEffect, useRef, useState } from "react";
 import ServiceSongUnitView from "./ServiceSongUnitView";
 
 type ServiceViewProps = {
   service: ClientService | null;
 };
-
 export default function ServiceView({ service }: ServiceViewProps) {
-  const { density, fontSize, setFontSize } = useServiceConfig();
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const { density, fontSize } = useServiceConfig();
+  const [isStageMode, setIsStageMode] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  // Música em que o Modo Palco abre e, ao sair, onde a tela normal volta.
+  const [stageIndex, setStageIndex] = useState(0);
+  // Indexado pela posição entre as músicas (não pela lista completa com itens de liturgia).
+  const songRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const shouldRestoreScroll = useRef(false);
 
   useEffect(() => {
-    const handleFSChange = () => setIsFullScreen(!!document.fullscreenElement);
-    document.addEventListener("fullscreenchange", handleFSChange);
-    return () => document.removeEventListener("fullscreenchange", handleFSChange);
-  }, []);
-
-  useEffect(() => {
-    if (!isFullScreen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      const total = songUnits.length;
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-        setCurrentIndex((i) => Math.min(i + 1, total - 1));
-      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-        setCurrentIndex((i) => Math.max(i - 1, 0));
-      }
-    };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isFullScreen]);
+    if (isStageMode || !shouldRestoreScroll.current) return;
+    shouldRestoreScroll.current = false;
+    songRefs.current[stageIndex]?.scrollIntoView({ block: "start" });
+  }, [isStageMode, stageIndex]);
 
   if (!service) return null;
   if (!service.units) throw new Error("Service units are not available");
 
-  const songUnits = service.units.filter(
-    (u): u is ClientServiceUnit => u?.type === "SONG"
-  );
-  const total = songUnits.length;
-  const currentTitle =
-    (
-      songUnits[currentIndex]?.arrangement as
-        | { song?: { title?: string } }
-        | undefined
-    )?.song?.title ?? "";
-  const sectionClass =
-    density === "compact"
-      ? "flex flex-col mx-auto gap-4"
-      : "flex flex-col mx-auto gap-10";
+  const songUnits = service.units.filter((u): u is ClientServiceUnit => u?.type === "SONG");
+  const sectionClass = density === "compact" ? "flex flex-col mx-auto gap-4" : "flex flex-col mx-auto gap-10";
 
-  const handleToggle = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
-  };
-
-  // Build merged list of plan items for "show all" mode.
-  // SONG items are matched to flat units by position (both lists share the same order),
-  // since the plan JSON may have stale/null arrangementIds after first save.
+  // Lista de itens do plano para o modo "Todos os itens".
+  // As músicas do plano casam com songUnits pela posição (ambas seguem a mesma ordem),
+  // pois o JSON do plano pode ter arrangementIds desatualizados/nulos após o primeiro save.
   const planUnits = service.plan?.sections.flatMap((s) => s.units) ?? [];
   let songCursor = 0;
   const mergedPlanItems = planUnits.map((unit) => {
     if (unit.type === "SONG") {
-      const flatUnit = songUnits[songCursor++] ?? null;
-      return { unit, flatUnit };
+      const songIndex = songCursor++;
+      return { unit, flatUnit: songUnits[songIndex] ?? null, songIndex };
     }
-    return { unit, flatUnit: null };
+    return { unit, flatUnit: null, songIndex: -1 };
   });
+
+  function enterStageMode() {
+    // Primeira música cujo fim ainda está na tela.
+    const visibleIndex = songRefs.current.findIndex((el) => el && el.getBoundingClientRect().bottom > 0);
+    setStageIndex(Math.max(0, visibleIndex));
+    pushStageModeEntry();
+    setIsStageMode(true);
+  }
+
+  if (isStageMode) {
+    return (
+      <StageMode
+        units={songUnits}
+        initialIndex={stageIndex}
+        initialFontSize={fontSize}
+        onExit={(index) => {
+          setStageIndex(index);
+          shouldRestoreScroll.current = true;
+          setIsStageMode(false);
+        }}
+      />
+    );
+  }
+
+  const setSongRef = (index: number) => (el: HTMLDivElement | null) => {
+    songRefs.current[index] = el;
+  };
 
   return (
     <>
-      {isFullScreen ? (
-        <div
-          className="h-dvh overflow-y-auto pt-16 pb-8 px-4 sm:px-6 lg:px-8"
-          style={{ fontSize: `${fontSize}px` }}
-        >
-          {songUnits[currentIndex] && (
-            <ServiceSongUnitView unit={songUnits[currentIndex]} />
-          )}
+      <div className="flex items-center justify-end gap-2 mb-6">
+        <Label htmlFor="show-all-toggle" className="text-sm text-zinc-500 cursor-pointer">
+          Todos os itens
+        </Label>
+        <Switch id="show-all-toggle" checked={showAll} onCheckedChange={setShowAll} />
+      </div>
+
+      <section className={sectionClass} style={{ fontSize: `${fontSize}px` }}>
+        {showAll
+          ? mergedPlanItems.map(({ unit, flatUnit, songIndex }, index) =>
+              unit.type === "SONG" ? (
+                flatUnit ? (
+                  <div key={index} ref={setSongRef(songIndex)}>
+                    <ServiceSongUnitView unit={flatUnit} />
+                  </div>
+                ) : null
+              ) : (
+                <NonSongDivider key={index} unit={unit} />
+              )
+            )
+          : songUnits.map((unit, index) => (
+              <div key={index} ref={setSongRef(index)}>
+                <ServiceSongUnitView unit={unit} />
+              </div>
+            ))}
+      </section>
+
+      {songUnits.length > 0 && (
+        <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50">
+          <Button
+            variant="secondary"
+            aria-label="Entrar no Modo Palco"
+            onClick={enterStageMode}
+            className="shadow-md rounded-full gap-1.5"
+          >
+            <Mic2 size={18} />
+            Palco
+          </Button>
         </div>
-      ) : (
-        <>
-          <div className="flex items-center justify-end gap-2 mb-6">
-            <Label
-              htmlFor="show-all-toggle"
-              className="text-sm text-zinc-500 cursor-pointer"
-            >
-              Todos os itens
-            </Label>
-            <Switch
-              id="show-all-toggle"
-              checked={showAll}
-              onCheckedChange={setShowAll}
-            />
-          </div>
-
-          <section className={sectionClass} style={{ fontSize: `${fontSize}px` }}>
-            {showAll
-              ? mergedPlanItems.map(({ unit, flatUnit }, index) =>
-                  unit.type === "SONG" ? (
-                    flatUnit ? (
-                      <ServiceSongUnitView key={index} unit={flatUnit} />
-                    ) : null
-                  ) : (
-                    <NonSongDivider key={index} unit={unit} />
-                  )
-                )
-              : service.units.map((unit, index) => (
-                  <Fragment key={index}>
-                    {unit?.type === "SONG" && (
-                      <ServiceSongUnitView unit={unit as ClientServiceUnit} />
-                    )}
-                  </Fragment>
-                ))}
-          </section>
-        </>
       )}
-
-      <FullScreenToggle
-        isFullScreen={isFullScreen}
-        currentIndex={currentIndex}
-        total={total}
-        currentTitle={currentTitle}
-        fontSize={fontSize}
-        onFontSizeChange={setFontSize}
-        onPrev={() => setCurrentIndex((i) => Math.max(i - 1, 0))}
-        onNext={() => setCurrentIndex((i) => Math.min(i + 1, total - 1))}
-        onToggle={handleToggle}
-      />
     </>
   );
 }

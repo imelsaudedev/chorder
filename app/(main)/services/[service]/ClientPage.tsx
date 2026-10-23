@@ -16,12 +16,12 @@ export default function ClientPage({ serviceSlug }: ClientPageProps) {
 
   return (
     <ServiceConfigProvider>
-      <div className="fullscreen-hidden">
+      <div className="stage-mode-hidden">
         <ServiceHeader service={service} />
       </div>
 
       <Tabs defaultValue="liturgia" className="flex flex-col gap-0">
-        <div className="fullscreen-hidden bg-zinc-50 border-b border-border px-4 sm:px-5 lg:px-8 pt-2 flex items-end">
+        <div className="stage-mode-hidden bg-zinc-50 border-b border-border px-4 sm:px-5 lg:px-8 pt-2 flex items-end">
           <TabsList className="bg-transparent h-auto p-0 gap-0.5 rounded-none items-end">
             <TabsTrigger
               value="liturgia"
