@@ -19,10 +19,12 @@ import ServiceSectionBlock from "./ServiceSectionBlock";
 
 type ServiceTimelineProps = {
   service: ClientService;
+  activeClientId?: string;
   onAddSection: (section: Omit<ClientServiceSection, "order" | "id">) => void;
   onUpdateSection: (sectionIndex: number, changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: (sectionIndex: number) => void;
   onMoveSection: (from: number, to: number) => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
   onUpdateUnit: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (sectionIndex: number, unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
@@ -41,10 +43,12 @@ function isSectionDragData(data: Record<string, unknown>): data is SectionDragDa
 
 export default function ServiceTimeline({
   service,
+  activeClientId,
   onAddSection,
   onUpdateSection,
   onRemoveSection,
   onMoveSection,
+  onAddUnit,
   onUpdateUnit,
   onRemoveUnit,
   onMoveUnit,
@@ -68,8 +72,10 @@ export default function ServiceTimeline({
           section={section}
           sectionIndex={sectionIndex}
           timing={timings[sectionIndex]}
+          activeClientId={activeClientId}
           onUpdateSection={(changes) => onUpdateSection(sectionIndex, changes)}
           onRemoveSection={() => onRemoveSection(sectionIndex)}
+          onAddUnit={onAddUnit}
           onUpdateUnit={(unitIndex, changes) => onUpdateUnit(sectionIndex, unitIndex, changes)}
           onRemoveUnit={(unitIndex) => onRemoveUnit(sectionIndex, unitIndex)}
           onMoveUnit={onMoveUnit}
@@ -97,8 +103,10 @@ type SortableSectionBlockProps = {
   section: ClientServiceSection;
   sectionIndex: number;
   timing?: ReturnType<typeof useServiceTimeline>[number];
+  activeClientId?: string;
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: () => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
   onUpdateUnit: (unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
@@ -110,8 +118,10 @@ function SortableSectionBlock({
   section,
   sectionIndex,
   timing,
+  activeClientId,
   onUpdateSection,
   onRemoveSection,
+  onAddUnit,
   onUpdateUnit,
   onRemoveUnit,
   onMoveUnit,
@@ -178,8 +188,10 @@ function SortableSectionBlock({
         sectionIndex={sectionIndex}
         timing={timing}
         dragHandleRef={dragHandleRef}
+        activeClientId={activeClientId}
         onUpdateSection={onUpdateSection}
         onRemoveSection={onRemoveSection}
+        onAddUnit={onAddUnit}
         onUpdateUnit={onUpdateUnit}
         onRemoveUnit={onRemoveUnit}
         onMoveUnit={onMoveUnit}

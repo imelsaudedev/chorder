@@ -69,14 +69,14 @@ export function useTemplateEditor(initial: {
   );
 
   const addUnit = useCallback(
-    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => {
+    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => {
       mutate((s) => {
         const next = [...s];
         const current = next[sectionIndex];
         const units = current.units ?? [];
         next[sectionIndex] = {
           ...current,
-          units: [...units, { ...unit, clientId: crypto.randomUUID(), order: units.length + 1 }],
+          units: [...units, { ...unit, order: units.length + 1 }],
         };
         return next;
       });

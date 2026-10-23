@@ -14,28 +14,35 @@ import {
   ClientServiceUnit,
   ClientSong,
 } from "@/prisma/models";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { DrawerState } from "../hooks/usePlanEditor";
-import { UNIT_CONFIG, ServiceUnitTypeValue } from "../unitConfig";
+import { ArrowLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { DrawerState, findUnitByClientId } from "../hooks/usePlanEditor";
+import { UNIT_CONFIG } from "../unitConfig";
+import {
+  AvisosUnitForm,
+  FalaUnitForm,
+  LeituraUnitForm,
+  SermaoUnitForm,
+  UnitFormHandle,
+} from "../ServiceItemForms";
 
 type ServiceItemDrawerProps = {
   drawerState: DrawerState;
   sections: ClientServiceSection[];
   onClose: () => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
   onUpdateUnit: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
-  onLoadTemplate: (sections: ClientServiceSection[], startTime?: string) => void;
+  onRemoveUnit: (sectionIndex: number, unitIndex: number) => void;
 };
 
 type DrawerView =
-  | { screen: "menu" }
+  | { screen: "closed" }
   | { screen: "song-picker"; sectionIndex: number; unitIndex?: number }
   | { screen: "arrangement-picker"; sectionIndex: number; unitIndex?: number; song: ClientSong }
-  | { screen: "fala-form"; sectionIndex: number; unitIndex?: number; unitType: "FALA" | "ORACAO" }
-  | { screen: "leitura-form"; sectionIndex: number; unitIndex?: number }
-  | { screen: "sermao-form"; sectionIndex: number; unitIndex?: number }
-  | { screen: "avisos-form"; sectionIndex: number; unitIndex?: number };
+  | { screen: "fala-form"; sectionIndex: number; unitIndex: number; unitType: "FALA" | "ORACAO" }
+  | { screen: "leitura-form"; sectionIndex: number; unitIndex: number }
+  | { screen: "sermao-form"; sectionIndex: number; unitIndex: number }
+  | { screen: "avisos-form"; sectionIndex: number; unitIndex: number };
 
 export default function ServiceItemDrawer({
   drawerState,
@@ -43,73 +50,67 @@ export default function ServiceItemDrawer({
   onClose,
   onAddUnit,
   onUpdateUnit,
-  onLoadTemplate,
+  onRemoveUnit,
 }: ServiceItemDrawerProps) {
   const isOpen = drawerState.type !== "closed";
-  const sectionIndex =
-    drawerState.type === "add-unit" || drawerState.type === "edit-unit"
-      ? drawerState.sectionIndex
-      : 0;
+  const isNew = drawerState.type === "edit-unit" && !!drawerState.isNew;
 
-  const [view, setView] = useState<DrawerView>({ screen: "menu" });
+  const [view, setView] = useState<DrawerView>({ screen: "closed" });
+  const formRef = useRef<UnitFormHandle>(null);
 
-  // Route edit-unit to the appropriate form
+  // Roteia pro formulário certo com base no que o drawerState pede
   useEffect(() => {
+    if (drawerState.type === "add-song") {
+      setView({ screen: "song-picker", sectionIndex: drawerState.sectionIndex });
+      return;
+    }
     if (drawerState.type === "edit-unit") {
-      const unit = sections[drawerState.sectionIndex]?.units?.[drawerState.unitIndex];
-      if (unit?.type === "SONG") {
-        setView({ screen: "song-picker", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex });
+      const found = findUnitByClientId(sections, drawerState.clientId);
+      if (!found) {
+        setView({ screen: "closed" });
         return;
       }
-      if (unit?.type === "FALA" || unit?.type === "ORACAO") {
-        setView({ screen: "fala-form", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex, unitType: unit.type });
+      const { sectionIndex, unitIndex, unit } = found;
+      if (unit.type === "SONG") {
+        setView({ screen: "song-picker", sectionIndex, unitIndex });
         return;
       }
-      if (unit?.type === "LEITURA") {
-        setView({ screen: "leitura-form", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex });
+      if (unit.type === "FALA" || unit.type === "ORACAO") {
+        setView({ screen: "fala-form", sectionIndex, unitIndex, unitType: unit.type });
         return;
       }
-      if (unit?.type === "SERMAO") {
-        setView({ screen: "sermao-form", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex });
+      if (unit.type === "LEITURA") {
+        setView({ screen: "leitura-form", sectionIndex, unitIndex });
         return;
       }
-      if (unit?.type === "AVISOS") {
-        setView({ screen: "avisos-form", sectionIndex: drawerState.sectionIndex, unitIndex: drawerState.unitIndex });
+      if (unit.type === "SERMAO") {
+        setView({ screen: "sermao-form", sectionIndex, unitIndex });
+        return;
+      }
+      if (unit.type === "AVISOS") {
+        setView({ screen: "avisos-form", sectionIndex, unitIndex });
         return;
       }
     }
-    if (drawerState.type === "add-unit" && drawerState.unitType) {
-      const { sectionIndex: si, unitType } = drawerState;
-      if (unitType === "SONG") { setView({ screen: "song-picker", sectionIndex: si }); return; }
-      if (unitType === "FALA" || unitType === "ORACAO") { setView({ screen: "fala-form", sectionIndex: si, unitType }); return; }
-      if (unitType === "LEITURA") { setView({ screen: "leitura-form", sectionIndex: si }); return; }
-      if (unitType === "SERMAO") { setView({ screen: "sermao-form", sectionIndex: si }); return; }
-      if (unitType === "AVISOS") { setView({ screen: "avisos-form", sectionIndex: si }); return; }
-    }
-    if (drawerState.type !== "closed") {
-      setView({ screen: "menu" });
-    }
-  }, [drawerState]); // eslint-disable-line react-hooks/exhaustive-deps
+    setView({ screen: "closed" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drawerState]);
 
   function handleOpenChange(open: boolean) {
     if (!open) {
+      // Fechar de verdade (X, escape, clicar fora, arrastar pra baixo) é o
+      // único ponto real de "desistir" no drawer — a timeline fica coberta
+      // enquanto ele está aberto, então não tem como trocar de item sem
+      // passar por aqui primeiro.
+      formRef.current?.discardIfBlank();
       onClose();
-      setView({ screen: "menu" });
+      setView({ screen: "closed" });
     }
   }
 
-  function handleSelectType(type: ServiceUnitTypeValue) {
-    if (type === "SONG") {
-      setView({ screen: "song-picker", sectionIndex });
-    } else if (type === "FALA" || type === "ORACAO") {
-      setView({ screen: "fala-form", sectionIndex, unitType: type });
-    } else if (type === "LEITURA") {
-      setView({ screen: "leitura-form", sectionIndex });
-    } else if (type === "SERMAO") {
-      setView({ screen: "sermao-form", sectionIndex });
-    } else if (type === "AVISOS") {
-      setView({ screen: "avisos-form", sectionIndex });
-    }
+  function handleDone() {
+    onClose();
+    setView({ screen: "closed" });
   }
 
   // Commit a song unit (add or update), using a resolved source arrangement
@@ -138,23 +139,22 @@ export default function ServiceItemDrawer({
       onUpdateUnit(si, ui, { arrangementId: null, semitoneTranspose: 0, arrangement });
     } else {
       onAddUnit(si, {
+        clientId: crypto.randomUUID(),
         type: "SONG",
         arrangementId: null,
         semitoneTranspose: 0,
-
         durationMin: 5,
         label: null,
         metadata: null,
         arrangement,
       });
     }
-    onClose();
-    setView({ screen: "menu" });
+    handleDone();
   }
 
   function handleSongSelected(song: ClientSong) {
-    const si = view.screen === "song-picker" ? view.sectionIndex : sectionIndex;
-    const ui = view.screen === "song-picker" ? view.unitIndex : undefined;
+    if (view.screen !== "song-picker") return;
+    const { sectionIndex: si, unitIndex: ui } = view;
 
     const arrangements = song.arrangements ?? [];
 
@@ -176,28 +176,8 @@ export default function ServiceItemDrawer({
     commitSongUnit(view.sectionIndex, view.unitIndex, song, arrangement);
   }
 
-  function handleFalaDone() {
-    onClose();
-    setView({ screen: "menu" });
-  }
-
-  function handleLeituraDone() {
-    onClose();
-    setView({ screen: "menu" });
-  }
-
-  function handleSermaoDone() {
-    onClose();
-    setView({ screen: "menu" });
-  }
-
-  function handleAvisosDone() {
-    onClose();
-    setView({ screen: "menu" });
-  }
-
   function handleBack() {
-    // arrangement-picker → back to song-picker (not menu)
+    // arrangement-picker → back to song-picker (not fecha)
     if (view.screen === "arrangement-picker") {
       setView({
         screen: "song-picker",
@@ -206,52 +186,50 @@ export default function ServiceItemDrawer({
       });
       return;
     }
-    setView({ screen: "menu" });
   }
 
-  const currentFalaUnit =
-    view.screen === "fala-form" && view.unitIndex !== undefined
+  const currentUnit =
+    (view.screen === "fala-form" ||
+      view.screen === "leitura-form" ||
+      view.screen === "sermao-form" ||
+      view.screen === "avisos-form")
       ? sections[view.sectionIndex]?.units?.[view.unitIndex]
       : undefined;
 
-  const currentLeituraUnit =
-    view.screen === "leitura-form" && view.unitIndex !== undefined
-      ? sections[view.sectionIndex]?.units?.[view.unitIndex]
-      : undefined;
-
-  const currentSermaoUnit =
-    view.screen === "sermao-form" && view.unitIndex !== undefined
-      ? sections[view.sectionIndex]?.units?.[view.unitIndex]
-      : undefined;
-
-  const currentAvisosUnit =
-    view.screen === "avisos-form" && view.unitIndex !== undefined
-      ? sections[view.sectionIndex]?.units?.[view.unitIndex]
-      : undefined;
-
-  const isEditing =
+  const isEditingSong =
     (view.screen === "song-picker" || view.screen === "arrangement-picker") &&
     view.unitIndex !== undefined;
 
   const isSongView =
     view.screen === "song-picker" || view.screen === "arrangement-picker";
 
+  const showBack = view.screen === "arrangement-picker";
+
   const drawerTitle =
     view.screen === "song-picker"
-      ? isEditing ? "Trocar música" : "Adicionar música"
+      ? isEditingSong ? "Trocar música" : "Adicionar música"
       : view.screen === "arrangement-picker"
       ? "Escolher arranjo"
       : view.screen === "leitura-form"
-      ? view.unitIndex !== undefined ? "Editar leitura" : "Adicionar leitura"
+      ? "Leitura"
       : view.screen === "sermao-form"
-      ? view.unitIndex !== undefined ? "Editar sermão" : "Adicionar sermão"
+      ? "Sermão"
       : view.screen === "avisos-form"
-      ? view.unitIndex !== undefined ? "Editar avisos" : "Adicionar avisos"
+      ? "Avisos"
       : view.screen === "fala-form"
-      ? `${view.unitIndex !== undefined ? "Editar" : "Adicionar"} ${UNIT_CONFIG[view.unitType]?.label.toLowerCase()}`
-      : sections.length === 0
-      ? "Montar liturgia"
-      : "Adicionar item";
+      ? UNIT_CONFIG[view.unitType]?.label
+      : "";
+
+  function handleDiscard() {
+    if (
+      view.screen === "fala-form" ||
+      view.screen === "leitura-form" ||
+      view.screen === "sermao-form" ||
+      view.screen === "avisos-form"
+    ) {
+      onRemoveUnit(view.sectionIndex, view.unitIndex);
+    }
+  }
 
   return (
     <Drawer
@@ -261,7 +239,7 @@ export default function ServiceItemDrawer({
     >
       <DrawerContent className={isSongView ? "max-h-[85dvh]" : "overflow-y-auto"}>
         <DrawerHeader className="flex items-center gap-2">
-          {view.screen !== "menu" && (
+          {showBack && (
             <button
               type="button"
               onClick={handleBack}
@@ -275,94 +253,60 @@ export default function ServiceItemDrawer({
         </DrawerHeader>
 
         <div className="px-4 pb-6">
-          {view.screen === "menu" && (
-            <MenuScreen
-              onSelectType={handleSelectType}
-            />
-          )}
           {view.screen === "song-picker" && (
             <SongPicker onSelected={handleSongSelected} />
           )}
           {view.screen === "arrangement-picker" && (
             <ArrangementPickerScreen
               song={view.song}
-              isEditing={isEditing}
+              isEditing={isEditingSong}
               onConfirm={handleArrangementSelected}
             />
           )}
-          {view.screen === "leitura-form" && (
+          {view.screen === "leitura-form" && currentUnit && (
             <LeituraUnitForm
-              sectionIndex={view.sectionIndex}
-              unitIndex={view.unitIndex}
-              existingUnit={currentLeituraUnit}
-              onAdd={onAddUnit}
-              onUpdate={onUpdateUnit}
-              onDone={handleLeituraDone}
+              ref={formRef}
+              unit={currentUnit}
+              isNew={isNew}
+              onUpdate={(changes) => onUpdateUnit(view.sectionIndex, view.unitIndex, changes)}
+              onDiscard={handleDiscard}
+              onDone={handleDone}
             />
           )}
-          {view.screen === "fala-form" && (
+          {view.screen === "fala-form" && currentUnit && (
             <FalaUnitForm
-              sectionIndex={view.sectionIndex}
-              unitIndex={view.unitIndex}
+              ref={formRef}
+              unit={currentUnit}
               unitType={view.unitType}
-              existingUnit={currentFalaUnit}
-              onAdd={onAddUnit}
-              onUpdate={onUpdateUnit}
-              onDone={handleFalaDone}
+              isNew={isNew}
+              onUpdate={(changes) => onUpdateUnit(view.sectionIndex, view.unitIndex, changes)}
+              onDiscard={handleDiscard}
+              onDone={handleDone}
             />
           )}
-          {view.screen === "sermao-form" && (
+          {view.screen === "sermao-form" && currentUnit && (
             <SermaoUnitForm
-              sectionIndex={view.sectionIndex}
-              unitIndex={view.unitIndex}
-              existingUnit={currentSermaoUnit}
-              onAdd={onAddUnit}
-              onUpdate={onUpdateUnit}
-              onDone={handleSermaoDone}
+              ref={formRef}
+              unit={currentUnit}
+              isNew={isNew}
+              onUpdate={(changes) => onUpdateUnit(view.sectionIndex, view.unitIndex, changes)}
+              onDiscard={handleDiscard}
+              onDone={handleDone}
             />
           )}
-          {view.screen === "avisos-form" && (
+          {view.screen === "avisos-form" && currentUnit && (
             <AvisosUnitForm
-              sectionIndex={view.sectionIndex}
-              unitIndex={view.unitIndex}
-              existingUnit={currentAvisosUnit}
-              onAdd={onAddUnit}
-              onUpdate={onUpdateUnit}
-              onDone={handleAvisosDone}
+              ref={formRef}
+              unit={currentUnit}
+              isNew={isNew}
+              onUpdate={(changes) => onUpdateUnit(view.sectionIndex, view.unitIndex, changes)}
+              onDiscard={handleDiscard}
+              onDone={handleDone}
             />
           )}
         </div>
       </DrawerContent>
     </Drawer>
-  );
-}
-
-// --- Menu screen ---
-
-function MenuScreen({
-  onSelectType,
-}: {
-  onSelectType: (type: ServiceUnitTypeValue) => void;
-}) {
-  const types = Object.entries(UNIT_CONFIG) as [ServiceUnitTypeValue, (typeof UNIT_CONFIG)[ServiceUnitTypeValue]][];
-
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      {types.map(([type, config]) => {
-        const Icon = config.icon;
-        return (
-          <button
-            key={type}
-            type="button"
-            onClick={() => onSelectType(type)}
-            className="flex items-center gap-2 px-3 py-3 rounded-lg border border-zinc-200 hover:border-emerald-300 hover:bg-zinc-50 transition-colors text-left"
-          >
-            <Icon className={`w-4 h-4 shrink-0 ${config.color}`} />
-            <span className="text-sm">{config.label}</span>
-          </button>
-        );
-      })}
-    </div>
   );
 }
 
@@ -389,488 +333,6 @@ function ArrangementPickerScreen({
         className="w-full py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-40"
       >
         {isEditing ? "Trocar para este arranjo" : "Usar este arranjo"}
-      </button>
-    </div>
-  );
-}
-
-// --- Fala unit form ---
-
-function FalaUnitForm({
-  sectionIndex,
-  unitIndex,
-  unitType,
-  existingUnit,
-  onAdd,
-  onUpdate,
-  onDone,
-}: {
-  sectionIndex: number;
-  unitIndex?: number;
-  unitType: "FALA" | "ORACAO";
-  existingUnit?: ClientServiceUnit;
-  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
-  onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
-  onDone: () => void;
-}) {
-  const existingMeta = existingUnit?.metadata as {
-    speaker?: string | null;
-    description?: string | null;
-  } | null;
-
-  const [label, setLabel] = useState(existingUnit?.label ?? "");
-  const [speaker, setSpeaker] = useState(existingMeta?.speaker ?? "");
-  const [description, setDescription] = useState(existingMeta?.description ?? "");
-  const [duration, setDuration] = useState(
-    existingUnit?.durationMin != null ? String(existingUnit.durationMin) : ""
-  );
-
-  function handleSave() {
-    const durationMin = duration ? parseFloat(duration) : null;
-    const metadata = {
-      speaker: speaker.trim() || null,
-      description: description.trim() || null,
-    };
-
-    if (unitIndex !== undefined) {
-      onUpdate(sectionIndex, unitIndex, {
-        label: label.trim() || null,
-        metadata,
-        durationMin,
-      });
-    } else {
-      onAdd(sectionIndex, {
-        type: unitType,
-        arrangementId: null,
-        semitoneTranspose: null,
-
-        label: label.trim() || null,
-        metadata,
-        durationMin,
-      });
-    }
-    onDone();
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Título</label>
-        <input
-          type="text"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="Ex: Boas-vindas, Apresentação dos visitantes..."
-          autoFocus
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Quem faz</label>
-        <input
-          type="text"
-          value={speaker}
-          onChange={(e) => setSpeaker(e.target.value)}
-          placeholder="Ex: Dirigente, Pastor João..."
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Descrição</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Roteiro, orientações ou observações para este momento..."
-          rows={4}
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 resize-none"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
-        <input
-          type="number"
-          min={0}
-          step={0.5}
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-          placeholder="—"
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
-        />
-      </div>
-
-      <button
-        type="button"
-        onClick={handleSave}
-        className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
-      >
-        {unitIndex !== undefined ? "Salvar" : "Adicionar"}
-      </button>
-    </div>
-  );
-}
-
-// --- Leitura unit form ---
-
-function LeituraUnitForm({
-  sectionIndex,
-  unitIndex,
-  existingUnit,
-  onAdd,
-  onUpdate,
-  onDone,
-}: {
-  sectionIndex: number;
-  unitIndex?: number;
-  existingUnit?: ClientServiceUnit;
-  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
-  onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
-  onDone: () => void;
-}) {
-  const existingMeta = existingUnit?.metadata as {
-    version?: string | null;
-    text?: string | null;
-  } | null;
-
-  const [label, setLabel] = useState(existingUnit?.label ?? "");
-  const [version, setVersion] = useState(existingMeta?.version ?? "");
-  const [text, setText] = useState(existingMeta?.text ?? "");
-  const [duration, setDuration] = useState(
-    existingUnit?.durationMin != null ? String(existingUnit.durationMin) : ""
-  );
-
-  function handleSave() {
-    const durationMin = duration ? parseFloat(duration) : null;
-    const metadata = {
-      version: version.trim() || null,
-      text: text.trim() || null,
-    };
-
-    if (unitIndex !== undefined) {
-      onUpdate(sectionIndex, unitIndex, {
-        label: label.trim() || null,
-        metadata,
-        durationMin,
-      });
-    } else {
-      onAdd(sectionIndex, {
-        type: "LEITURA",
-        arrangementId: null,
-        semitoneTranspose: null,
-
-        label: label.trim() || null,
-        metadata,
-        durationMin,
-      });
-    }
-    onDone();
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Referência</label>
-        <input
-          type="text"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="Ex: João 3:16, Salmo 23..."
-          autoFocus
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Versão</label>
-        <input
-          type="text"
-          value={version}
-          onChange={(e) => setVersion(e.target.value)}
-          placeholder="Ex: NVI, ARA, NTLH..."
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Texto</label>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Cole o texto da passagem aqui..."
-          rows={6}
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 resize-none"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
-        <input
-          type="number"
-          min={0}
-          step={0.5}
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-          placeholder="—"
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
-        />
-      </div>
-
-      <button
-        type="button"
-        onClick={handleSave}
-        className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
-      >
-        {unitIndex !== undefined ? "Salvar" : "Adicionar"}
-      </button>
-    </div>
-  );
-}
-
-// --- Sermao unit form ---
-
-function SermaoUnitForm({
-  sectionIndex,
-  unitIndex,
-  existingUnit,
-  onAdd,
-  onUpdate,
-  onDone,
-}: {
-  sectionIndex: number;
-  unitIndex?: number;
-  existingUnit?: ClientServiceUnit;
-  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
-  onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
-  onDone: () => void;
-}) {
-  const existingMeta = existingUnit?.metadata as {
-    preacher?: string | null;
-    reference?: string | null;
-    description?: string | null;
-  } | null;
-
-  const [label, setLabel] = useState(existingUnit?.label ?? "");
-  const [preacher, setPreacher] = useState(existingMeta?.preacher ?? "");
-  const [reference, setReference] = useState(existingMeta?.reference ?? "");
-  const [description, setDescription] = useState(existingMeta?.description ?? "");
-  const [duration, setDuration] = useState(
-    existingUnit?.durationMin != null ? String(existingUnit.durationMin) : ""
-  );
-
-  function handleSave() {
-    const durationMin = duration ? parseFloat(duration) : null;
-    const metadata = {
-      preacher: preacher.trim() || null,
-      reference: reference.trim() || null,
-      description: description.trim() || null,
-    };
-
-    if (unitIndex !== undefined) {
-      onUpdate(sectionIndex, unitIndex, { label: label.trim() || null, metadata, durationMin });
-    } else {
-      onAdd(sectionIndex, {
-        type: "SERMAO",
-        arrangementId: null,
-        semitoneTranspose: null,
-        label: label.trim() || null,
-        metadata,
-        durationMin,
-      });
-    }
-    onDone();
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Tema</label>
-        <input
-          type="text"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="Ex: A graça que transforma..."
-          autoFocus
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Pregador</label>
-        <input
-          type="text"
-          value={preacher}
-          onChange={(e) => setPreacher(e.target.value)}
-          placeholder="Ex: Pastor João..."
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Referência bíblica</label>
-        <input
-          type="text"
-          value={reference}
-          onChange={(e) => setReference(e.target.value)}
-          placeholder="Ex: João 3:16, Rm 8:28..."
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Notas</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Observações ou roteiro..."
-          rows={4}
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 resize-none"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
-        <input
-          type="number"
-          min={0}
-          step={0.5}
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-          placeholder="—"
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
-        />
-      </div>
-
-      <button
-        type="button"
-        onClick={handleSave}
-        className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
-      >
-        {unitIndex !== undefined ? "Salvar" : "Adicionar"}
-      </button>
-    </div>
-  );
-}
-
-// --- Avisos unit form ---
-
-type AvisosItem = { id: string; text: string };
-
-function AvisosUnitForm({
-  sectionIndex,
-  unitIndex,
-  existingUnit,
-  onAdd,
-  onUpdate,
-  onDone,
-}: {
-  sectionIndex: number;
-  unitIndex?: number;
-  existingUnit?: ClientServiceUnit;
-  onAdd: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => void;
-  onUpdate: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
-  onDone: () => void;
-}) {
-  const existingMeta = existingUnit?.metadata as { items?: AvisosItem[] } | null;
-  const existingItems = existingMeta?.items ?? [];
-
-  const [items, setItems] = useState<AvisosItem[]>(
-    existingItems.length ? existingItems : [{ id: crypto.randomUUID(), text: "" }]
-  );
-  const [duration, setDuration] = useState(
-    existingUnit?.durationMin != null ? String(existingUnit.durationMin) : ""
-  );
-
-  function updateItemText(id: string, text: string) {
-    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, text } : item)));
-  }
-
-  function removeItem(id: string) {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  }
-
-  function addItem() {
-    setItems((prev) => [...prev, { id: crypto.randomUUID(), text: "" }]);
-  }
-
-  function handleSave() {
-    const durationMin = duration ? parseFloat(duration) : null;
-    const cleanItems = items
-      .map((item) => ({ ...item, text: item.text.trim() }))
-      .filter((item) => item.text);
-    const metadata = { items: cleanItems };
-
-    if (unitIndex !== undefined) {
-      onUpdate(sectionIndex, unitIndex, { label: null, metadata, durationMin });
-    } else {
-      onAdd(sectionIndex, {
-        type: "AVISOS",
-        arrangementId: null,
-        semitoneTranspose: null,
-        label: null,
-        metadata,
-        durationMin,
-      });
-    }
-    onDone();
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Avisos</label>
-        <div className="flex flex-col gap-2">
-          {items.map((item, i) => (
-            <div key={item.id} className="flex items-center gap-2">
-              <input
-                type="text"
-                value={item.text}
-                onChange={(e) => updateItemText(item.id, e.target.value)}
-                placeholder={`Aviso ${i + 1}`}
-                autoFocus={i === 0}
-                className="flex-1 border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-              />
-              <button
-                type="button"
-                onClick={() => removeItem(item.id)}
-                className="shrink-0 text-zinc-300 hover:text-red-400 transition-colors"
-                aria-label="Remover aviso"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={addItem}
-          className="self-start flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 transition-colors"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          Adicionar aviso
-        </button>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
-        <input
-          type="number"
-          min={0}
-          step={0.5}
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-          placeholder="—"
-          className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
-        />
-      </div>
-
-      <button
-        type="button"
-        onClick={handleSave}
-        className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
-      >
-        {unitIndex !== undefined ? "Salvar" : "Adicionar"}
       </button>
     </div>
   );

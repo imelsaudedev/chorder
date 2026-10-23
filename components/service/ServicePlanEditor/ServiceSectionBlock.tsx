@@ -36,13 +36,30 @@ type ServiceSectionBlockProps = {
   sectionIndex: number;
   timing?: SectionTiming;
   dragHandleRef?: React.RefObject<HTMLDivElement>;
+  activeClientId?: string;
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: () => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
   onUpdateUnit: (unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
   onOpenDrawer: (state: DrawerState) => void;
 };
+
+// Unidade em branco pra qualquer tipo que não seja música — o item já entra
+// na timeline vazio (esqueleto) e abre pra edição na sequência, unificando
+// os fluxos de adicionar e editar.
+function buildBlankUnit(type: ServiceUnitTypeValue): Omit<ClientServiceUnit, "order"> {
+  return {
+    clientId: crypto.randomUUID(),
+    type,
+    arrangementId: null,
+    semitoneTranspose: null,
+    durationMin: null,
+    label: null,
+    metadata: null,
+  };
+}
 
 type DragData = {
   type: "service-unit";
@@ -59,8 +76,10 @@ export default function ServiceSectionBlock({
   sectionIndex,
   timing,
   dragHandleRef,
+  activeClientId,
   onUpdateSection,
   onRemoveSection,
+  onAddUnit,
   onUpdateUnit,
   onRemoveUnit,
   onMoveUnit,
@@ -136,10 +155,11 @@ export default function ServiceSectionBlock({
             sectionIndex={sectionIndex}
             unitIndex={unitIndex}
             timing={timing?.units[unitIndex]}
+            isActive={unit.clientId === activeClientId}
             onUpdate={(changes) => onUpdateUnit(unitIndex, changes)}
             onRemove={() => onRemoveUnit(unitIndex)}
             onEditDetails={() =>
-              onOpenDrawer({ type: "edit-unit", sectionIndex, unitIndex })
+              onOpenDrawer({ type: "edit-unit", clientId: unit.clientId })
             }
             onMoveUnit={onMoveUnit}
           />
@@ -165,7 +185,15 @@ export default function ServiceSectionBlock({
               return (
                 <DropdownMenuItem
                   key={type}
-                  onClick={() => onOpenDrawer({ type: "add-unit", sectionIndex, unitType: type })}
+                  onClick={() => {
+                    if (type === "SONG") {
+                      onOpenDrawer({ type: "add-song", sectionIndex });
+                      return;
+                    }
+                    const unit = buildBlankUnit(type);
+                    onAddUnit(sectionIndex, unit);
+                    onOpenDrawer({ type: "edit-unit", clientId: unit.clientId, isNew: true });
+                  }}
                 >
                   <Icon className={`w-4 h-4 ${config.color}`} />
                   {config.label}
@@ -186,6 +214,7 @@ type SortableUnitRowProps = {
   sectionIndex: number;
   unitIndex: number;
   timing?: SectionTiming["units"][number];
+  isActive?: boolean;
   onUpdate: (changes: Partial<ClientServiceUnit>) => void;
   onRemove: () => void;
   onEditDetails: () => void;
@@ -197,6 +226,7 @@ function SortableUnitRow({
   sectionIndex,
   unitIndex,
   timing,
+  isActive,
   onUpdate,
   onRemove,
   onEditDetails,
@@ -263,6 +293,7 @@ function SortableUnitRow({
         unit={unit}
         timing={timing}
         isDragging={isDragging}
+        isActive={isActive}
         onUpdate={onUpdate}
         onRemove={onRemove}
         onEditDetails={onEditDetails}

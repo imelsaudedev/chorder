@@ -10,6 +10,7 @@ type ServiceUnitRowProps = {
   unit: ClientServiceUnit;
   timing?: UnitTiming;
   isDragging?: boolean;
+  isActive?: boolean;
   onUpdate: (changes: Partial<ClientServiceUnit>) => void;
   onRemove: () => void;
   onEditDetails: () => void;
@@ -23,7 +24,7 @@ type AvisosMeta = { items?: { id: string; text: string }[] };
 
 const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
   function ServiceUnitRow(
-    { unit, timing, isDragging, onUpdate, onRemove, onEditDetails, dragHandleRef },
+    { unit, timing, isDragging, isActive, onUpdate, onRemove, onEditDetails, dragHandleRef },
     ref
   ) {
     const [descExpanded, setDescExpanded] = useState(false);
@@ -60,9 +61,9 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
     return (
       <div
         ref={ref}
-        className={`group rounded-md hover:bg-zinc-50 transition-colors ${
+        className={`group rounded-md transition-colors ${
           isDragging ? "opacity-40" : ""
-        }`}
+        } ${isActive ? "bg-emerald-50 hover:bg-emerald-50" : "hover:bg-zinc-50"}`}
       >
         {/* Main row — items-center alinha tudo com a linha do título */}
         <div className="flex items-center gap-2 px-1 py-1">

@@ -2,13 +2,26 @@
 
 import { useCreateOrUpdateService } from "@/app/api/api-client";
 import { ClientService, ClientServiceSection, ClientServiceUnit, ServicePlan } from "@/prisma/models";
-import { ServiceUnitTypeValue } from "../unitConfig";
 import { useCallback, useState } from "react";
 
 export type DrawerState =
   | { type: "closed" }
-  | { type: "add-unit"; sectionIndex: number; unitType?: ServiceUnitTypeValue }
-  | { type: "edit-unit"; sectionIndex: number; unitIndex: number };
+  | { type: "add-song"; sectionIndex: number }
+  | { type: "edit-unit"; clientId: string; isNew?: boolean };
+
+export function findUnitByClientId(
+  sections: ClientServiceSection[],
+  clientId: string
+): { sectionIndex: number; unitIndex: number; unit: ClientServiceUnit } | null {
+  for (let sectionIndex = 0; sectionIndex < sections.length; sectionIndex++) {
+    const units = sections[sectionIndex].units ?? [];
+    const unitIndex = units.findIndex((u) => u.clientId === clientId);
+    if (unitIndex !== -1) {
+      return { sectionIndex, unitIndex, unit: units[unitIndex] };
+    }
+  }
+  return null;
+}
 
 function reorder<T>(list: T[], from: number, to: number): T[] {
   const result = [...list];
@@ -88,14 +101,14 @@ export function usePlanEditor(initialService: ClientService) {
   // --- Units ---
 
   const addUnit = useCallback(
-    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order" | "clientId">) => {
+    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => {
       mutate((s) => {
         const sections = [...getSections(s)];
         const current = sections[sectionIndex];
         const units = current.units ?? [];
         sections[sectionIndex] = {
           ...current,
-          units: [...units, { ...unit, clientId: crypto.randomUUID(), order: units.length + 1 }],
+          units: [...units, { ...unit, order: units.length + 1 }],
         };
         return setPlan(s, sections);
       });

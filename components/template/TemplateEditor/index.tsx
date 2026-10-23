@@ -91,6 +91,7 @@ export default function TemplateEditor({ id, name, defaultStartTime, sections }:
           onUpdateSection={editor.updateSection}
           onRemoveSection={editor.removeSection}
           onMoveSection={editor.moveSection}
+          onAddUnit={editor.addUnit}
           onUpdateUnit={editor.updateUnit}
           onRemoveUnit={editor.removeUnit}
           onMoveUnit={editor.moveUnit}
@@ -124,7 +125,7 @@ export default function TemplateEditor({ id, name, defaultStartTime, sections }:
         onClose={() => editor.setDrawer({ type: "closed" })}
         onAddUnit={editor.addUnit}
         onUpdateUnit={editor.updateUnit}
-        onLoadTemplate={() => {}}
+        onRemoveUnit={editor.removeUnit}
       />
     </div>
   );
