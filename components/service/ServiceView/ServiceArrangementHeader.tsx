@@ -114,7 +114,7 @@ function ServiceArrangementHeader({
         {!isEditing ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="md:hidden flex h-8 w-8 md:size-9" variant="ghost" size="icon">
+              <Button className="md:hidden flex h-8 w-8 md:size-9" variant="ghost" size="icon" aria-label="Mais opções">
                 <MoreVertical size={20} />
               </Button>
             </DropdownMenuTrigger>
@@ -142,6 +142,7 @@ function ServiceArrangementHeader({
             variant="outline"
             size="icon"
             onClick={onStartEdit}
+            aria-label={t("editChords")}
             className="hidden md:flex"
           >
             <Pencil size={16} />
@@ -160,6 +161,7 @@ function ServiceArrangementHeader({
               size="icon"
               disabled={isSaving}
               onClick={() => hasOriginal ? setScopeDialogOpen(true) : onSaveServiceOnly()}
+              aria-label={t("saveChanges")}
               className="h-8 w-8 md:size-auto md:h-9 md:px-4 md:py-2"
             >
               {isSaving
@@ -173,6 +175,7 @@ function ServiceArrangementHeader({
               variant="outline"
               size="icon"
               onClick={onCancel}
+              aria-label="Cancelar edição"
               disabled={isSaving}
               className="h-8 w-8 md:size-9"
             >
