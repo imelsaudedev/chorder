@@ -36,6 +36,7 @@ export default function ServicePlanHeader({ service, onEdit, compact = false }: 
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <Text
             variant="heading-lg"
+            as="h1"
             size={compact ? "lg" : undefined}
             className="truncate transition-[font-size] duration-200 motion-reduce:transition-none"
           >
