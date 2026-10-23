@@ -1,8 +1,13 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ClientServiceUnit } from "@/prisma/models";
 import { Plus, Trash2 } from "lucide-react";
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useId, useImperativeHandle, useRef, useState } from "react";
+import { AvisosMeta, FalaMeta, LeituraMeta, SermaoMeta } from "./unitSummary";
 
 // Formulários de edição por tipo de item (exceto Música, que tem fluxo
 // próprio de busca em ServiceItemDrawer). Adicionar e editar são o mesmo
@@ -28,12 +33,148 @@ type UnitFormBaseProps = {
   onDone: () => void;
 };
 
+// --- Peças compartilhadas ---
+
+// Corpo rolável + rodapé fixo com o botão de salvar. O envio pelo <form>
+// permite confirmar com Enter e usa a validação nativa dos campos.
+function FormShell({
+  onSubmit,
+  children,
+}: {
+  onSubmit: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <form
+      className="flex min-h-0 flex-1 flex-col"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-4">{children}</div>
+      <div className="shrink-0 border-t border-border bg-background px-4 py-3">
+        <Button type="submit" variant="secondary" className="h-11 w-full">
+          Salvar
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: (id: string) => React.ReactNode;
+}) {
+  const id = useId();
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
+        {label}
+      </Label>
+      {children(id)}
+    </div>
+  );
+}
+
+function TextField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  autoFocus,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  autoFocus?: boolean;
+}) {
+  return (
+    <Field label={label}>
+      {(id) => (
+        <Input
+          id={id}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoFocus={autoFocus}
+          autoComplete="off"
+          enterKeyHint="next"
+          className="h-11"
+        />
+      )}
+    </Field>
+  );
+}
+
+function AreaField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  rows: number;
+}) {
+  return (
+    <Field label={label}>
+      {(id) => (
+        <Textarea
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          rows={rows}
+          style={{ minHeight: `${rows * 1.5 + 1}rem` }}
+          className="max-h-[60dvh] resize-y"
+        />
+      )}
+    </Field>
+  );
+}
+
+function DurationField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  return (
+    <Field label="Duração">
+      {(id) => (
+        <div className="flex items-center gap-2">
+          <Input
+            id={id}
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step={0.5}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="—"
+            className="h-11 w-28"
+          />
+          <span className="text-sm text-muted-foreground">min</span>
+        </div>
+      )}
+    </Field>
+  );
+}
+
+function parseDuration(value: string): number | null {
+  if (!value) return null;
+  const parsed = parseFloat(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 // --- Fala / Oração ---
 
-type FalaMeta = { speaker?: string | null; description?: string | null };
-
 export const FalaUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps & { unitType: "FALA" | "ORACAO" }>(
-  function FalaUnitForm({ unit, isNew, onUpdate, onDiscard, onDone }, ref) {
+  function FalaUnitForm({ unit, unitType, isNew, onUpdate, onDiscard, onDone }, ref) {
     const existingMeta = unit.metadata as FalaMeta | null;
 
     const [label, setLabel] = useState(unit.label ?? "");
@@ -54,79 +195,47 @@ export const FalaUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps & { uni
 
     function handleSave() {
       setSaved(true);
-      const durationMin = duration ? parseFloat(duration) : null;
       const metadata = {
         speaker: speaker.trim() || null,
         description: description.trim() || null,
       };
-      onUpdate({ label: label.trim() || null, metadata, durationMin });
+      onUpdate({ label: label.trim() || null, metadata, durationMin: parseDuration(duration) });
       onDone();
     }
 
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Título</label>
-          <input
-            type="text"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder="Ex: Boas-vindas, Apresentação dos visitantes..."
-            autoFocus
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Quem faz</label>
-          <input
-            type="text"
-            value={speaker}
-            onChange={(e) => setSpeaker(e.target.value)}
-            placeholder="Ex: Dirigente, Pastor João..."
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Descrição</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Roteiro, orientações ou observações para este momento..."
-            rows={4}
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 resize-none"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
-          <input
-            type="number"
-            min={0}
-            step={0.5}
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="—"
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={handleSave}
-          className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
-        >
-          Salvar
-        </button>
-      </div>
+      <FormShell onSubmit={handleSave}>
+        <TextField
+          label="Título"
+          value={label}
+          onChange={setLabel}
+          placeholder="Ex: Boas-vindas, Apresentação dos visitantes..."
+          autoFocus
+        />
+        <TextField
+          label="Quem faz"
+          value={speaker}
+          onChange={setSpeaker}
+          placeholder="Ex: Dirigente, Pastor João..."
+        />
+        <AreaField
+          label="Descrição"
+          value={description}
+          onChange={setDescription}
+          placeholder={
+            unitType === "ORACAO"
+              ? "Motivos de oração, texto a ser lido ou observações..."
+              : "Roteiro da fala, pontos que não podem faltar ou observações..."
+          }
+          rows={9}
+        />
+        <DurationField value={duration} onChange={setDuration} />
+      </FormShell>
     );
   }
 );
 
 // --- Leitura ---
-
-type LeituraMeta = { version?: string | null; text?: string | null };
 
 export const LeituraUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
   function LeituraUnitForm({ unit, isNew, onUpdate, onDiscard, onDone }, ref) {
@@ -150,79 +259,43 @@ export const LeituraUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
 
     function handleSave() {
       setSaved(true);
-      const durationMin = duration ? parseFloat(duration) : null;
       const metadata = {
         version: version.trim() || null,
         text: text.trim() || null,
       };
-      onUpdate({ label: label.trim() || null, metadata, durationMin });
+      onUpdate({ label: label.trim() || null, metadata, durationMin: parseDuration(duration) });
       onDone();
     }
 
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Referência</label>
-          <input
-            type="text"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder="Ex: João 3:16, Salmo 23..."
-            autoFocus
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Versão</label>
-          <input
-            type="text"
-            value={version}
-            onChange={(e) => setVersion(e.target.value)}
-            placeholder="Ex: NVI, ARA, NTLH..."
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Texto</label>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Cole o texto da passagem aqui..."
-            rows={6}
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 resize-none"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
-          <input
-            type="number"
-            min={0}
-            step={0.5}
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="—"
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={handleSave}
-          className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
-        >
-          Salvar
-        </button>
-      </div>
+      <FormShell onSubmit={handleSave}>
+        <TextField
+          label="Referência"
+          value={label}
+          onChange={setLabel}
+          placeholder="Ex: João 3:16, Salmo 23..."
+          autoFocus
+        />
+        <TextField
+          label="Versão"
+          value={version}
+          onChange={setVersion}
+          placeholder="Ex: NVI, ARA, NTLH..."
+        />
+        <AreaField
+          label="Texto"
+          value={text}
+          onChange={setText}
+          placeholder="Cole o texto da passagem aqui..."
+          rows={9}
+        />
+        <DurationField value={duration} onChange={setDuration} />
+      </FormShell>
     );
   }
 );
 
 // --- Sermão ---
-
-type SermaoMeta = { preacher?: string | null; reference?: string | null; description?: string | null };
 
 export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
   function SermaoUnitForm({ unit, isNew, onUpdate, onDiscard, onDone }, ref) {
@@ -248,84 +321,45 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
 
     function handleSave() {
       setSaved(true);
-      const durationMin = duration ? parseFloat(duration) : null;
       const metadata = {
         preacher: preacher.trim() || null,
         reference: reference.trim() || null,
         description: description.trim() || null,
       };
-      onUpdate({ label: label.trim() || null, metadata, durationMin });
+      onUpdate({ label: label.trim() || null, metadata, durationMin: parseDuration(duration) });
       onDone();
     }
 
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Tema</label>
-          <input
-            type="text"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder="Ex: A graça que transforma..."
-            autoFocus
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Pregador</label>
-          <input
-            type="text"
-            value={preacher}
-            onChange={(e) => setPreacher(e.target.value)}
-            placeholder="Ex: Pastor João..."
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Referência bíblica</label>
-          <input
-            type="text"
-            value={reference}
-            onChange={(e) => setReference(e.target.value)}
-            placeholder="Ex: João 3:16, Rm 8:28..."
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Notas</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Observações ou roteiro..."
-            rows={4}
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 resize-none"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
-          <input
-            type="number"
-            min={0}
-            step={0.5}
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="—"
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={handleSave}
-          className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
-        >
-          Salvar
-        </button>
-      </div>
+      <FormShell onSubmit={handleSave}>
+        <TextField
+          label="Tema"
+          value={label}
+          onChange={setLabel}
+          placeholder="Ex: A graça que transforma..."
+          autoFocus
+        />
+        <TextField
+          label="Pregador"
+          value={preacher}
+          onChange={setPreacher}
+          placeholder="Ex: Pastor João..."
+        />
+        <TextField
+          label="Referência bíblica"
+          value={reference}
+          onChange={setReference}
+          placeholder="Ex: João 3:16, Rm 8:28..."
+        />
+        <AreaField
+          label="Notas"
+          value={description}
+          onChange={setDescription}
+          placeholder="Pontos principais do sermão, ilustrações ou observações..."
+          rows={9}
+        />
+        <DurationField value={duration} onChange={setDuration} />
+      </FormShell>
     );
   }
 );
@@ -333,7 +367,6 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
 // --- Avisos ---
 
 type AvisosItem = { id: string; text: string };
-type AvisosMeta = { items?: AvisosItem[] };
 
 export const AvisosUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
   function AvisosUnitForm({ unit, isNew, onUpdate, onDiscard, onDone }, ref) {
@@ -347,6 +380,7 @@ export const AvisosUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
       unit.durationMin != null ? String(unit.durationMin) : ""
     );
     const [saved, setSaved] = useState(false);
+    const listRef = useRef<HTMLDivElement>(null);
 
     useImperativeHandle(ref, () => ({
       discardIfBlank: () => {
@@ -366,75 +400,57 @@ export const AvisosUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
 
     function addItem() {
       setItems((prev) => [...prev, { id: crypto.randomUUID(), text: "" }]);
+      // Foca o campo recém-criado depois que ele entra na tela.
+      requestAnimationFrame(() => {
+        const inputs = listRef.current?.querySelectorAll<HTMLInputElement>("input");
+        inputs?.[inputs.length - 1]?.focus();
+      });
     }
 
     function handleSave() {
       setSaved(true);
-      const durationMin = duration ? parseFloat(duration) : null;
       const cleanItems = items
         .map((item) => ({ ...item, text: item.text.trim() }))
         .filter((item) => item.text);
-      onUpdate({ label: null, metadata: { items: cleanItems }, durationMin });
+      onUpdate({ label: null, metadata: { items: cleanItems }, durationMin: parseDuration(duration) });
       onDone();
     }
 
     return (
-      <div className="flex flex-col gap-4">
+      <FormShell onSubmit={handleSave}>
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Avisos</label>
-          <div className="flex flex-col gap-2">
+          <span className="text-xs font-medium text-muted-foreground">Avisos</span>
+          <div ref={listRef} className="flex flex-col gap-2">
             {items.map((item, i) => (
-              <div key={item.id} className="flex items-center gap-2">
-                <input
+              <div key={item.id} className="flex items-center gap-1">
+                <Input
                   type="text"
                   value={item.text}
                   onChange={(e) => updateItemText(item.id, e.target.value)}
                   placeholder={`Aviso ${i + 1}`}
+                  aria-label={`Aviso ${i + 1}`}
                   autoFocus={i === 0}
-                  className="flex-1 border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400"
+                  autoComplete="off"
+                  className="h-11 flex-1"
                 />
                 <button
                   type="button"
                   onClick={() => removeItem(item.id)}
-                  className="shrink-0 text-zinc-300 hover:text-red-400 transition-colors"
-                  aria-label="Remover aviso"
+                  className="cursor-pointer flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-destructive focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  aria-label={`Remover aviso ${i + 1}`}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={addItem}
-            className="self-start flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" />
+          <Button type="button" variant="ghost" onClick={addItem} className="h-11 self-start gap-1 px-2">
+            <Plus className="w-4 h-4" />
             Adicionar aviso
-          </button>
+          </Button>
         </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-zinc-500">Duração (min)</label>
-          <input
-            type="number"
-            min={0}
-            step={0.5}
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="—"
-            className="border border-zinc-300 rounded-md px-3 py-2 text-sm outline-none focus:border-emerald-400 w-24"
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={handleSave}
-          className="py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
-        >
-          Salvar
-        </button>
-      </div>
+        <DurationField value={duration} onChange={setDuration} />
+      </FormShell>
     );
   }
 );

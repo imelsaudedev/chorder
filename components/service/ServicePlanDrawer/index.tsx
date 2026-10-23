@@ -448,11 +448,11 @@ function TemplateSelector({ selected, onSelect }: TemplateSelectorProps) {
   const { templates, isLoading } = useFetchTemplates();
 
   if (isLoading) {
-    return <p className="text-xs text-zinc-400">Carregando templates...</p>;
+    return <p className="text-xs text-muted-foreground">Carregando templates...</p>;
   }
 
   if (templates.length === 0) {
-    return <p className="text-xs text-zinc-400">Nenhum template cadastrado.</p>;
+    return <p className="text-xs text-muted-foreground">Nenhum template cadastrado.</p>;
   }
 
   return (
@@ -464,26 +464,26 @@ function TemplateSelector({ selected, onSelect }: TemplateSelectorProps) {
             key={tmpl.id}
             type="button"
             onClick={() => onSelect(tmpl)}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-md border text-sm transition-colors text-left ${
+            className={`cursor-pointer flex items-center gap-3 px-3 min-h-11 py-2.5 rounded-md border text-sm transition-colors text-left ${
               isSelected
-                ? "border-emerald-500 bg-emerald-50"
-                : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+                ? "border-ring bg-muted/50"
+                : "border-border hover:border-ring hover:bg-muted/50"
             }`}
           >
             <div
               className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
                 isSelected
-                  ? "border-emerald-500 bg-emerald-500"
-                  : "border-zinc-300"
+                  ? "border-ring bg-ring"
+                  : "border-border"
               }`}
             >
-              {isSelected && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
+              {isSelected && <Check className="w-2.5 h-2.5 text-background" strokeWidth={3} />}
             </div>
             <div className="flex-1 min-w-0">
-              <p className={`font-medium ${isSelected ? "text-emerald-700" : "text-zinc-800"}`}>
+              <p className={`font-medium ${isSelected ? "text-foreground" : "text-foreground"}`}>
                 {tmpl.name}
               </p>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {templateSummary(tmpl)}
               </p>
             </div>
@@ -494,22 +494,22 @@ function TemplateSelector({ selected, onSelect }: TemplateSelectorProps) {
       <button
         type="button"
         onClick={() => onSelect(null)}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-md border text-sm transition-colors ${
+        className={`cursor-pointer flex items-center gap-3 px-3 min-h-11 py-2.5 rounded-md border text-sm transition-colors ${
           selected === null
-            ? "border-zinc-400 bg-zinc-50"
-            : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+            ? "border-ring bg-muted/50"
+            : "border-border hover:border-ring hover:bg-muted/50"
         }`}
       >
         <div
           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-            selected === null ? "border-zinc-500 bg-zinc-500" : "border-zinc-300"
+            selected === null ? "border-ring bg-ring" : "border-border"
           }`}
         >
           {selected === null && (
-            <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+            <Check className="w-2.5 h-2.5 text-background" strokeWidth={3} />
           )}
         </div>
-        <span className={selected === null ? "text-zinc-700" : "text-zinc-500"}>
+        <span className={selected === null ? "text-foreground" : "text-muted-foreground"}>
           Sem template
         </span>
       </button>

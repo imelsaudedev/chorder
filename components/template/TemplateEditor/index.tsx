@@ -54,10 +54,10 @@ export default function TemplateEditor({ id, name, defaultStartTime, sections }:
   return (
     <div className="flex flex-col h-dvh">
       {/* Header */}
-      <div className="shrink-0 px-4 sm:px-6 lg:px-8 py-4 border-b border-border bg-white">
+      <div className="shrink-0 px-4 sm:px-6 lg:px-8 py-4 border-b border-border bg-background">
         <div className="flex items-end gap-4">
           <div className="flex-1 min-w-0">
-            <Label htmlFor="template-name" className="text-xs text-zinc-500 mb-1 block">
+            <Label htmlFor="template-name" className="text-xs text-muted-foreground mb-1 block">
               Nome do template
             </Label>
             <Input
@@ -69,7 +69,7 @@ export default function TemplateEditor({ id, name, defaultStartTime, sections }:
             />
           </div>
           <div className="shrink-0">
-            <Label htmlFor="template-start-time" className="text-xs text-zinc-500 mb-1 block">
+            <Label htmlFor="template-start-time" className="text-xs text-muted-foreground mb-1 block">
               Horário padrão
             </Label>
             <Input

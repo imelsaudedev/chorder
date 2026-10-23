@@ -7,14 +7,21 @@ type FormFooterProps = {
   loading?: boolean;
   label?: string;
   cancelButton?: React.ReactNode;
+  /** Texto de estado à esquerda (ex.: "Não salvo"). */
+  status?: React.ReactNode;
   onSave?: () => void;
 };
 
-export default function FormFooter({ disabled = false, loading = false, label, cancelButton, onSave }: FormFooterProps) {
+export default function FormFooter({ disabled = false, loading = false, label, cancelButton, status, onSave }: FormFooterProps) {
   const t = useTranslations("Messages");
 
   return (
-    <div className="shrink-0 px-4 sm:px-6 lg:px-8 py-3 bg-white shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+    <div className="shrink-0 px-4 sm:px-6 lg:px-8 py-3 bg-background shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+      {status && (
+        <div role="status" aria-live="polite" className="mb-2 text-xs text-muted-foreground sm:mb-0 sm:float-left sm:mt-2.5">
+          {status}
+        </div>
+      )}
       <div className={`gap-2 sm:flex sm:justify-end ${cancelButton ? "grid grid-cols-2" : "flex justify-end"}`}>
         {cancelButton}
         <Button

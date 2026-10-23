@@ -17,10 +17,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { UNIT_CONFIG, ServiceUnitTypeValue } from "./unitConfig";
-import { GripVertical, Plus, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { formatTime, SectionTiming } from "./hooks/useServiceTimeline";
+import { DrawerState } from "./hooks/usePlanEditor";
+import SectionDialog from "./SectionDialog";
+import ServiceUnitRow from "./ServiceUnitRow";
+import { isUnitPending, summarizeUnit } from "./unitSummary";
 
 function formatDuration(min: number): string {
   if (min < 60) return `${min} min`;
@@ -28,15 +33,21 @@ function formatDuration(min: number): string {
   const m = min % 60;
   return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, "0")}`;
 }
-import { DrawerState } from "./hooks/usePlanEditor";
-import ServiceUnitRow from "./ServiceUnitRow";
+
+export type AdjacentSections = {
+  prev?: { label: string; unitCount: number };
+  next?: { label: string };
+};
 
 type ServiceSectionBlockProps = {
   section: ClientServiceSection;
   sectionIndex: number;
   timing?: SectionTiming;
+  adjacent: AdjacentSections;
   dragHandleRef?: React.RefObject<HTMLDivElement>;
   activeClientId?: string;
+  onSectionHandleKeyDown?: (e: React.KeyboardEvent) => void;
+  onAnnounce: (message: string) => void;
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: () => void;
   onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
@@ -75,8 +86,11 @@ export default function ServiceSectionBlock({
   section,
   sectionIndex,
   timing,
+  adjacent,
   dragHandleRef,
   activeClientId,
+  onSectionHandleKeyDown,
+  onAnnounce,
   onUpdateSection,
   onRemoveSection,
   onAddUnit,
@@ -86,65 +100,77 @@ export default function ServiceSectionBlock({
   onOpenDrawer,
 }: ServiceSectionBlockProps) {
   const units = section.units ?? [];
+  const [editOpen, setEditOpen] = useState(false);
+  const pendingCount = units.filter(isUnitPending).length;
+  const totalLabel = timing
+    ? [
+        formatTime(timing.startTime),
+        formatDuration(Math.round((timing.endTime.getTime() - timing.startTime.getTime()) / 60000)),
+      ].join(" · ")
+    : null;
 
   return (
     <div className="mb-6">
-      {/* Section header */}
-      <div className="flex items-center gap-2 mb-1 px-1 py-1">
-        {/* Drag handle da seção */}
+      {/* Cabeçalho da seção: nome editável e total lado a lado, divisória embaixo */}
+      <div className="mb-1.5 flex min-h-12 items-center border-b border-border">
+        {/* Alça da seção */}
         <div
           ref={dragHandleRef}
-          className="cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-400 shrink-0 touch-none"
+          role="button"
+          tabIndex={0}
+          data-section-handle={section.id}
+          aria-label={`Reordenar a seção ${section.label || "sem nome"}. Use as setas para cima e para baixo para mover a seção.`}
+          onKeyDown={onSectionHandleKeyDown}
+          className="grid h-12 w-10 shrink-0 cursor-grab place-items-center rounded-lg text-muted-foreground touch-none active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
-          <GripVertical className="w-4 h-4" />
+          <GripVertical className="w-5 h-5" />
         </div>
 
-        {/* Label */}
-        <input
-          type="text"
-          value={section.label}
-          onChange={(e) => onUpdateSection({ label: e.target.value })}
-          className="flex-1 text-xs font-semibold uppercase tracking-widest text-zinc-500 bg-transparent outline-none placeholder:text-zinc-300"
-          placeholder="Nome da seção"
-        />
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2.5">
+          {/* Nome da seção (edição rápida) */}
+          <Input
+            type="text"
+            value={section.label}
+            onChange={(e) => onUpdateSection({ label: e.target.value })}
+            aria-label="Nome da seção"
+            className="h-11 w-auto min-w-24 max-w-full border-transparent bg-transparent px-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground shadow-none [field-sizing:content] hover:border-input placeholder:text-muted-foreground"
+            placeholder="Nome da seção"
+          />
+          {(totalLabel || pendingCount > 0) && (
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {totalLabel}
+              {pendingCount > 0 && (
+                <span className="ml-2 font-semibold text-foreground">
+                  {pendingCount} {pendingCount === 1 ? "pendente" : "pendentes"}
+                </span>
+              )}
+            </span>
+          )}
+        </div>
 
-        {/* Duration + time — desktop apenas */}
-        {timing && (
-          <span className="hidden sm:inline text-xs text-zinc-400  shrink-0">
-            {[
-              formatDuration(Math.round((timing.endTime.getTime() - timing.startTime.getTime()) / 60000)),
-              formatTime(timing.startTime),
-            ].join(" · ")}
-          </span>
-        )}
+        <button
+          type="button"
+          onClick={() => setEditOpen(true)}
+          className="cursor-pointer flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          aria-label={`Editar seção ${section.label || "sem nome"}`}
+        >
+          <Pencil className="w-4 h-4" />
+        </button>
 
         <button
           type="button"
           onClick={onRemoveSection}
           disabled={units.length > 0}
-          title={units.length > 0 ? "Remova os itens antes de deletar a seção" : undefined}
-          className="text-zinc-300 hover:text-red-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-zinc-300"
-          aria-label="Remover seção"
+          className="cursor-pointer flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-destructive focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-30 disabled:pointer-events-none"
+          aria-label={
+            units.length > 0
+              ? "Remover seção (remova os itens antes)"
+              : `Remover seção ${section.label || "sem nome"}`
+          }
         >
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
-
-      {/* Mobile: duration + time abaixo do label, alinhado com ele */}
-      {timing && (
-        <div className="flex gap-2 px-1 mb-1 sm:hidden">
-          <div className="w-4 shrink-0" />
-          <span className="text-xs text-zinc-400 ">
-            {[
-              formatDuration(Math.round((timing.endTime.getTime() - timing.startTime.getTime()) / 60000)),
-              formatTime(timing.startTime),
-            ].join(" · ")}
-          </span>
-        </div>
-      )}
-
-      {/* Divider */}
-      <div className="h-px bg-zinc-200 mb-2" />
 
       {/* Units */}
       <div className="flex flex-col">
@@ -154,6 +180,8 @@ export default function ServiceSectionBlock({
             unit={unit}
             sectionIndex={sectionIndex}
             unitIndex={unitIndex}
+            unitCount={units.length}
+            adjacent={adjacent}
             timing={timing?.units[unitIndex]}
             isActive={unit.clientId === activeClientId}
             onUpdate={(changes) => onUpdateUnit(unitIndex, changes)}
@@ -162,29 +190,30 @@ export default function ServiceSectionBlock({
               onOpenDrawer({ type: "edit-unit", clientId: unit.clientId })
             }
             onMoveUnit={onMoveUnit}
+            onAnnounce={onAnnounce}
           />
         ))}
       </div>
 
-      {/* Add unit — dropdown alinhado com o ícone dos itens */}
-      <div className="flex items-center gap-2 mt-2 px-1">
-        <div className="w-4 shrink-0" />
+      {/* Adicionar item */}
+      <div className="mt-2 pl-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1.5 text-xs text-zinc-500 border border-zinc-200 rounded-md px-2.5 py-1 hover:border-zinc-400 hover:text-zinc-700 transition-colors"
+              className="cursor-pointer flex h-11 items-center gap-1.5 rounded-md border border-input px-3 text-sm text-muted-foreground transition-colors hover:border-ring hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-4 h-4" />
               Adicionar item
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-44">
+          <DropdownMenuContent align="start" className="w-48">
             {(Object.entries(UNIT_CONFIG) as [ServiceUnitTypeValue, typeof UNIT_CONFIG[ServiceUnitTypeValue]][]).map(([type, config]) => {
               const Icon = config.icon;
               return (
                 <DropdownMenuItem
                   key={type}
+                  className="min-h-11 cursor-pointer"
                   onClick={() => {
                     if (type === "SONG") {
                       onOpenDrawer({ type: "add-song", sectionIndex });
@@ -203,6 +232,13 @@ export default function ServiceSectionBlock({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <SectionDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        section={section}
+        onSubmit={({ label, type }) => onUpdateSection({ label, type })}
+      />
     </div>
   );
 }
@@ -213,24 +249,30 @@ type SortableUnitRowProps = {
   unit: ClientServiceUnit;
   sectionIndex: number;
   unitIndex: number;
+  unitCount: number;
+  adjacent: AdjacentSections;
   timing?: SectionTiming["units"][number];
   isActive?: boolean;
   onUpdate: (changes: Partial<ClientServiceUnit>) => void;
   onRemove: () => void;
   onEditDetails: () => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
+  onAnnounce: (message: string) => void;
 };
 
 function SortableUnitRow({
   unit,
   sectionIndex,
   unitIndex,
+  unitCount,
+  adjacent,
   timing,
   isActive,
   onUpdate,
   onRemove,
   onEditDetails,
   onMoveUnit,
+  onAnnounce,
 }: SortableUnitRowProps) {
   const rowRef = useRef<HTMLDivElement>(null);
   const dragHandleRef = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
@@ -286,6 +328,42 @@ function SortableUnitRow({
     });
   }, [sectionIndex, unitIndex, onMoveUnit]);
 
+  // Reordenar pelo teclado: dentro da seção, e passando para a seção vizinha nas pontas.
+  function handleKeyboardMove(direction: -1 | 1) {
+    const config = UNIT_CONFIG[unit.type as ServiceUnitTypeValue];
+    const summary = summarizeUnit(unit, config?.label ?? unit.type);
+    const name = summary.title ?? summary.placeholder;
+
+    if (direction === -1) {
+      if (unitIndex > 0) {
+        onMoveUnit(sectionIndex, unitIndex, sectionIndex, unitIndex - 1);
+        onAnnounce(`${name}: posição ${unitIndex} de ${unitCount}.`);
+      } else if (adjacent.prev) {
+        onMoveUnit(sectionIndex, unitIndex, sectionIndex - 1, adjacent.prev.unitCount);
+        onAnnounce(`${name} movido para a seção ${adjacent.prev.label || "sem nome"}.`);
+      } else {
+        return;
+      }
+    } else {
+      if (unitIndex < unitCount - 1) {
+        onMoveUnit(sectionIndex, unitIndex, sectionIndex, unitIndex + 1);
+        onAnnounce(`${name}: posição ${unitIndex + 2} de ${unitCount}.`);
+      } else if (adjacent.next) {
+        onMoveUnit(sectionIndex, unitIndex, sectionIndex + 1, 0);
+        onAnnounce(`${name} movido para a seção ${adjacent.next.label || "sem nome"}.`);
+      } else {
+        return;
+      }
+    }
+
+    // A linha pode ser remontada ao trocar de seção; devolve o foco para a alça.
+    requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLElement>(`[data-unit-handle="${unit.clientId}"]`)
+        ?.focus();
+    });
+  }
+
   return (
     <div className="relative">
       <ServiceUnitRow
@@ -294,9 +372,12 @@ function SortableUnitRow({
         timing={timing}
         isDragging={isDragging}
         isActive={isActive}
+        isFirst={unitIndex === 0}
+        isLast={unitIndex === unitCount - 1}
         onUpdate={onUpdate}
         onRemove={onRemove}
         onEditDetails={onEditDetails}
+        onKeyboardMove={handleKeyboardMove}
         dragHandleRef={dragHandleRef}
       />
       {closestEdge && <DropIndicator edge={closestEdge} gap="0px" />}

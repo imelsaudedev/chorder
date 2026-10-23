@@ -15,7 +15,9 @@ import { Plus } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DrawerState } from "./hooks/usePlanEditor";
 import { formatTime, useServiceTimeline } from "./hooks/useServiceTimeline";
-import ServiceSectionBlock from "./ServiceSectionBlock";
+import SectionDialog from "./SectionDialog";
+import { PlanEndRow } from "./UnitRowContent";
+import ServiceSectionBlock, { AdjacentSections } from "./ServiceSectionBlock";
 
 type ServiceTimelineProps = {
   service: ClientService;
@@ -57,11 +59,17 @@ export default function ServiceTimeline({
   const sections = service.plan?.sections ?? [];
   const timings = useServiceTimeline(service);
   const finalTiming = timings[timings.length - 1];
+  // Mensagem para leitores de tela ao reordenar pelo teclado.
+  const [announcement, setAnnouncement] = useState("");
 
   return (
     <div className="py-4">
+      <div role="status" aria-live="polite" className="sr-only">
+        {announcement}
+      </div>
+
       {sections.length === 0 && (
-        <div className="text-center py-12 text-zinc-400 text-sm">
+        <div className="text-center py-12 text-muted-foreground text-sm">
           Nenhuma seção. Adicione um bloco abaixo.
         </div>
       )}
@@ -71,6 +79,19 @@ export default function ServiceTimeline({
           key={section.id}
           section={section}
           sectionIndex={sectionIndex}
+          sectionCount={sections.length}
+          adjacent={{
+            prev: sections[sectionIndex - 1]
+              ? {
+                  label: sections[sectionIndex - 1].label,
+                  unitCount: sections[sectionIndex - 1].units?.length ?? 0,
+                }
+              : undefined,
+            next: sections[sectionIndex + 1]
+              ? { label: sections[sectionIndex + 1].label }
+              : undefined,
+          }}
+          onAnnounce={setAnnouncement}
           timing={timings[sectionIndex]}
           activeClientId={activeClientId}
           onUpdateSection={(changes) => onUpdateSection(sectionIndex, changes)}
@@ -84,11 +105,7 @@ export default function ServiceTimeline({
         />
       ))}
 
-      {finalTiming && (
-        <div className="flex items-center gap-2 px-1 py-1.5 mt-1 text-xs text-zinc-400">
-          Término previsto: {formatTime(finalTiming.endTime)}
-        </div>
-      )}
+      {finalTiming && <PlanEndRow time={finalTiming.endTime} withGrip />}
 
       <AddSectionMenu
         onAdd={(type, label) => onAddSection({ type, label, units: [] })}
@@ -102,6 +119,9 @@ export default function ServiceTimeline({
 type SortableSectionBlockProps = {
   section: ClientServiceSection;
   sectionIndex: number;
+  sectionCount: number;
+  adjacent: AdjacentSections;
+  onAnnounce: (message: string) => void;
   timing?: ReturnType<typeof useServiceTimeline>[number];
   activeClientId?: string;
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
@@ -117,6 +137,9 @@ type SortableSectionBlockProps = {
 function SortableSectionBlock({
   section,
   sectionIndex,
+  sectionCount,
+  adjacent,
+  onAnnounce,
   timing,
   activeClientId,
   onUpdateSection,
@@ -176,9 +199,22 @@ function SortableSectionBlock({
     });
   }, [sectionIndex, onMoveSection]);
 
-  const handleMoveSection = useCallback(
-    (from: number, to: number) => onMoveSection(from, to),
-    [onMoveSection]
+  // Reordenar a seção pelo teclado (setas na alça).
+  const handleHandleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      e.preventDefault();
+      const to = e.key === "ArrowUp" ? sectionIndex - 1 : sectionIndex + 1;
+      if (to < 0 || to >= sectionCount) return;
+      onMoveSection(sectionIndex, to);
+      onAnnounce(`Seção ${section.label || "sem nome"}: posição ${to + 1} de ${sectionCount}.`);
+      requestAnimationFrame(() => {
+        document
+          .querySelector<HTMLElement>(`[data-section-handle="${section.id}"]`)
+          ?.focus();
+      });
+    },
+    [sectionIndex, sectionCount, section.id, section.label, onMoveSection, onAnnounce]
   );
 
   return (
@@ -187,6 +223,9 @@ function SortableSectionBlock({
         section={section}
         sectionIndex={sectionIndex}
         timing={timing}
+        adjacent={adjacent}
+        onAnnounce={onAnnounce}
+        onSectionHandleKeyDown={handleHandleKeyDown}
         dragHandleRef={dragHandleRef}
         activeClientId={activeClientId}
         onUpdateSection={onUpdateSection}
@@ -207,16 +246,24 @@ function AddSectionMenu({
 }: {
   onAdd: (type: ClientServiceSection["type"], label: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="mt-4 px-1">
+    <div className="mt-4">
       <button
         type="button"
-        onClick={() => onAdd("ESPECIAL", "")}
-        className="w-full flex items-center gap-1 text-xs text-zinc-400 border border-dashed border-zinc-300 rounded-md px-2.5 py-2 hover:border-zinc-400 hover:text-zinc-600 transition-colors"
+        onClick={() => setOpen(true)}
+        className="cursor-pointer flex h-12 w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-input text-sm text-muted-foreground transition-colors hover:border-ring hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring"
       >
-        <Plus className="w-3 h-3" />
+        <Plus className="w-4 h-4" />
         Adicionar seção
       </button>
+      <SectionDialog
+        open={open}
+        onOpenChange={setOpen}
+        section={null}
+        onSubmit={({ label, type }) => onAdd(type, label)}
+      />
     </div>
   );
 }
