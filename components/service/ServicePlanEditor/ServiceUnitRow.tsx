@@ -4,6 +4,7 @@ import { ClientServiceUnit } from "@/prisma/models";
 import { GripVertical, Trash2 } from "lucide-react";
 import { forwardRef } from "react";
 import { UnitTiming } from "./hooks/useServiceTimeline";
+import { usePlanMode } from "./planMode";
 import { summarizeUnit } from "./unitSummary";
 import { UNIT_CONFIG, ServiceUnitTypeValue } from "./unitConfig";
 import UnitRowContent from "./UnitRowContent";
@@ -39,7 +40,8 @@ const ServiceUnitRow = forwardRef<HTMLDivElement, ServiceUnitRowProps>(
     ref
   ) {
     const config = UNIT_CONFIG[unit.type as ServiceUnitTypeValue];
-    const summary = summarizeUnit(unit, config?.label ?? unit.type);
+    const mode = usePlanMode();
+    const summary = summarizeUnit(unit, config?.label ?? unit.type, mode);
     const itemName = summary.title ?? summary.placeholder;
 
     function handleHandleKeyDown(e: React.KeyboardEvent) {

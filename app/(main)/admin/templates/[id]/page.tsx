@@ -3,7 +3,7 @@ import { retrieveTemplate } from "@/prisma/data";
 import { buildSectionsFromTemplate, getTemplateDefaultStartTime } from "@/lib/template-utils";
 import { notFound } from "next/navigation";
 
-export const metadata = { title: "Editar template" };
+export const metadata = { title: "Editar modelo" };
 
 export default async function EditTemplatePage({
   params,

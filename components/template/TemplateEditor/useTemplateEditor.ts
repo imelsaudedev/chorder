@@ -69,14 +69,17 @@ export function useTemplateEditor(initial: {
   );
 
   const addUnit = useCallback(
-    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => {
+    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">, index?: number) => {
       mutate((s) => {
         const next = [...s];
         const current = next[sectionIndex];
-        const units = current.units ?? [];
+        const units = [...(current.units ?? [])];
+        // Sem `index`, entra no fim; com `index`, entra naquela posição.
+        const at = index === undefined ? units.length : Math.max(0, Math.min(index, units.length));
+        units.splice(at, 0, { ...unit, order: at + 1 });
         next[sectionIndex] = {
           ...current,
-          units: [...units, { ...unit, order: units.length + 1 }],
+          units: units.map((u, i) => ({ ...u, order: i + 1 })),
         };
         return next;
       });
@@ -129,7 +132,21 @@ export function useTemplateEditor(initial: {
   );
 
   const save = useCallback(async (): Promise<ClientServiceSection & { id?: number } | undefined> => {
-    const items = { defaultStartTime, sections };
+    // O template guarda só o esqueleto (o que buildSectionsFromTemplate lê): tipo, rótulo,
+    // duração e metadados de cada item — sem ids, ordem nem músicas/arranjos.
+    const items = {
+      defaultStartTime,
+      sections: sections.map((section) => ({
+        type: section.type,
+        label: section.label,
+        units: (section.units ?? []).map((unit) => ({
+          type: unit.type,
+          label: unit.label ?? null,
+          durationMin: unit.durationMin ?? null,
+          metadata: unit.metadata ?? null,
+        })),
+      })),
+    };
     let result;
     if (initial.id) {
       result = await updateTemplate({ name, items });

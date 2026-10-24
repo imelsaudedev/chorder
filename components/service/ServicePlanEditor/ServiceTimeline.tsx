@@ -26,7 +26,7 @@ type ServiceTimelineProps = {
   onUpdateSection: (sectionIndex: number, changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: (sectionIndex: number) => void;
   onMoveSection: (from: number, to: number) => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">, index?: number) => void;
   onUpdateUnit: (sectionIndex: number, unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (sectionIndex: number, unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;
@@ -126,7 +126,7 @@ type SortableSectionBlockProps = {
   activeClientId?: string;
   onUpdateSection: (changes: Partial<ClientServiceSection>) => void;
   onRemoveSection: () => void;
-  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => void;
+  onAddUnit: (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">, index?: number) => void;
   onUpdateUnit: (unitIndex: number, changes: Partial<ClientServiceUnit>) => void;
   onRemoveUnit: (unitIndex: number) => void;
   onMoveUnit: (fromSection: number, fromIndex: number, toSection: number, toIndex: number) => void;

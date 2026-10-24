@@ -6,7 +6,8 @@ import { useCallback, useState } from "react";
 
 export type DrawerState =
   | { type: "closed" }
-  | { type: "add-song"; sectionIndex: number }
+  // `index`: posição de inserção na seção (sem ele, entra no fim).
+  | { type: "add-song"; sectionIndex: number; index?: number }
   | { type: "edit-unit"; clientId: string; isNew?: boolean };
 
 export function findUnitByClientId(
@@ -101,15 +102,15 @@ export function usePlanEditor(initialService: ClientService) {
   // --- Units ---
 
   const addUnit = useCallback(
-    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">) => {
+    (sectionIndex: number, unit: Omit<ClientServiceUnit, "order">, index?: number) => {
       mutate((s) => {
         const sections = [...getSections(s)];
         const current = sections[sectionIndex];
-        const units = current.units ?? [];
-        sections[sectionIndex] = {
-          ...current,
-          units: [...units, { ...unit, order: units.length + 1 }],
-        };
+        const units = [...(current.units ?? [])];
+        // Sem `index`, entra no fim; com `index`, entra naquela posição.
+        const at = index === undefined ? units.length : Math.max(0, Math.min(index, units.length));
+        units.splice(at, 0, { ...unit, order: at + 1 });
+        sections[sectionIndex] = { ...current, units: withOrders(units) };
         return setPlan(s, sections);
       });
     },
