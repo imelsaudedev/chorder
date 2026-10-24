@@ -192,7 +192,9 @@ export default function ServicePlanDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="flex flex-col max-w-sm overflow-y-auto">
+      {/* overflow-x-hidden: o drawer (vaul) tem um ::after com 200% da largura para o gesto de
+          arrastar; com overflow-y-auto ele viraria rolagem horizontal. */}
+      <DrawerContent className="flex flex-col max-w-sm overflow-y-auto overflow-x-hidden">
         <DrawerHeader>
           <DrawerTitle>{drawerTitle}</DrawerTitle>
         </DrawerHeader>
