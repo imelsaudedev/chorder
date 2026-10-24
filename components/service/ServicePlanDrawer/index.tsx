@@ -1,6 +1,6 @@
 "use client";
 
-import { useFetchTemplates } from "@/app/api/api-client";
+import { useFetchServices, useFetchTemplates } from "@/app/api/api-client";
 import DatePicker from "@/components/common/DatePicker";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,23 +24,28 @@ import {
   getTemplateDefaultStartTime,
   summarizeTemplate,
 } from "@/lib/template-utils";
+import { buildServiceTitle, nextSunday } from "@/lib/service-schedule";
 import { ClientServiceSection, ClientServiceTemplate } from "@/prisma/models";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Check, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+// Data e hora começam vazias na criação (a pessoa precisa escolher), então a data
+// aceita nulo e a obrigatoriedade fica na validação.
 const schema = z.object({
   title: z.string().min(1),
   worshipLeader: z.string().nullable(),
   preacher: z.string().nullable(),
-  date: z.coerce.date(),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/, "Formato HH:MM"),
+  // Boolean(...) de propósito: um `value !== null` estreitaria o tipo de saída e separaria
+  // entrada e saída do formulário.
+  date: z.date().nullable().refine((value) => Boolean(value), "Escolha a data"),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/, "Escolha a hora"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -83,10 +88,6 @@ function combineDateAndTime(date: Date, time: string): Date {
   return result;
 }
 
-function suggestTitle(date: Date): string {
-  return "Culto - " + format(date, "EEE, d MMM", { locale: ptBR });
-}
-
 export default function ServicePlanDrawer({
   open,
   onOpenChange,
@@ -96,18 +97,23 @@ export default function ServicePlanDrawer({
   onSave,
 }: ServicePlanDrawerProps) {
   const t = useTranslations();
-  const baseDate = defaultValues?.date ?? new Date();
+
+  // Criação: data, hora e título começam vazios. Edição: os valores do culto.
+  const initialValues = (): FormValues => {
+    const date = isNew ? null : (defaultValues?.date ?? new Date());
+    return {
+      title: isNew ? "" : (defaultValues?.title ?? ""),
+      worshipLeader: defaultValues?.worshipLeader ?? "",
+      preacher: defaultValues?.preacher ?? "",
+      date,
+      startTime: date ? timeFromDate(date) : "",
+    };
+  };
 
   const form = useForm<FormValues>({
     mode: "onChange",
     resolver: zodResolver(schema),
-    defaultValues: {
-      title: isNew ? suggestTitle(baseDate) : (defaultValues?.title ?? ""),
-      worshipLeader: defaultValues?.worshipLeader ?? "",
-      preacher: defaultValues?.preacher ?? "",
-      date: baseDate,
-      startTime: timeFromDate(baseDate),
-    },
+    defaultValues: initialValues(),
   });
 
   // undefined = user hasn't interacted yet (nothing highlighted)
@@ -120,46 +126,49 @@ export default function ServicePlanDrawer({
   // Tracks whether the user manually edited the title (suppresses auto-suggest)
   const isTitleDirty = useRef(false);
 
+  // O horário do modelo é adotado ao escolher o modelo. Este sinal diz que o horário atual
+  // veio dele (e não foi editado), para poder ser limpo se trocarem para um modelo sem horário.
+  const timeFromTemplate = useRef(false);
+
   // Reset on open
   useEffect(() => {
     if (open) {
-      const d = defaultValues?.date ?? new Date();
       isTitleDirty.current = false;
-      form.reset({
-        title: isNew ? suggestTitle(d) : (defaultValues?.title ?? ""),
-        worshipLeader: defaultValues?.worshipLeader ?? "",
-        preacher: defaultValues?.preacher ?? "",
-        date: d,
-        startTime: timeFromDate(d),
-      });
+      timeFromTemplate.current = false;
+      form.reset(initialValues());
       setSelectedTemplate(undefined);
     }
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-suggest title when date changes (only in creation mode, only if not dirty)
+  // Título sugerido (só na criação e enquanto a pessoa não o editar): nome do modelo +
+  // referência no calendário. O horário do modelo vira um atalho de hora, não é
+  // preenchido sozinho: data e hora precisam ser escolhidas.
   const dateValue = form.watch("date");
   useEffect(() => {
     if (!isNew || isTitleDirty.current) return;
-    if (dateValue) {
-      form.setValue("title", suggestTitle(new Date(dateValue)), {
-        shouldValidate: true,
-      });
-    }
-  }, [dateValue, isNew]); // eslint-disable-line react-hooks/exhaustive-deps
+    form.setValue(
+      "title",
+      buildServiceTitle(selectedTemplate?.name, dateValue ? new Date(dateValue) : null),
+      { shouldValidate: true }
+    );
+  }, [dateValue, selectedTemplate, isNew]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-fill startTime from template's defaultStartTime
   function handleTemplateSelect(tmpl: ClientServiceTemplate | null) {
     setSelectedTemplate(tmpl);
-    if (tmpl) {
-      const defaultTime = getTemplateDefaultStartTime(tmpl);
-      if (defaultTime) {
-        form.setValue("startTime", defaultTime, { shouldValidate: true });
-      }
+    const templateTime = tmpl ? getTemplateDefaultStartTime(tmpl) : null;
+    if (templateTime) {
+      // Modelo com horário de início: adota, sem oferecer outros horários.
+      form.setValue("startTime", templateTime, { shouldValidate: true, shouldDirty: true });
+      timeFromTemplate.current = true;
+    } else if (timeFromTemplate.current) {
+      // O horário anterior veio de outro modelo: sem horário agora, a pessoa precisa escolher.
+      form.setValue("startTime", "", { shouldValidate: true, shouldDirty: true });
+      timeFromTemplate.current = false;
     }
   }
 
   function handleSubmit(values: FormValues) {
-    const date = combineDateAndTime(values.date, values.startTime);
+    const date = combineDateAndTime(values.date as Date, values.startTime);
 
     const result = onSave({
       title: values.title,
@@ -183,7 +192,9 @@ export default function ServicePlanDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="flex flex-col max-w-sm overflow-y-auto">
+      {/* overflow-x-hidden: o drawer (vaul) tem um ::after com 200% da largura para o gesto de
+          arrastar; com overflow-y-auto ele viraria rolagem horizontal. */}
+      <DrawerContent className="flex flex-col max-w-sm overflow-y-auto overflow-x-hidden">
         <DrawerHeader>
           <DrawerTitle>{drawerTitle}</DrawerTitle>
         </DrawerHeader>
@@ -202,6 +213,9 @@ export default function ServicePlanDrawer({
                   onTitleChange={() => {
                     isTitleDirty.current = true;
                   }}
+                  onTimeChange={() => {
+                    timeFromTemplate.current = false;
+                  }}
                 />
               ) : (
                 <EditFields form={form} />
@@ -209,6 +223,11 @@ export default function ServicePlanDrawer({
             </div>
 
             <DrawerFooter>
+              {isNew && (!dateValue || !form.watch("startTime")) && (
+                <p className="text-center text-xs text-muted-foreground">
+                  Escolha a data e a hora para continuar.
+                </p>
+              )}
               <Button
                 type="submit"
                 variant="secondary"
@@ -230,7 +249,11 @@ export default function ServicePlanDrawer({
 }
 
 // ---------------------------------------------------------------------------
-// Creation fields: data → template → hora → título → dirigente
+// Creation fields: modelo → data e hora → título → dirigente
+//
+// A ordem segue as dependências: o modelo sugere o horário e compõe o título, então vem
+// primeiro. Data e hora começam vazias e são obrigatórias; os atalhos são escolhas de um
+// toque (próximos dias de culto, horários usados antes), não valores preenchidos.
 // ---------------------------------------------------------------------------
 
 type CreationFieldsProps = {
@@ -238,47 +261,122 @@ type CreationFieldsProps = {
   selectedTemplate: ClientServiceTemplate | null | undefined;
   onSelectTemplate: (t: ClientServiceTemplate | null) => void;
   onTitleChange: () => void;
+  onTimeChange: () => void;
 };
+
+function ChoiceChip({
+  selected,
+  onClick,
+  children,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onClick}
+      className={`cursor-pointer inline-flex h-10 items-center rounded-full border px-3.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+        selected
+          ? "border-ring bg-ring/10 text-foreground"
+          : "border-border text-muted-foreground hover:border-ring hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
 
 function CreationFields({
   form,
   selectedTemplate,
   onSelectTemplate,
   onTitleChange,
+  onTimeChange,
 }: CreationFieldsProps) {
   const t = useTranslations();
+  const { services } = useFetchServices();
+
+  // Liturgias existentes, para avisar quando o dia escolhido já tem uma.
+  const existingServices = useMemo<{ slug: string; title: string | null; date: Date }[]>(
+    () =>
+      (Array.isArray(services) ? services : [])
+        .filter((service: { isDeleted?: boolean }) => !service.isDeleted)
+        .map((service: { slug: string; title?: string | null; date: string | Date }) => ({
+          slug: service.slug,
+          title: service.title ?? null,
+          date: new Date(String(service.date)),
+        })),
+    [services]
+  );
+  // Os cultos são prioritariamente dominicais: o único atalho de data é o próximo domingo
+  // do calendário (hoje, se for domingo).
+  const sunday = useMemo(() => nextSunday(), []);
+  const templateTime = selectedTemplate ? getTemplateDefaultStartTime(selectedTemplate) : null;
+
+  const dateValue = form.watch("date");
+  const timeValue = form.watch("startTime");
+  const sundayLabel = `${isSameDay(sunday, new Date()) ? "Hoje" : "Próximo domingo"} · ${format(sunday, "d/MM", { locale: ptBR })}`;
+  const sameDayServices = dateValue
+    ? existingServices.filter((service) => isSameDay(service.date, new Date(dateValue)))
+    : [];
+
   return (
     <>
-      {/* 1. Data */}
+      {/* 1. Modelo */}
+      <div>
+        <p className="text-sm font-medium mb-2">Modelo</p>
+        <TemplateSelector selected={selectedTemplate} onSelect={onSelectTemplate} />
+      </div>
+
+      {/* 2. Data */}
       <FormField
         control={form.control}
         name="date"
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("ServiceData.date")}</FormLabel>
+            <div className="flex flex-wrap gap-1.5">
+              <ChoiceChip
+                selected={!!dateValue && isSameDay(new Date(dateValue), sunday)}
+                onClick={() => form.setValue("date", sunday, { shouldValidate: true, shouldDirty: true })}
+              >
+                {sundayLabel}
+              </ChoiceChip>
+            </div>
             <FormControl>
               <DatePicker
-                buttonProps={{ className: "w-full" }}
+                buttonProps={{ className: "w-full h-11" }}
                 disabled={field.disabled}
-                onChange={field.onChange}
-                value={field.value}
+                onChange={(date) => field.onChange(date ?? null)}
+                value={field.value ?? undefined}
               />
             </FormControl>
+            {sameDayServices.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Já existe uma liturgia neste dia:{" "}
+                {sameDayServices.map((service, index) => (
+                  <Fragment key={service.slug}>
+                    {index > 0 && ", "}
+                    <a href={`/services/${service.slug}`} className="cursor-pointer underline">
+                      {service.title?.trim() || "Sem título"}
+                    </a>
+                  </Fragment>
+                ))}
+              </p>
+            )}
             <FormMessage />
           </FormItem>
         )}
       />
 
-      {/* 2. Template */}
-      <div>
-        <p className="text-sm font-medium mb-2">Modelo</p>
-        <TemplateSelector
-          selected={selectedTemplate}
-          onSelect={onSelectTemplate}
-        />
-      </div>
-
-      {/* 3. Hora de início */}
+      {/* 3. Hora de início: o modelo, quando tem horário, define; sem ele a pessoa escolhe */}
       <FormField
         control={form.control}
         name="startTime"
@@ -286,14 +384,25 @@ function CreationFields({
           <FormItem>
             <FormLabel>Hora de início</FormLabel>
             <FormControl>
-              <Input type="time" {...field} className="w-32" />
+              <Input
+                type="time"
+                {...field}
+                className="h-11 w-32"
+                onChange={(e) => {
+                  onTimeChange();
+                  field.onChange(e);
+                }}
+              />
             </FormControl>
+            {templateTime && timeValue === templateTime && (
+              <p className="text-xs text-muted-foreground">Horário definido pelo modelo.</p>
+            )}
             <FormMessage />
           </FormItem>
         )}
       />
 
-      {/* 4. Título (auto-sugerido) */}
+      {/* 4. Título (sugerido a partir do modelo e da data) */}
       <FormField
         control={form.control}
         name="title"
@@ -302,14 +411,18 @@ function CreationFields({
             <FormLabel>{t("ServiceData.title")}</FormLabel>
             <FormControl>
               <Input
-                placeholder={t("ServiceData.titlePlaceholder")}
+                placeholder="Aparece depois de escolher a data"
                 {...field}
+                className="h-11"
                 onChange={(e) => {
                   onTitleChange();
                   field.onChange(e);
                 }}
               />
             </FormControl>
+            <p className="text-xs text-muted-foreground">
+              Sugerido pelo modelo e pela data. Pode editar.
+            </p>
             <FormMessage />
           </FormItem>
         )}
@@ -326,6 +439,7 @@ function CreationFields({
               <Input
                 placeholder={t("ServiceData.worshipLeaderPlaceholder")}
                 {...field}
+                className="h-11"
                 value={field.value ?? ""}
               />
             </FormControl>
@@ -336,6 +450,7 @@ function CreationFields({
     </>
   );
 }
+
 
 // ---------------------------------------------------------------------------
 // Edit fields: título → data → hora → dirigente → pregador
@@ -378,7 +493,7 @@ function EditFields({ form }: EditFieldsProps) {
                 buttonProps={{ className: "w-full" }}
                 disabled={field.disabled}
                 onChange={field.onChange}
-                value={field.value}
+                value={field.value ?? undefined}
               />
             </FormControl>
             <FormMessage />
