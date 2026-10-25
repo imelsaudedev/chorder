@@ -8,9 +8,12 @@ import ServiceSongUnitEditForm, { EditFormHandle } from "./ServiceSongUnitEditFo
 
 type ServiceSongUnitViewProps = {
   unit: ClientServiceUnit;
+  /** Elevado até o ServiceView — sobrevive à troca para o Modo Palco e volta. */
+  transpose: number;
+  onTransposeChange: (value: number) => void;
 };
 
-export default function ServiceSongUnitView({ unit }: ServiceSongUnitViewProps) {
+export default function ServiceSongUnitView({ unit, transpose, onTransposeChange }: ServiceSongUnitViewProps) {
   const arrangement = unit.arrangement;
   const { columns, fontSize, mode, density } = useServiceConfig();
   const [isEditing, setIsEditing] = useState(false);
@@ -47,7 +50,8 @@ export default function ServiceSongUnitView({ unit }: ServiceSongUnitViewProps) 
   return (
     <div className="w-full" style={{ "--song-header-h": `${headerHeight}px` } as React.CSSProperties}>
       <SongConfigProvider
-        transpose={unit.semitoneTranspose}
+        transpose={transpose}
+        onTransposeChange={onTransposeChange}
         columns={columns}
         fontSize={fontSize}
         mode={mode}

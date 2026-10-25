@@ -49,6 +49,14 @@ export default function ServiceView({ service }: ServiceViewProps) {
   // Música em que o Modo Palco abre e, ao sair, onde a tela normal volta.
   const [stageIndex, setStageIndex] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
+  // Elevado acima do modo normal e do Modo Palco: trocar de um pro outro não
+  // pode resetar um tom que já foi ajustado na sessão (bug: "tom volta ao
+  // original ao entrar no Modo Palco").
+  const [transposes, setTransposes] = useState(() =>
+    (service?.units ?? [])
+      .filter((u): u is ClientServiceUnit => u?.type === "SONG")
+      .map((u) => u.semitoneTranspose ?? 0)
+  );
   const [collapsed, setCollapsed] = useLocalStorageState(SIDEBAR_COLLAPSED_KEY, false);
   // Indexado pela posição entre as músicas.
   const songRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -183,8 +191,10 @@ export default function ServiceView({ service }: ServiceViewProps) {
         units={songUnits}
         initialIndex={stageIndex}
         initialFontSize={fontSize}
-        onExit={(index) => {
+        initialTransposes={transposes}
+        onExit={(index, exitTransposes) => {
           setStageIndex(index);
+          setTransposes(exitTransposes);
           shouldRestoreScroll.current = true;
           setIsStageMode(false);
         }}
@@ -230,7 +240,15 @@ export default function ServiceView({ service }: ServiceViewProps) {
                       songRefs.current[entry.songIndex] = el;
                     }}
                   >
-                    <ServiceSongUnitView unit={entry.unit} />
+                    <ServiceSongUnitView
+                      unit={entry.unit}
+                      transpose={transposes[entry.songIndex] ?? 0}
+                      onTransposeChange={(value) =>
+                        setTransposes((prev) =>
+                          prev.map((v, i) => (i === entry.songIndex ? value : v))
+                        )
+                      }
+                    />
                   </div>
                 ))}
               </div>

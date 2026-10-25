@@ -3,8 +3,10 @@ import { RefObject, useEffect, useRef } from "react";
 // Escala de velocidade como múltiplos (igual player de áudio/vídeo), só com
 // velocidades lentas — com 1x = 25px/s, uma cifra longa de ~4000px leva ~2,5min.
 // Calibração inicial — ajustável livremente, sem precisar de nova aprovação.
-export const SCROLL_SPEED_MULTIPLIERS = [0.25, 0.5, 0.75, 1] as const;
-export const DEFAULT_SCROLL_SPEED_MULTIPLIER: number = SCROLL_SPEED_MULTIPLIERS[1];
+// 0.15x adicionado para músicas lentas, em que 0.25x (6,25px/s) ainda
+// corria rápido demais.
+export const SCROLL_SPEED_MULTIPLIERS = [0.15, 0.25, 0.5, 0.75, 1] as const;
+export const DEFAULT_SCROLL_SPEED_MULTIPLIER: number = SCROLL_SPEED_MULTIPLIERS[2];
 
 // Pixels por segundo na velocidade "1x" — base da escala de múltiplos.
 const BASE_SCROLL_SPEED_PX_PER_SECOND = 25;

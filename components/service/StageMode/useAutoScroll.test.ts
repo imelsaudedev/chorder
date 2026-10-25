@@ -62,7 +62,11 @@ describe("stepScrollSpeed", () => {
 
   it("fica preso nos extremos, sem dar a volta", () => {
     expect(stepScrollSpeed(1, 1)).toBe(1);
-    expect(stepScrollSpeed(0.25, -1)).toBe(0.25);
+    expect(stepScrollSpeed(0.15, -1)).toBe(0.15);
+  });
+
+  it("0.15x é o novo mínimo, abaixo do 0.25x original", () => {
+    expect(stepScrollSpeed(0.25, -1)).toBe(0.15);
   });
 
   it("valor fora da escala (salvo por versão anterior) parte da velocidade padrão", () => {

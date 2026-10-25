@@ -25,8 +25,12 @@ type StageModeProps = {
   /** Fonte que o usuário já usa na tela normal — ponto de partida do Modo
    * Palco, antes de qualquer ajuste próprio salvo. */
   initialFontSize: number;
-  /** Recebe a música em que o músico estava, pra tela normal voltar nela. */
-  onExit: (currentIndex: number) => void;
+  /** Tom por música, elevado pelo ServiceView — ponto de partida do Modo
+   * Palco, e devolvido em onExit para a tela normal continuar dali. */
+  initialTransposes: number[];
+  /** Recebe a música em que o músico estava e o tom de cada uma, pra tela
+   * normal voltar no mesmo ponto. */
+  onExit: (currentIndex: number, transposes: number[]) => void;
 };
 
 // Velocidade é lembrada por música (arranjo) no aparelho — ver §6.5 da spec.
@@ -46,7 +50,13 @@ function scrollSpeedKey(unit: ClientServiceUnit) {
  * Tom e velocidade valem para a música que está no topo da tela; a fonte é
  * a mesma para todas.
  */
-export default function StageMode({ units, initialIndex, initialFontSize, onExit }: StageModeProps) {
+export default function StageMode({
+  units,
+  initialIndex,
+  initialFontSize,
+  initialTransposes,
+  onExit,
+}: StageModeProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -56,9 +66,9 @@ export default function StageMode({ units, initialIndex, initialFontSize, onExit
   // (nunca liga sozinha).
   const [isScrollEnabled, setIsScrollEnabled] = useState(false);
 
-  // Tom é só da sessão (parte do tom salvo no culto); fonte e velocidade
-  // vêm do aparelho.
-  const [transposes, setTransposes] = useState(() => units.map((unit) => unit.semitoneTranspose ?? 0));
+  // Tom é só da sessão, elevado pelo ServiceView para sobreviver à troca
+  // entre o modo normal e o Modo Palco; fonte e velocidade vêm do aparelho.
+  const [transposes, setTransposes] = useState(initialTransposes);
   const [fontSize, setFontSize] = useLocalStorageState(
     FONT_SIZE_KEY,
     Math.min(FONT_MAX, Math.max(FONT_MIN, initialFontSize))
@@ -95,7 +105,7 @@ export default function StageMode({ units, initialIndex, initialFontSize, onExit
 
   // Botão voltar do aparelho e botão de sair seguem o mesmo caminho: o
   // histórico volta uma entrada e o popstate fecha o modo.
-  useStageModeBack(() => onExit(currentIndexRef.current));
+  useStageModeBack(() => onExit(currentIndexRef.current, transposes));
 
   // Abre na música que estava visível na tela normal.
   useLayoutEffect(() => {
@@ -201,7 +211,7 @@ export default function StageMode({ units, initialIndex, initialFontSize, onExit
           onTogglePlayback={() => setIsScrollEnabled((enabled) => !enabled)}
           onSlower={() => changeCurrentScrollSpeed(-1)}
           onFaster={() => changeCurrentScrollSpeed(1)}
-          onExit={() => requestStageModeExit(() => onExit(currentIndex))}
+          onExit={() => requestStageModeExit(() => onExit(currentIndex, transposes))}
         />
       </SongConfigProvider>
     </div>

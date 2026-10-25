@@ -31,6 +31,10 @@ export const SongConfigContext = createContext<SongConfigContextType | null>(
 
 type SongConfigContextProps = {
   transpose?: number | null;
+  /** Avisa quem chamou quando o tom muda, para elevar o estado além do
+   * tempo de vida deste provider (ex.: o Modo Palco precisa continuar de
+   * onde o modo normal parou, e vice-versa). */
+  onTransposeChange?: (value: number) => void;
   columns?: number | null;
   fontSize?: number | null;
   mode?: Mode | null;
@@ -40,13 +44,21 @@ type SongConfigContextProps = {
 
 export default function SongConfigProvider({
   transpose: initialTranspose,
+  onTransposeChange,
   columns: initialColumns,
   fontSize: initialFontSize,
   mode: initialMode,
   density: initialDensity,
   children,
 }: SongConfigContextProps) {
-  const [transpose, setTranspose] = useState(initialTranspose ?? 0);
+  const [transpose, setTransposeState] = useState(initialTranspose ?? 0);
+  const setTranspose: Dispatch<SetStateAction<number>> = (value) => {
+    setTransposeState((prev) => {
+      const next = typeof value === "function" ? (value as (p: number) => number)(prev) : value;
+      onTransposeChange?.(next);
+      return next;
+    });
+  };
   const [enharmonicPreference, setEnharmonicPreference] = useState<"sharp" | "flat" | null>(null);
   const [columns, setColumns, setUntouchedColumns, columnsTouched] =
     useTouchedState(initialColumns ?? 0);
@@ -59,7 +71,9 @@ export default function SongConfigProvider({
     useTouchedState<Density>(initialDensity ?? "normal");
 
   useEffect(() => {
-    setTranspose(initialTranspose ?? 0);
+    // Direto no estado interno, sem passar por onTransposeChange — este
+    // efeito só re-sincroniza com o valor que o próprio chamador já tem.
+    setTransposeState(initialTranspose ?? 0);
   }, [initialTranspose]);
   useEffect(() => {
     if (!columnsTouched) {
