@@ -72,24 +72,24 @@ const mockUnit: ClientServiceUnit = {
 
 describe('ServiceSongUnitView', () => {
   it('renders arrangement header', () => {
-    render(<ServiceSongUnitView unit={mockUnit} />);
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
     expect(screen.getByTestId('service-arrangement-header')).toBeDefined();
   });
 
   it('shows ArrangementView and hides edit form when not editing', () => {
-    render(<ServiceSongUnitView unit={mockUnit} />);
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
     expect(screen.getByTestId('arrangement-view')).toBeDefined();
     expect(screen.queryByTestId('edit-form')).toBeNull();
   });
 
   it('passes isEditing=false to header initially', () => {
-    render(<ServiceSongUnitView unit={mockUnit} />);
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
     expect(screen.queryByTestId('is-editing')).toBeNull();
   });
 
   it('switches to edit form and hides view when onStartEdit triggered', async () => {
     const user = userEvent.setup();
-    render(<ServiceSongUnitView unit={mockUnit} />);
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
     await user.click(screen.getByTestId('start-edit'));
     expect(screen.getByTestId('edit-form')).toBeDefined();
     expect(screen.queryByTestId('arrangement-view')).toBeNull();
@@ -97,14 +97,14 @@ describe('ServiceSongUnitView', () => {
 
   it('passes isEditing=true to header during edit', async () => {
     const user = userEvent.setup();
-    render(<ServiceSongUnitView unit={mockUnit} />);
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
     await user.click(screen.getByTestId('start-edit'));
     expect(screen.getByTestId('is-editing')).toBeDefined();
   });
 
   it('returns to view mode when onCancel triggered', async () => {
     const user = userEvent.setup();
-    render(<ServiceSongUnitView unit={mockUnit} />);
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
     await user.click(screen.getByTestId('start-edit'));
     await user.click(screen.getByTestId('cancel-edit'));
     expect(screen.getByTestId('arrangement-view')).toBeDefined();
@@ -113,7 +113,7 @@ describe('ServiceSongUnitView', () => {
 
   it('returns to view mode after onSaved called from edit form', async () => {
     const user = userEvent.setup();
-    render(<ServiceSongUnitView unit={mockUnit} />);
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
     await user.click(screen.getByTestId('start-edit'));
     await user.click(screen.getByTestId('mock-saved'));
     expect(screen.getByTestId('arrangement-view')).toBeDefined();
