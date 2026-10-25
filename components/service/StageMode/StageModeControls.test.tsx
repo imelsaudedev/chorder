@@ -129,7 +129,7 @@ describe("StageModeControls — rolagem (play separado da velocidade)", () => {
   });
 
   it("desabilita mais devagar na menor velocidade e mais rápido na maior", () => {
-    const { rerender } = render(<StageModeControls {...baseProps} scrollSpeedMultiplier={0.25} />);
+    const { rerender } = render(<StageModeControls {...baseProps} scrollSpeedMultiplier={0.15} />);
     expect(screen.getByRole("button", { name: /mais devagar/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /mais rápido/i })).toBeEnabled();
 
