@@ -18,6 +18,7 @@ import {
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { GripVertical, Minus, Plus, Trash2 } from "lucide-react";
 import { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useRef, useState } from "react";
+import { usePlanMode } from "./planMode";
 import { AvisosMeta, FalaMeta, LeituraMeta, SermaoMeta } from "./unitSummary";
 
 // Formulários de edição por tipo de item (exceto Música, que tem fluxo
@@ -246,10 +247,13 @@ export const FalaUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps & { uni
       unit.durationMin != null ? String(unit.durationMin) : ""
     );
     const [saved, setSaved] = useState(false);
+    const mode = usePlanMode();
 
     useImperativeHandle(ref, () => ({
       discardIfBlank: () => {
-        if (!isNew || saved) return;
+        // No modelo, um item em branco é um estado válido (o esqueleto da
+        // liturgia) — só descarta sozinho no culto de verdade.
+        if (!isNew || saved || mode === "template") return;
         const stillBlank = !label.trim() && !speaker.trim() && !description.trim() && !duration;
         if (stillBlank) onDiscard();
       },
@@ -311,10 +315,13 @@ export const LeituraUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
       unit.durationMin != null ? String(unit.durationMin) : ""
     );
     const [saved, setSaved] = useState(false);
+    const mode = usePlanMode();
 
     useImperativeHandle(ref, () => ({
       discardIfBlank: () => {
-        if (!isNew || saved) return;
+        // No modelo, um item em branco é um estado válido (o esqueleto da
+        // liturgia) — só descarta sozinho no culto de verdade.
+        if (!isNew || saved || mode === "template") return;
         const stillBlank = !label.trim() && !version.trim() && !text.trim() && !duration;
         if (stillBlank) onDiscard();
       },
@@ -373,10 +380,13 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
       unit.durationMin != null ? String(unit.durationMin) : ""
     );
     const [saved, setSaved] = useState(false);
+    const mode = usePlanMode();
 
     useImperativeHandle(ref, () => ({
       discardIfBlank: () => {
-        if (!isNew || saved) return;
+        // No modelo, um item em branco é um estado válido (o esqueleto da
+        // liturgia) — só descarta sozinho no culto de verdade.
+        if (!isNew || saved || mode === "template") return;
         const stillBlank =
           !label.trim() && !preacher.trim() && !reference.trim() && !description.trim() && !duration;
         if (stillBlank) onDiscard();
@@ -445,6 +455,7 @@ export const AvisosUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
       unit.durationMin != null ? String(unit.durationMin) : ""
     );
     const [saved, setSaved] = useState(false);
+    const mode = usePlanMode();
     const listRef = useRef<HTMLDivElement>(null);
     const formId = useId();
     // Mensagem para leitores de tela ao reordenar pelo teclado.
@@ -452,7 +463,9 @@ export const AvisosUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
 
     useImperativeHandle(ref, () => ({
       discardIfBlank: () => {
-        if (!isNew || saved) return;
+        // No modelo, um item em branco é um estado válido (o esqueleto da
+        // liturgia) — só descarta sozinho no culto de verdade.
+        if (!isNew || saved || mode === "template") return;
         const stillBlank = items.every((item) => !item.text.trim()) && !duration;
         if (stillBlank) onDiscard();
       },
@@ -658,10 +671,13 @@ export const SongSlotForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
     const [label, setLabel] = useState(unit.label ?? "");
     const [duration, setDuration] = useState(initialDuration);
     const [saved, setSaved] = useState(false);
+    const mode = usePlanMode();
 
     useImperativeHandle(ref, () => ({
       discardIfBlank: () => {
-        if (!isNew || saved) return;
+        // Este formulário só existe no modelo — um espaço de música em
+        // branco é o próprio propósito dele, nunca descarta sozinho.
+        if (!isNew || saved || mode === "template") return;
         if (!label.trim() && duration === initialDuration) onDiscard();
       },
     }));

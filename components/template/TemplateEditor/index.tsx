@@ -18,6 +18,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ClientService, ClientServiceSection } from "@/prisma/models";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef } from "react";
+import { toast } from "sonner";
 import { useTemplateEditor } from "./useTemplateEditor";
 
 type TemplateEditorProps = {
@@ -75,9 +76,11 @@ export default function TemplateEditor({ id, name, defaultStartTime, sections }:
   }, [editor.name, editor.defaultStartTime, editor.sections]);
 
   async function handleSave() {
-    const result = await editor.save() as unknown as { id?: number } | undefined;
-    if (!id && result?.id) {
-      router.replace(`/admin/templates/${result.id}`);
+    try {
+      await editor.save();
+      router.push("/admin/templates");
+    } catch {
+      toast.error("Não foi possível salvar o modelo. Tente novamente.");
     }
   }
 
