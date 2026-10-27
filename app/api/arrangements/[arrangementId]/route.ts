@@ -101,9 +101,11 @@ export async function POST(
     return new Response("Invalid arrangement data", { status: 400 });
   }
 
+  const preserveMedia = request.nextUrl.searchParams.get("preserveMedia") === "true";
   const createdArrangement = await updateArrangement(arrangement, {
     includeSong: true,
     includeUnits: true,
+    preserveMedia,
   });
 
   return new Response(JSON.stringify(createdArrangement), {

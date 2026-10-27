@@ -484,9 +484,16 @@ export async function updateArrangement(
   {
     includeSong = false,
     includeUnits = false,
+    // true para quem só edita cifra/dados do arranjo (ex.: o editor de
+    // liturgia) e nunca mexe em vídeo/áudio — preserva o que já está
+    // salvo em vez de sobrescrever com o que o chamador carregava, que
+    // pode estar desatualizado se um vídeo foi inserido por outro caminho
+    // (ServiceMediaButtons) um instante antes deste save.
+    preserveMedia = false,
   }: {
     includeSong?: boolean;
     includeUnits?: boolean;
+    preserveMedia?: boolean;
   } = {}
 ): Promise<ClientArrangement> {
   if (!arrangement.id) {
@@ -509,8 +516,10 @@ export async function updateArrangement(
     id: arrangement.id,
     name: arrangement.name,
     key: arrangement.key,
-    youtubeUrl: arrangement.youtubeUrl || null,
   };
+  if (!preserveMedia) {
+    arrangementData.youtubeUrl = arrangement.youtubeUrl || null;
+  }
 
   const song = arrangement.song ?? baseArrangement.song!;
   const songData: {
@@ -539,7 +548,7 @@ export async function updateArrangement(
     where: { slug: song.slug },
     data: songData,
   });
-  if (arrangement.audios !== undefined) {
+  if (arrangement.audios !== undefined && !preserveMedia) {
     const keptIds = arrangement.audios.filter((a) => a.id).map((a) => a.id!);
     await prisma.arrangementAudio.deleteMany({
       where: {
