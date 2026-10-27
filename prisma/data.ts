@@ -778,6 +778,47 @@ export async function duplicateArrangement(
   return duplicatedArrangement;
 }
 
+// Operações granulares de áudio de referência: cada ação (adicionar, remover,
+// renomear) toca só o item em questão, nunca o array inteiro — diferente do
+// PATCH antigo (que reenviava/apagava tudo que não estivesse no array),
+// permitindo que duas abas editando a mesma música não se sobrescrevam.
+
+export async function addArrangementAudio(
+  arrangementId: number,
+  data: { url: string; label: string; order?: number }
+) {
+  const order =
+    data.order ??
+    (await prisma.arrangementAudio.count({ where: { arrangementId } }));
+  return prisma.arrangementAudio.create({
+    data: { arrangementId, url: data.url, label: data.label, order },
+  });
+}
+
+export async function removeArrangementAudio(
+  arrangementId: number,
+  audioId: number
+) {
+  const audio = await prisma.arrangementAudio.findFirst({
+    where: { id: audioId, arrangementId },
+  });
+  if (!audio) return null;
+  await prisma.arrangementAudio.delete({ where: { id: audioId } });
+  return audio;
+}
+
+export async function renameArrangementAudio(
+  arrangementId: number,
+  audioId: number,
+  label: string
+): Promise<boolean> {
+  const { count } = await prisma.arrangementAudio.updateMany({
+    where: { id: audioId, arrangementId },
+    data: { label },
+  });
+  return count > 0;
+}
+
 const arrangementIncludeFields = {
   song: true,
   units: { orderBy: { order: "asc" } },

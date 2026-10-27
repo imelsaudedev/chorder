@@ -93,8 +93,8 @@ Mapa da música (D5), redesenho dos players, Modo Roteiro, miolo da cifra/`Colum
 
 Decidido: agrupar em 3 PRs.
 
-1. **Dados e API** (Etapas 0, 1, 2, 3) — fechar PR #65, nova branch, corrigir upload de áudio, API granular, arranjo mínimo on-demand. Testável com a UI atual (chips), sem mudança visual.
-2. **Lista de referências e novo cabeçalho** (Etapas 4, 6) — substitui os chips pela lista única em `Popover`; reestrutura o cabeçalho (tom, sticky, aviso de plano).
+1. **Dados e API** (Etapas 0, 1, 2) — fechar PR #65, nova branch, corrigir upload de áudio, API granular. Testável com a UI atual (chips), sem mudança visual.
+2. **Lista de referências e novo cabeçalho** (Etapas 3, 4, 6) — arranjo mínimo on-demand (movida pra cá: só faz sentido junto do botão que a aciona), substitui os chips pela lista única em `Popover`, reestrutura o cabeçalho (tom, sticky, aviso de plano).
 3. **Players e espaçamento** (Etapas 5, 7) — `arrangementId` no contexto dos players, fecha mídia ao entrar no Modo Palco, resolve sobreposição de z-index.
 
 Cada PR segue o fluxo normal do `CLAUDE.md`: branch própria a partir de `main` atualizado, `tsc`/testes antes do push, preview da Vercel pro Tiago testar, merge só depois da aprovação.
