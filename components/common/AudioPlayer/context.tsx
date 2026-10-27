@@ -12,7 +12,7 @@ type AudioPlayerState = {
 };
 
 type AudioPlayerContextType = AudioPlayerState & {
-  play: (audios: AudioItem[], title?: string) => void;
+  play: (audios: AudioItem[], title?: string, initialIndex?: number) => void;
   switchTo: (index: number) => void;
   close: () => void;
 };
@@ -26,8 +26,8 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     isOpen: false,
   });
 
-  const play = (audios: AudioItem[], title?: string) =>
-    setState({ audios, currentIndex: 0, title, isOpen: true });
+  const play = (audios: AudioItem[], title?: string, initialIndex = 0) =>
+    setState({ audios, currentIndex: initialIndex, title, isOpen: true });
 
   const switchTo = (index: number) =>
     setState((s) => ({ ...s, currentIndex: index }));
