@@ -121,7 +121,14 @@ export function useFetchArrangement(
   };
 }
 
-export function useCreateOrUpdateArrangement(arrangementId?: number | null) {
+export function useCreateOrUpdateArrangement(
+  arrangementId?: number | null,
+  // Quem salva aqui nunca edita youtubeUrl/audios diretamente (isso é do
+  // ServiceMediaButtons, que salva na hora) — sem isso, um save "cheio"
+  // feito logo após inserir um vídeo sobrescreve o vídeo de volta pra
+  // vazio, com o valor desatualizado que este formulário carregava.
+  options: { preserveMedia?: boolean } = {}
+) {
   async function createOrUpdateArrangement(
     url: string,
     { arg }: { arg: ClientArrangement }
@@ -139,9 +146,10 @@ export function useCreateOrUpdateArrangement(arrangementId?: number | null) {
     return response.json();
   }
 
-  const url = arrangementId
+  const baseUrl = arrangementId
     ? `/api/arrangements/${arrangementId}`
     : "/api/arrangements";
+  const url = options.preserveMedia ? `${baseUrl}?preserveMedia=true` : baseUrl;
 
   const { data, trigger, isMutating, error } = useSWRMutation(
     url,
