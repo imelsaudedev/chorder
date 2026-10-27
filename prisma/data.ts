@@ -524,7 +524,7 @@ export async function updateArrangement(
     // liturgia) e nunca mexe em vídeo/áudio — preserva o que já está
     // salvo em vez de sobrescrever com o que o chamador carregava, que
     // pode estar desatualizado se um vídeo foi inserido por outro caminho
-    // (ServiceMediaButtons) um instante antes deste save.
+    // (ServiceMediaReferences) um instante antes deste save.
     preserveMedia = false,
   }: {
     includeSong?: boolean;

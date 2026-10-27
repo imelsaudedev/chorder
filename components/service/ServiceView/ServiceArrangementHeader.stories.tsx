@@ -31,7 +31,6 @@ export const Default: Story = {
               order={1}
               isEditing={false}
               isSaving={false}
-              onStartEdit={() => {}}
               onCancel={() => {}}
               onSaveServiceOnly={() => {}}
               onSaveBoth={() => {}}

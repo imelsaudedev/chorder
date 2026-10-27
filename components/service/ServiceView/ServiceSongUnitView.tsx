@@ -4,6 +4,7 @@ import ArrangementView from "@/components/song/ArrangementView";
 import { ClientServiceUnit } from "@/prisma/models";
 import React, { useEffect, useRef, useState } from "react";
 import ServiceArrangementHeader from "./ServiceArrangementHeader";
+import ServiceArrangementMeta from "./ServiceArrangementMeta";
 import ServiceSongUnitEditForm, { EditFormHandle } from "./ServiceSongUnitEditForm";
 
 type ServiceSongUnitViewProps = {
@@ -64,10 +65,14 @@ export default function ServiceSongUnitView({ unit, transpose, onTransposeChange
           isEditing={isEditing}
           isSaving={isSaving}
           isStuck={isHeaderStuck}
-          onStartEdit={() => setIsEditing(true)}
           onCancel={() => setIsEditing(false)}
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
+        />
+        <ServiceArrangementMeta
+          arrangement={arrangement}
+          isEditing={isEditing}
+          onStartEdit={() => setIsEditing(true)}
         />
         {isEditing ? (
           <ServiceSongUnitEditForm

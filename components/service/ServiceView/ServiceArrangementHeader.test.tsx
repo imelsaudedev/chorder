@@ -12,18 +12,6 @@ vi.mock('@/components/config/SongConfig', () => ({
   useSongConfig: () => ({ transpose: 0, setTranspose: vi.fn(), density: 'normal' }),
 }));
 
-vi.mock('@/components/common/AudioReferenceButton', () => ({
-  default: () => <button data-testid="audio-btn" />,
-}));
-
-vi.mock('@/components/common/YoutubeReferenceButton', () => ({
-  default: () => <button data-testid="youtube-btn" />,
-}));
-
-vi.mock('@/components/config/KeyButtonSet', () => ({
-  default: () => <div data-testid="key-button-set" />,
-}));
-
 const baseArrangement: ClientArrangement = {
   id: 14,
   songId: 53,
@@ -51,7 +39,6 @@ const defaultProps = {
   order: 1,
   isEditing: false,
   isSaving: false,
-  onStartEdit: vi.fn(),
   onCancel: vi.fn(),
   onSaveServiceOnly: vi.fn(),
   onSaveBoth: vi.fn(),
@@ -63,47 +50,9 @@ describe('ServiceArrangementHeader — view mode', () => {
     expect(screen.getByText(/Glória e Força/)).toBeDefined();
   });
 
-  it('calls onStartEdit when pencil clicked (desktop)', async () => {
-    const user = userEvent.setup();
-    const onStartEdit = vi.fn();
-    render(<ServiceArrangementHeader {...defaultProps} onStartEdit={onStartEdit} />);
-    const pencilBtn = screen.getAllByRole('button').find(
-      (b) => b.className.includes('hidden md:flex')
-    );
-    expect(pencilBtn).toBeDefined();
-    await user.click(pencilBtn!);
-    expect(onStartEdit).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows youtube and audio buttons when urls present', () => {
-    render(
-      <ServiceArrangementHeader
-        {...defaultProps}
-        arrangement={{
-          ...baseArrangement,
-          youtubeUrl: 'https://yt.be/x',
-          audios: [{ id: 1, url: 'https://audio.mp3', label: 'Voz', order: 0 }],
-        }}
-      />
-    );
-    expect(screen.getByTestId('youtube-btn')).toBeDefined();
-    expect(screen.getByTestId('audio-btn')).toBeDefined();
-  });
-
-  it('hides media buttons in edit mode', () => {
-    render(
-      <ServiceArrangementHeader
-        {...defaultProps}
-        isEditing
-        arrangement={{
-          ...baseArrangement,
-          youtubeUrl: 'https://yt.be/x',
-          audios: [{ id: 1, url: 'https://audio.mp3', label: 'Voz', order: 0 }],
-        }}
-      />
-    );
-    expect(screen.queryByTestId('youtube-btn')).toBeNull();
-    expect(screen.queryByTestId('audio-btn')).toBeNull();
+  it('shows no buttons outside of edit mode (tom/referências/lápis ficam em ServiceArrangementMeta)', () => {
+    render(<ServiceArrangementHeader {...defaultProps} />);
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
   });
 });
 
@@ -122,11 +71,7 @@ describe('ServiceArrangementHeader — edit mode, no original', () => {
     const user = userEvent.setup();
     const onCancel = vi.fn();
     render(<ServiceArrangementHeader {...editProps} onCancel={onCancel} />);
-    const buttons = screen.getAllByRole('button');
-    const cancelBtn = buttons.find((b) => b.querySelector('svg'));
-    // cancel is the last icon button in edit mode
-    const cancelBtnEl = buttons[buttons.length - 1];
-    await user.click(cancelBtnEl);
+    await user.click(screen.getByRole('button', { name: /cancelEdit/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 

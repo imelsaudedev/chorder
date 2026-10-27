@@ -1,5 +1,4 @@
 import Heading from "@/components/common/Heading";
-import KeyButtonSet from "@/components/config/KeyButtonSet";
 import { useSongConfig } from "@/components/config/SongConfig";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,30 +7,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientArrangement } from "@/prisma/models";
-import AudioReferenceButton from "@/components/common/AudioReferenceButton";
-import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
-import { transposeChord } from "@/chopro/music";
-import ServiceMediaButtons from "./ServiceMediaButtons";
-import { Check, Loader2, MoreVertical, Pencil, X } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { forwardRef, useState } from "react";
 
+// Só o título (+ Salvar/Cancelar em edição) é sticky — tom, referências,
+// aviso de plano e mapa rolam com a página (ver D1 na análise/plano:
+// cabeçalho inteiro sticky ocupava espaço demais no celular).
 type ServiceArrangementHeaderProps = {
   arrangement: ClientArrangement | null;
   order: number;
   isEditing: boolean;
   isSaving: boolean;
   isStuck?: boolean;
-  onStartEdit: () => void;
   onCancel: () => void;
   onSaveServiceOnly: () => void;
   onSaveBoth: () => void;
@@ -44,18 +34,13 @@ function ServiceArrangementHeader({
   isEditing,
   isSaving,
   isStuck = false,
-  onStartEdit,
   onCancel,
   onSaveServiceOnly,
   onSaveBoth,
 }: ServiceArrangementHeaderProps, ref) {
-  const { transpose, setTranspose, density } = useSongConfig();
+  const { density } = useSongConfig();
   const t = useTranslations("ServiceView");
-  const tGlobal = useTranslations("Messages");
   const [scopeDialogOpen, setScopeDialogOpen] = useState(false);
-  const effectiveKey = arrangement?.key
-    ? transposeChord(arrangement.key, arrangement.key, transpose)
-    : "";
 
   if (!arrangement) {
     return (
@@ -86,126 +71,57 @@ function ServiceArrangementHeader({
         </Heading>
       </div>
 
-      <div className="key-controls flex items-center gap-1 md:gap-2">
-        {/* Media buttons — só fora do modo edição */}
-        {!isEditing && arrangement.youtubeUrl && (
-          <YoutubeReferenceButton
-            youtubeUrl={arrangement.youtubeUrl}
-            title={arrangement.song.title}
-          />
-        )}
-        {!isEditing && (arrangement.audios?.length ?? 0) > 0 && (
-          <AudioReferenceButton
-            audios={arrangement.audios!}
-            title={arrangement.song.title}
-          />
-        )}
-
-        {/* Tom — só no modo visualização; na edição fica no dicionário */}
-        {!isEditing && (
-          <div className="hidden md:flex">
-            <KeyButtonSet
-              originalKey={arrangement.key || ""}
-              transpose={transpose}
-              setTranspose={setTranspose}
-            />
-          </div>
-        )}
-        {!isEditing ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="md:hidden flex h-8 w-8 md:size-9" variant="ghost" size="icon" aria-label="Mais opções">
-                <MoreVertical size={20} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" sideOffset={4}>
-              <DropdownMenuItem asChild>
-                <KeyButtonSet
-                  originalKey={arrangement.key || ""}
-                  transpose={transpose}
-                  setTranspose={setTranspose}
-                />
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={onStartEdit}>
-                <Pencil size={14} className="mr-2" />
-                {t("editChords")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : null}
-
-        {/* Desktop: lápis standalone; mobile: está no ⋮ acima */}
-        {!isEditing ? (
+      {isEditing && (
+        <div className="flex items-center gap-1 md:gap-2">
+          <Button
+            type="button"
+            size="icon"
+            disabled={isSaving}
+            onClick={() => hasOriginal ? setScopeDialogOpen(true) : onSaveServiceOnly()}
+            aria-label={t("saveChanges")}
+            className="h-8 w-8 md:size-auto md:h-9 md:px-4 md:py-2"
+          >
+            {isSaving
+              ? <Loader2 size={14} className="animate-spin" />
+              : <Check size={16} className="md:hidden" />
+            }
+            <span className="hidden md:inline">{t("saveChanges")}</span>
+          </Button>
           <Button
             type="button"
             variant="outline"
             size="icon"
-            onClick={onStartEdit}
-            aria-label={t("editChords")}
-            className="hidden md:flex"
+            onClick={onCancel}
+            aria-label={t("cancelEdit")}
+            disabled={isSaving}
+            className="h-8 w-8 md:size-9"
           >
-            <Pencil size={16} />
+            <X size={18} />
           </Button>
-        ) : (
-          <>
-            {hasOriginal && (
-              <ServiceMediaButtons
-                originalArrangementId={arrangement.originalArrangementId!}
-                youtubeUrl={arrangement.youtubeUrl ?? null}
-                audios={arrangement.audios ?? []}
-              />
-            )}
-            <Button
-              type="button"
-              size="icon"
-              disabled={isSaving}
-              onClick={() => hasOriginal ? setScopeDialogOpen(true) : onSaveServiceOnly()}
-              aria-label={t("saveChanges")}
-              className="h-8 w-8 md:size-auto md:h-9 md:px-4 md:py-2"
-            >
-              {isSaving
-                ? <Loader2 size={14} className="animate-spin" />
-                : <Check size={16} className="md:hidden" />
-              }
-              <span className="hidden md:inline">{t("saveChanges")}</span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={onCancel}
-              aria-label="Cancelar edição"
-              disabled={isSaving}
-              className="h-8 w-8 md:size-9"
-            >
-              <X size={18} />
-            </Button>
-            <Dialog open={scopeDialogOpen} onOpenChange={setScopeDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t("saveScopeTitle")}</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col gap-2 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => { setScopeDialogOpen(false); onSaveServiceOnly(); }}
-                  >
-                    {t("serviceOnly")}
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => { setScopeDialogOpen(false); onSaveBoth(); }}
-                  >
-                    {t("serviceAndOriginal")}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </>
-        )}
-      </div>
+          <Dialog open={scopeDialogOpen} onOpenChange={setScopeDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("saveScopeTitle")}</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => { setScopeDialogOpen(false); onSaveServiceOnly(); }}
+                >
+                  {t("serviceOnly")}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => { setScopeDialogOpen(false); onSaveBoth(); }}
+                >
+                  {t("serviceAndOriginal")}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
     </div>
   );
 });

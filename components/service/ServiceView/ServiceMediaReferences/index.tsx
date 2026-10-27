@@ -12,7 +12,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 
-type Audio = { id: number; url: string; label: string; order: number };
+type Audio = { id?: number; url: string; label: string; order: number };
 
 type Props = {
   songId: number;
@@ -243,7 +243,7 @@ export default function ServiceMediaReferences({
   }
 
   function startRename(audio: Audio) {
-    setRenamingId(audio.id);
+    setRenamingId(audio.id ?? null);
     setRenameDraft(audio.label);
   }
 

@@ -143,7 +143,10 @@
     "mediaUndo": "Undo",
     "mediaRemoveVideo": "Remove video reference",
     "mediaRemoveAudio": "Remove audio reference",
-    "mediaRenameAudio": "Rename audio"
+    "mediaRenameAudio": "Rename audio",
+    "keyButtonLabel": "Key {key}",
+    "inPlanLabel": "In the plan: {key}",
+    "backToPlan": "Back to plan"
   },
   "ServiceForm": {
     "editArrangement": "Edit arrangement",

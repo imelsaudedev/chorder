@@ -1,5 +1,7 @@
 import type { Preview } from "@storybook/nextjs-vite";
 import { NextIntlClientProvider } from "next-intl";
+import { AudioPlayerProvider } from "../components/common/AudioPlayer/context";
+import { YoutubePlayerProvider } from "../components/common/YoutubePlayer/context";
 import {
   bricolageGrotesque,
   ibmPlexMono,
@@ -63,7 +65,11 @@ const preview: Preview = {
             messages={messages}
             timeZone="America/Sao_Paulo"
           >
-            <Story />
+            <YoutubePlayerProvider>
+              <AudioPlayerProvider>
+                <Story />
+              </AudioPlayerProvider>
+            </YoutubePlayerProvider>
           </NextIntlClientProvider>
         </div>
       );

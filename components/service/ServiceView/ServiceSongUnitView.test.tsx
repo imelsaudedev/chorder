@@ -18,13 +18,18 @@ vi.mock('@/components/config/SongConfig', () => ({
 }));
 
 vi.mock('./ServiceArrangementHeader', () => ({
-  default: ({ onStartEdit, onCancel, isEditing, isSaving }: any) => (
+  default: ({ onCancel, isEditing, isSaving }: any) => (
     <div data-testid="service-arrangement-header">
-      <button onClick={onStartEdit} data-testid="start-edit">start editing</button>
       <button onClick={onCancel} data-testid="cancel-edit">cancel</button>
       {isEditing && <span data-testid="is-editing" />}
       {isSaving && <span data-testid="is-saving" />}
     </div>
+  ),
+}));
+
+vi.mock('./ServiceArrangementMeta', () => ({
+  default: ({ onStartEdit }: any) => (
+    <button onClick={onStartEdit} data-testid="start-edit">start editing</button>
   ),
 }));
 
