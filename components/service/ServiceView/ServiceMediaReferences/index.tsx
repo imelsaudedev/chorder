@@ -1,5 +1,7 @@
 "use client";
 
+import { AudioItem, useAudioPlayer } from "@/components/common/AudioPlayer/context";
+import { useYoutubePlayer } from "@/components/common/YoutubePlayer/context";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { upload } from "@vercel/blob/client";
-import { Music, Play, Trash2, Upload } from "lucide-react";
+import { Check, Music, Pencil, Play, Plus, Trash2, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useSWRConfig } from "swr";
 
@@ -20,6 +22,7 @@ type Props = {
   originalArrangementId: number;
   youtubeUrl: string | null;
   audios: Audio[];
+  title?: string;
 };
 
 const ACCEPTED_AUDIO_TYPES = ".mp3,.m4a,.aac";
@@ -37,40 +40,44 @@ async function patchArrangementMedia(
   if (!res.ok) throw new Error("Falha ao salvar");
 }
 
-export default function ServiceMediaButtons({ originalArrangementId, youtubeUrl, audios }: Props) {
+// Referências de vídeo/áudio são "ao vivo": sempre lidas e gravadas no
+// arranjo original, nunca na cópia da liturgia. Por isso vivem fora do modo
+// de edição de cifra — gerenciar aqui nunca afeta o que está sendo editado.
+export default function ServiceMediaReferences({
+  originalArrangementId,
+  youtubeUrl,
+  audios,
+  title,
+}: Props) {
   return (
-    <>
-      <YoutubeButton
-        originalArrangementId={originalArrangementId}
-        currentUrl={youtubeUrl}
-      />
-      <AudioButton
-        originalArrangementId={originalArrangementId}
-        currentAudios={audios}
-      />
-    </>
+    <div className="flex flex-wrap items-center gap-2 pb-2">
+      <YoutubeChip originalArrangementId={originalArrangementId} currentUrl={youtubeUrl} title={title} />
+      <AudioChip originalArrangementId={originalArrangementId} currentAudios={audios} title={title} />
+    </div>
   );
 }
 
-// ─── YouTube ──────────────────────────────────────────────────────────────────
+// ─── Vídeo ──────────────────────────────────────────────────────────────────
 
-function YoutubeButton({
+function YoutubeChip({
   originalArrangementId,
   currentUrl,
+  title,
 }: {
   originalArrangementId: number;
   currentUrl: string | null;
+  title?: string;
 }) {
-  const [open, setOpen] = useState(false);
+  const { play } = useYoutubePlayer();
+  const { close: closeAudio } = useAudioPlayer();
+  const { mutate } = useSWRConfig();
+  const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(currentUrl ?? "");
   const [saving, setSaving] = useState(false);
-  const { mutate } = useSWRConfig();
 
-  const hasUrl = Boolean(currentUrl);
-
-  function handleOpen(isOpen: boolean) {
-    if (isOpen) setDraft(currentUrl ?? "");
-    setOpen(isOpen);
+  function startEdit() {
+    setDraft(currentUrl ?? "");
+    setIsEditing(true);
   }
 
   async function handleSave() {
@@ -78,7 +85,7 @@ function YoutubeButton({
     try {
       await patchArrangementMedia(originalArrangementId, { youtubeUrl: draft.trim() || null });
       mutate((key) => typeof key === "string" && key.startsWith("/api/services"));
-      setOpen(false);
+      setIsEditing(false);
     } finally {
       setSaving(false);
     }
@@ -89,70 +96,113 @@ function YoutubeButton({
     try {
       await patchArrangementMedia(originalArrangementId, { youtubeUrl: null });
       mutate((key) => typeof key === "string" && key.startsWith("/api/services"));
-      setOpen(false);
+      setIsEditing(false);
     } finally {
       setSaving(false);
     }
   }
 
-  return (
-    <Dialog open={open} onOpenChange={handleOpen}>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        className={`h-8 w-8 md:size-9 ${hasUrl ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100" : ""}`}
-        onClick={() => setOpen(true)}
-        title="YouTube"
-      >
-        <Play size={15} className={hasUrl ? "text-red-500" : "text-zinc-400"} />
-      </Button>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Referência YouTube</DialogTitle>
-        </DialogHeader>
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-1">
         <Input
+          autoFocus
+          className="h-8 w-56 text-sm"
           placeholder="https://youtube.com/watch?v=..."
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSave(); } }}
-          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === "Enter") { e.preventDefault(); handleSave(); }
+            if (e.key === "Escape") { e.preventDefault(); setIsEditing(false); }
+          }}
+          disabled={saving}
         />
-        <DialogFooter className="flex-row justify-between sm:justify-between">
-          {hasUrl && (
-            <Button
-              type="button"
-              variant="ghost"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={handleRemove}
-              disabled={saving}
-            >
-              Remover
-            </Button>
-          )}
-          <div className="flex gap-2 ml-auto">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button type="button" onClick={handleSave} disabled={saving}>
-              Salvar
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <Button
+          type="button"
+          size="icon"
+          className="h-8 w-8"
+          onClick={handleSave}
+          disabled={saving}
+          aria-label="Salvar vídeo de referência"
+        >
+          <Check size={14} />
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => setIsEditing(false)}
+          disabled={saving}
+          aria-label="Cancelar"
+        >
+          <X size={14} />
+        </Button>
+      </div>
+    );
+  }
+
+  if (!currentUrl) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-8 gap-1.5 text-muted-foreground"
+        onClick={startEdit}
+      >
+        <Plus size={14} />
+        Vídeo de referência
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1 rounded-md border border-red-200 bg-red-50 pl-1 pr-1 h-8">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="h-6 gap-1.5 px-1.5 text-red-600 hover:bg-red-100 hover:text-red-700"
+        onClick={() => { closeAudio(); play(currentUrl, title); }}
+      >
+        <Play size={14} />
+        Vídeo de referência
+      </Button>
+      <button
+        type="button"
+        onClick={startEdit}
+        className="text-red-400 hover:text-red-600 p-1"
+        aria-label="Editar vídeo de referência"
+      >
+        <Pencil size={13} />
+      </button>
+      <button
+        type="button"
+        onClick={handleRemove}
+        disabled={saving}
+        className="text-red-400 hover:text-red-600 p-1"
+        aria-label="Remover vídeo de referência"
+      >
+        <X size={14} />
+      </button>
+    </div>
   );
 }
 
 // ─── Áudio ────────────────────────────────────────────────────────────────────
 
-function AudioButton({
+function AudioChip({
   originalArrangementId,
   currentAudios,
+  title,
 }: {
   originalArrangementId: number;
   currentAudios: Audio[];
+  title?: string;
 }) {
+  const { play } = useAudioPlayer();
+  const { close: closeYoutube } = useYoutubePlayer();
   const [open, setOpen] = useState(false);
   const [audios, setAudios] = useState<Audio[]>(currentAudios);
   const [isUploading, setIsUploading] = useState(false);
@@ -160,9 +210,9 @@ function AudioButton({
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { mutate } = useSWRConfig();
+  const [pendingDeletes, setPendingDeletes] = useState<string[]>([]);
 
   const hasAudios = currentAudios.length > 0;
-  const [pendingDeletes, setPendingDeletes] = useState<string[]>([]);
 
   function handleOpen(isOpen: boolean) {
     if (isOpen) {
@@ -193,7 +243,7 @@ function AudioButton({
     }
   }
 
-  function handleRemove(index: number) {
+  function handleRemoveItem(index: number) {
     const audio = audios[index];
     if (audio?.url) setPendingDeletes((prev) => [...prev, audio.url]);
     setAudios((prev) => prev.filter((_, i) => i !== index));
@@ -221,16 +271,39 @@ function AudioButton({
 
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        className={`h-8 w-8 md:size-9 ${hasAudios ? "border-secondary/30 text-secondary bg-secondary/10 hover:bg-secondary/20" : ""}`}
-        onClick={() => setOpen(true)}
-        title={`Áudio${hasAudios ? ` (${currentAudios.length})` : ""}`}
-      >
-        <Music size={15} className={hasAudios ? "text-secondary" : "text-zinc-400"} />
-      </Button>
+      {hasAudios ? (
+        <div className="flex items-center gap-1 rounded-md border border-secondary/30 bg-secondary/10 pl-1 pr-1 h-8">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-6 gap-1.5 px-1.5 text-secondary hover:bg-secondary/20"
+            onClick={() => { closeYoutube(); play(currentAudios as AudioItem[], title); }}
+          >
+            <Music size={14} />
+            Áudio de referência ({currentAudios.length})
+          </Button>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="text-secondary/70 hover:text-secondary p-1"
+            aria-label="Gerenciar áudios de referência"
+          >
+            <Pencil size={13} />
+          </button>
+        </div>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-8 gap-1.5 text-muted-foreground"
+          onClick={() => setOpen(true)}
+        >
+          <Plus size={14} />
+          Áudio de referência
+        </Button>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Áudios de referência</DialogTitle>
@@ -252,7 +325,7 @@ function AudioButton({
                   />
                   <button
                     type="button"
-                    onClick={() => handleRemove(idx)}
+                    onClick={() => handleRemoveItem(idx)}
                     className="text-zinc-400 hover:text-red-500 transition-colors shrink-0"
                   >
                     <Trash2 size={15} />

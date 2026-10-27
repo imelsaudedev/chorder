@@ -45,7 +45,7 @@ export default function ServiceSongUnitEditForm({
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // Este formulário só edita cifra — vídeo e áudio são salvos à parte, na
-  // hora, por ServiceMediaButtons. Sem preserveMedia, um save daqui feito
+  // hora, por ServiceMediaReferences. Sem preserveMedia, um save daqui feito
   // logo após inserir um vídeo sobrescreveria o vídeo de volta pra vazio
   // (o valor que este formulário carrega pode estar desatualizado).
   const { createOrUpdateArrangement: saveToService, isMutating: savingService } =

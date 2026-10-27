@@ -12,14 +12,6 @@ vi.mock('@/components/config/SongConfig', () => ({
   useSongConfig: () => ({ transpose: 0, setTranspose: vi.fn(), density: 'normal' }),
 }));
 
-vi.mock('@/components/common/AudioReferenceButton', () => ({
-  default: () => <button data-testid="audio-btn" />,
-}));
-
-vi.mock('@/components/common/YoutubeReferenceButton', () => ({
-  default: () => <button data-testid="youtube-btn" />,
-}));
-
 vi.mock('@/components/config/KeyButtonSet', () => ({
   default: () => <div data-testid="key-button-set" />,
 }));
@@ -75,36 +67,6 @@ describe('ServiceArrangementHeader — view mode', () => {
     expect(onStartEdit).toHaveBeenCalledTimes(1);
   });
 
-  it('shows youtube and audio buttons when urls present', () => {
-    render(
-      <ServiceArrangementHeader
-        {...defaultProps}
-        arrangement={{
-          ...baseArrangement,
-          youtubeUrl: 'https://yt.be/x',
-          audios: [{ id: 1, url: 'https://audio.mp3', label: 'Voz', order: 0 }],
-        }}
-      />
-    );
-    expect(screen.getByTestId('youtube-btn')).toBeDefined();
-    expect(screen.getByTestId('audio-btn')).toBeDefined();
-  });
-
-  it('hides media buttons in edit mode', () => {
-    render(
-      <ServiceArrangementHeader
-        {...defaultProps}
-        isEditing
-        arrangement={{
-          ...baseArrangement,
-          youtubeUrl: 'https://yt.be/x',
-          audios: [{ id: 1, url: 'https://audio.mp3', label: 'Voz', order: 0 }],
-        }}
-      />
-    );
-    expect(screen.queryByTestId('youtube-btn')).toBeNull();
-    expect(screen.queryByTestId('audio-btn')).toBeNull();
-  });
 });
 
 describe('ServiceArrangementHeader — edit mode, no original', () => {

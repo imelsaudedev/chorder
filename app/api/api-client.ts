@@ -124,7 +124,7 @@ export function useFetchArrangement(
 export function useCreateOrUpdateArrangement(
   arrangementId?: number | null,
   // Quem salva aqui nunca edita youtubeUrl/audios diretamente (isso é do
-  // ServiceMediaButtons, que salva na hora) — sem isso, um save "cheio"
+  // ServiceMediaReferences, que salva na hora) — sem isso, um save "cheio"
   // feito logo após inserir um vídeo sobrescreve o vídeo de volta pra
   // vazio, com o valor desatualizado que este formulário carregava.
   options: { preserveMedia?: boolean } = {}

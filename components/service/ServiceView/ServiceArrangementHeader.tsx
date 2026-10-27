@@ -17,10 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientArrangement } from "@/prisma/models";
-import AudioReferenceButton from "@/components/common/AudioReferenceButton";
-import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
 import { transposeChord } from "@/chopro/music";
-import ServiceMediaButtons from "./ServiceMediaButtons";
 import { Check, Loader2, MoreVertical, Pencil, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { forwardRef, useState } from "react";
@@ -87,20 +84,6 @@ function ServiceArrangementHeader({
       </div>
 
       <div className="key-controls flex items-center gap-1 md:gap-2">
-        {/* Media buttons — só fora do modo edição */}
-        {!isEditing && arrangement.youtubeUrl && (
-          <YoutubeReferenceButton
-            youtubeUrl={arrangement.youtubeUrl}
-            title={arrangement.song.title}
-          />
-        )}
-        {!isEditing && (arrangement.audios?.length ?? 0) > 0 && (
-          <AudioReferenceButton
-            audios={arrangement.audios!}
-            title={arrangement.song.title}
-          />
-        )}
-
         {/* Tom — só no modo visualização; na edição fica no dicionário */}
         {!isEditing && (
           <div className="hidden md:flex">
@@ -149,13 +132,6 @@ function ServiceArrangementHeader({
           </Button>
         ) : (
           <>
-            {hasOriginal && (
-              <ServiceMediaButtons
-                originalArrangementId={arrangement.originalArrangementId!}
-                youtubeUrl={arrangement.youtubeUrl ?? null}
-                audios={arrangement.audios ?? []}
-              />
-            )}
             <Button
               type="button"
               size="icon"

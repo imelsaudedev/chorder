@@ -32,6 +32,10 @@ vi.mock('@/components/song/ArrangementView', () => ({
   default: () => <div data-testid="arrangement-view" />,
 }));
 
+vi.mock('./ServiceMediaReferences', () => ({
+  default: () => <div data-testid="media-references" />,
+}));
+
 vi.mock('./ServiceSongUnitEditForm', () => ({
   default: ({ onSaved, onSavingChange, submitRef }: any) => {
     submitRef.current = { submit: () => { onSavingChange(true); onSaved(); } };

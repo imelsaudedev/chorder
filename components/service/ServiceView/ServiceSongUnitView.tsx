@@ -4,6 +4,7 @@ import ArrangementView from "@/components/song/ArrangementView";
 import { ClientServiceUnit } from "@/prisma/models";
 import React, { useEffect, useRef, useState } from "react";
 import ServiceArrangementHeader from "./ServiceArrangementHeader";
+import ServiceMediaReferences from "./ServiceMediaReferences";
 import ServiceSongUnitEditForm, { EditFormHandle } from "./ServiceSongUnitEditForm";
 
 type ServiceSongUnitViewProps = {
@@ -69,6 +70,15 @@ export default function ServiceSongUnitView({ unit, transpose, onTransposeChange
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
         />
+        {/* Referências de vídeo/áudio: ao vivo no original, independente do modo de edição de cifra */}
+        {arrangement.originalArrangementId && (
+          <ServiceMediaReferences
+            originalArrangementId={arrangement.originalArrangementId}
+            youtubeUrl={arrangement.youtubeUrl ?? null}
+            audios={arrangement.audios ?? []}
+            title={arrangement.song?.title}
+          />
+        )}
         {isEditing ? (
           <ServiceSongUnitEditForm
             unit={unit}
