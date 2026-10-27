@@ -1,4 +1,4 @@
-import { retrieveSongArrangements } from "@/prisma/data";
+import { createMinimalArrangementForSong, retrieveSongArrangements } from "@/prisma/data";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -21,5 +21,20 @@ export async function GET(
     headers: {
       "Content-Type": "application/json",
     },
+  });
+}
+
+// Cria (ou reaproveita, se já existir) um arranjo mínimo sem cifra para a
+// música — usado quando uma música é adicionada à liturgia sem nenhum
+// arranjo ainda, e alguém quer anexar a primeira referência de mídia a ela.
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ slugOrId: string }> }
+) {
+  const { slugOrId } = await params;
+  const arrangement = await createMinimalArrangementForSong(slugOrId);
+  return new Response(JSON.stringify(arrangement), {
+    status: 201,
+    headers: { "Content-Type": "application/json" },
   });
 }

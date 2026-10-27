@@ -310,6 +310,42 @@ export async function retrieveSongArrangements(
   });
 }
 
+// Para uma música adicionada à liturgia como placeholder, sem nenhum arranjo
+// ainda (nada pra ser "o original"): cria um arranjo mínimo, sem cifra, só
+// pra servir de lugar onde a primeira referência de mídia pode ser gravada.
+// Se a música já ganhou um arranjo nesse meio tempo, reaproveita em vez de
+// duplicar.
+export async function createMinimalArrangementForSong(
+  songSlugOrId: string | number
+): Promise<ClientArrangement> {
+  const existing = await prisma.songArrangement.findFirst({
+    where: {
+      song: selectSlugOrId(songSlugOrId),
+      isServiceArrangement: false,
+      isDeleted: false,
+    },
+    include: { audios: { orderBy: { order: "asc" } } },
+  });
+  if (existing) return existing;
+
+  const song = await prisma.song.findFirst({
+    where: selectSlugOrId(songSlugOrId),
+  });
+  if (!song) {
+    throw new Error("Song not found");
+  }
+
+  return prisma.songArrangement.create({
+    data: {
+      songId: song.id,
+      key: "C",
+      isDefault: true,
+      isServiceArrangement: false,
+    },
+    include: { audios: { orderBy: { order: "asc" } } },
+  });
+}
+
 export async function retrieveArrangement(
   arrangementId?: number | null,
   {
