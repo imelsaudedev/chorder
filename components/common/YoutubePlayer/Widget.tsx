@@ -2,20 +2,7 @@
 
 import { X } from "lucide-react";
 import { useYoutubePlayer } from "./context";
-
-function extractYoutubeId(url: string): string | null {
-  const patterns = [
-    /[?&]v=([^&#]+)/,
-    /youtu\.be\/([^?&#]+)/,
-    /youtube\.com\/embed\/([^?&#]+)/,
-    /youtube\.com\/shorts\/([^?&#]+)/,
-  ];
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
-  }
-  return null;
-}
+import { extractYoutubeId } from "./extractYoutubeId";
 
 export default function YoutubePlayerWidget() {
   const { url, title, isOpen, close } = useYoutubePlayer();
