@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { upload } from "@vercel/blob/client";
 import { Music, Play, Trash2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { useSWRConfig } from "swr";
@@ -179,12 +178,15 @@ function AudioButton({
     setUploadError(null);
     setIsUploading(true);
     try {
-      const blob = await upload(`audio/${Date.now()}-${file.name}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/upload-audio",
-      });
+      // A rota só implementa o upload via FormData simples (ver ArrangementInfoForm),
+      // não o protocolo de token de @vercel/blob/client — por isso um fetch comum aqui.
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload-audio", { method: "POST", body: formData });
+      if (!res.ok) throw new Error(await res.text());
+      const { url } = await res.json();
       const defaultLabel = file.name.replace(/\.[^.]+$/, "");
-      setAudios((prev) => [...prev, { url: blob.url, label: defaultLabel, order: prev.length }]);
+      setAudios((prev) => [...prev, { url, label: defaultLabel, order: prev.length }]);
     } catch {
       setUploadError("Erro ao enviar arquivo.");
     } finally {
