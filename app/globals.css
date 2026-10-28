@@ -228,13 +228,3 @@ html.stage-mode-active .sm\:ml-20 {
 .audio-player-dark .rhap_volume-filled {
   background-color: #3b82f6;
 }
-
-/* Permite rolar sem mostrar a barra de rolagem (ex.: roteiro do culto na
-   visualização de cifras, onde o conteúdo pode passar da altura da tela). */
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
