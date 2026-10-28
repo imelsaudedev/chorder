@@ -295,7 +295,7 @@ function SongSidebar({
   return (
     <nav
       aria-label="Roteiro do culto"
-      className={`stage-mode-hidden sticky top-4 hidden max-h-[calc(100dvh-2rem)] shrink-0 flex-col overflow-y-auto lg:flex ${
+      className={`stage-mode-hidden no-scrollbar sticky top-4 hidden max-h-[calc(100dvh-2rem)] shrink-0 flex-col overflow-y-auto lg:flex ${
         collapsed ? "w-12" : "w-64"
       }`}
     >
@@ -321,9 +321,6 @@ function SongSidebar({
 
       <ul className="flex flex-col">
         {sequence.map((item, index) => {
-          const isFirst = index === 0;
-          const isLast = index === sequence.length - 1;
-
           if (item.kind === "info") {
             const config = UNIT_CONFIG[item.unit.type as ServiceUnitTypeValue];
             const Icon = config?.icon;
@@ -335,9 +332,9 @@ function SongSidebar({
               <li
                 key={`info-${index}`}
                 title={collapsed ? text : undefined}
-                className="flex min-h-9 items-stretch gap-2 text-sm text-muted-foreground"
+                className="flex min-h-7 items-center gap-2 text-sm text-muted-foreground"
               >
-                <Rail isFirst={isFirst} isLast={isLast} className="text-muted-foreground">
+                <Rail className="text-muted-foreground">
                   {Icon && <Icon className="w-5 h-5" />}
                 </Rail>
                 <span className={collapsed ? "sr-only" : "min-w-0 self-center truncate"}>{text}</span>
@@ -356,9 +353,9 @@ function SongSidebar({
                 aria-current={isCurrent ? "true" : undefined}
                 aria-label={`${entry.songIndex + 1}. ${title}`}
                 title={collapsed ? title : undefined}
-                className="cursor-pointer flex min-h-11 w-full items-stretch gap-2 rounded-md text-left hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-[current=true]:bg-muted/20"
+                className="cursor-pointer flex min-h-9 w-full items-center gap-2 rounded-md text-left hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-[current=true]:bg-muted/20"
               >
-                <Rail isFirst={isFirst} isLast={isLast} className={songConfig.color}>
+                <Rail className={songConfig.color}>
                   <SongIcon className="w-5 h-5" />
                 </Rail>
                 {/* Número colado ao título (no recolhido, só o número ao lado do ícone) */}
@@ -386,25 +383,17 @@ function SongSidebar({
   );
 }
 
-// Coluna do ícone com o fio vertical que liga um item ao seguinte. O fio é
-// desenhado em dois trechos (acima e abaixo do ícone), então não precisa de
-// fundo para "esconder" a linha atrás do ícone.
+// Coluna do ícone, sem fio vertical ligando um item ao seguinte.
 function Rail({
-  isFirst,
-  isLast,
   className,
   children,
 }: {
-  isFirst: boolean;
-  isLast: boolean;
   className?: string;
   children: React.ReactNode;
 }) {
   return (
-    <span aria-hidden="true" className="flex w-6 shrink-0 flex-col items-center self-stretch">
-      <span className={`w-px flex-1 ${isFirst ? "" : "bg-muted-foreground/30"}`} />
-      <span className={`py-0.5 ${className ?? ""}`}>{children}</span>
-      <span className={`w-px flex-1 ${isLast ? "" : "bg-muted-foreground/30"}`} />
+    <span aria-hidden="true" className={`flex w-6 shrink-0 items-center justify-center ${className ?? ""}`}>
+      {children}
     </span>
   );
 }
