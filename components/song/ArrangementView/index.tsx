@@ -1,12 +1,15 @@
 import { useSongConfig } from "@/components/config/SongConfig";
 import { ClientArrangement } from "@/prisma/models";
+import { ReactNode } from "react";
 import ColumnViewer from "./ColumnViewer";
 import Skeleton from "./Skeleton";
 
 type ArrangementViewProps = {
   arrangement: ClientArrangement | null;
+  /** Repassado pra ColumnViewer — renderiza dentro da última coluna, depois do último bloco. */
+  footer?: ReactNode;
 };
-export default function ArrangementView({ arrangement }: ArrangementViewProps) {
+export default function ArrangementView({ arrangement, footer }: ArrangementViewProps) {
   const { density, fontSize, columns, transpose, mode, enharmonicPreference } = useSongConfig();
 
   if (!arrangement) {
@@ -33,6 +36,7 @@ export default function ArrangementView({ arrangement }: ArrangementViewProps) {
         enharmonicPreference={enharmonicPreference}
         mode={mode}
         density={density}
+        footer={footer}
       />
     </div>
   );

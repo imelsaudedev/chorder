@@ -6,6 +6,7 @@ import {
   SetStateAction,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { Density, Mode } from "./config";
@@ -51,14 +52,17 @@ export default function SongConfigProvider({
   density: initialDensity,
   children,
 }: SongConfigContextProps) {
-  const [transpose, setTransposeState] = useState(initialTranspose ?? 0);
-  const setTranspose: Dispatch<SetStateAction<number>> = (value) => {
-    setTransposeState((prev) => {
-      const next = typeof value === "function" ? (value as (p: number) => number)(prev) : value;
-      onTransposeChange?.(next);
-      return next;
-    });
-  };
+  const [transpose, setTranspose] = useState(initialTranspose ?? 0);
+
+  // Avisa quem elevou o estado depois da renderização (nunca dentro do
+  // updater do setState — chamar o callback do pai ali violava as regras
+  // do React: "Cannot update a component while rendering a different
+  // component", reproduzido ao trocar o tom na liturgia).
+  const onTransposeChangeRef = useRef(onTransposeChange);
+  onTransposeChangeRef.current = onTransposeChange;
+  useEffect(() => {
+    onTransposeChangeRef.current?.(transpose);
+  }, [transpose]);
   const [enharmonicPreference, setEnharmonicPreference] = useState<"sharp" | "flat" | null>(null);
   const [columns, setColumns, setUntouchedColumns, columnsTouched] =
     useTouchedState(initialColumns ?? 0);
@@ -71,9 +75,10 @@ export default function SongConfigProvider({
     useTouchedState<Density>(initialDensity ?? "normal");
 
   useEffect(() => {
-    // Direto no estado interno, sem passar por onTransposeChange — este
-    // efeito só re-sincroniza com o valor que o próprio chamador já tem.
-    setTransposeState(initialTranspose ?? 0);
+    // Só re-sincroniza com o valor que o próprio chamador já tem; dispara
+    // de novo o efeito de onTransposeChange acima, mas com o mesmo valor
+    // que ele já possui, então é inofensivo.
+    setTranspose(initialTranspose ?? 0);
   }, [initialTranspose]);
   useEffect(() => {
     if (!columnsTouched) {
