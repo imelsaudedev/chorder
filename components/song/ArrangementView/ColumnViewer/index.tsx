@@ -8,7 +8,7 @@ import { ClientSongUnit } from "@/prisma/models";
 import clsx from "clsx";
 import { Repeat2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { findBestDistribution } from "./column-logic";
 
 type ColumnViewerProps = {
@@ -19,6 +19,8 @@ type ColumnViewerProps = {
   enharmonicPreference?: "sharp" | "flat" | null;
   mode: Mode;
   density: Density;
+  /** Renderizado dentro da última coluna, depois do último bloco — não abaixo de todas as colunas. */
+  footer?: ReactNode;
 };
 
 export default function ColumnViewer({
@@ -29,6 +31,7 @@ export default function ColumnViewer({
   enharmonicPreference,
   mode,
   density,
+  footer,
 }: ColumnViewerProps) {
   const t = useTranslations("UnitTypes");
   const { columns, columnData } = useColumnData(songUnits, columnConfig);
@@ -118,6 +121,7 @@ export default function ColumnViewer({
               </div>
             );
           })}
+          {footer && idx === columnData.length - 1 && footer}
         </div>
       ))}
     </div>

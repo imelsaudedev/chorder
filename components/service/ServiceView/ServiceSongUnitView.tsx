@@ -2,6 +2,7 @@ import { useServiceConfig } from "@/components/config/ServiceConfig";
 import SongConfigProvider from "@/components/config/SongConfig";
 import ArrangementView from "@/components/song/ArrangementView";
 import { ClientServiceUnit } from "@/prisma/models";
+import { useTranslations } from "next-intl";
 import React, { useEffect, useRef, useState } from "react";
 import ServiceArrangementHeader from "./ServiceArrangementHeader";
 import ServiceArrangementMeta from "./ServiceArrangementMeta";
@@ -16,6 +17,7 @@ type ServiceSongUnitViewProps = {
 
 export default function ServiceSongUnitView({ unit, transpose, onTransposeChange }: ServiceSongUnitViewProps) {
   const arrangement = unit.arrangement;
+  const t = useTranslations("ServiceView");
   const { columns, fontSize, mode, density } = useServiceConfig();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -63,6 +65,12 @@ export default function ServiceSongUnitView({ unit, transpose, onTransposeChange
           arrangement={arrangement}
           order={unit.order}
           isStuck={isHeaderStuck}
+          isEditing={isEditing}
+          isSaving={isSaving}
+          onStartEdit={() => setIsEditing(true)}
+          onCancel={() => setIsEditing(false)}
+          onSaveServiceOnly={() => submitRef.current?.submit("service")}
+          onSaveBoth={() => submitRef.current?.submit("both")}
         />
         <ServiceArrangementMeta
           arrangement={arrangement}
@@ -73,16 +81,27 @@ export default function ServiceSongUnitView({ unit, transpose, onTransposeChange
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
         />
-        {isEditing ? (
-          <ServiceSongUnitEditForm
-            unit={unit}
-            submitRef={submitRef}
-            onSavingChange={setIsSaving}
-            onSaved={() => setIsEditing(false)}
-          />
-        ) : (
-          <ArrangementView arrangement={arrangement} />
-        )}
+        <div className="mt-3 md:mt-4">
+          {isEditing ? (
+            <ServiceSongUnitEditForm
+              unit={unit}
+              submitRef={submitRef}
+              onSavingChange={setIsSaving}
+              onSaved={() => setIsEditing(false)}
+            />
+          ) : (
+            <ArrangementView
+              arrangement={arrangement}
+              footer={
+                arrangement.song?.artist ? (
+                  <p className="text-sm text-muted-foreground">
+                    {t("composerLabel", { name: arrangement.song.artist })}
+                  </p>
+                ) : undefined
+              }
+            />
+          )}
+        </div>
       </SongConfigProvider>
     </div>
   );

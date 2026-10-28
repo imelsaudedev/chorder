@@ -4,11 +4,24 @@ import ServiceArrangementHeader from './ServiceArrangementHeader';
 import { ClientArrangement } from '@/prisma/models';
 
 vi.mock('next-intl', () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: () => (key: string, params?: Record<string, unknown>) =>
+    params ? `${key}:${JSON.stringify(params)}` : key,
 }));
 
 vi.mock('@/components/config/SongConfig', () => ({
-  useSongConfig: () => ({ transpose: 0, setTranspose: vi.fn(), density: 'normal' }),
+  useSongConfig: () => ({ density: 'normal' }),
+}));
+
+vi.mock('@/components/service/ServiceView/KeySelectorButton', () => ({
+  default: () => <div data-testid="key-selector" />,
+}));
+
+vi.mock('@/components/service/ServiceView/ServiceMediaReferences', () => ({
+  default: () => <div data-testid="media-references" />,
+}));
+
+vi.mock('@/components/service/ServiceView/EditOrSaveCancelGroup', () => ({
+  default: () => <div data-testid="edit-or-save-cancel" />,
 }));
 
 const baseArrangement: ClientArrangement = {
@@ -33,14 +46,34 @@ const baseArrangement: ClientArrangement = {
   units: [],
 };
 
+const defaultProps = {
+  arrangement: baseArrangement,
+  order: 1,
+  isEditing: false,
+  isSaving: false,
+  onStartEdit: vi.fn(),
+  onCancel: vi.fn(),
+  onSaveServiceOnly: vi.fn(),
+  onSaveBoth: vi.fn(),
+};
+
 describe('ServiceArrangementHeader', () => {
   it('renders song title', () => {
-    render(<ServiceArrangementHeader arrangement={baseArrangement} order={1} />);
+    render(<ServiceArrangementHeader {...defaultProps} />);
     expect(screen.getByText(/Glória e Força/)).toBeDefined();
   });
 
-  it('shows no buttons (tom/referências/lápis/salvar/cancelar ficam em ServiceArrangementMeta)', () => {
-    render(<ServiceArrangementHeader arrangement={baseArrangement} order={1} />);
-    expect(screen.queryAllByRole('button')).toHaveLength(0);
+  it('mostra tom, referências e lápis/salvar-cancelar na mesma linha do título (desktop)', () => {
+    render(<ServiceArrangementHeader {...defaultProps} />);
+    expect(screen.getByTestId('key-selector')).toBeDefined();
+    expect(screen.getByTestId('media-references')).toBeDefined();
+    expect(screen.getByTestId('edit-or-save-cancel')).toBeDefined();
+  });
+
+  it('esconde tom e referências durante a edição', () => {
+    render(<ServiceArrangementHeader {...defaultProps} isEditing />);
+    expect(screen.queryByTestId('key-selector')).toBeNull();
+    expect(screen.queryByTestId('media-references')).toBeNull();
+    expect(screen.getByTestId('edit-or-save-cancel')).toBeDefined();
   });
 });

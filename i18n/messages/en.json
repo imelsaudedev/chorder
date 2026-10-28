@@ -144,8 +144,7 @@
     "mediaRemoveAudio": "Remove audio reference",
     "mediaRenameAudio": "Rename audio",
     "keyButtonLabel": "Key {key}",
-    "inPlanLabel": "In the plan: {key}",
-    "backToPlan": "Back to plan"
+    "composerLabel": "Composer: {name}"
   },
   "ServiceForm": {
     "editArrangement": "Edit arrangement",

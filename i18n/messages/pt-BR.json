@@ -145,8 +145,7 @@
     "mediaRemoveAudio": "Remover áudio de referência",
     "mediaRenameAudio": "Renomear áudio",
     "keyButtonLabel": "Tom {key}",
-    "inPlanLabel": "No plano: {key}",
-    "backToPlan": "Voltar ao plano"
+    "composerLabel": "Compositor: {name}"
   },
   "ServiceForm": {
     "editArrangement": "Editar arranjo",

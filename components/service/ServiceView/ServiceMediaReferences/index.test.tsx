@@ -108,6 +108,22 @@ describe('ServiceMediaReferences', () => {
     expect(screen.queryByText('mediaVideoLabel')).toBeNull();
   });
 
+  it('troca o rótulo genérico pelo título real do vídeo quando o oEmbed responde', async () => {
+    const user = userEvent.setup();
+    (global.fetch as any).mockImplementation((url: string) => {
+      if (typeof url === 'string' && url.startsWith('https://www.youtube.com/oembed')) {
+        return Promise.resolve({ ok: true, json: async () => ({ title: 'Nome Real do Vídeo' }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    renderWithProviders({ ...baseProps, youtubeUrl: 'https://youtu.be/tituloReal1' });
+    await user.click(screen.getByRole('button', { name: 'mediaButtonLabelWithMedia' }));
+
+    await waitFor(() => expect(screen.getByText('Nome Real do Vídeo')).toBeDefined());
+    expect(screen.queryByText('mediaVideoLabel')).toBeNull();
+  });
+
   it('remover agenda um toast com desfazer, e desfazer cancela a remoção', async () => {
     const user = userEvent.setup();
     renderWithProviders({ ...baseProps, youtubeUrl: 'https://youtu.be/abc123DEF45' });
@@ -126,8 +142,12 @@ describe('ServiceMediaReferences', () => {
 
     expect(screen.getByRole('button', { name: 'mediaButtonLabelWithMedia' })).toBeDefined();
     expect(screen.getByText('mediaVideoLabel')).toBeDefined();
-    // nenhuma chamada de rede foi feita — desfazer antes do commit
-    expect(global.fetch).not.toHaveBeenCalled();
+    // nenhuma chamada de mutação foi feita — desfazer antes do commit
+    // (a lista pode ter buscado o título do vídeo via oEmbed ao abrir, o que é esperado)
+    const mutationCalls = (global.fetch as any).mock.calls.filter(
+      ([url]: [string]) => typeof url === 'string' && url.startsWith('/api/')
+    );
+    expect(mutationCalls).toHaveLength(0);
   });
 
   it('renomeia um áudio existente', async () => {

@@ -3,6 +3,7 @@
 import { AudioItem, useAudioPlayer } from "@/components/common/AudioPlayer/context";
 import { extractYoutubeId } from "@/components/common/YoutubePlayer/extractYoutubeId";
 import { useYoutubePlayer } from "@/components/common/YoutubePlayer/context";
+import { useYoutubeTitle } from "@/components/common/YoutubePlayer/useYoutubeTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -89,6 +90,9 @@ export default function ServiceMediaReferences({
     (a) => !(pending?.kind === "audio" && pending.audio.id === a.id)
   );
   const isEmpty = !liveYoutubeUrl && liveAudios.length === 0 && !uploading;
+  // Só busca o título real do vídeo quando a lista está aberta — evita uma
+  // chamada externa por música carregada na tela.
+  const videoTitle = useYoutubeTitle(open ? liveYoutubeUrl : null);
 
   function revalidate() {
     mutate((key) => typeof key === "string" && key.startsWith("/api/services"));
@@ -283,7 +287,7 @@ export default function ServiceMediaReferences({
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[340px] max-w-[calc(100vw-2rem)] p-1">
+      <PopoverContent align="end" collisionPadding={16} className="w-[340px] max-w-[calc(100vw-2rem)] p-1">
         <div className="flex flex-col gap-0.5">
           {/* Vídeo */}
           {addingVideo ? (
@@ -320,18 +324,18 @@ export default function ServiceMediaReferences({
               {videoError && <p className="text-xs text-destructive">{videoError}</p>}
             </div>
           ) : liveYoutubeUrl ? (
-            <div className="flex items-center rounded-md hover:bg-accent">
+            <div className="flex items-center">
               <button
                 type="button"
-                className="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-2.5 text-left text-sm"
+                className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2.5 text-left text-sm hover:bg-muted/50"
                 onClick={handlePlayVideo}
               >
                 <Play size={16} className="shrink-0 text-red-500" />
-                <span className="truncate">{t("mediaVideoLabel")}</span>
+                <span className="truncate">{videoTitle ?? t("mediaVideoLabel")}</span>
               </button>
               <button
                 type="button"
-                className="flex h-11 w-11 shrink-0 items-center justify-center text-muted-foreground hover:text-destructive"
+                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-destructive"
                 onClick={handleRemoveVideo}
                 aria-label={t("mediaRemoveVideo")}
               >
@@ -341,7 +345,7 @@ export default function ServiceMediaReferences({
           ) : (
             <button
               type="button"
-              className="flex min-h-11 items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
+              className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground hover:bg-muted/50"
               onClick={startAddVideo}
             >
               <Plus size={16} className="shrink-0" />
@@ -351,7 +355,7 @@ export default function ServiceMediaReferences({
 
           {/* Áudios */}
           {liveAudios.map((audio) => (
-            <div key={audio.id} className="flex items-center rounded-md hover:bg-accent">
+            <div key={audio.id} className="flex items-center">
               {renamingId === audio.id ? (
                 <Input
                   autoFocus
@@ -367,7 +371,7 @@ export default function ServiceMediaReferences({
               ) : (
                 <button
                   type="button"
-                  className="flex min-w-0 flex-1 items-center gap-2.5 px-2.5 py-2.5 text-left text-sm"
+                  className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2.5 text-left text-sm hover:bg-muted/50"
                   onClick={() => handlePlayAudio(audio)}
                 >
                   <Music size={16} className="shrink-0 text-secondary" />
@@ -377,7 +381,7 @@ export default function ServiceMediaReferences({
               {renamingId !== audio.id && (
                 <button
                   type="button"
-                  className="flex h-11 w-9 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
+                  className="flex h-11 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   onClick={() => startRename(audio)}
                   aria-label={t("mediaRenameAudio")}
                 >
@@ -386,7 +390,7 @@ export default function ServiceMediaReferences({
               )}
               <button
                 type="button"
-                className="flex h-11 w-11 shrink-0 items-center justify-center text-muted-foreground hover:text-destructive"
+                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-destructive"
                 onClick={() => handleRemoveAudio(audio)}
                 aria-label={t("mediaRemoveAudio")}
               >
@@ -412,7 +416,7 @@ export default function ServiceMediaReferences({
           <button
             type="button"
             disabled={uploading}
-            className="flex min-h-11 items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground hover:bg-accent disabled:opacity-50"
+            className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground hover:bg-muted/50 disabled:cursor-default disabled:opacity-50"
             onClick={startAddAudio}
           >
             <Plus size={16} className="shrink-0" />

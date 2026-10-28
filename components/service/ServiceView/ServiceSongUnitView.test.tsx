@@ -33,7 +33,7 @@ vi.mock('./ServiceArrangementMeta', () => ({
 }));
 
 vi.mock('@/components/song/ArrangementView', () => ({
-  default: () => <div data-testid="arrangement-view" />,
+  default: ({ footer }: any) => <div data-testid="arrangement-view">{footer}</div>,
 }));
 
 vi.mock('./ServiceSongUnitEditForm', () => ({
@@ -84,6 +84,27 @@ describe('ServiceSongUnitView', () => {
     render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
     expect(screen.getByTestId('arrangement-view')).toBeDefined();
     expect(screen.queryByTestId('edit-form')).toBeNull();
+  });
+
+  it('mostra o compositor depois da cifra quando a música tem autor', () => {
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
+    expect(screen.getByText('composerLabel')).toBeDefined();
+  });
+
+  it('omite o compositor quando a música não tem autor', () => {
+    const noArtistUnit = {
+      ...mockUnit,
+      arrangement: { ...mockUnit.arrangement!, song: { ...mockUnit.arrangement!.song!, artist: null } },
+    };
+    render(<ServiceSongUnitView unit={noArtistUnit} transpose={0} onTransposeChange={() => {}} />);
+    expect(screen.queryByText('composerLabel')).toBeNull();
+  });
+
+  it('esconde o compositor durante a edição', async () => {
+    const user = userEvent.setup();
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
+    await user.click(screen.getByTestId('start-edit'));
+    expect(screen.queryByText('composerLabel')).toBeNull();
   });
 
   it('passes isEditing=false to header initially', () => {
