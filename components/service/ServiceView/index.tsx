@@ -322,10 +322,6 @@ function SongSidebar({
       <ul className="flex flex-col">
         {sequence.map((item, index) => {
           if (item.kind === "info") {
-            // Recolhida, a sidebar mostra só os ícones de música — itens
-            // não-música (fala, oração, sermão...) somem até expandir de novo.
-            if (collapsed) return null;
-
             const config = UNIT_CONFIG[item.unit.type as ServiceUnitTypeValue];
             const Icon = config?.icon;
             const summary = summarizeUnit(item.unit, config?.label ?? item.unit.type);
@@ -335,12 +331,13 @@ function SongSidebar({
             return (
               <li
                 key={`info-${index}`}
+                title={collapsed ? text : undefined}
                 className="flex min-h-7 items-center gap-2 text-sm text-muted-foreground"
               >
                 <Rail className="text-muted-foreground">
                   {Icon && <Icon className="w-5 h-5" />}
                 </Rail>
-                <span className="min-w-0 self-center truncate">{text}</span>
+                <span className={collapsed ? "sr-only" : "min-w-0 self-center truncate"}>{text}</span>
               </li>
             );
           }
