@@ -9,10 +9,13 @@ type AudioPlayerState = {
   currentIndex: number;
   title?: string;
   isOpen: boolean;
+  /** Arranjo cujo áudio está tocando — usado pra realçar o botão de
+   * referências certo (vários podem existir na tela ao mesmo tempo). */
+  arrangementId: number | null;
 };
 
 type AudioPlayerContextType = AudioPlayerState & {
-  play: (audios: AudioItem[], title?: string, initialIndex?: number) => void;
+  play: (audios: AudioItem[], title?: string, initialIndex?: number, arrangementId?: number | null) => void;
   switchTo: (index: number) => void;
   close: () => void;
 };
@@ -24,10 +27,11 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     audios: [],
     currentIndex: 0,
     isOpen: false,
+    arrangementId: null,
   });
 
-  const play = (audios: AudioItem[], title?: string, initialIndex = 0) =>
-    setState({ audios, currentIndex: initialIndex, title, isOpen: true });
+  const play = (audios: AudioItem[], title?: string, initialIndex = 0, arrangementId: number | null = null) =>
+    setState({ audios, currentIndex: initialIndex, title, isOpen: true, arrangementId });
 
   const switchTo = (index: number) =>
     setState((s) => ({ ...s, currentIndex: index }));

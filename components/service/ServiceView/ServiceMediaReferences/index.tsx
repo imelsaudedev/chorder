@@ -57,9 +57,10 @@ export default function ServiceMediaReferences({
   title,
 }: Props) {
   const t = useTranslations("ServiceView");
-  const { play: playYoutube } = useYoutubePlayer();
-  const { play: playAudio, close: closeAudio } = useAudioPlayer();
-  const { close: closeYoutube } = useYoutubePlayer();
+  const youtubePlayer = useYoutubePlayer();
+  const { play: playYoutube, close: closeYoutube } = youtubePlayer;
+  const audioPlayer = useAudioPlayer();
+  const { play: playAudio, close: closeAudio } = audioPlayer;
   const { mutate } = useSWRConfig();
 
   const [open, setOpen] = useState(false);
@@ -188,16 +189,22 @@ export default function ServiceMediaReferences({
   function handlePlayVideo() {
     if (!liveYoutubeUrl) return;
     closeAudio();
-    playYoutube(liveYoutubeUrl, title);
+    playYoutube(liveYoutubeUrl, title, arrangementId);
     setOpen(false);
   }
 
   function handlePlayAudio(audio: Audio) {
     closeYoutube();
     const index = Math.max(0, liveAudios.findIndex((a) => a.id === audio.id));
-    playAudio(liveAudios as AudioItem[], title, index);
+    playAudio(liveAudios as AudioItem[], title, index, arrangementId);
     setOpen(false);
   }
+
+  // Realça o botão quando é este arranjo que está tocando em algum dos
+  // players (vários ServiceMediaReferences podem existir na tela ao mesmo tempo).
+  const isPlayingHere =
+    (youtubePlayer.isOpen && youtubePlayer.arrangementId === arrangementId) ||
+    (audioPlayer.isOpen && audioPlayer.arrangementId === arrangementId);
 
   function startAddAudio() {
     commitPending();
@@ -277,7 +284,9 @@ export default function ServiceMediaReferences({
           variant="outline"
           size="sm"
           aria-label={buttonLabel}
-          className={`h-10 md:h-9 gap-1.5 ${isEmpty ? "border-dashed text-muted-foreground" : ""}`}
+          className={`h-10 md:h-9 gap-1.5 ${isEmpty ? "border-dashed text-muted-foreground" : ""} ${
+            isPlayingHere ? "ring-2 ring-secondary ring-offset-1" : ""
+          }`}
         >
           {isEmpty && <Plus size={16} />}
           <Play size={16} className={liveYoutubeUrl ? "text-red-500" : "text-muted-foreground/40"} />

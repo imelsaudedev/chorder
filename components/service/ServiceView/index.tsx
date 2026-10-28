@@ -1,6 +1,8 @@
 "use client";
 
 import StageMode from "@/components/service/StageMode";
+import { useAudioPlayer } from "@/components/common/AudioPlayer/context";
+import { useYoutubePlayer } from "@/components/common/YoutubePlayer/context";
 import { useServiceConfig } from "@/components/config/ServiceConfig";
 import { Button } from "@/components/ui/button";
 import { ClientService, ClientServiceUnit } from "@/prisma/models";
@@ -28,6 +30,9 @@ type SectionBlock = {
 
 export default function ServiceView({ service }: ServiceViewProps) {
   const { density, fontSize } = useServiceConfig();
+  const { isOpen: isAudioOpen, close: closeAudio } = useAudioPlayer();
+  const { isOpen: isYoutubeOpen, close: closeYoutube } = useYoutubePlayer();
+  const isMediaOpen = isAudioOpen || isYoutubeOpen;
   const [isStageMode, setIsStageMode] = useState(false);
   // Música em que o Modo Palco abre e, ao sair, onde a tela normal volta.
   const [stageIndex, setStageIndex] = useState(0);
@@ -89,6 +94,10 @@ export default function ServiceView({ service }: ServiceViewProps) {
     const visibleIndex = songRefs.current.findIndex((el) => el && el.getBoundingClientRect().bottom > 0);
     setStageIndex(Math.max(0, visibleIndex));
     pushStageModeEntry();
+    // Entrar no Palco fecha qualquer mídia tocando (decisão: mídia e Modo
+    // Palco não convivem — evita sobreposição e referência tocando fora de contexto).
+    closeAudio();
+    closeYoutube();
     setIsStageMode(true);
   }
 
@@ -119,7 +128,10 @@ export default function ServiceView({ service }: ServiceViewProps) {
 
   return (
     <>
-      <div className="flex flex-col gap-14" style={{ fontSize: `${fontSize}px` }}>
+      <div
+        className={`flex flex-col gap-14 ${isAudioOpen ? "pb-24" : ""}`}
+        style={{ fontSize: `${fontSize}px` }}
+      >
         {blocks.map((block) => (
           <section key={block.id}>
             {block.label !== null && (
@@ -151,7 +163,13 @@ export default function ServiceView({ service }: ServiceViewProps) {
         ))}
       </div>
 
-      <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50">
+      {/* Sobe acima da janela do YouTube/barra de áudio (M2: mesmo canto no
+          celular, barra cobrindo o rodapé) em vez de disputar o mesmo espaço. */}
+      <div
+        className={`fixed right-4 md:right-8 z-50 transition-[bottom] ${
+          isMediaOpen ? "bottom-24 md:bottom-28" : "bottom-4 md:bottom-8"
+        }`}
+      >
         <Button
           variant="secondary"
           aria-label="Entrar no Modo Palco"

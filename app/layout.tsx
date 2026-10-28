@@ -51,7 +51,10 @@ export default async function RootLayout({
               <SongMetaModalProvider>
                 {children}
               </SongMetaModalProvider>
-              <Toaster position="bottom-center" richColors />
+              {/* z-index explícito acima dos players (ambos z-[9999]) — o aviso
+                  de desfazer de uma remoção de referência precisa ficar visível
+                  mesmo com vídeo ou áudio tocando (M2). */}
+              <Toaster position="bottom-center" richColors style={{ zIndex: 99999 }} />
               <YoutubePlayerWidget />
               <AudioPlayerWidget />
             </AudioPlayerProvider>

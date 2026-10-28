@@ -108,6 +108,18 @@ describe('ServiceMediaReferences', () => {
     expect(screen.queryByText('mediaVideoLabel')).toBeNull();
   });
 
+  it('realça o botão quando este arranjo está tocando', async () => {
+    const user = userEvent.setup();
+    renderWithProviders({ ...baseProps, youtubeUrl: 'https://youtu.be/abc123DEF45' });
+    const trigger = screen.getByRole('button', { name: 'mediaButtonLabelWithMedia' });
+    expect(trigger.className).not.toMatch(/ring-2/);
+
+    await user.click(trigger);
+    await user.click(screen.getByText('mediaVideoLabel'));
+
+    expect(trigger.className).toMatch(/ring-2/);
+  });
+
   it('troca o rótulo genérico pelo título real do vídeo quando o oEmbed responde', async () => {
     const user = userEvent.setup();
     (global.fetch as any).mockImplementation((url: string) => {
