@@ -273,22 +273,14 @@ export default function ServiceMediaReferences({
           variant="outline"
           size="sm"
           aria-label={buttonLabel}
-          className={`h-10 gap-1.5 ${isEmpty ? "border-dashed text-muted-foreground" : ""}`}
+          className={`h-10 md:h-9 gap-1.5 ${isEmpty ? "border-dashed text-muted-foreground" : ""}`}
         >
-          {isEmpty ? (
-            <>
-              <Plus size={16} />
-              {t("mediaButtonEmpty")}
-            </>
-          ) : (
-            <>
-              <Play size={16} className={liveYoutubeUrl ? "text-red-500" : "text-muted-foreground/40"} />
-              <Music
-                size={16}
-                className={liveAudios.length || uploading ? "text-secondary" : "text-muted-foreground/40"}
-              />
-            </>
-          )}
+          {isEmpty && <Plus size={16} />}
+          <Play size={16} className={liveYoutubeUrl ? "text-red-500" : "text-muted-foreground/40"} />
+          <Music
+            size={16}
+            className={liveAudios.length || uploading ? "text-secondary" : "text-muted-foreground/40"}
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[340px] max-w-[calc(100vw-2rem)] p-1">

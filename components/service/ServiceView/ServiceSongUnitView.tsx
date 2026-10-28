@@ -62,17 +62,16 @@ export default function ServiceSongUnitView({ unit, transpose, onTransposeChange
           ref={headerRef}
           arrangement={arrangement}
           order={unit.order}
-          isEditing={isEditing}
-          isSaving={isSaving}
           isStuck={isHeaderStuck}
-          onCancel={() => setIsEditing(false)}
-          onSaveServiceOnly={() => submitRef.current?.submit("service")}
-          onSaveBoth={() => submitRef.current?.submit("both")}
         />
         <ServiceArrangementMeta
           arrangement={arrangement}
           isEditing={isEditing}
+          isSaving={isSaving}
           onStartEdit={() => setIsEditing(true)}
+          onCancel={() => setIsEditing(false)}
+          onSaveServiceOnly={() => submitRef.current?.submit("service")}
+          onSaveBoth={() => submitRef.current?.submit("both")}
         />
         {isEditing ? (
           <ServiceSongUnitEditForm

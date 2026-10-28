@@ -123,7 +123,6 @@
     "cancelEdit": "Cancel editing",
     "saveChanges": "Save",
     "saveError": "Error saving. Please try again.",
-    "mediaButtonEmpty": "References",
     "mediaButtonLabelWithMedia": "Audio and video references",
     "mediaButtonLabelEmpty": "Add reference",
     "mediaAddVideo": "Add video",

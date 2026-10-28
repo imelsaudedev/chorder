@@ -26,15 +26,7 @@ export const Default: Story = {
     return (
       <div className="w-4xl">
         <SongConfigProvider>
-          <ServiceArrangementHeader
-              arrangement={arrangement}
-              order={1}
-              isEditing={false}
-              isSaving={false}
-              onCancel={() => {}}
-              onSaveServiceOnly={() => {}}
-              onSaveBoth={() => {}}
-            />
+          <ServiceArrangementHeader arrangement={arrangement} order={1} />
         </SongConfigProvider>
       </div>
     );
