@@ -3,6 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import MediaPlayerBar from './index';
 
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/services/4er8oc',
+}));
+
 const baseProps = {
   icon: <span data-testid="icon" />,
   title: 'Faixa de Teste',
@@ -21,8 +25,11 @@ const baseProps = {
 describe('MediaPlayerBar', () => {
   it('mostra título, ícone e tempos formatados', () => {
     render(<MediaPlayerBar {...baseProps} />);
-    expect(screen.getByTestId('icon')).toBeDefined();
-    expect(screen.getByText('Faixa de Teste')).toBeDefined();
+    // O ícone e o título aparecem duas vezes no DOM (mini-player + barra
+    // completa) — CSS decide qual mostrar em cada breakpoint; o teste só
+    // confere que pelo menos uma cópia de cada existe.
+    expect(screen.getAllByTestId('icon').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Faixa de Teste').length).toBeGreaterThan(0);
     expect(screen.getByText('0:30')).toBeDefined();
     expect(screen.getByText('2:00')).toBeDefined();
   });
@@ -95,5 +102,46 @@ describe('MediaPlayerBar', () => {
   it('não mostra chips quando há só uma faixa', () => {
     render(<MediaPlayerBar {...baseProps} tracks={[{ label: 'Voz' }]} currentTrackIndex={0} />);
     expect(screen.queryByText('Voz')).toBeNull();
+  });
+
+  // "sm:hidden"/"sm:flex" ficam sempre na className (regra fixa pro desktop);
+  // só a classe "hidden"/"flex" isolada, sem prefixo, muda com o estado.
+  function isHiddenOnMobile(el: HTMLElement) {
+    return el.className.split(/\s+/).includes('hidden');
+  }
+
+  describe('mini-player (celular)', () => {
+    it('abre recolhida por padrão, sem botão de play próprio', () => {
+      render(<MediaPlayerBar {...baseProps} />);
+      expect(isHiddenOnMobile(screen.getByTestId('mini-player'))).toBe(false);
+      expect(isHiddenOnMobile(screen.getByTestId('expanded-player'))).toBe(true);
+      // O único play/pause do componente é o da barra completa, escondida agora.
+      expect(screen.getAllByRole('button', { name: 'Tocar' })).toHaveLength(1);
+    });
+
+    it('expande ao tocar na barra recolhida', async () => {
+      const user = userEvent.setup();
+      render(<MediaPlayerBar {...baseProps} />);
+      await user.click(screen.getByTestId('mini-player'));
+      expect(isHiddenOnMobile(screen.getByTestId('mini-player'))).toBe(true);
+      expect(isHiddenOnMobile(screen.getByTestId('expanded-player'))).toBe(false);
+    });
+
+    it('recolhe ao tocar no título da barra expandida', async () => {
+      const user = userEvent.setup();
+      render(<MediaPlayerBar {...baseProps} />);
+      await user.click(screen.getByTestId('mini-player'));
+      await user.click(screen.getByText('Faixa de Teste', { selector: '[data-testid="expanded-player"] *' }));
+      expect(isHiddenOnMobile(screen.getByTestId('mini-player'))).toBe(false);
+      expect(isHiddenOnMobile(screen.getByTestId('expanded-player'))).toBe(true);
+    });
+
+    it('fechar funciona independente de estar recolhida ou expandida', async () => {
+      const user = userEvent.setup();
+      const onClose = vi.fn();
+      render(<MediaPlayerBar {...baseProps} onClose={onClose} />);
+      await user.click(screen.getByRole('button', { name: 'Fechar player' }));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 });

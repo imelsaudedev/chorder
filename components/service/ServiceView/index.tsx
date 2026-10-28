@@ -5,6 +5,7 @@ import { useAudioPlayer } from "@/components/common/AudioPlayer/context";
 import { useYoutubePlayer } from "@/components/common/YoutubePlayer/context";
 import { useServiceConfig } from "@/components/config/ServiceConfig";
 import { Button } from "@/components/ui/button";
+import { useMediaBarOpen } from "@/hooks/useMediaBarOpen";
 import { ClientService, ClientServiceUnit } from "@/prisma/models";
 import { Mic2 } from "lucide-react";
 import { pushStageModeEntry } from "@/components/service/StageMode/useStageModeHistory";
@@ -31,8 +32,8 @@ type SectionBlock = {
 export default function ServiceView({ service }: ServiceViewProps) {
   const { density, fontSize } = useServiceConfig();
   const { isOpen: isAudioOpen, close: closeAudio } = useAudioPlayer();
-  const { isOpen: isYoutubeOpen, close: closeYoutube } = useYoutubePlayer();
-  const isMediaOpen = isAudioOpen || isYoutubeOpen;
+  const { close: closeYoutube } = useYoutubePlayer();
+  const isMediaOpen = useMediaBarOpen();
   const [isStageMode, setIsStageMode] = useState(false);
   // Música em que o Modo Palco abre e, ao sair, onde a tela normal volta.
   const [stageIndex, setStageIndex] = useState(0);

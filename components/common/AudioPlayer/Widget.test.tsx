@@ -5,6 +5,10 @@ import { beforeAll, describe, it, expect, vi } from 'vitest';
 import AudioPlayerWidget from './Widget';
 import { AudioItem, AudioPlayerProvider, useAudioPlayer } from './context';
 
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/services/4er8oc',
+}));
+
 beforeAll(() => {
   // jsdom não implementa reprodução de mídia de verdade.
   window.HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
@@ -36,7 +40,8 @@ describe('AudioPlayerWidget', () => {
 
   it('mostra a barra com o nome da faixa ao abrir', () => {
     renderWithProvider([{ url: 'https://x/voz.mp3', label: 'Voz' }], 'Música Teste');
-    expect(screen.getByText('Voz')).toBeDefined();
+    // Aparece no mini-player e na barra completa — CSS escolhe qual mostrar.
+    expect(screen.getAllByText('Voz').length).toBeGreaterThan(0);
   });
 
   it('toca/pausa a tag <audio> ao clicar no botão principal', async () => {

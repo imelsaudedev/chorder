@@ -11,6 +11,9 @@ vi.mock('./youtubeIframeApi', () => ({
 vi.mock('./useYoutubeTitle', () => ({
   useYoutubeTitle: () => 'Título Real do Vídeo',
 }));
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/services/4er8oc',
+}));
 
 class FakePlayer {
   static instances: FakePlayer[] = [];
@@ -103,7 +106,8 @@ describe('YoutubePlayerWidget', () => {
 
   it('mostra a barra com o título real do vídeo (via oEmbed)', async () => {
     renderWithProvider('https://youtu.be/abc123DEF45');
-    await waitFor(() => expect(screen.getByText('Título Real do Vídeo')).toBeDefined());
+    // Aparece no mini-player e na barra completa — CSS escolhe qual mostrar.
+    await waitFor(() => expect(screen.getAllByText('Título Real do Vídeo').length).toBeGreaterThan(0));
   });
 
   it('alterna Tocar/Pausar via a IFrame API', async () => {

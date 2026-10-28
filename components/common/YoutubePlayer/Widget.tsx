@@ -17,7 +17,14 @@ export default function YoutubePlayerWidget() {
   const videoId = url ? extractYoutubeId(url) : null;
   const realTitle = useYoutubeTitle(isOpen ? url : null);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  // React só é dono desta div (wrapperRef); o alvo de verdade da API do
+  // YouTube é um <div> criado na mão dentro dela. A API substitui esse alvo
+  // por um iframe por fora do React — se o React tentasse remover o próprio
+  // nó que deu pra API, a troca já teria acontecido por baixo dos panos e
+  // ele quebraria com "Failed to execute 'removeChild'". Com a div extra,
+  // o React nunca manipula o nó trocado: só remove o wrapper (que continua
+  // sendo filho de verdade), e o que estiver dentro vai junto.
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YT.Player | null>(null);
   const [ready, setReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -27,8 +34,10 @@ export default function YoutubePlayerWidget() {
   const [muted, setMuted] = useState(false);
 
   useEffect(() => {
-    if (!videoId || !containerRef.current) return;
+    if (!videoId || !wrapperRef.current) return;
     let cancelled = false;
+    const target = document.createElement("div");
+    wrapperRef.current.appendChild(target);
 
     setReady(false);
     setIsPlaying(false);
@@ -36,8 +45,8 @@ export default function YoutubePlayerWidget() {
     setDuration(0);
 
     loadYoutubeIframeApi().then(() => {
-      if (cancelled || !containerRef.current || !window.YT) return;
-      playerRef.current = new window.YT.Player(containerRef.current, {
+      if (cancelled || !window.YT) return;
+      playerRef.current = new window.YT.Player(target, {
         videoId,
         width: "1",
         height: "1",
@@ -59,6 +68,7 @@ export default function YoutubePlayerWidget() {
       cancelled = true;
       playerRef.current?.destroy();
       playerRef.current = null;
+      target.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId]);
@@ -79,7 +89,7 @@ export default function YoutubePlayerWidget() {
 
   return (
     <>
-      <div ref={containerRef} className="fixed -left-full -top-full" aria-hidden="true" />
+      <div ref={wrapperRef} className="fixed -left-full -top-full" aria-hidden="true" />
       <MediaPlayerBar
         icon={<Play size={13} className="text-red-500 shrink-0" />}
         title={realTitle ?? "Vídeo do YouTube"}

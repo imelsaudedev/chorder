@@ -1,6 +1,8 @@
 "use client";
 
-import { ChevronUp, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useBottomNavVisible } from "@/hooks/useBottomNavVisible";
+import { ChevronDown, ChevronUp, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX, X } from "lucide-react";
 import { ReactNode, useState } from "react";
 
 // Barra única de rodapé, compartilhada pelo áudio enviado e pelo vídeo do
@@ -8,6 +10,12 @@ import { ReactNode, useState } from "react";
 // (AudioPlayer/Widget.tsx, YoutubePlayer/Widget.tsx) é o "motor" por trás
 // (uma tag <audio> nativa ou a API do player do YouTube) e só repassa estado
 // e callbacks pra esta barra — o visual fica idêntico nos dois casos.
+//
+// No celular abre recolhida (mini-player, 44px — o mínimo de um alvo de
+// toque, sem botão de play próprio: a faixa inteira só expande) e só mostra
+// os controles completos quando tocada; no desktop não existe recolhida,
+// é sempre a barra completa (não tem navegação inferior disputando espaço
+// lá — ver useBottomNavVisible).
 type Track = { label: string };
 
 type MediaPlayerBarProps = {
@@ -59,47 +67,90 @@ export default function MediaPlayerBar({
   onSelectTrack,
 }: MediaPlayerBarProps) {
   const [listVisible, setListVisible] = useState(true);
+  // Recolhida por padrão (mini-player) — só vale no celular, ver className
+  // de cada bloco abaixo; no desktop os dois ficam sempre com o completo.
+  const [expanded, setExpanded] = useState(false);
+  const bottomNavVisible = useBottomNavVisible();
   const hasMultiple = (tracks?.length ?? 0) > 1;
+  const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-zinc-900 text-white shadow-2xl">
-      {hasMultiple && listVisible && (
-        <div className="flex flex-wrap gap-2 px-4 py-2 bg-zinc-800 border-t border-zinc-700">
-          {tracks!.map((track, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => onSelectTrack?.(idx)}
-              className={`cursor-pointer text-xs px-3 py-1 rounded-full border transition-colors ${
-                idx === currentTrackIndex
-                  ? "bg-emerald-500 border-emerald-500 text-white"
-                  : "border-zinc-600 text-zinc-300 hover:border-zinc-400 hover:text-white"
-              }`}
-            >
-              {track.label}
-            </button>
-          ))}
-        </div>
-      )}
+    <div
+      className={`fixed left-0 right-0 z-[9999] bg-zinc-900 text-white shadow-2xl ${
+        bottomNavVisible ? "bottom-16 sm:bottom-0" : "bottom-0"
+      }`}
+    >
+      {/* Mini-player — só no celular, só quando recolhida. */}
+      <button
+        type="button"
+        data-testid="mini-player"
+        onClick={() => setExpanded(true)}
+        aria-label={`Abrir controles — ${title}`}
+        className={`relative flex h-11 w-full cursor-pointer items-center gap-2 px-3 sm:hidden ${
+          expanded ? "hidden" : "flex"
+        }`}
+      >
+        <span
+          className="absolute left-0 top-0 h-0.5 bg-secondary"
+          style={{ width: `${progress}%` }}
+          aria-hidden="true"
+        />
+        <span className="text-secondary shrink-0">{icon}</span>
+        <span className="min-w-0 flex-1 truncate text-left text-xs text-zinc-300">{title}</span>
+        <ChevronUp size={16} className="shrink-0 text-zinc-500" />
+      </button>
 
-      <div className="flex flex-col gap-1 px-4 py-2">
-        <div className="flex items-center justify-between">
-          <div className="flex min-w-0 items-center gap-2">
-            {hasMultiple && (
+      {/* Controles completos — sempre no desktop; no celular, só expandida. */}
+      <div
+        data-testid="expanded-player"
+        className={`flex-col gap-1 px-4 py-2 ${expanded ? "flex" : "hidden"} sm:flex`}
+      >
+        {hasMultiple && listVisible && (
+          <div className="-mx-4 -mt-2 mb-1 flex flex-wrap gap-2 bg-zinc-800 px-4 py-2">
+            {tracks!.map((track, idx) => (
               <button
+                key={idx}
                 type="button"
-                onClick={() => setListVisible((v) => !v)}
+                onClick={() => onSelectTrack?.(idx)}
+                className={`cursor-pointer text-xs px-3 py-1 rounded-full border transition-colors ${
+                  idx === currentTrackIndex
+                    ? "bg-secondary border-secondary text-secondary-foreground"
+                    : "border-zinc-600 text-zinc-300 hover:border-zinc-400 hover:text-white"
+                }`}
+              >
+                {track.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setExpanded(false)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpanded(false); } }}
+            aria-label="Recolher player"
+            className="flex min-w-0 cursor-pointer items-center gap-2 sm:cursor-default"
+          >
+            {hasMultiple && (
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={(e) => { e.stopPropagation(); setListVisible((v) => !v); }}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); setListVisible((v) => !v); } }}
                 className="cursor-pointer shrink-0 text-zinc-500 hover:text-white transition-colors"
                 title={listVisible ? "Ocultar lista" : "Exibir lista"}
               >
                 <ChevronUp size={15} className={`transition-transform ${listVisible ? "" : "rotate-180"}`} />
-              </button>
+              </span>
             )}
             {icon}
             <span className="min-w-0 truncate text-xs text-zinc-300">
               {title}
               {subtitle && <span className="ml-1 text-zinc-500">({subtitle})</span>}
             </span>
+            <ChevronDown size={14} className="shrink-0 text-zinc-500 sm:hidden" />
           </div>
           <button
             type="button"
@@ -123,14 +174,16 @@ export default function MediaPlayerBar({
             </button>
           )}
 
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="icon"
             onClick={onPlayPause}
             aria-label={isPlaying ? "Pausar" : "Tocar"}
-            className="cursor-pointer shrink-0 flex size-8 items-center justify-center rounded-full bg-emerald-500 text-white hover:bg-emerald-400 transition-colors"
+            className="shrink-0 size-8 rounded-full"
           >
             {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-          </button>
+          </Button>
 
           {onNext && (
             <button
@@ -154,7 +207,7 @@ export default function MediaPlayerBar({
             step={0.1}
             value={Math.min(currentTime, duration || 0)}
             onChange={(e) => onSeek(Number(e.target.value))}
-            className="min-w-0 flex-1 accent-emerald-500 cursor-pointer"
+            className="min-w-0 flex-1 accent-secondary cursor-pointer"
           />
           <span className="shrink-0 text-xs tabular-nums text-zinc-400 w-10">
             {formatTime(duration)}
@@ -176,7 +229,7 @@ export default function MediaPlayerBar({
             step={0.05}
             value={muted ? 0 : volume}
             onChange={(e) => onVolumeChange(Number(e.target.value))}
-            className="hidden sm:block w-16 accent-emerald-500 cursor-pointer"
+            className="hidden sm:block w-16 accent-secondary cursor-pointer"
           />
         </div>
       </div>
