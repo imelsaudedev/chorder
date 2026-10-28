@@ -1114,15 +1114,18 @@ async function syncPlanArrangements(
     }
   }
 
-  // Só reaproveitamos uma cópia existente se a música não mudou — pra isso, precisamos
-  // saber a que música cada cópia anterior pertencia de fato.
-  const songIdByArrangementId = new Map<number, number>();
+  // Só reaproveitamos uma cópia existente se nem a música nem o arranjo
+  // original escolhido mudaram — senão a cópia continuaria com a cifra e o
+  // originalArrangementId do arranjo antigo, mesmo trocando pra outro na UI.
+  const arrangementInfoById = new Map<number, { songId: number; originalArrangementId: number | null }>();
   if (previousArrangementIds.size > 0) {
     const rows = await tx.songArrangement.findMany({
       where: { id: { in: [...previousArrangementIds] } },
-      select: { id: true, songId: true },
+      select: { id: true, songId: true, originalArrangementId: true },
     });
-    for (const row of rows) songIdByArrangementId.set(row.id, row.songId);
+    for (const row of rows) {
+      arrangementInfoById.set(row.id, { songId: row.songId, originalArrangementId: row.originalArrangementId });
+    }
   }
 
   const keptArrangementIds = new Set<number>();
@@ -1137,12 +1140,14 @@ async function syncPlanArrangements(
       }
 
       const previousArrangementId = previousArrangementIdByClientId.get(unit.clientId) ?? null;
-      const sameSong =
-        previousArrangementId != null &&
-        songIdByArrangementId.get(previousArrangementId) === unit.arrangement.songId;
+      const previousInfo = previousArrangementId != null ? arrangementInfoById.get(previousArrangementId) : undefined;
+      const sameArrangementSource =
+        previousInfo != null &&
+        previousInfo.songId === unit.arrangement.songId &&
+        previousInfo.originalArrangementId === (unit.arrangement.originalArrangementId ?? null);
 
       let arrangementId: number;
-      if (sameSong && previousArrangementId != null) {
+      if (sameArrangementSource && previousArrangementId != null) {
         await tx.songArrangement.update({
           where: { id: previousArrangementId },
           data: { name: unit.arrangement.name, key: unit.arrangement.key },

@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useBottomNavVisible } from "@/hooks/useBottomNavVisible";
 import { ListMusic, MessageCircleHeart, Music } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -13,9 +14,7 @@ export default function NavBar() {
   const currentPage = pathParts[1];
   const isEditPage = pathname.includes("/edit") || pathname.endsWith("/new") ||
     (pathname.startsWith("/admin/templates/") && pathParts.length > 3);
-
-  // Página de lista: /songs ou /services (sem slug)
-  const isListPage = pathParts.length === 2;
+  const bottomNavVisible = useBottomNavVisible();
 
   if (isEditPage) return null;
 
@@ -48,7 +47,7 @@ export default function NavBar() {
       {/* Sidebar — sempre visível em sm+ nas listas, só em lg+ nas views */}
       <nav className={clsx(
         "flex-col fixed left-0 top-0 h-full w-20 bg-zinc-50 border-r border-border",
-        isListPage ? "hidden sm:flex" : "hidden lg:flex"
+        bottomNavVisible ? "hidden sm:flex" : "hidden lg:flex"
       )}>
         <div className="flex flex-col items-center pt-6 sm:pt-8 gap-6">
           {items}
@@ -56,7 +55,7 @@ export default function NavBar() {
       </nav>
 
       {/* Bottom nav — só nas páginas de lista e só no mobile */}
-      {isListPage && (
+      {bottomNavVisible && (
         <nav className="sm:hidden fixed bottom-0 left-0 w-full z-40 bg-white/80 backdrop-blur-lg shadow-md border-t border-gray-100">
           <div className="flex justify-around py-3">
             {items}

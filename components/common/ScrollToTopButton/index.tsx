@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useMediaBarOpen } from "@/hooks/useMediaBarOpen";
 import { CircleArrowUp } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
@@ -14,6 +15,7 @@ export default function ScrollToTopButton({
 }: ScrollToTopButtonProps) {
   const [isVisible, setIsVisible] = useState(scrollThreshold <= 0); // Estado para controlar a visibilidade do botão
   const t = useTranslations("Messages");
+  const mediaBarOpen = useMediaBarOpen();
 
   // Função para verificar a posição do scroll
   const handleScroll = useCallback(() => {
@@ -37,7 +39,9 @@ export default function ScrollToTopButton({
   return (
     <Button
       variant="outline"
-      className={`fixed bottom-24 sm:bottom-8 left-1/2 transform -translate-x-1/2 transition-opacity duration-300 gap-1 ${
+      className={`fixed left-1/2 transform -translate-x-1/2 transition-[opacity,bottom] duration-300 gap-1 ${
+        mediaBarOpen ? "bottom-44 sm:bottom-28" : "bottom-24 sm:bottom-8"
+      } ${
         isVisible
           ? "opacity-100 cursor-pointer"
           : "opacity-0 pointer-events-none"
