@@ -1,14 +1,18 @@
 "use client";
 
-import AudioPlayer from "react-h5-audio-player";
-import "react-h5-audio-player/lib/styles.css";
-import { ChevronUp, Music, Pause, Play, Repeat, SkipBack, SkipForward, Volume2, VolumeX, X } from "lucide-react";
-import { useState } from "react";
+import MediaPlayerBar from "@/components/common/MediaPlayerBar";
+import { Music } from "lucide-react";
+import { useRef, useState } from "react";
 import { useAudioPlayer } from "./context";
 
 export default function AudioPlayerWidget() {
-  const { audios, currentIndex, title, isOpen, close, switchTo } = useAudioPlayer();
-  const [listVisible, setListVisible] = useState(true);
+  const { audios, currentIndex, isOpen, close, switchTo } = useAudioPlayer();
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [muted, setMuted] = useState(false);
 
   const current = audios[currentIndex];
   const hasMultiple = audios.length > 1;
@@ -24,83 +28,57 @@ export default function AudioPlayerWidget() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] audio-player-dark">
-      {/* Seletor de faixas */}
-      {hasMultiple && listVisible && (
-        <div className="flex flex-wrap gap-2 px-4 py-2 bg-zinc-800 border-t border-zinc-700">
-          {audios.map((audio, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => switchTo(idx)}
-              className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-                idx === currentIndex
-                  ? "bg-emerald-500 border-emerald-500 text-white"
-                  : "border-zinc-600 text-zinc-300 hover:border-zinc-400 hover:text-white"
-              }`}
-            >
-              {audio.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <AudioPlayer
+    <>
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <audio
         key={current.url}
+        ref={audioRef}
         src={current.url}
         autoPlay
-        showSkipControls={hasMultiple}
-        showJumpControls={false}
-        onClickPrevious={handlePrev}
-        onClickNext={handleNext}
-        onEnded={hasMultiple && currentIndex < audios.length - 1 ? handleNext : undefined}
-        customIcons={{
-          play: <Play size={20} />,
-          pause: <Pause size={20} />,
-          previous: <SkipBack size={16} />,
-          next: <SkipForward size={16} />,
-          volume: <Volume2 size={16} />,
-          volumeMute: <VolumeX size={16} />,
-          loop: <Repeat size={14} />,
-          loopOff: <Repeat size={14} className="opacity-30" />,
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+        onEnded={() => {
+          if (hasMultiple && currentIndex < audios.length - 1) handleNext();
         }}
-        layout="horizontal"
-        header={
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2 min-w-0">
-              {hasMultiple && (
-                <button
-                  type="button"
-                  onClick={() => setListVisible((v) => !v)}
-                  className="text-zinc-500 hover:text-white transition-colors shrink-0"
-                  title={listVisible ? "Ocultar lista" : "Exibir lista"}
-                >
-                  <ChevronUp
-                    size={15}
-                    className={`transition-transform ${listVisible ? "" : "rotate-180"}`}
-                  />
-                </button>
-              )}
-              <Music size={13} className="text-emerald-400 shrink-0" />
-              <span className="text-xs text-zinc-300 truncate">
-                {current.label}
-                {hasMultiple && (
-                  <span className="text-zinc-500 ml-1">
-                    ({currentIndex + 1}/{audios.length})
-                  </span>
-                )}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={close}
-              className="text-zinc-500 hover:text-white transition-colors shrink-0 ml-3"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        }
+        className="hidden"
       />
-    </div>
+      <MediaPlayerBar
+        icon={<Music size={13} className="text-emerald-400 shrink-0" />}
+        title={current.label}
+        subtitle={hasMultiple ? `${currentIndex + 1}/${audios.length}` : undefined}
+        isPlaying={isPlaying}
+        currentTime={currentTime}
+        duration={duration}
+        volume={volume}
+        muted={muted}
+        onPlayPause={() => {
+          const el = audioRef.current;
+          if (!el) return;
+          if (el.paused) el.play(); else el.pause();
+        }}
+        onSeek={(time) => {
+          if (audioRef.current) audioRef.current.currentTime = time;
+          setCurrentTime(time);
+        }}
+        onVolumeChange={(value) => {
+          setVolume(value);
+          if (audioRef.current) audioRef.current.volume = value;
+          if (value > 0) setMuted(false);
+        }}
+        onToggleMute={() => {
+          const next = !muted;
+          setMuted(next);
+          if (audioRef.current) audioRef.current.muted = next;
+        }}
+        onClose={close}
+        onPrev={hasMultiple ? handlePrev : undefined}
+        onNext={hasMultiple ? handleNext : undefined}
+        tracks={hasMultiple ? audios : undefined}
+        currentTrackIndex={currentIndex}
+        onSelectTrack={switchTo}
+      />
+    </>
   );
 }

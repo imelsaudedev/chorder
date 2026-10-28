@@ -129,7 +129,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
   return (
     <>
       <div
-        className={`flex flex-col gap-14 ${isAudioOpen ? "pb-24" : ""}`}
+        className={`flex flex-col gap-14 ${isMediaOpen ? "pb-24" : ""}`}
         style={{ fontSize: `${fontSize}px` }}
       >
         {blocks.map((block) => (
@@ -163,8 +163,9 @@ export default function ServiceView({ service }: ServiceViewProps) {
         ))}
       </div>
 
-      {/* Sobe acima da janela do YouTube/barra de áudio (M2: mesmo canto no
-          celular, barra cobrindo o rodapé) em vez de disputar o mesmo espaço. */}
+      {/* Sobe acima da barra de mídia (vídeo ou áudio — as duas usam a mesma
+          barra full-width no rodapé, ver MediaPlayerBar) em vez de disputar o
+          mesmo espaço (M2). */}
       <div
         className={`fixed right-4 md:right-8 z-50 transition-[bottom] ${
           isMediaOpen ? "bottom-24 md:bottom-28" : "bottom-4 md:bottom-8"
