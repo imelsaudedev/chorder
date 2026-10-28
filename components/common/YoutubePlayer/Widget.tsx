@@ -85,42 +85,58 @@ export default function YoutubePlayerWidget() {
     return () => clearInterval(id);
   }, [ready, isPlaying]);
 
-  if (!isOpen || !videoId) return null;
+  // Pausa (sem destruir) quando o áudio assume, e retoma ao reabrir o mesmo
+  // vídeo — ver comentário abaixo sobre por que a div/o player continuam
+  // montados mesmo com isOpen false. No primeiro play de um vídeo novo,
+  // playVideo() aqui só repete o que playerVars.autoplay já faz (inofensivo).
+  useEffect(() => {
+    if (isOpen) playerRef.current?.playVideo();
+    else playerRef.current?.pauseVideo();
+  }, [isOpen]);
+
+  if (!videoId) return null;
 
   return (
     <>
+      {/* Sempre montada enquanto houver um videoId — nunca condicionada a
+          isOpen. Se ela desmontasse ao fechar (trocar pra áudio), o efeito
+          acima não rodaria de novo (só depende de videoId), e o player da
+          API ficaria "vivo" apontando pra um iframe já removido: o play
+          pararia de responder ao reabrir o mesmo vídeo. */}
       <div ref={wrapperRef} className="fixed -left-full -top-full" aria-hidden="true" />
-      <MediaPlayerBar
-        icon={<Play size={13} className="text-red-500 shrink-0" />}
-        title={realTitle ?? "Vídeo do YouTube"}
-        isPlaying={isPlaying}
-        currentTime={currentTime}
-        duration={duration}
-        volume={volume}
-        muted={muted}
-        onPlayPause={() => {
-          const player = playerRef.current;
-          if (!player) return;
-          if (isPlaying) player.pauseVideo(); else player.playVideo();
-        }}
-        onSeek={(time) => {
-          playerRef.current?.seekTo(time, true);
-          setCurrentTime(time);
-        }}
-        onVolumeChange={(value) => {
-          setVolume(value);
-          playerRef.current?.setVolume(value * 100);
-          if (value > 0) setMuted(false);
-        }}
-        onToggleMute={() => {
-          const player = playerRef.current;
-          if (!player) return;
-          const next = !muted;
-          setMuted(next);
-          if (next) player.mute(); else player.unMute();
-        }}
-        onClose={close}
-      />
+      {isOpen && (
+        <MediaPlayerBar
+          icon={<Play size={13} className="text-red-500 shrink-0" />}
+          title={realTitle ?? "Vídeo do YouTube"}
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          duration={duration}
+          volume={volume}
+          muted={muted}
+          onPlayPause={() => {
+            const player = playerRef.current;
+            if (!player) return;
+            if (isPlaying) player.pauseVideo(); else player.playVideo();
+          }}
+          onSeek={(time) => {
+            playerRef.current?.seekTo(time, true);
+            setCurrentTime(time);
+          }}
+          onVolumeChange={(value) => {
+            setVolume(value);
+            playerRef.current?.setVolume(value * 100);
+            if (value > 0) setMuted(false);
+          }}
+          onToggleMute={() => {
+            const player = playerRef.current;
+            if (!player) return;
+            const next = !muted;
+            setMuted(next);
+            if (next) player.mute(); else player.unMute();
+          }}
+          onClose={close}
+        />
+      )}
     </>
   );
 }

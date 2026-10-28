@@ -118,12 +118,45 @@ describe('YoutubePlayerWidget', () => {
     expect(screen.getByRole('button', { name: 'Pausar' })).toBeDefined();
   });
 
-  it('fecha o player ao clicar em fechar e destrói o player da API', async () => {
+  it('fecha o player ao clicar em fechar', async () => {
     const user = userEvent.setup();
     renderWithProvider('https://youtu.be/abc123DEF45');
     await waitFor(() => expect(screen.getByRole('button', { name: 'Fechar player' })).toBeDefined());
     await user.click(screen.getByRole('button', { name: 'Fechar player' }));
     expect(screen.queryByRole('button', { name: 'Tocar' })).toBeNull();
+  });
+
+  it('pausa (sem destruir) ao fechar, e retoma ao reabrir o mesmo vídeo', async () => {
+    const user = userEvent.setup();
+    function HarnessWithClose() {
+      const { play, close } = useYoutubePlayer();
+      useEffect(() => {
+        play('https://youtu.be/abc123DEF45');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+      return (
+        <>
+          <button onClick={close}>fechar-simulando-troca-pra-audio</button>
+          <button onClick={() => play('https://youtu.be/abc123DEF45')}>tocar de novo</button>
+          <YoutubePlayerWidget />
+        </>
+      );
+    }
+    render(<YoutubePlayerProvider><HarnessWithClose /></YoutubePlayerProvider>);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Tocar' })).toBeDefined());
+    await user.click(screen.getByRole('button', { name: 'Tocar' }));
+    expect(screen.getByRole('button', { name: 'Pausar' })).toBeDefined();
+
+    // "Fecha" (como ao trocar pra áudio) — some a barra, mas não destrói o player.
+    await user.click(screen.getByText('fechar-simulando-troca-pra-audio'));
+    expect(screen.queryByRole('button', { name: 'Tocar' })).toBeNull();
+    expect(FakePlayer.instances).toHaveLength(1);
+    expect(FakePlayer.instances[0].destroyed).toBe(false);
+
+    // Reabre o mesmo vídeo — tem que voltar a tocar sozinho, sem criar outro player.
+    await user.click(screen.getByText('tocar de novo'));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Pausar' })).toBeDefined());
+    expect(FakePlayer.instances).toHaveLength(1);
   });
 
   it('não renderiza nada quando a url não é um link de vídeo válido', () => {
