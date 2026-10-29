@@ -22,7 +22,10 @@ const SAMPLE_UNITS: ClientSongUnit[] = [
   },
   {
     type: "CHORUS",
-    content: "{c:Forte}\n[C]Santo, Santo, [G]Santo\n{c:Suave}\n[Am]é o [F]Senhor",
+    // Convenção colada ao acorde (sem \n entre os dois) — só assim ela
+    // aparece acima do acorde (commentAbove); numa linha própria ela vira
+    // um chip isolado (ver ANALISE.md, achado sobre chordsheetjs).
+    content: "{c:Forte}[C]Santo, Santo, [G]Santo\n{c:Suave}[Am]é o [F]Senhor",
     order: 3,
     notes: "Levantar as mãos",
     repeatCount: 2,
@@ -40,14 +43,14 @@ const SAMPLE_UNITS: ClientSongUnit[] = [
 export const UmaColuna: Story = {
   render: () => {
     const [units, setUnits] = useState<ClientSongUnit[]>(SAMPLE_UNITS);
-    return <BlockEditor units={units} columns={1} onChangeUnits={setUnits} />;
+    return <BlockEditor units={units} columns={1} baseKey="D" onChangeUnits={setUnits} />;
   },
 };
 
 export const DuasColunas: Story = {
   render: () => {
     const [units, setUnits] = useState<ClientSongUnit[]>(SAMPLE_UNITS);
-    return <BlockEditor units={units} columns={2} onChangeUnits={setUnits} />;
+    return <BlockEditor units={units} columns={2} baseKey="D" onChangeUnits={setUnits} />;
   },
 };
 
@@ -55,7 +58,7 @@ export const UmSoBloco: Story = {
   name: "Um só bloco (Apagar desabilitado — D12)",
   render: () => {
     const [units, setUnits] = useState<ClientSongUnit[]>([SAMPLE_UNITS[0]]);
-    return <BlockEditor units={units} columns={1} onChangeUnits={setUnits} />;
+    return <BlockEditor units={units} columns={1} baseKey="D" onChangeUnits={setUnits} />;
   },
 };
 
@@ -71,6 +74,6 @@ export const ComBlocoDeTexto: Story = {
         repeatCount: 1,
       },
     ]);
-    return <BlockEditor units={units} columns={1} onChangeUnits={setUnits} />;
+    return <BlockEditor units={units} columns={1} baseKey="D" onChangeUnits={setUnits} />;
   },
 };

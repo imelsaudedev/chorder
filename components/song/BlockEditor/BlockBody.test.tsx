@@ -59,7 +59,10 @@ describe("BlockBody — seleção (placeholder até o modal da Etapa 4)", () => 
     render(<BlockBody content="[D]uma [G]duas" onSelectItem={onSelectItem} />);
 
     await user.click(screen.getByText("uma"));
-    expect(onSelectItem).toHaveBeenCalledWith({ lineIndex: 0, itemIndex: 0 });
+    expect(onSelectItem).toHaveBeenCalledWith(
+      { lineIndex: 0, itemIndex: 0 },
+      expect.any(HTMLButtonElement)
+    );
   });
 
   it("convenção isolada (não emparelhada) não é um alvo de toque", () => {

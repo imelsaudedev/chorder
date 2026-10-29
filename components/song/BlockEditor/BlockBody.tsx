@@ -13,7 +13,7 @@ type BlockBodyProps = {
   commentClass?: string;
   density?: "compact" | "normal";
   selected?: ItemCoords | null;
-  onSelectItem?: (coords: ItemCoords) => void;
+  onSelectItem?: (coords: ItemCoords, element: HTMLButtonElement) => void;
 };
 
 // Corpo visual tocável (Etapa 3 do PLANO.md) — componente novo (D3), sem
@@ -69,7 +69,7 @@ type BlockLineProps = {
   commentClass?: string;
   density: "compact" | "normal";
   selected?: ItemCoords | null;
-  onSelectItem?: (coords: ItemCoords) => void;
+  onSelectItem?: (coords: ItemCoords, element: HTMLButtonElement) => void;
 };
 
 function BlockLine({ items, lineIndex, commentClass, density, selected, onSelectItem }: BlockLineProps) {
@@ -114,9 +114,10 @@ function BlockLine({ items, lineIndex, commentClass, density, selected, onSelect
             commentClass={commentClass}
             density={density}
             isSelected={selected?.lineIndex === lineIndex && selected?.itemIndex === itemIndex}
+            coords={{ lineIndex, itemIndex }}
             onSelect={
               onSelectItem && item._name !== "comment"
-                ? () => onSelectItem({ lineIndex, itemIndex })
+                ? (element) => onSelectItem({ lineIndex, itemIndex }, element)
                 : undefined
             }
           />
@@ -136,7 +137,8 @@ type BlockItemProps = {
   commentClass?: string;
   density: "compact" | "normal";
   isSelected?: boolean;
-  onSelect?: () => void;
+  coords?: ItemCoords;
+  onSelect?: (element: HTMLButtonElement) => void;
 };
 
 // Réplica do ramo mode==="chords" de Item.tsx:100-125 — mesmas classes, só
@@ -150,6 +152,7 @@ function BlockItem({
   commentClass = "text-zinc-600 border-zinc-600",
   density,
   isSelected,
+  coords,
   onSelect,
 }: BlockItemProps) {
   if (item._name === "comment") {
@@ -186,7 +189,11 @@ function BlockItem({
   return (
     <Wrapper
       type={onSelect ? "button" : undefined}
-      onClick={onSelect}
+      // Coordenada estável pro BlockShell reancorar o modal depois de uma
+      // edição (o clique original fica com o nó antigo, removido do DOM
+      // quando o conteúdo muda e o corpo visual é refeito).
+      data-block-item={coords ? `${coords.lineIndex}-${coords.itemIndex}` : undefined}
+      onClick={onSelect ? (e) => onSelect(e.currentTarget as HTMLButtonElement) : undefined}
       className={[
         "relative flex flex-col whitespace-pre-wrap mb-[var(--item-mb)] text-left appearance-none bg-transparent border-0 p-0 m-0",
         commentAbove ? "pl-[0.5625em]" : "",

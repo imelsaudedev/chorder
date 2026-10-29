@@ -24,6 +24,10 @@ import { computeUnitTypeNumbers } from "../unit-numbering";
 type BlockEditorProps = {
   units: ClientSongUnit[];
   columns?: number;
+  // D9: tom base do arranjo — nunca o tom transposto do culto. A grade do
+  // modal do acorde (Etapa 4) é sempre montada a partir deste valor.
+  baseKey: string;
+  enharmonicPreference?: "sharp" | "flat" | null;
   onChangeUnits: (units: ClientSongUnit[]) => void;
 };
 
@@ -31,7 +35,13 @@ type BlockEditorProps = {
 // a nenhuma tela real (Etapa 6 faz isso); hoje só Storybook/testes. Colunas
 // sempre dinâmicas (D2), recalculadas a cada mudança de conteúdo, reusando
 // findBestDistribution sem alterá-lo via distributeUnitsIntoColumns.
-export default function BlockEditor({ units, columns = 1, onChangeUnits }: BlockEditorProps) {
+export default function BlockEditor({
+  units,
+  columns = 1,
+  baseKey,
+  enharmonicPreference = null,
+  onChangeUnits,
+}: BlockEditorProps) {
   const t = useTranslations("SongForm");
   const numbers = useMemo(() => computeUnitTypeNumbers(units.map((u) => u.type)), [units]);
   const positionedColumns = useMemo(
@@ -54,6 +64,8 @@ export default function BlockEditor({ units, columns = 1, onChangeUnits }: Block
                 isFirst={index === 0}
                 isLast={index === units.length - 1}
                 canDelete={canDelete}
+                baseKey={baseKey}
+                enharmonicPreference={enharmonicPreference}
                 onChangeType={(type: SongUnitType) =>
                   onChangeUnits(changeUnitType(units, index, type))
                 }

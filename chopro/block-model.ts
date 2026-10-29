@@ -123,7 +123,64 @@ export function insertComment(
   });
 }
 
+/**
+ * Convenção "do acorde" (seção 8.3, D8): a convenção que o modal aplica a um
+ * acorde é a que está imediatamente antes dele, sem nenhum texto entre os
+ * dois — mesma condição de adjacência que StyledLine.tsx usa pra decidir
+ * commentAbove, só que no nível de token (não de item já agrupado).
+ */
+export function getPrecedingComment(
+  model: BlockModel,
+  tokenIndex: number
+): { tokenIndex: number; value: string } | null {
+  const prev = model.tokens[tokenIndex - 1];
+  if (!prev || prev.kind !== "comment") return null;
+  return { tokenIndex: tokenIndex - 1, value: prev.value };
+}
+
+/** Insere uma convenção logo antes de um token (tipicamente um acorde). */
+export function insertCommentBefore(
+  model: BlockModel,
+  tokenIndex: number,
+  value: string
+): BlockModel {
+  const tokens = model.tokens.slice();
+  tokens.splice(tokenIndex, 0, { kind: "comment", value, raw: `{c:${value}}` });
+  return withTokens(model, tokens);
+}
+
+/**
+ * Aplica/troca/remove a convenção de um acorde num só toque (D8: "tocar
+ * aplica ao acorde; tocar de novo remove"). Tocar numa convenção diferente
+ * da já aplicada troca em vez de empilhar — o app só reconhece uma convenção
+ * emparelhada por acorde (StyledLine só olha um item pra trás).
+ */
+export function toggleChordComment(
+  model: BlockModel,
+  chordTokenIndex: number,
+  value: string
+): BlockModel {
+  const preceding = getPrecedingComment(model, chordTokenIndex);
+  if (preceding?.value === value) return removeMarker(model, preceding.tokenIndex);
+  if (preceding) return setMarkerValue(model, preceding.tokenIndex, value);
+  return insertCommentBefore(model, chordTokenIndex, value);
+}
+
 export type MoveDirection = "left" | "right";
+
+/** Se há uma letra pra atravessar naquela direção (botão ◀ ▶ habilitado). */
+export function canMoveChord(
+  model: BlockModel,
+  index: number,
+  direction: MoveDirection
+): boolean {
+  const token = model.tokens[index];
+  if (!token || token.kind !== "chord") return false;
+  const neighbor = model.tokens[direction === "right" ? index + 1 : index - 1];
+  if (!neighbor || neighbor.kind !== "text" || neighbor.raw.length === 0) return false;
+  const char = direction === "right" ? neighbor.raw[0] : neighbor.raw[neighbor.raw.length - 1];
+  return char !== "\n" && char !== "\r";
+}
 
 /**
  * Move um acorde uma letra para a esquerda/direita, atravessando o texto
@@ -135,16 +192,11 @@ export function moveChordOneStep(
   index: number,
   direction: MoveDirection
 ): BlockModel {
-  const token = model.tokens[index];
-  if (!token || token.kind !== "chord") return model;
+  if (!canMoveChord(model, index, direction)) return model;
 
   if (direction === "right") {
-    const neighbor = model.tokens[index + 1];
-    if (!neighbor || neighbor.kind !== "text" || neighbor.raw.length === 0) {
-      return model;
-    }
+    const neighbor = model.tokens[index + 1] as TextToken;
     const char = neighbor.raw[0];
-    if (char === "\n" || char === "\r") return model;
     const rest = neighbor.raw.slice(1);
 
     const tokens = model.tokens.slice();
@@ -161,12 +213,8 @@ export function moveChordOneStep(
     return withTokens(model, tokens);
   }
 
-  const neighbor = model.tokens[index - 1];
-  if (!neighbor || neighbor.kind !== "text" || neighbor.raw.length === 0) {
-    return model;
-  }
+  const neighbor = model.tokens[index - 1] as TextToken;
   const char = neighbor.raw[neighbor.raw.length - 1];
-  if (char === "\n" || char === "\r") return model;
   const rest = neighbor.raw.slice(0, -1);
 
   const tokens = model.tokens.slice();
@@ -179,4 +227,135 @@ export function moveChordOneStep(
   if (rest) tokens[index - 1] = { kind: "text", raw: rest };
   else tokens.splice(index - 1, 1);
   return withTokens(model, tokens);
+}
+
+// ─── Vista editável (Etapa 3/4) ────────────────────────────────────────────
+//
+// O corpo visual (BlockBody.tsx) precisa renderizar exatamente como
+// `chordsheetjs` renderiza a leitura (paridade visual, Etapa 3) — mas editar
+// via block-model.ts, por índice de token (Etapa 1), não via coordenada
+// adivinhada. `toEditableLines` replica a regra de agrupamento do
+// `chordsheetjs` (confirmada empiricamente, não documentada por ele) em cima
+// dos tokens do próprio block-model, carregando o índice de token exato de
+// cada item — union por construção, não por coincidência: cada acorde/
+// convenção só pode vir de um [ ]/{c:} do próprio conteúdo, contado na mesma
+// ordem em que aparece no texto, então as duas leituras nunca podem discordar
+// sobre "qual é o 3º acorde da linha 2", mesmo sem comparar string a string.
+//
+// Regra (verificada com vários casos reais e sintéticos, inclusive acorde
+// colado a acorde, várias palavras, espaços múltiplos, tab, linha só com
+// espaço): um acorde "rouba" apenas a primeira palavra (não-espaço + todo o
+// espaço em branco seguinte) do texto que vem depois dele; o que sobrar
+// desse texto (se sobrar) vira um item seguinte só, sem acorde — não é
+// dividido palavra a palavra de novo. Texto que não vem logo depois de um
+// acorde (início de linha, ou depois de uma convenção) nunca é dividido.
+
+export type EditableChordItem = {
+  kind: "pair";
+  chords: string;
+  lyrics: string;
+  // Índice em model.tokens do token [acorde] já existente — null quando esta
+  // palavra ainda não tem acorde.
+  chordTokenIndex: number | null;
+  // Onde inserir um acorde novo (insertChord) quando chordTokenIndex é null.
+  insertAt: { textTokenIndex: number; offset: number } | null;
+};
+export type EditableCommentItem = { kind: "comment"; value: string; tokenIndex: number };
+export type EditableItem = EditableChordItem | EditableCommentItem;
+
+type LineEntry =
+  | { kind: "chord"; value: string; tokenIndex: number }
+  | { kind: "comment"; value: string; tokenIndex: number }
+  | { kind: "text"; text: string; tokenIndex: number; offset: number };
+
+function splitIntoLineEntries(tokens: BlockToken[]): LineEntry[][] {
+  const lines: LineEntry[][] = [[]];
+  const currentLine = () => lines[lines.length - 1];
+
+  tokens.forEach((token, tokenIndex) => {
+    if (token.kind === "chord") {
+      currentLine().push({ kind: "chord", value: token.value, tokenIndex });
+      return;
+    }
+    if (token.kind === "comment") {
+      currentLine().push({ kind: "comment", value: token.value, tokenIndex });
+      return;
+    }
+
+    const breakRe = /\r\n|\n/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = breakRe.exec(token.raw))) {
+      const piece = token.raw.slice(lastIndex, match.index);
+      if (piece) currentLine().push({ kind: "text", text: piece, tokenIndex, offset: lastIndex });
+      lastIndex = match.index + match[0].length;
+      lines.push([]);
+    }
+    const rest = token.raw.slice(lastIndex);
+    if (rest) currentLine().push({ kind: "text", text: rest, tokenIndex, offset: lastIndex });
+  });
+
+  return lines;
+}
+
+function lineEntriesToItems(entries: LineEntry[]): EditableItem[] {
+  const items: EditableItem[] = [];
+  let pendingChord: { value: string; tokenIndex: number } | null = null;
+
+  const flushPendingAsEmpty = () => {
+    if (pendingChord) {
+      items.push({
+        kind: "pair",
+        chords: pendingChord.value,
+        lyrics: "",
+        chordTokenIndex: pendingChord.tokenIndex,
+        insertAt: null,
+      });
+      pendingChord = null;
+    }
+  };
+
+  for (const entry of entries) {
+    if (entry.kind === "chord") {
+      flushPendingAsEmpty();
+      pendingChord = { value: entry.value, tokenIndex: entry.tokenIndex };
+    } else if (entry.kind === "comment") {
+      flushPendingAsEmpty();
+      items.push({ kind: "comment", value: entry.value, tokenIndex: entry.tokenIndex });
+    } else if (pendingChord) {
+      const firstWord = /^\S*\s*/.exec(entry.text)![0];
+      const rest = entry.text.slice(firstWord.length);
+      items.push({
+        kind: "pair",
+        chords: pendingChord.value,
+        lyrics: firstWord,
+        chordTokenIndex: pendingChord.tokenIndex,
+        insertAt: null,
+      });
+      pendingChord = null;
+      if (rest) {
+        items.push({
+          kind: "pair",
+          chords: "",
+          lyrics: rest,
+          chordTokenIndex: null,
+          insertAt: { textTokenIndex: entry.tokenIndex, offset: entry.offset + firstWord.length },
+        });
+      }
+    } else {
+      items.push({
+        kind: "pair",
+        chords: "",
+        lyrics: entry.text,
+        chordTokenIndex: null,
+        insertAt: { textTokenIndex: entry.tokenIndex, offset: entry.offset },
+      });
+    }
+  }
+  flushPendingAsEmpty();
+  return items;
+}
+
+export function toEditableLines(model: BlockModel): EditableItem[][] {
+  return splitIntoLineEntries(model.tokens).map(lineEntriesToItems);
 }

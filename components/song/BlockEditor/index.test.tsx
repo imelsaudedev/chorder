@@ -22,14 +22,16 @@ async function openBlockMenu(user: ReturnType<typeof userEvent.setup>, blockEl: 
   await user.click(within(blockEl).getByRole("button", { name: "Mais opções do bloco" }));
 }
 
-function getBlocks() {
+function getBlocks(): HTMLElement[] {
   // cada bloco tem exatamente um gatilho de seletor de tipo (UnitTypes.*)
-  return screen.getAllByRole("button", { name: /^UnitTypes\./ }).map((btn) => btn.closest("div.border")!);
+  return screen
+    .getAllByRole("button", { name: /^UnitTypes\./ })
+    .map((btn) => btn.closest("div.border") as HTMLElement);
 }
 
 describe("BlockEditor", () => {
   it("renderiza um bloco por unidade, com a numeração por tipo", () => {
-    render(<BlockEditor units={makeUnits(["INTRO", "VERSE", "VERSE"])} onChangeUnits={vi.fn()} />);
+    render(<BlockEditor units={makeUnits(["INTRO", "VERSE", "VERSE"])} baseKey="D" onChangeUnits={vi.fn()} />);
     expect(screen.getByRole("button", { name: "UnitTypes.INTRO 1" })).toBeDefined();
     expect(screen.getByRole("button", { name: "UnitTypes.VERSE 1" })).toBeDefined();
     expect(screen.getByRole("button", { name: "UnitTypes.VERSE 2" })).toBeDefined();
@@ -37,7 +39,7 @@ describe("BlockEditor", () => {
 
   it("Subir fica desabilitado no primeiro bloco, Descer no último", async () => {
     const user = userEvent.setup();
-    render(<BlockEditor units={makeUnits(["INTRO", "VERSE", "CHORUS"])} onChangeUnits={vi.fn()} />);
+    render(<BlockEditor units={makeUnits(["INTRO", "VERSE", "CHORUS"])} baseKey="D" onChangeUnits={vi.fn()} />);
     const blocks = getBlocks();
 
     await openBlockMenu(user, blocks[0]);
@@ -54,7 +56,7 @@ describe("BlockEditor", () => {
     const user = userEvent.setup();
     const units = makeUnits(["INTRO", "VERSE", "CHORUS"]);
     const onChangeUnits = vi.fn();
-    render(<BlockEditor units={units} onChangeUnits={onChangeUnits} />);
+    render(<BlockEditor units={units} baseKey="D" onChangeUnits={onChangeUnits} />);
     const blocks = getBlocks();
 
     await openBlockMenu(user, blocks[0]);
@@ -70,7 +72,7 @@ describe("BlockEditor", () => {
     const user = userEvent.setup();
     const units = makeUnits(["INTRO", "VERSE"]);
     const onChangeUnits = vi.fn();
-    render(<BlockEditor units={units} onChangeUnits={onChangeUnits} />);
+    render(<BlockEditor units={units} baseKey="D" onChangeUnits={onChangeUnits} />);
     const blocks = getBlocks();
 
     await openBlockMenu(user, blocks[0]);
@@ -84,7 +86,7 @@ describe("BlockEditor", () => {
     const user = userEvent.setup();
     const units = makeUnits(["INTRO", "VERSE"]);
     const onChangeUnits = vi.fn();
-    render(<BlockEditor units={units} onChangeUnits={onChangeUnits} />);
+    render(<BlockEditor units={units} baseKey="D" onChangeUnits={onChangeUnits} />);
     const blocks = getBlocks();
 
     await openBlockMenu(user, blocks[1]);
@@ -98,7 +100,7 @@ describe("BlockEditor", () => {
 
   it("D12: Apagar fica desabilitado quando é o único bloco restante", async () => {
     const user = userEvent.setup();
-    render(<BlockEditor units={makeUnits(["INTRO"])} onChangeUnits={vi.fn()} />);
+    render(<BlockEditor units={makeUnits(["INTRO"])} baseKey="D" onChangeUnits={vi.fn()} />);
     const blocks = getBlocks();
 
     await openBlockMenu(user, blocks[0]);
@@ -112,7 +114,7 @@ describe("BlockEditor", () => {
     const user = userEvent.setup();
     const units = makeUnits(["INTRO", "VERSE"]);
     const onChangeUnits = vi.fn();
-    render(<BlockEditor units={units} onChangeUnits={onChangeUnits} />);
+    render(<BlockEditor units={units} baseKey="D" onChangeUnits={onChangeUnits} />);
     const blocks = getBlocks();
 
     await openBlockMenu(user, blocks[0]);
@@ -124,7 +126,7 @@ describe("BlockEditor", () => {
     const user = userEvent.setup();
     const units = makeUnits(["INTRO", "VERSE"]);
     const onChangeUnits = vi.fn();
-    render(<BlockEditor units={units} onChangeUnits={onChangeUnits} />);
+    render(<BlockEditor units={units} baseKey="D" onChangeUnits={onChangeUnits} />);
 
     await user.click(screen.getByRole("button", { name: "UnitTypes.VERSE 1" }));
     await user.click(screen.getByRole("menuitem", { name: "UnitTypes.BRIDGE" }));
@@ -138,7 +140,7 @@ describe("BlockEditor", () => {
     const user = userEvent.setup();
     const units = makeUnits(["INTRO"]);
     const onChangeUnits = vi.fn();
-    render(<BlockEditor units={units} onChangeUnits={onChangeUnits} />);
+    render(<BlockEditor units={units} baseKey="D" onChangeUnits={onChangeUnits} />);
 
     await user.click(screen.getByRole("button", { name: "newUnit" }));
     const result = onChangeUnits.mock.calls[0][0] as ClientSongUnit[];
@@ -149,7 +151,7 @@ describe("BlockEditor", () => {
     const user = userEvent.setup();
     const units = makeUnits(["INTRO", "VERSE", "CHORUS", "VERSE"]);
     const onChangeUnits = vi.fn();
-    render(<BlockEditor units={units} columns={2} onChangeUnits={onChangeUnits} />);
+    render(<BlockEditor units={units} columns={2} baseKey="D" onChangeUnits={onChangeUnits} />);
     const blocks = getBlocks();
 
     await openBlockMenu(user, blocks[0]);
