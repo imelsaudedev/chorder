@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ChangeEvent, useCallback, useId, useMemo, useState } from "react";
+import BlockBody, { ItemCoords } from "./BlockBody";
 import TypeSelector from "./TypeSelector";
 
 type BlockShellProps = {
@@ -48,9 +49,9 @@ type BlockShellProps = {
   className?: string;
 };
 
-// Casca do bloco (Etapa 2 do PLANO.md): cabeçalho com seletor de tipo e menu,
-// corpo ainda com o textarea + preview antigos — a Etapa 3 troca só o corpo
-// por uma renderização tocável, sem precisar mexer neste arquivo de novo.
+// Casca do bloco (Etapa 2) + corpo visual tocável (Etapa 3 do PLANO.md).
+// "Editar como texto" (menu do bloco) troca pro textarea+preview antigos —
+// útil como modo de escape, mas o padrão agora é o corpo visual.
 export default function BlockShell({
   unit,
   number,
@@ -72,9 +73,20 @@ export default function BlockShell({
   const colorClasses = unitColorClasses[unit.type];
   const contentId = useId();
   const [notesExpanded, setNotesExpanded] = useState(!!unit.notes);
-  // Por ora não há corpo visual (Etapa 3) pra alternar com o texto — o
-  // estado já existe pra o menu não precisar ser refeito quando ele chegar.
-  const [textMode, setTextMode] = useState(true);
+  // Bloco TEXT nunca tem corpo visual de acordes (sempre MarkdownUnitForm);
+  // pra tipos normais, texto é só uma saída temporária via menu — Etapa 5
+  // decide o critério definitivo de quando abrir direto em modo texto
+  // (bloco vazio/inválido).
+  const [textMode, setTextMode] = useState(false);
+  // Seleção do corpo visual — ainda não abre modal (Etapa 4); só marca.
+  const [selectedItem, setSelectedItem] = useState<ItemCoords | null>(null);
+  const handleSelectItem = useCallback((coords: ItemCoords) => {
+    setSelectedItem((prev) =>
+      prev && prev.lineIndex === coords.lineIndex && prev.itemIndex === coords.itemIndex
+        ? null
+        : coords
+    );
+  }, []);
 
   const isTextUnit = unit.type === "TEXT";
   const { hasError } = useMemo(() => {
@@ -201,7 +213,7 @@ export default function BlockShell({
 
       {isTextUnit ? (
         <MarkdownUnitForm initialContent={unit.content} onChange={onChangeContent} />
-      ) : (
+      ) : textMode ? (
         <div className="lg:grid lg:grid-cols-2 gap-4 flex flex-col">
           <div className="lg:flex lg:flex-col">
             <TextInput
@@ -228,6 +240,13 @@ export default function BlockShell({
             )}
           </div>
         </div>
+      ) : (
+        <BlockBody
+          content={unit.content}
+          commentClass={colorClasses.comment}
+          selected={selectedItem}
+          onSelectItem={handleSelectItem}
+        />
       )}
     </div>
   );
