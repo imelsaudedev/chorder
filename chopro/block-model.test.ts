@@ -214,13 +214,11 @@ describe("toEditableLines — mesmo agrupamento que chordsheetjs produz na leitu
   ];
 
   function toComparable(items: (ChordProItem | EditableItem)[]) {
-    return items.map((item) =>
-      "_value" in item
-        ? { kind: "comment", value: item._value }
-        : item.kind === "comment"
-          ? { kind: "comment", value: item.value }
-          : { kind: "pair", chords: item.chords, lyrics: item.lyrics }
-    );
+    return items.map((item) => {
+      if ("_value" in item) return { kind: "comment", value: item._value };
+      if ("kind" in item && item.kind === "comment") return { kind: "comment", value: item.value };
+      return { kind: "pair", chords: item.chords, lyrics: item.lyrics };
+    });
   }
 
   it.each(CASES)("agrupamento idêntico ao de chordsheetjs: %s", (content) => {

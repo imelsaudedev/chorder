@@ -187,3 +187,59 @@ describe("BlockShell — ponte entre toque, block-model e o modal (Etapa 4)", ()
     expect(screen.getByRole("button", { name: "A" })).toHaveClass("bg-zinc-800");
   });
 });
+
+async function openTextToggle(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByLabelText("Mais opções do bloco"));
+}
+
+describe("BlockShell — modo texto, bloco vazio/inválido (Etapa 5, critério 10)", () => {
+  it("bloco vazio (content: \"\") abre direto em modo texto", () => {
+    render(<Harness initialContent="" onChange={vi.fn()} />);
+    expect(screen.getByRole("textbox")).toBeDefined();
+  });
+
+  it("bloco com erro de parse abre direto em modo texto, com o aviso ao lado", () => {
+    render(<Harness initialContent="{incompleto" onChange={vi.fn()} />);
+    expect(screen.getByRole("textbox")).toHaveValue("{incompleto");
+    expect(screen.getByText("Messages.invalidChordPro")).toBeDefined();
+  });
+
+  it("bloco válido e não vazio abre direto em modo visual", () => {
+    render(<Harness initialContent="[D]letra" onChange={vi.fn()} />);
+    expect(screen.getByText("letra")).toBeDefined();
+    expect(screen.queryByRole("textbox")).toBeNull();
+  });
+
+  it("bloco TEXT sempre usa MarkdownUnitForm, mesmo vazio, e não tem o item de alternar modo", async () => {
+    const user = userEvent.setup();
+    render(<Harness initialContent="" type="TEXT" onChange={vi.fn()} />);
+    expect(screen.getByPlaceholderText("UnitData.markdownPlaceholder")).toBeDefined();
+
+    await openTextToggle(user);
+    expect(screen.queryByText(/Editar como texto|Editar visual/)).toBeNull();
+  });
+
+  it("ida e volta entre modo texto e visual não perde nada (alternando pelo menu)", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<Harness initialContent="[D]letra" onChange={onChange} />);
+
+    await openTextToggle(user);
+    await user.click(screen.getByText("Editar como texto"));
+    const textarea = screen.getByRole("textbox");
+    expect(textarea).toHaveValue("[D]letra");
+
+    await user.clear(textarea);
+    // userEvent.type usa [ pra iniciar uma sequência especial de teclado —
+    // [[ produz o colchete de abertura literal; ] sozinho já é literal.
+    await user.type(textarea, "[[D]letra mais");
+    expect(onChange).toHaveBeenLastCalledWith("[D]letra mais");
+
+    await openTextToggle(user);
+    await user.click(screen.getByText("Editar visual"));
+
+    expect(screen.queryByRole("textbox")).toBeNull();
+    expect(screen.getByText("letra")).toBeDefined();
+    expect(screen.getByText("mais")).toBeDefined();
+  });
+});

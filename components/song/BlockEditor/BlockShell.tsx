@@ -43,6 +43,18 @@ import BlockBody, { ItemCoords } from "./BlockBody";
 import ChordModal from "./ChordModal";
 import TypeSelector from "./TypeSelector";
 
+// Seção 8.5 / critério 10: bloco vazio ou com erro de parse abre direto em
+// modo texto — não há nada tocável num bloco assim, então o corpo visual
+// não tem como oferecer uma entrada de edição.
+function hasParseError(content: string): boolean {
+  try {
+    parseChordPro(content);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
 type BlockShellProps = {
   unit: ClientSongUnit;
   number: number;
@@ -92,11 +104,14 @@ export default function BlockShell({
   const colorClasses = unitColorClasses[unit.type];
   const contentId = useId();
   const [notesExpanded, setNotesExpanded] = useState(!!unit.notes);
-  // Bloco TEXT nunca tem corpo visual de acordes (sempre MarkdownUnitForm);
-  // pra tipos normais, texto é só uma saída temporária via menu — Etapa 5
-  // decide o critério definitivo de quando abrir direto em modo texto
-  // (bloco vazio/inválido).
-  const [textMode, setTextMode] = useState(false);
+  const isTextUnit = unit.type === "TEXT";
+  // Bloco TEXT nunca tem corpo visual de acordes (sempre MarkdownUnitForm).
+  // Pros demais: visual é o padrão, exceto bloco vazio/inválido (8.5), que
+  // nasce em modo texto — só no mount; depois disso é o Editar como texto/
+  // visual do menu que decide, não isto de novo.
+  const [textMode, setTextMode] = useState(
+    () => !isTextUnit && (unit.content === "" || hasParseError(unit.content))
+  );
 
   // Seleção do corpo visual + modal do acorde (Etapa 4). A coordenada
   // (lineIndex, itemIndex) é do corpo visual (chordsheetjs, Etapa 3); a cada
@@ -164,16 +179,10 @@ export default function BlockShell({
     [onChangeContent]
   );
 
-  const isTextUnit = unit.type === "TEXT";
-  const { hasError } = useMemo(() => {
-    if (isTextUnit) return { hasError: false };
-    try {
-      parseChordPro(unit.content);
-      return { hasError: false };
-    } catch {
-      return { hasError: true };
-    }
-  }, [unit.content, isTextUnit]);
+  const hasError = useMemo(
+    () => !isTextUnit && hasParseError(unit.content),
+    [unit.content, isTextUnit]
+  );
 
   const handleChangeChordpro = useCallback(
     (event: ChangeEvent<HTMLTextAreaElement>) => onChangeContent(event.target.value),
