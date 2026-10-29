@@ -245,4 +245,17 @@ describe("toEditableLines — mesmo agrupamento que chordsheetjs produz na leitu
     const updated = insertChord(model, insertAt.textTokenIndex, insertAt.offset, "Em");
     expect(serializeBlock(updated)).toBe("[D]wordA [Em]wordB wordC");
   });
+
+  it("carrega onde inserir um acorde novo mesmo numa palavra que JÁ tem acorde (achado em teste manual)", () => {
+    // Tocar no meio de "palavra" (que já pertence ao acorde D) precisa
+    // poder nascer um acorde novo ali, sem mexer no D original — não dá
+    // mais pra confiar só em "chordTokenIndex === null" pra saber se dá
+    // pra inserir.
+    const model = parseBlock("[D]palavra");
+    const [line] = toEditableLines(model);
+    expect(line[0]).toMatchObject({ chords: "D", lyrics: "palavra", chordTokenIndex: 0 });
+    const insertAt = (line[0] as EditableItem & { kind: "pair" }).insertAt!;
+    const updated = insertChord(model, insertAt.textTokenIndex, insertAt.offset + 3, "G");
+    expect(serializeBlock(updated)).toBe("[D]pal[G]avra");
+  });
 });

@@ -6,13 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import clsx from "clsx";
-import { ChevronLeft, ChevronRight, MoveHorizontal, TrashIcon, XIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, MoveHorizontal, PlusCircle, SquarePen, TrashIcon, XIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { COMMENT_CHIPS } from "../ArrangementForm/SongUnitListForm/commentChips";
 import { EditableChordItem } from "@/chopro/block-model";
 
+// Largura máxima do modal — no desktop, a largura do bloco (uma coluna
+// inteira da leitura) é grande demais para um popup de grade de acordes;
+// achado em teste manual ("a modal fica larga demais"). No mobile, o bloco
+// já é mais estreito que isso na prática, então o `Math.min` com blockWidth
+// continua valendo ali.
+const CHORD_MODAL_MAX_WIDTH = 320;
+
+export function resolveChordModalWidth(blockWidth: number | null): number {
+  return blockWidth ? Math.min(blockWidth, CHORD_MODAL_MAX_WIDTH) : CHORD_MODAL_MAX_WIDTH;
+}
+
 export type ChordModalProps = {
   open: boolean;
+  // "edit" = acorde já existente; "insert" = acabou de nascer deste toque —
+  // rótulo e cor no topo do modal, par do anel no corpo (BlockBody).
+  mode: "edit" | "insert";
   anchorRef: React.RefObject<HTMLElement | null>;
   blockWidth: number | null;
   baseKey: string;
@@ -39,6 +53,7 @@ export type ChordModalProps = {
 // telas largas via `hidden sm:block`.
 export default function ChordModal({
   open,
+  mode,
   anchorRef,
   blockWidth,
   baseKey,
@@ -91,11 +106,12 @@ export default function ChordModal({
           BlockShell), então o cast é seguro. */}
       <PopoverAnchor virtualRef={anchorRef as React.RefObject<{ getBoundingClientRect(): DOMRect }>} />
       <PopoverContent
+        data-testid="chord-modal"
         align="center"
         side="top"
         sideOffset={8}
         collisionPadding={{ top: 56 }}
-        style={blockWidth ? { width: blockWidth, maxWidth: "95vw" } : undefined}
+        style={{ width: resolveChordModalWidth(blockWidth), maxWidth: "95vw" }}
         className="w-auto p-2"
         // Qualquer alvo tocável do corpo (o acorde atual ou outro, inclusive
         // em outro bloco) conta como "dentro" pra fins de fechar — é o
@@ -118,6 +134,19 @@ export default function ChordModal({
         }}
       >
         <div className="flex flex-col gap-2">
+          {/* Indicador do cenário (editar x inserir) — achado em teste manual:
+              os dois toques pareciam idênticos, sem nenhum sinal de qual
+              ação ia acontecer. */}
+          <div
+            className={clsx(
+              "flex items-center gap-1.5 text-xs font-medium pb-1 border-b",
+              mode === "insert" ? "text-emerald-600 border-emerald-200" : "text-sky-600 border-sky-200"
+            )}
+          >
+            {mode === "insert" ? <PlusCircle size={13} /> : <SquarePen size={13} />}
+            {mode === "insert" ? "Acorde novo" : "Editar acorde"}
+          </div>
+
           {/* Acordes do tom + grade expandida (D7) */}
           <div className="flex items-start gap-2">
             <div className="flex-1 grid grid-cols-4 gap-1">

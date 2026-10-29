@@ -330,7 +330,12 @@ function lineEntriesToItems(entries: LineEntry[]): EditableItem[] {
         chords: pendingChord.value,
         lyrics: firstWord,
         chordTokenIndex: pendingChord.tokenIndex,
-        insertAt: null,
+        // Mesmo com acorde já existente, insertAt aponta pra dentro da
+        // própria lyrics desse item — tocar em qualquer posição que não
+        // seja bem o início (offset 0) divide o texto e nasce um acorde
+        // novo ali, no meio da palavra que já tinha um. offset 0 continua
+        // significando "selecionar o acorde existente" (ver BlockShell).
+        insertAt: { textTokenIndex: entry.tokenIndex, offset: entry.offset },
       });
       pendingChord = null;
       if (rest) {

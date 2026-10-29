@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ChangeEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import BlockBody, { ItemCoords } from "./BlockBody";
+import BlockBody, { ItemCoords, TapInfo } from "./BlockBody";
 import ChordModal from "./ChordModal";
 import TypeSelector from "./TypeSelector";
 
@@ -119,6 +119,11 @@ export default function BlockShell({
   // toEditableLines, então nunca fica com um índice de token obsoleto depois
   // de uma edição — ver chopro/block-model.ts.
   const [selectedItem, setSelectedItem] = useState<ItemCoords | null>(null);
+  // "edit" = acorde já existente (anel azul); "insert" = acabou de nascer
+  // deste toque (anel verde) — indicador visual pros dois cenários (editar x
+  // inserir) apontado em teste manual; fica assim até fechar ou selecionar
+  // outra coisa, mesmo depois do acorde novo já existir de verdade no model.
+  const [selectionMode, setSelectionMode] = useState<"edit" | "insert">("edit");
   const anchorElRef = useRef<HTMLElement | null>(null);
   const blockRef = useRef<HTMLDivElement>(null);
   const [blockWidth, setBlockWidth] = useState<number | null>(null);
@@ -132,7 +137,7 @@ export default function BlockShell({
   }, []);
 
   const handleSelectItem = useCallback(
-    (coords: ItemCoords, element: HTMLButtonElement) => {
+    (coords: ItemCoords, element: HTMLElement, tap: TapInfo) => {
       const isSame =
         selectedItem && selectedItem.lineIndex === coords.lineIndex && selectedItem.itemIndex === coords.itemIndex;
       if (isSame) {
@@ -142,11 +147,26 @@ export default function BlockShell({
 
       const model = parseBlock(unit.content);
       const resolved = toEditableLines(model)[coords.lineIndex]?.[coords.itemIndex];
-      // 8.4: tocar numa palavra sem acorde já insere o acorde do tom (I) e
-      // seleciona; se já houver acorde, só seleciona.
-      if (resolved?.kind === "pair" && resolved.chordTokenIndex === null && resolved.insertAt) {
-        const updated = insertChord(model, resolved.insertAt.textTokenIndex, resolved.insertAt.offset, baseKey);
+      if (resolved?.kind !== "pair") return;
+
+      // Tocar no próprio acorde sempre seleciona ele pra editar. Tocar na
+      // letra exatamente no início de um acorde já existente (offset 0)
+      // também — é a mesma posição onde o acorde está. Qualquer outra
+      // posição na letra insere um acorde NOVO ali, mesmo no meio de uma
+      // palavra que já tem acorde (block-model.ts expõe insertAt pros dois
+      // casos agora) — achado em teste manual: a forma de inserir/selecionar
+      // tinha que distinguir essas duas intenções pela posição do toque,
+      // não só pelo item tocado como um todo.
+      const tappedOffset = tap.target === "lyrics" ? (tap.offset ?? 0) : 0;
+      const wantsToEditExisting = resolved.chordTokenIndex !== null && (tap.target === "chord" || tappedOffset === 0);
+
+      if (!wantsToEditExisting && resolved.insertAt) {
+        const offset = resolved.insertAt.offset + tappedOffset;
+        const updated = insertChord(model, resolved.insertAt.textTokenIndex, offset, baseKey);
         onChangeContent(serializeBlock(updated));
+        setSelectionMode("insert");
+      } else {
+        setSelectionMode("edit");
       }
       anchorElRef.current = element;
       setSelectedItem(coords);
@@ -330,7 +350,8 @@ export default function BlockShell({
         <BlockBody
           content={unit.content}
           commentClass={colorClasses.comment}
-          selected={selectedItem}
+          chipClassName={colorClasses.repeatBadge}
+          selected={selectedItem ? { ...selectedItem, mode: selectionMode } : null}
           onSelectItem={handleSelectItem}
         />
       )}
@@ -338,6 +359,7 @@ export default function BlockShell({
       {selectedResolved && (
         <ChordModal
           open
+          mode={selectionMode}
           anchorRef={anchorElRef}
           blockWidth={blockWidth}
           baseKey={baseKey}

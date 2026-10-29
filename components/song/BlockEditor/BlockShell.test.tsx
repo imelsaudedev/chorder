@@ -1,7 +1,7 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ClientSongUnit, SongUnitType } from "@/prisma/models";
 import BlockShell from "./BlockShell";
 
@@ -53,6 +53,24 @@ function Harness({
   );
 }
 
+// O corpo tem seu próprio chip de acorde (fundo sempre visível) e a grade
+// do modal também mostra os acordes do tom — os dois podem ter o mesmo
+// nome ("D", "G"...). Os testes que checam a grade escopam a busca aqui.
+function modal() {
+  return within(screen.getByTestId("chord-modal"));
+}
+
+// O corpo pode ter um acorde com o mesmo nome de uma célula da grade do
+// modal (ex.: baseKey "D" e o acorde recém-inserido também "D") — pega
+// especificamente o chip do CORPO, fora do modal.
+function bodyChordButton(name: string) {
+  const match = screen
+    .getAllByRole("button", { name })
+    .find((el) => !el.closest('[data-testid="chord-modal"]'));
+  if (!match) throw new Error(`Nenhum botão "${name}" fora do modal`);
+  return match;
+}
+
 describe("BlockShell — ponte entre toque, block-model e o modal (Etapa 4)", () => {
   it("8.4: tocar numa palavra sem acorde insere o acorde do tom (I) e abre o modal", async () => {
     const user = userEvent.setup();
@@ -62,7 +80,12 @@ describe("BlockShell — ponte entre toque, block-model e o modal (Etapa 4)", ()
     await user.click(screen.getByText("palavra"));
 
     expect(onChange).toHaveBeenCalledWith("[D]palavra");
-    expect(screen.getByRole("button", { name: "D" })).toHaveClass("bg-zinc-800");
+    expect(modal().getByRole("button", { name: "D" })).toHaveClass("bg-zinc-800");
+    // indicador visual do cenário "inserir" (achado em teste manual: os
+    // dois cenários — editar x inserir — pareciam idênticos) — o chip do
+    // acorde no CORPO (não o da grade) ganha o anel verde.
+    expect(screen.getByText("Acorde novo")).toBeDefined();
+    expect(bodyChordButton("D").className).toMatch(/ring-emerald-400/);
   });
 
   it("8.4: tocar numa palavra que já tem acorde só seleciona, sem mudar o conteúdo", async () => {
@@ -73,7 +96,22 @@ describe("BlockShell — ponte entre toque, block-model e o modal (Etapa 4)", ()
     await user.click(screen.getByText("palavra"));
 
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "G" })).toHaveClass("bg-zinc-800");
+    expect(modal().getByRole("button", { name: "G" })).toHaveClass("bg-zinc-800");
+    // indicador visual do cenário "editar" — cor diferente do de inserir,
+    // no chip do CORPO.
+    expect(screen.getByText("Editar acorde")).toBeDefined();
+    expect(bodyChordButton("G").className).toMatch(/ring-sky-400/);
+  });
+
+  it("tocar no próprio acorde sempre seleciona (não insere), em qualquer posição", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<Harness initialContent="[G]palavra" onChange={onChange} />);
+
+    await user.click(screen.getByRole("button", { name: "G" }));
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByText("Editar acorde")).toBeDefined();
   });
 
   it("tocar de novo no mesmo acorde fecha o modal", async () => {
@@ -87,16 +125,37 @@ describe("BlockShell — ponte entre toque, block-model e o modal (Etapa 4)", ()
     expect(screen.queryByLabelText("Mover acorde para a esquerda")).toBeNull();
   });
 
+  it("tocar no meio de uma palavra que já tem acorde divide e insere um acorde novo ali (achado em teste manual)", async () => {
+    const onChange = vi.fn();
+    render(<Harness initialContent="[D]palavra" onChange={onChange} />);
+
+    // Simula o toque caindo exatamente no caractere de índice 3
+    // ("pal[a]vra") — no meio da palavra que já pertence ao acorde D.
+    Range.prototype.getBoundingClientRect = function (this: Range) {
+      if (this.startOffset === 3) {
+        return { left: 100, right: 110, top: 0, bottom: 20, width: 10, height: 20 } as DOMRect;
+      }
+      return { left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0 } as DOMRect;
+    };
+
+    fireEvent.click(screen.getByText("palavra"), { clientX: 105, clientY: 10 });
+
+    // o D original continua antes de "pal"; nasce um D novo (tônica de D)
+    // antes de "avra" — dois acordes separados, não editou o primeiro.
+    expect(onChange).toHaveBeenCalledWith("[D]pal[D]avra");
+    delete (Range.prototype as unknown as { getBoundingClientRect?: unknown }).getBoundingClientRect;
+  });
+
   it("escolher outro acorde na grade troca só o acorde tocado (critério 6), modal continua aberto e reancorado", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     render(<Harness initialContent="[G]uma [A]outra" onChange={onChange} />);
 
     await user.click(screen.getByText("uma"));
-    await user.click(screen.getByRole("button", { name: "Em" }));
+    await user.click(modal().getByRole("button", { name: "Em" }));
 
     expect(onChange).toHaveBeenCalledWith("[Em]uma [A]outra");
-    expect(screen.getByRole("button", { name: "Em" })).toHaveClass("bg-zinc-800");
+    expect(modal().getByRole("button", { name: "Em" })).toHaveClass("bg-zinc-800");
     // a palavra "outra" (acorde A, intocada) continua exatamente como estava
     expect(screen.getByText("outra")).toBeDefined();
   });
@@ -179,12 +238,35 @@ describe("BlockShell — ponte entre toque, block-model e o modal (Etapa 4)", ()
     expect(screen.getByText("Acorde inválido")).toBeDefined();
   });
 
+  describe("posição exata do toque (correção do bug 'acorde na letra errada')", () => {
+    afterEach(() => {
+      delete (Range.prototype as unknown as { getBoundingClientRect?: unknown }).getBoundingClientRect;
+    });
+
+    it("insere o acorde na letra exata tocada, não na seguinte", () => {
+      const onChange = vi.fn();
+      render(<Harness initialContent="palavra" onChange={onChange} />);
+
+      // Caractere de índice 3 ("pal[a]vra") é o único com caixa real.
+      Range.prototype.getBoundingClientRect = function (this: Range) {
+        if (this.startOffset === 3) {
+          return { left: 100, right: 110, top: 0, bottom: 20, width: 10, height: 20 } as DOMRect;
+        }
+        return { left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0 } as DOMRect;
+      };
+
+      fireEvent.click(screen.getByText("palavra"), { clientX: 105, clientY: 10 });
+
+      expect(onChange).toHaveBeenCalledWith("pal[D]avra");
+    });
+  });
+
   it("D9: a grade nasce sempre do baseKey recebido, nunca transposta", async () => {
     const user = userEvent.setup();
     render(<Harness initialContent="palavra" baseKey="A" onChange={vi.fn()} />);
 
     await user.click(screen.getByText("palavra"));
-    expect(screen.getByRole("button", { name: "A" })).toHaveClass("bg-zinc-800");
+    expect(modal().getByRole("button", { name: "A" })).toHaveClass("bg-zinc-800");
   });
 });
 
