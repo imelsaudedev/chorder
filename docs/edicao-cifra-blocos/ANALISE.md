@@ -131,6 +131,28 @@ Confirmação pontual: "Lápis no cabeçalho entra na edição" — hoje o lápi
 - O arquivo residual `UnitForm.tsx.tmp.1133.7ec5d7cdd414` pode ser removido como parte da limpeza final (etapa 7 do plano da spec), não antes — removê-lo agora, fora do escopo pedido, violaria a instrução de não alterar nada fora do documento desta análise.
 - `ChordPickerPanel.tsx` pode ser removido com segurança assim que o editor novo substituir `SongUnitListForm` no fluxo da liturgia — está confirmado sem importadores, então sua remoção não quebra nada, mas também não é urgente.
 
+## G. Decisões do Tiago (seção 6 da spec)
+
+Respondidas em conversa, depois desta análise. Registradas aqui conforme pedido pelo entregável 3 da spec.
+
+| # | Decisão | Resposta do Tiago |
+|---|---|---|
+| D1 | Escopo: só liturgia ou também catálogo? | **Também o catálogo.** O editor novo substitui `SongUnitListForm` nos dois fluxos (liturgia e `/songs/.../edit`) já nesta entrega. |
+| D2 | "Manter o posicionamento" = rolagem/blocos (a) ou também as colunas da leitura (b)? | **(b), com colunas sempre dinâmicas.** Reusa (sem alterar) o algoritmo de distribuição existente (`findBestDistribution`) também no editor, recalculando a cada mudança de conteúdo — aceito o risco de um bloco saltar de coluna enquanto outro é editado. |
+| D3 | Acorde tocável: componente novo (a) ou props aditivas no miolo (b)? | **(a) Componente novo**, replicando o alinhamento sem tocar `ChordProLine`/`StyledLine`/`Item`. |
+| D4 | Drag and drop: remover ou manter no desktop? | **Remover.** Subir/Descer cobre o reordenamento; o código antigo de DnD fica intocado (só segue em uso se algo do catálogo antigo precisar, o que não é o caso aqui já que D1 unifica). |
+| D5 | `repeatCount`: o que fazer com dados existentes e com o botão Repetir? | **Abandonar a feature.** Sem controle novo no editor, sem conversão automática de dados antigos; a leitura não muda (repeatBadge continua exibido para dados legados). Repetição, dali em diante, é sempre "duplicar o bloco" — decisão que, segundo o Tiago, também é a base de como o futuro "mapa da música" vai ser montado (cada repetição é um bloco de verdade, não um multiplicador). |
+| D6 | `unit.notes` ("Adicionar instrução"): onde no editor novo? | **Item no menu do bloco** (junto de Subir/Descer/Duplicar/Apagar), não como linha fixa no cabeçalho. |
+| D7 | Ícone de grade expandida: grade real do app ou simplificada do protótipo? | **Grade real do app** (`buildChordGrid`: Tríade, 7ª, Inversão, Variante, com preferência enarmônica). |
+| D8 | Lista final de convenções `{c:...}`? | **Manter a lista atual do app** (Pausa, Forte, Suave, Crescendo, Só voz, Só base, Rall. + Personalizado), só unificando a fonte (hoje duplicada em `SongUnitListForm/index.tsx` e `ChordSidebar.tsx`). |
+| D9 | Tom na edição: sempre tom base (corrige o bug ativo de A5) ou manter como está? | **Sempre no tom base.** Corrige o bug nos dois fluxos de uma vez (liturgia e catálogo), já que o Dicionário antigo deixa de existir nos dois. |
+| D10 | Inserir acima/abaixo + Nova unidade: manter os dois? | **Sim, manter os dois.** |
+| D11 | Cancelar (X): confirmar só se alterado, ou manter descarte direto? | **Confirmar só se alterado**, reaproveitando `ConfirmDiscardDialog` (padrão já existente em `ArrangementForm/index.tsx`). |
+| D12 | Apagar o último bloco: permitir (schema aceita lista vazia na liturgia) ou sempre manter 1? | **Sempre manter pelo menos 1 bloco.** Apagar fica desabilitado no último bloco restante, com explicação — mais restritivo que o schema permitiria, por escolha do Tiago. |
+| D13 | Base de branch? | **Resolvida pela própria análise**: `origin/main` atual (`eb868e5`), sem branch de mídia pendente — ver seção F. |
+| D14 | Tecnologia do modal do acorde? | **Em aberto, a decidir na implementação.** Critério do Tiago: "mobile first, mas reaproveitável para cada bloco no desktop" — nem Popover do Radix nem elemento posicionado manualmente foram escolhidos de antemão; avaliar as duas (ou uma terceira abordagem) ao chegar na etapa do modal (Plano, etapa 4), sem travar a decisão agora. |
+| Extra: siglas no Modo Palco | A seção 8.2.1 pede siglas no Palco; a seção 10 diz "Palco sem mudança visual" — contradição levantada nesta análise (seção "Observações adicionais"). | **Deixar para depois.** Nesta entrega as siglas valem só no editor novo (e no "mapa da música", quando existir); o Modo Palco não muda. |
+
 ## Observações adicionais (fora da lista numerada da spec, mas relevantes)
 
 - **Contradição a levantar com o Tiago, não decidida aqui:** a seção 8.2.1 da spec exige que as siglas (`UnitTypesShort.*`) e a numeração valham "no mapa da música, no Modo Palco e em qualquer rótulo curto", mas a seção 10 (Fora de escopo) diz "Modo Palco e Modo de leitura (nenhuma mudança visual)". Hoje o Modo Palco **não mostra nenhum rótulo de tipo/numeração** (`StageMode/index.tsx:162-169` só mostra índice da música + título) — ou seja, aplicar as siglas ao Modo Palco seria uma mudança visual nova ali, o que colide com "nenhuma mudança visual". Isso não é uma pergunta das D1-D14 listadas na spec, mas acho que merece ser levantado ao Tiago junto das outras: **o Modo Palco ganha os rótulos de tipo/numeração nesta entrega, ou isso fica para quando o "mapa da música" (ainda inexistente, ver próximo ponto) for implementado?**
