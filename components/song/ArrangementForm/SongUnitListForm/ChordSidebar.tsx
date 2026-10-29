@@ -9,10 +9,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useContext, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useInstructionToolbar } from ".";
-
-const COMMENT_CHIPS = [
-  "Pausa", "Forte", "Suave", "Crescendo", "Só voz", "Só base", "Rall.",
-];
+import { COMMENT_CHIPS } from "./commentChips";
 
 type ChordSidebarProps = {
   fieldPrefix?: string;

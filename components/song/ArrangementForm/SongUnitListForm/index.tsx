@@ -8,11 +8,8 @@ import { useFormContext } from "react-hook-form";
 import { useArrangementUnitsFieldArray } from "../useArrangementForm";
 import AddUnitForm from "./AddUnitForm";
 import ChordSidebar from "./ChordSidebar";
+import { COMMENT_CHIPS } from "./commentChips";
 import SortableUnitForm from "./SortableUnitForm";
-
-const COMMENT_CHIPS = [
-  "Pausa", "Forte", "Suave", "Crescendo", "Só voz", "Só base", "Rall.",
-];
 
 type InsertFn = (tag: string) => void;
 
