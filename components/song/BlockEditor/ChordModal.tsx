@@ -6,10 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import clsx from "clsx";
-import { ChevronLeft, ChevronRight, MoveHorizontal, PlusCircle, SquarePen, TrashIcon, XIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MessageSquareIcon,
+  MoveHorizontal,
+  PlusCircle,
+  SquarePen,
+  TrashIcon,
+  XIcon,
+} from "lucide-react";
 import { useCallback, useState } from "react";
 import { COMMENT_CHIPS } from "../ArrangementForm/SongUnitListForm/commentChips";
-import { EditableChordItem } from "@/chopro/block-model";
+import { MoveDirection } from "@/chopro/block-model";
 
 // Largura máxima do modal — no desktop, a largura do bloco (uma coluna
 // inteira da leitura) é grande demais para um popup de grade de acordes;
@@ -22,22 +31,36 @@ export function resolveChordModalWidth(blockWidth: number | null): number {
   return blockWidth ? Math.min(blockWidth, CHORD_MODAL_MAX_WIDTH) : CHORD_MODAL_MAX_WIDTH;
 }
 
+// O que o modal está editando — resolvido pelo BlockShell a partir do
+// ordinal rastreado (ver chopro/block-model.ts, ordinalOfToken). "empty" é o
+// toque numa letra/espaço sem nada ali ainda (Round 2: nada é inserido só
+// de tocar — só a ESCOLHA dentro do modal, grade/convenção, é que muda o
+// conteúdo). "chord"/"comment" são alvos que já existem de verdade.
+export type ChordModalTarget =
+  | {
+      kind: "chord";
+      value: string;
+      activeComment: string | null;
+      canMoveLeft: boolean;
+      canMoveRight: boolean;
+    }
+  | { kind: "comment"; value: string }
+  | { kind: "empty" };
+
 export type ChordModalProps = {
   open: boolean;
-  // "edit" = acorde já existente; "insert" = acabou de nascer deste toque —
-  // rótulo e cor no topo do modal, par do anel no corpo (BlockBody).
-  mode: "edit" | "insert";
+  target: ChordModalTarget;
   anchorRef: React.RefObject<HTMLElement | null>;
   blockWidth: number | null;
   baseKey: string;
   enharmonicPreference?: "sharp" | "flat" | null;
-  item: EditableChordItem;
-  activeComment: string | null;
-  canMoveLeft: boolean;
-  canMoveRight: boolean;
   onApplyChord: (value: string) => void;
-  onRemoveChord: () => void;
-  onMoveChord: (direction: "left" | "right") => void;
+  onApplyComment: (value: string) => void;
+  onRemove: () => void;
+  onMoveChord: (direction: MoveDirection) => void;
+  // D8: convenção EMPARELHADA com o acorde sendo editado (target.kind ===
+  // "chord") — toggle de aplicar/trocar/remover num só toque. Diferente do
+  // toggle Acorde/Convenção da aba (que nasce de tocar numa letra vazia).
   onToggleComment: (value: string) => void;
   onClose: () => void;
 };
@@ -53,17 +76,14 @@ export type ChordModalProps = {
 // telas largas via `hidden sm:block`.
 export default function ChordModal({
   open,
-  mode,
+  target,
   anchorRef,
   blockWidth,
   baseKey,
   enharmonicPreference = null,
-  item,
-  activeComment,
-  canMoveLeft,
-  canMoveRight,
   onApplyChord,
-  onRemoveChord,
+  onApplyComment,
+  onRemove,
   onMoveChord,
   onToggleComment,
   onClose,
@@ -71,9 +91,18 @@ export default function ChordModal({
   const [gridExpanded, setGridExpanded] = useState(false);
   const [typedValue, setTypedValue] = useState("");
   const [typedError, setTypedError] = useState(false);
+  // Toggle Acorde/Convenção (Round 2: "nasce de tocar na letra") — só existe
+  // de fato quando target.kind é "empty" (nada ainda); pra um acorde ou
+  // convenção já existente não há escolha, a view é fixa no tipo dele. O
+  // BlockShell troca o `key` do componente sempre que o alvo muda de
+  // identidade, então este estado nunca "vaza" de um toque pro próximo.
+  const [activeTab, setActiveTab] = useState<"chord" | "comment">("chord");
+  const view = target.kind === "empty" ? activeTab : target.kind;
 
   const rawGrid = buildChordGrid(baseKey);
   const grid = applyEnharmonicToGrid(rawGrid, enharmonicPreference);
+  const currentChordValue = target.kind === "chord" ? target.value : null;
+  const currentCommentValue = target.kind === "comment" ? target.value : null;
 
   const handleApply = useCallback(
     (value: string) => {
@@ -93,6 +122,21 @@ export default function ChordModal({
     }
     handleApply(trimmed);
   }, [typedValue, handleApply]);
+
+  // Convenção tocada na aba/alvo "comment": tocar na mesma que já está
+  // aplicada remove (mesmo toggle do D8, só que operando direto no token de
+  // convenção em vez de no acorde emparelhado); tocar numa diferente troca;
+  // e no alvo "empty" não há "já aplicada" — toda escolha insere uma nova.
+  const handlePickComment = useCallback(
+    (value: string) => {
+      if (currentCommentValue === value) {
+        onRemove();
+        return;
+      }
+      onApplyComment(value);
+    },
+    [currentCommentValue, onApplyComment, onRemove]
+  );
 
   return (
     <Popover
@@ -134,137 +178,199 @@ export default function ChordModal({
         }}
       >
         <div className="flex flex-col gap-2">
-          {/* Indicador do cenário (editar x inserir) — achado em teste manual:
-              os dois toques pareciam idênticos, sem nenhum sinal de qual
-              ação ia acontecer. */}
-          <div
-            className={clsx(
-              "flex items-center gap-1.5 text-xs font-medium pb-1 border-b",
-              mode === "insert" ? "text-emerald-600 border-emerald-200" : "text-sky-600 border-sky-200"
-            )}
-          >
-            {mode === "insert" ? <PlusCircle size={13} /> : <SquarePen size={13} />}
-            {mode === "insert" ? "Acorde novo" : "Editar acorde"}
-          </div>
-
-          {/* Acordes do tom + grade expandida (D7) */}
-          <div className="flex items-start gap-2">
-            <div className="flex-1 grid grid-cols-4 gap-1">
-              {grid.flatMap((row) => [row.triad, row.seventh]).map((chord) => (
-                <ChordCell
-                  key={chord}
-                  chord={chord}
-                  isCurrent={chord === item.chords}
-                  onSelect={handleApply}
-                />
-              ))}
+          {/* Toggle Acorde/Convenção — só no alvo "empty" (Round 2: nasce de
+              tocar numa letra sem nada ainda; pra algo que já existe a view
+              já é a do tipo dele, sem escolha). */}
+          {target.kind === "empty" ? (
+            <div className="flex items-center gap-1 pb-1 border-b border-emerald-200">
+              <button
+                type="button"
+                onClick={() => setActiveTab("chord")}
+                aria-pressed={view === "chord"}
+                className={clsx(
+                  "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded transition-colors",
+                  view === "chord" ? "bg-emerald-600 text-white" : "text-emerald-700 hover:bg-emerald-50"
+                )}
+              >
+                <PlusCircle size={13} />
+                Acorde
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("comment")}
+                aria-pressed={view === "comment"}
+                className={clsx(
+                  "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded transition-colors",
+                  view === "comment" ? "bg-emerald-600 text-white" : "text-emerald-700 hover:bg-emerald-50"
+                )}
+              >
+                <MessageSquareIcon size={13} />
+                Convenção
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setGridExpanded((v) => !v)}
-              aria-label={gridExpanded ? "Recolher grade" : "Expandir grade"}
-              aria-expanded={gridExpanded}
-              className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0"
-            >
-              {gridExpanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-            </button>
-            {/* Campo de digitar — só desktop (8.3) */}
-            <div className="hidden sm:flex flex-col gap-0.5 w-28 shrink-0">
-              <Input
-                value={typedValue}
-                onChange={(e) => {
-                  setTypedValue(e.target.value);
-                  setTypedError(false);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleTypedSubmit();
-                  }
-                }}
-                placeholder="Digitar..."
-                className="h-7 text-xs"
-              />
-              {typedError && <span className="text-[10px] text-red-500">Acorde inválido</span>}
+          ) : (
+            // Indicador do cenário (editar x inserir) — achado em teste
+            // manual: os dois toques pareciam idênticos, sem nenhum sinal de
+            // qual ação ia acontecer.
+            <div className="flex items-center gap-1.5 text-xs font-medium pb-1 border-b text-sky-600 border-sky-200">
+              <SquarePen size={13} />
+              {target.kind === "comment" ? "Editar convenção" : "Editar acorde"}
             </div>
-          </div>
+          )}
 
-          {gridExpanded && (
-            <div className="grid grid-cols-2 gap-1 border-t pt-2">
-              {grid.map((row, i) => (
-                <div key={i} className="flex gap-1">
-                  <ChordCell
-                    chord={row.slash}
-                    variant="slash"
-                    isCurrent={row.slash === item.chords}
-                    onSelect={handleApply}
-                  />
-                  <ChordCell
-                    chord={row.variante}
-                    variant={row.varType ?? undefined}
-                    isCurrent={row.variante === item.chords}
-                    onSelect={handleApply}
-                  />
+          {view === "chord" ? (
+            <>
+              {/* Acordes do tom + grade expandida (D7) */}
+              <div className="flex items-start gap-2">
+                <div className="flex-1 grid grid-cols-4 gap-1">
+                  {grid.flatMap((row) => [row.triad, row.seventh]).map((chord) => (
+                    <ChordCell
+                      key={chord}
+                      chord={chord}
+                      isCurrent={chord === currentChordValue}
+                      onSelect={handleApply}
+                    />
+                  ))}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setGridExpanded((v) => !v)}
+                  aria-label={gridExpanded ? "Recolher grade" : "Expandir grade"}
+                  aria-expanded={gridExpanded}
+                  className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0"
+                >
+                  {gridExpanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                </button>
+                {/* Campo de digitar — só desktop (8.3) */}
+                <div className="hidden sm:flex flex-col gap-0.5 w-28 shrink-0">
+                  <Input
+                    value={typedValue}
+                    onChange={(e) => {
+                      setTypedValue(e.target.value);
+                      setTypedError(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleTypedSubmit();
+                      }
+                    }}
+                    placeholder="Digitar..."
+                    className="h-7 text-xs"
+                  />
+                  {typedError && <span className="text-[10px] text-red-500">Acorde inválido</span>}
+                </div>
+              </div>
+
+              {gridExpanded && (
+                <div className="grid grid-cols-2 gap-1 border-t pt-2">
+                  {grid.map((row, i) => (
+                    <div key={i} className="flex gap-1">
+                      <ChordCell
+                        chord={row.slash}
+                        variant="slash"
+                        isCurrent={row.slash === currentChordValue}
+                        onSelect={handleApply}
+                      />
+                      <ChordCell
+                        chord={row.variante}
+                        variant={row.varType ?? undefined}
+                        isCurrent={row.variante === currentChordValue}
+                        onSelect={handleApply}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Convenção EMPARELHADA com este acorde (D8) — só faz
+                  sentido pra um acorde que já existe de verdade. */}
+              {target.kind === "chord" && (
+                <div className="flex flex-wrap gap-1 border-t pt-2">
+                  {COMMENT_CHIPS.map((chip) => (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={() => onToggleComment(chip)}
+                      aria-pressed={target.activeComment === chip}
+                      className={clsx(
+                        "text-xs px-2 py-1 rounded border transition-colors",
+                        target.activeComment === chip
+                          ? "bg-zinc-800 border-zinc-800 text-white"
+                          : "border-zinc-200 hover:bg-zinc-100"
+                      )}
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            // Convenção isolada (não emparelhada a um acorde) — aba
+            // "Convenção" do toggle (alvo "empty") ou edição direta de uma
+            // convenção já existente (alvo "comment").
+            <div className="flex flex-wrap gap-1">
+              {COMMENT_CHIPS.map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => handlePickComment(chip)}
+                  aria-pressed={currentCommentValue === chip}
+                  className={clsx(
+                    "text-xs px-2 py-1 rounded border transition-colors",
+                    currentCommentValue === chip
+                      ? "bg-zinc-800 border-zinc-800 text-white"
+                      : "border-zinc-200 hover:bg-zinc-100"
+                  )}
+                >
+                  {chip}
+                </button>
               ))}
             </div>
           )}
 
-          {/* Convenções (D8) */}
-          <div className="flex flex-wrap gap-1 border-t pt-2">
-            {COMMENT_CHIPS.map((chip) => (
-              <button
-                key={chip}
-                type="button"
-                onClick={() => onToggleComment(chip)}
-                aria-pressed={activeComment === chip}
-                className={clsx(
-                  "text-xs px-2 py-1 rounded border transition-colors",
-                  activeComment === chip
-                    ? "bg-zinc-800 border-zinc-800 text-white"
-                    : "border-zinc-200 hover:bg-zinc-100"
-                )}
-              >
-                {chip}
-              </button>
-            ))}
-          </div>
-
-          {/* Ações do acorde */}
+          {/* Ações */}
           <div className="flex items-center gap-1 border-t pt-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={!canMoveLeft}
-              onClick={() => onMoveChord("left")}
-              aria-label="Mover acorde para a esquerda"
-              className="px-2"
-            >
-              <MoveHorizontal size={13} className="rotate-180 mr-1" />◀
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={!canMoveRight}
-              onClick={() => onMoveChord("right")}
-              aria-label="Mover acorde para a direita"
-              className="px-2"
-            >
-              ▶
-            </Button>
+            {target.kind === "chord" && (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={!target.canMoveLeft}
+                  onClick={() => onMoveChord("left")}
+                  aria-label="Mover acorde para a esquerda"
+                  className="px-2"
+                >
+                  <MoveHorizontal size={13} className="rotate-180 mr-1" />◀
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={!target.canMoveRight}
+                  onClick={() => onMoveChord("right")}
+                  aria-label="Mover acorde para a direita"
+                  className="px-2"
+                >
+                  ▶
+                </Button>
+              </>
+            )}
             <div className="flex-1" />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onRemoveChord}
-              className="text-red-600 hover:text-red-600 px-2"
-            >
-              <TrashIcon size={13} className="mr-1" />
-              Remover
-            </Button>
+            {target.kind !== "empty" && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onRemove}
+                className="text-red-600 hover:text-red-600 px-2"
+              >
+                <TrashIcon size={13} className="mr-1" />
+                Remover
+              </Button>
+            )}
             <Button
               type="button"
               variant="ghost"

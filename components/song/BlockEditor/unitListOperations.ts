@@ -11,8 +11,16 @@ function reassignOrder(units: ClientSongUnit[]): ClientSongUnit[] {
   return units.map((unit, i) => ({ ...unit, order: i + 1 }));
 }
 
+// Um espaço, não string vazia — dá ao corpo visual (cursor + barra
+// flutuante) um ponto tocável de verdade pra começar a editar (mesmo
+// padrão do bloco "só acorde": um item com lyrics=" ", sem acorde ainda,
+// mas com insertAt). Conteúdo puro vazio ("") produz ZERO itens no
+// block-model (nenhum token de texto é gerado pra uma string vazia) —
+// nada pra tocar, daí o bloco recém-criado teria que nascer em modo texto
+// de novo (achado em teste manual: "a experiência de adicionar unidade
+// assume modo texto" — a causa raiz era essa, não uma escolha de UX).
 function blankUnit(): ClientSongUnit {
-  return { type: "BLOCK", content: "", notes: null, repeatCount: 1, order: 0 };
+  return { type: "BLOCK", content: " ", notes: null, repeatCount: 1, order: 0 };
 }
 
 export function moveUnitUp(units: ClientSongUnit[], index: number): ClientSongUnit[] {

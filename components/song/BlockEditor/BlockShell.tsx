@@ -1,17 +1,5 @@
 "use client";
 
-import {
-  canMoveChord,
-  getPrecedingComment,
-  insertChord,
-  moveChordOneStep,
-  parseBlock,
-  removeMarker,
-  serializeBlock,
-  setMarkerValue,
-  toEditableLines,
-  toggleChordComment,
-} from "@/chopro/block-model";
 import { parseChordPro } from "@/chopro/music";
 import { MarkdownUnitForm } from "@/components/common/MarkdownUnitForm";
 import TextInput from "@/components/common/TextInput";
@@ -33,14 +21,14 @@ import {
   CopyIcon,
   MessageSquareIcon,
   MoreVertical,
-  PenLineIcon,
+  Pointer,
   TrashIcon,
+  Type,
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import BlockBody, { ItemCoords, TapInfo } from "./BlockBody";
-import ChordModal from "./ChordModal";
+import { ChangeEvent, useCallback, useId, useMemo, useState } from "react";
+import BlockBody from "./BlockBody";
 import TypeSelector from "./TypeSelector";
 
 // Seção 8.5 / critério 10: bloco vazio ou com erro de parse abre direto em
@@ -106,97 +94,16 @@ export default function BlockShell({
   const [notesExpanded, setNotesExpanded] = useState(!!unit.notes);
   const isTextUnit = unit.type === "TEXT";
   // Bloco TEXT nunca tem corpo visual de acordes (sempre MarkdownUnitForm).
-  // Pros demais: visual é o padrão, exceto bloco vazio/inválido (8.5), que
-  // nasce em modo texto — só no mount; depois disso é o Editar como texto/
-  // visual do menu que decide, não isto de novo.
+  // Pros demais: bloco em branco (novo, ou conteúdo só espaço/vazio) nasce
+  // em modo TEXTO — decisão explícita: colar a letra pronta é o caso mais
+  // comum de começar um bloco do zero, e com o toggle visível no cabeçalho
+  // a troca pro visual é um toque, não precisa adivinhar certo de cara.
+  // Bloco com conteúdo real (carregado do banco) sempre abre no visual,
+  // que é o padrão da edição normal; erro de parse (8.5) também cai pro
+  // texto, já que não há nada tocável num conteúdo inválido. Só no mount —
+  // depois disso é o toggle do cabeçalho que decide, não isto de novo.
   const [textMode, setTextMode] = useState(
-    () => !isTextUnit && (unit.content === "" || hasParseError(unit.content))
-  );
-
-  // Seleção do corpo visual + modal do acorde (Etapa 4). A coordenada
-  // (lineIndex, itemIndex) é do corpo visual (chordsheetjs, Etapa 3); a cada
-  // render ela é resolvida de novo contra o block-model (Etapa 1) via
-  // toEditableLines, então nunca fica com um índice de token obsoleto depois
-  // de uma edição — ver chopro/block-model.ts.
-  const [selectedItem, setSelectedItem] = useState<ItemCoords | null>(null);
-  // "edit" = acorde já existente (anel azul); "insert" = acabou de nascer
-  // deste toque (anel verde) — indicador visual pros dois cenários (editar x
-  // inserir) apontado em teste manual; fica assim até fechar ou selecionar
-  // outra coisa, mesmo depois do acorde novo já existir de verdade no model.
-  const [selectionMode, setSelectionMode] = useState<"edit" | "insert">("edit");
-  const anchorElRef = useRef<HTMLElement | null>(null);
-  const blockRef = useRef<HTMLDivElement>(null);
-  const [blockWidth, setBlockWidth] = useState<number | null>(null);
-
-  useEffect(() => {
-    const el = blockRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => setBlockWidth(entry.contentRect.width));
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  const handleSelectItem = useCallback(
-    (coords: ItemCoords, element: HTMLElement, tap: TapInfo) => {
-      const isSame =
-        selectedItem && selectedItem.lineIndex === coords.lineIndex && selectedItem.itemIndex === coords.itemIndex;
-      if (isSame) {
-        setSelectedItem(null);
-        return;
-      }
-
-      const model = parseBlock(unit.content);
-      const resolved = toEditableLines(model)[coords.lineIndex]?.[coords.itemIndex];
-      if (resolved?.kind !== "pair") return;
-
-      // Tocar no próprio acorde sempre seleciona ele pra editar. Tocar na
-      // letra exatamente no início de um acorde já existente (offset 0)
-      // também — é a mesma posição onde o acorde está. Qualquer outra
-      // posição na letra insere um acorde NOVO ali, mesmo no meio de uma
-      // palavra que já tem acorde (block-model.ts expõe insertAt pros dois
-      // casos agora) — achado em teste manual: a forma de inserir/selecionar
-      // tinha que distinguir essas duas intenções pela posição do toque,
-      // não só pelo item tocado como um todo.
-      const tappedOffset = tap.target === "lyrics" ? (tap.offset ?? 0) : 0;
-      const wantsToEditExisting = resolved.chordTokenIndex !== null && (tap.target === "chord" || tappedOffset === 0);
-
-      if (!wantsToEditExisting && resolved.insertAt) {
-        const offset = resolved.insertAt.offset + tappedOffset;
-        const updated = insertChord(model, resolved.insertAt.textTokenIndex, offset, baseKey);
-        onChangeContent(serializeBlock(updated));
-        setSelectionMode("insert");
-      } else {
-        setSelectionMode("edit");
-      }
-      anchorElRef.current = element;
-      setSelectedItem(coords);
-    },
-    [selectedItem, unit.content, baseKey, onChangeContent]
-  );
-
-  // O clique original fica com o <button> de antes da edição — quando o
-  // conteúdo muda, BlockBody refaz o DOM inteiro e esse nó é removido. Sem
-  // isto, o Popover ficaria ancorado num elemento morto depois da primeira
-  // troca de acorde/convenção/mover.
-  useEffect(() => {
-    if (!selectedItem) return;
-    const selector = `[data-block-item="${selectedItem.lineIndex}-${selectedItem.itemIndex}"]`;
-    const fresh = blockRef.current?.querySelector<HTMLElement>(selector);
-    if (fresh) anchorElRef.current = fresh;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItem, unit.content]);
-
-  const selectedResolved = useMemo(() => {
-    if (!selectedItem) return null;
-    const model = parseBlock(unit.content);
-    const resolved = toEditableLines(model)[selectedItem.lineIndex]?.[selectedItem.itemIndex];
-    if (!resolved || resolved.kind !== "pair" || resolved.chordTokenIndex === null) return null;
-    return { model, item: resolved, chordTokenIndex: resolved.chordTokenIndex };
-  }, [selectedItem, unit.content]);
-
-  const applyModelChange = useCallback(
-    (updated: ReturnType<typeof parseBlock>) => onChangeContent(serializeBlock(updated)),
-    [onChangeContent]
+    () => !isTextUnit && (unit.content.trim() === "" || hasParseError(unit.content))
   );
 
   const hasError = useMemo(
@@ -221,45 +128,70 @@ export default function BlockShell({
 
   return (
     <div
-      ref={blockRef}
       className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg p-2 md:p-4 mb-2 ${className || ""}`}
     >
+      {/* Notas numa linha PRÓPRIA, acima dos ícones — achado em teste
+          manual: colada na mesma linha que o TypeSelector/ícones, sem teto
+          de largura nenhum, a nota estourava a largura do bloco (min-w-[4rem]
+          só dava um PISO, nunca um limite). min-w-0 (não é o default de um
+          filho flex) deixa o campo encolher/quebrar dentro do espaço real
+          do bloco em vez de empurrar os vizinhos pra fora dele. */}
+      {notesExpanded && (
+        <div className={`flex items-center gap-1 rounded px-2 py-1 mb-2 border ${colorClasses.border} bg-white`}>
+          <MessageSquareIcon size={11} className={`shrink-0 ${colorClasses.text}`} />
+          <span className="relative flex-1 min-w-0 inline-flex items-center">
+            <span className="invisible whitespace-pre-wrap break-words text-xs pointer-events-none" aria-hidden>
+              {unit.notes || t("UnitData.notesPlaceholder")}
+            </span>
+            <input
+              type="text"
+              className={`absolute inset-0 w-full bg-transparent text-xs outline-none ${colorClasses.text} placeholder:opacity-50`}
+              value={unit.notes ?? ""}
+              onChange={handleChangeNotes}
+              placeholder={t("UnitData.notesPlaceholder")}
+            />
+          </span>
+          <button
+            type="button"
+            onClick={handleClearNotes}
+            className={`shrink-0 cursor-pointer ${colorClasses.text} opacity-60 hover:opacity-100`}
+          >
+            <XIcon size={11} />
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 mb-2">
         <TypeSelector value={unit.type} number={number} onChange={onChangeType} />
 
-        {notesExpanded && (
-          <div className={`inline-flex items-center gap-1 rounded px-2 py-1 border ${colorClasses.border} bg-white`}>
-            <MessageSquareIcon size={11} className={`shrink-0 ${colorClasses.text}`} />
-            <span className="relative inline-flex items-center min-w-[4rem]">
-              <span className="invisible whitespace-pre text-xs pointer-events-none" aria-hidden>
-                {unit.notes || t("UnitData.notesPlaceholder")}
-              </span>
-              <input
-                type="text"
-                className={`absolute inset-0 w-full bg-transparent text-xs outline-none ${colorClasses.text} placeholder:opacity-50`}
-                value={unit.notes ?? ""}
-                onChange={handleChangeNotes}
-                placeholder={t("UnitData.notesPlaceholder")}
-              />
-            </span>
-            <button
-              type="button"
-              onClick={handleClearNotes}
-              className={`shrink-0 ${colorClasses.text} opacity-60 hover:opacity-100`}
-            >
-              <XIcon size={11} />
-            </button>
-          </div>
-        )}
-
         <div className="flex-1" />
+
+        {/* Toggle visível visual/texto, fora do menu de três pontinhos —
+            achado em discussão: o modo era uma troca tão barata (um clique)
+            que não fazia sentido escondê-la atrás de um menu; deixar os
+            dois caminhos (começar pelo acorde no visual, ou colar a letra
+            pronta no texto) sempre à vista remove a necessidade de acertar
+            um "modo padrão" pro bloco novo. Ícone mostra o MODO PRA ONDE o
+            clique leva: Pointer (apontar/tocar) pro visual, Type (digitar)
+            pro texto. */}
+        {!isTextUnit && (
+          <button
+            type="button"
+            onClick={() => setTextMode((v) => !v)}
+            aria-label={textMode ? "Editar visual" : "Editar como texto"}
+            title={textMode ? "Editar visual" : "Editar como texto"}
+            className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0 cursor-pointer"
+          >
+            {textMode ? <Pointer size={14} /> : <Type size={14} />}
+          </button>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
               aria-label="Mais opções do bloco"
-              className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0"
+              className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0 cursor-pointer"
             >
               <MoreVertical size={14} />
             </button>
@@ -294,15 +226,6 @@ export default function BlockShell({
               <MessageSquareIcon size={13} className="mr-1.5" />
               Notas do bloco
             </DropdownMenuItem>
-            {!isTextUnit && (
-              <DropdownMenuItem
-                onClick={() => setTextMode((v) => !v)}
-                className="text-xs cursor-pointer"
-              >
-                <PenLineIcon size={13} className="mr-1.5" />
-                {textMode ? "Editar visual" : "Editar como texto"}
-              </DropdownMenuItem>
-            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               disabled={!canDelete}
@@ -320,78 +243,49 @@ export default function BlockShell({
       {isTextUnit ? (
         <MarkdownUnitForm initialContent={unit.content} onChange={onChangeContent} />
       ) : textMode ? (
-        <div className="lg:grid lg:grid-cols-2 gap-4 flex flex-col">
-          <div className="lg:flex lg:flex-col">
-            <TextInput
-              id={contentId}
-              className="resize-none lg:flex-1 bg-white font-mono"
-              onChange={handleChangeChordpro}
-              value={unit.content}
-              minRows={1}
-              long
-            />
-          </div>
-          <div
-            className="rounded-md bg-black/5 px-2 py-2"
-            style={{
-              "--item-mb": "0.5em",
-              "--block-px": "0",
-              "--block-pt": "0",
-            } as React.CSSProperties}
-          >
-            {hasError ? (
-              <p className="text-red-500 text-sm">{t("Messages.invalidChordPro")}</p>
-            ) : (
-              <ChordProViewer chordpro={unit.content} density="compact" commentClass={colorClasses.comment} />
-            )}
+        // Achado: lado a lado não pode depender da largura da TELA (lg:) —
+        // o bloco vive dentro de uma coluna (1 a 4, ver useResponsiveColumns),
+        // então a tela pode estar larga e a coluna mesmo assim estreita.
+        // @container reage à largura real do BLOCO, não da viewport (Tailwind
+        // v4 já suporta nativo, sem plugin) — um elemento não pode reagir à
+        // própria largura, por isso o wrapper "@container" fica por fora e
+        // o "@lg:" por dentro, num filho.
+        <div className="@container">
+          <div className="@lg:grid @lg:grid-cols-2 gap-4 flex flex-col">
+            <div className="@lg:flex @lg:flex-col">
+              <TextInput
+                id={contentId}
+                className="resize-none @lg:flex-1 bg-white font-mono"
+                onChange={handleChangeChordpro}
+                value={unit.content}
+                minRows={1}
+                long
+              />
+            </div>
+            <div
+              className="rounded-md bg-black/5 px-2 py-2"
+              style={{
+                "--item-mb": "0.5em",
+                "--block-px": "0",
+                "--block-pt": "0",
+              } as React.CSSProperties}
+            >
+              {hasError ? (
+                <p className="text-red-500 text-sm">{t("Messages.invalidChordPro")}</p>
+              ) : (
+                <ChordProViewer chordpro={unit.content} density="compact" commentClass={colorClasses.comment} />
+              )}
+            </div>
           </div>
         </div>
       ) : (
         <BlockBody
           content={unit.content}
-          commentClass={colorClasses.comment}
-          chipClassName={colorClasses.repeatBadge}
-          selected={selectedItem ? { ...selectedItem, mode: selectionMode } : null}
-          onSelectItem={handleSelectItem}
-        />
-      )}
-
-      {selectedResolved && (
-        <ChordModal
-          open
-          mode={selectionMode}
-          anchorRef={anchorElRef}
-          blockWidth={blockWidth}
+          onChangeContent={onChangeContent}
           baseKey={baseKey}
           enharmonicPreference={enharmonicPreference}
-          item={selectedResolved.item}
-          activeComment={getPrecedingComment(selectedResolved.model, selectedResolved.chordTokenIndex)?.value ?? null}
-          canMoveLeft={canMoveChord(selectedResolved.model, selectedResolved.chordTokenIndex, "left")}
-          canMoveRight={canMoveChord(selectedResolved.model, selectedResolved.chordTokenIndex, "right")}
-          onApplyChord={(value) =>
-            applyModelChange(setMarkerValue(selectedResolved.model, selectedResolved.chordTokenIndex, value))
-          }
-          onRemoveChord={() => {
-            applyModelChange(removeMarker(selectedResolved.model, selectedResolved.chordTokenIndex));
-            setSelectedItem(null);
-          }}
-          onMoveChord={(direction) =>
-            applyModelChange(moveChordOneStep(selectedResolved.model, selectedResolved.chordTokenIndex, direction))
-          }
-          onToggleComment={(value) => {
-            // Inserir/remover a convenção desloca o índice do acorde na
-            // mesma linha em +1/-1 (um item novo nasce ou um item some antes
-            // dele) — sem isto, selectedItem fica apontando pro item errado
-            // depois da troca (achado em teste, não hipotético).
-            const preceding = getPrecedingComment(selectedResolved.model, selectedResolved.chordTokenIndex);
-            applyModelChange(toggleChordComment(selectedResolved.model, selectedResolved.chordTokenIndex, value));
-            if (!preceding) {
-              setSelectedItem((prev) => (prev ? { ...prev, itemIndex: prev.itemIndex + 1 } : prev));
-            } else if (preceding.value === value) {
-              setSelectedItem((prev) => (prev ? { ...prev, itemIndex: prev.itemIndex - 1 } : prev));
-            }
-          }}
-          onClose={() => setSelectedItem(null)}
+          commentClass={colorClasses.comment}
+          chipClassName={colorClasses.repeatBadge}
         />
       )}
     </div>

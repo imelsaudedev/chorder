@@ -8,12 +8,14 @@ import {
   insertComment,
   insertCommentBefore,
   moveChordOneStep,
+  ordinalOfToken,
   parseBlock,
   removeMarker,
   serializeBlock,
   setMarkerValue,
   toEditableLines,
   toggleChordComment,
+  tokenIndexForOrdinal,
 } from "./block-model";
 
 // Conteúdo real, copiado de prisma/seed/songs.json — cobre CRLF, acordes com
@@ -257,5 +259,50 @@ describe("toEditableLines — mesmo agrupamento que chordsheetjs produz na leitu
     const insertAt = (line[0] as EditableItem & { kind: "pair" }).insertAt!;
     const updated = insertChord(model, insertAt.textTokenIndex, insertAt.offset + 3, "G");
     expect(serializeBlock(updated)).toBe("[D]pal[G]avra");
+  });
+});
+
+describe("ordinalOfToken / tokenIndexForOrdinal", () => {
+  it("fazem round-trip: ordinal → índice → ordinal", () => {
+    const model = parseBlock("[D]uma {c:ponte}[G]duas [A]tres");
+    // tokens: [D] text "uma " [c:ponte] [G] text "duas " [A] text "tres"
+    for (let ordinal = 0; ordinal < 3; ordinal++) {
+      const tokenIndex = tokenIndexForOrdinal(model, ordinal, "chord")!;
+      expect(ordinalOfToken(model, tokenIndex, "chord")).toBe(ordinal);
+    }
+    expect(tokenIndexForOrdinal(model, 0, "comment")).not.toBeNull();
+    expect(ordinalOfToken(model, tokenIndexForOrdinal(model, 0, "comment")!, "comment")).toBe(0);
+  });
+
+  it("ordinal de acorde não muda quando se insere/remove uma convenção em OUTRO acorde", () => {
+    const model = parseBlock("[D]uma [G]duas [A]tres");
+    const gOrdinal = ordinalOfToken(model, 2, "chord"); // [G]
+    expect(gOrdinal).toBe(1);
+
+    // Aplica convenção ao [A] (ordinal 2), antes do [G]
+    const aTokenIndex = tokenIndexForOrdinal(model, 2, "chord")!;
+    const withComment = insertCommentBefore(model, aTokenIndex, "repete");
+
+    // [G] continua sendo o acorde de ordinal 1, mesmo que seu tokenIndex
+    // bruto não tenha mudado (a convenção nova entrou depois dele).
+    const gTokenIndexAfter = tokenIndexForOrdinal(withComment, 1, "chord")!;
+    expect(ordinalOfToken(withComment, gTokenIndexAfter, "chord")).toBe(1);
+    expect(withComment.tokens[gTokenIndexAfter]).toMatchObject({ kind: "chord", value: "G" });
+  });
+
+  it("ordinal de acorde sobrevive a moveChordOneStep (que pode splicar um token vizinho)", () => {
+    const model = parseBlock("[D]a [G]bc");
+    const gOrdinal = 1;
+    const gTokenIndex = tokenIndexForOrdinal(model, gOrdinal, "chord")!;
+    const moved = moveChordOneStep(model, gTokenIndex, "left");
+
+    const gTokenIndexAfter = tokenIndexForOrdinal(moved, gOrdinal, "chord")!;
+    expect(moved.tokens[gTokenIndexAfter]).toMatchObject({ kind: "chord", value: "G" });
+  });
+
+  it("tokenIndexForOrdinal retorna null para ordinal inexistente", () => {
+    const model = parseBlock("[D]uma [G]duas");
+    expect(tokenIndexForOrdinal(model, 2, "chord")).toBeNull();
+    expect(tokenIndexForOrdinal(model, 0, "comment")).toBeNull();
   });
 });

@@ -3,7 +3,7 @@ import { MarkdownViewer } from "@/components/common/MarkdownViewer";
 import { Density, Mode } from "@/components/config/config";
 import ChordProLine from "@/components/song/ChordProLine";
 import { unitColorClasses } from "@/components/song/unit-colors";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useResponsiveColumns } from "@/hooks/useResponsiveColumns";
 import { ClientSongUnit } from "@/prisma/models";
 import clsx from "clsx";
 import { Repeat2 } from "lucide-react";
@@ -141,7 +141,11 @@ function getGridColumnClass(mode: string, columns: number) {
 }
 
 function useColumnData(songUnits: ClientSongUnit[], columnConfig: number) {
-  const [columns, setColumns] = useState(columnConfig);
+  // Resolução de "0 = automático" extraída pra hooks/useResponsiveColumns —
+  // reaproveitada pelo editor por blocos, que precisa mostrar as MESMAS
+  // colunas da leitura.
+  const responsiveColumns = useResponsiveColumns(columnConfig);
+  const [columns, setColumns] = useState(responsiveColumns);
 
   const columnData = useMemo(
     () => findBestDistribution(songUnits, columns),
@@ -154,24 +158,9 @@ function useColumnData(songUnits: ClientSongUnit[], columnConfig: number) {
     }
   }, [columnData.length, columns]);
 
-  const isPhone = useMediaQuery("(max-width: 639px)");
-  const isTablet = useMediaQuery("(max-width: 1023px)");
-  const isDesktop = useMediaQuery("(max-width: 1279px)");
   useEffect(() => {
-    if (columnConfig === 0) {
-      if (isPhone) {
-        setColumns(1);
-      } else if (isTablet) {
-        setColumns(2);
-      } else if (isDesktop) {
-        setColumns(3);
-      } else {
-        setColumns(4);
-      }
-    } else {
-      setColumns(columnConfig);
-    }
-  }, [columnConfig, isDesktop, isPhone, isTablet]);
+    setColumns(responsiveColumns);
+  }, [responsiveColumns]);
 
   return { columnData, columns, setColumns };
 }

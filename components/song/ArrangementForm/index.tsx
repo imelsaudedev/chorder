@@ -15,7 +15,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import ArrangementInfoForm from "./ArrangementInfoForm";
-import SongUnitListForm from "./SongUnitListForm";
+import BlockEditorFormBridge from "./BlockEditorFormBridge";
 import { initForm } from "./useArrangementForm";
 
 type ArrangementFormProps = {
@@ -119,7 +119,7 @@ export default function ArrangementForm({
               )}
             </button>
             <ArrangementInfoForm arrangementId={origArrangement?.id} />
-            <SongUnitListForm />
+            <BlockEditorFormBridge />
           </div>
 
           <FormFooter

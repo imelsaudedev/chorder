@@ -1,5 +1,12 @@
 import { ChordProItem, applyEnharmonic, transposeChord } from "@/chopro/music";
 import { Density, Mode } from "@/components/config/config";
+import {
+  CHORD_TEXT_CLASS,
+  COMMENT_CONNECTOR_POSITION_CLASS,
+  COMMENT_LABEL_POSITION_CLASS,
+  COMMENT_LABEL_TEXT_CLASS,
+  ITEM_WITH_COMMENT_PADDING_CLASS,
+} from "./chord-item-tokens";
 import styles from "./styles.module.scss";
 
 export type ItemProps = {
@@ -43,7 +50,7 @@ export default function Item({
     // standalone comment (not paired with a following item — handled by commentAbove)
     return (
       <div className="flex flex-col whitespace-pre-wrap mb-[var(--item-mb)]">
-        <span className={`text-[0.75em] font-semibold leading-none my-[0.5em] self-start ${commentClass}`}>
+        <span className={`${COMMENT_LABEL_TEXT_CLASS} my-[0.5em] self-start ${commentClass}`}>
           {item._value}
         </span>
         {hasLyrics && <span className="invisible leading-none h-[1em]">&nbsp;</span>}
@@ -60,15 +67,7 @@ export default function Item({
     }
   }
 
-  const chordClasses = [
-    "leading-none",
-    "text-foreground",
-    "font-mono",
-    "font-bold",
-    "tracking-tighter",
-    "pr-[0.5em]",
-    "mb-0",
-  ];
+  const chordClasses = [CHORD_TEXT_CLASS, "pr-[0.5em]", "mb-0"];
   if (mode === "text") {
     chordClasses.push("font-mono");
     if (lyrics.length > chords.length) {
@@ -109,12 +108,12 @@ export default function Item({
   if (mode === "chords") {
     return (
       <div
-        className={`relative flex flex-col whitespace-pre-wrap mb-[var(--item-mb)]${commentAbove ? " pl-[0.5625em]" : ""}`}
+        className={`relative flex flex-col whitespace-pre-wrap mb-[var(--item-mb)]${commentAbove ? ` ${ITEM_WITH_COMMENT_PADDING_CLASS}` : ""}`}
       >
         {commentAbove && (
           <>
-            <div className={`absolute -top-[1.125em] left-[0.25em] bottom-0 w-0 border-l border-dotted ${commentClass}`} />
-            <span className={`absolute -top-[1.375em] left-[0.5625em] text-[0.75em] font-semibold whitespace-nowrap leading-none ${commentClass}`}>
+            <div className={`${COMMENT_CONNECTOR_POSITION_CLASS} ${commentClass}`} />
+            <span className={`${COMMENT_LABEL_POSITION_CLASS} ${COMMENT_LABEL_TEXT_CLASS} ${commentClass}`}>
               {commentAbove}
             </span>
           </>

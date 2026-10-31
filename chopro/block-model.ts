@@ -168,14 +168,21 @@ export function toggleChordComment(
 
 export type MoveDirection = "left" | "right";
 
-/** Se há uma letra pra atravessar naquela direção (botão ◀ ▶ habilitado). */
+/**
+ * Se há uma letra pra atravessar naquela direção (botão ◀ ▶ habilitado) —
+ * de acorde OU de convenção (achado: "a convenção também poderia ser
+ * movida de uma letra para outra" — mesmo mecanismo, o token em `index`
+ * nunca precisou ser especificamente um acorde, só não-texto). `kind`
+ * default "chord" mantém as chamadas antigas (acorde) sem precisar mudar.
+ */
 export function canMoveChord(
   model: BlockModel,
   index: number,
-  direction: MoveDirection
+  direction: MoveDirection,
+  kind: "chord" | "comment" = "chord"
 ): boolean {
   const token = model.tokens[index];
-  if (!token || token.kind !== "chord") return false;
+  if (!token || token.kind !== kind) return false;
   const neighbor = model.tokens[direction === "right" ? index + 1 : index - 1];
   if (!neighbor || neighbor.kind !== "text" || neighbor.raw.length === 0) return false;
   const char = direction === "right" ? neighbor.raw[0] : neighbor.raw[neighbor.raw.length - 1];
@@ -183,16 +190,18 @@ export function canMoveChord(
 }
 
 /**
- * Move um acorde uma letra para a esquerda/direita, atravessando o texto
- * vizinho (seção 8.3: "mover uma letra ◀ ▶"). Não atravessa quebra de linha
- * — parar na borda da linha é o comportamento esperado, não um bug.
+ * Move um acorde (ou convenção) uma letra para a esquerda/direita,
+ * atravessando o texto vizinho (seção 8.3: "mover uma letra ◀ ▶"). Não
+ * atravessa quebra de linha — parar na borda da linha é o comportamento
+ * esperado, não um bug.
  */
 export function moveChordOneStep(
   model: BlockModel,
   index: number,
-  direction: MoveDirection
+  direction: MoveDirection,
+  kind: "chord" | "comment" = "chord"
 ): BlockModel {
-  if (!canMoveChord(model, index, direction)) return model;
+  if (!canMoveChord(model, index, direction, kind)) return model;
 
   if (direction === "right") {
     const neighbor = model.tokens[index + 1] as TextToken;
@@ -363,4 +372,41 @@ function lineEntriesToItems(entries: LineEntry[]): EditableItem[] {
 
 export function toEditableLines(model: BlockModel): EditableItem[][] {
   return splitIntoLineEntries(model.tokens).map(lineEntriesToItems);
+}
+
+// ─── Rastreio estável entre edições ────────────────────────────────────────
+//
+// Um índice bruto de token (tokens[N]) desloca a cada inserção/remoção
+// ANTES dele — inviável pra guardar "qual acorde está selecionado" entre um
+// toque e o próximo, já que mover ◀▶ pode splicar/remover um token vizinho
+// (ver moveChordOneStep) e aplicar uma convenção insere/remove um token de
+// OUTRO tipo antes dele. O "ordinal" (sou o Nº-ésimo acorde/convenção da
+// música inteira, contado na ordem em que aparecem) é estável a qualquer
+// mudança que não mexa na CONTAGEM de tokens daquele mesmo tipo — ou seja,
+// a tudo que importa pra edição de UM acorde/convenção por vez (mover,
+// trocar valor, aplicar/remover uma convenção EM OUTRO acorde). Só precisa
+// recalcular o ordinal quando a própria ação cria ou apaga um token desse
+// tipo (inserir um novo, remover o que está selecionado).
+
+export function ordinalOfToken(model: BlockModel, tokenIndex: number, kind: "chord" | "comment"): number {
+  let ordinal = 0;
+  for (let i = 0; i < tokenIndex; i++) {
+    if (model.tokens[i].kind === kind) ordinal++;
+  }
+  return ordinal;
+}
+
+export function tokenIndexForOrdinal(
+  model: BlockModel,
+  ordinal: number,
+  kind: "chord" | "comment"
+): number | null {
+  let count = 0;
+  for (let i = 0; i < model.tokens.length; i++) {
+    if (model.tokens[i].kind === kind) {
+      if (count === ordinal) return i;
+      count++;
+    }
+  }
+  return null;
 }
