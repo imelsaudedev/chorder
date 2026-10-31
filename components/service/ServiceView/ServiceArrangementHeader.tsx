@@ -18,6 +18,7 @@ type ServiceArrangementHeaderProps = {
   order: number;
   isEditing: boolean;
   isSaving: boolean;
+  isDirty: boolean;
   isStuck?: boolean;
   onStartEdit: () => void;
   onCancel: () => void;
@@ -31,6 +32,7 @@ function ServiceArrangementHeader({
   order,
   isEditing,
   isSaving,
+  isDirty,
   isStuck = false,
   onStartEdit,
   onCancel,
@@ -83,6 +85,7 @@ function ServiceArrangementHeader({
         <EditOrSaveCancelGroup
           isEditing={isEditing}
           isSaving={isSaving}
+          isDirty={isDirty}
           hasOriginal={hasOriginal}
           onStartEdit={onStartEdit}
           onCancel={onCancel}

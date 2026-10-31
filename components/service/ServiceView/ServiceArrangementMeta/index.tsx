@@ -7,6 +7,7 @@ type Props = {
   arrangement: ClientArrangement;
   isEditing: boolean;
   isSaving: boolean;
+  isDirty: boolean;
   onStartEdit: () => void;
   onCancel: () => void;
   onSaveServiceOnly: () => void;
@@ -21,6 +22,7 @@ export default function ServiceArrangementMeta({
   arrangement,
   isEditing,
   isSaving,
+  isDirty,
   onStartEdit,
   onCancel,
   onSaveServiceOnly,
@@ -48,6 +50,7 @@ export default function ServiceArrangementMeta({
         <EditOrSaveCancelGroup
           isEditing={isEditing}
           isSaving={isSaving}
+          isDirty={isDirty}
           hasOriginal={hasOriginal}
           onStartEdit={onStartEdit}
           onCancel={onCancel}

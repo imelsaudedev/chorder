@@ -1,5 +1,6 @@
 "use client";
 
+import ConfirmDiscardDialog from "@/components/common/ConfirmDiscardDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +15,9 @@ import { useState } from "react";
 type Props = {
   isEditing: boolean;
   isSaving: boolean;
+  // D11: confirmar o X só quando há alteração — mesmo padrão já usado em
+  // ArrangementForm/index.tsx (isDirty + ConfirmDiscardDialog).
+  isDirty: boolean;
   hasOriginal: boolean;
   onStartEdit: () => void;
   onCancel: () => void;
@@ -28,6 +32,7 @@ type Props = {
 export default function EditOrSaveCancelGroup({
   isEditing,
   isSaving,
+  isDirty,
   hasOriginal,
   onStartEdit,
   onCancel,
@@ -64,17 +69,32 @@ export default function EditOrSaveCancelGroup({
         {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
         {t("saveChanges")}
       </Button>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        onClick={onCancel}
-        aria-label={t("cancelEdit")}
-        disabled={isSaving}
-        className="h-10 w-10 md:h-9 md:w-9"
-      >
-        <X size={18} />
-      </Button>
+      {isDirty ? (
+        <ConfirmDiscardDialog onDiscard={onCancel}>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label={t("cancelEdit")}
+            disabled={isSaving}
+            className="h-10 w-10 md:h-9 md:w-9"
+          >
+            <X size={18} />
+          </Button>
+        </ConfirmDiscardDialog>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={onCancel}
+          aria-label={t("cancelEdit")}
+          disabled={isSaving}
+          className="h-10 w-10 md:h-9 md:w-9"
+        >
+          <X size={18} />
+        </Button>
+      )}
       <Dialog open={scopeDialogOpen} onOpenChange={setScopeDialogOpen}>
         <DialogContent>
           <DialogHeader>

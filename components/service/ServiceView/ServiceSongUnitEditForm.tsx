@@ -2,7 +2,7 @@
 
 import { useCreateOrUpdateArrangement } from "#api-client";
 import { defaultArrangementValues } from "@/components/song/ArrangementForm/useArrangementForm";
-import SongUnitListForm from "@/components/song/ArrangementForm/SongUnitListForm";
+import BlockEditorFormBridge from "@/components/song/ArrangementForm/BlockEditorFormBridge";
 import { Form } from "@/components/ui/form";
 import { ClientArrangement, ClientServiceUnit } from "@/prisma/models";
 import { ArrangementSchema, arrangementSchema } from "@/schemas/arrangement";
@@ -20,6 +20,9 @@ type ServiceSongUnitEditFormProps = {
   unit: ClientServiceUnit;
   submitRef: MutableRefObject<EditFormHandle | null>;
   onSavingChange: (saving: boolean) => void;
+  // D11: sobe pro EditOrSaveCancelGroup decidir se o X confirma antes de
+  // descartar — antes não existia (o X sempre cancelava direto).
+  onDirtyChange: (dirty: boolean) => void;
   onSaved: () => void;
 };
 
@@ -27,6 +30,7 @@ export default function ServiceSongUnitEditForm({
   unit,
   submitRef,
   onSavingChange,
+  onDirtyChange,
   onSaved,
 }: ServiceSongUnitEditFormProps) {
   const t = useTranslations("ServiceView");
@@ -61,6 +65,14 @@ export default function ServiceSongUnitEditForm({
   useEffect(() => {
     onSavingChangeRef.current(isSaving);
   }, [isSaving]);
+
+  const onDirtyChangeRef = useRef(onDirtyChange);
+  onDirtyChangeRef.current = onDirtyChange;
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    onDirtyChangeRef.current(isDirty);
+  }, [isDirty]);
 
   function buildServicePayload(data: ArrangementSchema): ClientArrangement {
     return {
@@ -109,7 +121,7 @@ export default function ServiceSongUnitEditForm({
 
   return (
     <Form {...form}>
-      <SongUnitListForm fieldPrefix="" sectionClassName="" toolbarClassName="" />
+      <BlockEditorFormBridge className="" />
       {saveError && (
         <p className="text-sm text-red-500 text-right py-2 px-2">{saveError}</p>
       )}

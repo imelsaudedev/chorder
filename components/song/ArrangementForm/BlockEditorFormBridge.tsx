@@ -8,18 +8,27 @@ import { ClientSongUnit } from "@/prisma/models";
 import { useContext } from "react";
 import { useFormContext } from "react-hook-form";
 
-// Ponte TEMPORÁRIA pra testar o BlockEditor (Etapas 1-5 do PLANO.md) dentro
-// da página real de edição, antes de decidir a integração definitiva da
-// Etapa 6 (que ainda precisa olhar pro segundo consumidor de
-// SongUnitListForm, o editor de liturgia, e decidir se os dois convivem ou
-// se um substitui o outro). Aqui é só o suficiente pra testar em
-// localhost:3000 com dados reais antes de abrir PR — não é a versão final.
+// Ponte entre o BlockEditor (controlado por props simples: units +
+// onChangeUnits) e os dois formulários reais que antes usavam
+// SongUnitListForm (field array do react-hook-form) — Etapa 6 do
+// PLANO.md: ArrangementForm (catálogo) e ServiceSongUnitEditForm
+// (liturgia). Os dois usam o mesmo arrangementSchema/ArrangementSchema
+// (campos "units" e "key"), então ler/escrever o campo "units" inteiro via
+// useFormContext funciona nos dois sem precisar de field array nem de
+// nada específico de cada tela.
 //
-// SongUnitListForm lê/escreve via useArrangementUnitsFieldArray (field
-// array do react-hook-form); BlockEditor é controlado por props simples
-// (units + onChangeUnits), então a ponte é só ler/escrever o campo "units"
-// inteiro direto no form, sem field array.
-export default function BlockEditorFormBridge() {
+// `className` controla o wrapper: o catálogo é uma página própria (precisa
+// do próprio padding); a liturgia já vive dentro de um layout com padding
+// (o antigo SongUnitListForm era chamado ali com sectionClassName="" pra
+// zerar o padding padrão) — por isso o padrão aqui segue sendo o do
+// catálogo, e quem for a liturgia passa className="".
+type BlockEditorFormBridgeProps = {
+  className?: string;
+};
+
+export default function BlockEditorFormBridge({
+  className = "px-4 sm:px-6 lg:px-8 py-8",
+}: BlockEditorFormBridgeProps) {
   const { watch, setValue } = useFormContext();
   const units = (watch("units") as ClientSongUnit[] | undefined) ?? [];
   const baseKey = (watch("key") as string) || "C";
@@ -35,7 +44,7 @@ export default function BlockEditorFormBridge() {
   const transposedKey = transpose !== 0 ? transposeChord(baseKey, baseKey, transpose) : baseKey;
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8">
+    <div className={className}>
       {transpose !== 0 && (
         <p className="text-xs text-muted-foreground mb-4">
           Editando no tom salvo ({baseKey}). O tom do culto ({transposedKey}) volta ao salvar.

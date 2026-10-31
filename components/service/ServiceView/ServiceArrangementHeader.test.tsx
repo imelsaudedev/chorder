@@ -51,6 +51,7 @@ const defaultProps = {
   order: 1,
   isEditing: false,
   isSaving: false,
+  isDirty: false,
   onStartEdit: vi.fn(),
   onCancel: vi.fn(),
   onSaveServiceOnly: vi.fn(),

@@ -21,6 +21,7 @@ export default function ServiceSongUnitView({ unit, transpose, onTransposeChange
   const { columns, fontSize, mode, density } = useServiceConfig();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const submitRef = useRef<EditFormHandle | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -50,6 +51,22 @@ export default function ServiceSongUnitView({ unit, transpose, onTransposeChange
     throw new Error("Arrangement is not available for this unit");
   }
 
+  // D11: o X só confirma com ConfirmDiscardDialog quando há alteração —
+  // isDirty reseta junto, senão a próxima edição começaria "suja" por
+  // engano (mesmo bug que faria o X pedir confirmação à toa logo de cara).
+  function handleStartEdit() {
+    setIsDirty(false);
+    setIsEditing(true);
+  }
+  function handleCancel() {
+    setIsDirty(false);
+    setIsEditing(false);
+  }
+  function handleSaved() {
+    setIsDirty(false);
+    setIsEditing(false);
+  }
+
   return (
     <div className="w-full" style={{ "--song-header-h": `${headerHeight}px` } as React.CSSProperties}>
       <SongConfigProvider
@@ -67,8 +84,9 @@ export default function ServiceSongUnitView({ unit, transpose, onTransposeChange
           isStuck={isHeaderStuck}
           isEditing={isEditing}
           isSaving={isSaving}
-          onStartEdit={() => setIsEditing(true)}
-          onCancel={() => setIsEditing(false)}
+          isDirty={isDirty}
+          onStartEdit={handleStartEdit}
+          onCancel={handleCancel}
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
         />
@@ -76,8 +94,9 @@ export default function ServiceSongUnitView({ unit, transpose, onTransposeChange
           arrangement={arrangement}
           isEditing={isEditing}
           isSaving={isSaving}
-          onStartEdit={() => setIsEditing(true)}
-          onCancel={() => setIsEditing(false)}
+          isDirty={isDirty}
+          onStartEdit={handleStartEdit}
+          onCancel={handleCancel}
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
         />
@@ -87,7 +106,8 @@ export default function ServiceSongUnitView({ unit, transpose, onTransposeChange
               unit={unit}
               submitRef={submitRef}
               onSavingChange={setIsSaving}
-              onSaved={() => setIsEditing(false)}
+              onDirtyChange={setIsDirty}
+              onSaved={handleSaved}
             />
           ) : (
             <ArrangementView
