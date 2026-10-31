@@ -6,7 +6,9 @@ import SongConfigProvider, {
   useSongConfig,
 } from "@/components/config/SongConfig";
 import ArrangementHeader from "@/components/song/ArrangementHeader";
-import ArrangementView from "@/components/song/ArrangementView";
+import ArrangementView, { ArrangementViewHandle } from "@/components/song/ArrangementView";
+import SongMap from "@/components/song/SongMap";
+import { useRef } from "react";
 
 type ClientPageProps = { songSlug: string; arrangementId?: number };
 export default function ClientPage({
@@ -14,12 +16,20 @@ export default function ClientPage({
   arrangementId,
 }: ClientPageProps) {
   const { arrangement } = useFetchArrangement(songSlug, arrangementId);
+  const viewRef = useRef<ArrangementViewHandle>(null);
 
   return (
     <SongConfigProvider>
       <ArrangementHeader arrangement={arrangement} />
       <MainWithDensity>
-        <ArrangementView arrangement={arrangement} showMap />
+        {arrangement?.units && (
+          <SongMap
+            units={arrangement.units}
+            onSelectUnit={(index) => viewRef.current?.selectUnit(index)}
+            className="mb-4"
+          />
+        )}
+        <ArrangementView ref={viewRef} arrangement={arrangement} />
       </MainWithDensity>
     </SongConfigProvider>
   );

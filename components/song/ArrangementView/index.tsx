@@ -1,9 +1,8 @@
 "use client";
 
-import SongMap from "@/components/song/SongMap";
 import { useSongConfig } from "@/components/config/SongConfig";
 import { ClientArrangement } from "@/prisma/models";
-import { ReactNode, useRef } from "react";
+import { forwardRef, ReactNode, useImperativeHandle, useRef } from "react";
 import ColumnViewer from "./ColumnViewer";
 import Skeleton from "./Skeleton";
 
@@ -11,23 +10,20 @@ type ArrangementViewProps = {
   arrangement: ClientArrangement | null;
   /** Repassado pra ColumnViewer — renderiza dentro da última coluna, depois do último bloco. */
   footer?: ReactNode;
-  // Mapa da música (seção 8.2/9.9 das specs — "espelho das repetições
-  // existentes nos blocos", achado em teste manual). Opcional: contextos
-  // menores que reaproveitam ArrangementView como preview (ArrangementPicker,
-  // ServicePlanEditor/SongFlow) não pedem o mapa, só a tela de leitura de
-  // verdade (catálogo e liturgia) e o Modo Palco (que usa sua própria cópia,
-  // ver StageMode/index.tsx).
-  showMap?: boolean;
 };
-export default function ArrangementView({ arrangement, footer, showMap = false }: ArrangementViewProps) {
+
+/** Ações expostas via ref — o mapa da música vive FORA daqui (pode haver mais de uma cópia, ex.: inline + cabeçalho fixo) e aciona a mesma rolagem. */
+export type ArrangementViewHandle = {
+  /** Rola até o bloco `index` (ordem global dos blocos) e o destaca brevemente. */
+  selectUnit: (index: number) => void;
+};
+
+const ArrangementView = forwardRef<ArrangementViewHandle, ArrangementViewProps>(function ArrangementView(
+  { arrangement, footer },
+  ref,
+) {
   const { density, fontSize, columns, transpose, mode, enharmonicPreference } = useSongConfig();
   const unitRefs = useRef<(HTMLElement | null)[]>([]);
-
-  if (!arrangement) {
-    return <Skeleton density={density} />;
-  }
-
-  const isCompact = density === "compact";
 
   // Rola até o bloco tocado no mapa + destaque breve (scroll-target-flash,
   // já com prefers-reduced-motion tratado em globals.css).
@@ -35,7 +31,7 @@ export default function ArrangementView({ arrangement, footer, showMap = false }
   // o desconto do cabeçalho sticky — cada tela já expõe a própria altura
   // via --song-header-h quando tem uma (ver ServiceSongUnitView.tsx);
   // onde não existe, a variável simplesmente não aplica desconto nenhum.
-  function handleSelectUnit(index: number) {
+  function selectUnit(index: number) {
     const el = unitRefs.current[index];
     if (!el) return;
     const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -45,6 +41,14 @@ export default function ArrangementView({ arrangement, footer, showMap = false }
     void el.offsetWidth;
     el.classList.add("scroll-target-flash");
   }
+
+  useImperativeHandle(ref, () => ({ selectUnit }), []);
+
+  if (!arrangement) {
+    return <Skeleton density={density} />;
+  }
+
+  const isCompact = density === "compact";
 
   return (
     <div
@@ -56,13 +60,6 @@ export default function ArrangementView({ arrangement, footer, showMap = false }
         "--item-mb":   isCompact ? "0.375em" : "0.5em",
       } as React.CSSProperties}
     >
-      {showMap && (
-        <SongMap
-          units={arrangement.units!}
-          onSelectUnit={handleSelectUnit}
-          className="mt-[1.5em] mb-[var(--block-gap)]"
-        />
-      )}
       <ColumnViewer
         columns={columns}
         songUnits={arrangement.units!}
@@ -72,8 +69,10 @@ export default function ArrangementView({ arrangement, footer, showMap = false }
         mode={mode}
         density={density}
         footer={footer}
-        onUnitRef={showMap ? (index, el) => { unitRefs.current[index] = el; } : undefined}
+        onUnitRef={(index, el) => { unitRefs.current[index] = el; }}
       />
     </div>
   );
-}
+});
+
+export default ArrangementView;

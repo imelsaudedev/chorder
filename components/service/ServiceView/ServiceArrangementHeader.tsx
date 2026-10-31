@@ -5,7 +5,7 @@ import KeySelectorButton from "@/components/service/ServiceView/KeySelectorButto
 import ServiceMediaReferences from "@/components/service/ServiceView/ServiceMediaReferences";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientArrangement } from "@/prisma/models";
-import { forwardRef } from "react";
+import { forwardRef, ReactNode } from "react";
 
 // Só o título é sticky no celular — tom, referências e salvar/cancelar ficam
 // em ServiceArrangementMeta, fora da parte sticky, pra não ocupar espaço fixo
@@ -20,6 +20,8 @@ type ServiceArrangementHeaderProps = {
   isSaving: boolean;
   isDirty: boolean;
   isStuck?: boolean;
+  /** Quando presente, ocupa o lugar do título (mapa da música compacto ao rolar além do mapa inline). */
+  titleSlot?: ReactNode;
   onStartEdit: () => void;
   onCancel: () => void;
   onSaveServiceOnly: () => void;
@@ -34,6 +36,7 @@ function ServiceArrangementHeader({
   isSaving,
   isDirty,
   isStuck = false,
+  titleSlot,
   onStartEdit,
   onCancel,
   onSaveServiceOnly,
@@ -62,11 +65,15 @@ function ServiceArrangementHeader({
         density === "compact" ? "pt-2 md:pt-1 lg:pt-2" : "pt-2 md:pt-2 lg:pt-4"
       }`}
     >
-      <div className="flex min-w-0 flex-1">
-        <Heading level={2} className="truncate">
-          <span>{order}. </span>
-          {arrangement.song.title}
-        </Heading>
+      {/* min-h fixa a altura do slot: trocar título por mapa não pode mexer
+          na altura do cabeçalho (ela vira --song-header-h). */}
+      <div className="flex min-w-0 flex-1 min-h-8 items-center">
+        {titleSlot ?? (
+          <Heading level={2} className="truncate">
+            <span>{order}. </span>
+            {arrangement.song.title}
+          </Heading>
+        )}
       </div>
 
       <div className="hidden md:flex items-center gap-2 shrink-0">
