@@ -178,7 +178,7 @@ export default function BlockShell({
           data-drag-handle
           aria-label="Mover bloco (arraste ou use o menu)"
           title="Mover bloco (arraste ou use o menu)"
-          className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0 cursor-grab active:cursor-grabbing"
+          className={`p-1 ${colorClasses.text} rounded transition-colors shrink-0 cursor-grab active:cursor-grabbing ${colorClasses.handleBackground}`}
         >
           <GripVertical size={14} />
         </button>
