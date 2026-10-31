@@ -80,6 +80,18 @@ export function getChords(chordproString?: string) {
   }
 }
 
+// Validação do campo de digitar do modal do acorde (seção 8.3: "digitar um
+// acorde inválido mostra um aviso... Enter confirma o válido"). Permissivo
+// de propósito — cobre tudo que já aparece nos dados reais (M4, M9, dim,
+// 7+, sus4, m7b5...) sem tentar enumerar toda a teoria musical; a única
+// exigência rígida é a nota (A-G, com sustenido(s)/bemol(is)) no início e,
+// se houver baixo invertido, outra nota válida depois da barra.
+const CHORD_NAME_RE = /^[A-G](#{1,2}|b{1,2})?[A-Za-z0-9°+\-]*(\/[A-G](#{1,2}|b{1,2})?)?$/;
+
+export function isValidChordName(value: string): boolean {
+  return CHORD_NAME_RE.test(value.trim());
+}
+
 const KEYS = {
   C: ["C", "Dm", "Em", "F", "G", "Am", "Bdim"],
   "C#": ["C#", "D#m", "E#m", "F#", "G#", "A#m", "B#dim"],

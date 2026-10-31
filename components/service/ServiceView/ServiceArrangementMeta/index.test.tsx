@@ -45,6 +45,7 @@ const defaultProps = {
   arrangement: baseArrangement,
   isEditing: false,
   isSaving: false,
+  isDirty: false,
   onStartEdit: vi.fn(),
   onCancel: vi.fn(),
   onSaveServiceOnly: vi.fn(),
@@ -59,9 +60,9 @@ describe('ServiceArrangementMeta', () => {
     expect(screen.getByTestId('edit-or-save-cancel')).toBeDefined();
   });
 
-  it('esconde tom e referências durante a edição', () => {
+  it('mantém o tom visível durante a edição (dá pra trocar o tom do culto editando a cifra), esconde só referências', () => {
     render(<ServiceArrangementMeta {...defaultProps} isEditing />);
-    expect(screen.queryByTestId('key-selector')).toBeNull();
+    expect(screen.getByTestId('key-selector')).toBeDefined();
     expect(screen.queryByTestId('media-references')).toBeNull();
     expect(screen.getByTestId('edit-or-save-cancel')).toBeDefined();
   });

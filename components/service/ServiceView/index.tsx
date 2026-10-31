@@ -4,11 +4,22 @@ import StageMode from "@/components/service/StageMode";
 import { useAudioPlayer } from "@/components/common/AudioPlayer/context";
 import { useYoutubePlayer } from "@/components/common/YoutubePlayer/context";
 import { useServiceConfig } from "@/components/config/ServiceConfig";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useMediaBarOpen } from "@/hooks/useMediaBarOpen";
 import { ClientService, ClientServiceUnit } from "@/prisma/models";
 import { Mic2 } from "lucide-react";
 import { pushStageModeEntry } from "@/components/service/StageMode/useStageModeHistory";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import ServiceSongUnitView from "./ServiceSongUnitView";
 
@@ -30,6 +41,7 @@ type SectionBlock = {
 };
 
 export default function ServiceView({ service }: ServiceViewProps) {
+  const t = useTranslations("Messages");
   const { density, fontSize } = useServiceConfig();
   const { isOpen: isAudioOpen, close: closeAudio } = useAudioPlayer();
   const { close: closeYoutube } = useYoutubePlayer();
@@ -45,6 +57,17 @@ export default function ServiceView({ service }: ServiceViewProps) {
       .filter((u): u is ClientServiceUnit => u?.type === "SONG")
       .map((u) => u.semitoneTranspose ?? 0)
   );
+  // Achado em teste manual: "entrar no modo palco perde a edição e
+  // descarta o que era feito" — trocar pro Modo Palco desmonta a árvore
+  // normal inteira (ver o `if (isStageMode)` abaixo), levando junto
+  // qualquer ServiceSongUnitEditForm aberto, sem avisar. Indexado pela
+  // posição entre as músicas, igual `transposes`.
+  const [unsavedEdits, setUnsavedEdits] = useState(() =>
+    (service?.units ?? [])
+      .filter((u): u is ClientServiceUnit => u?.type === "SONG")
+      .map(() => false)
+  );
+  const [confirmStageModeOpen, setConfirmStageModeOpen] = useState(false);
   // Indexado pela posição entre as músicas.
   const songRefs = useRef<(HTMLDivElement | null)[]>([]);
   const shouldRestoreScroll = useRef(false);
@@ -90,7 +113,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
   }
   const hasSongs = blocks.some((block) => block.entries.length > 0);
 
-  function enterStageMode() {
+  function doEnterStageMode() {
     // Primeira música cujo fim ainda está na tela.
     const visibleIndex = songRefs.current.findIndex((el) => el && el.getBoundingClientRect().bottom > 0);
     setStageIndex(Math.max(0, visibleIndex));
@@ -100,6 +123,17 @@ export default function ServiceView({ service }: ServiceViewProps) {
     closeAudio();
     closeYoutube();
     setIsStageMode(true);
+  }
+
+  // Só confirma quando há edição de cifra realmente ABERTA e alterada —
+  // entrar no Palco só olhando a leitura, ou com um editor aberto mas sem
+  // nenhuma alteração, não perde nada, não precisa perguntar.
+  function enterStageMode() {
+    if (unsavedEdits.some(Boolean)) {
+      setConfirmStageModeOpen(true);
+      return;
+    }
+    doEnterStageMode();
   }
 
   if (isStageMode) {
@@ -156,6 +190,11 @@ export default function ServiceView({ service }: ServiceViewProps) {
                         prev.map((v, i) => (i === entry.songIndex ? value : v))
                       )
                     }
+                    onUnsavedEditChange={(hasUnsavedEdit) =>
+                      setUnsavedEdits((prev) =>
+                        prev.map((v, i) => (i === entry.songIndex ? hasUnsavedEdit : v))
+                      )
+                    }
                   />
                 </div>
               ))}
@@ -182,6 +221,27 @@ export default function ServiceView({ service }: ServiceViewProps) {
           Palco
         </Button>
       </div>
+
+      {/* Mesmo texto/padrão do ConfirmDiscardDialog (D11), mas controlado
+          aqui em vez de via trigger — a decisão de perguntar ou não
+          (unsavedEdits.some) acontece no clique do botão Palco, antes de
+          qualquer diálogo existir. */}
+      <AlertDialog open={confirmStageModeOpen} onOpenChange={setConfirmStageModeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("discardChanges")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("discardChangesDesc")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button variant="outline" onClick={doEnterStageMode}>
+                {t("discard")}
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

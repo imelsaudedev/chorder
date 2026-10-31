@@ -18,6 +18,7 @@ type ServiceArrangementHeaderProps = {
   order: number;
   isEditing: boolean;
   isSaving: boolean;
+  isDirty: boolean;
   isStuck?: boolean;
   onStartEdit: () => void;
   onCancel: () => void;
@@ -31,6 +32,7 @@ function ServiceArrangementHeader({
   order,
   isEditing,
   isSaving,
+  isDirty,
   isStuck = false,
   onStartEdit,
   onCancel,
@@ -68,7 +70,13 @@ function ServiceArrangementHeader({
       </div>
 
       <div className="hidden md:flex items-center gap-2 shrink-0">
-        {!isEditing && arrangement.key && <KeySelectorButton originalKey={arrangement.key} />}
+        {/* Visível também durante a edição (achado em teste manual: "não é
+            possível alterar o tom pois escondemos o botão de tonalidade")
+            — seguro porque a edição sempre trabalha no tom base (D9),
+            trocar o tom do culto aqui só muda o aviso "o tom do culto
+            volta ao salvar" exibido no editor, não o que está sendo
+            editado. */}
+        {arrangement.key && <KeySelectorButton originalKey={arrangement.key} />}
 
         {!isEditing && arrangement.songId && (
           <ServiceMediaReferences
@@ -83,6 +91,7 @@ function ServiceArrangementHeader({
         <EditOrSaveCancelGroup
           isEditing={isEditing}
           isSaving={isSaving}
+          isDirty={isDirty}
           hasOriginal={hasOriginal}
           onStartEdit={onStartEdit}
           onCancel={onCancel}

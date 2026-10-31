@@ -43,10 +43,10 @@ Leia antes de começar, nesta ordem: `CLAUDE.md`, `AGENTS.md`, `docs/SPEC_MODO_P
 
 ## 3. Referência visual
 
-Pasta `prototipo/` ao lado desta spec:
+Pasta `docs/prototipo-cifras/` (compartilhada com a spec de edição da cifra):
 
-- `prototipo/cabecalho-referencias.html`: protótipo navegável (abra no navegador). Alterna entre **Proposta** e **Atual**, celular e desktop, tema claro e escuro. Os dois players do protótipo são simulados.
-- `prototipo/capturas/`: capturas dos estados principais (celular fechado, lista aberta, tom, vazio, adicionar vídeo, áudio tocando, desktop, tom alterado, atual).
+- `cabecalho-e-edicao.html`: **protótipo único e navegável** (abra no navegador). Alterna entre cabeçalho **Proposta** e **Atual**, celular e desktop, tema claro e escuro. Os dois players são simulados. O lápis entra no modo de edição por blocos, que pertence à outra spec (`docs/edicao-cifra-blocos/`); aqui vale só o cabeçalho.
+- `capturas/`: relevantes a esta spec: 01 a 06 (celular: fechado, info, tom, lista, sem referências, áudio tocando), 14 a 17 (desktop: fechado, info, tom, lista) e 20 (cabeçalho atual). Ver o README da pasta.
 
 **O protótipo ilustra layout e interação. Nada nele é especificação de código, de dados ou de estilo.** Letras, autores, nomes de arquivo e cores de bloco são de exemplo. O que vale é o que o app faz hoje (tokens, componentes `ui/`, `unit-colors.ts`, `KeyButtonSet`). Mapeie as medidas para a escala do projeto.
 
@@ -141,23 +141,28 @@ O plano deve conter: decisões de 6 respondidas; etapas pequenas e verificáveis
 
 **Celular**, de cima para baixo:
 
-1. **Título**: "N. Nome da música". (Em modo edição, Salvar e Cancelar à direita, como hoje.)
-2. **Autor · Arranjo**, uma linha, texto secundário. Omite o que não existir.
-3. **Linha de controles**, à esquerda: botão **Tom X ⌄** e botão de **referências** (ícones de vídeo e áudio, ou `+ Referências` quando vazio). À direita: ícone de **editar cifra** (lápis).
-4. **Aviso "No plano: X · Voltar ao plano"**, só quando o tom em uso difere do tom do plano.
-5. **Mapa da música** (ver 9.9), com mais espaço acima do que abaixo.
-6. Os blocos da cifra. O espaço entre o mapa e o primeiro bloco é **igual** ao espaço entre blocos.
+1. **Título** "N. Nome da música", seguido de um **ícone de info** (ver 9.1.1). (Em modo edição, Salvar e Cancelar à direita, como hoje.)
+2. **Linha de controles**, à esquerda: botão do **tom** (só o tom e uma seta, ex.: `C ⌄`) e botão de **referências** (ícones de vídeo e áudio, ou `+ Referências` quando vazio). À direita: ícone de **editar cifra** (lápis).
+3. **Mapa da música** (ver 9.9), com mais espaço acima do que abaixo.
+4. Os blocos da cifra. O espaço entre o mapa e o primeiro bloco é **igual** ao espaço entre blocos.
 
-**Desktop**: título e "Autor · Arranjo" à esquerda. À direita, na altura do título e **nesta ordem**: seletor de tom **já aberto** (⊖ X ⊕, como `KeyButtonSet` hoje), botão de referências, lápis de editar cifra. Aviso de plano, mapa e blocos abaixo, em largura total.
+**Tablet e desktop**: **título (com o ícone de info) à esquerda** e, **à direita na mesma linha e nesta ordem**: botão do tom, botão de referências, lápis de editar cifra. Mapa e blocos abaixo, em largura total.
 
-Remover do cabeçalho atual: chips de vídeo e de áudio, o ⋮ do celular com tom e "Editar cifras" (o tom passa a ter botão próprio e o lápis fica à vista), e qualquer rótulo "Alterada neste culto" ou "original em X".
+Não há mais linha "Autor · Arranjo" nem aviso "No plano / Voltar ao plano". Remover do cabeçalho atual: chips de vídeo e de áudio, o ⋮ do celular com tom e "Editar cifras" (o tom passa a ter botão próprio e o lápis fica à vista), o seletor de tom inline do desktop e qualquer rótulo "Alterada neste culto" ou "original em X".
+
+#### 9.1.1 Info de autor e arranjo
+
+- Ícone de **info** (círculo com "i") imediatamente à direita do título, alvo de toque ≥ 40 px (a área clicável pode exceder o desenho).
+- **Tooltip** com o autor (destaque) e "Arranjo {nome}" abaixo. Omite o que não existir (D9); se nenhum existir, não mostra o ícone.
+- Abre ao **passar o mouse** e ao **focar** (desktop) e ao **tocar** (celular, alterna). Fecha ao tocar fora, com Esc ou ao abrir outro menu. Fica dentro da tela (desloca o mínimo necessário).
+- Acessibilidade: botão com `aria-label` "Autor e arranjo", conteúdo ligado por `aria-describedby`, `role="tooltip"`. Em toque, o conteúdo também precisa ser acessível sem hover.
 
 ### 9.2 Tom
 
-- **Celular**: o botão "Tom X ⌄" abre um **balão suspenso** com o seletor de tom existente (`KeyButtonSet`). Fecha ao tocar fora ou com Esc.
-- **Desktop**: o seletor aparece aberto na linha de controles, sem balão.
-- Reutilizar `KeyButtonSet` e o estado de transposição existentes, sem alterar sua lógica.
-- **"No plano"**: quando `transpose ≠ 0`, mostrar "No plano: {tom do plano}" e a ação "Voltar ao plano" (volta a `transpose = 0`). O tom do plano é o tom da cópia na liturgia **[a confirmar]**. Considerar a preferência enarmônica (sustenido ou bemol) já usada no app.
+- O botão do tom mostra **apenas o tom em uso e uma seta para baixo** (ex.: `C ⌄`), sem a palavra "Tom". Rótulo acessível: "Tom C, ajustar".
+- **Mesmo padrão no celular e no desktop**: o botão abre um **balão suspenso** com o seletor de tom existente (`KeyButtonSet`, ⊖ X ⊕), **alinhado à esquerda do botão** e deslocado o mínimo necessário para caber na tela. Fecha ao tocar fora ou com Esc. Não há mais seletor aberto inline no desktop.
+- Reutilizar `KeyButtonSet` e o estado de transposição existentes, sem alterar sua lógica. Considerar a preferência enarmônica (sustenido ou bemol) já usada no app.
+- **Removido:** o aviso "No plano: X" e a ação "Voltar ao plano". Quem quiser voltar ao tom original usa o próprio seletor.
 
 ### 9.3 Botão de referências
 
@@ -169,7 +174,10 @@ Remover do cabeçalho atual: chips de vídeo e de áudio, o ⋮ do celular com t
 
 ### 9.4 Lista de referências
 
-Abre abaixo do botão como **popover** (não `DropdownMenu`, ver riscos). Largura confortável no celular (cabe na tela com margem) e fixa em torno de 340 px no desktop, alinhada à direita do botão.
+Abre abaixo do botão como **popover** (não `DropdownMenu`, ver riscos).
+
+- **Celular**: ocupa a largura da linha de controles (cabe na tela com margem de 16 px, no máximo ~360 px), alinhada à esquerda.
+- **Tablet e desktop**: largura fixa em torno de 340 px, **alinhada à esquerda do botão de referências**. Como o botão fica à direita do cabeçalho, o popover é **deslocado o mínimo necessário para a esquerda** quando não cabe na tela (nunca cortado, nunca com rolagem horizontal). Decidir na análise se isso se resolve com a colisão do próprio popover (Radix `collisionPadding`).
 
 Ordem, de cima para baixo:
 
@@ -224,10 +232,26 @@ Regras:
 
 ### 9.9 Mapa da música
 
-- Linha horizontal rolável de botões **retangulares de cantos pequenos** (não pílulas), um por bloco, **na ordem dos blocos da cifra**, com a sigla do bloco (Intro, V1, R1, Interl., Saída…).
+- Linha horizontal rolável de botões **retangulares de cantos pequenos** (não pílulas), um por bloco, **na ordem dos blocos da cifra**, com a **sigla mínima** do bloco (tabela abaixo). Rótulo acessível e `title` com o nome completo ("Refrão 2").
 - Cores iguais às do bloco correspondente (`unit-colors.ts`).
 - Tocar rola até o bloco, descontando a altura da parte sticky do cabeçalho, e dá um destaque breve no bloco. Respeitar `prefers-reduced-motion`.
-- **Depende de D5.** Se aprovado, a siglas e a regra de abreviação (V1, R2, Interl.) devem seguir o que o app já usa para nomear blocos.
+- **Siglas** (decididas pelo Tiago; texto `UnitTypesShort.*` em `i18n`, função única compartilhada com a edição e o Palco):
+
+| Tipo | Sigla | Numeração |
+|---|---|---|
+| Intro | I | só se houver mais de uma |
+| Verso | V | sempre (V1, V2…) |
+| Pré-refrão | PR | nunca |
+| Refrão | R | sempre (R1, R2…) |
+| Ponte | P | sempre |
+| Interlúdio | IL | só se houver mais de um |
+| Solo | S | só se houver mais de um |
+| Final | F | só se houver mais de um |
+| Bloco | B | só se houver mais de um |
+| Texto | T | só se houver mais de um |
+
+- **O rótulo do tipo `ENDING` muda de "Saída" para "Final"** (só texto em `UnitTypes.ENDING`; o valor interno e o schema não mudam). Isso afeta leitura, Palco, seletor de tipo e testes/snapshots que citam "Saída": listar na análise.
+- A numeração segue a ordem dos blocos da música (como o app já faz). Depende de D5 a forma de obter o número sem alterar o miolo da cifra.
 - Espaçamento: **maior** entre o cabeçalho e o mapa (~24 px) do que entre o mapa e o primeiro bloco (igual ao gap entre blocos).
 - Se há blocos repetidos ou "TEXT" sem tipo, definir na análise o que o mapa mostra.
 
@@ -246,8 +270,9 @@ Regras:
 | Vídeo adicionado | `Vídeo adicionado. Vale para todos os cultos.` |
 | Áudio adicionado | `Áudio adicionado. Vale para todos os cultos.` |
 | Remoção | `Referência removida de todos os cultos.` + `Desfazer` |
-| Aviso de tom | `No plano: X` + `Voltar ao plano` |
-| Botão do tom (celular) | `Tom X` |
+| Botão do tom | `X` (só o tom) · rótulo acessível `Tom X, ajustar` |
+| Info de autor e arranjo | rótulo `Autor e arranjo` · conteúdo `{autor}` / `Arranjo {nome}` |
+| Tipo `ENDING` | `Final` (antes `Saída`) |
 | Erros | ver 9.5 e 9.6 |
 
 Seguir a convenção de i18n do projeto (5.1 C). Termo "referência" no singular e plural conforme o contexto; sem anglicismos.
@@ -295,14 +320,17 @@ Veja os detalhes e as evidências em `PRE_ANALISE_ESTADO_ATUAL.md`. Resumo:
 
 - [ ] Análise (`ANALISE.md`) entregue, com leitura crítica e respostas às decisões da seção 6.
 - [ ] Plano aprovado pelo Tiago antes de qualquer código.
-- [ ] Celular: título, autor·arranjo, `[Tom X][referências]` à esquerda e lápis à direita na mesma linha, sem quebrar em 360 px.
-- [ ] Desktop: tom aberto, referências e lápis à direita do título, nessa ordem.
+- [ ] Celular: título com ícone de info; `[X ⌄][referências]` à esquerda e lápis à direita na mesma linha, sem quebrar em 360 px.
+- [ ] Tablet e desktop: título à esquerda; tom, referências e lápis à direita, nessa ordem, na mesma linha.
+- [ ] Info de autor e arranjo abre por hover/foco (desktop) e por toque (celular), fecha com Esc/fora, e some quando não há dados.
+- [ ] O botão do tom mostra só o tom e a seta, e abre o seletor em balão no celular **e** no desktop.
+- [ ] A lista de referências abre alinhada à esquerda do botão no tablet/desktop (sem cortar) e na largura da tela no celular.
+- [ ] Mapa com siglas I, V1, PR, R1, P, IL, S, F, B, T; tipo `ENDING` exibido como "Final".
 - [ ] Estado vazio mostra `+ Referências` e a lista oferece "Adicionar vídeo" e "Adicionar áudio".
 - [ ] Vídeo: no máximo um; link inválido mostra o erro certo; adicionar e remover refletem na tela **sem recarregar** e valem em outro culto com o mesmo arranjo.
 - [ ] Áudio: enviar (progresso e erro), tocar a faixa escolhida, remover e desfazer em até 6 s.
 - [ ] Tocar uma linha abre o player existente e fecha a lista; uma referência por vez.
 - [ ] Barra de áudio não cobre a última linha da cifra nem o aviso de desfazer; Palco continua acessível.
-- [ ] "No plano: X · Voltar ao plano" aparece só quando o tom foi alterado.
 - [ ] Modo edição de cifra continua salvando **sem apagar** mídia (regressão do PR #64).
 - [ ] Modo Palco sem nenhum controle de referência.
 - [ ] Nada do miolo da cifra alterado (diff limpo em `ColumnViewer`, parser e `KeyButtonSet`), salvo o que o Tiago aprovar em D5.
@@ -316,10 +344,10 @@ Veja os detalhes e as evidências em `PRE_ANALISE_ESTADO_ATUAL.md`. Resumo:
 3. Adicionar dois áudios; tocar o segundo (deve começar nele). Conferir a barra e o botão Palco.
 4. Remover um áudio; desfazer dentro de 6 s; remover de novo e esperar. Conferir que o arquivo some e que outra aba (mesma liturgia) reflete.
 5. Abrir **outra liturgia** com a mesma música: as referências devem estar lá.
-6. Alterar o tom; ver "No plano"; voltar ao plano.
+6. Alterar o tom pelo botão (`C ⌄`) no celular e no desktop; passar o mouse / tocar no ícone de info para ver autor e arranjo.
 7. Editar a cifra e salvar nos dois escopos: a mídia **não** pode sumir.
 8. Entrar no Modo Palco: sem controles de mídia. Voltar.
-9. No desktop (1280 px e 768 px): ordem tom, referências, lápis; lista alinhada; mapa.
+9. No desktop (1280 px e 768 px): título à esquerda; tom, referências, lápis à direita; lista de referências alinhada à esquerda do botão e dentro da tela; mapa com siglas.
 10. Teclado: Tab, Enter e Esc em todos os controles.
 
 ## 13. Entregáveis

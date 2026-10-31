@@ -10,6 +10,7 @@ vi.mock('next-intl', () => ({
 const defaultProps = {
   isEditing: false,
   isSaving: false,
+  isDirty: false,
   hasOriginal: false,
   onStartEdit: vi.fn(),
   onCancel: vi.fn(),
@@ -49,6 +50,17 @@ describe('EditOrSaveCancelGroup — edição, sem original', () => {
     const onCancel = vi.fn();
     render(<EditOrSaveCancelGroup {...editProps} onCancel={onCancel} />);
     await user.click(screen.getByRole('button', { name: /cancelEdit/i }));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('D11: com isDirty, X abre confirmação em vez de cancelar direto', async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+    render(<EditOrSaveCancelGroup {...editProps} isDirty onCancel={onCancel} />);
+    await user.click(screen.getByRole('button', { name: /cancelEdit/i }));
+    expect(onCancel).not.toHaveBeenCalled();
+    expect(screen.getByRole('alertdialog')).toBeDefined();
+    await user.click(screen.getByRole('button', { name: /^discard$/i }));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 

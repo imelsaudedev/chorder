@@ -1,4 +1,4 @@
-import { harmonicIndex, keyFromChord, simplifyChord, parseChordPro, getLyrics, getChords } from "./music";
+import { harmonicIndex, keyFromChord, simplifyChord, parseChordPro, getLyrics, getChords, isValidChordName } from "./music";
 
 test("harmonic index", () => {
   expect(harmonicIndex("Cb")).toBe(11);
@@ -57,6 +57,22 @@ test("{comment:texto} também é reconhecido como comment", () => {
   const item = song.lines[0].items[0] as any;
   expect(item._name).toBe("comment");
   expect(item._value).toBe("Forte");
+});
+
+test("isValidChordName aceita acordes reais do app", () => {
+  for (const chord of ["C", "Dm", "D7+", "F#m7", "A/C#", "B4/D#", "C#m7", "G7+", "Fdim", "E4", "A9", "D/F#", "Bm4", "F##dim7", "Gbm9"]) {
+    expect(isValidChordName(chord)).toBe(true);
+  }
+});
+
+test("isValidChordName rejeita o que não começa com uma nota válida", () => {
+  for (const value of ["", "H", "xyz", "7D", "/D", "D//F", "D#$"]) {
+    expect(isValidChordName(value)).toBe(false);
+  }
+});
+
+test("isValidChordName ignora espaços nas pontas", () => {
+  expect(isValidChordName("  D7+  ")).toBe(true);
 });
 
 test("{c:} e {comment:} produzem o mesmo resultado", () => {

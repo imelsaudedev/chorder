@@ -44,6 +44,7 @@
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-caret-blink: caret-blink 1s step-end infinite;
 
   @keyframes accordion-down {
     from {
@@ -59,6 +60,14 @@
     }
     to {
       height: 0;
+    }
+  }
+  /* Cursor do corpo visual do editor por bloco (BlockEditor/BlockBody.tsx)
+     — traço desenhado à mão (não é o cursor nativo do contentEditable,
+     escondido via caret-color) pra poder ficar mais espesso que o padrão. */
+  @keyframes caret-blink {
+    50% {
+      opacity: 0;
     }
   }
 }

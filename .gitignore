@@ -48,3 +48,6 @@ storybook-static
 
 # DevContainer
 .devcontainer/devcontainer-lock.json
+
+# Claude Code local state (permissions, scheduled tasks) — por máquina/sessão
+.claude/

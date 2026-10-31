@@ -10,6 +10,11 @@ const dirname =
   typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  server: {
+    fs: {
+      strict: false,
+    },
+  },
   test: {
     globals: true,
     coverage: {

@@ -7,15 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { ClientArrangement } from "@/prisma/models";
 import { ArrangementSchema } from "@/schemas/arrangement";
-import { autoScrollWindowForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
 import { NotebookPen, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import ArrangementInfoForm from "./ArrangementInfoForm";
-import SongUnitListForm from "./SongUnitListForm";
+import BlockEditorFormBridge from "./BlockEditorFormBridge";
 import { initForm } from "./useArrangementForm";
 
 type ArrangementFormProps = {
@@ -63,10 +62,6 @@ export default function ArrangementForm({
   const watchedTitle = form.watch("song.title");
   const watchedArtist = form.watch("song.artist");
   const { createOrUpdateArrangement, isMutating } = useCreateOrUpdateArrangement(origArrangement?.id);
-
-  useEffect(() => {
-    return autoScrollWindowForElements();
-  }, []);
 
   async function onSubmit(arrangement: ArrangementSchema) {
     const newOrUpdatedArrangement = await createOrUpdateArrangement(arrangement);
@@ -119,7 +114,7 @@ export default function ArrangementForm({
               )}
             </button>
             <ArrangementInfoForm arrangementId={origArrangement?.id} />
-            <SongUnitListForm />
+            <BlockEditorFormBridge />
           </div>
 
           <FormFooter

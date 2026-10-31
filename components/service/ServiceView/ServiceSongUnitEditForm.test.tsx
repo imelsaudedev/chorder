@@ -13,8 +13,8 @@ vi.mock('#api-client', () => ({
   useCreateOrUpdateArrangement: vi.fn(),
 }));
 
-vi.mock('@/components/song/ArrangementForm/SongUnitListForm', () => ({
-  default: () => <div data-testid="song-unit-list-form" />,
+vi.mock('@/components/song/ArrangementForm/BlockEditorFormBridge', () => ({
+  default: () => <div data-testid="block-editor-form-bridge" />,
 }));
 
 const mockUnit: ClientServiceUnit = {
@@ -76,17 +76,18 @@ beforeEach(() => {
 });
 
 describe('ServiceSongUnitEditForm', () => {
-  it('renders SongUnitListForm', () => {
+  it('renders BlockEditorFormBridge', () => {
     const submitRef = makeSubmitRef();
     render(
       <ServiceSongUnitEditForm
         unit={mockUnit}
         submitRef={submitRef}
         onSavingChange={vi.fn()}
+        onDirtyChange={vi.fn()}
         onSaved={vi.fn()}
       />
     );
-    expect(screen.getByTestId('song-unit-list-form')).toBeDefined();
+    expect(screen.getByTestId('block-editor-form-bridge')).toBeDefined();
   });
 
   it('saves only to service and calls onSaved when submit("service") called', async () => {
@@ -97,6 +98,7 @@ describe('ServiceSongUnitEditForm', () => {
         unit={mockUnit}
         submitRef={submitRef}
         onSavingChange={vi.fn()}
+        onDirtyChange={vi.fn()}
         onSaved={onSaved}
       />
     );
@@ -118,6 +120,7 @@ describe('ServiceSongUnitEditForm', () => {
         unit={mockUnit}
         submitRef={submitRef}
         onSavingChange={vi.fn()}
+        onDirtyChange={vi.fn()}
         onSaved={onSaved}
       />
     );
@@ -143,6 +146,7 @@ describe('ServiceSongUnitEditForm', () => {
         unit={unitWithoutOriginal}
         submitRef={submitRef}
         onSavingChange={vi.fn()}
+        onDirtyChange={vi.fn()}
         onSaved={onSaved}
       />
     );
@@ -162,6 +166,7 @@ describe('ServiceSongUnitEditForm', () => {
         unit={mockUnit}
         submitRef={submitRef}
         onSavingChange={vi.fn()}
+        onDirtyChange={vi.fn()}
         onSaved={vi.fn()}
       />
     );

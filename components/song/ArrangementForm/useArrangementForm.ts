@@ -1,7 +1,7 @@
-import { ClientArrangement, ClientSongUnit } from "@/prisma/models";
+import { ClientArrangement } from "@/prisma/models";
 import { ArrangementSchema, arrangementSchema } from "@/schemas/arrangement";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useFormContext, UseFormProps } from "react-hook-form";
+import { UseFormProps } from "react-hook-form";
 
 export function initForm(
   arrangement: ClientArrangement | null
@@ -37,30 +37,4 @@ export function defaultArrangementValues(
     },
     units: arrangement?.units,
   } satisfies ClientArrangement;
-}
-
-export function useArrangementUnitsFieldArray(fieldPrefix: string = "") {
-  const { control, watch, setValue: globalSetValue, getValues: globalGetValues } = useFormContext();
-  const setValue = (index: number, name: string, value: any) => {
-    globalSetValue(`${fieldPrefix}units.${index}.${name}`, value, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
-  };
-  const { fields, ...rest } = useFieldArray({
-    name: `${fieldPrefix}units`,
-    control,
-    rules: {
-      minLength: 1,
-      required: true,
-    },
-  });
-  return {
-    fields,
-    units: watch(`${fieldPrefix}units`) as ClientSongUnit[],
-    getValues: () => (globalGetValues(`${fieldPrefix}units`) as ClientSongUnit[]) || [],
-    setValue,
-    ...rest,
-  };
 }
