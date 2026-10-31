@@ -14,6 +14,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ClientSongUnit, SongUnitType } from "@/prisma/models";
 import {
+  attachClosestEdge,
+  Edge,
+  extractClosestEdge,
+} from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+import { getReorderDestinationIndex } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index";
+import { DropIndicator } from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box";
+import { draggable, dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import {
   ArrowDown,
   ArrowUp,
   ChevronDown,
@@ -28,8 +36,9 @@ import {
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { ChangeEvent, useCallback, useId, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import BlockBody from "./BlockBody";
+import { DRAG_DATA_TYPE, isSongUnitDragData } from "./dragData";
 import TypeSelector from "./TypeSelector";
 
 // Seção 8.5 / critério 10: bloco vazio ou com erro de parse abre direto em
@@ -46,6 +55,11 @@ function hasParseError(content: string): boolean {
 
 type BlockShellProps = {
   unit: ClientSongUnit;
+  // Índice no array PLANO de units (não é `number`, que é a numeração por
+  // tipo exibida — ver unit-numbering.ts). É o dado de arrasto: origem e
+  // destino do drag and drop são sempre posições nesse array único, mesmo
+  // quando o bloco é solto numa coluna visual diferente (ver dragData.ts).
+  index: number;
   number: number;
   isFirst: boolean;
   isLast: boolean;
@@ -64,6 +78,11 @@ type BlockShellProps = {
   onRemove: () => void;
   onChangeNotes: (notes: string | null) => void;
   onChangeContent: (content: string) => void;
+  // Drag and drop (Trello-like): chamado com (índice de origem, índice de
+  // destino já ajustado pela remoção — getReorderDestinationIndex faz essa
+  // conta). "Colunas" não são dado — mover pra outra coluna e mover dentro
+  // da mesma são a MESMA chamada, só muda o destino calculado.
+  onMoveUnit: (fromIndex: number, toIndex: number) => void;
   className?: string;
 };
 
@@ -72,6 +91,7 @@ type BlockShellProps = {
 // útil como modo de escape, mas o padrão agora é o corpo visual.
 export default function BlockShell({
   unit,
+  index,
   number,
   isFirst,
   isLast,
@@ -87,12 +107,66 @@ export default function BlockShell({
   onRemove,
   onChangeNotes,
   onChangeContent,
+  onMoveUnit,
   className,
 }: BlockShellProps) {
   const t = useTranslations();
   const colorClasses = unitColorClasses[unit.type];
   const contentId = useId();
   const [notesExpanded, setNotesExpanded] = useState(!!unit.notes);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLButtonElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
+
+  // Fonte de arrasto: o CARTÃO INTEIRO é o que se move (é o que o Pragmatic
+  // DnD arrasta e o que vira o alvo de soltar dos vizinhos), mas só a ALÇA
+  // inicia o gesto (`dragHandle`) — o resto do bloco continua clicável
+  // (acorde, texto, menu) sem brigar com o arrasto.
+  useEffect(() => {
+    const el = rootRef.current;
+    const handle = handleRef.current;
+    if (!el || !handle) return;
+    return draggable({
+      element: el,
+      dragHandle: handle,
+      getInitialData: () => ({ type: DRAG_DATA_TYPE, index }),
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
+  }, [index]);
+
+  // Alvo de soltar: este bloco específico, com a borda mais próxima
+  // (acima/abaixo) decidindo se o solto entra antes ou depois dele —
+  // mesmo mecanismo que o antigo SortableUnitForm.tsx (hoje removido) já
+  // usava, só generalizado pra funcionar entre colunas também (ver
+  // onMoveUnit/moveUnitTo: não existe "lista de outra coluna", é sempre o
+  // mesmo array).
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    return dropTargetForElements({
+      element: el,
+      canDrop: ({ source }) => isSongUnitDragData(source.data) && source.data.index !== index,
+      getData: ({ input, element }) =>
+        attachClosestEdge({ type: DRAG_DATA_TYPE, index }, { input, element, allowedEdges: ["top", "bottom"] }),
+      onDragEnter: ({ self }) => setClosestEdge(extractClosestEdge(self.data)),
+      onDrag: ({ self }) => setClosestEdge(extractClosestEdge(self.data)),
+      onDragLeave: () => setClosestEdge(null),
+      onDrop: ({ source, self }) => {
+        setClosestEdge(null);
+        if (!isSongUnitDragData(source.data)) return;
+        const edge = extractClosestEdge(self.data);
+        const destinationIndex = getReorderDestinationIndex({
+          startIndex: source.data.index,
+          indexOfTarget: index,
+          closestEdgeOfTarget: edge,
+          axis: "vertical",
+        });
+        onMoveUnit(source.data.index, destinationIndex);
+      },
+    });
+  }, [index, onMoveUnit]);
   const isTextUnit = unit.type === "TEXT";
   // Bloco TEXT nunca tem corpo visual de acordes (sempre MarkdownUnitForm).
   // Pros demais: bloco em branco (novo, ou conteúdo só espaço/vazio) nasce
@@ -129,6 +203,7 @@ export default function BlockShell({
 
   return (
     <div
+      ref={rootRef}
       // borderHandleHover (:has() — ver unit-colors.ts) acende a borda do
       // bloco INTEIRO quando o mouse passa só na alça de arrastar, achado:
       // "é possível que o hover dela acenda a borda de todo o bloco? Usaria
@@ -137,8 +212,10 @@ export default function BlockShell({
       // border-width conta pro box model, engrossar a borda empurrava o
       // conteúdo 1px pra dentro; ring cresce pra fora sem mover nada
       // (transition-shadow, não transition-[border-*], acompanha a troca).
-      // A alça ainda não arrasta nada — só a casca visual por enquanto.
-      className={`border ${colorClasses.border} ${colorClasses.background} ${colorClasses.borderHandleHover} rounded-lg p-2 md:p-4 mb-2 transition-shadow ${className || ""}`}
+      // relative: ancora o DropIndicator absoluto. opacity: feedback de
+      // "isto está sendo arrastado" (mesmo padrão do antigo
+      // SortableUnitForm.tsx).
+      className={`relative border ${colorClasses.border} ${colorClasses.background} ${colorClasses.borderHandleHover} rounded-lg p-2 md:p-4 mb-2 transition-shadow ${isDragging ? "opacity-50" : "opacity-100"} ${className || ""}`}
     >
       {/* Notas numa linha PRÓPRIA, acima dos ícones — achado em teste
           manual: colada na mesma linha que o TypeSelector/ícones, sem teto
@@ -174,10 +251,9 @@ export default function BlockShell({
       <div className="flex items-center gap-2 mb-2">
         {/* Alça de arrastar — não o bloco inteiro (achado: "o bloco tem
             acorde tocável, texto selecionável, menu... pegar em qualquer
-            lugar brigaria com isso"). Ainda só casca visual: cursor e o
-            aceso da borda (borderHandleHover acima); o arrasto de verdade
-            entra numa etapa seguinte do plano. */}
+            lugar brigaria com isso"). */}
         <button
+          ref={handleRef}
           type="button"
           data-drag-handle
           aria-label="Mover bloco (arraste ou use o menu)"
@@ -313,6 +389,7 @@ export default function BlockShell({
           chipClassName={colorClasses.repeatBadge}
         />
       )}
+      {closestEdge && <DropIndicator edge={closestEdge} gap="8px" />}
     </div>
   );
 }

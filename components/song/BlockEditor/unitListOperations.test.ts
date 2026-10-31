@@ -7,6 +7,7 @@ import {
   insertUnitAfter,
   insertUnitBefore,
   moveUnitDown,
+  moveUnitTo,
   moveUnitUp,
   removeUnit,
   setUnitContent,
@@ -46,6 +47,33 @@ describe("moveUnitUp/moveUnitDown", () => {
     const down = moveUnitDown(units, 1);
     const backUp = moveUnitUp(down, 2);
     expect(backUp.map((u) => u.type)).toEqual(units.map((u) => u.type));
+  });
+});
+
+describe("moveUnitTo", () => {
+  it("move de um índice pra qualquer outro (não só vizinho), renumera", () => {
+    const units = makeUnits(["INTRO", "VERSE", "CHORUS", "BRIDGE"]);
+    const moved = moveUnitTo(units, 0, 2);
+    expect(moved.map((u) => u.type)).toEqual(["VERSE", "CHORUS", "INTRO", "BRIDGE"]);
+    expect(orders(moved)).toEqual([1, 2, 3, 4]);
+  });
+
+  it("move pra trás também", () => {
+    const units = makeUnits(["INTRO", "VERSE", "CHORUS", "BRIDGE"]);
+    const moved = moveUnitTo(units, 3, 0);
+    expect(moved.map((u) => u.type)).toEqual(["BRIDGE", "INTRO", "VERSE", "CHORUS"]);
+  });
+
+  it("é a mesma operação de moveUnitUp/moveUnitDown pra vizinhos", () => {
+    const units = makeUnits(["INTRO", "VERSE", "CHORUS"]);
+    expect(moveUnitTo(units, 0, 1)).toEqual(moveUnitDown(units, 0));
+  });
+
+  it("não faz nada se origem e destino são iguais, ou fora dos limites", () => {
+    const units = makeUnits(["INTRO", "VERSE"]);
+    expect(moveUnitTo(units, 0, 0)).toBe(units);
+    expect(moveUnitTo(units, -1, 0)).toBe(units);
+    expect(moveUnitTo(units, 0, 2)).toBe(units);
   });
 });
 

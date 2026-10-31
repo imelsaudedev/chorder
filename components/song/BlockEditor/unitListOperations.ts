@@ -39,6 +39,34 @@ export function moveUnitDown(units: ClientSongUnit[], index: number): ClientSong
   return reassignOrder(next);
 }
 
+// Generalização de moveUnitUp/moveUnitDown pro arrasto (drag and drop,
+// Trello-like): de QUALQUER índice pra QUALQUER índice, não só vizinho. As
+// "colunas" não são dado nenhum (ver distributeUnits.ts) — são só onde
+// essa lista única quebra visualmente — então "mover pra outra coluna" e
+// "mover dentro da mesma coluna" são a MESMA operação aqui: mudar a
+// posição no array plano. `toIndex` já é o índice de destino PÓS-remoção
+// (mesma convenção de getReorderDestinationIndex do pragmatic-drag-and-drop
+// — quem chama já fez essa conta).
+export function moveUnitTo(
+  units: ClientSongUnit[],
+  fromIndex: number,
+  toIndex: number
+): ClientSongUnit[] {
+  if (
+    fromIndex === toIndex ||
+    fromIndex < 0 ||
+    fromIndex >= units.length ||
+    toIndex < 0 ||
+    toIndex >= units.length
+  ) {
+    return units;
+  }
+  const next = units.slice();
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return reassignOrder(next);
+}
+
 export function duplicateUnit(units: ClientSongUnit[], index: number): ClientSongUnit[] {
   const unit = units[index];
   if (!unit) return units;
