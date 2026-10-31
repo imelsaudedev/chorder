@@ -10,13 +10,17 @@ export const unitColorClasses: {
     repeatBadge: string;
     // Aceso quando o container TEM um descendente com [data-drag-handle] em
     // :hover (CSS puro, sem JS) — achado: "a alça acende a borda do bloco
-    // inteiro". Mesma cor do circleBackground (o pontinho do seletor de
-    // tipo), só que como borda — é a MESMA gradação da borda normal, não
-    // uma cor nova, só mais viva. Classe completa (variante+utilitário)
-    // porque o scanner do Tailwind só pega token literal e contíguo no
-    // código-fonte — nunca combinar variante e cor por string interpolada
-    // (ver chord-item-tokens.ts/BlockBody.tsx pra outros exemplos do mesmo
-    // cuidado neste projeto).
+    // inteiro". `ring` (box-shadow por baixo dos panos), não `border-2`:
+    // achado em teste manual — border-width conta pro box model
+    // (box-sizing:border-box), então engrossar a borda empurrava o
+    // conteúdo 1px pra dentro. ring nunca participa do layout, só pinta por
+    // cima/por fora — cresce sem mover nada. A borda normal (1px, cor
+    // suave) fica intocada por baixo; o ring (mais grosso, mesma cor viva
+    // do circleBackground) é o que dá a sensação de "borda mais forte".
+    // Classe completa (variante+utilitário) porque o scanner do Tailwind só
+    // pega token literal e contíguo no código-fonte — nunca combinar
+    // variante e cor por string interpolada (ver chord-item-tokens.ts/
+    // BlockBody.tsx pra outros exemplos do mesmo cuidado neste projeto).
     borderHandleHover: string;
     // Fundo da própria alça — achado: "equiparar visualmente o fundo deste
     // elemento com o botão... fundo levemente colorido, bordas
@@ -34,7 +38,7 @@ export const unitColorClasses: {
     border: "border-lime-200",
     comment: "text-lime-600 border-lime-600",
     repeatBadge: "bg-lime-200 text-lime-700",
-    borderHandleHover: "has-[[data-drag-handle]:hover]:border-2 has-[[data-drag-handle]:hover]:border-lime-300",
+    borderHandleHover: "has-[[data-drag-handle]:hover]:ring-2 has-[[data-drag-handle]:hover]:ring-lime-300",
     handleBackground: "bg-lime-100 hover:bg-lime-200",
   },
   VERSE: {
@@ -44,7 +48,7 @@ export const unitColorClasses: {
     border: "border-cyan-200",
     comment: "text-cyan-600 border-cyan-600",
     repeatBadge: "bg-cyan-200 text-cyan-700",
-    borderHandleHover: "has-[[data-drag-handle]:hover]:border-2 has-[[data-drag-handle]:hover]:border-cyan-400",
+    borderHandleHover: "has-[[data-drag-handle]:hover]:ring-2 has-[[data-drag-handle]:hover]:ring-cyan-400",
     handleBackground: "bg-cyan-100 hover:bg-cyan-200",
   },
   PRECHORUS: {
@@ -54,7 +58,7 @@ export const unitColorClasses: {
     border: "border-orange-200",
     comment: "text-orange-600 border-orange-600",
     repeatBadge: "bg-orange-200 text-orange-700",
-    borderHandleHover: "has-[[data-drag-handle]:hover]:border-2 has-[[data-drag-handle]:hover]:border-orange-400",
+    borderHandleHover: "has-[[data-drag-handle]:hover]:ring-2 has-[[data-drag-handle]:hover]:ring-orange-400",
     handleBackground: "bg-orange-100 hover:bg-orange-200",
   },
   CHORUS: {
@@ -64,7 +68,7 @@ export const unitColorClasses: {
     border: "border-rose-200",
     comment: "text-rose-700 border-rose-700",
     repeatBadge: "bg-rose-200 text-rose-700",
-    borderHandleHover: "has-[[data-drag-handle]:hover]:border-2 has-[[data-drag-handle]:hover]:border-rose-500",
+    borderHandleHover: "has-[[data-drag-handle]:hover]:ring-2 has-[[data-drag-handle]:hover]:ring-rose-500",
     handleBackground: "bg-rose-100 hover:bg-rose-200",
   },
   BRIDGE: {
@@ -74,7 +78,7 @@ export const unitColorClasses: {
     border: "border-violet-200",
     comment: "text-violet-700 border-violet-700",
     repeatBadge: "bg-violet-200 text-violet-700",
-    borderHandleHover: "has-[[data-drag-handle]:hover]:border-2 has-[[data-drag-handle]:hover]:border-violet-500",
+    borderHandleHover: "has-[[data-drag-handle]:hover]:ring-2 has-[[data-drag-handle]:hover]:ring-violet-500",
     handleBackground: "bg-violet-100 hover:bg-violet-200",
   },
   INTERLUDE: {
@@ -84,7 +88,7 @@ export const unitColorClasses: {
     border: "border-amber-200",
     comment: "text-amber-700 border-amber-700",
     repeatBadge: "bg-amber-200 text-amber-700",
-    borderHandleHover: "has-[[data-drag-handle]:hover]:border-2 has-[[data-drag-handle]:hover]:border-amber-500",
+    borderHandleHover: "has-[[data-drag-handle]:hover]:ring-2 has-[[data-drag-handle]:hover]:ring-amber-500",
     handleBackground: "bg-amber-100 hover:bg-amber-200",
   },
   SOLO: {
@@ -94,7 +98,7 @@ export const unitColorClasses: {
     border: "border-fuchsia-200",
     comment: "text-fuchsia-700 border-fuchsia-700",
     repeatBadge: "bg-fuchsia-200 text-fuchsia-700",
-    borderHandleHover: "has-[[data-drag-handle]:hover]:border-2 has-[[data-drag-handle]:hover]:border-fuchsia-600",
+    borderHandleHover: "has-[[data-drag-handle]:hover]:ring-2 has-[[data-drag-handle]:hover]:ring-fuchsia-600",
     handleBackground: "bg-fuchsia-100 hover:bg-fuchsia-200",
   },
   ENDING: {
@@ -104,7 +108,7 @@ export const unitColorClasses: {
     border: "border-lime-200",
     comment: "text-lime-700 border-lime-700",
     repeatBadge: "bg-lime-200 text-lime-700",
-    borderHandleHover: "has-[[data-drag-handle]:hover]:border-2 has-[[data-drag-handle]:hover]:border-lime-500",
+    borderHandleHover: "has-[[data-drag-handle]:hover]:ring-2 has-[[data-drag-handle]:hover]:ring-lime-500",
     handleBackground: "bg-lime-100 hover:bg-lime-200",
   },
   BLOCK: {
@@ -114,7 +118,7 @@ export const unitColorClasses: {
     border: "border-zinc-200",
     comment: "text-zinc-600 border-zinc-600",
     repeatBadge: "bg-zinc-200 text-zinc-700",
-    borderHandleHover: "has-[[data-drag-handle]:hover]:border-2 has-[[data-drag-handle]:hover]:border-zinc-400",
+    borderHandleHover: "has-[[data-drag-handle]:hover]:ring-2 has-[[data-drag-handle]:hover]:ring-zinc-400",
     handleBackground: "bg-zinc-100 hover:bg-zinc-200",
   },
   TEXT: {
@@ -124,7 +128,7 @@ export const unitColorClasses: {
     border: "border-slate-200",
     comment: "text-slate-600 border-slate-600",
     repeatBadge: "bg-slate-200 text-slate-700",
-    borderHandleHover: "has-[[data-drag-handle]:hover]:border-2 has-[[data-drag-handle]:hover]:border-slate-400",
+    borderHandleHover: "has-[[data-drag-handle]:hover]:ring-2 has-[[data-drag-handle]:hover]:ring-slate-400",
     handleBackground: "bg-slate-100 hover:bg-slate-200",
   },
 };

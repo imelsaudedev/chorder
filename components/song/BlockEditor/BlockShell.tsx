@@ -132,9 +132,13 @@ export default function BlockShell({
       // borderHandleHover (:has() — ver unit-colors.ts) acende a borda do
       // bloco INTEIRO quando o mouse passa só na alça de arrastar, achado:
       // "é possível que o hover dela acenda a borda de todo o bloco? Usaria
-      // a mesma gradação de cor da borda, mais vivo e mais grosso". A alça
-      // ainda não arrasta nada — só a casca visual por enquanto.
-      className={`border ${colorClasses.border} ${colorClasses.background} ${colorClasses.borderHandleHover} rounded-lg p-2 md:p-4 mb-2 transition-[border-color,border-width] ${className || ""}`}
+      // a mesma gradação de cor da borda, mais vivo e mais grosso". É um
+      // ring (box-shadow), não border-width maior — achado em teste manual:
+      // border-width conta pro box model, engrossar a borda empurrava o
+      // conteúdo 1px pra dentro; ring cresce pra fora sem mover nada
+      // (transition-shadow, não transition-[border-*], acompanha a troca).
+      // A alça ainda não arrasta nada — só a casca visual por enquanto.
+      className={`border ${colorClasses.border} ${colorClasses.background} ${colorClasses.borderHandleHover} rounded-lg p-2 md:p-4 mb-2 transition-shadow ${className || ""}`}
     >
       {/* Notas numa linha PRÓPRIA, acima dos ícones — achado em teste
           manual: colada na mesma linha que o TypeSelector/ícones, sem teto
