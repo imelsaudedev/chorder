@@ -20,7 +20,7 @@ import {
 } from "@/chopro/block-model";
 import { ChordVariant, applyEnharmonicToGrid, buildChordGrid } from "@/chopro/chord-grid";
 import { isValidChordName, parseChordPro } from "@/chopro/music";
-import { COMMENT_CHIPS } from "@/components/song/ArrangementForm/SongUnitListForm/commentChips";
+import { COMMENT_CHIPS } from "@/components/song/BlockEditor/commentChips";
 import { CHORD_TEXT_CLASS, COMMENT_LABEL_TEXT_CLASS } from "@/components/song/ChordProLine/chord-item-tokens";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { ChevronUp, PlusIcon } from "lucide-react";
