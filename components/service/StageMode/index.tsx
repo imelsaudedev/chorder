@@ -1,7 +1,8 @@
 "use client";
 
 import SongConfigProvider from "@/components/config/SongConfig";
-import ArrangementView from "@/components/song/ArrangementView";
+import ArrangementView, { ArrangementViewHandle } from "@/components/song/ArrangementView";
+import SongMap from "@/components/song/SongMap";
 import { readStorage, useLocalStorageState, writeStorage } from "@/hooks/useLocalStorageState";
 import { ClientServiceUnit } from "@/prisma/models";
 import { X } from "lucide-react";
@@ -59,6 +60,11 @@ export default function StageMode({
 }: StageModeProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
+  const arrangementRefs = useRef<(ArrangementViewHandle | null)[]>([]);
+  const mapRefs = useRef<(HTMLElement | null)[]>([]);
+  // A música atual já rolou além do mapa inline dela: o mapa passa pra
+  // barra do topo (compacto). Só liga/desliga — não reflete cada pixel.
+  const [isPastMap, setIsPastMap] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const currentIndexRef = useRef(currentIndex);
   currentIndexRef.current = currentIndex;
@@ -117,7 +123,12 @@ export default function StageMode({
   useEffect(() => {
     const container = contentRef.current;
     if (!container) return;
-    const onScroll = () => setCurrentIndex(findSongIndex(getSongStarts(), container.scrollTop));
+    const onScroll = () => {
+      const index = findSongIndex(getSongStarts(), container.scrollTop);
+      setCurrentIndex(index);
+      const mapEl = mapRefs.current[index];
+      setIsPastMap(!!mapEl && mapEl.getBoundingClientRect().bottom <= TOP_BAR_HEIGHT_PX);
+    };
     container.addEventListener("scroll", onScroll, { passive: true });
     return () => container.removeEventListener("scroll", onScroll);
   }, []);
@@ -128,6 +139,12 @@ export default function StageMode({
     document.documentElement.classList.add("stage-mode-active");
     return () => document.documentElement.classList.remove("stage-mode-active");
   }, []);
+
+  // Rolagem automática pausa ao pular pelo mapa (como em onSelectSong).
+  function selectUnit(songIndex: number, unitIndex: number) {
+    setIsScrollEnabled(false);
+    arrangementRefs.current[songIndex]?.selectUnit(unitIndex);
+  }
 
   function setCurrentTranspose(action: SetStateAction<number>) {
     setTransposes((prev) =>
@@ -147,7 +164,12 @@ export default function StageMode({
     // Visual claro por enquanto — o tratamento escuro fica pra quando o
     // design system tratar dark mode em todas as telas, não só aqui.
     <div className="fixed inset-0 h-dvh bg-background flex flex-col">
-      <div ref={contentRef} className="relative flex-1 overflow-y-auto">
+      {/* --song-header-h: o bloco escolhido no mapa para logo abaixo da barra fixa. */}
+      <div
+        ref={contentRef}
+        className="relative flex-1 overflow-y-auto"
+        style={{ "--song-header-h": `${TOP_BAR_HEIGHT_PX}px` } as React.CSSProperties}
+      >
         <div className="px-4 sm:px-6 lg:px-8 pt-14 pb-28">
           {units.map((unit, index) => {
             const arrangement = unit.arrangement;
@@ -168,7 +190,22 @@ export default function StageMode({
                   <div className="h-px flex-1 bg-border" />
                 </div>
                 <SongConfigProvider transpose={transposes[index]} columns={1} fontSize={fontSize}>
-                  <ArrangementView arrangement={arrangement} />
+                  {arrangement.units && arrangement.units.length > 0 && (
+                    <div
+                      ref={(el) => {
+                        mapRefs.current[index] = el;
+                      }}
+                      className="mb-4"
+                    >
+                      <SongMap units={arrangement.units} onSelectUnit={(unitIndex) => selectUnit(index, unitIndex)} />
+                    </div>
+                  )}
+                  <ArrangementView
+                    ref={(handle) => {
+                      arrangementRefs.current[index] = handle;
+                    }}
+                    arrangement={arrangement}
+                  />
                 </SongConfigProvider>
               </section>
             );
@@ -201,6 +238,16 @@ export default function StageMode({
             setIsScrollEnabled(false);
             scrollToSong(index);
           }}
+          map={
+            isPastMap && currentArrangement?.units && currentArrangement.units.length > 0 ? (
+              <SongMap
+                compact
+                units={currentArrangement.units}
+                onSelectUnit={(unitIndex) => selectUnit(currentIndex, unitIndex)}
+                className="w-full"
+              />
+            ) : undefined
+          }
           originalKey={currentArrangement?.key ?? ""}
           transpose={transposes[currentIndex]}
           setTranspose={setCurrentTranspose}

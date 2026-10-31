@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronDown, Minus, Pause, Play, Plus, SlidersHorizontal, X } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactNode, SetStateAction } from "react";
 import { formatScrollSpeedMultiplier, SCROLL_SPEED_MULTIPLIERS } from "./useAutoScroll";
 
 export const FONT_MIN = 16;
@@ -26,6 +26,8 @@ type StageModeControlsProps = {
   songTitles: string[];
   currentIndex: number;
   onSelectSong: (index: number) => void;
+  /** Mapa compacto da música atual; quando presente, ocupa o lugar do título (a barra mantém h-14). */
+  map?: ReactNode;
   originalKey: string;
   transpose: number;
   setTranspose: Dispatch<SetStateAction<number>>;
@@ -43,6 +45,7 @@ export default function StageModeControls({
   songTitles,
   currentIndex,
   onSelectSong,
+  map,
   originalKey,
   transpose,
   setTranspose,
@@ -72,9 +75,11 @@ export default function StageModeControls({
               <span className="shrink-0 text-sm text-muted-foreground tabular-nums">
                 {currentIndex + 1}/{songTitles.length}
               </span>
-              <Text variant="heading-sm" as="span" className="truncate">
-                {songTitles[currentIndex]}
-              </Text>
+              {!map && (
+                <Text variant="heading-sm" as="span" className="truncate">
+                  {songTitles[currentIndex]}
+                </Text>
+              )}
               <ChevronDown size={18} className="shrink-0 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
@@ -92,7 +97,9 @@ export default function StageModeControls({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="flex items-center shrink-0 ml-auto gap-0.5">
+        {map && <div className="min-w-0 flex-1 flex items-center">{map}</div>}
+
+        <div className={`flex items-center shrink-0 gap-0.5 ${map ? "" : "ml-auto"}`}>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Configurações" className="text-muted-foreground">

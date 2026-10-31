@@ -138,3 +138,14 @@ describe("StageModeControls — rolagem (play separado da velocidade)", () => {
     expect(screen.getByRole("button", { name: /mais rápido/i })).toBeDisabled();
   });
 });
+
+describe("StageModeControls — mapa no lugar do título", () => {
+  it("com o mapa, esconde o título mas mantém contador, configurações e sair", () => {
+    render(<StageModeControls {...baseProps} map={<div data-testid="mapa" />} />);
+    expect(screen.getByTestId("mapa")).toBeDefined();
+    expect(screen.queryByText("Nada Além do Sangue")).toBeNull();
+    expect(screen.getByText("3/5")).toBeDefined();
+    expect(screen.getByRole("button", { name: /configurações/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /sair do modo palco/i })).toBeDefined();
+  });
+});
