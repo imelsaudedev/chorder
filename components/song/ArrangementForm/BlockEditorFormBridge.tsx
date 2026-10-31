@@ -55,6 +55,7 @@ export default function BlockEditorFormBridge({
         columns={columns}
         baseKey={baseKey}
         enharmonicPreference={songConfig?.enharmonicPreference ?? null}
+        density={songConfig?.density ?? "normal"}
         onChangeUnits={(next) =>
           setValue("units", next, { shouldDirty: true, shouldValidate: true })
         }

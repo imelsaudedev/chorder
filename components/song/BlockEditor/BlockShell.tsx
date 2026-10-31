@@ -214,8 +214,12 @@ export default function BlockShell({
       // (transition-shadow, não transition-[border-*], acompanha a troca).
       // relative: ancora o DropIndicator absoluto. opacity: feedback de
       // "isto está sendo arrastado" (mesmo padrão do antigo
-      // SortableUnitForm.tsx).
-      className={`relative border ${colorClasses.border} ${colorClasses.background} ${colorClasses.borderHandleHover} rounded-lg p-2 md:p-4 mb-2 transition-shadow ${isDragging ? "opacity-50" : "opacity-100"} ${className || ""}`}
+      // SortableUnitForm.tsx). Sem mb-2 própria — o espaçamento entre
+      // blocos é só o gap do pai (ColumnDropZone, BlockEditor/index.tsx),
+      // pra bater com --block-gap da view (achado: "o espaçamento vertical
+      // entre blocos deve respeitar o mesmo da view"); margem própria aqui
+      // somaria com esse gap, dobrando o espaço.
+      className={`relative border ${colorClasses.border} ${colorClasses.background} ${colorClasses.borderHandleHover} rounded-lg p-2 md:p-4 transition-shadow ${isDragging ? "opacity-50" : "opacity-100"} ${className || ""}`}
     >
       {/* Notas numa linha PRÓPRIA, acima dos ícones — achado em teste
           manual: colada na mesma linha que o TypeSelector/ícones, sem teto

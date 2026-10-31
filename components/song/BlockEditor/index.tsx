@@ -32,6 +32,15 @@ type BlockEditorProps = {
   // modal do acorde (Etapa 4) é sempre montada a partir deste valor.
   baseKey: string;
   enharmonicPreference?: "sharp" | "flat" | null;
+  // Achado em teste manual: "o espaçamento vertical entre blocos deve
+  // respeitar o mesmo da view" — ArrangementView/index.tsx define
+  // --block-gap (0.5em compacto / 1em normal) como variável CSS só na sua
+  // própria árvore; o editor é uma árvore separada (nunca fica dentro de
+  // ArrangementView), então sem isto a variável simplesmente não existe
+  // aqui. Replica só o --block-gap (não o --block-px/--block-pt/--item-mb
+  // nem o fontSize do leitor — o editor não segue a preferência de
+  // tamanho de fonte da leitura, é um espaço deliberadamente separado).
+  density?: "compact" | "normal";
   onChangeUnits: (units: ClientSongUnit[]) => void;
 };
 
@@ -44,6 +53,7 @@ export default function BlockEditor({
   columns = 1,
   baseKey,
   enharmonicPreference = null,
+  density = "normal",
   onChangeUnits,
 }: BlockEditorProps) {
   const t = useTranslations("SongForm");
@@ -74,7 +84,10 @@ export default function BlockEditor({
   let runningOffset = 0;
 
   return (
-    <div className="space-y-4">
+    <div
+      className="space-y-4"
+      style={{ "--block-gap": density === "compact" ? "0.5em" : "1em" } as React.CSSProperties}
+    >
       <div className={`grid gap-4 ${getGridColumnClass(columns)}`}>
         {positionedColumns.map((column, columnIdx) => {
           const columnEndIndex = runningOffset + column.length;
@@ -175,7 +188,12 @@ function ColumnDropZone({ columnEndIndex, onMoveUnit, children }: ColumnDropZone
   return (
     <div
       ref={ref}
-      className={`space-y-2 rounded-lg transition-colors ${
+      // gap-[var(--block-gap)], não space-y-* fixo — achado em teste
+      // manual: "o espaçamento vertical entre blocos deve respeitar o
+      // mesmo da view" (ColumnViewer/index.tsx usa a mesma variável,
+      // definida em ArrangementView/index.tsx). flex flex-col é exigido
+      // pro `gap` funcionar (ao contrário de space-y-*, que não precisa).
+      className={`flex flex-col gap-[var(--block-gap)] rounded-lg transition-colors ${
         isDraggedOver ? "bg-zinc-100 outline-2 outline-dashed outline-zinc-300 outline-offset-4" : ""
       }`}
     >
