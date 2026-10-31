@@ -19,6 +19,7 @@ import {
   ChevronDown,
   ChevronUp,
   CopyIcon,
+  GripVertical,
   MessageSquareIcon,
   MoreVertical,
   Pointer,
@@ -128,7 +129,12 @@ export default function BlockShell({
 
   return (
     <div
-      className={`border ${colorClasses.border} ${colorClasses.background} rounded-lg p-2 md:p-4 mb-2 ${className || ""}`}
+      // borderHandleHover (:has() — ver unit-colors.ts) acende a borda do
+      // bloco INTEIRO quando o mouse passa só na alça de arrastar, achado:
+      // "é possível que o hover dela acenda a borda de todo o bloco? Usaria
+      // a mesma gradação de cor da borda, mais vivo e mais grosso". A alça
+      // ainda não arrasta nada — só a casca visual por enquanto.
+      className={`border ${colorClasses.border} ${colorClasses.background} ${colorClasses.borderHandleHover} rounded-lg p-2 md:p-4 mb-2 transition-[border-color,border-width] ${className || ""}`}
     >
       {/* Notas numa linha PRÓPRIA, acima dos ícones — achado em teste
           manual: colada na mesma linha que o TypeSelector/ícones, sem teto
@@ -162,6 +168,21 @@ export default function BlockShell({
       )}
 
       <div className="flex items-center gap-2 mb-2">
+        {/* Alça de arrastar — não o bloco inteiro (achado: "o bloco tem
+            acorde tocável, texto selecionável, menu... pegar em qualquer
+            lugar brigaria com isso"). Ainda só casca visual: cursor e o
+            aceso da borda (borderHandleHover acima); o arrasto de verdade
+            entra numa etapa seguinte do plano. */}
+        <button
+          type="button"
+          data-drag-handle
+          aria-label="Mover bloco (arraste ou use o menu)"
+          title="Mover bloco (arraste ou use o menu)"
+          className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0 cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical size={14} />
+        </button>
+
         <TypeSelector value={unit.type} number={number} onChange={onChangeType} />
 
         <div className="flex-1" />
