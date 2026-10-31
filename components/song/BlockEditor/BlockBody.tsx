@@ -790,20 +790,26 @@ function CaretLine({
               }}
               className={[
                 "relative inline-flex flex-col whitespace-pre-wrap mb-1.5",
-                // Só ganha respiro à direita quando não há NENHUMA letra
-                // própria (acordes colados, "[C][G]") — é o único caso em
-                // que não existe espaço de verdade (nem palavra, nem
-                // largura de chip) separando este item do próximo. O caso
-                // da convenção emparelhada não precisa mais disso: o
-                // rótulo agora está no fluxo (ver abaixo) e empurra o
-                // próximo item sozinho, pela própria largura.
+                // Ganha respiro à direita quando a letra própria não tem
+                // NENHUM caractere visível (trim) — cobre tanto "[C][G]"
+                // (colado) quanto "[C] [G]" (um espaço só, a notação comum
+                // de trecho instrumental). Achado em teste manual: um
+                // espaço sozinho não sobra como respiro de verdade — a
+                // largura da COLUNA do item é o maior entre acorde e letra
+                // (align-items:stretch no flex-col), e um acorde curto é
+                // quase sempre mais largo que um espaço só, então a letra
+                // fica espremida dentro da largura do próprio acorde, sem
+                // nunca criar gap nenhum. Palavra de verdade com espaço no
+                // fim ("Deus ") não cai aqui — o trim() não some com letras
+                // reais, só com espaço puro — porque aí é a PRÓPRIA palavra
+                // que domina a largura da coluna e sobra espaço de verdade.
                 // mr-2 (8px), não mr-1 (4px): medido num navegador real que
                 // 4px aplicava certinho mas ficava imperceptível entre dois
                 // chips do mesmo fundo (lê como "uma pastilha só", achado
                 // em teste manual com 3 acordes colados). 8px é o mesmo
                 // alcance da área de toque invisível (after:-left-2/-right-2
                 // do chipBase) — não é um número novo, é um que já existe.
-                item.lyrics.length === 0 ? "mr-2" : "",
+                item.lyrics.trim().length === 0 ? "mr-2" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
