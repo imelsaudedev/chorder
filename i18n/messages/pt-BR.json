@@ -116,6 +116,21 @@
     "ENDING": "Final",
     "TEXT": "Texto"
   },
+  "UnitTypesShort": {
+    "BLOCK": "B",
+    "INTRO": "I",
+    "VERSE": "V",
+    "PRECHORUS": "PR",
+    "CHORUS": "R",
+    "BRIDGE": "P",
+    "INTERLUDE": "IL",
+    "SOLO": "S",
+    "ENDING": "F",
+    "TEXT": "T"
+  },
+  "SongMap": {
+    "label": "Mapa da música"
+  },
   "ServiceView": {
     "editChords": "Editar cifras",
     "saveScopeTitle": "Salvar alterações",

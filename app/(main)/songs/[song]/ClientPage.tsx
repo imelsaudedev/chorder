@@ -19,7 +19,7 @@ export default function ClientPage({
     <SongConfigProvider>
       <ArrangementHeader arrangement={arrangement} />
       <MainWithDensity>
-        <ArrangementView arrangement={arrangement} />
+        <ArrangementView arrangement={arrangement} showMap />
       </MainWithDensity>
     </SongConfigProvider>
   );

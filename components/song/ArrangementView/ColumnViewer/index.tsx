@@ -21,6 +21,13 @@ type ColumnViewerProps = {
   density: Density;
   /** Renderizado dentro da última coluna, depois do último bloco — não abaixo de todas as colunas. */
   footer?: ReactNode;
+  // Mapa da música (SongMap): "tocar rola até o bloco" precisa de um
+  // elemento de verdade por unidade pra rolar até ele — findBestDistribution
+  // (column-logic.ts, regra de ouro: não alterar) só corta songUnits em
+  // faixas contíguas, nunca reordena, então o índice GLOBAL de cada
+  // unidade renderizada é só a posição corrida através das colunas (ver
+  // offset abaixo) — não precisa de nenhum campo novo vindo de lá.
+  onUnitRef?: (index: number, el: HTMLElement | null) => void;
 };
 
 export default function ColumnViewer({
@@ -32,11 +39,13 @@ export default function ColumnViewer({
   mode,
   density,
   footer,
+  onUnitRef,
 }: ColumnViewerProps) {
   const t = useTranslations("UnitTypes");
   const { columns, columnData } = useColumnData(songUnits, columnConfig);
   const gridColsClass = getGridColumnClass(mode, columns);
   const isTextMode = mode === "text";
+  let globalIndex = -1;
 
   return (
     <div
@@ -48,6 +57,8 @@ export default function ColumnViewer({
           className="flex flex-col gap-[var(--block-gap)]"
         >
           {data.map((unit, unitIdx) => {
+            globalIndex += 1;
+            const thisIndex = globalIndex;
             const isTextUnit = unit.unitType === "TEXT";
             const unitClasses = unitColorClasses[unit.unitType];
 
@@ -55,10 +66,19 @@ export default function ColumnViewer({
               return (
                 <div
                   key={`unit-${unitIdx}`}
-                  className={clsx({
-                    "py-[0.5em]": isTextMode,
-                    "bg-muted rounded-lg p-[1em]": !isTextMode,
-                  })}
+                  ref={onUnitRef ? (el) => onUnitRef(thisIndex, el) : undefined}
+                  className={clsx(
+                    // scroll-mt: desconta a altura do cabeçalho sticky ao
+                    // rolar até aqui pelo mapa da música — --song-header-h
+                    // só existe onde há um cabeçalho sticky de verdade
+                    // (ServiceSongUnitView.tsx); nos demais contextos o
+                    // fallback 0px não desconta nada.
+                    onUnitRef && "scroll-mt-[var(--song-header-h,0px)]",
+                    {
+                      "py-[0.5em]": isTextMode,
+                      "bg-muted rounded-lg p-[1em]": !isTextMode,
+                    }
+                  )}
                 >
                   <MarkdownViewer content={unit.content || ""} />
                 </div>
@@ -68,10 +88,16 @@ export default function ColumnViewer({
             return (
               <div
                 key={`unit-${unitIdx}`}
-                className={clsx(unitClasses.background, unitClasses.border, {
-                  "border-t bg-transparent mb-[1em]": isTextMode,
-                  "border rounded-lg pb-[0.5em]": !isTextMode,
-                })}
+                ref={onUnitRef ? (el) => onUnitRef(thisIndex, el) : undefined}
+                className={clsx(
+                  unitClasses.background,
+                  unitClasses.border,
+                  onUnitRef && "scroll-mt-[var(--song-header-h,0px)]",
+                  {
+                    "border-t bg-transparent mb-[1em]": isTextMode,
+                    "border rounded-lg pb-[0.5em]": !isTextMode,
+                  }
+                )}
               >
                 <div
                   className={clsx(

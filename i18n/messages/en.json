@@ -115,6 +115,21 @@
     "BLOCK": "Block",
     "TEXT": "Text"
   },
+  "UnitTypesShort": {
+    "BLOCK": "B",
+    "INTRO": "I",
+    "VERSE": "V",
+    "PRECHORUS": "PR",
+    "CHORUS": "R",
+    "BRIDGE": "P",
+    "INTERLUDE": "IL",
+    "SOLO": "S",
+    "ENDING": "F",
+    "TEXT": "T"
+  },
+  "SongMap": {
+    "label": "Song map"
+  },
   "ServiceView": {
     "editChords": "Edit chords",
     "saveScopeTitle": "Save changes",

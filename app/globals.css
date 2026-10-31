@@ -189,3 +189,31 @@ html.stage-mode-active .lg\:ml-20,
 html.stage-mode-active .sm\:ml-20 {
   margin-left: 0;
 }
+
+/* Mapa da música (SongMap) — linha rolável sem barra de rolagem visível,
+   igual ao protótipo (docs/prototipo-cifras: "scrollbar-width:none"). Sem
+   utilitário Tailwind pronto pra isso. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Destaque breve ao rolar até um bloco pelo mapa da música (seção 8.2/9.9
+   das specs) — mesmo efeito do protótipo (anel que desaparece), parado
+   com prefers-reduced-motion em vez de global (não queremos desligar
+   TODA transição do app, só esta). */
+@keyframes scroll-target-flash {
+  0% { box-shadow: 0 0 0 4px var(--ring); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.scroll-target-flash {
+  animation: scroll-target-flash 0.9s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-target-flash {
+    animation: none;
+  }
+}

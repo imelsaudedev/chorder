@@ -133,6 +133,7 @@ export default function ServiceSongUnitView({
           ) : (
             <ArrangementView
               arrangement={arrangement}
+              showMap
               footer={
                 arrangement.song?.artist ? (
                   <p className="text-sm text-muted-foreground">
