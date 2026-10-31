@@ -34,7 +34,9 @@ export default function ServiceArrangementMeta({
 
   return (
     <div className="flex flex-wrap items-center gap-2 pb-3 md:hidden">
-      {!isEditing && arrangement.key && <KeySelectorButton originalKey={arrangement.key} />}
+      {/* Visível também durante a edição — ver o mesmo achado em
+          ServiceArrangementHeader.tsx. */}
+      {arrangement.key && <KeySelectorButton originalKey={arrangement.key} />}
 
       {!isEditing && arrangement.songId && (
         <ServiceMediaReferences
