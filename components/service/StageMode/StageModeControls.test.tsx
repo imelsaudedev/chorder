@@ -140,10 +140,10 @@ describe("StageModeControls — rolagem (play separado da velocidade)", () => {
 });
 
 describe("StageModeControls — mapa no lugar do título", () => {
-  it("com o mapa, esconde o título mas mantém contador, configurações e sair", () => {
+  it("com o mapa, mostra o mapa numa linha abaixo e mantém título, contador, configurações e sair", () => {
     render(<StageModeControls {...baseProps} map={<div data-testid="mapa" />} />);
     expect(screen.getByTestId("mapa")).toBeDefined();
-    expect(screen.queryByText("Nada Além do Sangue")).toBeNull();
+    expect(screen.getByText("Nada Além do Sangue")).toBeDefined();
     expect(screen.getByText("3/5")).toBeDefined();
     expect(screen.getByRole("button", { name: /configurações/i })).toBeDefined();
     expect(screen.getByRole("button", { name: /sair do modo palco/i })).toBeDefined();

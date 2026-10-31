@@ -29,6 +29,7 @@ describe("SongMap", () => {
           { type: "VERSE" },
           { type: "CHORUS" },
         ]}
+        onSelectUnit={() => {}}
       />
     );
     const chips = screen.getAllByRole("button");
@@ -36,8 +37,22 @@ describe("SongMap", () => {
   });
 
   it("rótulo acessível e title têm o nome completo com número", () => {
-    render(<SongMap units={[{ type: "CHORUS" }, { type: "CHORUS" }]} />);
+    render(<SongMap units={[{ type: "CHORUS" }, { type: "CHORUS" }]} onSelectUnit={() => {}} />);
     expect(screen.getByRole("button", { name: "Refrão 2" })).toBeDefined();
+  });
+
+  it("sem onSelectUnit os chips são só informação (não são botões)", () => {
+    render(<SongMap units={[{ type: "VERSE" }, { type: "CHORUS" }]} />);
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
+    expect(screen.getByLabelText("Verso 1").textContent).toBe("V1");
+  });
+
+  it("fit: mostra todos os chips numa linha só, sem rolagem horizontal", () => {
+    const units = Array.from({ length: 20 }, (_, i) => ({ type: i % 2 ? ("CHORUS" as const) : ("VERSE" as const) }));
+    render(<SongMap fit units={units} />);
+    const group = screen.getByRole("group");
+    expect(group.className).not.toContain("overflow-x-auto");
+    expect(group.children).toHaveLength(20);
   });
 
   it("tocar um chip chama onSelectUnit com o índice certo", async () => {

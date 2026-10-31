@@ -1,7 +1,6 @@
 "use client";
 
 import IncreaseDecreaseButtonSet from "@/components/common/IncreaseDecreaseButtonSet";
-import Text from "@/components/common/Text";
 import KeyButtonSet from "@/components/config/KeyButtonSet";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,14 +18,14 @@ export const FONT_MIN = 16;
 export const FONT_MAX = 40;
 const FONT_STEP = 2;
 
-/** Altura da barra superior (h-14) — o início de cada música fica logo abaixo dela. */
-export const TOP_BAR_HEIGHT_PX = 56;
+/** Altura da barra superior (h-16: linha do título h-10 + linha do mapa h-6) — o início de cada música fica logo abaixo dela. */
+export const TOP_BAR_HEIGHT_PX = 64;
 
 type StageModeControlsProps = {
   songTitles: string[];
   currentIndex: number;
   onSelectSong: (index: number) => void;
-  /** Mapa compacto da música atual; quando presente, ocupa o lugar do título (a barra mantém h-14). */
+  /** Mapa da música atual, numa linha própria abaixo do título (variante `fit` do SongMap). */
   map?: ReactNode;
   originalKey: string;
   transpose: number;
@@ -64,22 +63,19 @@ export default function StageModeControls({
     <>
       {/* Barra superior — música atual (toque abre a lista do culto pra
           pular direto) + um único ícone de configuração (tom + fonte). */}
-      <div className="fixed top-0 inset-x-0 h-14 z-50 flex items-center px-4 sm:px-6 lg:px-8 gap-1 bg-background/90 backdrop-blur-sm border-b border-border">
+      <div className="fixed top-0 inset-x-0 h-16 z-50 flex flex-col px-4 sm:px-6 lg:px-8 bg-background/90 backdrop-blur-sm border-b border-border">
+        <div className="flex h-10 shrink-0 items-center gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               aria-label="Escolher música"
-              className="min-w-0 px-2 -ml-2 gap-2 justify-start"
+              className="h-8 min-w-0 px-2 -ml-2 gap-2 justify-start"
             >
-              <span className="shrink-0 text-sm text-muted-foreground tabular-nums">
+              <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                 {currentIndex + 1}/{songTitles.length}
               </span>
-              {!map && (
-                <Text variant="heading-sm" as="span" className="truncate">
-                  {songTitles[currentIndex]}
-                </Text>
-              )}
+              <span className="truncate text-sm font-semibold">{songTitles[currentIndex]}</span>
               <ChevronDown size={18} className="shrink-0 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
@@ -97,9 +93,7 @@ export default function StageModeControls({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {map && <div className="min-w-0 flex-1 flex items-center">{map}</div>}
-
-        <div className={`flex items-center shrink-0 gap-0.5 ${map ? "" : "ml-auto"}`}>
+        <div className="flex items-center shrink-0 ml-auto gap-0.5">
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Configurações" className="text-muted-foreground">
@@ -141,6 +135,10 @@ export default function StageModeControls({
             <X size={20} />
           </Button>
         </div>
+        </div>
+
+        {/* Mapa da música atual — uma linha só, sempre visível, só informação. */}
+        <div className="flex h-6 shrink-0 items-center">{map}</div>
       </div>
 
       {/* Rolagem — flutuante e centralizada, sem barra de fundo. Parar e
