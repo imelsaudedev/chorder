@@ -6,6 +6,7 @@ import { ClientService, ServiceRef } from "@/prisma/models";
 import { Calendar, ChevronLeft, ChevronRight, MicVocal } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import HolyricsSetlistButton from "./HolyricsSetlistButton";
 import ServiceActionMenu from "./ServiceActionMenu";
 import Skeleton from "./Skeleton";
 
@@ -32,6 +33,8 @@ export default function ServiceHeader({ service }: ServiceHeaderProps) {
           <div className="flex gap-1 items-center">
             <ServiceNavButton dir="prev" serviceRef={service.prevService} />
             <ServiceNavButton dir="next" serviceRef={service.nextService} />
+            {/* Holyrics: ícone ao lado das setinhas, em qualquer aba. */}
+            <HolyricsSetlistButton service={service} iconOnly />
             <div className="w-px h-5 bg-border mx-1" />
             <ServiceActionMenu service={service} />
           </div>

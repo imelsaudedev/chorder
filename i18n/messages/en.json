@@ -45,6 +45,7 @@
     "fontSize": "Font size",
     "mode": "Mode",
     "config": "Configuration",
+    "layout": "Layout",
     "auto": "Automatic",
     "density": "Densidade",
     "compact": "Compact",
@@ -55,6 +56,7 @@
   "Modes": {
     "text": "Text",
     "lyrics": "Lyrics",
+    "conventions": "Conventions",
     "chords": "Chords"
   },
   "Service": {

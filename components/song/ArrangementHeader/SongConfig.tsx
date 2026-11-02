@@ -21,7 +21,7 @@ export default function SongConfig() {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm font-semibold text-primary">{t("Messages.config")}</p>
+      <p className="text-sm font-semibold text-primary">{t("Messages.layout")}</p>
 
       <div className="flex flex-col gap-1.5">
         <span className="text-xs text-zinc-500">{t("Messages.mode")}</span>

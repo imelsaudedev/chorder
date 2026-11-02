@@ -8,7 +8,6 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
-import HolyricsSetlistButton from "./ServiceHeader/HolyricsSetlistButton";
 import ServiceConfig from "./ServiceHeader/ServiceConfig";
 
 // No celular só o ícone (quadrado); a partir de sm, ícone + rótulo.
@@ -29,10 +28,8 @@ export default function ServiceActionsBar({ service, view }: ServiceActionsBarPr
           <EditPlanButton />
         </>
       ) : (
-        <>
-          <HolyricsSetlistButton service={service} />
-          <ConfigButton />
-        </>
+        // (o Holyrics saiu daqui: agora é um ícone no topo, ao lado das setinhas — ServiceHeader)
+        <ConfigButton />
       )}
     </div>
   );
@@ -92,9 +89,9 @@ function ConfigButton() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" aria-label={t("config")} className={RESPONSIVE}>
+        <Button type="button" variant="outline" aria-label={t("layout")} className={RESPONSIVE}>
           <SlidersHorizontal aria-hidden="true" />
-          <span className="hidden sm:inline">{t("config")}</span>
+          <span className="hidden sm:inline">{t("layout")}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="end">

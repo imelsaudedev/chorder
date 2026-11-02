@@ -83,7 +83,7 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <SlidersHorizontal />
-                  <span className="sr-only">{t("toggleConfig")}</span>
+                  <span className="sr-only">{t("layout")}</span>
                 </Button>
               </PopoverTrigger>
               <ArrangementActionMenu

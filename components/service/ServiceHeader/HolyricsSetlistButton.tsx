@@ -8,9 +8,13 @@ import { CheckCircle2, Circle, Loader2, Radio, RefreshCw, XCircle } from "lucide
 import Link from "next/link";
 import { useState } from "react";
 
-type Props = { service: ClientService };
+type Props = {
+  service: ClientService;
+  /** Só o ícone, no estilo das setinhas do topo (ghost, quadrado). Sem isso: botão com rótulo. */
+  iconOnly?: boolean;
+};
 
-export default function HolyricsSetlistButton({ service }: Props) {
+export default function HolyricsSetlistButton({ service, iconOnly = false }: Props) {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [sendError, setSendError] = useState("");
@@ -72,13 +76,15 @@ export default function HolyricsSetlistButton({ service }: Props) {
       <PopoverTrigger asChild>
         <Button
           type="button"
-          variant="outline"
+          variant={iconOnly ? "ghost" : "outline"}
+          size={iconOnly ? "icon" : undefined}
           disabled={sending}
           aria-label="Holyrics"
-          className="max-sm:w-9 max-sm:px-0"
+          title="Holyrics"
+          className={iconOnly ? undefined : "max-sm:w-9 max-sm:px-0"}
         >
           {triggerIcon}
-          <span className="hidden sm:inline">Holyrics</span>
+          {!iconOnly && <span className="hidden sm:inline">Holyrics</span>}
         </Button>
       </PopoverTrigger>
 
