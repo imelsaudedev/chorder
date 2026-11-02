@@ -97,7 +97,10 @@ export default function StageMode({
 
   // Tom é só da sessão, elevado pelo ServiceView para sobreviver à troca
   // entre o modo normal e o Modo Palco; fonte e velocidade vêm do aparelho.
-  const [transposes, setTransposes] = useState(initialTransposes);
+  // Sempre do tamanho das músicas: se o ServiceView mandar menos tons (ex.:
+  // calculou antes do culto terminar de carregar), o que falta vale 0 — um tom
+  // `undefined` chegando no seletor de tom derrubava a tela ao abrir Configurações.
+  const [transposes, setTransposes] = useState(() => units.map((_, i) => initialTransposes[i] ?? 0));
   const [fontSize, setFontSize] = useLocalStorageState(
     FONT_SIZE_KEY,
     Math.min(FONT_MAX, Math.max(FONT_MIN, initialFontSize))
@@ -308,7 +311,7 @@ export default function StageMode({
                   </span>
                   <div className="h-px flex-1 bg-border" />
                 </div>
-                <SongConfigProvider transpose={transposes[entry.songIndex]} columns={1} fontSize={fontSize}>
+                <SongConfigProvider transpose={transposes[entry.songIndex] ?? 0} columns={1} fontSize={fontSize}>
                   <ArrangementView arrangement={arrangement} />
                 </SongConfigProvider>
               </section>
@@ -331,13 +334,13 @@ export default function StageMode({
 
       {/* StageModeControls renderiza KeyButtonSet, que precisa de um
           SongConfigProvider ancestral — o da música atual. */}
-      <SongConfigProvider transpose={transposes[currentIndex]} columns={1} fontSize={fontSize}>
+      <SongConfigProvider transpose={transposes[currentIndex] ?? 0} columns={1} fontSize={fontSize}>
         <StageModeControls
           indexLabel={indexLabel}
           title={title}
           map={headerMap}
           originalKey={currentArrangement?.key ?? ""}
-          transpose={transposes[currentIndex]}
+          transpose={transposes[currentIndex] ?? 0}
           setTranspose={setCurrentTranspose}
           fontSize={fontSize}
           onFontSizeChange={setFontSize}
