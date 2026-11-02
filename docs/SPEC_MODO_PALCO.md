@@ -1,5 +1,7 @@
 # SPEC: Modo Palco (substitui o fullscreen atual)
 
+> **Status: documento histórico.** Esta é a spec inicial da tarefa; a implementação evoluiu (rolagem contínua única em vez de coluna única só com rolagem ligada, roteiro opcional, visão geral, tela cheia real, controles no rodapé). O comportamento atual está descrito em `CLAUDE.md`, seção "Arquitetura: Modo Palco".
+
 > Documento de entrada para o Claude Code. Descreve o problema, o comportamento desejado e os limites do trabalho. **Não prescreve implementação, estrutura de arquivos nem modelo de dados.** Leia o código existente primeiro e adapte-se às convenções do projeto.
 
 ## 1. Como trabalhar nesta tarefa

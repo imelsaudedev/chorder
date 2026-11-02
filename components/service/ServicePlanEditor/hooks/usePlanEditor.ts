@@ -183,6 +183,12 @@ export function usePlanEditor(initialService: ClientService) {
     [mutate]
   );
 
+  // Substitui o culto em edição (recuperação de rascunho) e marca como alterado.
+  const restore = useCallback((restored: ClientService) => {
+    setService(restored);
+    setIsDirty(true);
+  }, []);
+
   const save = useCallback(async () => {
     const saved = await createOrUpdateService(service);
     setIsDirty(false);
@@ -206,5 +212,6 @@ export function usePlanEditor(initialService: ClientService) {
     loadTemplate,
     updateServiceMeta,
     save,
+    restore,
   };
 }

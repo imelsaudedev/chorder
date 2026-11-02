@@ -2,22 +2,18 @@ import { useDeleteService } from "@/app/api/api-client";
 import ActionMenu from "@/components/common/ActionMenu";
 import { ClientService } from "@/prisma/models";
 import { useTranslations } from "next-intl";
-import { usePathname } from "next/navigation";
 
 interface ServiceActionMenuProps {
   service: ClientService;
 }
 
+// Só ações destrutivas ficam aqui; editar o roteiro está na barra de ações da liturgia.
 export default function ServiceActionMenu({ service }: ServiceActionMenuProps) {
   const t = useTranslations();
-  const pathname = usePathname();
-  const editUrl = `${pathname}/edit`;
   const { deleteService, isMutating } = useDeleteService(service.id!);
 
   return (
     <ActionMenu
-      editUrl={editUrl}
-      editLabel={t("Messages.editService")}
       isDeleting={isMutating}
       isDuplicating={false}
       onDelete={deleteService}

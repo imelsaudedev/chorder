@@ -5,6 +5,7 @@ import ConfirmDiscardDialog from "@/components/common/ConfirmDiscardDialog";
 import FormFooter from "@/components/common/FormFooter";
 import ServicePlanDrawer, { ServicePlanConfig } from "@/components/service/ServicePlanDrawer";
 import { Button } from "@/components/ui/button";
+import { friendlySaveError } from "@/lib/friendly-save-error";
 import { ClientService } from "@/prisma/models";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useTranslations } from "next-intl";
@@ -12,9 +13,12 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { DrawerState, findUnitByClientId, usePlanEditor } from "./hooks/usePlanEditor";
+import DraftRecoveryDialog from "./DraftRecoveryDialog";
+import { usePlanDraft } from "./hooks/usePlanDraft";
 import ServiceItemDrawer from "./ServiceItemDrawer";
 import ServiceItemPanel from "./ServiceItemPanel";
 import SongFlow from "./SongFlow";
+import { listPendingUnits } from "./unitSummary";
 import { UnitFormHandle } from "./ServiceItemForms";
 import ServicePlanHeader from "./ServicePlanHeader";
 import ServiceTimeline from "./ServiceTimeline";
@@ -33,6 +37,7 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
   const viewUrl = `/services/${service.slug}`;
 
   const editor = usePlanEditor(service);
+  const draft = usePlanDraft(service, editor.service, editor.isDirty);
   const [metaDrawerOpen, setMetaDrawerOpen] = useState(false);
   // Filtros por tag do seletor de músicas: duram enquanto o editor está aberto,
   // para adicionar várias músicas seguidas do mesmo tipo sem refazer o filtro.
@@ -71,6 +76,18 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
     );
   }
 
+  const pendingUnits = listPendingUnits(sections);
+  // Rola até o primeiro item incompleto e abre o editor dele (menos Música, que
+  // se resolve escolhendo a música no próprio item).
+  function goToFirstPending() {
+    const first = pendingUnits[0];
+    if (!first) return;
+    document
+      .querySelector(`[data-unit-id="${first.clientId}"]`)
+      ?.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (first.type !== "SONG") openDrawer({ type: "edit-unit", clientId: first.clientId });
+  }
+
   const panelRef = useRef<UnitFormHandle>(null);
   function openDrawer(next: DrawerState) {
     const currentClientId = editor.drawer.type === "edit-unit" ? editor.drawer.clientId : null;
@@ -84,6 +101,7 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
   async function handleSave() {
     try {
       const saved = await editor.save();
+      draft.clear();
       if (onSaved) onSaved(saved);
     } catch (err) {
       if (err instanceof ServiceSaveError && err.status === 409) {
@@ -95,7 +113,13 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
         });
         return;
       }
-      toast.error("Não foi possível salvar o culto. Tente novamente.");
+      const friendly =
+        err instanceof ServiceSaveError && err.status === 400
+          ? friendlySaveError(err.message, editor.service)
+          : null;
+      toast.error("Não foi possível salvar o culto.", {
+        description: friendly ?? "Tente novamente em instantes.",
+      });
     }
   }
 
@@ -193,20 +217,36 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
         label={t("saveService")}
         onSave={handleSave}
         status={
-          editor.isSaving ? (
-            "Salvando…"
-          ) : editor.isDirty ? (
-            <span className="inline-flex items-center gap-1.5">
-              <span aria-hidden="true" className="size-2 rounded-full bg-secondary" />
-              Não salvo
-            </span>
-          ) : (
-            "Tudo salvo"
-          )
+          <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
+            {editor.isSaving ? (
+              "Salvando…"
+            ) : editor.isDirty ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden="true" className="size-2 rounded-full bg-secondary" />
+                Não salvo · rascunho neste aparelho
+              </span>
+            ) : (
+              "Tudo salvo"
+            )}
+            {pendingUnits.length > 0 && (
+              <button
+                type="button"
+                onClick={goToFirstPending}
+                className="cursor-pointer rounded-sm font-medium text-amber-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                {pendingUnits.length} {pendingUnits.length === 1 ? "item pendente" : "itens pendentes"}
+              </button>
+            )}
+          </span>
         }
         cancelButton={
           editor.isDirty ? (
-            <ConfirmDiscardDialog onDiscard={() => router.push(viewUrl)}>
+            <ConfirmDiscardDialog
+              onDiscard={() => {
+                draft.clear();
+                router.push(viewUrl);
+              }}
+            >
               <Button type="button" variant="outline">{t("cancel")}</Button>
             </ConfirmDiscardDialog>
           ) : (
@@ -228,6 +268,25 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
         onAddUnit={editor.addUnit}
         onUpdateUnit={editor.updateUnit}
         onRemoveUnit={editor.removeUnit}
+      />
+
+      <DraftRecoveryDialog
+        draft={draft.pending}
+        conflict={draft.conflict}
+        onDiscard={draft.clear}
+        onRestore={() => {
+          if (draft.pending) {
+            // Mantém identidade e updatedAt do servidor atual: assim, ao salvar,
+            // o rascunho vira a versão vigente em vez de dar conflito.
+            editor.restore({
+              ...draft.pending.service,
+              id: service.id,
+              slug: service.slug,
+              updatedAt: service.updatedAt,
+            });
+          }
+          draft.dismiss();
+        }}
       />
 
       {/* Meta drawer */}

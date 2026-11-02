@@ -5,6 +5,7 @@ import Main from "@/components/common/Main";
 import ServiceConfigProvider, {
   useServiceConfig,
 } from "@/components/config/ServiceConfig";
+import ServiceActionsBar from "@/components/service/ServiceActionsBar";
 import ServiceHeader from "@/components/service/ServiceHeader";
 import ServiceLiturgyView from "@/components/service/ServiceLiturgyView";
 import ServiceView from "@/components/service/ServiceView";
@@ -40,7 +41,7 @@ export default function ClientPage({ serviceSlug }: ClientPageProps) {
       </div>
 
       <Tabs value={view} onValueChange={handleViewChange} className="flex flex-col gap-0">
-        <div className="stage-mode-hidden px-4 sm:px-5 lg:px-8 pb-4">
+        <div className="stage-mode-hidden flex items-center justify-between gap-2 px-4 sm:px-5 lg:px-8 pb-4">
           <TabsList aria-label="Visão do culto" className="h-11 p-1 bg-muted/50">
             <TabsTrigger value="liturgia" className="h-full min-w-24 px-4 cursor-pointer">
               <ListOrdered aria-hidden="true" />
@@ -51,6 +52,7 @@ export default function ClientPage({ serviceSlug }: ClientPageProps) {
               Cifras
             </TabsTrigger>
           </TabsList>
+          {service && <ServiceActionsBar service={service} view={view} />}
         </div>
 
         <TabsContent value="liturgia" className="mt-0">

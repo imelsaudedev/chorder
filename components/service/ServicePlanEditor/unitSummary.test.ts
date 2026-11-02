@@ -13,6 +13,14 @@ function unit(partial: Partial<ClientServiceUnit> & Pick<ClientServiceUnit, "typ
 }
 
 describe("summarizeUnit (culto)", () => {
+  it("sermão mostra pregador e referência lado a lado", () => {
+    const s = summarizeUnit(
+      unit({ type: "SERMAO", metadata: { preacher: "Ziel", reference: "Jo 3:16" } }),
+      "Sermão"
+    );
+    expect(s.subtitle).toBe("Ziel · Jo 3:16");
+  });
+
   it("fala com título mas sem quem faz: mostra o título, continua pendente e diz o que falta", () => {
     const s = summarizeUnit(unit({ type: "FALA", label: "Boas-vindas" }), "Fala");
     expect(s.title).toBe("Boas-vindas");

@@ -7,6 +7,13 @@ import {
 import { serviceSchema } from "@/schemas/service";
 import { NextRequest } from "next/server";
 
+// Resposta 400 estruturada quando o corpo não passa na validação; o cliente
+// traduz os problemas para uma mensagem amigável (lib/friendly-save-error).
+function invalidServiceResponse(error: import("zod").ZodError) {
+  const issues = error.issues.map(({ path, message }) => ({ path, message }));
+  return Response.json({ error: "invalid", issues }, { status: 400 });
+}
+
 export async function GET(
   request: Request,
   {
@@ -77,7 +84,9 @@ export async function POST(
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
   const { slugOrId } = await params;
-  const service = serviceSchema.parse(await request.json());
+  const parsed = serviceSchema.safeParse(await request.json());
+  if (!parsed.success) return invalidServiceResponse(parsed.error);
+  const service = parsed.data;
   if (service.id !== parseInt(slugOrId) && service.slug !== slugOrId) {
     return new Response(
       `Arrangement ID or slug mismatch. Expected ${

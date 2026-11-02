@@ -99,14 +99,18 @@ Componentes que precisam aparecer sobre Drawers e headers com `backdrop-filter` 
 
 ## Arquitetura: Modo Palco
 
-Substituiu o fullscreen na página do culto (spec em `docs/SPEC_MODO_PALCO.md`). Código em `components/service/StageMode/`.
+Substituiu o fullscreen na página do culto (spec original e histórica em `docs/SPEC_MODO_PALCO.md`; o comportamento atual está aqui). Código em `components/service/StageMode/`.
 
-- Todas as músicas do culto numa única rolagem contínua; só as músicas (`type === "SONG"`) entram, itens de outros tipos ficam de fora.
-- Esconde a navegação via classe `stage-mode-active` em `<html>` + `.stage-mode-hidden` nos elementos a esconder (ver `app/globals.css`). **Não existe mais** `fullscreen-hidden` nem `:fullscreen`.
-- Persistência só no aparelho (`localStorage`, via `hooks/useLocalStorageState`), chaves `modo-palco:*`: fonte única (`modo-palco:fontSize`) e velocidade por arranjo (`modo-palco:<arranjo>:scrollSpeed`). O tom não é persistido.
+- Entrada: botão `variant="secondary"` com ícone Maximize na tela do culto. Pede **tela cheia real** (Fullscreen API) com fallback silencioso (iPhone/Safari não tem); sair pelo sistema fecha o Palco.
+- Todas as músicas do culto numa única rolagem contínua. Por padrão só `type === "SONG"` entra; com **Exibir roteiro** ligado (`modo-palco:showRoteiro`, off por padrão) os demais itens aparecem como `StageRoteiroItem`, a rolagem pausa em cada um e há vão de 2em entre música e conjunto de itens.
+- Cabeçalho: só informação (título e mapa da música). Rodapé no padrão do sistema: − ▶ + (velocidade), seletor Rolagem/Geral, Configurações (Popover, padrão do `ServiceConfig`) e Sair.
+- **Visão geral** (`StageOverview`): a música inteira numa tela, com encaixe automático de colunas × densidade. Constantes (piso 11px, conforto 14px, 300px/coluna, ≤70% de altura para 1 coluna, tolerância 1px) **ainda sem calibração em aparelho**. Ajustes manuais por música (colunas, fonte, densidade, cada um com Auto). Navegação por ◀ n/N ▶, setas/PageUp/PageDown e deslizar na vertical.
+- Esconde a navegação via classe `stage-mode-active` em `<html>` + `.stage-mode-hidden` nos elementos a esconder (ver `app/globals.css`). **Não existe mais** `fullscreen-hidden` nem `:fullscreen`. A área rolável usa `no-scrollbar` (sem barra visível) para alinhar com cabeçalho e rodapé.
+- Persistência só no aparelho (`localStorage`, via `hooks/useLocalStorageState`), chaves `modo-palco:*`: `fontSize` (fonte única), `showRoteiro`, `layout`, `<arranjo>:scrollSpeed` e `<arranjo>:overview`. O tom não é persistido.
 - Tela sempre ligada: `useWakeLock` (API nativa, **só funciona em HTTPS**; em HTTP aparece o aviso de que a tela pode apagar). Testar no Preview da Vercel ou num túnel HTTPS, não por `http://<ip>:3000`.
 - Botão voltar: entrar no modo empilha uma entrada no histórico (`useStageModeHistory`); voltar fecha o modo antes de sair da página.
 - Rolagem automática: `requestAnimationFrame` com acúmulo de fração de pixel (`computeScrollStep`); para no divisor da próxima música e retoma sozinha depois de rolagem manual. Velocidades 0.25x–1x, base em `useAutoScroll.ts`.
+- Blocos podem ser minimizados (chevron no cabeçalho do bloco), também no Palco; estado em `collapsed-units:<arrangementId>` por **posição** do bloco (`hooks/useCollapsedUnits.ts`) — reorganizar a cifra pode deslocar quais aparecem minimizados.
 
 ## Checklist ao adicionar campo a um modelo Prisma
 
