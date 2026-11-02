@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useMediaBarOpen } from "@/hooks/useMediaBarOpen";
 import { ClientService, ClientServiceUnit } from "@/prisma/models";
-import { Mic2 } from "lucide-react";
+import { Maximize } from "lucide-react";
 import { pushStageModeEntry } from "@/components/service/StageMode/useStageModeHistory";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
@@ -235,12 +235,12 @@ export default function ServiceView({ service }: ServiceViewProps) {
         }`}
       >
         <Button
-          variant="secondary"
+          variant="outline"
           aria-label="Entrar no Modo Palco"
           onClick={enterStageMode}
-          className="shadow-md rounded-full gap-1.5"
+          className="shadow-md gap-1.5"
         >
-          <Mic2 size={18} />
+          <Maximize size={18} />
           Palco
         </Button>
       </div>

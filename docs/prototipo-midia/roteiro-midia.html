@@ -2,256 +2,288 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Roteiro da Mídia — protótipo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Culto — Roteiro, Cifras e Mídia</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Figtree:wght@500;600;700&display=swap">
 <style>
+/* Visual: página do culto do Chorder (linha do tempo: horário | ícone no fio | texto), cores e tipografia do protótipo de cifras,
+   ícones por tipo de item de components/service/ServicePlanEditor/unitConfig.ts. */
 :root{
-  --bg:#f6f8f7;--card:#fff;--fg:#0f1a17;--mut:#5f6f69;--line:#dbe3df;--hover:#eef3f1;
-  --act:#059669;--actf:#fff;--actbg:#ecfdf5;--actbd:#6ee7b7;
-  --warn-bg:#fff8e1;--warn-bd:#f3dc9b;--warn-fg:#a16207;
-  --c-info:#2563eb;--c-video:#7c3aed;--c-img:#0e7490;--c-ins:#be123c;--c-com:#a16207;--c-aud:#047857;
+  --bg:#fff;--fg:#0b1220;--mfg:#5b6b82;--soft:#8693a6;--line:#e2e6ec;--line2:#d9dee6;
+  --hover:#f1f4f8;--seg2:#d7dce4;--act:#2463eb;--actf:#fff;--selbg:#e8effd;
+  --fio:rgba(91,107,130,.4);--red:#dc2626;--grn:#16a34a;--warnbg:#fff3e0;--warnfg:#8a4500;
+  --emerald:#059669;--blue:#3b82f6;--amber:#d97706;--pink:#ec4899;--orange:#f97316;--violet:#7c3aed;
 }
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0c1311;--card:#141d1a;--fg:#e8f0ed;--mut:#93a59e;--line:#25322e;--hover:#1b2723;
-  --act:#34d399;--actf:#052e22;--actbg:#0f2a21;--actbd:#1f6b50;
-  --warn-bg:#2a2210;--warn-bd:#5a4716;--warn-fg:#e8c15a;
-}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c1222;--fg:#f2f5fb;--mfg:#9aa9bf;--soft:#6b7a93;--line:#26314a;--line2:#33405a;
+  --hover:#18213a;--seg2:#1f2940;--act:#4b84f7;--actf:#0c1222;--selbg:#16254a;
+  --fio:rgba(154,169,191,.4);--red:#ff7a7a;--grn:#4ade80;--warnbg:#33290f;--warnfg:#ffd36a;
+  --emerald:#34d399;--blue:#60a5fa;--amber:#fbbf24;--pink:#f472b6;--orange:#fb923c;--violet:#a78bfa;
+  color-scheme:dark}}
 *{box-sizing:border-box}
-body{margin:0;font:15px/1.4 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
-button,select,input,textarea{font:inherit;color:inherit}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 14px/20px 'IBM Plex Sans',system-ui,sans-serif;padding-bottom:48px}
+button,input{font:inherit;color:inherit}
 button{cursor:pointer}
-header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px}
-.top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:860px;margin:0 auto}
-h1{font-size:17px;margin:0;flex:1 1 200px}
-h1 small{display:block;font-weight:400;color:var(--mut);font-size:12px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.seg button{border:0;background:none;padding:7px 14px}
-.seg button[aria-pressed=true]{background:var(--act);color:var(--actf);font-weight:600}
-.roles{max-width:860px;margin:8px auto 0;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.chip{border:1px solid var(--line);background:none;border-radius:999px;padding:3px 11px;font-size:13px}
-.chip[aria-pressed=true]{background:var(--actbg);border-color:var(--actbd);color:var(--act);font-weight:600}
-main{max-width:860px;margin:0 auto;padding:14px 16px 90px}
-.banner{background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn-fg);border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start}
-.banner button{margin-left:auto;border:1px solid var(--warn-bd);background:none;border-radius:8px;padding:3px 10px;color:inherit;white-space:nowrap}
-.sec{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:20px 0 6px;font-weight:700}
-.item{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;align-items:center}
-.item .t{font-variant-numeric:tabular-nums;color:var(--mut);width:48px;flex:none;font-size:13px}
-.item .n{font-weight:600;flex:1}
-.item .n small{display:block;font-weight:400;color:var(--mut);font-size:12.5px}
-.tag{font-size:11px;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--mut)}
-.item.cur{border-color:var(--act);box-shadow:0 0 0 2px var(--actbd)}
-.item.past{opacity:.5}
-.lock{font-size:12px;color:var(--mut)}
-.gap{margin:0 0 0 20px;padding-left:14px;border-left:2px dashed var(--line);min-height:14px}
-.cue{display:flex;gap:10px;align-items:flex-start;margin:6px 0;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);border-left:4px solid var(--cc,var(--mut))}
-.cue.done{opacity:.5}.cue.done .ct{text-decoration:line-through}
-.cue.next{border-color:var(--act);box-shadow:0 0 0 2px var(--actbd)}
-.cue .ic{font-size:12px;font-weight:700;color:var(--cc);width:70px;flex:none;text-transform:uppercase;padding-top:2px}
-.cue .ct{flex:1}
-.cue .ct small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px}
-.who{font-size:11px;background:var(--hover);border-radius:6px;padding:1px 6px;margin-left:6px;color:var(--mut);font-weight:600}
-.aud-open{color:var(--c-aud);font-weight:700}.aud-closed{color:var(--c-ins);font-weight:700}
-.cue input[type=checkbox]{width:22px;height:22px;accent-color:var(--act);flex:none;margin-top:1px}
-.ghost{border:1px dashed var(--line);background:none;border-radius:8px;padding:3px 10px;color:var(--mut);font-size:13px;margin:4px 0}
-.ghost:hover{border-color:var(--act);color:var(--act)}
-.mini{border:0;background:none;color:var(--mut);padding:2px 6px;font-size:13px}
-form.f{background:var(--card);border:1px solid var(--act);border-radius:12px;padding:12px;margin:6px 0;display:grid;gap:8px;grid-template-columns:1fr 1fr}
-form.f .full{grid-column:1/-1}
-form.f label{font-size:12px;color:var(--mut);display:grid;gap:3px}
-form.f input,form.f select,form.f textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:7px 9px}
-.btns{display:flex;gap:8px;justify-content:flex-end}
-.btn{border:1px solid var(--line);background:none;border-radius:8px;padding:7px 14px}
-.btn.p{background:var(--act);color:var(--actf);border-color:var(--act);font-weight:600}
-.dock{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px}
-.dock .in{max-width:860px;margin:0 auto;display:flex;gap:10px;align-items:center}
-.dock .now{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dock .now small{color:var(--mut)}
-.foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:26px;color:var(--mut);font-size:13px;align-items:center}
-@media(max-width:560px){form.f{grid-template-columns:1fr}.cue .ic{width:56px}}
+svg{flex:none;display:block;width:18px;height:18px}
+:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--act) 45%,transparent)}
+.wrap{max-width:720px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left,0px))}
+
+.tb{display:flex;align-items:center;min-height:52px;margin:0 -8px;padding:0 4px}
+.tb .back{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 8px;border:0;background:none;color:var(--mfg);font-size:14px}
+.pt{margin:4px 0 0;font:700 30px/34px 'Figtree',system-ui,sans-serif;letter-spacing:-.05em}
+.pm{display:flex;align-items:center;gap:8px;margin-top:6px;color:var(--mfg);font-size:15px;min-height:24px}
+.vt{display:flex;width:max-content;max-width:100%;margin-top:16px;padding:4px;gap:2px;background:var(--seg2);border-radius:10px}
+.vt button{padding:0 16px;min-height:40px;border:0;border-radius:8px;background:none;color:var(--fg);font-weight:600}
+.vt button[aria-pressed="true"]{background:var(--bg);box-shadow:0 1px 3px rgba(11,18,32,.2)}
+.hint{margin:14px 0 0;padding:10px 12px;border-radius:8px;background:var(--selbg);display:flex;gap:10px;align-items:flex-start}
+.hint svg{margin-top:1px}
+.banner{margin:14px 0 0;padding:10px 12px;border-radius:8px;background:var(--warnbg);color:var(--warnfg);display:flex;gap:10px;align-items:flex-start}
+.banner button{margin-left:auto;min-height:32px;padding:0 12px;border:1px solid currentColor;border-radius:8px;background:none;color:inherit;white-space:nowrap}
+
+/* linha do tempo (igual à liturgia do Chorder) */
+.liturgia{padding-top:20px}
+.sec{margin-bottom:24px}
+.sech{display:flex;flex-wrap:wrap;align-items:center;gap:0 10px;min-height:32px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.sech h2{margin:0;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mfg)}
+.sech span{font-size:12px;color:var(--mfg);font-variant-numeric:tabular-nums}
+.row{display:flex;min-height:56px;align-items:stretch}
+.row.done{opacity:.5}
+.tm{width:48px;flex:none;display:flex;flex-direction:column;padding:10px 0}
+.tm b{font:600 16px/22px 'Figtree',system-ui,sans-serif;letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:var(--mfg);white-space:nowrap}
+.tm small{font-size:14px;line-height:20px;color:var(--mfg);white-space:nowrap}
+.rail{width:40px;flex:none;display:flex;flex-direction:column;align-items:center}
+.rail i{display:block;width:1px;background:var(--fio)}
+.rail .stub{height:7px;flex:none}
+.rail .grow{flex:1}
+.rail .ic{width:28px;height:28px;display:grid;place-items:center;flex:none}
+.rail .ic svg{width:20px;height:20px}
+.tx{flex:1;min-width:0;padding:10px 0 12px;display:flex;flex-direction:column}
+.tt{font:600 16px/22px 'Figtree',system-ui,sans-serif;letter-spacing:-.01em;overflow-wrap:anywhere}
+.ts{color:var(--mfg);font-size:14px;line-height:20px}
+.bl{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}
+.bl>li{padding:2px 0}
+.bl .bt{display:flex;gap:6px}
+.bl .bt::before{content:"•"}
+.end .tt{font-weight:400;color:var(--mfg)}
+.end{display:flex;min-height:56px;border-top:1px solid var(--line)}
+
+/* camada da mídia: notas (marcáveis) e anexos */
+.md{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.note{display:flex;align-items:flex-start;gap:8px;min-height:36px;padding:4px 4px 4px 0}
+.note .chk{margin-top:-1px}
+.note .nt{flex:1;padding-top:4px;overflow-wrap:anywhere}
+.note.ok .nt{text-decoration:line-through;color:var(--mfg)}
+.chk{width:28px;height:28px;border-radius:8px;border:2px solid var(--line2);background:none;display:grid;place-items:center;color:var(--actf);flex:none;padding:0}
+.chk[aria-pressed="true"]{background:var(--grn);border-color:var(--grn)}
+.chk svg{width:16px;height:16px}
+.file{display:flex;align-items:center;gap:8px;min-height:36px;padding:4px 4px 4px 10px;border:1px solid var(--line2);border-radius:8px;margin:2px 0}
+.file .fi{color:var(--mfg)}
+.file .fn{flex:1;min-width:0;overflow-wrap:anywhere;font-size:13px}
+.x{width:32px;height:32px;border:0;background:none;color:var(--soft);display:grid;place-items:center;border-radius:6px;flex:none;padding:0}
+.x:hover{color:var(--red);background:var(--hover)}
+.x svg{width:16px;height:16px}
+.add{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 10px 0 6px;border:0;background:none;color:var(--mfg);border-radius:8px;font-size:13px}
+.add:hover{color:var(--fg);background:var(--hover)}
+.add svg{width:16px;height:16px}
+.sub-add{margin-left:14px}
+.form{display:flex;flex-direction:column;gap:8px;margin-top:6px;padding:10px;border:1px solid var(--act);border-radius:8px}
+.form .k{display:flex;gap:6px}
+.form .k button{min-height:32px;padding:0 12px;border:1px solid var(--line2);border-radius:9999px;background:var(--bg);font-size:13px}
+.form .k button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.form input{min-height:44px;padding:8px 12px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);font-size:15px;width:100%}
+.form .a{display:flex;gap:8px;justify-content:flex-end}
+.btn{min-height:40px;padding:0 16px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);font-weight:500}
+.btn.p{background:var(--act);border-color:var(--act);color:var(--actf);font-weight:600}
+.stub-box{margin-top:20px;padding:24px 16px;border:1px dashed var(--line2);border-radius:8px;color:var(--mfg);text-align:center}
+.foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:28px 0 0;padding-top:16px;border-top:1px solid var(--line);color:var(--mfg);font-size:13px}
+.foot .btn{min-height:36px;font-size:13px}
 </style>
 </head>
 <body>
-<header>
-  <div class="top">
-    <h1>Culto — 1 de março de 2026<small>Roteiro da Mídia · a liturgia vem do dirigente (somente leitura)</small></h1>
-    <div class="seg" role="group" aria-label="Modo">
-      <button id="m-plan" aria-pressed="true">Planejar</button>
-      <button id="m-live" aria-pressed="false">Ao vivo</button>
-    </div>
+<div class="wrap">
+  <div class="tb"><button class="back" type="button" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="m15 18-6-6 6-6"/></svg>Cultos</button></div>
+  <h1 class="pt">Culto de domingo</h1>
+  <div class="pm" id="meta"></div>
+  <div class="vt" role="group" aria-label="Visão">
+    <button type="button" data-tab="roteiro" aria-pressed="true">Roteiro</button>
+    <button type="button" data-tab="cifras" aria-pressed="false">Cifras</button>
+    <button type="button" data-tab="midia" aria-pressed="false">Mídia</button>
   </div>
-  <div class="roles" id="roles"></div>
-</header>
-<main>
   <div id="banner"></div>
-  <div id="list"></div>
+  <div id="hint"></div>
+  <div class="liturgia" id="list"></div>
   <div class="foot">
-    <span>Protótipo para validação — dados de exemplo do PDF do Planning Center.</span>
-    <button class="btn" id="sim">Simular: dirigente trocou REINA ↔ LOUVAI O NOME</button>
-    <button class="btn" id="reset">Reiniciar exemplo</button>
-  </div>
-</main>
-<div class="dock" id="dock" hidden>
-  <div class="in">
-    <div class="now" id="now"></div>
-    <button class="btn" id="prev">← Voltar</button>
-    <button class="btn p" id="advance">Avançar →</button>
+    <span>Protótipo com dados de exemplo.</span>
+    <button class="btn" id="sim" type="button">Simular: dirigente trocou REINA ↔ LOUVAI O NOME</button>
+    <button class="btn" id="clear" type="button">Limpar marcações</button>
+    <button class="btn" id="reset" type="button">Reiniciar exemplo</button>
   </div>
 </div>
 
 <script>
-const ROLES=["Áudio","Câmera","Letras","Switcher"];
-const TYPES={
-  info:["Info","--c-info"],video:["Vídeo","--c-video"],img:["Imagem","--c-img"],
-  ins:["Instrução","--c-ins"],com:["Comentário","--c-com"],aud:["Mesa de som","--c-aud"]
+const P={
+  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  mic:'<path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12"/><circle cx="17" cy="7" r="5"/>',
+  book:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  msg:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>',
+  video:'<path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
+  image:'<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>',
+  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  alert:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'
 };
-// Liturgia do dirigente: somente leitura, a mídia nunca grava aqui.
-const SEED_ITEMS=[
-  {id:"i1",sec:"Pré-culto",time:"10:15",name:"Música",sub:'Playlist "intro" + cronômetro (Holyrics)'},
-  {id:"i2",sec:"Culto",time:"10:30",name:"Boas-vindas",sub:"Dirigente: Hugo Hanashiro · Salmo 130:1-8 (NVT), Rm 3:10, 22, 26 (NVT)"},
-  {id:"i3",time:"10:35",name:"QUEBRANTADO",tag:"Música"},
-  {id:"i4",time:"10:40",name:"VIVA ESPERANÇA",tag:"Música",sub:"Salmo 130:6 (NVT)"},
-  {id:"i5",time:"10:45",name:"REINA",tag:"Música"},
-  {id:"i6",time:"10:50",name:"LOUVAI O NOME",tag:"Música"},
-  {id:"i7",time:"10:55",name:"Avisos + Oração",sub:"Ordem dos avisos livre"},
-  {id:"i8",time:"11:05",name:"Oração comunitária",sub:"Luan Brandão"},
-  {id:"i9",time:"11:10",name:"UNIDADE E DIVERSIDADE",tag:"Música"},
-  {id:"i10",sec:"Mensagem",time:"11:15",name:"Mensagem",sub:"Ziel Machado · Josué 1:6-9, Gl 4:6-7 (NVT)"},
-  {id:"i11",time:"11:45",name:"FRUTOS DE VIDA",tag:"Música"},
-  {id:"i12",time:"11:50",name:"Oração final"},
-  {id:"i13",sec:"Fim da transmissão",time:"11:50",name:"Tela final",sub:'Playlist "out-tro"'},
-  {id:"i14",time:"11:52",name:"Projetar imagem de fim de culto"}
-];
-// Camada da mídia: cada cue fica preso a um item ("depois de"), não a uma posição.
-const SEED_CUES=[
-  {after:"i1",type:"aud",audio:"closed",who:"Áudio",text:"Mesa Focusrite fechada"},
-  {after:"i1",type:"aud",audio:"open",who:"Áudio",text:"Abrir mesa antes das boas-vindas"},
-  {after:"i2",type:"ins",who:"Letras",text:"Projetar Salmo 130:1-8, depois 130:3 e Rm 3:10, 22, 26"},
-  {after:"i4",type:"ins",who:"Letras",text:"Projetar Salmo 130:6 durante a música"},
-  {after:"i6",type:"com",who:"Câmera",text:"Plano aberto no fim da música; dirigente vai aos avisos"},
-  {after:"i6",type:"info",who:"Switcher",text:"Avisos: ordem pode mudar, ficar atento ao dirigente"},
-  {after:"i6",type:"video",who:"Switcher",text:"Campanha Casa 46",media:"AVISOS - VIDEO - Video Casa 46 - alta"},
-  {after:"i6",type:"img",who:"Letras",text:"Doar (frente)",media:"AVISOS - IMAGEM - Folder_Dar_Frente_Jan26"},
-  {after:"i6",type:"img",who:"Letras",text:"Doar (verso)",media:"AVISOS - IMAGEM - Folder_Dar_Verso_Jan26"},
-  {after:"i6",type:"img",who:"Letras",text:"Estudo de batismo",media:"AVISOS - IMAGEM - Interessados Batismo"},
-  {after:"i6",type:"img",who:"Letras",text:"Café para quem quer conhecer a igreja",media:"AVISOS - IMAGEM - Quem Somos - Cafe.jpg"},
-  {after:"i7",type:"img",who:"Letras",text:"Luan Brandão",media:"Oração Comunitária - IMAGEM - Luan Brandão"},
-  {after:"i12",type:"aud",audio:"closed",who:"Áudio",text:"Fechar mesa Focusrite"},
-  {after:"i14",type:"img",who:"Switcher",text:"Fim de culto (contato)",media:"IMAGEM - FIM DE CULTO"}
-].map((c,i)=>({...c,id:"c"+i,done:false}));
+const svg=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+const UT={SONG:["music","--emerald"],FALA:["mic","--blue"],LEITURA:["book","--amber"],ORACAO:["heart","--pink"],AVISOS:["bell","--orange"],SERMAO:["msg","--violet"]};
 
-const KEY="chorder-midia-proto-v1";
-let S;
-function fresh(){return{mode:"plan",roles:[],items:JSON.parse(JSON.stringify(SEED_ITEMS)),cues:JSON.parse(JSON.stringify(SEED_CUES)),cur:0,notice:null,editing:null,n:100}}
+/* Liturgia do dirigente (somente leitura aqui). Horários são calculados pela duração, como no Chorder. */
+const START="10:15";
+const SEED_ITEMS=[
+  {id:"i1",sec:"Pré-culto",type:"SONG",title:"Música",sub:'Playlist "intro" + cronômetro',dur:15},
+  {id:"i2",sec:"Culto",type:"FALA",title:"Boas-vindas",sub:"Hugo Hanashiro",dur:2},
+  {id:"i2a",type:"LEITURA",title:"Salmo 130:1-8",sub:"NVT",dur:1},
+  {id:"i2b",type:"LEITURA",title:"Salmo 130:3",sub:"NVT",dur:1},
+  {id:"i2c",type:"LEITURA",title:"Romanos 3:10, 22, 26",sub:"NVT",dur:1},
+  {id:"i3",type:"SONG",title:"QUEBRANTADO",sub:"Tom G",dur:5},
+  {id:"i4",type:"SONG",title:"VIVA ESPERANÇA",sub:"Tom D",dur:5},
+  {id:"i5",type:"SONG",title:"REINA",sub:"Tom A",dur:5},
+  {id:"i6",type:"SONG",title:"LOUVAI O NOME",sub:"Tom E",dur:5},
+  {id:"i7",type:"AVISOS",title:"Avisos",dur:10,avisos:[
+    {id:"a1",text:"Alegria de ter adolescentes na reunião de oração"},
+    {id:"a2",text:"Campanha Casa 46"},
+    {id:"a3",text:"Doar (folder)"},
+    {id:"a4",text:"Estudo de batismo"},
+    {id:"a5",text:"Café para quem quer conhecer a igreja e ser membro"}]},
+  {id:"i8",type:"ORACAO",title:"Oração comunitária",sub:"Luan Brandão",dur:5},
+  {id:"i9",type:"SONG",title:"UNIDADE E DIVERSIDADE",sub:"Tom C",dur:5},
+  {id:"i10",sec:"Mensagem",type:"SERMAO",title:"Uma nova etapa: História, Identidade e Visão (parte 2)",sub:"Ziel Machado",dur:28},
+  {id:"i10a",type:"LEITURA",title:"Josué 1:6-9",sub:"NVT",dur:1},
+  {id:"i10b",type:"LEITURA",title:"Gálatas 4:6-7",sub:"NVT",dur:1},
+  {id:"i11",type:"SONG",title:"FRUTOS DE VIDA",sub:"Tom A",dur:5},
+  {id:"i12",sec:"Encerramento",type:"ORACAO",title:"Oração final",dur:1},
+  {id:"i13",type:"SONG",title:"Tela final",sub:'Playlist "out-tro"',dur:1}
+];
+/* Camada da mídia: guardada à parte, presa ao id do item (ou do aviso). A liturgia nunca é alterada por ela. */
+const SEED_MEDIA={
+  i1:{notes:["Mesa de som fechada"]},
+  i2:{notes:["Abrir a mesa de som"]},
+  i6:{notes:["Plano aberto no fim; dirigente vai aos avisos"]},
+  i7:{notes:["Avisos podem mudar de ordem; seguir o dirigente"]},
+  a2:{files:["AVISOS - VIDEO - Video Casa 46 - alta"]},
+  a3:{files:["AVISOS - IMAGEM - Folder_Dar_Frente_Jan26","AVISOS - IMAGEM - Folder_Dar_Verso_Jan26"]},
+  a4:{files:["AVISOS - IMAGEM - Interessados Batismo"]},
+  a5:{files:["AVISOS - IMAGEM - Quem Somos - Cafe.jpg"]},
+  i8:{files:["Oração Comunitária - IMAGEM - Luan Brandão"]},
+  i12:{notes:["Fechar a mesa de som"]},
+  i13:{notes:["Depois da tela final, projetar a imagem de fim de culto (com contatos)"],files:["IMAGEM - FIM DE CULTO"]}
+};
+const mk=(m)=>{let n=0,o={};for(const[k,v]of Object.entries(m))o[k]={notes:(v.notes||[]).map(t=>({id:"n"+n++,text:t,done:false})),files:(v.files||[]).map(t=>({id:"f"+n++,name:t}))};return o};
+
+const KEY="chorder-midia-proto-v3";
+let S,UI={add:null,kind:"note"};
+const fresh=()=>({tab:"roteiro",items:JSON.parse(JSON.stringify(SEED_ITEMS)),media:mk(SEED_MEDIA),notice:null,n:1000});
 function load(){try{S=JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){S=fresh()}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-
 const $=s=>document.querySelector(s);
 const esc=t=>String(t??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const visible=c=>!S.roles.length||S.roles.includes(c.who);
+const mins=t=>{const[h,m]=t.split(":").map(Number);return h*60+m};
+const hhmm=m=>`${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;
+const fmtDur=m=>m<60?`${m} min`:`${Math.floor(m/60)}h${String(m%60).padStart(2,"0")}`;
+const M=id=>S.media[id]||(S.media[id]={notes:[],files:[]});
+const fileIcon=n=>/video|\.(mp4|mov|mkv)$/i.test(n)?"video":/imagem|image|\.(jpe?g|png|gif|webp)$/i.test(n)?"image":"file";
 
-// sequência única de passos para o modo ao vivo: item, cues dele, próximo item...
-function steps(){const out=[];S.items.forEach(it=>{out.push({k:"item",it});S.cues.filter(c=>c.after===it.id&&visible(c)).forEach(c=>out.push({k:"cue",c}))});return out}
+function timings(){let t=mins(START);return S.items.map(it=>{const s=t;t+=it.dur||0;return s})}
 
-function cueHTML(c,live,isNext){
-  const [lab,v]=TYPES[c.type];
-  const aud=c.type==="aud"?` <span class="aud-${c.audio}">${c.audio==="open"?"ABERTA":"FECHADA"}</span>`:"";
-  const body=`<div class="ct">${esc(c.text)}${aud}<span class="who">${esc(c.who)}</span>${c.media?`<small>📎 ${esc(c.media)}</small>`:""}${c.note?`<small>${esc(c.note)}</small>`:""}</div>`;
-  const ctl=live
-    ?`<input type="checkbox" data-done="${c.id}" ${c.done?"checked":""} aria-label="Feito">`
-    :`<button class="mini" data-edit="${c.id}">Editar</button><button class="mini" data-del="${c.id}">Excluir</button>`;
-  return `<div class="cue ${c.done?"done":""} ${isNext?"next":""}" style="--cc:var(${v})" id="cue-${c.id}">${live?ctl:""}<div class="ic">${lab}</div>${body}${live?"":ctl}</div>`;
-}
-
-function formHTML(c,after){
-  const t=c?.type||"info";
-  return `<form class="f" data-form="${c?c.id:""}" data-after="${after}">
-    <label>Tipo<select name="type">${Object.entries(TYPES).map(([k,[l]])=>`<option value="${k}" ${k===t?"selected":""}>${l}</option>`).join("")}</select></label>
-    <label>Responsável<select name="who">${ROLES.map(r=>`<option ${c?.who===r?"selected":""}>${r}</option>`).join("")}</select></label>
-    <label class="full">Texto<input name="text" required value="${esc(c?.text||"")}" placeholder="O que precisa acontecer aqui?"></label>
-    <label>Mídia / link (opcional)<input name="media" value="${esc(c?.media||"")}" placeholder="nome do arquivo ou URL"></label>
-    <label>Se for mesa de som<select name="audio"><option value="open" ${c?.audio==="open"?"selected":""}>Aberta</option><option value="closed" ${c?.audio==="closed"?"selected":""}>Fechada</option></select></label>
-    <div class="btns full"><button type="button" class="btn" data-cancel>Cancelar</button><button class="btn p">Salvar</button></div>
+function addForm(id,onlyFile){
+  const k=onlyFile?"file":UI.kind;
+  return `<form class="form" data-form="${id}">
+    ${onlyFile?"":`<div class="k"><button type="button" data-kind="note" aria-pressed="${k==="note"}">Nota</button><button type="button" data-kind="file" aria-pressed="${k==="file"}">Anexo</button></div>`}
+    <input name="v" required autofocus autocomplete="off" placeholder="${k==="note"?"O que a mídia precisa fazer aqui?":"Nome do arquivo ou link"}">
+    <div class="a"><button type="button" class="btn" data-cancel>Cancelar</button><button class="btn p">Adicionar</button></div>
   </form>`;
+}
+function fileHTML(id,f){return `<div class="file"><span class="fi">${svg(fileIcon(f.name))}</span><span class="fn">${esc(f.name)}</span><button class="x" type="button" data-delf="${id}|${f.id}" aria-label="Remover anexo">${svg("x")}</button></div>`}
+function noteHTML(id,n){return `<div class="note ${n.done?"ok":""}"><button class="chk" type="button" data-chk="${id}|${n.id}" aria-pressed="${n.done}" aria-label="Marcar como feito">${svg("check")}</button><span class="nt">${esc(n.text)}</span><button class="x" type="button" data-deln="${id}|${n.id}" aria-label="Remover nota">${svg("x")}</button></div>`}
+
+function midiaBlock(it){
+  const m=M(it.id);
+  let h=`<div class="md">${m.notes.map(n=>noteHTML(it.id,n)).join("")}${m.files.map(f=>fileHTML(it.id,f)).join("")}`;
+  h+=UI.add===it.id?addForm(it.id):`<button class="add" type="button" data-open="${it.id}">${svg("plus")}Para a mídia</button>`;
+  return h+`</div>`;
+}
+function avisosHTML(it,midia){
+  return `<ul class="bl">${it.avisos.map(a=>{
+    const m=M(a.id);
+    return `<li><div class="bt">${esc(a.text)}</div>${midia?`<div class="md" style="margin-left:14px">${m.files.map(f=>fileHTML(a.id,f)).join("")}${UI.add===a.id?addForm(a.id,true):`<button class="add" type="button" data-open="${a.id}">${svg("plus")}Anexar</button>`}</div>`:""}</li>`}).join("")}</ul>`;
 }
 
 function render(){
-  const live=S.mode==="live";
-  $("#m-plan").setAttribute("aria-pressed",!live);$("#m-live").setAttribute("aria-pressed",live);
-  $("#roles").innerHTML=`<span class="lock">${live?"Mostrar só:":"Filtrar por função:"}</span>`+ROLES.map(r=>`<button class="chip" data-role="${r}" aria-pressed="${S.roles.includes(r)}">${r}</button>`).join("");
-  $("#banner").innerHTML=S.notice?`<div class="banner"><span>⚠ <b>O dirigente alterou a liturgia:</b> ${esc(S.notice)} Seus cues acompanharam os itens.</span><button data-ack>Entendi</button></div>`:"";
-  const st=steps();
-  let curIdx=Math.min(S.cur,st.length-1);
-  // próximo passo pendente: primeiro cue não feito a partir do item atual
-  const curStep=st[curIdx];
-  let html="",sec="";
-  S.items.forEach((it,ix)=>{
-    if(it.sec&&it.sec!==sec){sec=it.sec;html+=`<div class="sec">${esc(sec)}</div>`}
-    const isCur=live&&curStep?.k==="item"&&curStep.it.id===it.id;
-    const pos=st.findIndex(s=>s.k==="item"&&s.it.id===it.id);
-    const past=live&&pos<curIdx&&S.cues.filter(c=>c.after===it.id&&visible(c)).every(c=>c.done);
-    html+=`<div class="item ${isCur?"cur":""} ${past?"past":""}" id="item-${it.id}" ${live?`data-jump="${pos}"`:""}>
-      <div class="t">${it.time}</div>
-      <div class="n">${esc(it.name)}${it.sub?`<small>${esc(it.sub)}</small>`:""}</div>
-      ${it.tag?`<span class="tag">${it.tag}</span>`:""}${live?"":`<span class="lock" title="Quem edita é o dirigente">🔒</span>`}
-    </div><div class="gap">`;
-    S.cues.filter(c=>c.after===it.id&&visible(c)).forEach(c=>{
-      if(S.editing===c.id){html+=formHTML(c,it.id);return}
-      const isNext=live&&curStep?.k==="cue"&&curStep.c.id===c.id;
-      html+=cueHTML(c,live,isNext);
-    });
-    if(!live){html+=S.editing==="new:"+it.id?formHTML(null,it.id):`<button class="ghost" data-add="${it.id}">+ Cue depois de “${esc(it.name.length>22?it.name.slice(0,22)+"…":it.name)}”</button>`}
-    html+=`</div>`;
-  });
-  $("#list").innerHTML=html;
-  $("#dock").hidden=!live;
-  if(live&&curStep){
-    $("#now").innerHTML=curStep.k==="item"?`<small>Agora</small> <b>${esc(curStep.it.time+" "+curStep.it.name)}</b>`:`<small>Próximo cue</small> <b>${esc(curStep.c.text)}</b> <span class="who">${esc(curStep.c.who)}</span>`;
-    $("#advance").textContent=curStep.k==="cue"?"Feito, avançar →":"Avançar →";
+  document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tab===S.tab));
+  const ts=timings(),end=mins(START)+S.items.reduce((a,i)=>a+(i.dur||0),0);
+  $("#meta").innerHTML=`${svg("cal")}1 de março de 2026 · ${START}`;
+  $("#banner").innerHTML=S.notice?`<div class="banner">${svg("alert")}<span><b>O dirigente mudou a liturgia:</b> ${esc(S.notice)} Suas notas e anexos acompanharam os itens.</span><button type="button" data-ack>Entendi</button></div>`:"";
+  const midia=S.tab==="midia";
+  $("#hint").innerHTML=midia?`<div class="hint">${svg("info")}<span>A liturgia é do dirigente. Aqui você só acrescenta o que é da mídia: <b>notas</b> (que você marca quando fizer) e <b>anexos</b> (vídeos, imagens, links).</span></div>`:"";
+  if(S.tab==="cifras"){
+    $("#list").innerHTML=`<div class="stub-box">Visão de cifras já existente no Chorder, fora deste protótipo.<br>As músicas do culto: ${S.items.filter(i=>i.type==="SONG"&&!/Playlist/.test(i.sub||"")).map(i=>esc(i.title)).join(" · ")}</div>`;
+    return;
   }
+  let html="",open=false;
+  S.items.forEach((it,ix)=>{
+    if(it.sec){
+      if(open)html+=`</div></section>`;
+      let tot=0,j=ix;do{tot+=S.items[j].dur||0;j++}while(j<S.items.length&&!S.items[j].sec);
+      html+=`<section class="sec" aria-label="${esc(it.sec)}"><div class="sech"><h2>${esc(it.sec)}</h2><span>${hhmm(ts[ix])} · ${fmtDur(tot)}</span></div><div>`;open=true;
+    }
+    const [ic,col]=UT[it.type],isLast=ix===S.items.length-1;
+    const m=S.media[it.id];
+    const allDone=midia&&m&&m.notes.length&&m.notes.every(n=>n.done)&&!m.files.length;
+    html+=`<div class="row ${allDone?"done":""}">
+      <span class="tm"><b>${hhmm(ts[ix])}</b><small>${it.dur?fmtDur(it.dur):""}</small></span>
+      <span class="rail"><i class="stub" ${ix===0?'style="background:none"':""}></i><span class="ic" style="color:var(${col})">${svg(ic)}</span><i class="grow" ${isLast?'style="background:none"':""}></i></span>
+      <span class="tx"><span class="tt">${esc(it.title)}</span>${it.sub?`<span class="ts">${esc(it.sub)}</span>`:""}
+      ${it.avisos?avisosHTML(it,midia):""}${midia?midiaBlock(it):""}</span>
+    </div>`;
+  });
+  if(open)html+=`</div></section>`;
+  html+=`<div class="end"><span class="tm"><b>${hhmm(end)}</b></span><span class="rail"><span class="ic" style="margin-top:7px;color:var(--mfg)">${svg("flag")}</span></span><span class="tx"><span class="tt">Término previsto</span></span></div>`;
+  $("#list").innerHTML=html;
+  const inp=$("form.form input");if(inp)inp.focus();
 }
 
 document.addEventListener("click",e=>{
-  const t=e.target;const g=a=>t.closest(`[${a}]`)?.getAttribute(a);
-  if(t.id==="m-plan"||t.id==="m-live"){S.mode=t.id==="m-live"?"live":"plan";S.editing=null;save();render();return}
-  if(t.id==="reset"){S=fresh();save();render();return}
+  const t=e.target,q=s=>t.closest(s);
+  if(q("[data-tab]")){S.tab=q("[data-tab]").dataset.tab;UI.add=null;save();render();return}
+  if(q("[data-open]")){UI.add=q("[data-open]").dataset.open;UI.kind="note";render();return}
+  if(q("[data-kind]")){UI.kind=q("[data-kind]").dataset.kind;const v=$("form.form input")?.value;render();if(v)$("form.form input").value=v;return}
+  if(q("[data-cancel]")){UI.add=null;render();return}
+  if(q("[data-chk]")){const[id,nid]=q("[data-chk]").dataset.chk.split("|");const n=M(id).notes.find(n=>n.id===nid);n.done=!n.done;save();render();return}
+  if(q("[data-deln]")){const[id,nid]=q("[data-deln]").dataset.deln.split("|");M(id).notes=M(id).notes.filter(n=>n.id!==nid);save();render();return}
+  if(q("[data-delf]")){const[id,fid]=q("[data-delf]").dataset.delf.split("|");M(id).files=M(id).files.filter(f=>f.id!==fid);save();render();return}
+  if(q("[data-ack]")){S.notice=null;save();render();return}
+  if(t.id==="reset"){S=fresh();UI.add=null;save();render();return}
+  if(t.id==="clear"){Object.values(S.media).forEach(m=>m.notes.forEach(n=>n.done=false));save();render();return}
   if(t.id==="sim"){
     const a=S.items.findIndex(i=>i.id==="i5"),b=S.items.findIndex(i=>i.id==="i6");
     if(a<0||b<0||a>b)return;
     [S.items[a],S.items[b]]=[S.items[b],S.items[a]];
-    const tm=S.items[a].time;S.items[a].time=S.items[b].time;S.items[b].time=tm;
-    S.notice="REINA e LOUVAI O NOME trocaram de lugar.";save();render();return}
-  if(g("data-ack")!==null&&t.closest("[data-ack]")){S.notice=null;save();render();return}
-  const role=g("data-role");if(role){S.roles=S.roles.includes(role)?S.roles.filter(r=>r!==role):[...S.roles,role];S.cur=0;save();render();return}
-  const add=g("data-add");if(add){S.editing="new:"+add;render();return}
-  const ed=g("data-edit");if(ed){S.editing=ed;render();return}
-  const del=g("data-del");if(del){S.cues=S.cues.filter(c=>c.id!==del);save();render();return}
-  if(t.closest("[data-cancel]")){S.editing=null;render();return}
-  const jump=g("data-jump");if(jump!==null&&S.mode==="live"&&t.closest(".item")){S.cur=+jump;save();render();return}
-  if(t.id==="advance"||t.id==="prev"){
-    const st=steps();const s=st[S.cur];
-    if(t.id==="advance"){if(s?.k==="cue")s.c.done=true;S.cur=Math.min(S.cur+1,st.length-1)}
-    else{S.cur=Math.max(S.cur-1,0);const p=st[S.cur];if(p?.k==="cue")p.c.done=false}
-    save();render();
-    document.querySelector(".cur,.next")?.scrollIntoView({block:"center",behavior:"smooth"})}
-});
-document.addEventListener("change",e=>{
-  const id=e.target.getAttribute?.("data-done");if(!id)return;
-  const c=S.cues.find(c=>c.id===id);c.done=e.target.checked;save();render();
+    S.notice="REINA e LOUVAI O NOME trocaram de lugar.";save();render()}
 });
 document.addEventListener("submit",e=>{
-  const f=e.target.closest("form.f");if(!f)return;e.preventDefault();
-  const d=Object.fromEntries(new FormData(f));
-  const data={type:d.type,who:d.who,text:d.text.trim(),media:d.media.trim()||undefined,audio:d.type==="aud"?d.audio:undefined};
-  const id=f.dataset.form;
-  if(id)Object.assign(S.cues.find(c=>c.id===id),data);
-  else{
-    const after=f.dataset.after;
-    const idx=S.cues.map(c=>c.after).lastIndexOf(after);
-    const cue={id:"c"+(S.n++),after,done:false,...data};
-    if(idx<0)S.cues.push(cue);else S.cues.splice(idx+1,0,cue);
-  }
-  S.editing=null;save();render();
+  const f=e.target.closest("form.form");if(!f)return;e.preventDefault();
+  const v=new FormData(f).get("v").trim();if(!v)return;
+  const id=f.dataset.form,isAviso=id.startsWith("a");
+  if(isAviso||UI.kind==="file")M(id).files.push({id:"f"+S.n++,name:v});
+  else M(id).notes.push({id:"n"+S.n++,text:v,done:false});
+  UI.add=null;save();render();
 });
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&UI.add){UI.add=null;render()}});
 load();render();
 </script>
 </body>

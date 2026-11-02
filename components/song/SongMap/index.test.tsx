@@ -51,7 +51,8 @@ describe("SongMap", () => {
     const units = Array.from({ length: 20 }, (_, i) => ({ type: i % 2 ? ("CHORUS" as const) : ("VERSE" as const) }));
     render(<SongMap fit units={units} />);
     const group = screen.getByRole("group");
-    expect(group.className).not.toContain("overflow-x-auto");
+    // sem rolagem no celular; só de lg pra cima (lg:overflow-x-auto) quando não couber
+    expect(group.className).not.toMatch(/(^|\s)overflow-x-auto/);
     expect(group.children).toHaveLength(20);
   });
 

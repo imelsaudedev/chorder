@@ -39,8 +39,11 @@ export default function SongMap({ units, onSelectUnit, compact = false, fit = fa
 
   if (units.length === 0) return null;
 
+  // fit: no celular/tablet vertical a linha ocupa toda a largura e os chips (quadrados)
+  // encolhem juntos pra caber; de lg pra cima (tablet paisagem, desktop) a linha vira do
+  // tamanho do conteúdo, alinhada à direita pelo cabeçalho, e só rola se não couber.
   const containerClasses = fit
-    ? "flex w-full items-center gap-0.5"
+    ? "flex w-full items-center gap-0.5 lg:w-auto lg:max-w-full lg:gap-1 lg:overflow-x-auto no-scrollbar"
     : `flex items-center ${compact ? "gap-0.5" : "gap-1.5"} overflow-x-auto no-scrollbar`;
 
   return (
@@ -58,7 +61,10 @@ export default function SongMap({ units, onSelectUnit, compact = false, fit = fa
               key={index}
               title={fullLabel}
               aria-label={fullLabel}
-              className={`flex h-5 min-w-0 max-w-9 flex-1 basis-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-sm border text-[9px] font-semibold uppercase leading-none ${colors}`}
+              // Quadrado (aspect-square). Teto por largura de tela: celular 24px (encolhe
+              // junto se houver muitos blocos), tablet vertical 28px, tablet paisagem 28px
+              // fixo, desktop 32px (tamanho normal).
+              className={`flex aspect-square min-w-0 max-w-6 flex-1 basis-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-sm border text-[9px] font-semibold uppercase leading-none md:max-w-7 md:text-[10px] lg:size-7 lg:max-w-none lg:flex-none lg:basis-auto lg:rounded-md lg:text-[11px] xl:size-8 xl:text-xs ${colors}`}
             >
               {abbr}
             </span>

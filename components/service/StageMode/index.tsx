@@ -262,7 +262,7 @@ export default function StageMode({
   let title = currentArrangement?.song?.title ?? "";
   let headerMap: React.ReactNode =
     currentArrangement?.units && currentArrangement.units.length > 0 ? (
-      <SongMap fit units={currentArrangement.units} className="lg:justify-end" />
+      <SongMap fit units={currentArrangement.units} />
     ) : null;
   if (currentItem) {
     const type = roteiroTypeLabel(currentItem);
