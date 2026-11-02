@@ -92,7 +92,7 @@ function ServiceArrangementHeader({
       style={isStuck ? undefined : { paddingBottom: blockGapPx }}
     >
       <div className="flex w-full flex-row items-center gap-2">
-      <div className={`flex min-w-0 flex-1 items-center ${isStuck ? "h-6" : "h-8"}`}>
+      <div className={`flex min-w-0 flex-1 items-center ${isStuck ? "h-5" : "h-8"}`}>
         {/* Sempre o mesmo título (mesma fonte, peso e espaçamento): preso, só o corpo diminui. */}
         <Text variant="heading-lg" as="h2" size={isStuck ? "base" : undefined} className="truncate">
           <span>{order}. </span>
@@ -136,7 +136,8 @@ function ServiceArrangementHeader({
           blocos do título. Preso: uma linha de chips pequenos (como no Modo Palco). */}
       {hasMap && (
         <div
-          className={`flex items-center ${isStuck ? "mt-1" : ""}`}
+          // Preso: o vão entre o título (16px, linha de 20px) e os chips é só ~4px — o bastante para não encostar.
+          className={`flex items-center ${isStuck ? "mt-0.5" : ""}`}
           style={isStuck ? undefined : { marginTop: blockGapPx }}
         >
           {/* fitSmall: preso, os chips ficam pequenos (24px) em qualquer tela, inclusive no desktop. */}
