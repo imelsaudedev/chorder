@@ -93,7 +93,10 @@ export default function Item({
     lyricsClasses.push(styles.lyricsConnection);
   }
   if (hasLyrics) {
-    lyricsClasses.push("h-[1em]");
+    // Altura MÍNIMA, não fixa: uma linha sem cifra é um item só, longo — quando
+    // quebra em duas (coluna estreita, fonte grande) a segunda linha vazava por
+    // cima da de baixo. Com uma linha só, nada muda.
+    lyricsClasses.push("min-h-[1em]");
   }
 
   const content = (

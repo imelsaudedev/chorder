@@ -8,9 +8,13 @@ vi.mock("@/components/config/KeyButtonSet", () => ({
 }));
 
 const baseProps = {
-  songTitles: ["Abertura", "Grande é o Senhor", "Nada Além do Sangue", "Tu és Fiel", "Final"],
-  currentIndex: 2,
-  onSelectSong: vi.fn(),
+  indexLabel: "3/5" as string | null,
+  title: "Nada Além do Sangue",
+  map: null,
+  layoutMode: "scroll" as const,
+  onLayoutModeChange: vi.fn(),
+  showRoteiro: false,
+  onShowRoteiroChange: vi.fn(),
   originalKey: "C",
   transpose: 0,
   setTranspose: vi.fn(),
@@ -31,13 +35,19 @@ describe("StageModeControls — música atual", () => {
     expect(screen.getByText("Nada Além do Sangue")).toBeDefined();
   });
 
-  it("tocar no título abre a lista do culto e escolher uma música chama onSelectSong", async () => {
+  it("sem contador (item do roteiro na tela) mostra só o título", () => {
+    render(<StageModeControls {...baseProps} indexLabel={null} title="Oração · Oração inicial" />);
+    expect(screen.queryByText("3/5")).toBeNull();
+    expect(screen.getByText("Oração · Oração inicial")).toBeDefined();
+  });
+
+  it("o seletor de layout fica no rodapé e troca para a visão geral", async () => {
     const user = userEvent.setup();
-    const onSelectSong = vi.fn();
-    render(<StageModeControls {...baseProps} onSelectSong={onSelectSong} />);
-    await user.click(screen.getByRole("button", { name: /escolher música/i }));
-    await user.click(await screen.findByRole("menuitem", { name: /tu és fiel/i }));
-    expect(onSelectSong).toHaveBeenCalledWith(3);
+    const onLayoutModeChange = vi.fn();
+    render(<StageModeControls {...baseProps} onLayoutModeChange={onLayoutModeChange} />);
+    expect(screen.getByRole("radio", { name: /rolagem/i })).toBeChecked();
+    await user.click(screen.getByRole("radio", { name: /visão geral/i }));
+    expect(onLayoutModeChange).toHaveBeenCalledWith("overview");
   });
 
   it("chama onExit ao clicar em sair", async () => {
@@ -96,15 +106,16 @@ describe("StageModeControls — configurações (tom + fonte, bandeja única)", 
 });
 
 describe("StageModeControls — rolagem (play separado da velocidade)", () => {
-  it("parado: mostra o play com a velocidade da música", () => {
+  it("parado: o play traz a velocidade da música no nome, sem mostrá-la", () => {
     render(<StageModeControls {...baseProps} isScrollEnabled={false} scrollSpeedMultiplier={0.75} />);
-    const button = screen.getByRole("button", { name: /ligar rolagem/i });
-    expect(button).toHaveTextContent("0.75x");
+    const button = screen.getByRole("button", { name: /ligar rolagem \(0\.75x\)/i });
+    expect(button).not.toHaveTextContent("0.75x");
   });
 
-  it("ligado: o mesmo botão pausa", () => {
-    render(<StageModeControls {...baseProps} isScrollEnabled={true} />);
-    expect(screen.getByRole("button", { name: /pausar rolagem/i })).toBeDefined();
+  it("rolando: o botão mostra só a velocidade e pausa", () => {
+    render(<StageModeControls {...baseProps} isScrollEnabled={true} scrollSpeedMultiplier={0.5} />);
+    const button = screen.getByRole("button", { name: /pausar rolagem/i });
+    expect(button).toHaveTextContent("0.5x");
   });
 
   it("play, mais devagar e mais rápido chamam cada um o seu handler", async () => {
@@ -136,5 +147,66 @@ describe("StageModeControls — rolagem (play separado da velocidade)", () => {
     rerender(<StageModeControls {...baseProps} scrollSpeedMultiplier={1} />);
     expect(screen.getByRole("button", { name: /mais devagar/i })).toBeEnabled();
     expect(screen.getByRole("button", { name: /mais rápido/i })).toBeDisabled();
+  });
+});
+
+describe("StageModeControls — visão geral", () => {
+  const overview = {
+    editable: true,
+    settings: { columns: 0, fontSize: 0, density: "auto" as const },
+    fit: null,
+    onChange: vi.fn(),
+    position: "2/6",
+    canPrev: true,
+    canNext: true,
+    onPrev: vi.fn(),
+    onNext: vi.fn(),
+  };
+
+  it("troca o play por anterior/próxima, com a posição entre as telas", async () => {
+    const user = userEvent.setup();
+    const onPrev = vi.fn();
+    const onNext = vi.fn();
+    render(<StageModeControls {...baseProps} layoutMode="overview" overview={{ ...overview, onPrev, onNext }} />);
+    expect(screen.queryByRole("button", { name: /rolagem/i })).toBeNull();
+    expect(screen.getByText("2/6")).toBeDefined();
+    await user.click(screen.getByRole("button", { name: /tela anterior/i }));
+    await user.click(screen.getByRole("button", { name: /próxima tela/i }));
+    expect(onPrev).toHaveBeenCalledTimes(1);
+    expect(onNext).toHaveBeenCalledTimes(1);
+  });
+
+  it("desabilita anterior na primeira tela e próxima na última", () => {
+    render(
+      <StageModeControls
+        {...baseProps}
+        layoutMode="overview"
+        overview={{ ...overview, canPrev: false, canNext: false }}
+      />
+    );
+    expect(screen.getByRole("button", { name: /tela anterior/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /próxima tela/i })).toBeDisabled();
+  });
+});
+
+describe("StageModeControls — exibir roteiro", () => {
+  it("o interruptor nas configurações liga o roteiro", async () => {
+    const user = userEvent.setup();
+    const onShowRoteiroChange = vi.fn();
+    render(<StageModeControls {...baseProps} onShowRoteiroChange={onShowRoteiroChange} />);
+    await user.click(screen.getByRole("button", { name: /configurações/i }));
+    await user.click(await screen.findByRole("switch", { name: /exibir roteiro/i }));
+    expect(onShowRoteiroChange).toHaveBeenCalledWith(true);
+  });
+});
+
+describe("StageModeControls — mapa no lugar do título", () => {
+  it("com o mapa, mostra o mapa numa linha abaixo e mantém título, contador, configurações e sair", () => {
+    render(<StageModeControls {...baseProps} map={<div data-testid="mapa" />} />);
+    expect(screen.getByTestId("mapa")).toBeDefined();
+    expect(screen.getByText("Nada Além do Sangue")).toBeDefined();
+    expect(screen.getByText("3/5")).toBeDefined();
+    expect(screen.getByRole("button", { name: /configurações/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /sair do modo palco/i })).toBeDefined();
   });
 });

@@ -1,0 +1,239 @@
+"use client";
+
+import { DRAG_DATA_TYPE, isSongUnitDragData } from "@/components/song/BlockEditor/dragData";
+import { unitColorClasses } from "@/components/song/unit-colors";
+import { computeUnitTypeShortNumbers } from "@/components/song/unit-numbering";
+import { SongUnitType } from "@/prisma/models";
+import {
+  attachClosestEdge,
+  Edge,
+  extractClosestEdge,
+} from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+import { getReorderDestinationIndex } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index";
+import { DropIndicator } from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box";
+import { draggable, dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
+
+export type SongMapUnit = { type: SongUnitType };
+
+type SongMapProps = {
+  // Espelho das repetições existentes nos blocos — um chip por unidade, na
+  // ordem da música, SEM deduplicar (repetição já é bloco duplicado desde
+  // D5: "cada repetição é um bloco de verdade, não um multiplicador" —
+  // ANALISE.md §G). Dois Refrão viram dois chips "R1"/"R2", não um só.
+  units: SongMapUnit[];
+  // Rola até o bloco (seção 8.2/9.9 das specs) — quem chama decide COMO
+  // (ColumnViewer e StageMode têm containers de rolagem diferentes), o
+  // mapa só avisa qual índice foi tocado. Sem isso, os chips são só
+  // informação (não viram botões).
+  onSelectUnit?: (index: number) => void;
+  // Reordenar pelo mapa (modo edição): arrastar um chip pra antes/depois de
+  // outro move o bloco (mesmo mecanismo de arrastar do BlockEditor). Alt+←/→
+  // com o chip focado faz o mesmo pelo teclado.
+  onMoveUnit?: (fromIndex: number, toIndex: number) => void;
+  // Variante menor pro mapa preso no topo da leitura.
+  compact?: boolean;
+  // Variante "tudo numa linha só" (cabeçalhos fixos): os chips encolhem juntos pra
+  // caber todos, mesmo que a sigla fique pouco legível.
+  fit?: boolean;
+  // Com `fit`: chips sempre pequenos (24px, encolhem pra caber), em qualquer largura de tela —
+  // como no celular. Sem isto, crescem com a tela (28px no tablet, 32px no desktop), que é o que
+  // o cabeçalho do Modo Palco usa.
+  fitSmall?: boolean;
+  className?: string;
+};
+
+// Mapa da música (seção 8.2.1 da spec de edição + 9.9 de referências de
+// mídia): chips QUADRADOS com a sigla mínima de cada bloco, cor igual ao bloco
+// correspondente (unit-colors.ts).
+// - normal (leitura e edição): 32px, quebra em linhas — sem rolagem lateral (e
+//   sem a rolagem vertical "escondida" que o overflow-x criava ao girar a roda
+//   do mouse em cima do mapa). Cabem 10 por linha num celular: até 20 blocos em 2 linhas.
+// - compact: 24px, também quebra em linhas.
+// - fit (cabeçalho do Palco e da liturgia): uma linha, os chips encolhem juntos. Celular
+//   e tablet usam a largura toda (teto 24/28px); no desktop (xl) a linha vira do
+//   tamanho do conteúdo (chips de 32px), alinhada à direita pelo cabeçalho.
+export default function SongMap({
+  units,
+  onSelectUnit,
+  onMoveUnit,
+  compact = false,
+  fit = false,
+  fitSmall = false,
+  className,
+}: SongMapProps) {
+  const t = useTranslations();
+  const numbers = computeUnitTypeShortNumbers(units.map((u) => u.type));
+
+  if (units.length === 0) return null;
+
+  // As classes dos dois estados (normal e fit) mexem nas MESMAS propriedades (largura, corpo,
+  // cantos, gap), então ao trocar `fit` — cabeçalho da liturgia grudando no topo — o tamanho
+  // dos chips anima em vez de pular. A quebra de linha (wrap → uma linha) é discreta.
+  const containerClasses = fit
+    ? `flex flex-nowrap w-full items-center gap-0.5 no-scrollbar ${
+        fitSmall ? "" : "xl:w-auto xl:max-w-full xl:gap-1 xl:overflow-x-auto xl:overflow-y-hidden"
+      }`
+    : `flex flex-wrap items-center ${compact ? "gap-0.5" : "gap-1"}`;
+
+  return (
+    <div
+      role="group"
+      aria-label={t("SongMap.label")}
+      className={`${containerClasses} transition-[gap] duration-200 ease-out motion-reduce:transition-none ${className || ""}`}
+    >
+      {units.map((unit, index) => {
+        const colorClasses = unitColorClasses[unit.type];
+        const number = numbers[index];
+        const fullLabel = t(`UnitTypes.${unit.type}`) + (number ? ` ${number}` : "");
+        return (
+          <Chip
+            key={index}
+            index={index}
+            abbr={t(`UnitTypesShort.${unit.type}`) + (number ?? "")}
+            fullLabel={fullLabel}
+            // Na edição o chip convive com o botão de tipo do bloco, que já se chama "Verso 1":
+            // nomes diferentes pra leitor de tela (e pra não haver dois botões iguais).
+            ariaLabel={onMoveUnit ? `${t("SongMap.goTo")} ${fullLabel}` : fullLabel}
+            colors={`${colorClasses.border} ${colorClasses.background} ${colorClasses.text}`}
+            compact={compact}
+            fit={fit}
+            fitSmall={fitSmall}
+            onSelect={onSelectUnit}
+            onMove={onMoveUnit}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+type ChipProps = {
+  index: number;
+  abbr: string;
+  fullLabel: string;
+  ariaLabel: string;
+  colors: string;
+  compact: boolean;
+  fit: boolean;
+  fitSmall: boolean;
+  onSelect?: (index: number) => void;
+  onMove?: (fromIndex: number, toIndex: number) => void;
+};
+
+function Chip({ index, abbr, fullLabel, ariaLabel, colors, compact, fit, fitSmall, onSelect, onMove }: ChipProps) {
+  const ref = useRef<HTMLElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
+  const reorderable = !!onMove;
+
+  // Reordenar: o chip é fonte de arrasto e alvo de soltar (borda esquerda/direita decide se
+  // entra antes ou depois). Os dados são os mesmos do bloco (DRAG_DATA_TYPE), então arrastar um
+  // chip até um bloco — ou um bloco até um chip — também funciona.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !onMove) return;
+    const cleanupDrag = draggable({
+      element: el,
+      getInitialData: () => ({ type: DRAG_DATA_TYPE, index }),
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
+    const cleanupDrop = dropTargetForElements({
+      element: el,
+      canDrop: ({ source }) => isSongUnitDragData(source.data) && source.data.index !== index,
+      getData: ({ input, element }) =>
+        attachClosestEdge({ type: "song-map-chip", index }, { input, element, allowedEdges: ["left", "right"] }),
+      onDragEnter: ({ self }) => setClosestEdge(extractClosestEdge(self.data)),
+      onDrag: ({ self }) => setClosestEdge(extractClosestEdge(self.data)),
+      onDragLeave: () => setClosestEdge(null),
+      onDrop: ({ source, self }) => {
+        setClosestEdge(null);
+        if (!isSongUnitDragData(source.data)) return;
+        onMove(
+          source.data.index,
+          getReorderDestinationIndex({
+            startIndex: source.data.index,
+            indexOfTarget: index,
+            closestEdgeOfTarget: extractClosestEdge(self.data),
+            axis: "horizontal",
+          })
+        );
+      },
+    });
+    return () => {
+      cleanupDrag();
+      cleanupDrop();
+    };
+  }, [index, onMove]);
+
+  // Quadrado (aspect-square: a altura acompanha a largura). Nos dois estados a largura é uma
+  // `w-*`, e a transição cobre largura, corpo e cantos.
+  // - fit: teto por largura de tela — celular 24px (encolhe junto se houver muitos blocos, por
+  //   isso `shrink min-w-0`), tablet 28px, desktop 32px (tamanho normal, sem encolher).
+  // - normal: 32px (compacto 24px), sem encolher, quebrando em linhas.
+  const chipClasses = `flex aspect-square items-center justify-center whitespace-nowrap border font-semibold uppercase leading-none transition-[width,font-size,border-radius,letter-spacing] duration-200 ease-out motion-reduce:transition-none ${
+    fit
+      ? `min-w-0 w-6 shrink overflow-hidden rounded-sm text-[9px] ${
+          fitSmall ? "" : "md:w-7 md:text-[10px] xl:w-8 xl:shrink-0 xl:rounded-md xl:text-xs"
+        }`
+      : `shrink-0 tracking-wide ${compact ? "w-6 rounded text-[11px]" : "w-8 rounded-md text-xs"}`
+  } ${colors}`;
+
+  const interactive = !!onSelect || reorderable;
+  if (!interactive) {
+    return (
+      <span title={fullLabel} aria-label={ariaLabel} className={chipClasses}>
+        {abbr}
+      </span>
+    );
+  }
+
+  // O desenho é pequeno (32px / 24px); o alvo de toque de verdade (≥44px) vem do
+  // after: invisível, igual ao chip do editor — "a área de toque pode exceder o
+  // desenho" (seção 8.8/8.2.1).
+  const touch = compact || fit ? "after:-inset-2" : "after:-inset-1.5";
+  const interactiveClasses = `relative p-0 hover:brightness-95 after:content-[''] after:absolute ${touch} ${
+    reorderable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
+  } ${isDragging ? "opacity-40" : ""}`;
+
+  // Reordenável: span com role=button (não <button>) — o Firefox não deixa arrastar a partir de <button>.
+  if (reorderable) {
+    return (
+      <span
+        ref={ref}
+        role="button"
+        tabIndex={0}
+        title={fullLabel}
+        aria-label={ariaLabel}
+        onClick={() => onSelect?.(index)}
+        onKeyDown={(event) => {
+          if (event.altKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+            event.preventDefault();
+            onMove?.(index, event.key === "ArrowLeft" ? index - 1 : index + 1);
+          } else if ((event.key === "Enter" || event.key === " ") && onSelect) {
+            event.preventDefault();
+            onSelect(index);
+          }
+        }}
+        className={`${chipClasses} ${interactiveClasses}`}
+      >
+        {abbr}
+        {closestEdge && <DropIndicator edge={closestEdge} gap="2px" />}
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect?.(index)}
+      aria-label={ariaLabel}
+      title={fullLabel}
+      className={`${chipClasses} ${interactiveClasses}`}
+    >
+      {abbr}
+    </button>
+  );
+}

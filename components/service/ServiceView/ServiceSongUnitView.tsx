@@ -1,6 +1,7 @@
 import { useServiceConfig } from "@/components/config/ServiceConfig";
 import SongConfigProvider from "@/components/config/SongConfig";
-import ArrangementView from "@/components/song/ArrangementView";
+import ArrangementView, { ArrangementViewHandle } from "@/components/song/ArrangementView";
+import SongMap from "@/components/song/SongMap";
 import { ClientServiceUnit } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useRef, useState } from "react";
@@ -38,13 +39,29 @@ export default function ServiceSongUnitView({
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [isHeaderStuck, setIsHeaderStuck] = useState(false);
+  const viewRef = useRef<ArrangementViewHandle>(null);
+  // Ao grudar no topo o cabeçalho encolhe (título e chips menores). Se a altura do fluxo mudasse junto,
+  // o conteúdo pularia e o navegador (scroll anchoring) compensaria a rolagem, o cabeçalho
+  // desgrudaria, cresceria... e ficaria piscando. Então a altura "parado" é lembrada e um
+  // espaçador (abaixo) preenche a diferença: o fluxo não muda, só o cabeçalho (que é sticky).
+  const naturalHeaderHeightRef = useRef(0);
+  const lastStuckToggleRef = useRef(0);
+  const isHeaderStuckRef = useRef(false);
 
   useEffect(() => {
     const el = headerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setHeaderHeight(el.offsetHeight));
+    const update = () => {
+      const height = el.offsetHeight;
+      // Só vale como altura "parado" quando está parado e a transição já acabou (200ms + folga).
+      if (!isHeaderStuckRef.current && performance.now() - lastStuckToggleRef.current > 300) {
+        naturalHeaderHeightRef.current = height;
+      }
+      setHeaderHeight(height);
+    };
+    const ro = new ResizeObserver(update);
     ro.observe(el);
-    setHeaderHeight(el.offsetHeight);
+    update();
     return () => ro.disconnect();
   }, []);
 
@@ -52,7 +69,14 @@ export default function ServiceSongUnitView({
     const el = headerRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => setIsHeaderStuck(entry.intersectionRatio < 1),
+      ([entry]) => {
+        const stuck = entry.intersectionRatio < 1;
+        if (stuck !== isHeaderStuckRef.current) {
+          isHeaderStuckRef.current = stuck;
+          lastStuckToggleRef.current = performance.now();
+        }
+        setIsHeaderStuck(stuck);
+      },
       { threshold: 1, rootMargin: "-1px 0px 0px 0px" }
     );
     observer.observe(el);
@@ -88,6 +112,12 @@ export default function ServiceSongUnitView({
     setIsEditing(false);
   }
 
+  const units = arrangement.units ?? [];
+  // Vão vertical entre blocos da cifra (--block-gap de ArrangementView: 1em / 0.5em compacto, na
+  // fonte da cifra). O cabeçalho usa ele pra separar título, mapa e cifra.
+  const blockGapPx = (density === "compact" ? 0.5 : 1) * fontSize;
+  const handleSelectUnit = (index: number) => viewRef.current?.selectUnit(index);
+
   return (
     <div className="w-full" style={{ "--song-header-h": `${headerHeight}px` } as React.CSSProperties}>
       <SongConfigProvider
@@ -103,6 +133,12 @@ export default function ServiceSongUnitView({
           arrangement={arrangement}
           order={unit.order}
           isStuck={isHeaderStuck}
+          // Mapa sempre no cabeçalho, logo abaixo do título, tocável: normal parado e pequeno
+          // (como no Modo Palco) quando preso no topo. Na edição some: o editor tem o próprio
+          // mapa, com o rascunho.
+          mapUnits={!isEditing && units.length > 0 ? units : undefined}
+          onSelectMapUnit={handleSelectUnit}
+          blockGapPx={blockGapPx}
           isEditing={isEditing}
           isSaving={isSaving}
           isDirty={isDirty}
@@ -111,6 +147,8 @@ export default function ServiceSongUnitView({
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
         />
+        {/* Espaçador: completa a altura que o cabeçalho "perde" ao grudar, pro fluxo não mudar. */}
+        <div aria-hidden style={{ height: Math.max(0, naturalHeaderHeightRef.current - headerHeight) }} />
         <ServiceArrangementMeta
           arrangement={arrangement}
           isEditing={isEditing}
@@ -121,7 +159,9 @@ export default function ServiceSongUnitView({
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
         />
-        <div className="mt-3 md:mt-4">
+        {/* O vão entre o cabeçalho e o conteúdo (cifra ou editor) é o padding do próprio cabeçalho: o
+            mesmo vão entre blocos na visualização e na edição. */}
+        <div>
           {isEditing ? (
             <ServiceSongUnitEditForm
               unit={unit}
@@ -132,7 +172,9 @@ export default function ServiceSongUnitView({
             />
           ) : (
             <ArrangementView
+              ref={viewRef}
               arrangement={arrangement}
+              collapsible
               footer={
                 arrangement.song?.artist ? (
                   <p className="text-sm text-muted-foreground">
