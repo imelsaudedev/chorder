@@ -74,3 +74,33 @@ describe("SongMap", () => {
     expect(container.firstChild).toBeNull();
   });
 });
+
+describe("SongMap — reordenar na edição", () => {
+  const units = [{ type: "INTRO" as const }, { type: "VERSE" as const }, { type: "CHORUS" as const }];
+
+  it("com onMoveUnit os chips ganham o nome 'Ir para …' (não repetem o botão de tipo do bloco)", () => {
+    render(<SongMap units={units} onSelectUnit={() => {}} onMoveUnit={() => {}} />);
+    expect(screen.getByRole("button", { name: /SongMap\.goTo.*Verso 1/ })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Verso 1" })).toBeNull();
+  });
+
+  it("Alt+→ move o bloco do chip focado uma posição pra frente, Alt+← pra trás", async () => {
+    const user = userEvent.setup();
+    const onMoveUnit = vi.fn();
+    render(<SongMap units={units} onSelectUnit={() => {}} onMoveUnit={onMoveUnit} />);
+    const verse = screen.getByRole("button", { name: /Verso 1/ });
+    verse.focus();
+    await user.keyboard("{Alt>}{ArrowRight}{/Alt}");
+    expect(onMoveUnit).toHaveBeenLastCalledWith(1, 2);
+    await user.keyboard("{Alt>}{ArrowLeft}{/Alt}");
+    expect(onMoveUnit).toHaveBeenLastCalledWith(1, 0);
+  });
+
+  it("tocar num chip reordenável ainda rola até o bloco", async () => {
+    const user = userEvent.setup();
+    const onSelectUnit = vi.fn();
+    render(<SongMap units={units} onSelectUnit={onSelectUnit} onMoveUnit={() => {}} />);
+    await user.click(screen.getByRole("button", { name: /Refrão 1|Refr.o 1/ }));
+    expect(onSelectUnit).toHaveBeenCalledWith(2);
+  });
+});

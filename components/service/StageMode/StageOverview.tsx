@@ -40,16 +40,24 @@ const MIN_COLUMN_WIDTH = 300;
 const SWIPE_MIN_PX = 60;
 
 type Candidate = { columns: number; density: OverviewDensity };
-/** Resultado de um candidato: a maior fonte que coube e quão parecidas ficaram as colunas (1 = iguais; 1 coluna = 1). */
-type Best = Candidate & { fontSize: number; balance: number };
+/**
+ * Resultado de um candidato: a maior fonte que coube, quão parecidas ficaram as colunas
+ * (1 = iguais; 1 coluna = 1) e quanto da altura da tela o conteúdo ocupa (0–1).
+ */
+type Best = Candidate & { fontSize: number; balance: number; fill: number };
+
+/** Uma coluna só continua valendo quando sobra espaço: se já enche mais que isso da tela, colunas são melhores. */
+const ONE_COLUMN_MAX_FILL = 0.7;
 
 /**
  * Escolhe o layout entre os candidatos que couberam:
  * 1. densidade normal enquanto alcançar a fonte confortável; senão compacta, se alcançar; senão qualquer um;
  * 2. dentro do grupo, a maior fonte (empate de até FONT_TIE_PX conta como igual);
- * 3. no empate, as colunas mais equilibradas; persistindo, menos colunas.
+ * 3. no empate, 1 coluna só se ela sobra espaço (preenche até ONE_COLUMN_MAX_FILL da tela);
+ *    entre o resto, as colunas mais equilibradas; persistindo, menos colunas.
  * Com o teto de fonte (preferência do músico) uma música curta empata em todos — e uma coluna
- * (equilíbrio 1) ganha, sobrando espaço em branco em vez de esticar o texto.
+ * (que sobra espaço) ganha, ficando em branco em vez de esticar o texto. Uma música que enche
+ * a tela em uma coluna passa a usar colunas.
  */
 function chooseBest(found: Best[], comfort: number): Best | null {
   if (found.length === 0) return null;
@@ -57,7 +65,8 @@ function chooseBest(found: Best[], comfort: number): Best | null {
   const pool = comfortable("normal").length ? comfortable("normal") : comfortable("compact").length ? comfortable("compact") : found;
   const top = Math.max(...pool.map((c) => c.fontSize));
   const tied = pool.filter((c) => c.fontSize >= top - FONT_TIE_PX);
-  return [...tied].sort((a, b) => b.balance - a.balance || a.columns - b.columns)[0];
+  const roomy = tied.filter((c) => c.columns > 1 || c.fill <= ONE_COLUMN_MAX_FILL);
+  return [...(roomy.length ? roomy : tied)].sort((a, b) => b.balance - a.balance || a.columns - b.columns)[0];
 }
 
 type StageOverviewProps = {
@@ -212,7 +221,8 @@ export default function StageOverview({
         return last ? last.getBoundingClientRect().bottom - column.getBoundingClientRect().top : 0;
       });
       const balance = heights.length > 1 && Math.max(...heights) > 0 ? Math.min(...heights) / Math.max(...heights) : 1;
-      current.found.push({ ...candidate, fontSize, balance });
+      const fill = area.clientHeight > 0 ? content.scrollHeight / area.clientHeight : 1;
+      current.found.push({ ...candidate, fontSize, balance, fill });
     }
 
     if (current.i + 1 < current.queue.length) {
@@ -229,6 +239,7 @@ export default function StageOverview({
       ...current.queue[current.queue.length - 1],
       fontSize: manualFont > 0 ? manualFont : OVERVIEW_FONT_MIN,
       balance: 1,
+      fill: 1,
     };
     const chosen = best ?? fallback;
     wrapper.style.fontSize = `${chosen.fontSize}px`;

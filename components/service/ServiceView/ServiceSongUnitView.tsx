@@ -40,8 +40,6 @@ export default function ServiceSongUnitView({
   const [headerHeight, setHeaderHeight] = useState(0);
   const [isHeaderStuck, setIsHeaderStuck] = useState(false);
   const viewRef = useRef<ArrangementViewHandle>(null);
-  const inlineMapRef = useRef<HTMLDivElement>(null);
-  const [isInlineMapAbove, setIsInlineMapAbove] = useState(false);
 
   useEffect(() => {
     const el = headerRef.current;
@@ -62,24 +60,6 @@ export default function ServiceSongUnitView({
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-
-  // Mapa inline saiu da tela POR CIMA (já passou, abaixo do cabeçalho fixo):
-  // o mesmo slot do título passa a mostrar o mapa compacto. rootMargin
-  // desconta a altura do cabeçalho, pra trocar só quando o mapa some de fato.
-  useEffect(() => {
-    const el = inlineMapRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") {
-      setIsInlineMapAbove(false);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) =>
-        setIsInlineMapAbove(!entry.isIntersecting && entry.boundingClientRect.top < (entry.rootBounds?.top ?? 0) + 1),
-      { threshold: 0, rootMargin: `-${headerHeight}px 0px 0px 0px` }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [headerHeight, isEditing, arrangement?.id]);
 
   const onUnsavedEditChangeRef = useRef(onUnsavedEditChange);
   onUnsavedEditChangeRef.current = onUnsavedEditChange;
@@ -128,9 +108,11 @@ export default function ServiceSongUnitView({
           arrangement={arrangement}
           order={unit.order}
           isStuck={isHeaderStuck}
-          titleSlot={
-            !isEditing && isInlineMapAbove && units.length > 0 ? (
-              <SongMap compact units={units} onSelectUnit={handleSelectUnit} className="w-full" />
+          // Mapa sempre no cabeçalho fixo, logo abaixo do título (como no Modo Palco),
+          // tocável. Na edição some: o editor tem o próprio mapa, com o rascunho.
+          map={
+            !isEditing && units.length > 0 ? (
+              <SongMap fit units={units} onSelectUnit={handleSelectUnit} />
             ) : undefined
           }
           isEditing={isEditing}
@@ -161,25 +143,18 @@ export default function ServiceSongUnitView({
               onSaved={handleSaved}
             />
           ) : (
-            <>
-              {units.length > 0 && (
-                <div ref={inlineMapRef} className="mb-4">
-                  <SongMap units={units} onSelectUnit={handleSelectUnit} />
-                </div>
-              )}
-              <ArrangementView
-                ref={viewRef}
-                arrangement={arrangement}
-                collapsible
-                footer={
-                  arrangement.song?.artist ? (
-                    <p className="text-sm text-muted-foreground">
-                      {t("composerLabel", { name: arrangement.song.artist })}
-                    </p>
-                  ) : undefined
-                }
-              />
-            </>
+            <ArrangementView
+              ref={viewRef}
+              arrangement={arrangement}
+              collapsible
+              footer={
+                arrangement.song?.artist ? (
+                  <p className="text-sm text-muted-foreground">
+                    {t("composerLabel", { name: arrangement.song.artist })}
+                  </p>
+                ) : undefined
+              }
+            />
           )}
         </div>
       </SongConfigProvider>

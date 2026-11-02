@@ -128,7 +128,8 @@
     "TEXT": "T"
   },
   "SongMap": {
-    "label": "Song map"
+    "label": "Song map",
+    "goTo": "Go to"
   },
   "Blocks": {
     "collapse": "Collapse block",

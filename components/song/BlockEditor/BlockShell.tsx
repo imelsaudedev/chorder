@@ -204,6 +204,8 @@ export default function BlockShell({
   return (
     <div
       ref={rootRef}
+      // Permite ao mapa da música (BlockEditor) rolar até este bloco.
+      data-unit-index={index}
       // borderHandleHover (:has() — ver unit-colors.ts) acende a borda do
       // bloco INTEIRO quando o mouse passa só na alça de arrastar, achado:
       // "é possível que o hover dela acenda a borda de todo o bloco? Usaria

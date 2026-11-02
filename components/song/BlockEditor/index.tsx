@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import SongMap from "@/components/song/SongMap";
 import { ClientSongUnit, SongUnitType } from "@/prisma/models";
 import { autoScrollWindowForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
@@ -78,6 +79,17 @@ export default function BlockEditor({
     onChangeUnits(moveUnitTo(units, fromIndex, toIndex));
   }
 
+  // Tocar num chip do mapa rola até o bloco. scroll-margin-top desconta o
+  // cabeçalho fixo da liturgia (--song-header-h, só existe lá; fora dela vale 0).
+  const containerRef = useRef<HTMLDivElement>(null);
+  function scrollToBlock(index: number) {
+    const el = containerRef.current?.querySelector<HTMLElement>(`[data-unit-index="${index}"]`);
+    if (!el) return;
+    el.style.scrollMarginTop = "var(--song-header-h, 0px)";
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+  }
+
   // offset acumulado: cada coluna é só um RECORTE do array único de units
   // (distributeUnits.ts) — não existe "índice dentro da coluna" nenhum,
   // só onde essa faixa começa e termina no array plano.
@@ -85,9 +97,14 @@ export default function BlockEditor({
 
   return (
     <div
+      ref={containerRef}
       className="space-y-4"
       style={{ "--block-gap": density === "compact" ? "0.5em" : "1em" } as React.CSSProperties}
     >
+      {/* Mapa da música também na edição: mostra a ordem do rascunho, tocar rola até o bloco e
+          arrastar um chip (ou Alt+←/→ com o chip focado) reordena os blocos. */}
+      <SongMap units={units} onSelectUnit={scrollToBlock} onMoveUnit={handleMoveUnit} />
+
       <div className={`grid gap-4 ${getGridColumnClass(columns)}`}>
         {positionedColumns.map((column, columnIdx) => {
           const columnEndIndex = runningOffset + column.length;

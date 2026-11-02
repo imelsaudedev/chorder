@@ -129,7 +129,8 @@
     "TEXT": "T"
   },
   "SongMap": {
-    "label": "Mapa da música"
+    "label": "Mapa da música",
+    "goTo": "Ir para"
   },
   "Blocks": {
     "collapse": "Minimizar bloco",
