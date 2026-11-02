@@ -29,7 +29,7 @@ export default function ClientPage({
             className="mb-4"
           />
         )}
-        <ArrangementView ref={viewRef} arrangement={arrangement} />
+        <ArrangementView ref={viewRef} arrangement={arrangement} collapsible />
       </MainWithDensity>
     </SongConfigProvider>
   );

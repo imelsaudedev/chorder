@@ -1,6 +1,7 @@
 "use client";
 
 import ColumnViewer from "@/components/song/ArrangementView/ColumnViewer";
+import { useCollapsedUnits } from "@/hooks/useCollapsedUnits";
 import { ClientArrangement, ClientServiceUnit } from "@/prisma/models";
 import { useLayoutEffect, useRef, useState } from "react";
 import StageRoteiroItem from "./StageRoteiroItem";
@@ -128,6 +129,11 @@ export default function StageOverview({
   onFitRef.current = onFit;
 
   const songUnits = arrangement?.units ?? [];
+  // Blocos minimizados (os mesmos da tela normal e da rolagem): sobra espaço, então o encaixe refaz.
+  const [collapsedUnits, toggleCollapse] = useCollapsedUnits(arrangement?.id);
+  const collapsedKey = Array.from(collapsedUnits)
+    .sort((a, b) => a - b)
+    .join(",");
 
   // Tamanho da área útil (entre cabeçalho e rodapé).
   useLayoutEffect(() => {
@@ -144,7 +150,7 @@ export default function StageOverview({
 
   // Começa uma busca nova sempre que algo que muda o encaixe muda: tela, tom,
   // ajustes ou tamanho da área (girar o aparelho, por exemplo).
-  const searchKey = `${screenKey}|${transpose}|${settings.columns}|${settings.fontSize}|${settings.density}|${maxFontSize}|${size.w}x${size.h}`;
+  const searchKey = `${screenKey}|${transpose}|${settings.columns}|${settings.fontSize}|${settings.density}|${maxFontSize}|${collapsedKey}|${size.w}x${size.h}`;
   useLayoutEffect(() => {
     if (size.w === 0 || size.h === 0) return;
     let columnsList: number[];
@@ -270,13 +276,13 @@ export default function StageOverview({
     >
       <div ref={contentRef} className="px-4 py-3 sm:px-6">
         {items ? (
-          <div style={wrapperStyle} className="stage-overview-fit">
+          <div style={wrapperStyle}>
             {items.map((unit) => (
               <StageRoteiroItem key={unit.clientId} unit={unit} />
             ))}
           </div>
         ) : arrangement ? (
-          <div style={wrapperStyle} className="stage-overview-fit">
+          <div style={wrapperStyle}>
             <ColumnViewer
               key={cfg.columns}
               columns={cfg.columns}
@@ -286,6 +292,8 @@ export default function StageOverview({
               enharmonicPreference={null}
               mode="chords"
               density={cfg.density}
+              collapsedUnits={collapsedUnits}
+              onToggleCollapse={toggleCollapse}
             />
           </div>
         ) : null}

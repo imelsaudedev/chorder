@@ -18,33 +18,33 @@ type SongMapProps = {
   // mapa só avisa qual índice foi tocado. Sem isso, os chips são só
   // informação (não viram botões).
   onSelectUnit?: (index: number) => void;
-  // Variante estreita pro mapa preso no topo da leitura (cabeçalho da
-  // liturgia): paddings horizontais reduzidos pra caber mais chips; ainda
-  // rola na horizontal se não couber e mantém o toque.
+  // Variante menor pro mapa preso no topo da leitura (cabeçalho da liturgia).
   compact?: boolean;
-  // Variante "tudo numa linha só", sem rolagem: os chips encolhem juntos
-  // pra caber todos, mesmo que a sigla fique pouco legível (Modo Palco —
-  // aqui o mapa é visão geral, não navegação).
+  // Variante "tudo numa linha só" (Modo Palco): os chips encolhem juntos pra
+  // caber todos, mesmo que a sigla fique pouco legível. Visão geral, não navegação.
   fit?: boolean;
   className?: string;
 };
 
 // Mapa da música (seção 8.2.1 da spec de edição + 9.9 de referências de
-// mídia): chips com a sigla mínima de cada bloco, cor igual ao bloco
-// correspondente (unit-colors.ts). Tamanho normal (protótipo), compact
-// (preso no cabeçalho, ainda tocável) ou fit (uma linha, só informação).
+// mídia): chips QUADRADOS com a sigla mínima de cada bloco, cor igual ao bloco
+// correspondente (unit-colors.ts).
+// - normal (leitura): 32px, quebra em linhas — sem rolagem lateral (e sem a
+//   rolagem vertical "escondida" que o overflow-x criava ao girar a roda do
+//   mouse em cima do mapa). Cabem 10 por linha num celular: até 20 blocos em 2 linhas.
+// - compact (cabeçalho fixo da liturgia): 24px, também quebra em linhas.
+// - fit (Modo Palco): uma linha, os chips encolhem juntos. Celular e tablet
+//   usam a largura toda (teto 24/28px); no desktop (xl) a linha vira do tamanho
+//   do conteúdo (chips de 32px), alinhada à direita pelo cabeçalho.
 export default function SongMap({ units, onSelectUnit, compact = false, fit = false, className }: SongMapProps) {
   const t = useTranslations();
   const numbers = computeUnitTypeShortNumbers(units.map((u) => u.type));
 
   if (units.length === 0) return null;
 
-  // fit: no celular/tablet vertical a linha ocupa toda a largura e os chips (quadrados)
-  // encolhem juntos pra caber; de lg pra cima (tablet paisagem, desktop) a linha vira do
-  // tamanho do conteúdo, alinhada à direita pelo cabeçalho, e só rola se não couber.
   const containerClasses = fit
-    ? "flex w-full items-center gap-0.5 lg:w-auto lg:max-w-full lg:gap-1 lg:overflow-x-auto no-scrollbar"
-    : `flex items-center ${compact ? "gap-0.5" : "gap-1.5"} overflow-x-auto no-scrollbar`;
+    ? "flex w-full items-center gap-0.5 xl:w-auto xl:max-w-full xl:gap-1 xl:overflow-x-auto xl:overflow-y-hidden no-scrollbar"
+    : `flex flex-wrap items-center ${compact ? "gap-0.5" : "gap-1"}`;
 
   return (
     <div role="group" aria-label={t("SongMap.label")} className={`${containerClasses} ${className || ""}`}>
@@ -62,24 +62,26 @@ export default function SongMap({ units, onSelectUnit, compact = false, fit = fa
               title={fullLabel}
               aria-label={fullLabel}
               // Quadrado (aspect-square). Teto por largura de tela: celular 24px (encolhe
-              // junto se houver muitos blocos), tablet vertical 28px, tablet paisagem 28px
-              // fixo, desktop 32px (tamanho normal).
-              className={`flex aspect-square min-w-0 max-w-6 flex-1 basis-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-sm border text-[9px] font-semibold uppercase leading-none md:max-w-7 md:text-[10px] lg:size-7 lg:max-w-none lg:flex-none lg:basis-auto lg:rounded-md lg:text-[11px] xl:size-8 xl:text-xs ${colors}`}
+              // junto se houver muitos blocos), tablet 28px, desktop 32px (tamanho normal).
+              className={`flex aspect-square min-w-0 max-w-6 flex-1 basis-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-sm border text-[9px] font-semibold uppercase leading-none md:max-w-7 md:text-[10px] xl:size-8 xl:max-w-none xl:flex-none xl:basis-auto xl:rounded-md xl:text-xs ${colors}`}
             >
               {abbr}
             </span>
           );
         }
 
-        const size = compact
-          ? "min-w-6 h-6 px-1 rounded text-[11px]"
-          : "min-w-9 h-8 px-2.5 rounded-md text-xs";
+        const size = compact ? "size-6 rounded text-[11px]" : "size-8 rounded-md text-xs";
         const touch = compact ? "after:-inset-2" : "after:-inset-1.5";
-        const className = `relative shrink-0 ${size} border font-semibold uppercase tracking-wide transition-colors ${colors}`;
+        const chipClasses = `relative shrink-0 ${size} border font-semibold uppercase tracking-wide transition-colors ${colors}`;
 
         if (!onSelectUnit) {
           return (
-            <span key={index} title={fullLabel} aria-label={fullLabel} className={`${className} inline-flex items-center justify-center`}>
+            <span
+              key={index}
+              title={fullLabel}
+              aria-label={fullLabel}
+              className={`${chipClasses} inline-flex items-center justify-center`}
+            >
               {abbr}
             </span>
           );
@@ -92,11 +94,10 @@ export default function SongMap({ units, onSelectUnit, compact = false, fit = fa
             onClick={() => onSelectUnit(index)}
             aria-label={fullLabel}
             title={fullLabel}
-            // O desenho é pequeno (min-w-9 / min-w-6); o alvo de toque de
-            // verdade (≥44px) vem do after: invisível, igual ao chip do
-            // editor — "a área de toque pode exceder o desenho" (seção
-            // 8.8/8.2.1).
-            className={`${className} cursor-pointer hover:brightness-95 after:content-[''] after:absolute ${touch}`}
+            // O desenho é pequeno (32px / 24px); o alvo de toque de verdade
+            // (≥44px) vem do after: invisível, igual ao chip do editor — "a
+            // área de toque pode exceder o desenho" (seção 8.8/8.2.1).
+            className={`${chipClasses} cursor-pointer inline-flex items-center justify-center p-0 hover:brightness-95 after:content-[''] after:absolute ${touch}`}
           >
             {abbr}
           </button>

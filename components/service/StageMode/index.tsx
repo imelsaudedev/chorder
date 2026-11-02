@@ -471,7 +471,7 @@ export default function StageMode({
                     <div className="h-px flex-1 bg-border" />
                   </div>
                   <SongConfigProvider transpose={transposes[entry.songIndex] ?? 0} columns={1} fontSize={fontSize}>
-                    <ArrangementView arrangement={arrangement} />
+                    <ArrangementView arrangement={arrangement} collapsible />
                   </SongConfigProvider>
                 </section>
               );

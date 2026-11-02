@@ -170,6 +170,7 @@ export default function ServiceSongUnitView({
               <ArrangementView
                 ref={viewRef}
                 arrangement={arrangement}
+                collapsible
                 footer={
                   arrangement.song?.artist ? (
                     <p className="text-sm text-muted-foreground">

@@ -8,7 +8,19 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ChevronLeft, ChevronRight, Minimize, Minus, Play, Plus, Rows2, Rows3, SlidersHorizontal } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Columns3,
+  Minimize,
+  Minus,
+  MoveVertical,
+  Play,
+  Plus,
+  Rows2,
+  Rows3,
+  SlidersHorizontal,
+} from "lucide-react";
 import { Dispatch, ReactNode, SetStateAction } from "react";
 import { OVERVIEW_FONT_MIN, OverviewFit, OverviewSettings } from "./StageOverview";
 import { formatScrollSpeedMultiplier, SCROLL_SPEED_MULTIPLIERS } from "./useAutoScroll";
@@ -98,33 +110,23 @@ export default function StageModeControls({
   onExit,
 }: StageModeControlsProps) {
   const speedLabel = formatScrollSpeedMultiplier(scrollSpeedMultiplier);
-  // Na visão geral a altura é preciosa: o cabeçalho é sempre uma linha só (título + mapa).
-  const oneLineHeader = layoutMode === "overview";
 
   return (
     <>
       {/* Cabeçalho — só informação (sem botões, menos toque acidental). Altura fixa:
-          a rolagem calcula posições a partir dela. Celular: título e, embaixo, o mapa
-          numa linha. Tablet/desktop (e visão geral): título à esquerda, mapa à direita. */}
+          a rolagem calcula posições a partir dela. Celular e tablet: título e, embaixo,
+          o mapa numa linha. Desktop (xl): título à esquerda, mapa à direita, numa linha só. */}
       <div
         id={TOP_BAR_ID}
-        className={`fixed top-0 inset-x-0 z-50 px-4 sm:px-6 lg:px-8 bg-background/90 backdrop-blur-sm border-b border-border ${
-          oneLineHeader ? "flex items-center gap-2 py-2.5" : "py-3.5 lg:flex lg:items-center lg:gap-2 lg:py-2.5"
-        }`}
+        className="fixed top-0 inset-x-0 z-50 px-4 sm:px-6 lg:px-8 py-3.5 xl:py-2.5 bg-background/90 backdrop-blur-sm border-b border-border xl:flex xl:items-center xl:gap-2"
       >
-        <div className={`flex h-6 min-w-0 items-center gap-2 ${oneLineHeader ? "max-w-[45%]" : "lg:max-w-[45%]"}`}>
+        <div className="flex h-6 min-w-0 items-center gap-2 xl:max-w-[45%]">
           {indexLabel && (
             <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{indexLabel}</span>
           )}
           <span className="truncate text-[15px] font-semibold">{title}</span>
         </div>
-        <div
-          className={`flex items-center ${
-            oneLineHeader ? "h-8 min-w-0 flex-1 justify-end" : "h-7 lg:h-8 lg:min-w-0 lg:flex-1 lg:justify-end"
-          }`}
-        >
-          {map}
-        </div>
+        <div className="flex h-7 items-center xl:h-8 xl:min-w-0 xl:flex-1 xl:justify-end">{map}</div>
       </div>
 
       {/* Rodapé (zona do polegar) — à esquerda a rolagem (− ▶ +) ou, na visão geral,
@@ -148,7 +150,7 @@ export default function StageModeControls({
             >
               <ChevronLeft />
             </Button>
-            <div className="flex h-10 w-[88px] items-center justify-center text-sm tabular-nums text-muted-foreground">
+            <div className="flex h-10 w-[72px] items-center justify-center text-sm tabular-nums text-muted-foreground">
               {overview.position}
             </div>
             <Button
@@ -178,7 +180,7 @@ export default function StageModeControls({
               size="lg"
               aria-label={isScrollEnabled ? `Pausar rolagem (${speedLabel})` : `Ligar rolagem (${speedLabel})`}
               onClick={onTogglePlayback}
-              className={`w-[88px] px-0 tabular-nums ${
+              className={`w-[72px] px-0 tabular-nums ${
                 isScrollEnabled ? "bg-blue-600 text-white hover:bg-blue-600/90" : ""
               }`}
             >
@@ -198,6 +200,26 @@ export default function StageModeControls({
         )}
 
         <div className="ml-auto flex gap-2">
+          {/* Layout do Palco, fora do popover (trocar é frequente): rolagem contínua
+              ou visão geral (música inteira numa tela). Sempre um dos dois ligado. */}
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="lg"
+            value={layoutMode}
+            onValueChange={(value) => {
+              if (value) onLayoutModeChange(value as StageLayoutMode);
+            }}
+            aria-label="Layout"
+          >
+            <ToggleGroupItem value="scroll" aria-label="Rolagem" title="Rolagem">
+              <MoveVertical />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="overview" aria-label="Visão geral" title="Visão geral">
+              <Columns3 />
+            </ToggleGroupItem>
+          </ToggleGroup>
+
           {/* Mesmo padrão do ServiceConfig (tela do culto): Popover, título em
               text-primary e grupos de rótulo text-xs text-zinc-500. */}
           <Popover>
@@ -209,25 +231,6 @@ export default function StageModeControls({
             <PopoverContent side="top" align="end" className="max-h-[70vh] w-72 overflow-y-auto">
               <div className="flex flex-col gap-4">
                 <p className="text-sm font-semibold text-primary">Configurações</p>
-
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-zinc-500">Layout</span>
-                  <ToggleGroup
-                    type="single"
-                    variant="outline"
-                    value={layoutMode}
-                    onValueChange={(value) => {
-                      if (value) onLayoutModeChange(value as StageLayoutMode);
-                    }}
-                  >
-                    <ToggleGroupItem value="scroll" aria-label="Rolagem" className="px-4">
-                      Rolagem
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="overview" aria-label="Visão geral" className="px-4">
-                      Geral
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                </div>
 
                 <div className="flex items-center justify-between gap-3">
                   <Label htmlFor="stage-show-roteiro" className="text-xs font-normal text-zinc-500">

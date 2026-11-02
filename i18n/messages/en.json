@@ -130,6 +130,10 @@
   "SongMap": {
     "label": "Song map"
   },
+  "Blocks": {
+    "collapse": "Collapse block",
+    "expand": "Expand block"
+  },
   "ServiceView": {
     "editChords": "Edit chords",
     "saveScopeTitle": "Save changes",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSongConfig } from "@/components/config/SongConfig";
+import { useCollapsedUnits } from "@/hooks/useCollapsedUnits";
 import { ClientArrangement } from "@/prisma/models";
 import { forwardRef, ReactNode, useImperativeHandle, useRef } from "react";
 import ColumnViewer from "./ColumnViewer";
@@ -10,6 +11,8 @@ type ArrangementViewProps = {
   arrangement: ClientArrangement | null;
   /** Repassado pra ColumnViewer — renderiza dentro da última coluna, depois do último bloco. */
   footer?: ReactNode;
+  /** Mostra o botão de minimizar em cada bloco (tela normal e Modo Palco). Fora disso (pré-visualizações) fica desligado. */
+  collapsible?: boolean;
 };
 
 /** Ações expostas via ref — o mapa da música vive FORA daqui (pode haver mais de uma cópia, ex.: inline + cabeçalho fixo) e aciona a mesma rolagem. */
@@ -19,11 +22,12 @@ export type ArrangementViewHandle = {
 };
 
 const ArrangementView = forwardRef<ArrangementViewHandle, ArrangementViewProps>(function ArrangementView(
-  { arrangement, footer },
+  { arrangement, footer, collapsible = false },
   ref,
 ) {
   const { density, fontSize, columns, transpose, mode, enharmonicPreference } = useSongConfig();
   const unitRefs = useRef<(HTMLElement | null)[]>([]);
+  const [collapsedUnits, toggleCollapse] = useCollapsedUnits(arrangement?.id);
 
   // Rola até o bloco tocado no mapa + destaque breve (scroll-target-flash,
   // já com prefers-reduced-motion tratado em globals.css).
@@ -70,6 +74,8 @@ const ArrangementView = forwardRef<ArrangementViewHandle, ArrangementViewProps>(
         density={density}
         footer={footer}
         onUnitRef={(index, el) => { unitRefs.current[index] = el; }}
+        collapsedUnits={collapsible ? collapsedUnits : undefined}
+        onToggleCollapse={collapsible ? toggleCollapse : undefined}
       />
     </div>
   );

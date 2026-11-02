@@ -131,6 +131,10 @@
   "SongMap": {
     "label": "Mapa da música"
   },
+  "Blocks": {
+    "collapse": "Minimizar bloco",
+    "expand": "Expandir bloco"
+  },
   "ServiceView": {
     "editChords": "Editar cifras",
     "saveScopeTitle": "Salvar alterações",

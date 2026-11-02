@@ -6,7 +6,7 @@ import { unitColorClasses } from "@/components/song/unit-colors";
 import { useResponsiveColumns } from "@/hooks/useResponsiveColumns";
 import { ClientSongUnit } from "@/prisma/models";
 import clsx from "clsx";
-import { Repeat2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Repeat2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { findBestDistribution } from "./column-logic";
@@ -28,6 +28,12 @@ type ColumnViewerProps = {
   // unidade renderizada é só a posição corrida através das colunas (ver
   // offset abaixo) — não precisa de nenhum campo novo vindo de lá.
   onUnitRef?: (index: number, el: HTMLElement | null) => void;
+  // Minimizar blocos ("esse eu já sei tocar"): com onToggleCollapse, cada bloco
+  // ganha um botão no cabeçalho; os blocos em collapsedUnits (índice entre os
+  // blocos) mostram só o cabeçalho. Controlado de fora pra valer entre telas e
+  // sobreviver a remontar o viewer (ex.: trocar de número de colunas).
+  collapsedUnits?: ReadonlySet<number>;
+  onToggleCollapse?: (index: number) => void;
 };
 
 export default function ColumnViewer({
@@ -40,9 +46,24 @@ export default function ColumnViewer({
   density,
   footer,
   onUnitRef,
+  collapsedUnits,
+  onToggleCollapse,
 }: ColumnViewerProps) {
   const t = useTranslations("UnitTypes");
-  const { columns, columnData } = useColumnData(songUnits, columnConfig);
+  const tBlocks = useTranslations("Blocks");
+  // Bloco minimizado entra na distribuição das colunas sem conteúdo (só o
+  // cabeçalho), pra elas se rebalancearem em vez de sobrar espaço onde ele estava.
+  // findBestDistribution só conta as linhas, então basta esvaziar o conteúdo.
+  const distributionUnits = useMemo(
+    () =>
+      collapsedUnits && collapsedUnits.size > 0
+        ? songUnits.map((unit, index) =>
+            collapsedUnits.has(index) && unit.type !== "TEXT" ? { ...unit, content: "" } : unit
+          )
+        : songUnits,
+    [songUnits, collapsedUnits]
+  );
+  const { columns, columnData } = useColumnData(distributionUnits, columnConfig);
   const gridColsClass = getGridColumnClass(mode, columns);
   const isTextMode = mode === "text";
   let globalIndex = -1;
@@ -60,6 +81,7 @@ export default function ColumnViewer({
             globalIndex += 1;
             const thisIndex = globalIndex;
             const isTextUnit = unit.unitType === "TEXT";
+            const isCollapsed = !!collapsedUnits?.has(thisIndex);
             const unitClasses = unitColorClasses[unit.unitType];
 
             if (isTextUnit) {
@@ -129,9 +151,25 @@ export default function ColumnViewer({
                       {unit.repeatCount}
                     </span>
                   )}
+                  {onToggleCollapse && (
+                    <button
+                      type="button"
+                      onClick={() => onToggleCollapse(thisIndex)}
+                      aria-expanded={!isCollapsed}
+                      aria-label={isCollapsed ? tBlocks("expand") : tBlocks("collapse")}
+                      title={isCollapsed ? tBlocks("expand") : tBlocks("collapse")}
+                      // Área maior que o ícone (padding negativo na margem: não engorda o cabeçalho).
+                      className={clsx(
+                        "-my-[0.3em] -mr-[0.3em] inline-flex shrink-0 cursor-pointer items-center justify-center rounded p-[0.3em] text-[1.3em] leading-none opacity-60 hover:opacity-100",
+                        (unit.repeatCount ?? 1) <= 1 && "ml-auto"
+                      )}
+                    >
+                      {isCollapsed ? <ChevronRight size="1em" /> : <ChevronDown size="1em" />}
+                    </button>
+                  )}
                 </div>
 
-                {unit.lines.map((line, idx) => (
+                {(isCollapsed ? [] : unit.lines).map((line, idx) => (
                   <ChordProLine
                     key={`unit-${unitIdx}-line-${idx}`}
                     items={line.items as ChordProItem[]}
