@@ -24,7 +24,7 @@ import {
 } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
-import { DurationField } from "./ServiceItemForms";
+import { DurationField, useLiveCommit } from "./ServiceItemForms";
 import { PanelShell } from "./ServiceItemPanel";
 
 // Fluxo de Música: buscar → escolher arranjo (com prévia da cifra, áudio e
@@ -176,10 +176,7 @@ export default function SongFlow({
           setArrangementBack("card");
           setStep("arrangement");
         }}
-        onSave={(durationMin) => {
-          onUpdate({ durationMin });
-          onClose();
-        }}
+        onUpdate={onUpdate}
       />
     </PanelShell>
   );
@@ -194,7 +191,7 @@ function SongCard({
   durationMin,
   onSwapSong,
   onSwapArrangement,
-  onSave,
+  onUpdate,
 }: {
   title: string;
   arrangementName: string | null;
@@ -202,18 +199,18 @@ function SongCard({
   durationMin: number | null;
   onSwapSong: () => void;
   onSwapArrangement: () => void;
-  onSave: (durationMin: number | null) => void;
+  onUpdate: (changes: Partial<ClientServiceUnit>) => void;
 }) {
   const [duration, setDuration] = useState(durationMin != null ? String(durationMin) : "");
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // A duração é aplicada ao plano enquanto se digita; sem botão de salvar.
+  useLiveCommit(() => {
     const parsed = duration ? parseFloat(duration) : null;
-    onSave(parsed !== null && Number.isFinite(parsed) && parsed >= 0 ? parsed : null);
-  }
+    return { durationMin: parsed !== null && Number.isFinite(parsed) && parsed >= 0 ? parsed : null };
+  }, onUpdate);
 
   return (
-    <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
+    <form className="flex min-h-0 flex-1 flex-col" onSubmit={(e) => e.preventDefault()}>
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-4">
         <div className="rounded-lg border border-border p-4">
           <p className="font-medium">{title}</p>
@@ -231,11 +228,6 @@ function SongCard({
           </Button>
         </div>
         <DurationField value={duration} onChange={setDuration} />
-      </div>
-      <div className="shrink-0 border-t border-border bg-background px-4 py-3">
-        <Button type="submit" variant="secondary" className="h-11 w-full">
-          Salvar
-        </Button>
       </div>
     </form>
   );

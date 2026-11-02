@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { UNIT_CONFIG, ServiceUnitTypeValue } from "./unitConfig";
+import { Button } from "@/components/ui/button";
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { formatTime, SectionTiming } from "./hooks/useServiceTimeline";
@@ -102,6 +103,8 @@ export default function ServiceSectionBlock({
 }: ServiceSectionBlockProps) {
   const units = section.units ?? [];
   const [editOpen, setEditOpen] = useState(false);
+  // Item sob o mouse: o botão de inserção logo depois dele é revelado.
+  const [hoveredUnit, setHoveredUnit] = useState<number | null>(null);
 
   // Cria um item em branco do tipo escolhido (ou abre o fluxo de música) na posição
   // `index` da seção; sem `index`, no fim.
@@ -200,6 +203,10 @@ export default function ServiceSectionBlock({
           return (
             <Fragment key={unit.clientId}>
               <InsertSlot
+                revealed={hoveredUnit === unitIndex - 1}
+                onHoverChange={(hover) =>
+                  setHoveredUnit((h) => (hover ? unitIndex - 1 : h === unitIndex - 1 ? null : h))
+                }
                 label={
                   unitIndex === 0
                     ? "Inserir item no início da seção"
@@ -207,6 +214,10 @@ export default function ServiceSectionBlock({
                 }
                 onPick={(type) => addItemOfType(type, unitIndex)}
               />
+              <div
+                onMouseEnter={() => setHoveredUnit(unitIndex)}
+                onMouseLeave={() => setHoveredUnit((h) => (h === unitIndex ? null : h))}
+              >
               <SortableUnitRow
                 unit={unit}
                 sectionIndex={sectionIndex}
@@ -223,6 +234,7 @@ export default function ServiceSectionBlock({
                 onMoveUnit={onMoveUnit}
                 onAnnounce={onAnnounce}
               />
+              </div>
             </Fragment>
           );
         })}
@@ -377,7 +389,7 @@ function SortableUnitRow({
   }
 
   return (
-    <div className="relative">
+    <div className="relative" data-unit-id={unit.clientId}>
       <ServiceUnitRow
         ref={rowRef}
         unit={unit}
@@ -400,9 +412,15 @@ function SortableUnitRow({
 // --- Inserir no meio ---
 
 // Menu com os tipos de item (usado pelo "Adicionar item" do fim e pelo ⊕ entre itens).
-function ItemTypeMenuContent({ onPick }: { onPick: (type: ServiceUnitTypeValue) => void }) {
+function ItemTypeMenuContent({
+  onPick,
+  align = "start",
+}: {
+  onPick: (type: ServiceUnitTypeValue) => void;
+  align?: "start" | "center" | "end";
+}) {
   return (
-    <DropdownMenuContent align="start" className="w-48">
+    <DropdownMenuContent align={align} className="w-48">
       {(Object.entries(UNIT_CONFIG) as [ServiceUnitTypeValue, (typeof UNIT_CONFIG)[ServiceUnitTypeValue]][]).map(
         ([type, config]) => {
           const Icon = config.icon;
@@ -425,20 +443,55 @@ function ItemTypeMenuContent({ onPick }: { onPick: (type: ServiceUnitTypeValue) 
 // alça (40) + horário (48) + metade da coluna do ícone (20).
 function InsertSlot({
   label,
+  revealed = false,
+  onHoverChange,
   onPick,
 }: {
   label: string;
+  // Item vizinho sob o mouse: mostra o ⊕ maior e em destaque.
+  revealed?: boolean;
+  onHoverChange?: (hover: boolean) => void;
   onPick: (type: ServiceUnitTypeValue) => void;
 }) {
   return (
     <div className="relative z-[2] h-0">
-      <div className="group/slot absolute -top-3 left-[86px] flex h-6 w-11 items-center justify-center">
+      {/* Com mouse: mini-botão outline centralizado, revelado ao passar sobre o item
+          vizinho (ou sobre o próprio botão). A faixa em volta ignora o mouse para não
+          bloquear o clique nos itens. */}
+      <div className="pointer-events-none absolute inset-x-0 -top-3.5 flex h-7 justify-center [@media(hover:none)]:hidden">
+        <div
+          data-revealed={revealed || undefined}
+          onMouseEnter={() => onHoverChange?.(true)}
+          onMouseLeave={() => onHoverChange?.(false)}
+          className="group/slot pointer-events-auto"
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                aria-label={label}
+                className="h-7 gap-1 rounded-md px-2.5 text-xs opacity-0 transition-opacity group-data-[revealed]/slot:opacity-100 group-hover/slot:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
+              >
+                <Plus className="size-3.5" />
+                Adicionar item
+              </Button>
+            </DropdownMenuTrigger>
+            <ItemTypeMenuContent align="center" onPick={onPick} />
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Sem hover (toque): ⊕ discreto e sempre visível sobre o fio da linha do tempo.
+          A área de toque tem 44px mesmo com o botão de 24px; 108px é o centro da
+          coluna do ícone (alça 40 + horário 48 + metade do ícone 20). */}
+      <div className="absolute -top-3 left-[86px] hidden h-6 w-11 items-center justify-center [@media(hover:none)]:flex">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
               aria-label={label}
-              className="cursor-pointer relative flex size-6 items-center justify-center rounded-full border border-input bg-background text-muted-foreground opacity-0 shadow-xs transition-opacity before:absolute before:-inset-2.5 before:content-[''] hover:border-ring hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 group-hover/slot:opacity-100 data-[state=open]:opacity-100 [@media(hover:none)]:opacity-70"
+              className="cursor-pointer relative flex size-6 items-center justify-center rounded-full border border-input bg-background text-muted-foreground opacity-70 shadow-xs before:absolute before:-inset-2.5 before:content-[''] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=open]:opacity-100"
             >
               <Plus className="w-3.5 h-3.5" />
             </button>

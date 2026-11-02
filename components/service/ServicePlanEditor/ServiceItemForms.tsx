@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ClientServiceUnit } from "@/prisma/models";
 import {
@@ -45,6 +52,50 @@ type UnitFormBaseProps = {
   onDone: () => void;
 };
 
+// Aplica as mudanças ao plano enquanto o usuário digita (debounce curto), sem
+// botão de salvar por card. `commit` aplica na hora (ao concluir) e a
+// alteração pendente também é aplicada ao desmontar, para não perder o que foi
+// digitado se o painel trocar de item antes do debounce.
+const LIVE_COMMIT_DELAY_MS = 400;
+
+export function useLiveCommit(
+  build: () => Partial<ClientServiceUnit>,
+  onUpdate: (changes: Partial<ClientServiceUnit>) => void
+) {
+  const buildRef = useRef(build);
+  const updateRef = useRef(onUpdate);
+  buildRef.current = build;
+  updateRef.current = onUpdate;
+  const pending = useRef(false);
+  const signature = JSON.stringify(build());
+  // Assinatura já aplicada ao plano; evita marcar como alterado só por abrir o painel
+  // (e o remount duplo do Strict Mode).
+  const applied = useRef(signature);
+
+  const commit = useCallback(() => {
+    pending.current = false;
+    const changes = buildRef.current();
+    applied.current = JSON.stringify(changes);
+    updateRef.current(changes);
+  }, []);
+
+  useEffect(() => {
+    if (signature === applied.current) return;
+    pending.current = true;
+    const id = setTimeout(commit, LIVE_COMMIT_DELAY_MS);
+    return () => clearTimeout(id);
+  }, [signature, commit]);
+
+  useEffect(
+    () => () => {
+      if (pending.current) commit();
+    },
+    [commit]
+  );
+
+  return commit;
+}
+
 // --- Peças compartilhadas ---
 
 // Corpo rolável + rodapé fixo com o botão de salvar. O envio pelo <form>
@@ -65,20 +116,18 @@ function FormShell({
       }}
     >
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-4">{children}</div>
-      <div className="shrink-0 border-t border-border bg-background px-4 py-3">
-        <Button type="submit" variant="secondary" className="h-11 w-full">
-          Salvar
-        </Button>
-      </div>
     </form>
   );
 }
 
 function Field({
   label,
+  required = false,
   children,
 }: {
   label: string;
+  /** Campo que o item precisa para ficar completo: ganha a marca "necessário". */
+  required?: boolean;
   children: (id: string) => React.ReactNode;
 }) {
   const id = useId();
@@ -86,6 +135,7 @@ function Field({
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
         {label}
+        {required && <span className="font-normal text-amber-700"> · necessário</span>}
       </Label>
       {children(id)}
     </div>
@@ -98,15 +148,19 @@ function TextField({
   onChange,
   placeholder,
   autoFocus,
+  required = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   autoFocus?: boolean;
+  required?: boolean;
 }) {
+  // Só destaca enquanto estiver vazio; preenchido, o campo volta ao normal.
+  const missing = required && !value.trim();
   return (
-    <Field label={label}>
+    <Field label={label} required={missing}>
       {(id) => (
         <Input
           id={id}
@@ -117,7 +171,7 @@ function TextField({
           autoFocus={autoFocus}
           autoComplete="off"
           enterKeyHint="next"
-          className="h-11"
+          className={missing ? "h-11 border-amber-400" : "h-11"}
         />
       )}
     </Field>
@@ -221,7 +275,7 @@ function FieldWithDuration({
   onDurationChange: (value: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
       {children}
       <DurationField value={duration} onChange={onDurationChange} />
     </div>
@@ -232,6 +286,79 @@ function parseDuration(value: string): number | null {
   if (!value) return null;
   const parsed = parseFloat(value);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+// --- Versão da Bíblia ---
+
+const BIBLE_VERSIONS = ["A21", "ACF", "ARA", "ARC", "NAA", "NTLH", "NVI", "NVT"];
+const OTHER_VERSION = "__outra";
+
+// Seletor com as versões mais comuns; "Outra…" abre um campo para digitar.
+function VersionField({
+  value,
+  onChange,
+  required,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  required: boolean;
+}) {
+  const known = BIBLE_VERSIONS.includes(value);
+  // "Outra" fica ativo se o usuário escolheu, ou se o valor salvo não é de uma versão da lista.
+  const [otherChosen, setOtherChosen] = useState(!!value && !known);
+  const isOther = otherChosen || (!!value && !known);
+  const missing = required && !value.trim();
+
+  return (
+    <Field label="Versão" required={missing}>
+      {(id) => (
+        <div className="flex flex-col gap-2">
+          <Select
+            value={isOther ? OTHER_VERSION : value || undefined}
+            onValueChange={(next) => {
+              if (next === OTHER_VERSION) {
+                setOtherChosen(true);
+                if (known) onChange("");
+              } else {
+                setOtherChosen(false);
+                onChange(next);
+              }
+            }}
+          >
+            <SelectTrigger
+              id={id}
+              aria-label="Versão da Bíblia"
+              className={`w-full cursor-pointer data-[size=default]:h-11 ${missing ? "border-amber-400" : ""}`}
+            >
+              <SelectValue placeholder="Escolher" />
+            </SelectTrigger>
+            <SelectContent>
+              {BIBLE_VERSIONS.map((v) => (
+                <SelectItem key={v} value={v} className="min-h-11 cursor-pointer">
+                  {v}
+                </SelectItem>
+              ))}
+              <SelectItem value={OTHER_VERSION} className="min-h-11 cursor-pointer">
+                Outra…
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          {isOther && (
+            <Input
+              type="text"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="Qual versão?"
+              aria-label="Outra versão"
+              autoComplete="off"
+              className={`h-11 ${missing ? "border-amber-400" : ""}`}
+              autoFocus={otherChosen && !value}
+            />
+          )}
+        </div>
+      )}
+    </Field>
+  );
 }
 
 // --- Fala / Oração ---
@@ -259,13 +386,19 @@ export const FalaUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps & { uni
       },
     }));
 
-    function handleSave() {
-      setSaved(true);
+    function buildChanges(): Partial<ClientServiceUnit> {
       const metadata = {
         speaker: speaker.trim() || null,
         description: description.trim() || null,
       };
-      onUpdate({ label: label.trim() || null, metadata, durationMin: parseDuration(duration) });
+      return { label: label.trim() || null, metadata, durationMin: parseDuration(duration) };
+    }
+
+    const commit = useLiveCommit(buildChanges, onUpdate);
+
+    function handleSave() {
+      setSaved(true);
+      commit();
       onDone();
     }
 
@@ -281,6 +414,7 @@ export const FalaUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps & { uni
         <FieldWithDuration duration={duration} onDurationChange={setDuration}>
           <TextField
           label="Quem faz"
+          required={mode !== "template"}
           value={speaker}
           onChange={setSpeaker}
           placeholder="Ex: Dirigente, Pastor João..."
@@ -327,13 +461,19 @@ export const LeituraUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
       },
     }));
 
-    function handleSave() {
-      setSaved(true);
+    function buildChanges(): Partial<ClientServiceUnit> {
       const metadata = {
         version: version.trim() || null,
         text: text.trim() || null,
       };
-      onUpdate({ label: label.trim() || null, metadata, durationMin: parseDuration(duration) });
+      return { label: label.trim() || null, metadata, durationMin: parseDuration(duration) };
+    }
+
+    const commit = useLiveCommit(buildChanges, onUpdate);
+
+    function handleSave() {
+      setSaved(true);
+      commit();
       onDone();
     }
 
@@ -347,12 +487,7 @@ export const LeituraUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
           autoFocus
         />
         <FieldWithDuration duration={duration} onDurationChange={setDuration}>
-          <TextField
-          label="Versão"
-          value={version}
-          onChange={setVersion}
-          placeholder="Ex: NVI, ARA, NTLH..."
-        />
+          <VersionField value={version} onChange={setVersion} required={mode !== "template"} />
         </FieldWithDuration>
         <AreaField
           label="Texto"
@@ -393,14 +528,20 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
       },
     }));
 
-    function handleSave() {
-      setSaved(true);
+    function buildChanges(): Partial<ClientServiceUnit> {
       const metadata = {
         preacher: preacher.trim() || null,
         reference: reference.trim() || null,
         description: description.trim() || null,
       };
-      onUpdate({ label: label.trim() || null, metadata, durationMin: parseDuration(duration) });
+      return { label: label.trim() || null, metadata, durationMin: parseDuration(duration) };
+    }
+
+    const commit = useLiveCommit(buildChanges, onUpdate);
+
+    function handleSave() {
+      setSaved(true);
+      commit();
       onDone();
     }
 
@@ -416,6 +557,7 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
         <FieldWithDuration duration={duration} onDurationChange={setDuration}>
           <TextField
           label="Pregador"
+          required={mode !== "template"}
           value={preacher}
           onChange={setPreacher}
           placeholder="Ex: Pastor João..."
@@ -497,12 +639,18 @@ export const AvisosUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
       });
     }
 
-    function handleSave() {
-      setSaved(true);
+    function buildChanges(): Partial<ClientServiceUnit> {
       const cleanItems = items
         .map((item) => ({ ...item, text: item.text.trim() }))
         .filter((item) => item.text);
-      onUpdate({ label: null, metadata: { items: cleanItems }, durationMin: parseDuration(duration) });
+      return { label: null, metadata: { items: cleanItems }, durationMin: parseDuration(duration) };
+    }
+
+    const commit = useLiveCommit(buildChanges, onUpdate);
+
+    function handleSave() {
+      setSaved(true);
+      commit();
       onDone();
     }
 
@@ -682,9 +830,15 @@ export const SongSlotForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
       },
     }));
 
+    function buildChanges(): Partial<ClientServiceUnit> {
+      return { label: label.trim() || null, durationMin: parseDuration(duration) };
+    }
+
+    const commit = useLiveCommit(buildChanges, onUpdate);
+
     function handleSave() {
       setSaved(true);
-      onUpdate({ label: label.trim() || null, durationMin: parseDuration(duration) });
+      commit();
       onDone();
     }
 

@@ -108,11 +108,13 @@ export function summarizeUnit(
     case "SERMAO": {
       const meta = unit.metadata as SermaoMeta | null;
       const preacher = meta?.preacher?.trim() || null;
+      const reference = meta?.reference?.trim() || null;
       const missing = !preacher && !isTemplate;
       return {
         ...base,
         title: typedLabel ?? (preacher || isTemplate ? typeLabel : null),
-        subtitle: preacher,
+        // Pregador e referência bíblica lado a lado na lista.
+        subtitle: [preacher, reference].filter(Boolean).join(" · ") || null,
         detail: meta?.description ?? null,
         pending: missing,
         hint: missing && typedLabel ? "Falta definir o pregador" : null,
@@ -136,6 +138,11 @@ export function summarizeUnit(
 
 export function isUnitPending(unit: ClientServiceUnit): boolean {
   return summarizeUnit(unit, "").pending;
+}
+
+/** Itens incompletos, na ordem em que aparecem no roteiro. */
+export function listPendingUnits(sections: ClientServiceSection[]): ClientServiceUnit[] {
+  return sections.flatMap((section) => (section.units ?? []).filter(isUnitPending));
 }
 
 export function countPlanProgress(sections: ClientServiceSection[]): { filled: number; total: number } {
