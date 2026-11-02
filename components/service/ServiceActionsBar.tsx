@@ -92,9 +92,9 @@ function ConfigButton() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" aria-label={t("config")} className={RESPONSIVE}>
+        <Button type="button" variant="outline" aria-label={t("layout")} className={RESPONSIVE}>
           <SlidersHorizontal aria-hidden="true" />
-          <span className="hidden sm:inline">{t("config")}</span>
+          <span className="hidden sm:inline">{t("layout")}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="end">
