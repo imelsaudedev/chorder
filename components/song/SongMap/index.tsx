@@ -63,12 +63,19 @@ export default function SongMap({
 
   if (units.length === 0) return null;
 
+  // As classes dos dois estados (normal e fit) mexem nas MESMAS propriedades (largura, corpo,
+  // cantos, gap), então ao trocar `fit` — cabeçalho da liturgia grudando no topo — o tamanho
+  // dos chips anima em vez de pular. A quebra de linha (wrap → uma linha) é discreta.
   const containerClasses = fit
-    ? "flex w-full items-center gap-0.5 xl:w-auto xl:max-w-full xl:gap-1 xl:overflow-x-auto xl:overflow-y-hidden no-scrollbar"
+    ? "flex flex-nowrap w-full items-center gap-0.5 xl:w-auto xl:max-w-full xl:gap-1 xl:overflow-x-auto xl:overflow-y-hidden no-scrollbar"
     : `flex flex-wrap items-center ${compact ? "gap-0.5" : "gap-1"}`;
 
   return (
-    <div role="group" aria-label={t("SongMap.label")} className={`${containerClasses} ${className || ""}`}>
+    <div
+      role="group"
+      aria-label={t("SongMap.label")}
+      className={`${containerClasses} transition-[gap] duration-200 ease-out motion-reduce:transition-none ${className || ""}`}
+    >
       {units.map((unit, index) => {
         const colorClasses = unitColorClasses[unit.type];
         const number = numbers[index];
@@ -152,13 +159,16 @@ function Chip({ index, abbr, fullLabel, ariaLabel, colors, compact, fit, onSelec
     };
   }, [index, onMove]);
 
-  const chipClasses = fit
-    ? // Quadrado (aspect-square). Teto por largura de tela: celular 24px (encolhe junto se
-      // houver muitos blocos), tablet 28px, desktop 32px (tamanho normal).
-      `flex aspect-square min-w-0 max-w-6 flex-1 basis-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-sm border text-[9px] font-semibold uppercase leading-none md:max-w-7 md:text-[10px] xl:size-8 xl:max-w-none xl:flex-none xl:basis-auto xl:rounded-md xl:text-xs ${colors}`
-    : `shrink-0 inline-flex items-center justify-center border font-semibold uppercase tracking-wide transition-colors ${
-        compact ? "size-6 rounded text-[11px]" : "size-8 rounded-md text-xs"
-      } ${colors}`;
+  // Quadrado (aspect-square: a altura acompanha a largura). Nos dois estados a largura é uma
+  // `w-*`, e a transição cobre largura, corpo e cantos.
+  // - fit: teto por largura de tela — celular 24px (encolhe junto se houver muitos blocos, por
+  //   isso `shrink min-w-0`), tablet 28px, desktop 32px (tamanho normal, sem encolher).
+  // - normal: 32px (compacto 24px), sem encolher, quebrando em linhas.
+  const chipClasses = `flex aspect-square items-center justify-center whitespace-nowrap border font-semibold uppercase leading-none transition-[width,font-size,border-radius,letter-spacing] duration-200 ease-out motion-reduce:transition-none ${
+    fit
+      ? "min-w-0 w-6 shrink overflow-hidden rounded-sm text-[9px] md:w-7 md:text-[10px] xl:w-8 xl:shrink-0 xl:rounded-md xl:text-xs"
+      : `shrink-0 tracking-wide ${compact ? "w-6 rounded text-[11px]" : "w-8 rounded-md text-xs"}`
+  } ${colors}`;
 
   const interactive = !!onSelect || reorderable;
   if (!interactive) {

@@ -98,7 +98,9 @@ export default function BlockEditor({
   return (
     <div
       ref={containerRef}
-      className="space-y-4"
+      // O vão entre o mapa, os blocos e o botão é o mesmo --block-gap que separa os blocos (e
+      // que, na visualização, separa título, mapa e cifra): a edição fica com o mesmo ritmo.
+      className="flex flex-col gap-[var(--block-gap)]"
       style={{ "--block-gap": density === "compact" ? "0.5em" : "1em" } as React.CSSProperties}
     >
       {/* Mapa da música também na edição: mostra a ordem do rascunho, tocar rola até o bloco e

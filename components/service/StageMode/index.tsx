@@ -437,7 +437,11 @@ export default function StageMode({
           />
         )
       ) : (
-        <div ref={contentRef} className="relative flex-1 overflow-y-auto">
+        // no-scrollbar: no desktop a barra de rolagem ocupava largura da área dos blocos, mas não
+        // do cabeçalho e do rodapé fixos (que vão até a borda da janela) — a margem direita dos
+        // blocos ficava maior. Sem a barra visível (a rolagem por roda/toque segue igual), as três
+        // margens coincidem.
+        <div ref={contentRef} className="relative flex-1 overflow-y-auto no-scrollbar">
           <div className="px-4 sm:px-6 lg:px-8 pb-28" style={{ paddingTop: topBarHeight }}>
             {visibleFlow.map((entry, position) => {
               if (entry.kind === "item") {

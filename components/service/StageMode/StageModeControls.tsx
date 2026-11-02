@@ -1,6 +1,7 @@
 "use client";
 
 import IncreaseDecreaseButtonSet from "@/components/common/IncreaseDecreaseButtonSet";
+import Text from "@/components/common/Text";
 import ColumnButtons from "@/components/config/ColumnButtons";
 import KeyButtonSet from "@/components/config/KeyButtonSet";
 import { Button } from "@/components/ui/button";
@@ -124,7 +125,10 @@ export default function StageModeControls({
           {indexLabel && (
             <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{indexLabel}</span>
           )}
-          <span className="truncate text-[15px] font-semibold">{title}</span>
+          {/* Mesmo título do cabeçalho da liturgia quando preso: heading-lg, só com o corpo menor. */}
+          <Text variant="heading-lg" as="span" size="base" className="truncate">
+            {title}
+          </Text>
         </div>
         <div className="flex h-7 items-center xl:h-8 xl:min-w-0 xl:flex-1 xl:justify-end">{map}</div>
       </div>

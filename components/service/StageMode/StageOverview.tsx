@@ -278,7 +278,7 @@ export default function StageOverview({
   return (
     <div
       ref={areaRef}
-      className={`absolute inset-x-0 ${scrollable ? "overflow-y-auto" : "overflow-hidden"}`}
+      className={`absolute inset-x-0 no-scrollbar ${scrollable ? "overflow-y-auto" : "overflow-hidden"}`}
       style={{ top: topInset, bottom: bottomInset }}
       onTouchStart={(e) => {
         touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };

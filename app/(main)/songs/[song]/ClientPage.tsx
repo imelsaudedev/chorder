@@ -28,16 +28,16 @@ export default function ClientPage({
   );
 }
 
-// Mapa da música + cifra. O espaçamento segue o vão entre blocos da cifra
+// Mapa da música + cifra. O espaçamento é sempre o vão entre blocos da cifra
 // (--block-gap de ArrangementView: 1em normal / 0.5em compacto, na fonte da
-// cifra): 2× entre o título e o mapa, 1× entre o mapa e a cifra.
+// cifra): entre o título e o mapa e entre o mapa e a cifra.
 function ArrangementBody({ arrangement }: { arrangement: ClientArrangement | null }) {
   const { fontSize, density } = useSongConfig();
   const viewRef = useRef<ArrangementViewHandle>(null);
   const blockGap = (density === "compact" ? 0.5 : 1) * fontSize;
 
   return (
-    <div style={{ paddingTop: blockGap * 2 }}>
+    <div style={{ paddingTop: blockGap }}>
       {arrangement?.units && arrangement.units.length > 0 && (
         <div style={{ marginBottom: blockGap }}>
           <SongMap
