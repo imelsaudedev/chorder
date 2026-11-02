@@ -25,7 +25,7 @@ describe("ChordProLine — modos de visualização", () => {
     const { container } = renderLine(withComment, "lyrics");
     expect(screen.queryByText("Cm7")).toBeNull();
     expect(screen.queryByText("Bateria entra")).toBeNull();
-    expect((container.firstChild as HTMLElement).className).not.toContain("pt-[1.375em]");
+    expect((container.firstChild as HTMLElement).className).not.toContain("pt-[1.5em]");
   });
 
   it("letra: uma linha só com convenção não deixa linha em branco", () => {
@@ -44,25 +44,36 @@ describe("ChordProLine — modos de visualização", () => {
 
   it("convenções: o espaço acima da linha é reservado ao chip", () => {
     const { container } = renderLine(withComment, "conventions");
-    expect((container.firstChild as HTMLElement).className).toContain("pt-[1.375em]");
+    expect((container.firstChild as HTMLElement).className).toContain("pt-[1.5em]");
   });
 
   it("o chip da convenção tem a face esquerda reta e a direita arredondada", () => {
     renderLine(withComment, "chords");
     const chip = screen.getByText("Bateria entra");
-    expect(chip.className).toContain("rounded-r-full");
+    expect(chip.className).toContain("rounded-r-[4px]");
     expect(chip.className).not.toMatch(/(^|\s)rounded(-[a-z]+)?(\s|$)/);
+  });
+
+  it("a linha pontilhada sobe até o topo do chip, que fica a 1px dela (não encostado)", () => {
+    const { container } = renderLine(withComment, "chords");
+    const chip = screen.getByText("Bateria entra");
+    const line = container.querySelector(".border-dotted") as HTMLElement;
+    expect(line.className).toContain("-top-[1.5em]");
+    expect(chip.className).toContain("-top-[1.5em]");
+    // linha em 0.25em (+1px de largura); chip começa 1px depois
+    expect(line.className).toContain("left-[0.25em]");
+    expect(chip.className).toContain("left-[calc(0.25em+2px)]");
   });
 
   it("convenção solta (sozinha na linha) também vira chip", () => {
     renderLine([comment], "conventions");
-    expect(screen.getByText("Bateria entra").className).toContain("rounded-r-full");
+    expect(screen.getByText("Bateria entra").className).toContain("rounded-r-[4px]");
   });
 
   it("texto: convenção continua em itálico monoespaçado, sem chip", () => {
     renderLine(withComment, "text");
     const label = screen.getAllByText("Bateria entra")[0];
     expect(label.className).toContain("italic");
-    expect(label.className).not.toContain("rounded-r-full");
+    expect(label.className).not.toContain("rounded-r-[4px]");
   });
 });
