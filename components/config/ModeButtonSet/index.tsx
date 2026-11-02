@@ -9,6 +9,13 @@ type ModeButtonSetProps = {
   setMode: Dispatch<SetStateAction<Mode>>;
 };
 
+const MODES: Mode[] = ["chords", "lyrics", "conventions", "text"];
+
+// O ToggleGroupItem do sistema é `flex-1 shrink-0` e o grupo é `w-fit`: a largura do grupo é a
+// soma dos textos, mas o flex-1 a reparte em partes IGUAIS — e um rótulo mais longo ("Convenções")
+// passa da sua parte e estoura o botão. `flex-none`: cada botão com a largura do próprio texto.
+const ITEM_CLASS = "flex-none";
+
 export default function ModeButtonSet({
   id,
   mode,
@@ -30,18 +37,11 @@ export default function ModeButtonSet({
       value={mode}
       variant="outline"
     >
-      <ToggleGroupItem value="chords" aria-label={t("chords")}>
-        {t("chords")}
-      </ToggleGroupItem>
-      <ToggleGroupItem value="lyrics" aria-label={t("lyrics")}>
-        {t("lyrics")}
-      </ToggleGroupItem>
-      <ToggleGroupItem value="conventions" aria-label={t("conventions")}>
-        {t("conventions")}
-      </ToggleGroupItem>
-      <ToggleGroupItem value="text" aria-label={t("text")}>
-        {t("text")}
-      </ToggleGroupItem>
+      {MODES.map((value) => (
+        <ToggleGroupItem key={value} value={value} aria-label={t(value)} className={ITEM_CLASS}>
+          {t(value)}
+        </ToggleGroupItem>
+      ))}
     </ToggleGroup>
   );
 }
