@@ -1,6 +1,6 @@
 "use client";
 
-import StageMode from "@/components/service/StageMode";
+import StageMode, { StageFlowEntry } from "@/components/service/StageMode";
 import { useAudioPlayer } from "@/components/common/AudioPlayer/context";
 import { useYoutubePlayer } from "@/components/common/YoutubePlayer/context";
 import { useServiceConfig } from "@/components/config/ServiceConfig";
@@ -113,6 +113,28 @@ export default function ServiceView({ service }: ServiceViewProps) {
   }
   const hasSongs = blocks.some((block) => block.entries.length > 0);
 
+  // Ordem completa do culto pro Modo Palco: as músicas (mesma regra de casamento
+  // acima) e, entre elas, os itens que não são música (fala, oração, leitura,
+  // avisos, sermão) — o conteúdo deles vive no plano, não nas unidades planas.
+  // O Palco só mostra os itens quando "Exibir roteiro" está ligado.
+  const stageFlow: StageFlowEntry[] = [];
+  if (sections.length === 0) {
+    songUnits.forEach((_, songIndex) => stageFlow.push({ kind: "song", songIndex }));
+  } else {
+    let flowCursor = 0;
+    sections.forEach((section) => {
+      (section.units ?? []).forEach((planUnit) => {
+        if (planUnit.type === "SONG") {
+          if (!planUnit.arrangement?.song || !songUnits[flowCursor]) return;
+          stageFlow.push({ kind: "song", songIndex: flowCursor });
+          flowCursor += 1;
+        } else {
+          stageFlow.push({ kind: "item", unit: planUnit });
+        }
+      });
+    });
+  }
+
   function doEnterStageMode() {
     // Primeira música cujo fim ainda está na tela.
     const visibleIndex = songRefs.current.findIndex((el) => el && el.getBoundingClientRect().bottom > 0);
@@ -140,6 +162,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
     return (
       <StageMode
         units={songUnits}
+        flow={stageFlow}
         initialIndex={stageIndex}
         initialFontSize={fontSize}
         initialTransposes={transposes}
