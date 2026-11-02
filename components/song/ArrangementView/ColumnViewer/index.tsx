@@ -158,13 +158,15 @@ export default function ColumnViewer({
                       aria-expanded={!isCollapsed}
                       aria-label={isCollapsed ? tBlocks("expand") : tBlocks("collapse")}
                       title={isCollapsed ? tBlocks("expand") : tBlocks("collapse")}
-                      // Área maior que o ícone (padding negativo na margem: não engorda o cabeçalho).
+                      // self-center: o cabeçalho alinha pela linha de base do texto do título; o
+                      // ícone fica centralizado na altura da linha. Área de toque maior que o
+                      // ícone (padding com margem negativa: não engorda o cabeçalho).
                       className={clsx(
-                        "-my-[0.3em] -mr-[0.3em] inline-flex shrink-0 cursor-pointer items-center justify-center rounded p-[0.3em] text-[1.3em] leading-none opacity-60 hover:opacity-100",
+                        "-my-[0.4em] -mr-[0.3em] inline-flex shrink-0 cursor-pointer items-center justify-center self-center rounded p-[0.4em] leading-none opacity-60 hover:opacity-100",
                         (unit.repeatCount ?? 1) <= 1 && "ml-auto"
                       )}
                     >
-                      {isCollapsed ? <ChevronRight size="1em" /> : <ChevronDown size="1em" />}
+                      {isCollapsed ? <ChevronRight size="0.9em" /> : <ChevronDown size="0.9em" />}
                     </button>
                   )}
                 </div>
