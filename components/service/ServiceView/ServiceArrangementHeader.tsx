@@ -40,9 +40,6 @@ type ServiceArrangementHeaderProps = {
   onSaveBoth: () => void;
 };
 
-// Transições curtas e desligadas com prefers-reduced-motion.
-const SMOOTH = "duration-200 ease-out motion-reduce:transition-none";
-
 const ServiceArrangementHeader = forwardRef<HTMLDivElement, ServiceArrangementHeaderProps>(
 function ServiceArrangementHeader({
   arrangement,
@@ -89,20 +86,15 @@ function ServiceArrangementHeader({
     <div
       ref={ref}
       // A borda existe sempre (transparente parado) pra não mudar a altura ao grudar.
-      className={`sticky top-0 bg-background z-10 flex w-full flex-col border-b transition-[padding] ${SMOOTH} ${
+      className={`sticky top-0 bg-background z-10 flex w-full flex-col border-b ${
         isStuck ? "border-border" : "border-transparent"
       } ${spacingClass}`}
       style={isStuck ? undefined : { paddingBottom: blockGapPx }}
     >
       <div className="flex w-full flex-row items-center gap-2">
-      <div className={`flex min-w-0 flex-1 items-center transition-[height] ${SMOOTH} ${isStuck ? "h-6" : "h-8"}`}>
+      <div className={`flex min-w-0 flex-1 items-center ${isStuck ? "h-5" : "h-8"}`}>
         {/* Sempre o mesmo título (mesma fonte, peso e espaçamento): preso, só o corpo diminui. */}
-        <Text
-          variant="heading-lg"
-          as="h2"
-          size={isStuck ? "base" : undefined}
-          className={`truncate transition-[font-size] ${SMOOTH}`}
-        >
+        <Text variant="heading-lg" as="h2" size={isStuck ? "base" : undefined} className="truncate">
           <span>{order}. </span>
           {arrangement.song.title}
         </Text>
@@ -144,7 +136,8 @@ function ServiceArrangementHeader({
           blocos do título. Preso: uma linha de chips pequenos (como no Modo Palco). */}
       {hasMap && (
         <div
-          className={`flex items-center transition-[margin] ${SMOOTH} ${isStuck ? "mt-1" : ""}`}
+          // Preso: o vão entre o título (16px, linha de 20px) e os chips é só ~4px — o bastante para não encostar.
+          className={`flex items-center ${isStuck ? "mt-0.5" : ""}`}
           style={isStuck ? undefined : { marginTop: blockGapPx }}
         >
           {/* fitSmall: preso, os chips ficam pequenos (24px) em qualquer tela, inclusive no desktop. */}

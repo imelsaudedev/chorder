@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import ServiceSongUnitView from './ServiceSongUnitView';
@@ -18,7 +18,7 @@ vi.mock('@/components/config/SongConfig', () => ({
 }));
 
 vi.mock('./ServiceArrangementHeader', () => ({
-  default: () => <div data-testid="service-arrangement-header" />,
+  default: ({ isStuck }: any) => <div data-testid="service-arrangement-header" data-stuck={String(!!isStuck)} />,
 }));
 
 vi.mock('./ServiceArrangementMeta', () => ({
@@ -143,5 +143,50 @@ describe('ServiceSongUnitView', () => {
     await user.click(screen.getByTestId('mock-saved'));
     expect(screen.getByTestId('arrangement-view')).toBeDefined();
     expect(screen.queryByTestId('edit-form')).toBeNull();
+  });
+});
+
+describe('ServiceSongUnitView — cabeçalho fixo (preso ou não)', () => {
+  type ObserverCallback = (entries: Array<Partial<IntersectionObserverEntry>>) => void;
+
+  function installFakeObserver() {
+    let callback: ObserverCallback | null = null;
+    class FakeObserver {
+      constructor(cb: ObserverCallback) {
+        callback = cb;
+      }
+      observe() {}
+      disconnect() {}
+      unobserve() {}
+    }
+    vi.stubGlobal('IntersectionObserver', FakeObserver);
+    return (entry: { isIntersecting: boolean; top: number }) =>
+      act(() => {
+        callback?.([{ isIntersecting: entry.isIntersecting, boundingClientRect: { top: entry.top } as DOMRectReadOnly }]);
+      });
+  }
+
+  const isStuck = () => screen.getByTestId('service-arrangement-header').getAttribute('data-stuck');
+
+  it('só fica preso quando o marcador sai da tela por cima', () => {
+    const report = installFakeObserver();
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
+    expect(isStuck()).toBe('false');
+
+    report({ isIntersecting: false, top: -5 });
+    expect(isStuck()).toBe('true');
+
+    report({ isIntersecting: true, top: 120 });
+    expect(isStuck()).toBe('false');
+    vi.unstubAllGlobals();
+  });
+
+  it('uma música que está entrando por baixo da tela (marcador abaixo) não fica presa', () => {
+    const report = installFakeObserver();
+    render(<ServiceSongUnitView unit={mockUnit} transpose={0} onTransposeChange={() => {}} />);
+
+    report({ isIntersecting: false, top: 900 });
+    expect(isStuck()).toBe('false');
+    vi.unstubAllGlobals();
   });
 });
