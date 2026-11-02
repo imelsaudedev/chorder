@@ -36,6 +36,9 @@ export default function ModeButtonSet({
       <ToggleGroupItem value="lyrics" aria-label={t("lyrics")}>
         {t("lyrics")}
       </ToggleGroupItem>
+      <ToggleGroupItem value="conventions" aria-label={t("conventions")}>
+        {t("conventions")}
+      </ToggleGroupItem>
       <ToggleGroupItem value="text" aria-label={t("text")}>
         {t("text")}
       </ToggleGroupItem>

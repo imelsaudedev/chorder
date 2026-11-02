@@ -1,4 +1,6 @@
 import { ChordProItem } from "@/chopro/music";
+import { DEFAULT_COMMENT_CLASS } from "./chord-item-tokens";
+import ConventionChip from "./ConventionChip";
 import Item, { ItemProps } from "./Item";
 import { isConnection } from "./line-utils";
 
@@ -34,8 +36,21 @@ export default function StyledLine({
           return null;
         }
 
-        const commentAbove =
-          prev?._name === "comment" && item._name !== "comment" ? prev._value : undefined;
+        // Convenção que sobra aqui não rotula nenhum trecho de letra (sozinha na linha ou no
+        // fim dela): chip no mesmo estilo da emparelhada.
+        if (item._name === "comment") {
+          return (
+            <ConventionChip
+              key={`song-line-item-${elementIdx}`}
+              value={item._value}
+              hasLyrics={hasLyrics}
+              commentClass={commentClass ?? DEFAULT_COMMENT_CLASS}
+            />
+          );
+        }
+
+        // (aqui `item` nunca é convenção: as soltas já saíram acima)
+        const commentAbove = prev?._name === "comment" ? prev._value : undefined;
 
         return (
           <Item

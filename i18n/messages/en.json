@@ -55,6 +55,7 @@
   "Modes": {
     "text": "Text",
     "lyrics": "Lyrics",
+    "conventions": "Conventions",
     "chords": "Chords"
   },
   "Service": {

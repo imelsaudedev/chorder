@@ -16,11 +16,31 @@ export const CHORD_TEXT_CLASS = "font-mono font-bold tracking-tighter text-foreg
 /** Tamanho/peso do texto da convenção — 75% do texto ao redor, por isso em `em`. */
 export const COMMENT_LABEL_TEXT_CLASS = "text-[0.75em] font-semibold leading-none";
 
-/** Posição do rótulo de convenção EMPARELHADA (acima do acorde que ela rotula). */
-export const COMMENT_LABEL_POSITION_CLASS = "absolute -top-[1.375em] left-[0.5625em] whitespace-nowrap";
+/**
+ * Forma do rótulo de convenção na LEITURA: um chip com a face esquerda reta (colada na linha
+ * pontilhada, quando há uma) e a direita arredondada. As cores (fundo escuro do tipo do bloco +
+ * texto branco) vêm de `commentClass` (unit-colors.ts). Paddings em `em` do próprio chip (que
+ * tem 0.75em da fonte ao redor): ~1.1em de altura no total.
+ */
+export const COMMENT_CHIP_SHAPE_CLASS = "rounded-r-full px-[0.6em] py-[0.25em]";
 
-/** Linha pontilhada que conecta a convenção emparelhada ao acorde abaixo. */
-export const COMMENT_CONNECTOR_POSITION_CLASS = "absolute -top-[1.125em] left-[0.25em] bottom-0 w-0 border-l border-dotted";
+/**
+ * Posição do rótulo de convenção EMPARELHADA (acima do acorde que ela rotula): `left` igual ao da
+ * linha pontilhada (COMMENT_CONNECTOR_POSITION_CLASS), pra face esquerda do chip ficar colada nela.
+ */
+export const COMMENT_LABEL_POSITION_CLASS = `absolute -top-[1.375em] left-[0.25em] whitespace-nowrap ${COMMENT_CHIP_SHAPE_CLASS}`;
+
+/**
+ * Linha pontilhada que conecta a convenção emparelhada ao acorde abaixo. Recebe o mesmo
+ * `commentClass` do rótulo (cor da borda), que agora traz também o fundo escuro do chip:
+ * `bg-transparent!` (importante) o anula aqui — a caixa tem só a largura da borda de 1px e um
+ * fundo preencheria os vãos do pontilhado, deixando a linha sólida.
+ */
+export const COMMENT_CONNECTOR_POSITION_CLASS =
+  "absolute -top-[1.125em] left-[0.25em] bottom-0 w-0 border-l border-dotted bg-transparent!";
+
+/** Cores da convenção quando quem chama não informa as do tipo do bloco (fundo escuro + texto branco). */
+export const DEFAULT_COMMENT_CLASS = "bg-zinc-700 text-white border-zinc-700";
 
 /** Recuo do item quando ele tem uma convenção emparelhada acima (abre espaço pro rótulo). */
 export const ITEM_WITH_COMMENT_PADDING_CLASS = "pl-[0.5625em]";
