@@ -29,8 +29,9 @@ export function roteiroMeta(unit: ClientServiceUnit): string {
 
 type StageRoteiroItemProps = {
   unit: ClientServiceUnit;
-  /** Mesma fonte dos blocos da cifra — o corpo do item segue o tamanho escolhido. */
-  fontSize: number;
+  /** Mesma fonte dos blocos da cifra — o corpo do item segue o tamanho escolhido.
+   * Sem ela, herda do contêiner (a visão geral escala a fonte do contêiner). */
+  fontSize?: number;
 };
 
 /**
@@ -46,10 +47,12 @@ export default function StageRoteiroItem({ unit, fontSize }: StageRoteiroItemPro
   const hasBody = !!summary.detail || summary.bullets.length > 0;
   const small = "text-[0.62em] font-bold uppercase tracking-wider text-muted-foreground";
 
+  const style = fontSize ? { fontSize } : undefined;
+
   if (!hasBody) {
     return (
       <div
-        style={{ fontSize }}
+        style={style}
         className="my-3 flex items-baseline gap-[0.6em] rounded-2xl bg-muted px-[0.9em] py-[0.5em] leading-snug"
       >
         <span className={small}>{type}</span>
@@ -60,7 +63,7 @@ export default function StageRoteiroItem({ unit, fontSize }: StageRoteiroItemPro
   }
 
   return (
-    <div style={{ fontSize }} className="my-3 rounded-2xl bg-muted px-[0.9em] py-[0.7em] leading-snug">
+    <div style={style} className="my-3 rounded-2xl bg-muted px-[0.9em] py-[0.7em] leading-snug">
       <div className={`flex items-baseline justify-between gap-2 ${small}`}>
         <span>{type}</span>
         {meta && <span className="text-right">{meta}</span>}
