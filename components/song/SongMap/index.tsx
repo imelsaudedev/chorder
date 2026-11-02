@@ -37,6 +37,10 @@ type SongMapProps = {
   // Variante "tudo numa linha só" (cabeçalhos fixos): os chips encolhem juntos pra
   // caber todos, mesmo que a sigla fique pouco legível.
   fit?: boolean;
+  // Com `fit`: chips sempre pequenos (24px, encolhem pra caber), em qualquer largura de tela —
+  // como no celular. Sem isto, crescem com a tela (28px no tablet, 32px no desktop), que é o que
+  // o cabeçalho do Modo Palco usa.
+  fitSmall?: boolean;
   className?: string;
 };
 
@@ -56,6 +60,7 @@ export default function SongMap({
   onMoveUnit,
   compact = false,
   fit = false,
+  fitSmall = false,
   className,
 }: SongMapProps) {
   const t = useTranslations();
@@ -67,7 +72,9 @@ export default function SongMap({
   // cantos, gap), então ao trocar `fit` — cabeçalho da liturgia grudando no topo — o tamanho
   // dos chips anima em vez de pular. A quebra de linha (wrap → uma linha) é discreta.
   const containerClasses = fit
-    ? "flex flex-nowrap w-full items-center gap-0.5 xl:w-auto xl:max-w-full xl:gap-1 xl:overflow-x-auto xl:overflow-y-hidden no-scrollbar"
+    ? `flex flex-nowrap w-full items-center gap-0.5 no-scrollbar ${
+        fitSmall ? "" : "xl:w-auto xl:max-w-full xl:gap-1 xl:overflow-x-auto xl:overflow-y-hidden"
+      }`
     : `flex flex-wrap items-center ${compact ? "gap-0.5" : "gap-1"}`;
 
   return (
@@ -92,6 +99,7 @@ export default function SongMap({
             colors={`${colorClasses.border} ${colorClasses.background} ${colorClasses.text}`}
             compact={compact}
             fit={fit}
+            fitSmall={fitSmall}
             onSelect={onSelectUnit}
             onMove={onMoveUnit}
           />
@@ -109,11 +117,12 @@ type ChipProps = {
   colors: string;
   compact: boolean;
   fit: boolean;
+  fitSmall: boolean;
   onSelect?: (index: number) => void;
   onMove?: (fromIndex: number, toIndex: number) => void;
 };
 
-function Chip({ index, abbr, fullLabel, ariaLabel, colors, compact, fit, onSelect, onMove }: ChipProps) {
+function Chip({ index, abbr, fullLabel, ariaLabel, colors, compact, fit, fitSmall, onSelect, onMove }: ChipProps) {
   const ref = useRef<HTMLElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
@@ -166,7 +175,9 @@ function Chip({ index, abbr, fullLabel, ariaLabel, colors, compact, fit, onSelec
   // - normal: 32px (compacto 24px), sem encolher, quebrando em linhas.
   const chipClasses = `flex aspect-square items-center justify-center whitespace-nowrap border font-semibold uppercase leading-none transition-[width,font-size,border-radius,letter-spacing] duration-200 ease-out motion-reduce:transition-none ${
     fit
-      ? "min-w-0 w-6 shrink overflow-hidden rounded-sm text-[9px] md:w-7 md:text-[10px] xl:w-8 xl:shrink-0 xl:rounded-md xl:text-xs"
+      ? `min-w-0 w-6 shrink overflow-hidden rounded-sm text-[9px] ${
+          fitSmall ? "" : "md:w-7 md:text-[10px] xl:w-8 xl:shrink-0 xl:rounded-md xl:text-xs"
+        }`
       : `shrink-0 tracking-wide ${compact ? "w-6 rounded text-[11px]" : "w-8 rounded-md text-xs"}`
   } ${colors}`;
 

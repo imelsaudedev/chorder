@@ -104,3 +104,19 @@ describe("SongMap — reordenar na edição", () => {
     expect(onSelectUnit).toHaveBeenCalledWith(2);
   });
 });
+
+describe("SongMap — fit pequeno (cabeçalho fixo da liturgia)", () => {
+  const units = [{ type: "VERSE" as const }, { type: "CHORUS" as const }];
+
+  it("fit cresce com a tela (tablet/desktop) por padrão", () => {
+    render(<SongMap fit units={units} />);
+    expect(screen.getByLabelText("Verso 1").className).toContain("xl:w-8");
+  });
+
+  it("fit + fitSmall mantém os chips pequenos em qualquer largura de tela", () => {
+    render(<SongMap fit fitSmall units={units} />);
+    const className = screen.getByLabelText("Verso 1").className;
+    expect(className).toContain("w-6");
+    expect(className).not.toMatch(/(md|xl):w-/);
+  });
+});

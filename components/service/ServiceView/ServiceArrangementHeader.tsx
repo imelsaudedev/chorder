@@ -147,7 +147,8 @@ function ServiceArrangementHeader({
           className={`flex items-center transition-[margin] ${SMOOTH} ${isStuck ? "mt-1" : ""}`}
           style={isStuck ? undefined : { marginTop: blockGapPx }}
         >
-          <SongMap fit={isStuck} units={mapUnits ?? []} onSelectUnit={onSelectMapUnit} />
+          {/* fitSmall: preso, os chips ficam pequenos (24px) em qualquer tela, inclusive no desktop. */}
+          <SongMap fit={isStuck} fitSmall units={mapUnits ?? []} onSelectUnit={onSelectMapUnit} />
         </div>
       )}
     </div>
