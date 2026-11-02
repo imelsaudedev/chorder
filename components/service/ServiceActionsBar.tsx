@@ -8,7 +8,6 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
-import HolyricsSetlistButton from "./ServiceHeader/HolyricsSetlistButton";
 import ServiceConfig from "./ServiceHeader/ServiceConfig";
 
 // No celular só o ícone (quadrado); a partir de sm, ícone + rótulo.
@@ -29,10 +28,8 @@ export default function ServiceActionsBar({ service, view }: ServiceActionsBarPr
           <EditPlanButton />
         </>
       ) : (
-        <>
-          <HolyricsSetlistButton service={service} />
-          <ConfigButton />
-        </>
+        // (o Holyrics saiu daqui: agora é um ícone no topo, ao lado das setinhas — ServiceHeader)
+        <ConfigButton />
       )}
     </div>
   );
