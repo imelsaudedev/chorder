@@ -448,7 +448,13 @@ export default function StageMode({
                       entryRefs.current[position] = el;
                     }}
                   >
-                    <StageRoteiroItem unit={entry.unit} fontSize={fontSize} />
+                    <StageRoteiroItem
+                      unit={entry.unit}
+                      fontSize={fontSize}
+                      // Vão maior entre uma música e um conjunto de itens (só na rolagem).
+                      spaceBefore={visibleFlow[position - 1]?.kind === "song"}
+                      spaceAfter={visibleFlow[position + 1]?.kind === "song"}
+                    />
                   </section>
                 );
               }

@@ -135,7 +135,7 @@ export default function StageModeControls({
           velocidade, quando está rolando. */}
       <div
         id={FOOTER_ID}
-        className="fixed bottom-0 inset-x-0 z-50 flex items-center gap-2 px-3 pt-2 bg-background/90 backdrop-blur-sm border-t border-border"
+        className="fixed bottom-0 inset-x-0 z-50 flex items-center gap-2 px-4 sm:px-6 lg:px-8 pt-2 bg-background/90 backdrop-blur-sm border-t border-border"
         style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
       >
         {overview ? (
@@ -177,12 +177,12 @@ export default function StageModeControls({
               <Minus />
             </Button>
             <Button
+              // Parado: cor primária do sistema; rolando: o azul de base do sistema (secondary).
+              variant={isScrollEnabled ? "secondary" : "default"}
               size="lg"
               aria-label={isScrollEnabled ? `Pausar rolagem (${speedLabel})` : `Ligar rolagem (${speedLabel})`}
               onClick={onTogglePlayback}
-              className={`w-[72px] px-0 tabular-nums ${
-                isScrollEnabled ? "bg-blue-600 text-white hover:bg-blue-600/90" : ""
-              }`}
+              className="w-[72px] px-0 tabular-nums"
             >
               {isScrollEnabled ? speedLabel : <Play />}
             </Button>
@@ -202,23 +202,33 @@ export default function StageModeControls({
         <div className="ml-auto flex gap-2">
           {/* Layout do Palco, fora do popover (trocar é frequente): rolagem contínua
               ou visão geral (música inteira numa tela). Sempre um dos dois ligado. */}
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="lg"
-            value={layoutMode}
-            onValueChange={(value) => {
-              if (value) onLayoutModeChange(value as StageLayoutMode);
-            }}
-            aria-label="Layout"
-          >
-            <ToggleGroupItem value="scroll" aria-label="Rolagem" title="Rolagem">
+          {/* Botões do sistema (cantos arredondados e leve sombra), um por layout; o ativo em cor primária. */}
+          <div role="radiogroup" aria-label="Layout" className="flex gap-1">
+            <Button
+              role="radio"
+              aria-checked={layoutMode === "scroll"}
+              variant={layoutMode === "scroll" ? "default" : "outline"}
+              size="lg"
+              aria-label="Rolagem"
+              title="Rolagem"
+              onClick={() => onLayoutModeChange("scroll")}
+              className={ICON_BUTTON}
+            >
               <MoveVertical />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="overview" aria-label="Visão geral" title="Visão geral">
+            </Button>
+            <Button
+              role="radio"
+              aria-checked={layoutMode === "overview"}
+              variant={layoutMode === "overview" ? "default" : "outline"}
+              size="lg"
+              aria-label="Visão geral"
+              title="Visão geral"
+              onClick={() => onLayoutModeChange("overview")}
+              className={ICON_BUTTON}
+            >
               <Columns3 />
-            </ToggleGroupItem>
-          </ToggleGroup>
+            </Button>
+          </div>
 
           {/* Mesmo padrão do ServiceConfig (tela do culto): Popover, título em
               text-primary e grupos de rótulo text-xs text-zinc-500. */}

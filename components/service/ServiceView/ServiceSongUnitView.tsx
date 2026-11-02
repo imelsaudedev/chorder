@@ -91,6 +91,9 @@ export default function ServiceSongUnitView({
   }
 
   const units = arrangement.units ?? [];
+  // Vão vertical entre blocos da cifra (--block-gap de ArrangementView: 1em / 0.5em compacto, na
+  // fonte da cifra). O cabeçalho usa ele pra separar título, mapa e cifra.
+  const blockGapPx = (density === "compact" ? 0.5 : 1) * fontSize;
   const handleSelectUnit = (index: number) => viewRef.current?.selectUnit(index);
 
   return (
@@ -108,13 +111,12 @@ export default function ServiceSongUnitView({
           arrangement={arrangement}
           order={unit.order}
           isStuck={isHeaderStuck}
-          // Mapa sempre no cabeçalho fixo, logo abaixo do título (como no Modo Palco),
-          // tocável. Na edição some: o editor tem o próprio mapa, com o rascunho.
-          map={
-            !isEditing && units.length > 0 ? (
-              <SongMap fit units={units} onSelectUnit={handleSelectUnit} />
-            ) : undefined
-          }
+          // Mapa sempre no cabeçalho, logo abaixo do título, tocável: normal parado e pequeno
+          // (como no Modo Palco) quando preso no topo. Na edição some: o editor tem o próprio
+          // mapa, com o rascunho.
+          mapUnits={!isEditing && units.length > 0 ? units : undefined}
+          onSelectMapUnit={handleSelectUnit}
+          blockGapPx={blockGapPx}
           isEditing={isEditing}
           isSaving={isSaving}
           isDirty={isDirty}
@@ -133,7 +135,8 @@ export default function ServiceSongUnitView({
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
         />
-        <div className="mt-3 md:mt-4">
+        {/* Com mapa, o vão entre ele e a cifra já vem do padding do cabeçalho; na edição vale o espaço de sempre. */}
+        <div className={isEditing ? "mt-3 md:mt-4" : ""}>
           {isEditing ? (
             <ServiceSongUnitEditForm
               unit={unit}

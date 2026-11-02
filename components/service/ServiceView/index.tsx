@@ -235,7 +235,8 @@ export default function ServiceView({ service }: ServiceViewProps) {
         }`}
       >
         <Button
-          variant="outline"
+          // secondary = o azul de base do sistema (--secondary).
+          variant="secondary"
           aria-label="Entrar no Modo Palco"
           onClick={enterStageMode}
           className="shadow-md gap-1.5"
