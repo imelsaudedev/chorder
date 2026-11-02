@@ -35,8 +35,8 @@ export default function ChordProLine({
   );
 
   const px = renderMode === "text" ? "px-0 py-0" : "px-[var(--block-px)]";
-  // 1.5em: a altura do chip (~1.1em) mais o vão até o acorde/letra (ver chord-item-tokens.ts).
-  const pt = hasPairedComment && renderMode !== "text" ? " pt-[1.5em]" : "";
+  // 1.40625em: a altura do chip (1.125em) mais o vão até o acorde/letra (0.28125em) — ver chord-item-tokens.ts.
+  const pt = hasPairedComment && renderMode !== "text" ? " pt-[1.40625em]" : "";
   const className = `flex flex-col relative ${px}${pt}`;
 
   const props = {

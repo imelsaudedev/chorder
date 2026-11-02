@@ -25,7 +25,7 @@ describe("ChordProLine — modos de visualização", () => {
     const { container } = renderLine(withComment, "lyrics");
     expect(screen.queryByText("Cm7")).toBeNull();
     expect(screen.queryByText("Bateria entra")).toBeNull();
-    expect((container.firstChild as HTMLElement).className).not.toContain("pt-[1.5em]");
+    expect((container.firstChild as HTMLElement).className).not.toContain("pt-[1.40625em]");
   });
 
   it("letra: uma linha só com convenção não deixa linha em branco", () => {
@@ -44,7 +44,7 @@ describe("ChordProLine — modos de visualização", () => {
 
   it("convenções: o espaço acima da linha é reservado ao chip", () => {
     const { container } = renderLine(withComment, "conventions");
-    expect((container.firstChild as HTMLElement).className).toContain("pt-[1.5em]");
+    expect((container.firstChild as HTMLElement).className).toContain("pt-[1.40625em]");
   });
 
   it("o chip da convenção tem a face esquerda reta e a direita arredondada", () => {
@@ -58,11 +58,25 @@ describe("ChordProLine — modos de visualização", () => {
     const { container } = renderLine(withComment, "chords");
     const chip = screen.getByText("Bateria entra");
     const line = container.querySelector(".border-dotted") as HTMLElement;
-    expect(line.className).toContain("-top-[1.5em]");
-    expect(chip.className).toContain("-top-[1.5em]");
-    // linha em 0.25em (+1px de largura); chip começa 1px depois
-    expect(line.className).toContain("left-[0.25em]");
-    expect(chip.className).toContain("left-[calc(0.25em+2px)]");
+    const num = (el: HTMLElement, prefix: string) =>
+      parseFloat(el.className.match(new RegExp(`${prefix}\\[(-?[\\d.]+)em\\]`))?.[1] ?? "NaN");
+
+    // O chip tem fonte de 0.75 da do item: o `em` dele vale 0.75 do `em` da linha. Convertido pra
+    // a mesma base, o topo do chip tem de ser o topo da linha, e a esquerda também.
+    const CHIP_FONT = 0.75;
+    expect(num(chip, "-top-") * CHIP_FONT).toBeCloseTo(num(line, "-top-"), 3);
+    expect(num(chip, "left-") * CHIP_FONT).toBeCloseTo(num(line, "left-"), 3);
+    // 1px da linha + 1px de folga
+    expect(chip.className).toContain("ml-[2px]");
+  });
+
+  it("o chip termina acima do acorde, deixando um vão de 0.28125 da fonte do item (altura do chip = 1.125)", () => {
+    renderLine(withComment, "chords");
+    const chip = screen.getByText("Bateria entra");
+    const chipTopInItemEm = parseFloat(chip.className.match(/-top-\[([\d.]+)em\]/)![1]) * 0.75;
+    const chipHeightInItemEm = 0.75 + 2 * 0.25 * 0.75; // texto + padding vertical (py-[0.25em] do chip)
+    const gap = chipTopInItemEm - chipHeightInItemEm;
+    expect(gap).toBeCloseTo(0.28125, 4);
   });
 
   it("convenção solta (sozinha na linha) também vira chip", () => {

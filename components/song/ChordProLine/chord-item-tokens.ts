@@ -25,22 +25,28 @@ export const COMMENT_LABEL_TEXT_CLASS = "text-[0.75em] font-semibold leading-non
 export const COMMENT_CHIP_SHAPE_CLASS = "rounded-r-[4px] px-[0.6em] py-[0.25em]";
 
 /**
- * Posição do rótulo de convenção EMPARELHADA (acima do acorde que ela rotula). O topo é o mesmo da
- * linha pontilhada (COMMENT_CONNECTOR_POSITION_CLASS): a linha sobe inteira até o topo do chip.
- * `left`: a linha fica em 0.25em e tem 1px de largura; o chip começa 1px depois dela
- * (0.25em + 1px da linha + 1px de folga), sem encostar. O topo (-1.5em) deixa o chip um pouco
- * acima do acorde/letra embaixo, com um vão leve entre os dois.
+ * Posição do rótulo de convenção EMPARELHADA (acima do acorde que ela rotula).
+ *
+ * ATENÇÃO às unidades: o chip tem `text-[0.75em]`, então um `em` DENTRO das classes dele vale
+ * 0.75 da fonte do item (`b`), enquanto na linha pontilhada (conector) o `em` vale `b` cheio.
+ * Os números abaixo já estão convertidos (valor em `b` ÷ 0.75), pra os dois baterem:
+ * - altura do chip: 0.75b de texto + 2 × 0.1875b de padding = 1.125b;
+ * - `top` -1.875em ⇒ -1.40625b: é o mesmo topo do conector (-1.40625em), a linha sobe inteira até o
+ *   topo do chip; o chip termina em -0.28125b, ou seja, um vão de 0.28125b até o acorde/letra;
+ * - `left` 0.33333em ⇒ 0.25b: mesma posição da linha; `ml-[2px]` empurra o chip pra depois da
+ *   linha (1px de largura) mais 1px de folga — não encosta nela.
  */
-export const COMMENT_LABEL_POSITION_CLASS = `absolute -top-[1.5em] left-[calc(0.25em+2px)] whitespace-nowrap ${COMMENT_CHIP_SHAPE_CLASS}`;
+export const COMMENT_LABEL_POSITION_CLASS = `absolute -top-[1.875em] left-[0.33333em] ml-[2px] whitespace-nowrap ${COMMENT_CHIP_SHAPE_CLASS}`;
 
 /**
- * Linha pontilhada que conecta a convenção emparelhada ao acorde abaixo, do topo do chip até a
- * base do item. Recebe o mesmo `commentClass` do rótulo (cor da borda), que agora traz também o
- * fundo escuro do chip: `bg-transparent!` (importante) o anula aqui — a caixa tem só a largura
- * da borda de 1px e um fundo preencheria os vãos do pontilhado, deixando a linha sólida.
+ * Linha pontilhada que conecta a convenção emparelhada ao acorde abaixo, do topo do chip (-1.40625b,
+ * ver COMMENT_LABEL_POSITION_CLASS) até a base do item. Recebe o mesmo `commentClass` do rótulo
+ * (cor da borda), que agora traz também o fundo escuro do chip: `bg-transparent!` (importante) o
+ * anula aqui — a caixa tem só a largura da borda de 1px e um fundo preencheria os vãos do
+ * pontilhado, deixando a linha sólida.
  */
 export const COMMENT_CONNECTOR_POSITION_CLASS =
-  "absolute -top-[1.5em] left-[0.25em] bottom-0 w-0 border-l border-dotted bg-transparent!";
+  "absolute -top-[1.40625em] left-[0.25em] bottom-0 w-0 border-l border-dotted bg-transparent!";
 
 /** Cores da convenção quando quem chama não informa as do tipo do bloco (fundo escuro + texto branco). */
 export const DEFAULT_COMMENT_CLASS = "bg-zinc-700 text-white border-zinc-700";
