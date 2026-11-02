@@ -68,9 +68,6 @@ export default function SongMap({
 
   if (units.length === 0) return null;
 
-  // As classes dos dois estados (normal e fit) mexem nas MESMAS propriedades (largura, corpo,
-  // cantos, gap), então ao trocar `fit` — cabeçalho da liturgia grudando no topo — o tamanho
-  // dos chips anima em vez de pular. A quebra de linha (wrap → uma linha) é discreta.
   const containerClasses = fit
     ? `flex flex-nowrap w-full items-center gap-0.5 no-scrollbar ${
         fitSmall ? "" : "xl:w-auto xl:max-w-full xl:gap-1 xl:overflow-x-auto xl:overflow-y-hidden"
@@ -78,11 +75,7 @@ export default function SongMap({
     : `flex flex-wrap items-center ${compact ? "gap-0.5" : "gap-1"}`;
 
   return (
-    <div
-      role="group"
-      aria-label={t("SongMap.label")}
-      className={`${containerClasses} transition-[gap] duration-200 ease-out motion-reduce:transition-none ${className || ""}`}
-    >
+    <div role="group" aria-label={t("SongMap.label")} className={`${containerClasses} ${className || ""}`}>
       {units.map((unit, index) => {
         const colorClasses = unitColorClasses[unit.type];
         const number = numbers[index];
@@ -168,12 +161,11 @@ function Chip({ index, abbr, fullLabel, ariaLabel, colors, compact, fit, fitSmal
     };
   }, [index, onMove]);
 
-  // Quadrado (aspect-square: a altura acompanha a largura). Nos dois estados a largura é uma
-  // `w-*`, e a transição cobre largura, corpo e cantos.
+  // Quadrado (aspect-square: a altura acompanha a largura).
   // - fit: teto por largura de tela — celular 24px (encolhe junto se houver muitos blocos, por
   //   isso `shrink min-w-0`), tablet 28px, desktop 32px (tamanho normal, sem encolher).
   // - normal: 32px (compacto 24px), sem encolher, quebrando em linhas.
-  const chipClasses = `flex aspect-square items-center justify-center whitespace-nowrap border font-semibold uppercase leading-none transition-[width,font-size,border-radius,letter-spacing] duration-200 ease-out motion-reduce:transition-none ${
+  const chipClasses = `flex aspect-square items-center justify-center whitespace-nowrap border font-semibold uppercase leading-none ${
     fit
       ? `min-w-0 w-6 shrink overflow-hidden rounded-sm text-[9px] ${
           fitSmall ? "" : "md:w-7 md:text-[10px] xl:w-8 xl:shrink-0 xl:rounded-md xl:text-xs"

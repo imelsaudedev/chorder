@@ -4,10 +4,13 @@ import ArrangementView, { ArrangementViewHandle } from "@/components/song/Arrang
 import SongMap from "@/components/song/SongMap";
 import { ClientServiceUnit } from "@/prisma/models";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import ServiceArrangementHeader from "./ServiceArrangementHeader";
 import ServiceArrangementMeta from "./ServiceArrangementMeta";
 import ServiceSongUnitEditForm, { EditFormHandle } from "./ServiceSongUnitEditForm";
+
+// useLayoutEffect avisa quando renderiza no servidor (React 18); lá, useEffect (não roda) basta.
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 type ServiceSongUnitViewProps = {
   unit: ClientServiceUnit;
@@ -40,48 +43,56 @@ export default function ServiceSongUnitView({
   const [headerHeight, setHeaderHeight] = useState(0);
   const [isHeaderStuck, setIsHeaderStuck] = useState(false);
   const viewRef = useRef<ArrangementViewHandle>(null);
-  // Ao grudar no topo o cabeçalho encolhe (título e chips menores). Se a altura do fluxo mudasse junto,
-  // o conteúdo pularia e o navegador (scroll anchoring) compensaria a rolagem, o cabeçalho
-  // desgrudaria, cresceria... e ficaria piscando. Então a altura "parado" é lembrada e um
-  // espaçador (abaixo) preenche a diferença: o fluxo não muda, só o cabeçalho (que é sticky).
-  const naturalHeaderHeightRef = useRef(0);
-  const lastStuckToggleRef = useRef(0);
-  const isHeaderStuckRef = useRef(false);
 
+  // --- Cabeçalho fixo (sticky) ---------------------------------------------------------------
+  // "Preso" = esta música JÁ passou do topo da tela. Detectado por um marcador de 1px logo antes do
+  // cabeçalho: quando ele sai da tela POR CIMA, o cabeçalho está grudado. (Antes olhava se o próprio
+  // cabeçalho estava parcialmente visível, o que também vale para uma música que está só entrando
+  // pela parte de baixo da tela — ela encolhia sem ter chegado ao topo.)
+  const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return;
-    const update = () => {
-      const height = el.offsetHeight;
-      // Só vale como altura "parado" quando está parado e a transição já acabou (200ms + folga).
-      if (!isHeaderStuckRef.current && performance.now() - lastStuckToggleRef.current > 300) {
-        naturalHeaderHeightRef.current = height;
-      }
-      setHeaderHeight(height);
-    };
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    update();
-    return () => ro.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return;
+    const el = sentinelRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        const stuck = entry.intersectionRatio < 1;
-        if (stuck !== isHeaderStuckRef.current) {
-          isHeaderStuckRef.current = stuck;
-          lastStuckToggleRef.current = performance.now();
-        }
-        setIsHeaderStuck(stuck);
-      },
-      { threshold: 1, rootMargin: "-1px 0px 0px 0px" }
+      ([entry]) => setIsHeaderStuck(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { threshold: 0 }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  // Preso, o cabeçalho encolhe (título e chips menores). Se a altura do fluxo encolhesse junto, o
+  // conteúdo pularia e o navegador (scroll anchoring) compensaria a rolagem, o que desgrudaria e
+  // faria crescer de novo... em ciclo. Então guarda-se a altura "parado" e um espaçador logo
+  // abaixo do cabeçalho preenche a diferença: a altura do fluxo não muda, só a do cabeçalho
+  // (que é sticky e sobrepõe o conteúdo). O espaçador é ajustado direto no DOM, antes de pintar.
+  const spacerRef = useRef<HTMLDivElement>(null);
+  const naturalHeaderHeightRef = useRef(0);
+  const isHeaderStuckRef = useRef(false);
+  isHeaderStuckRef.current = isHeaderStuck;
+  const measureHeader = useCallback(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const height = header.offsetHeight;
+    if (!isHeaderStuckRef.current) naturalHeaderHeightRef.current = height;
+    if (spacerRef.current) {
+      spacerRef.current.style.height = `${Math.max(0, naturalHeaderHeightRef.current - height)}px`;
+    }
+    // Altura atual (preso ou não): --song-header-h, usada pelo scroll-margin dos blocos.
+    setHeaderHeight(height);
+  }, []);
+  // A cada render (barato; setHeaderHeight com o mesmo valor não re-renderiza), e quando o
+  // tamanho muda sem render (girar o aparelho, redimensionar a janela, carregar fonte).
+  useIsomorphicLayoutEffect(() => {
+    measureHeader();
+  });
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measureHeader);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [measureHeader]);
 
   const onUnsavedEditChangeRef = useRef(onUnsavedEditChange);
   onUnsavedEditChangeRef.current = onUnsavedEditChange;
@@ -128,6 +139,8 @@ export default function ServiceSongUnitView({
         mode={mode}
         density={density}
       >
+        {/* Marcador: sai da tela por cima exatamente quando o cabeçalho (sticky) gruda. */}
+        <div ref={sentinelRef} aria-hidden className="pointer-events-none -mb-px h-px" />
         <ServiceArrangementHeader
           ref={headerRef}
           arrangement={arrangement}
@@ -147,8 +160,9 @@ export default function ServiceSongUnitView({
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
         />
-        {/* Espaçador: completa a altura que o cabeçalho "perde" ao grudar, pro fluxo não mudar. */}
-        <div aria-hidden style={{ height: Math.max(0, naturalHeaderHeightRef.current - headerHeight) }} />
+        {/* Espaçador: completa a altura que o cabeçalho "perde" ao grudar, pro fluxo não mudar.
+            Sem `style`: a altura é ajustada direto no DOM (measureHeader), antes de pintar. */}
+        <div ref={spacerRef} aria-hidden />
         <ServiceArrangementMeta
           arrangement={arrangement}
           isEditing={isEditing}
