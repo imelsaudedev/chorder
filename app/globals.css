@@ -201,6 +201,17 @@ html.stage-mode-active .sm\:ml-20 {
   display: none;
 }
 
+/* Visão geral do Modo Palco (StageOverview): a letra e a cifra de cada item têm
+   altura fixa de 1em (h-[1em], em ChordProLine/Item.tsx). Uma linha sem cifra é
+   um item só, longo — quando quebra em duas linhas (coluna estreita ou fonte
+   grande) a segunda vazava por cima da linha de baixo. Aqui a altura passa a
+   ser mínima, não fixa. Escopado ao wrapper da visão geral pra não mexer no
+   resto do app. */
+.stage-overview-fit .h-\[1em\] {
+  height: auto;
+  min-height: 1em;
+}
+
 /* Destaque breve ao rolar até um bloco pelo mapa da música (seção 8.2/9.9
    das specs) — mesmo efeito do protótipo (anel que desaparece), parado
    com prefers-reduced-motion em vez de global (não queremos desligar

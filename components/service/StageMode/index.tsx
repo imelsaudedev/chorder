@@ -429,6 +429,7 @@ export default function StageMode({
             items={screen.kind === "items" ? screen.units : undefined}
             transpose={screen.kind === "song" ? (transposes[screen.songIndex] ?? 0) : 0}
             settings={screen.kind === "song" ? (overviewSettings[screen.songIndex] ?? DEFAULT_OVERVIEW_SETTINGS) : DEFAULT_OVERVIEW_SETTINGS}
+            maxFontSize={fontSize}
             topInset={topBarHeight}
             bottomInset={footerHeight}
             onFit={setOverviewFit}

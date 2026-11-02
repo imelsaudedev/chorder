@@ -25,14 +25,39 @@ export type OverviewFit = {
 
 /** Piso de legibilidade da fonte no encaixe automático — calibrar no aparelho. */
 export const OVERVIEW_FONT_MIN = 11;
-const FONT_MAX_AUTO = 36;
+/**
+ * Fonte "confortável": o automático só usa densidade compacta (ou desce abaixo
+ * dela) quando a densidade normal não alcança isso. Antes disso, espaço entre
+ * linhas vale mais que uma fonte um pouco maior.
+ */
+const OVERVIEW_FONT_COMFORT = 14;
+/** Diferença de fonte (px) que conta como empate entre layouts; no empate decide o equilíbrio das colunas. */
+const FONT_TIE_PX = 1;
 /** Largura mínima de uma coluna: define quantas colunas cabem (celular 1, tablet vertical 2, horizontal 3, desktop largo 4). */
 const MIN_COLUMN_WIDTH = 300;
 /** Deslize vertical mínimo (px) pra trocar de tela. */
 const SWIPE_MIN_PX = 60;
 
 type Candidate = { columns: number; density: OverviewDensity };
-type Best = Candidate & { fontSize: number };
+/** Resultado de um candidato: a maior fonte que coube e quão parecidas ficaram as colunas (1 = iguais; 1 coluna = 1). */
+type Best = Candidate & { fontSize: number; balance: number };
+
+/**
+ * Escolhe o layout entre os candidatos que couberam:
+ * 1. densidade normal enquanto alcançar a fonte confortável; senão compacta, se alcançar; senão qualquer um;
+ * 2. dentro do grupo, a maior fonte (empate de até FONT_TIE_PX conta como igual);
+ * 3. no empate, as colunas mais equilibradas; persistindo, menos colunas.
+ * Com o teto de fonte (preferência do músico) uma música curta empata em todos — e uma coluna
+ * (equilíbrio 1) ganha, sobrando espaço em branco em vez de esticar o texto.
+ */
+function chooseBest(found: Best[], comfort: number): Best | null {
+  if (found.length === 0) return null;
+  const comfortable = (density: OverviewDensity) => found.filter((c) => c.density === density && c.fontSize >= comfort);
+  const pool = comfortable("normal").length ? comfortable("normal") : comfortable("compact").length ? comfortable("compact") : found;
+  const top = Math.max(...pool.map((c) => c.fontSize));
+  const tied = pool.filter((c) => c.fontSize >= top - FONT_TIE_PX);
+  return [...tied].sort((a, b) => b.balance - a.balance || a.columns - b.columns)[0];
+}
 
 type StageOverviewProps = {
   /** Muda a cada tela — reinicia o encaixe. */
@@ -43,6 +68,8 @@ type StageOverviewProps = {
   items?: ClientServiceUnit[];
   transpose: number;
   settings: OverviewSettings;
+  /** Teto da fonte no automático (a preferência de tamanho do músico): o texto só diminui pra caber, nunca passa disso. */
+  maxFontSize: number;
   /** Alturas do cabeçalho e do rodapé fixos — a área útil fica entre eles. */
   topInset: number;
   bottomInset: number;
@@ -69,6 +96,7 @@ export default function StageOverview({
   items,
   transpose,
   settings,
+  maxFontSize,
   topInset,
   bottomInset,
   onFit,
@@ -84,16 +112,18 @@ export default function StageOverview({
   });
   const [run, setRun] = useState(0);
   const [scrollable, setScrollable] = useState(false);
-  const search = useRef<{ active: boolean; queue: Candidate[]; i: number; best: Best | null }>({
+  const search = useRef<{ active: boolean; queue: Candidate[]; i: number; found: Best[] }>({
     active: false,
     queue: [],
     i: 0,
-    best: null,
+    found: [],
   });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
+  const maxFontSizeRef = useRef(maxFontSize);
+  maxFontSizeRef.current = maxFontSize;
   const onFitRef = useRef(onFit);
   onFitRef.current = onFit;
 
@@ -114,7 +144,7 @@ export default function StageOverview({
 
   // Começa uma busca nova sempre que algo que muda o encaixe muda: tela, tom,
   // ajustes ou tamanho da área (girar o aparelho, por exemplo).
-  const searchKey = `${screenKey}|${transpose}|${settings.columns}|${settings.fontSize}|${settings.density}|${size.w}x${size.h}`;
+  const searchKey = `${screenKey}|${transpose}|${settings.columns}|${settings.fontSize}|${settings.density}|${maxFontSize}|${size.w}x${size.h}`;
   useLayoutEffect(() => {
     if (size.w === 0 || size.h === 0) return;
     let columnsList: number[];
@@ -129,7 +159,7 @@ export default function StageOverview({
     }
     const queue: Candidate[] = [];
     columnsList.forEach((columns) => densityList.forEach((density) => queue.push({ columns, density })));
-    search.current = { active: true, queue, i: 0, best: null };
+    search.current = { active: true, queue, i: 0, found: [] };
     setCfg((prev) => ({ ...prev, columns: queue[0].columns, density: queue[0].density }));
     setRun((r) => r + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -154,7 +184,7 @@ export default function StageOverview({
       if (fits()) fontSize = manualFont;
     } else {
       let lo = OVERVIEW_FONT_MIN;
-      let hi = FONT_MAX_AUTO;
+      let hi = Math.max(OVERVIEW_FONT_MIN, Math.round(maxFontSizeRef.current));
       while (lo <= hi) {
         const mid = Math.floor((lo + hi) / 2);
         wrapper.style.fontSize = `${mid}px`;
@@ -166,9 +196,17 @@ export default function StageOverview({
         }
       }
     }
-    // Empate de fonte: fica o candidato anterior (menos colunas, densidade normal).
-    if (fontSize !== null && (!current.best || fontSize > current.best.fontSize)) {
-      current.best = { ...candidate, fontSize };
+    if (fontSize !== null) {
+      // Equilíbrio das colunas na fonte escolhida: altura do conteúdo de cada uma (a coluna em si
+      // estica até a mais alta, então mede-se pelo fundo do último bloco).
+      wrapper.style.fontSize = `${fontSize}px`;
+      const columnEls = Array.from((wrapper.firstElementChild?.children ?? []) as HTMLCollectionOf<HTMLElement>);
+      const heights = columnEls.map((column) => {
+        const last = column.lastElementChild as HTMLElement | null;
+        return last ? last.getBoundingClientRect().bottom - column.getBoundingClientRect().top : 0;
+      });
+      const balance = heights.length > 1 && Math.max(...heights) > 0 ? Math.min(...heights) / Math.max(...heights) : 1;
+      current.found.push({ ...candidate, fontSize, balance });
     }
 
     if (current.i + 1 < current.queue.length) {
@@ -180,15 +218,22 @@ export default function StageOverview({
 
     // Terminou: aplica o melhor; sem nenhum que caiba, usa o mais denso na fonte mínima (ou a manual) e deixa rolar.
     current.active = false;
+    const best = chooseBest(current.found, Math.min(maxFontSizeRef.current, OVERVIEW_FONT_COMFORT));
     const fallback: Best = {
       ...current.queue[current.queue.length - 1],
       fontSize: manualFont > 0 ? manualFont : OVERVIEW_FONT_MIN,
+      balance: 1,
     };
-    const chosen = current.best ?? fallback;
+    const chosen = best ?? fallback;
     wrapper.style.fontSize = `${chosen.fontSize}px`;
     setCfg({ columns: chosen.columns, density: chosen.density, fontSize: chosen.fontSize });
-    setScrollable(!current.best);
-    onFitRef.current({ ...chosen, overflow: !current.best });
+    setScrollable(!best);
+    onFitRef.current({
+      columns: chosen.columns,
+      density: chosen.density,
+      fontSize: chosen.fontSize,
+      overflow: !best,
+    });
   }, [cfg, run]);
 
   const compact = cfg.density === "compact";
@@ -225,13 +270,13 @@ export default function StageOverview({
     >
       <div ref={contentRef} className="px-4 py-3 sm:px-6">
         {items ? (
-          <div style={wrapperStyle}>
+          <div style={wrapperStyle} className="stage-overview-fit">
             {items.map((unit) => (
               <StageRoteiroItem key={unit.clientId} unit={unit} />
             ))}
           </div>
         ) : arrangement ? (
-          <div style={wrapperStyle}>
+          <div style={wrapperStyle} className="stage-overview-fit">
             <ColumnViewer
               key={cfg.columns}
               columns={cfg.columns}
