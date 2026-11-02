@@ -15,7 +15,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback } from "react";
 
 type ActionMenuProps = {
-  editUrl: string;
+  editUrl?: string;
   editLabel?: string;
   duplicateLabel?: string;
   deleteLabel?: string;
@@ -59,11 +59,13 @@ export default function ActionMenu({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Link href={editUrl} className="w-full">
-                {editLabel ?? t("Messages.edit")}
-              </Link>
-            </DropdownMenuItem>
+            {editUrl && (
+              <DropdownMenuItem>
+                <Link href={editUrl} className="w-full">
+                  {editLabel ?? t("Messages.edit")}
+                </Link>
+              </DropdownMenuItem>
+            )}
             {onDuplicate && (
               <DropdownMenuItem
                 onSelect={onDuplicate}
@@ -72,7 +74,7 @@ export default function ActionMenu({
                 {duplicateLabel ?? t("Messages.duplicate")}
               </DropdownMenuItem>
             )}
-            <DropdownMenuSeparator />
+            {(editUrl || onDuplicate) && <DropdownMenuSeparator />}
             <DropdownMenuItem asChild className="text-red-600 focus:text-red-600 focus:bg-red-50">
               <AlertDialogTrigger
                 className="w-full text-left"

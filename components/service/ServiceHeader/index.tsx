@@ -1,15 +1,12 @@
 import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useFormattedDate } from "@/hooks/useFormattedDate";
 import { ClientService, ServiceRef } from "@/prisma/models";
-import { Calendar, ChevronLeft, ChevronRight, MicVocal, SlidersHorizontal } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, MicVocal } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import HolyricsSetlistButton from "./HolyricsSetlistButton";
 import ServiceActionMenu from "./ServiceActionMenu";
-import ServiceConfig from "./ServiceConfig";
 import Skeleton from "./Skeleton";
 
 type ServiceHeaderProps = {
@@ -25,8 +22,7 @@ export default function ServiceHeader({ service }: ServiceHeaderProps) {
   }
 
   return (
-    <Popover>
-      <PageHeader
+    <PageHeader
         backLinkHref="/services"
         backLinkText={t("Messages.services")}
         title={serviceTitle}
@@ -37,22 +33,10 @@ export default function ServiceHeader({ service }: ServiceHeaderProps) {
             <ServiceNavButton dir="prev" serviceRef={service.prevService} />
             <ServiceNavButton dir="next" serviceRef={service.nextService} />
             <div className="w-px h-5 bg-border mx-1" />
-            <HolyricsSetlistButton service={service} />
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <SlidersHorizontal />
-                <span className="sr-only">{t("Messages.toggleConfig")}</span>
-              </Button>
-            </PopoverTrigger>
             <ServiceActionMenu service={service} />
           </div>
         }
       />
-
-      <PopoverContent className="w-80" align="end">
-        <ServiceConfig />
-      </PopoverContent>
-    </Popover>
   );
 }
 

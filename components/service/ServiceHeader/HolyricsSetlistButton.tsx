@@ -70,9 +70,15 @@ export default function HolyricsSetlistButton({ service }: Props) {
   return (
     <Popover onOpenChange={() => { setSent(false); setSendError(""); }}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="ghost" size="icon" disabled={sending}>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={sending}
+          aria-label="Holyrics"
+          className="max-sm:w-9 max-sm:px-0"
+        >
           {triggerIcon}
-          <span className="sr-only">Holyrics</span>
+          <span className="hidden sm:inline">Holyrics</span>
         </Button>
       </PopoverTrigger>
 
