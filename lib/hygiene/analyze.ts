@@ -93,6 +93,33 @@ export function suggestTitle(title: string): string {
     .join(" ");
 }
 
+const PROPER = new Map(
+  ["Deus", "Senhor", "Jesus", "Cristo", "Espírito", "Santo", "Messias", "Yahweh", "Jeová", "Yehovah", "Emanuel", "Belém", "José", "Maria", "Sião", "Israel", "Jerusalém", "Pai", "Rei", "Salvador", "Sl.", "Judá", "Salém", "Davi", "Abraão", "Isaque", "Jacó", "Moisés", "Elias", "Calvário", "Cordeiro", "Elohim", "Adonai", "Javé", "Egito", "Canaã", "Getsêmani", "Galileia", "Nazaré", "Aba"].map((w) => [w.toLowerCase(), w]),
+);
+
+function sentenceSegment(seg: string): string {
+  const lowered = seg
+    .toLowerCase()
+    .replace(/[\p{L}.]+/gu, (w) => PROPER.get(w) ?? w);
+  return lowered.replace(/\p{L}/u, (c) => c.toUpperCase());
+}
+
+/**
+ * Padrão "frase": só trechos TODOS EM MAIÚSCULAS são convertidos (1ª letra de cada trecho
+ * maiúscula; Deus, Senhor, Jesus etc. preservados). Trechos já em caixa mista não são tocados.
+ * Também colapsa espaços repetidos e remove espaços nas pontas.
+ */
+export function toSentenceTitle(title: string): string {
+  const clean = title.trim().replace(/\s+/g, " ");
+  return clean
+    .split(/(\s[-|+:]\s|:\s)/)
+    .map((seg) => {
+      const letters = seg.replace(/[^\p{L}]/gu, "");
+      return letters.length >= 2 && letters === letters.toUpperCase() ? sentenceSegment(seg) : seg;
+    })
+    .join("");
+}
+
 export function capitalizationIssue(title: string): string | null {
   const letters = title.replace(/[^\p{L}]/gu, "");
   if (letters.length > 3 && letters === letters.toUpperCase()) return "TUDO MAIÚSCULO";
