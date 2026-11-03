@@ -125,6 +125,7 @@ main{padding:16px;display:grid;gap:20px}
 .cols{display:flex;gap:12px;overflow-x:auto;align-items:flex-start}
 .col{flex:1 0 340px;max-width:520px;border:1px solid var(--bd);border-radius:10px;padding:10px}
 .col.keep{border:2px solid var(--ok)}
+.mv{margin-top:8px;padding:6px 8px;border:1px dashed var(--ok);border-radius:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.mv input[type=text]{flex:1 1 140px;font:inherit;padding:3px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg)}
 h2{margin:24px 0 0;font-size:17px}h3{margin:0 0 4px;font-size:15px}.mut{color:var(--mut);font-size:13px}
 .pill{display:inline-block;border:1px solid var(--bd);border-radius:99px;padding:1px 8px;font-size:12px;margin:2px 4px 2px 0}
 .warn{color:var(--warn)}.bad{color:var(--bad)}
@@ -141,21 +142,32 @@ button,label.opt{font:inherit;border:1px solid var(--bd);background:var(--card);
 const DATA=__DATA__;
 const KEY="decisoes-duplicatas";let dec={};try{dec=JSON.parse(localStorage.getItem(KEY)||"{}")}catch{}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(dec))}catch{}; prog()};
-const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const isMerge=g=>dec[g.n]&&dec[g.n].mode==="merge";
+const arrState=(g,it,a)=>(isMerge(g)&&dec[g.n].arrs&&dec[g.n].arrs[a.id])||{move:true,name:a.name||it.title};
+function ctl(g,it,a){if(!isMerge(g)||dec[g.n].target===it.id)return"";const s=arrState(g,it,a);
+return '<div class="mv"><label><input type="checkbox" data-arr="'+a.id+'"'+(s.move?' checked':'')+'> mover para #'+dec[g.n].target+'</label> <input type="text" data-name="'+a.id+'" value="'+esc(s.name)+'" placeholder="nome do arranjo"></div>'}
 function prog(){const d=DATA.filter(g=>dec[g.n]).length;document.getElementById("prog").textContent=d+" de "+DATA.length+" decididos";document.querySelectorAll(".group").forEach(el=>el.classList.toggle("done",!!dec[el.dataset.n]))}
 function blocks(a){return a.blocks.map(b=>'<div class="blk"><b>'+b.type+(b.repeat>1?' ×'+b.repeat:'')+'</b><pre>'+b.lines.map(l=>(l.chords?'<span class="ch">'+esc(l.chords)+'</span>':'')+'<span class="ly">'+esc(l.lyrics||" ")+'</span>').join('')+'</pre>'+(b.bad.length?'<div class="bad">acordes estranhos: '+esc(b.bad.join(", "))+'</div>':'')+'</div>').join('')}
-function col(g,it){const keep=dec[g.n]&&dec[g.n].keep===it.id;
+function col(g,it){const keep=(dec[g.n]&&dec[g.n].keep===it.id)||(isMerge(g)&&dec[g.n].target===it.id);
 return '<div class="col'+(keep?' keep':'')+'"><h3>#'+it.id+' '+esc(it.title)+(g.suggestedKeep===it.id?' <span class="pill">sugerida</span>':'')+'</h3><div class="mut">'+esc(it.artist||"sem artista")+'</div>'+
 '<div><span class="pill">'+it.arrs.length+' arranjo(s)</span><span class="pill">'+it.uses+' culto(s)'+(it.lastUse?' · último '+it.lastUse:'')+'</span>'+it.tags.map(t=>'<span class="pill">'+esc(t)+'</span>').join('')+'</div>'+
-it.arrs.map((a,i)=>'<details'+(i===0?' open':'')+'><summary>Tom '+esc(a.key)+(a.name?' · '+esc(a.name):'')+' <span class="'+(a.chordCount?'mut':'warn')+'">'+(a.chordCount?a.chordCount+' acordes':'SEM ACORDES')+'</span></summary>'+blocks(a)+'</details>').join('')+
-'<div class="opts"><button data-g="'+g.n+'" data-keep="'+it.id+'">Manter esta</button></div></div>'}
-function render(){document.getElementById("m").innerHTML=DATA.map((g,i)=>(g.tier==="low"&&(i===0||DATA[i-1].tier!=="low")?'<h2>Mesmo título, mas letras diferentes <span class="mut">— provavelmente são músicas distintas; confira só se quiser</span></h2>':'')+'<section class="group" data-n="'+g.n+'"><div class="mut">Grupo '+g.n+' · '+esc(g.why)+'</div><div class="cols">'+g.items.map(it=>col(g,it)).join('')+'</div><div class="opts"><button data-g="'+g.n+'" data-notdup="1">Não são duplicatas</button><button data-g="'+g.n+'" data-clear="1">Limpar</button><span class="mut">'+(dec[g.n]?(dec[g.n].notDuplicate?'Decisão: não é duplicata':'Decisão: manter #'+dec[g.n].keep):'Sem decisão')+'</span></div></section>').join('');prog()}
+it.arrs.map((a,i)=>ctl(g,it,a)+'<details'+(i===0?' open':'')+'><summary>Tom '+esc(a.key)+(a.name?' · '+esc(a.name):'')+' <span class="'+(a.chordCount?'mut':'warn')+'">'+(a.chordCount?a.chordCount+' acordes':'SEM ACORDES')+'</span></summary>'+blocks(a)+'</details>').join('')+
+'<div class="opts"><button data-g="'+g.n+'" data-keep="'+it.id+'" title="Esta música fica; as outras são descartadas">Manter esta (descartar as outras)</button><button data-g="'+g.n+'" data-merge="'+it.id+'" title="Esta música fica e recebe os arranjos das outras">Mesclar arranjos aqui</button></div></div>'}
+function render(){document.getElementById("m").innerHTML=DATA.map((g,i)=>(g.tier==="low"&&(i===0||DATA[i-1].tier!=="low")?'<h2>Mesmo título, mas letras diferentes <span class="mut">— provavelmente são músicas distintas; confira só se quiser</span></h2>':'')+'<section class="group" data-n="'+g.n+'"><div class="mut">Grupo '+g.n+' · '+esc(g.why)+'</div><div class="cols">'+g.items.map(it=>col(g,it)).join('')+'</div><div class="opts"><button data-g="'+g.n+'" data-notdup="1">Não são duplicatas</button><button data-g="'+g.n+'" data-clear="1">Limpar</button><span class="mut">'+(dec[g.n]?(dec[g.n].notDuplicate?'Decisão: não é duplicata':isMerge(g)?'Decisão: mesclar arranjos em #'+dec[g.n].target+' (marque abaixo o que mover e dê nome a cada arranjo)':'Decisão: manter #'+dec[g.n].keep):'Sem decisão')+'</span></div></section>').join('');prog()}
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
-if(b.id==="exp"){const out=DATA.map(g=>({grupo:g.n,decisao:dec[g.n]?(dec[g.n].notDuplicate?"nao_duplicata":"manter"):"pendente",manter:dec[g.n]&&dec[g.n].keep||null,remover:dec[g.n]&&dec[g.n].keep?g.items.map(i=>i.id).filter(i=>i!==dec[g.n].keep):[]}));
+if(b.id==="exp"){const out=DATA.map(g=>{const d=dec[g.n];
+if(d&&d.mode==="merge"){const mover=[],descartar=[];g.items.filter(i=>i.id!==d.target).forEach(it=>it.arrs.forEach(a=>{const s=arrState(g,it,a);(s.move?mover:descartar).push(s.move?{arranjo:a.id,deMusica:it.id,nome:(s.name||"").trim()||null}:a.id)}));
+return {grupo:g.n,decisao:"mesclar",destino:d.target,mover,descartarArranjos:descartar,removerMusicas:g.items.map(i=>i.id).filter(i=>i!==d.target)}}
+return {grupo:g.n,decisao:d?(d.notDuplicate?"nao_duplicata":"manter"):"pendente",manter:d&&d.keep||null,remover:d&&d.keep?g.items.map(i=>i.id).filter(i=>i!==d.keep):[]}});
 const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:"application/json"}));a.download="decisoes.json";a.click();return}
 const n=b.dataset.g;if(!n)return;
-if(b.dataset.keep)dec[n]={keep:+b.dataset.keep};else if(b.dataset.notdup)dec[n]={notDuplicate:true};else delete dec[n];
+if(b.dataset.keep)dec[n]={keep:+b.dataset.keep};else if(b.dataset.merge)dec[n]={mode:"merge",target:+b.dataset.merge,arrs:{}};else if(b.dataset.notdup)dec[n]={notDuplicate:true};else delete dec[n];
 const y=scrollY;save();render();scrollTo(0,y)});
+function edit(e){const t=e.target,id=t.dataset.arr||t.dataset.name;if(!id)return;const grp=t.closest(".group"),d=dec[grp.dataset.n];if(!d||d.mode!=="merge")return;
+const g=DATA.find(x=>String(x.n)===grp.dataset.n);let base;g.items.forEach(it=>it.arrs.forEach(a=>{if(String(a.id)===id)base=arrState(g,it,a)}));
+d.arrs[id]=Object.assign({},base,t.dataset.arr?{move:t.checked}:{name:t.value});save()}
+document.addEventListener("change",edit);document.addEventListener("input",edit);
 render();
 </script></html>`;
 
