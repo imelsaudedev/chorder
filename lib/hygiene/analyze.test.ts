@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chordLine, isPlausibleChord, capitalizationIssue, findExactDuplicates, findNearDuplicates, findOrphans, findUntyped, normalizeTitle, suggestTitle, toSentenceTitle, type HSong } from "./analyze";
+import { findDuplicateEdges, lyricSimilarity, lyricTokens, chordLine, isPlausibleChord, capitalizationIssue, findExactDuplicates, findNearDuplicates, findOrphans, findUntyped, normalizeTitle, suggestTitle, toSentenceTitle, type HSong } from "./analyze";
 
 const song = (id: number, title: string, units: [string, string][] = [], extra: Partial<HSong> = {}): HSong => ({
   id, title, slug: `s${id}`, artist: null, isDeleted: false,
@@ -39,6 +39,23 @@ describe("higienização", () => {
     expect(l.names).toEqual(["D", "F#"]);
     expect(chordLine("gria[Am]   [D]").chords).toBe("    Am D");
     expect(chordLine("só letra")).toEqual({ chords: "", lyrics: "só letra", names: [] });
+  });
+  it("usa a letra para confirmar ou descartar duplicatas", () => {
+    const A = "Grande é o Senhor e muito digno de louvor na cidade do nosso Deus";
+    const l = [
+      song(1, "Grande é o Senhor", [["VERSE", A]]),
+      song(2, "Grande é o Senhor (cópia)", [["VERSE", "[G]Grande é o [D]Senhor e muito digno de lou-vor na cidade do nosso Deus"]]),
+      song(3, "Cada momento", [["VERSE", "Sendo remido por Cristo na cruz vivo contente no reino da luz"]]),
+      song(4, "A cada momento", [["VERSE", "Andando na presença de Jesus ao sentar ao levantar ao dormir"]]),
+      song(5, "Outro nome totalmente diferente", [["VERSE", A]]),
+    ];
+    const { kept, dropped } = findDuplicateEdges(l);
+    expect(dropped.map((e) => [e.a, e.b])).toEqual([[3, 4]]);
+    expect(kept.map((e) => [e.a, e.b, e.title]).sort()).toEqual([[1, 2, "igual"], [1, 5, null], [2, 5, null]]);
+  });
+  it("lyricSimilarity ignora acordes, acentos e hifens de sílaba", () => {
+    expect(lyricSimilarity(lyricTokens("Je--sus [D]é a aliança"), lyricTokens("JESUS E A ALIANÇA"))).toBe(1);
+    expect(lyricSimilarity(lyricTokens("oi"), lyricTokens("oi"))).toBeNull();
   });
   it("valida acordes plausíveis", () => {
     for (const c of ["D", "F#m7", "E4", "D/F#", "Bbmaj7", "A4", "G/B", "Csus4", "Em7(b5)"]) expect(isPlausibleChord(c), c).toBe(true);

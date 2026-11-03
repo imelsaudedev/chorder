@@ -4,7 +4,7 @@
 import { PrismaClient } from "@prisma/client";
 import { writeFileSync } from "fs";
 import {
-  chordLine, findExactDuplicates, findNearDuplicates, isPlausibleChord, isTomUnit, type HSong,
+  chordLine, findDuplicateEdges, isPlausibleChord, isTomUnit, type HSong,
 } from "@/lib/hygiene/analyze";
 
 const prisma = new PrismaClient();
@@ -31,23 +31,37 @@ async function main() {
     ...s, arrangements: s.arrangements.map((a) => ({ ...a, hasServiceUnit: false })),
   }));
 
-  // Clusters = união de duplicatas exatas e pares parecidos.
-  const parent = new Map<number, number>();
-  const find = (x: number): number => (parent.get(x) === undefined || parent.get(x) === x ? x : (parent.set(x, find(parent.get(x)!)), parent.get(x)!));
-  const union = (a: number, b: number) => parent.set(find(a), find(b));
-  const kind = new Map<number, Set<string>>();
-  for (const g of findExactDuplicates(songs)) g.slice(1).forEach((s) => union(g[0].id, s.id));
-  for (const g of findExactDuplicates(songs)) g.forEach((s) => (kind.get(find(s.id)) ?? kind.set(find(s.id), new Set()).get(find(s.id))!).add("título igual"));
-  for (const [a, b] of findNearDuplicates(songs)) union(a.id, b.id);
-  for (const [a, b] of findNearDuplicates(songs)) (kind.get(find(a.id)) ?? kind.set(find(a.id), new Set()).get(find(a.id))!).add("título parecido");
+  // Pares candidatos: título E letra (ver findDuplicateEdges). Clusters = componentes conectados.
+  const { kept, dropped } = findDuplicateEdges(songs);
+  const titleOf = new Map(songs.map((s) => [s.id, s.title]));
+  const line = (e: { a: number; b: number; reason: string }) => `  #${e.a} "${titleOf.get(e.a)}"  ↔  #${e.b} "${titleOf.get(e.b)}"  [${e.reason}]`;
+  console.log(`\nDESCARTADOS (título parecido, letra diferente): ${dropped.length}`);
+  dropped.sort((x, y) => (y.sim ?? 0) - (x.sim ?? 0)).forEach((e) => console.log(line(e)));
+  console.log(`\nACRESCENTADOS (letra igual, título diferente): ${kept.filter((e) => !e.title).length}`);
+  kept.filter((e) => !e.title).forEach((e) => console.log(line(e)));
 
-  const members = new Map<number, number[]>();
-  for (const s of songs) {
-    const hasPeer = [...parent.keys()].includes(s.id) || [...parent.values()].includes(s.id);
-    if (hasPeer) members.set(find(s.id), [...(members.get(find(s.id)) ?? []), s.id]);
-  }
-  const clusters = [...members.values()].filter((m) => m.length > 1);
-  const allIds = clusters.flat();
+  // Componentes conectados de uma lista de pares.
+  const cluster = (edges: { a: number; b: number }[]) => {
+    const parent = new Map<number, number>();
+    const find = (x: number): number => {
+      const p = parent.get(x);
+      if (p === undefined || p === x) return x;
+      const r = find(p);
+      parent.set(x, r);
+      return r;
+    };
+    for (const e of edges) parent.set(find(e.a), find(e.b));
+    const members = new Map<number, Set<number>>();
+    for (const e of edges) for (const id of [e.a, e.b]) members.set(find(id), (members.get(find(id)) ?? new Set()).add(id));
+    return [...members.values()].map((s) => [...s].sort((x, y) => x - y));
+  };
+  // Seção principal: título+letra confirmam. Seção "low": MESMO título mas letras diferentes
+  // (provavelmente músicas distintas; fica no fim da página só para conferência).
+  const lowEdges = dropped.filter((e) => e.title === "igual");
+  const main = cluster(kept).map((ids) => ({ ids, tier: "main" as const, edges: kept.filter((e) => ids.includes(e.a)) }));
+  const low = cluster(lowEdges).map((ids) => ({ ids, tier: "low" as const, edges: lowEdges.filter((e) => ids.includes(e.a)) }));
+  const clusters = [...main, ...low];
+  const allIds = clusters.flatMap((c) => c.ids);
 
   // Uso em cultos (cópias de arranjo cujo original pertence à música).
   const arrToSong = new Map<number, number>();
@@ -67,7 +81,7 @@ async function main() {
   }
 
   const byId = new Map(rows.map((s) => [s.id, s]));
-  const data = clusters.map((ids, i) => {
+  const data = clusters.map(({ ids, tier, edges }, i) => {
     const sample = byId.get(ids[0])!;
     const items = ids.map((id) => {
       const s = byId.get(id)!;
@@ -89,7 +103,8 @@ async function main() {
       };
     });
     const best = [...items].sort((a, b) => b.score - a.score)[0].id;
-    return { n: i + 1, why: [...(kind.get(find(ids[0])) ?? [])].join(" + ") || "parecido", sample: sample.title, suggestedKeep: best, items };
+    const why = edges.map((e) => `#${e.a} ↔ #${e.b}: ${e.reason}`);
+    return { n: i + 1, tier, why: why.join(" · "), sample: sample.title, suggestedKeep: best, items };
   });
 
   const json = JSON.stringify(data).replace(/</g, "\\u003c");
@@ -110,7 +125,7 @@ main{padding:16px;display:grid;gap:20px}
 .cols{display:flex;gap:12px;overflow-x:auto;align-items:flex-start}
 .col{flex:1 0 340px;max-width:520px;border:1px solid var(--bd);border-radius:10px;padding:10px}
 .col.keep{border:2px solid var(--ok)}
-h3{margin:0 0 4px;font-size:15px}.mut{color:var(--mut);font-size:13px}
+h2{margin:24px 0 0;font-size:17px}h3{margin:0 0 4px;font-size:15px}.mut{color:var(--mut);font-size:13px}
 .pill{display:inline-block;border:1px solid var(--bd);border-radius:99px;padding:1px 8px;font-size:12px;margin:2px 4px 2px 0}
 .warn{color:var(--warn)}.bad{color:var(--bad)}
 pre{margin:6px 0;font:13px/1.25 ui-monospace,Consolas,monospace;overflow-x:auto;white-space:pre}
@@ -134,7 +149,7 @@ return '<div class="col'+(keep?' keep':'')+'"><h3>#'+it.id+' '+esc(it.title)+(g.
 '<div><span class="pill">'+it.arrs.length+' arranjo(s)</span><span class="pill">'+it.uses+' culto(s)'+(it.lastUse?' · último '+it.lastUse:'')+'</span>'+it.tags.map(t=>'<span class="pill">'+esc(t)+'</span>').join('')+'</div>'+
 it.arrs.map((a,i)=>'<details'+(i===0?' open':'')+'><summary>Tom '+esc(a.key)+(a.name?' · '+esc(a.name):'')+' <span class="'+(a.chordCount?'mut':'warn')+'">'+(a.chordCount?a.chordCount+' acordes':'SEM ACORDES')+'</span></summary>'+blocks(a)+'</details>').join('')+
 '<div class="opts"><button data-g="'+g.n+'" data-keep="'+it.id+'">Manter esta</button></div></div>'}
-function render(){document.getElementById("m").innerHTML=DATA.map(g=>'<section class="group" data-n="'+g.n+'"><div class="mut">Grupo '+g.n+' · '+esc(g.why)+'</div><div class="cols">'+g.items.map(it=>col(g,it)).join('')+'</div><div class="opts"><button data-g="'+g.n+'" data-notdup="1">Não são duplicatas</button><button data-g="'+g.n+'" data-clear="1">Limpar</button><span class="mut">'+(dec[g.n]?(dec[g.n].notDuplicate?'Decisão: não é duplicata':'Decisão: manter #'+dec[g.n].keep):'Sem decisão')+'</span></div></section>').join('');prog()}
+function render(){document.getElementById("m").innerHTML=DATA.map((g,i)=>(g.tier==="low"&&(i===0||DATA[i-1].tier!=="low")?'<h2>Mesmo título, mas letras diferentes <span class="mut">— provavelmente são músicas distintas; confira só se quiser</span></h2>':'')+'<section class="group" data-n="'+g.n+'"><div class="mut">Grupo '+g.n+' · '+esc(g.why)+'</div><div class="cols">'+g.items.map(it=>col(g,it)).join('')+'</div><div class="opts"><button data-g="'+g.n+'" data-notdup="1">Não são duplicatas</button><button data-g="'+g.n+'" data-clear="1">Limpar</button><span class="mut">'+(dec[g.n]?(dec[g.n].notDuplicate?'Decisão: não é duplicata':'Decisão: manter #'+dec[g.n].keep):'Sem decisão')+'</span></div></section>').join('');prog()}
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
 if(b.id==="exp"){const out=DATA.map(g=>({grupo:g.n,decisao:dec[g.n]?(dec[g.n].notDuplicate?"nao_duplicata":"manter"):"pendente",manter:dec[g.n]&&dec[g.n].keep||null,remover:dec[g.n]&&dec[g.n].keep?g.items.map(i=>i.id).filter(i=>i!==dec[g.n].keep):[]}));
 const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:"application/json"}));a.download="decisoes.json";a.click();return}

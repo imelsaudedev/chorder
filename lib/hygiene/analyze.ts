@@ -152,6 +152,89 @@ export function chordLine(line: string): ChordLine {
 const TOM_ONLY =/^\s*\[Tom:[^\]]*\]\s*$/i;
 export const isTomUnit = (u: HUnit) => TOM_ONLY.test(u.content);
 
+/** Palavras da letra, sem acordes, acentos, pontuação nem hifens de sílaba ("Je--sus", "ca-da"). */
+export function lyricTokens(content: string): string[] {
+  return content
+    .replace(/\[[^\]]*\]/g, "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/-{2,}/g, "")
+    .replace(/([a-z])-(?=[a-z])/g, "$1")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+/** Letra do arranjo mais completo da música (ignora blocos de Tom). */
+export function songLyricTokens(song: HSong): string[] {
+  let best: string[] = [];
+  for (const a of song.arrangements) {
+    if (a.isDeleted || a.isServiceArrangement) continue;
+    const t = lyricTokens(a.units.filter((u) => !isTomUnit(u)).map((u) => u.content).join("\n"));
+    if (t.length > best.length) best = t;
+  }
+  return best;
+}
+
+const shingles = (tokens: string[], n = 3): Set<string> => {
+  const out = new Set<string>();
+  if (tokens.length < n) tokens.forEach((t) => out.add(t));
+  else for (let i = 0; i <= tokens.length - n; i++) out.add(tokens.slice(i, i + n).join(" "));
+  return out;
+};
+
+/** Jaccard de trigramas de palavras (0–1). Repetição de refrão não infla o resultado (conjuntos). null = sem letra. */
+export function lyricSimilarity(a: string[], b: string[]): number | null {
+  if (a.length < 3 || b.length < 3) return null;
+  const A = shingles(a);
+  const B = shingles(b);
+  let inter = 0;
+  for (const s of A) if (B.has(s)) inter++;
+  return inter / (A.size + B.size - inter);
+}
+
+export type DupEdge = { a: number; b: number; title: "igual" | "parecido" | null; sim: number | null; reason: string };
+
+/**
+ * Pares candidatos a duplicata usando título E letra.
+ *  - título igual/parecido só vale se a letra for parecida (≥ titleMin) ou não houver letra para comparar;
+ *  - letra muito parecida (≥ lyricMin) vale mesmo com títulos diferentes.
+ */
+export function findDuplicateEdges(
+  songs: HSong[],
+  opts = { titleMin: 0.35, lyricMin: 0.6 },
+): { kept: DupEdge[]; dropped: DupEdge[] } {
+  const tokens = new Map(songs.map((s) => [s.id, songLyricTokens(s)]));
+  const sim = (a: HSong, b: HSong) => lyricSimilarity(tokens.get(a.id)!, tokens.get(b.id)!);
+  const key = (a: number, b: number) => `${Math.min(a, b)}-${Math.max(a, b)}`;
+  const titleEdges = new Map<string, "igual" | "parecido">();
+  for (const g of findExactDuplicates(songs))
+    for (let i = 0; i < g.length; i++) for (let j = i + 1; j < g.length; j++) titleEdges.set(key(g[i].id, g[j].id), "igual");
+  for (const [a, b] of findNearDuplicates(songs)) titleEdges.set(key(a.id, b.id), "parecido");
+
+  const kept: DupEdge[] = [];
+  const dropped: DupEdge[] = [];
+  const seen = new Set<string>();
+  const consider = (a: HSong, b: HSong, title: "igual" | "parecido" | null) => {
+    const k = key(a.id, b.id);
+    if (seen.has(k)) return;
+    seen.add(k);
+    const s = sim(a, b);
+    const base = { a: a.id, b: b.id, title, sim: s };
+    if (title && (s === null || s >= opts.titleMin))
+      kept.push({ ...base, reason: s === null ? `título ${title}, sem letra para comparar` : `título ${title} + letra ${Math.round(s * 100)}%` });
+    else if (title) dropped.push({ ...base, reason: `título ${title}, mas letra só ${Math.round((s ?? 0) * 100)}%` });
+    else if (s !== null && s >= opts.lyricMin) kept.push({ ...base, reason: `letra ${Math.round(s * 100)}% igual, títulos diferentes` });
+  };
+  const byId = new Map(songs.map((s) => [s.id, s]));
+  for (const [k, t] of titleEdges) {
+    const [a, b] = k.split("-").map(Number);
+    consider(byId.get(a)!, byId.get(b)!, t);
+  }
+  for (let i = 0; i < songs.length; i++) for (let j = i + 1; j < songs.length; j++) consider(songs[i], songs[j], null);
+  return { kept, dropped };
+}
+
 export type OrphanFinding = { songId: number; arrangementId?: number; unitId?: number; reason: string };
 
 export function findOrphans(songs: HSong[]): OrphanFinding[] {
