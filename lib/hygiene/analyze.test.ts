@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { capitalizationIssue, findExactDuplicates, findNearDuplicates, findOrphans, findUntyped, normalizeTitle, suggestTitle, toSentenceTitle, type HSong } from "./analyze";
+import { chordLine, isPlausibleChord, capitalizationIssue, findExactDuplicates, findNearDuplicates, findOrphans, findUntyped, normalizeTitle, suggestTitle, toSentenceTitle, type HSong } from "./analyze";
 
 const song = (id: number, title: string, units: [string, string][] = [], extra: Partial<HSong> = {}): HSong => ({
   id, title, slug: `s${id}`, artist: null, isDeleted: false,
@@ -31,6 +31,18 @@ describe("higienização", () => {
     expect(toSentenceTitle("EMANUEL 2")).toBe("Emanuel 2");
     expect(toSentenceTitle("LEÃO DA TRIBO DE JUDÁ")).toBe("Leão da tribo de Judá");
     expect(toSentenceTitle("REI DE SALÉM")).toBe("Rei de Salém");
+  });
+  it("posiciona acordes sobre a letra", () => {
+    const l = chordLine("Oh, Sen[D]hor tu me cing[F#]iste");
+    expect(l.lyrics).toBe("Oh, Senhor tu me cingiste");
+    expect(l.chords).toBe("       D             F#");
+    expect(l.names).toEqual(["D", "F#"]);
+    expect(chordLine("gria[Am]   [D]").chords).toBe("    Am D");
+    expect(chordLine("só letra")).toEqual({ chords: "", lyrics: "só letra", names: [] });
+  });
+  it("valida acordes plausíveis", () => {
+    for (const c of ["D", "F#m7", "E4", "D/F#", "Bbmaj7", "A4", "G/B", "Csus4", "Em7(b5)"]) expect(isPlausibleChord(c), c).toBe(true);
+    for (const c of ["H", "x", "Dó", "", "Tom:D"]) expect(isPlausibleChord(c), c).toBe(false);
   });
   it("detecta blocos sem tipo ignorando bloco de Tom", () => {
     const f = findUntyped([song(1, "x", [["BLOCK", "[Tom:D]"], ["BLOCK", "a"], ["BLOCK", "b"]]), song(2, "y", [["INTRO", "i"], ["BLOCK", "a"]]), song(3, "z", [["VERSE", "v"], ["BLOCK", "a"]])]);

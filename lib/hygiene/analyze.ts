@@ -128,7 +128,28 @@ export function capitalizationIssue(title: string): string | null {
   return null;
 }
 
-const TOM_ONLY = /^\s*\[Tom:[^\]]*\]\s*$/i;
+const CHORD_RE = /^[A-G][#b]?(maj|min|dim|aug|sus|add|m|M|\+|°|ø|-)?\d*((sus|add)?[#b+-]?\d+|\([^)]*\))*(\/[A-G][#b]?)?$/;
+export const isPlausibleChord = (c: string) => CHORD_RE.test(c.trim());
+
+export type ChordLine = { chords: string; lyrics: string; names: string[] };
+
+/** "Oh, Sen[D]hor" → acorde posicionado sobre a sílaba (duas linhas alinhadas, para fonte monoespaçada). */
+export function chordLine(line: string): ChordLine {
+  let chords = "";
+  let lyrics = "";
+  const names: string[] = [];
+  for (const part of line.split(/(\[[^\]]*\])/)) {
+    const m = /^\[([^\]]*)\]$/.exec(part);
+    if (!m) { lyrics += part; continue; }
+    const name = m[1].trim();
+    names.push(name);
+    if (chords.length > lyrics.length) lyrics = lyrics.padEnd(chords.length + 1);
+    chords = chords.padEnd(lyrics.length) + name;
+  }
+  return { chords: chords.trimEnd(), lyrics: lyrics.trimEnd(), names };
+}
+
+const TOM_ONLY =/^\s*\[Tom:[^\]]*\]\s*$/i;
 export const isTomUnit = (u: HUnit) => TOM_ONLY.test(u.content);
 
 export type OrphanFinding = { songId: number; arrangementId?: number; unitId?: number; reason: string };
