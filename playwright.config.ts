@@ -83,6 +83,7 @@ export default defineConfig({
     env: {
       DATABASE_URL: testDbUrl || '',
       NODE_ENV: 'test',
+      E2E_TEST: 'true',
     },
   },
 });

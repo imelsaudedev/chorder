@@ -136,5 +136,18 @@
     "submitAnother": "Submit another feedback",
     "invalidFeedback": "Invalid feedback.",
     "serverError": "Server error. Please try again later."
+  },
+  "Auth": {
+    "login": "Login",
+    "signInWithGoogle": "Sign in with Google",
+    "signInWithEmail": "Sign in with Email",
+    "emailPlaceholder": "your@email.com",
+    "sendMagicLink": "Send magic link",
+    "loginTitle": "Welcome to Chorder",
+    "loginSubtitle": "Sign in to manage your songs and services",
+    "signingIn": "Signing in...",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings"
   }
 }

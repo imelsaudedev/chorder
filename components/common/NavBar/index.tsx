@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function NavBar() {
+export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
   const t = useTranslations("Messages");
   const pathname = usePathname();
   const pathParts = pathname.split("/");
@@ -21,7 +21,7 @@ export default function NavBar() {
     <>
       {/* Sidebar (visível em telas maiores) */}
       <nav className="hidden sm:flex sm:flex-col sm:fixed sm:left-0 sm:top-0 sm:h-full sm:w-20 sm:bg-zinc-50 sm:border-r sm:border-zinc-100">
-        <div className="flex flex-col items-center sm:pt-12 lg:pt-16 gap-6">
+        <div className="flex flex-col items-center sm:pt-12 lg:pt-16 gap-6 grow">
           <NavItem
             href="/services"
             icon={<ListMusic size={24} />}
@@ -41,6 +41,9 @@ export default function NavBar() {
             active={currentPage === "feedback"}
           />
         </div>
+        {userNav && (
+          <div className="pb-8 flex flex-col items-center">{userNav}</div>
+        )}
       </nav>
 
       {/* Menu inferior fixo (aparece apenas em telas pequenas) */}
@@ -50,7 +53,7 @@ export default function NavBar() {
           { hidden: isServicePage }
         )}
       >
-        <div className="flex justify-around py-3">
+        <div className="flex justify-around py-3 items-center">
           <NavItem
             href="/services"
             icon={<ListMusic size={24} />}
@@ -69,6 +72,11 @@ export default function NavBar() {
             label={t("feedback")}
             active={currentPage === "feedback"}
           />
+          {userNav && (
+            <div className="flex flex-col items-center justify-center -mt-1">
+              {userNav}
+            </div>
+          )}
         </div>
       </nav>
     </>

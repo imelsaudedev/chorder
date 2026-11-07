@@ -137,5 +137,18 @@
     "submitAnother": "Enviar outro feedback",
     "invalidFeedback": "Feedback inválido.",
     "serverError": "Erro no servidor. Por favor, tente novamente mais tarde."
+  },
+  "Auth": {
+    "login": "Entrar",
+    "signInWithGoogle": "Entrar com Google",
+    "signInWithEmail": "Entrar com E-mail",
+    "emailPlaceholder": "seu@email.com",
+    "sendMagicLink": "Enviar link mágico",
+    "loginTitle": "Bem-vindo ao Chorder",
+    "loginSubtitle": "Entre para gerenciar suas músicas e liturgias",
+    "signingIn": "Entrando...",
+    "logout": "Sair",
+    "profile": "Perfil",
+    "settings": "Configurações"
   }
 }
