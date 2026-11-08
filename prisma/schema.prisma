@@ -35,20 +35,44 @@ model HolyricsConfig {
   host  String @default("localhost:8091")
 }
 
+// Como um grupo de tags se apresenta na tela de Músicas (ver docs/SPEC_CATEGORIZACAO_VISAO.md).
+enum TagGroupPresentation {
+  FEATURED // cards em destaque na home (grade, sem rolagem lateral)
+  SHELF    // prateleira de cards com rolagem lateral
+  FILTER   // nunca na home, só como filtro dentro da lista
+}
+
+// Cardinalidade do grupo: quantos valores uma mesma música pode ter.
+enum TagGroupSelection {
+  SINGLE
+  MULTI
+}
+
 model TagGroup {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  color String @default("#6b7280")
-  order Int    @default(0)
-  tags  Tag[]
+  id           Int                  @id @default(autoincrement())
+  name         String               @unique
+  color        String               @default("#6b7280")
+  order        Int                  @default(0)
+  // A pergunta que o grupo responde, em linguagem do dia a dia (ex.: "Para qual data ou ritual a música serve?").
+  description  String?
+  presentation TagGroupPresentation @default(FILTER)
+  selection    TagGroupSelection    @default(MULTI)
+  // Grupo ainda em validação com o ministério: a tela mostra o selo "em construção".
+  isProposed   Boolean              @default(false)
+  tags         Tag[]
 }
 
 model Tag {
-  id         Int      @id @default(autoincrement())
-  name       String
-  tagGroupId Int
-  group      TagGroup @relation(fields: [tagGroupId], references: [id])
-  songs      Song[]
+  id          Int      @id @default(autoincrement())
+  name        String
+  tagGroupId  Int
+  group       TagGroup @relation(fields: [tagGroupId], references: [id])
+  songs       Song[]
+  // Identidade visual opcional da página da tag; sem valores, vale a cor do grupo.
+  description String?
+  color       String?
+  pattern     String?
+  imageUrl    String?
 
   @@unique([name, tagGroupId])
 }

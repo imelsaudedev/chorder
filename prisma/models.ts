@@ -19,8 +19,13 @@ export type ClientTag = Pick<Tag, "id" | "name"> & {
   group: Pick<TagGroup, "id" | "name" | "color">;
 };
 
-export type ClientTagGroup = Pick<TagGroup, "id" | "name" | "color"> & {
-  tags: (Pick<Tag, "id" | "name"> & { songCount?: number })[];
+export type ClientTagGroup = Pick<
+  TagGroup,
+  "id" | "name" | "color" | "description" | "presentation" | "selection" | "isProposed"
+> & {
+  tags: (Pick<Tag, "id" | "name" | "description" | "color" | "pattern" | "imageUrl"> & {
+    songCount?: number;
+  })[];
 };
 
 export const SERVICE_UNIT_TYPES = [
@@ -59,7 +64,10 @@ export type ClientSong = Omit<Song, "id" | "legacyId" | "holyricsId"> & {
   holyricsId?: string | null;
   arrangements?: ClientArrangement[];
   tags?: ClientTag[];
+  // Preenchidos quando retrieveSongs é chamado com withUsageStats.
   lastUsedAt?: Date | null;
+  // Em quantas liturgias (não apagadas) a música aparece; mais de uma vez no mesmo culto conta uma só.
+  usageCount?: number;
 };
 export type ClientArrangement = Omit<
   SongArrangement,

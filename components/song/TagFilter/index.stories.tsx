@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import type { ClientTagGroup } from "@/prisma/models";
 import TagFilter from "./index";
 
 const meta = {
@@ -10,7 +11,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const tagGroups = [
+const rawGroups = [
   {
     id: 1, name: "Tema", color: "#10b981",
     tags: [
@@ -35,6 +36,15 @@ const tagGroups = [
     ],
   },
 ];
+
+// Campos de apresentação/identidade das tags, com os padrões do banco.
+const groupBase = { description: null, presentation: "FILTER" as const, selection: "MULTI" as const, isProposed: false };
+const tagBase = { description: null, color: null, pattern: null, imageUrl: null };
+const tagGroups: ClientTagGroup[] = rawGroups.map((g) => ({
+  ...groupBase,
+  ...g,
+  tags: g.tags.map((tag) => ({ ...tagBase, ...tag })),
+}));
 
 export const Default: Story = {
   parameters: { layout: "centered" },
