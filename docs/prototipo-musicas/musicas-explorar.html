@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Músicas — explorar por categorias (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+<style>
+/* Protótipo solto: abre com duplo clique. Ilustra layout e interação da nova tela de Músicas
+   (docs/SPEC_CATEGORIZACAO_VISAO.md). Visual espelhado do app (app/globals.css, NavBar, Tag, Button, SearchBar):
+   IBM Plex Sans + Space Grotesk nos títulos, ação em azul (secondary), hover laranja (accent) nos botões outline/ghost.
+   Títulos, artistas, tons e datas de uso vêm do acervo local; CLASSIFICAÇÃO (tags), mídias e arranjos extras são de EXEMPLO. */
+:root{
+  /* tokens do tema real (globals.css, :root) */
+  --background:hsl(0 0% 100%);--foreground:hsl(224 84% 4.9%);
+  --primary:hsl(0 0% 9%);--primary-foreground:hsl(214 95% 99%);
+  --secondary:hsl(221 83% 53%);--secondary-foreground:hsl(214 95% 99%);
+  --muted:hsl(215 16% 72%);--muted-foreground:hsl(215 14% 48%);
+  --accent:hsl(23 100% 60%);--accent-foreground:hsl(24 93% 98%);
+  --border:hsl(0 0% 89.8%);--ring:hsl(221 83% 53%);--radius:8px;--radius-md:6px;
+  --zinc50:#fafafa;
+  /* chrome da página de protótipo */
+  --pg:#e9edf3;--chip:#fff;--pgline:#a3b0c2;--pgfg:#0b1220;--pgmut:#475569;
+  --amber50:#fffbeb;--amber200:#fde68a;--amber700:#b45309;
+  --shadow:0 8px 24px rgba(15,23,42,.18);--shadow-xs:0 1px 2px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box;border-color:var(--border)}
+body{margin:0;padding:20px 16px 48px;background:var(--pg);color:var(--pgfg);font:400 14px/20px "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+svg{display:block;flex:none}
+h1,h2,h3,h4{margin:0}
+.intro{max-width:80ch;margin:0 auto 16px}
+.intro h1{font:600 20px/26px "Space Grotesk",sans-serif;letter-spacing:-.02em;margin-bottom:4px}
+.intro p{margin:0;color:var(--pgmut)}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:center;margin:0 auto 18px}
+.ctl .g{display:flex;flex-direction:column;gap:4px}
+.ctl .g>span{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--pgmut)}
+.seg{display:inline-flex;border:1px solid var(--pgline);border-radius:99px;background:var(--chip);padding:2px}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:99px;font-size:13px;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--pgfg);color:var(--pg)}
+.reset{border:1px solid var(--pgline);background:var(--chip);border-radius:99px;padding:6px 14px;min-height:32px;align-self:flex-end}
+.wrap{display:flex;flex-wrap:wrap;gap:24px 36px;justify-content:center;align-items:flex-start}
+.notes{flex:1 1 280px;max-width:400px;display:flex;flex-direction:column;gap:10px}
+.nc{background:var(--chip);border:1px solid var(--pgline);border-radius:10px;padding:12px 14px}
+.nc h2{margin:0 0 6px;font-size:14px}
+.nc ul{margin:0;padding-left:18px;color:var(--pgmut)}
+.nc li{margin:3px 0}
+.nc p{margin:0;color:var(--pgmut)}
+
+/* ---------- dispositivo = app real ---------- */
+.device{position:relative;overflow:hidden;background:var(--background);color:var(--foreground);border:2px solid var(--pgline);border-radius:28px;
+  width:390px;max-width:100%;height:780px}
+.device[data-dev=tablet]{width:min(820px,100%);height:700px;border-radius:20px}
+.device[data-dev=desktop]{width:min(1120px,100%);height:700px;border-radius:12px}
+.app{position:absolute;inset:0;display:flex}
+/* NavBar: lateral (sm+) bg-zinc-50 w-20; inferior no celular */
+.side{flex:none;width:80px;background:var(--zinc50);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding-top:32px;gap:24px}
+.device[data-dev=phone] .side{display:none}
+.ni{display:flex;flex-direction:column;align-items:center;gap:0;color:var(--muted-foreground);font-size:12px;line-height:16px;border:0;background:none;padding:0}
+.ni.on{color:var(--secondary);font-weight:600}
+.bnav{display:none;position:absolute;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid #f3f4f6;box-shadow:0 4px 6px -1px rgba(0,0,0,.1);justify-content:space-around;padding:12px 0}
+.device[data-dev=phone] .bnav{display:flex}
+.main{flex:1;min-width:0;position:relative;container-type:inline-size;container-name:app;display:flex;flex-direction:column}
+.scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;--px:20px;padding:0 var(--px) 120px}
+@container app (min-width:560px){.scroll{--px:32px}}
+@container app (min-width:860px){.scroll{--px:56px}}
+
+/* Heading nível 1: font-display, tracking-tighter */
+.h1{font:600 30px/1.1 "Space Grotesk",sans-serif;letter-spacing:-.05em;color:var(--primary);padding:24px 0 16px}
+@container app (min-width:560px){.h1{font-size:36px;padding:32px 0 20px}}
+@container app (min-width:860px){.h1{font-size:48px;padding:32px 0 24px}}
+.back{display:inline-flex;align-items:center;gap:2px;border:0;background:none;color:var(--muted-foreground);font-size:14px;padding:16px 0 8px;margin-left:-4px}
+.back:hover{color:var(--foreground)}
+
+/* barra fixa: só a busca */
+.sticky{position:sticky;top:0;z-index:6;margin:0 calc(var(--px)*-1);padding:8px var(--px);background:var(--background)}
+.search{position:relative}
+.search svg.s{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted-foreground);pointer-events:none}
+.search input{width:100%;height:36px;border-radius:999px;border:1px solid var(--border);background:var(--background);padding:4px 36px;font-size:16px;box-shadow:var(--shadow-xs);outline:none}
+@container app (min-width:860px){.search input{font-size:14px}}
+.search input:focus{border-color:var(--ring);box-shadow:0 0 0 3px hsl(221 83% 53% / .3)}
+.search .x{position:absolute;right:2px;top:0;display:none}
+.search.has .x{display:inline-flex}
+
+/* botões (components/ui/button) */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;border-radius:var(--radius-md);font-size:14px;font-weight:500;height:36px;padding:8px 16px;border:1px solid var(--border);background:var(--background);box-shadow:var(--shadow-xs);transition:all .15s}
+.btn.sm{height:32px;padding:0 12px;gap:6px}
+.btn.xs{height:28px;padding:0 10px;font-size:12px;gap:4px}
+.btn:hover{background:var(--accent);color:var(--accent-foreground);border-color:var(--accent)}
+.btn.sec{background:var(--secondary);color:var(--secondary-foreground);border-color:var(--secondary)}
+.btn.sec:hover{background:hsl(221 83% 53% / .8);border-color:transparent;color:var(--secondary-foreground)}
+.btn.def{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.btn.def:hover{background:hsl(0 0% 9% / .9);border-color:transparent;color:var(--primary-foreground)}
+.btn.lg{height:40px;padding:0 24px}
+.ib{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-md);border:0;background:none}
+.ib:hover{background:var(--accent);color:var(--accent-foreground)}
+.ib.r{border-radius:999px}
+.btn:focus-visible,.ib:focus-visible,.chip:focus-visible{outline:none;box-shadow:0 0 0 3px hsl(221 83% 53% / .5)}
+
+/* chip auxiliar ("Limpar") */
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--background);border-radius:var(--radius-md);height:32px;padding:0 12px;font-size:13px;white-space:nowrap;box-shadow:var(--shadow-xs)}
+.chip em{font-style:normal;color:var(--muted-foreground);font-size:12px}
+.chip:hover{background:hsl(215 16% 72% / .25)}
+.chip[aria-pressed=true]{font-weight:600}
+.chip.none{border-style:dashed}
+.chip.dim{border-style:dashed;color:var(--muted-foreground);box-shadow:none}
+.chip:disabled{opacity:.4;cursor:default}
+
+/* etiqueta (components/common/Tag): cor + 15% de fundo, 30% de borda */
+.tg{display:inline-flex;align-items:center;border-radius:var(--radius-md);border:1px solid var(--border);font-weight:500;font-size:10px;line-height:16px;padding:1px 6px;white-space:nowrap;background:hsl(215 16% 72% / .6);color:var(--foreground)}
+.tg.sm{font-size:12px;line-height:20px;padding:2px 8px}
+.tg.warn{background:var(--amber50);color:var(--amber700);border-color:var(--amber200)}
+.tg.muted{background:hsl(215 16% 72% / .6);color:var(--muted-foreground);border-color:hsl(0 0% 89.8% / .6)}
+.tg.x{gap:4px;cursor:pointer}
+
+/* ---------- home: prateleiras ---------- */
+.sec{margin:20px 0 28px}
+.sec>h3{display:flex;align-items:center;gap:8px;font:600 20px/1.2 "Space Grotesk",sans-serif;letter-spacing:-.025em;color:var(--primary)}
+.sec>p{margin:2px 0 12px;color:var(--muted-foreground);font-size:14px}
+.badge{font:600 11px/16px "IBM Plex Sans",sans-serif;letter-spacing:0;padding:1px 8px;border-radius:99px;background:var(--amber50);color:var(--amber700);border:1px solid var(--amber200)}
+/* grade responsiva (Tipo e "ver todas"): sem rolagem lateral; 2 colunas no celular, mais nas telas maiores */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tiles.big .tile{min-height:112px}
+/* prateleira (Ocasião, Atmosfera...): uma linha com rolagem lateral, que sangra até a borda da tela */
+.shelf{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;padding:0 var(--px) 8px;margin:0 calc(var(--px)*-1);scrollbar-width:thin}
+.device[data-dev=phone] .shelf{scrollbar-width:none}
+.device[data-dev=phone] .shelf::-webkit-scrollbar{display:none}
+.shelf .tile{flex:0 0 156px;scroll-snap-align:start}
+.shelf::after{content:"";flex:0 0 1px}
+.tile{position:relative;overflow:hidden;border:0;text-align:left;border-radius:var(--radius);min-height:96px;padding:12px;color:#fff;
+  display:flex;flex-direction:column;justify-content:flex-end;background-size:cover;background-position:center;isolation:isolate}
+.tile:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(0,0,0,.45),rgba(0,0,0,0) 65%)}
+.tile b{font:600 16px/20px "Space Grotesk",sans-serif;letter-spacing:-.01em;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.tile small{font-size:12px;opacity:.92}
+.tile:active{transform:scale(.98)}
+.sub1{margin:-4px 0 12px;font-size:13px;color:var(--muted-foreground)}
+
+/* ---------- página da tag: hero ---------- */
+#hero{display:contents}
+/* capa: largura total (sangra até as bordas) e rola junto com a página */
+.herow{--H0:164px;position:relative;height:var(--H0);margin:0 calc(var(--px)*-1) 4px}
+@container app (min-width:560px){.herow{--H0:180px}}
+@container app (min-width:860px){.herow{--H0:208px}}
+.hero{position:absolute;inset:0;overflow:hidden;border-radius:0;padding:16px var(--px);color:#fff;isolation:isolate;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end}
+.hero:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(0,0,0,.5),rgba(0,0,0,.05))}
+.hero .gl{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.92}
+.hero h1{font-family:"Space Grotesk",sans-serif;font-weight:600;line-height:1.1;letter-spacing:-.05em;font-size:30px;margin:2px 0;text-shadow:0 1px 3px rgba(0,0,0,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+@container app (min-width:560px){.hero h1{font-size:36px}}
+@container app (min-width:860px){.hero h1{font-size:44px}.hero{padding-top:24px;padding-bottom:24px}}
+.hero p{margin:0;font-size:14px;opacity:.95;max-width:100%}
+/* botões sobre a capa: fundo preto semitransparente, cantos arredondados (padrão de botão do app) */
+.herow .bk{position:absolute;left:12px;top:12px;z-index:2;height:32px;padding:0 12px 0 8px;border:0;border-radius:var(--radius-md);background:rgba(0,0,0,.4);color:#fff;display:inline-flex;align-items:center;gap:2px;font-size:14px;font-weight:500;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.herow .bk:hover{background:rgba(0,0,0,.6)}
+.herow .pers{position:absolute;right:12px;top:12px;z-index:2;width:32px;height:32px;border-radius:var(--radius-md);border:0;background:rgba(0,0,0,.4);color:#fff;display:inline-flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.herow:hover .pers,.herow .pers:focus-visible,.herow .pers[aria-expanded=true]{opacity:1}
+.herow .pers:hover{background:rgba(0,0,0,.6)}
+@media (hover:none){.herow .pers{opacity:.8}} /* no toque não existe hover: o ícone fica sempre visível */
+.pop{position:absolute;right:12px;top:52px;z-index:6;width:min(300px,calc(100% - 20px));background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px}
+.pop h4{margin:0 0 6px;font-size:12px;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.06em}
+.sw{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.sw button{width:30px;height:30px;border-radius:50%;border:2px solid transparent}
+.sw button[aria-pressed=true]{border-color:var(--foreground)}
+.sw.pt button{width:auto;height:32px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--background);padding:0 10px;font-size:12px}
+.sw.pt button[aria-pressed=true]{border-color:var(--secondary);color:var(--secondary)}
+.pop input{width:100%;height:34px;border:1px solid var(--border);border-radius:var(--radius-md);padding:0 8px;margin-bottom:8px;font-size:14px}
+.pop small{display:block;color:var(--muted-foreground);font-size:11px;line-height:15px}
+
+/* ---------- filtros da lista (um botão por grupo, como o TagFilter) ---------- */
+.gpw{position:relative}
+.gpp{position:absolute;left:0;top:40px;z-index:7;width:232px;max-width:calc(100vw - 48px);background:var(--background);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow);padding:4px}
+.gpp .q{padding:6px 10px;font-size:12px;color:var(--muted-foreground)}
+.gi{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;border:0;background:none;padding:8px 12px;border-radius:4px;font-size:14px;text-align:left;min-height:36px}
+.gi:hover{background:hsl(215 16% 72% / .3)}
+.gi:disabled{opacity:.4;cursor:default}
+.gi .r{display:flex;align-items:center;gap:6px;color:var(--muted-foreground);font-size:12px}
+.gi.sep{border-top:1px dashed var(--border);border-radius:0;margin-top:2px}
+.minisg{display:inline-flex;border:1px solid var(--border);border-radius:99px;padding:1px;margin:2px 10px 6px}
+.minisg button{border:0;background:none;border-radius:99px;font-size:11px;padding:2px 8px}
+.minisg button[aria-pressed=true]{background:var(--primary);color:var(--primary-foreground)}
+
+/* ---------- item da lista (NOVO) ---------- */
+.list{border-top:1px solid var(--border)}
+.lh{display:none}
+.row{position:relative;display:grid;column-gap:10px;row-gap:2px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);
+  grid-template-columns:minmax(0,1fr) 40px auto;
+  grid-template-areas:"title media act";cursor:pointer}
+.c-title{grid-area:title;min-width:0}
+.c-title .tt{font:600 16px/22px "Space Grotesk",sans-serif;letter-spacing:-.015em;color:var(--primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c-title .sub{color:var(--muted-foreground);font-size:12px;line-height:18px;min-width:0}
+.c-title .sub .ar{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* último uso: relógio + texto, mesmo corpo do autor; âmbar se foi nas últimas 3 semanas */
+.lu{display:flex;align-items:center;gap:4px;font-size:12px;line-height:18px;color:var(--muted-foreground);white-space:nowrap}
+.lu.rec{color:var(--amber700)}
+.lu.nev{font-style:italic}
+.c-lyric{grid-area:lyric;display:none;color:var(--muted-foreground);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.c-tags{grid-area:tags;display:none;gap:4px;flex-wrap:wrap;min-width:0}
+.c-used{grid-area:used;display:none;font-size:13px}
+.c-media{grid-area:media;display:flex;justify-content:center}
+.c-act{grid-area:act;display:flex;align-items:center;justify-content:flex-end}
+.menuw{position:relative}
+.menu{position:absolute;right:0;top:40px;z-index:5;background:var(--background);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow);min-width:240px;padding:4px}
+.menu button{display:flex;width:100%;gap:8px;align-items:center;text-align:left;border:0;background:none;padding:8px 12px;border-radius:4px;min-height:40px;font-size:14px}
+.menu button:hover{background:hsl(215 16% 72% / .3)}
+mark{background:#fde68a;color:inherit;border-radius:3px;padding:0 1px}
+
+@container app (min-width:560px){
+  .row{grid-template-columns:minmax(0,1fr) 40px auto;grid-template-areas:"title media act" "lyric lyric lyric" "tags tags tags";margin:0 -8px;padding-left:8px;padding-right:8px}
+  .row:hover{background:hsl(215 16% 72% / .14)}
+  .c-lyric{display:block}
+  .c-tags{display:flex}
+  .c-tags:empty{display:none}
+}
+@container app (min-width:860px){
+  .row{grid-template-columns:minmax(0,2.3fr) minmax(0,2.4fr) minmax(0,1.7fr) 112px 48px 128px;
+    grid-template-areas:"title lyric tags used media act";padding-top:8px;padding-bottom:8px}
+  .c-used{display:flex}
+  .c-title .tt{font-size:18px}
+  .u-inline{display:none}
+  .lh{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(0,2.4fr) minmax(0,1.7fr) 112px 48px 128px;column-gap:10px;padding:8px 8px 8px;margin:0 -8px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
+  .lh span:nth-child(5){text-align:center}
+  .c-tags{flex-wrap:nowrap;overflow:hidden}
+}
+
+/* ---------- item ATUAL (comparação, aproximação do código de hoje) ---------- */
+.old{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding:10px 8px;margin:0 -8px;border-radius:var(--radius-md);align-items:start}
+.old:hover{background:hsl(215 16% 72% / .25)}
+.old .ot{font:600 16px/22px "Space Grotesk",sans-serif;letter-spacing:-.015em;color:var(--primary)}
+.old .oa{font-size:12px;color:var(--muted-foreground)}
+.old .ol{display:none;font-size:12px;color:var(--muted-foreground)}
+.old .og{display:none}
+.old .oi{display:flex;gap:4px;justify-content:flex-end;color:var(--muted-foreground)}
+@container app (min-width:560px){.old{grid-template-columns:2fr 3fr 12rem}.old .ol{display:block}}
+@container app (min-width:860px){.old{grid-template-columns:2fr 3fr 1.5fr 8rem 6rem}.old .og{display:flex;gap:4px;flex-wrap:wrap}}
+
+/* ---------- FAB (FloatingAddLink) ---------- */
+.fab{position:absolute;right:16px;bottom:96px;z-index:30}
+.device:not([data-dev=phone]) .fab{right:32px;bottom:32px}
+.fab .m{display:inline-flex}.fab .d{display:none}
+.device:not([data-dev=phone]) .fab .m{display:none}.device:not([data-dev=phone]) .fab .d{display:inline-flex}
+.fab .btn{box-shadow:0 10px 15px -3px rgba(0,0,0,.15)}
+.fab .m{width:36px;padding:0;border-radius:999px}
+
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:112px;z-index:60;background:#0b1220;color:#fff;border-radius:var(--radius-md);padding:10px 14px;max-width:calc(100% - 32px);display:flex;gap:12px;align-items:center;box-shadow:var(--shadow)}
+.device:not([data-dev=phone]) .toast{bottom:88px}
+.toast button{border:0;background:none;color:#93c5fd;font-weight:700;min-height:28px}
+.empty{text-align:center;color:var(--muted-foreground);padding:32px 12px}
+.empty b{display:block;color:var(--foreground);margin-bottom:4px}
+
+/* ---------- chips de filtro + ordenação ---------- */
+.fchips{display:flex;gap:8px;align-items:center;overflow-x:auto;scrollbar-width:none;margin:12px calc(var(--px)*-1) 0;padding:0 var(--px) 4px}
+.fchips::-webkit-scrollbar{display:none}
+@container app (min-width:560px){.fchips{flex-wrap:wrap;overflow:visible;margin:12px 0 0;padding:0}}
+.fchip{display:inline-flex;align-items:center;height:36px;flex:none;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--background);box-shadow:var(--shadow-xs)}
+.fchip .fb{display:inline-flex;align-items:center;gap:6px;border:0;background:none;height:100%;padding:0 12px;font-size:14px;font-weight:500;white-space:nowrap;border-radius:5px}
+.fchip:not(.on) .fb:hover{background:hsl(215 16% 72% / .25)}
+.fchip.on .fb{padding-right:4px}
+.fchip .fx{width:30px;height:100%;border:0;background:none;display:inline-flex;align-items:center;justify-content:center;border-radius:0 5px 5px 0}
+.fchip .fx:hover{background:rgba(0,0,0,.08)}
+.fclear{flex:none;height:36px;border:0;background:none;color:var(--muted-foreground);font-size:14px;padding:0 8px;text-decoration:underline}
+.cs{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 4px}
+.res{color:var(--muted-foreground);font-size:14px}
+.res b{color:var(--foreground)}
+.sortb{display:inline-flex;align-items:center;gap:6px;border:0;background:none;height:36px;padding:0 4px 0 8px;font-size:14px;font-weight:500;color:var(--foreground);border-radius:var(--radius-md)}
+.sortb:hover{color:var(--secondary)}
+.gpp.rt{left:auto;right:0}
+.gpp .hint{margin:0;padding:6px 12px 8px;font-size:12px;color:var(--muted-foreground)}
+.gi.so[aria-pressed=true]{font-weight:600}
+
+/* ---------- folha de baixo (bottom sheet; no app seria um Drawer/vaul) ---------- */
+#sheet{display:contents}
+.ov{position:absolute;inset:0;z-index:80;background:rgba(0,0,0,.45)}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:81;background:var(--background);border-radius:10px 10px 0 0;max-height:78%;display:flex;flex-direction:column;box-shadow:0 -10px 30px rgba(0,0,0,.2)}
+.sheet .grab{width:48px;height:5px;border-radius:99px;background:var(--muted);margin:8px auto 2px;flex:none}
+.sheet .sh{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:6px 8px 8px 20px;flex:none}
+.sheet .sh h3{font:600 18px/24px "Space Grotesk",sans-serif;letter-spacing:-.02em;color:var(--primary)}
+.sheet .sh p{margin:0;font-size:13px;color:var(--muted-foreground)}
+.sheet .sb{overflow-y:auto;padding:0 12px 8px}
+.sheet .sb .gi{min-height:48px;font-size:16px;padding:10px 12px}
+.sheet .sb .minisg{margin:2px 12px 8px}
+.sheet .sb .minisg button{font-size:12px;padding:4px 12px}
+.sheet .hint{margin:0;padding:8px 12px 4px;font-size:13px;color:var(--muted-foreground)}
+.sheet .ft{flex:none;padding:12px 16px 24px;border-top:1px solid var(--border)}
+
+/* ---------- escolher a liturgia (adicionar a uma liturgia) ---------- */
+.sheet.modal{left:50%;top:50%;bottom:auto;right:auto;transform:translate(-50%,-50%);width:min(440px,calc(100% - 32px));border-radius:var(--radius);max-height:80%}
+.sheet.modal .grab{display:none}
+.sheet.modal .sh{padding-top:16px}
+.svc{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;border:0;border-bottom:1px solid var(--border);background:none;padding:12px;min-height:60px;text-align:left}
+.svc:hover:not(:disabled){background:hsl(215 16% 72% / .25)}
+.svc:disabled{opacity:.6;cursor:default}
+.svc b{font:600 16px/22px "Space Grotesk",sans-serif;letter-spacing:-.015em;color:var(--primary);margin-right:6px}
+.svc small{display:block;color:var(--muted-foreground);font-size:13px}
+.svc .r{display:inline-flex;align-items:center;gap:4px;color:var(--muted-foreground);font-size:13px;white-space:nowrap}
+.svc.new{justify-content:flex-start;gap:8px;color:var(--secondary);font-weight:600;border-bottom:0}
+
+/* ---------- faixa de letras + divisores (só na ordem A-Z) ---------- */
+.letters{display:flex;align-items:center;overflow-x:auto;scrollbar-width:none;margin:4px calc(var(--px)*-1) 0;padding:0 calc(var(--px) - 4px)}
+.letters::-webkit-scrollbar{display:none}
+@container app (min-width:560px){.letters{flex-wrap:wrap;overflow:visible;margin:4px -4px 0;padding:0}}
+.lt{flex:none;min-width:28px;height:36px;padding:0 4px;display:inline-flex;align-items:center;justify-content:center;border:0;background:none;font:600 18px/1 "Space Grotesk",sans-serif;color:var(--secondary)}
+button.lt:hover{background:hsl(221 83% 53% / .08);border-radius:var(--radius-md)}
+.lt.off{color:hsl(215 14% 48% / .3)}
+.bl{display:flex;align-items:center;gap:12px;padding:20px 0 4px}
+.bl span{font-size:12px;font-weight:600;color:var(--secondary);text-transform:uppercase;letter-spacing:.05em}
+.bl i{flex:1;border-top:1px solid hsl(221 83% 53% / .25)}
+.list.grp{border-top:0}
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>Músicas — explorar por categorias</h1>
+  <p>Protótipo da nova tela de Músicas, no estilo "busca do Spotify", com o visual do app. A home tem o <b>Tipo</b> em destaque (cards em grade), prateleiras de rolagem lateral para os demais grupos (Ocasião, Atmosfera...) e os cards de "ver todas" no fim. Só a busca fica fixa. Tocar num card abre a página daquela tag, e os outros grupos viram filtros. Teste nos três tamanhos. Para ver a lista antiga, use "Item: Atual".</p>
+</div>
+
+<div class="ctl">
+  <div class="g"><span>Tela</span><div class="seg" id="c-dev"><button data-v="phone" aria-pressed="true">Celular</button><button data-v="tablet" aria-pressed="false">Tablet</button><button data-v="desktop" aria-pressed="false">Desktop</button></div></div>
+  <div class="g"><span>Item da lista</span><div class="seg" id="c-item"><button data-v="new" aria-pressed="true">Novo</button><button data-v="old" aria-pressed="false">Atual</button></div></div>
+  <button class="reset" id="reset">Restaurar exemplo</button>
+</div>
+
+<div class="wrap">
+  <div class="device" id="device" data-dev="phone">
+    <div class="app">
+      <nav class="side" id="side" aria-label="Navegação"></nav>
+      <div class="main" id="mainc">
+        <div class="scroll" id="body">
+          <div id="top"></div>
+          <div id="hero"></div>
+          <div class="sticky">
+            <div class="search" id="search">
+              <svg class="s" id="ic-search" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input id="q" type="search" placeholder="Buscar por título, artista ou letra" autocomplete="off" aria-label="Buscar músicas">
+              <button class="ib x" id="qx" aria-label="Limpar busca"></button>
+            </div>
+          </div>
+          <div id="view"></div>
+        </div>
+        <div class="fab" id="fab"></div>
+        <div id="toast"></div>
+      </div>
+      <nav class="bnav" id="bnav" aria-label="Navegação"></nav>
+      <div id="sheet"></div>
+    </div>
+  </div>
+
+  <div class="notes" id="notes"></div>
+</div>
+
+<script>
+const SONGS = [{"t":"Olhos Fixos","a":"Jeremy Riddle","k":"G","n":1,"yt":0,"au":0,"l":"Que a sua voz","u":"2025-03-09","c":19},{"t":"Quão Grande É O Meu Deus","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Quão grande é o meu Deus!","u":"2025-04-20","c":19},{"t":"Ele é exaltado","a":"Twila Paris - Versão: Adhemar de Campos","k":"D","n":1,"yt":0,"au":0,"l":"Ele é exaltado,","u":"2025-03-16","c":16},{"t":"Muitos virão te louvar","a":"Jorge Camargo","k":"D","n":1,"yt":0,"au":0,"l":"De todas as tribos, povos e raças","u":"2025-04-20","c":15},{"t":"SONDA-ME USA-ME","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Sonda-me, Senhor,","u":"2025-05-18","c":15},{"t":"Venha Sobre Nós","a":"CantoVerbo","k":"C","n":1,"yt":0,"au":0,"l":"Sobre nós e através de nós","u":"2025-06-29","c":15},{"t":"Ajuntamento","a":"Jorge Camargo","k":"C","n":1,"yt":0,"au":0,"l":"Vem, e sopra sobre nós teu sopro","u":"2025-01-26","c":14},{"t":"Em Cristo só","a":"Stuart Townend, Keith & Kristyn Getty","k":"D","n":1,"yt":0,"au":0,"l":"Em Cristo só confiarei;","u":"2024-11-10","c":14},{"t":"Nada se compara a Ti","a":"Tiago da Costa","k":"A","n":1,"yt":0,"au":0,"l":"Tudo, tudo o que somos","u":"2025-03-30","c":14},{"t":"BRILHA JESUS","a":"","k":"A","n":1,"yt":0,"au":0,"l":"Vejo a luz do Senhor que brilha","u":"2024-05-02","c":13},{"t":"Eterno Deus","a":"Brenton Brown/Ken Riley, Versão Vineyard","k":"C","n":1,"yt":0,"au":0,"l":"||: Nossas forças irão se renovar","u":"2025-11-09","c":13},{"t":"Jesus Em Tua Presença","a":"Asaph Borba","k":"D","n":1,"yt":0,"au":0,"l":"Jesus em tua presença","u":"2025-05-18","c":13},{"t":"Vim para adorar-te","a":"Tim Hughes","k":"E","n":1,"yt":0,"au":0,"l":"Do mundo a luz, tu desceste às trevas","u":"2025-07-13","c":13},{"t":"Viva Esperança","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Quão grande abismo que separa","u":"2025-07-06","c":13},{"t":"A Jesus, Vem Mostrar","a":"Doug Plank","k":"A","n":1,"yt":0,"au":0,"l":"Prepara o nosso coração","u":"2025-03-30","c":12},{"t":"Cantai ao Senhor (Salmo 96)","a":"Nelson Bomilcar","k":"D","n":1,"yt":0,"au":0,"l":"Cantai ao Senhor","u":"2024-08-17","c":12},{"t":"Quem além de Ti","a":"Santiago Benavides","k":"E","n":1,"yt":0,"au":0,"l":"Tu nos tens trazido até aqui","u":"2025-03-02","c":12},{"t":"Reina","a":"Alexandre Malaquias","k":"D","n":1,"yt":0,"au":0,"l":"Reina sobre o meu ser","u":"2025-03-30","c":12},{"t":"Cantarei teu amor pra sempre","a":"Martin Smith","k":"C","n":1,"yt":0,"au":0,"l":"Dos montes corre para o mar","u":"2026-08-09","c":11},{"t":"DIGNO É O SENHOR 2","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Graças eu te dou, Pai","u":"2025-04-27","c":11},{"t":"Eu me alegro em Ti","a":"","k":"A","n":1,"yt":0,"au":0,"l":"A ti bendirei pra sempre","u":"2025-07-06","c":11},{"t":"Grande","a":"Adhemar de Campos","k":"A","n":1,"yt":0,"au":0,"l":"Grande é o Senhor mui digno de louvor","u":"2025-03-30","c":11},{"t":"Quebrantado","a":"Jeremy Riddle - Versão: Vineyard","k":"C","n":1,"yt":0,"au":0,"l":"Eu olho para cruz","u":"2025-08-10","c":11},{"t":"JUNTOS","a":"Edilson Botelho","k":"E","n":1,"yt":0,"au":0,"l":"Juntos  na mesma fé","u":"2025-05-18","c":10},{"t":"MARCHAREMOS","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Nós queremos ouvir tua voz","u":"2025-04-27","c":10},{"t":"No controle tu estás","a":"Scott Underwood - Vineyard","k":"D","n":1,"yt":0,"au":0,"l":"És meu Pastor e nada faltará","u":"2025-03-15","c":10},{"t":"Perdão e graça","a":"David Ruis - Vineyard","k":"C","n":1,"yt":0,"au":0,"l":"Confesso a ti, Senhor","u":"2025-07-13","c":10},{"t":"SEJA ENGRANDECIDO","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Seja engrandecido, oh Deus da minha vida,","u":"2025-03-30","c":10},{"t":"DEUS, SOMENTE DEUS","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Deus, somente Deus","u":"2025-06-01","c":9},{"t":"ERGUEREMOS NOSSA VOZ","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Sejam cheios nossos lares","u":"2025-07-06","c":9},{"t":"Só me orgulho em Cristo","a":"M. Boswell, B. Fowler, K. Getty, and M. Papa / Versão: Tiago da Costa","k":"G","n":1,"yt":0,"au":0,"l":"Quão maravilhoso, quão grande amor:","u":"2025-05-04","c":9},{"t":"Tudo Criou","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Tudo criou, somos o seu prazer","u":"2025-05-04","c":9},{"t":"Tu és soberano","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Tu és soberano","u":"2025-03-30","c":9},{"t":"ACLAME AO SENHOR","a":"","k":"A","n":1,"yt":0,"au":0,"l":"Meu Jesus, Salvador,","u":"2025-07-06","c":8},{"t":"ESPÍRITO DE DEUS","a":"","k":"A","n":1,"yt":0,"au":0,"l":"Capo","u":"2025-11-09","c":8},{"t":"Eu Venho A Ti","a":"Bob Fitts & Gary Sadler - Eloir de Paula","k":"C","n":1,"yt":0,"au":0,"l":"O Teu amor, é incrível para mim","u":"2025-05-18","c":8},{"t":"Felizes","a":"Tiago da Costa","k":"C","n":1,"yt":0,"au":0,"l":"Aos pobres de espírito, seu reino.","u":"2025-06-01","c":8},{"t":"FRUTOS DE VIDA","a":"","k":"F","n":1,"yt":0,"au":0,"l":"Frutos que a vida mostrar","u":"2025-04-06","c":8},{"t":"NOVA VIDA","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Romperam-se as cadeias","u":"2025-04-27","c":8},{"t":"QUÃO FORMOSO ÉS","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Quão formoso és, Rei do Universo","u":"2025-06-29","c":8},{"t":"Reina em mim","a":"Brenton Brown - Versão: Vineyard","k":"C","n":1,"yt":0,"au":0,"l":"Sobre toda a terra tu és o Rei","u":"2025-01-26","c":8},{"t":"SINAL DO REINO","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Ser um sinal do teu Reino","u":"2025-01-19","c":8},{"t":"Toda a glória seja a Deus","a":"Tiago da Costa","k":"C","n":1,"yt":0,"au":0,"l":"Graça e paz seja a nós","u":"2025-04-20","c":8},{"t":"Vinho e pão","a":"","k":"C","n":1,"yt":0,"au":0,"l":"No nome forte de Jesus","u":"2024-12-22","c":8},{"t":"A Ele a Glória","a":"Diante do Trono","k":"A","n":1,"yt":0,"au":0,"l":"Porque dele e por ele","u":"2024-07-21","c":7},{"t":"A alegria está no coração","a":"Vavá Rodrigues ","k":"G","n":2,"yt":0,"au":0,"l":"A alegria está no coração","u":"2025-04-20","c":1},{"t":"A Deus demos glória","a":"Hinário Para Culto Cristão","k":"A","n":1,"yt":0,"au":0,"l":"Como agradecer a Jesus o que fez por mim?","u":null,"c":0},{"t":"A Rocha E A Areia","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Não, não construa sua casa na areia;","u":"2025-02-23","c":1},{"t":"Abra Os Olhos do Meu Coração","a":"David Quinlan","k":"E","n":1,"yt":0,"au":0,"l":"Abra os olhos do meu coração","u":"2022-10-20","c":1},{"t":"Agnus Dei","a":"Michael W. Smith","k":"G","n":1,"yt":0,"au":0,"l":"Aleluia!","u":"2026-08-09","c":2},{"t":"ALELUIA CANTO A TI, SENHOR","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Aleluia, aleluia, aleluia","u":null,"c":0},{"t":"ALIANÇA","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Como é precioso, irmão,","u":"2022-09-16","c":1},{"t":"Antífona","a":"Henry M. Wright, William H. Monk","k":"D","n":1,"yt":0,"au":0,"l":"A ti, ó Deus,","u":"2024-08-11","c":3},{"t":"Apelo Á Unidade","a":"","k":"Bb","n":1,"yt":0,"au":0,"l":"Somos pequenos, mas sabemos","u":null,"c":0},{"t":"Bata As Mãos E Os Pés","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Bata as mãos, bata os pés","u":null,"c":0},{"t":"Bem Vindo À Família v2","a":"","k":"F","n":1,"yt":0,"au":0,"l":"Bem vindo à família,","u":"2024-11-03","c":1},{"t":"Bondade de Deus","a":"Isaías Saad","k":"G","n":1,"yt":0,"au":0,"l":"Te amo, Deus","u":"2025-07-06","c":7},{"t":"CAIAM POR TERRA","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Caiam por terra agora os inimigos de Deus","u":null,"c":0},{"t":"Cantando, Orando, Louvando","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Cantando, cantando","u":null,"c":0},{"t":"Canção do Apocalipse","a":"Diante do Trono","k":"G","n":1,"yt":0,"au":0,"l":"Digno é o Cordeiro, que foi morto","u":"2023-08-17","c":6},{"t":"Celebrai com júbilo (Salmo 100)","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Celebrai com júbilo ao Senhor","u":"2025-06-08","c":3},{"t":"COM TUDO QUE SOU","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Em tuas mãos     descansarei","u":"2025-03-16","c":2},{"t":"Como é precioso irmão","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Como é precioso irmão, estar bem junto a ti","u":"2025-08-10","c":3},{"t":"CONHECI UM GRANDE AMIGO","a":"","k":"A","n":1,"yt":0,"au":0,"l":"Conheci um grande amigo","u":"2023-01-12","c":2},{"t":"Convite à liberdade","a":"Sérgio Matos","k":"E","n":1,"yt":0,"au":0,"l":"Oh, vinde vós os povos de todas as nações","u":"2024-03-28","c":2},{"t":"CRIADOR DO UNIVERSO","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Criador do Universo,","u":"2024-07-14","c":3},{"t":"Damos Graças","a":"Otávio Vitor Sérgio De Paula","k":"C","n":1,"yt":0,"au":0,"l":"Damos graças ao Senhor, damos graças","u":"2021-11-05","c":1},{"t":"Desenvolvendo amor","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Tua palavra é uma semente","u":null,"c":0},{"t":"Deus Forte Assim","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Deus tão incrível clamam os céus","u":"2020-01-21","c":1},{"t":"Deus É Bom Pra Mim","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Deus é bom pra mim, Deus é bom pra mim","u":null,"c":0},{"t":"Doce nome","a":"Glaucia Carvalho","k":"F","n":1,"yt":0,"au":0,"l":"Só de ouvir tua voz e sentir teu amor","u":"2025-06-22","c":3},{"t":"Ele Ali Está","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Em momentos de angústia","u":null,"c":0},{"t":"Em Espírito, em Verdade (V2)","a":"Marcio Pereira, Min. Koinonya","k":"A","n":1,"yt":0,"au":0,"l":"Em espírito, em verdade","u":"2025-03-09","c":3},{"t":"Em todo tempo","a":"Jorge Redher | Versão: João Alexandre","k":"D","n":1,"yt":0,"au":0,"l":"Em todo tempo eu louvarei o Senhor","u":null,"c":0},{"t":"Enquanto eu calei","a":"Luciano G. Filho","k":"G","n":1,"yt":0,"au":0,"l":"Enquanto eu calei,","u":"2024-10-27","c":3},{"t":"Escuta, Senhor","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Escuta Senhor,","u":"2024-09-08","c":1},{"t":"ESTA PAZ QUE EU SINTO EM MINH’ALMA","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Esta paz que eu sinto em minh’alma","u":"2021-10-07","c":1},{"t":"ESTRELA DA MANHÃ","a":"","k":"A","n":1,"yt":0,"au":0,"l":"És a nossa estrela da manhã","u":"2024-07-21","c":5},{"t":"Eu Preciso De Você","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Eu preciso de você, você precisa de mim","u":null,"c":0},{"t":"Eu te louvarei meu bom Jesus","a":"Marcos Witt","k":"F#","n":1,"yt":0,"au":0,"l":"És Tu única razão","u":"2024-09-22","c":4},{"t":"Falai pelas montanhas","a":"Hino tradicional - Spiritual","k":"F","n":1,"yt":0,"au":0,"l":"Falai pelas montanhas","u":"2024-12-15","c":1},{"t":"FLUA, SENHOR","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Flua, Senhor, tua presença, tua Palavra","u":"2023-06-30","c":1},{"t":"GLÓRIA E LOUVOR","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Glória e louvor àquele que é soberano","u":"2024-01-04","c":1},{"t":"Grandes obras","a":"Ministério Koinonya de louvor","k":"A","n":1,"yt":0,"au":0,"l":"Quero te adorar, oh Rei Jesus","u":"2025-07-13","c":3},{"t":"Hosana","a":"Todd Pettygrove / Versão: Adhemar de Campos","k":"E","n":1,"yt":0,"au":0,"l":"Hosana, hosana,","u":"2025-04-27","c":6},{"t":"Infinitamente Mais II","a":"Asaph Borba","k":"F#","n":1,"yt":0,"au":0,"l":"Sim, eu sei, Senhor, que tu és soberano","u":"2022-10-27","c":3},{"t":"JESUS CRISTO, ESPERANÇA DO MUNDO","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Um pouco além do presente","u":null,"c":0},{"t":"Jesus é o Rei da Glória","a":"","k":"A","n":1,"yt":0,"au":0,"l":"Todo poder te foi dado","u":null,"c":0},{"t":"LAÇOS DE AMOR","a":"Celso Tavares – Vineyard Brasil – Mais que paixão","k":"E","n":1,"yt":0,"au":0,"l":"Foi Teu imenso amor, que me conquistou","u":"2025-03-15","c":3},{"t":"LOUVA OH MINH’ALMA AO SENHOR","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Louva oh min’alma ao Senhor","u":null,"c":0},{"t":"LOUVORES E HONRAS","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Louvores e honras ao nome de Cristo","u":null,"c":0},{"t":"Mais Perto Quero Estar","a":"André Valadão","k":"G","n":1,"yt":0,"au":0,"l":"Mais perto quero estar  meu  Deus  de ti","u":"2025-05-10","c":5},{"t":"Mar do esquecimento","a":"Jorge Camargo","k":"A","n":1,"yt":0,"au":0,"l":"Em ter misericórdia","u":"2021-09-24","c":1},{"t":"Melhor Amigo (Seja na Hora)","a":"Alda Célia","k":"B","n":1,"yt":0,"au":0,"l":"Lara, lara, lara, lara Rei","u":null,"c":0},{"t":"Meu refúgio","a":"","k":"E","n":1,"yt":0,"au":0,"l":"És o meu refúgio,  minha Fortaleza","u":"2025-01-12","c":2},{"t":"Mostra-me","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Mostra-me teus caminhos oh Senhor","u":"2024-04-19","c":1},{"t":"Nada se compara a Ti (V2)","a":"Tiago da Costa","k":"A","n":1,"yt":0,"au":0,"l":"Tudo, tudo o que somos","u":"2023-07-27","c":1},{"t":"NEM UM MOMENTO SÓ","a":"","k":"A","n":1,"yt":0,"au":0,"l":"Nem um momento só","u":"2023-10-05","c":3},{"t":"Nos Braços Do Pai","a":"","k":"D","n":1,"yt":0,"au":0,"l":"(BPM: 58)","u":"2020-01-21","c":1},{"t":"Não a minha vontade","a":"Gerson Borges","k":"C","n":1,"yt":0,"au":0,"l":"Não a minha vontade, mas a tua","u":"2025-03-02","c":6},{"t":"O Fruto do Espírito","a":"","k":"E","n":1,"yt":0,"au":0,"l":"O fruto do espírito é o amor","u":null,"c":0},{"t":"O PAI ILUMINOU","a":"","k":"D","n":1,"yt":0,"au":0,"l":"O Pai iluminou os nossos corações","u":null,"c":0},{"t":"O SENHOR PODEROSO REINA","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Aleluia! Aleluia! Aleluia!","u":null,"c":0},{"t":"Obrigado Jesus","a":"","k":"A","n":1,"yt":0,"au":0,"l":"Pelo sol da manhã","u":"2023-04-14","c":2},{"t":"Oh, Quão Lindo Esse Nome É","a":"Ana Nóbrega/Hillsong","k":"E","n":1,"yt":0,"au":0,"l":"Capotraste na 2ª casa","u":"2025-04-27","c":7},{"t":"OS CÉUS MANIFESTAM","a":"","k":"A","n":1,"yt":0,"au":0,"l":"Os céus manifestam","u":"2024-05-30","c":4},{"t":"Papai Do Céu","a":"","k":"A","n":1,"yt":0,"au":0,"l":"Papai no céu a me olhar , , , , , , , , , , , , , , , , , ,","u":"2025-05-25","c":2},{"t":"Pequeno Coração","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Senhor eu quero ser uma benção","u":null,"c":0},{"t":"POR ISSO REINA","a":"","k":"D","n":1,"yt":0,"au":0,"l":"O Rei da glória, o Rei    dos reis","u":null,"c":0},{"t":"Posso Adorar Para Sempre A Jesus","a":"Turma do Printy","k":"D","n":1,"yt":0,"au":0,"l":"Posso adorar para sempre a Jesus","u":null,"c":0},{"t":"Primeiro Amor","a":"Paulo Cesar Baruk","k":"C","n":1,"yt":0,"au":0,"l":"Quero voltar ao início de tudo , , , , , , , , , , , , , , ,","u":"2024-02-03","c":1},{"t":"QUANDO A GLÓRIA DO HOMEM SE VAI","a":"","k":"F","n":1,"yt":0,"au":0,"l":"Quando a glória de um homem se vai .","u":"2022-08-11","c":1},{"t":"Quebrantado - V2","a":"Vineyard","k":"A","n":1,"yt":0,"au":0,"l":"Eu olho para cruz","u":"2021-10-21","c":1},{"t":"Quem é Deus acima do Senhor?","a":"Lynn DeShazo","k":"G","n":1,"yt":0,"au":0,"l":"Quem é Deus acima do Senhor?","u":"2024-09-29","c":4},{"t":"QUERO SUBIR","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Quero subir ao monte santo de Sião","u":null,"c":0},{"t":"REI DE SALÉM","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Toda a glória, honra e poder","u":"2023-11-17","c":1},{"t":"RENOVA-ME - arr. Marcos Witt","a":"(arr Marcos Witt)","k":"D","n":1,"yt":0,"au":0,"l":"Renova-me, Senhor Jesus","u":"2024-10-13","c":1},{"t":"RIO DE VIDA","a":"","k":"C","n":1,"yt":0,"au":0,"l":"Há um rio de vida fluindo entre nós","u":"2022-01-09","c":1},{"t":"Salmo 1","a":"Tiago Costa","k":"C","n":1,"yt":0,"au":0,"l":"Como é feliz aquele que não ouve as ideias de quem faz o mal","u":"2020-01-26","c":1},{"t":"Santo Espírito","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Não há nada igual,","u":"2023-03-30","c":4},{"t":"SARA NOSSA TERRA","a":"","k":"A","n":1,"yt":0,"au":0,"l":"Se o meu povo se humilhar,","u":"2025-06-22","c":2},{"t":"Seja Deus Gracioso","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Seja Deus gracioso","u":"2023-05-18","c":3},{"t":"SENHOR, TE QUERO","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Eu te busco, te procuro, oh Deus","u":"2024-07-13","c":1},{"t":"Sou De Jesus","a":"","k":"B","n":1,"yt":0,"au":0,"l":"Sou tão pequeno mas sou de Jesus","u":null,"c":0},{"t":"Superabundante Graça","a":"Comunidade da Graça","k":"A","n":1,"yt":0,"au":0,"l":"Somos filhos da graça divina e sem par,","u":"2024-01-17","c":3},{"t":"SÓ A TI SERVIREI","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Com meu viver, com toda a força","u":"2023-07-20","c":2},{"t":"Terra boa","a":"Tiago da Costa","k":"G","n":1,"yt":0,"au":0,"l":"Uma semente","u":null,"c":0},{"t":"Teus olhos","a":"Marcos Witt","k":"G","n":1,"yt":0,"au":0,"l":"Teus olhos revelam que eu","u":"2025-06-15","c":7},{"t":"TODOS QUE TEM SEDE","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Todos que tem sede","u":"2023-05-11","c":4},{"t":"Três palavrinhas só","a":"","k":"D","n":1,"yt":0,"au":0,"l":"Três palavrinhas só","u":"2023-01-25","c":1},{"t":"Tua presença","a":"Diante do Trono","k":"F","n":1,"yt":0,"au":0,"l":"Onde quer que eu esteja, Senhor","u":"2025-06-01","c":7},{"t":"Tudo Entregarei","a":"Judson W. Van DeVenter / Winfield S. Weeden (1896)","k":"Bb","n":1,"yt":0,"au":0,"l":"Tudo, ó Cristo, a Ti entrego;","u":null,"c":0},{"t":"Um Rei Diferente","a":"","k":"G","n":1,"yt":0,"au":0,"l":"Dentre as palhas nasceu o Rei menino Jesus.","u":"2019-11-15","c":1},{"t":"Unidade e Diversidade","a":"Guilherme Kerr","k":"E","n":1,"yt":0,"au":0,"l":"Da multidão dos que creram era só um o coração","u":"2025-06-08","c":3},{"t":"VEM","a":"","k":"E","n":1,"yt":0,"au":0,"l":"Vem, esta é a hora da adoração","u":"2025-06-15","c":4},{"t":"Venham, Cantemos (Salmo 95)","a":"Tiago da Costa","k":"D","n":1,"yt":0,"au":0,"l":"Venham, cantemos","u":"2022-07-28","c":1},{"t":"Zuzim","a":"Carlinhos Veiga e Rogério Pinheiro","k":"E","n":1,"yt":0,"au":0,"l":"Somente adorar a Ti, louvores vamos te dar","u":"2024-09-22","c":3},{"t":"É o teu povo","a":"Jorge Camargo","k":"G","n":1,"yt":0,"au":0,"l":"É o Teu   povo       aqui presente","u":"2025-06-08","c":6},{"t":"Ó, vem, Emanuel!","a":"Hino latino/Melodia gregoriana","k":"G","n":1,"yt":0,"au":0,"l":"Ó, vem, ó, vem, Emanuel!","u":"2022-11-11","c":1}];
+const TODAY = new Date("2026-11-05T12:00:00");
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+/* ---------- ícones (lucide, como no app) ---------- */
+const P = {
+  search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>', x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  plus:'<path d="M5 12h14M12 5v14"/>', check:'<path d="M20 6 9 17l-5-5"/>', back:'<path d="m15 18-6-6 6-6"/>',
+  more:'<circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>',
+  play:'<path d="m6 3 14 9-14 9z"/>', audio:'<path d="M3 14v-4a9 9 0 0 1 18 0v4"/><path d="M3 14h3v6H3zM18 14h3v6h-3z"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  arrowup:'<path d="M12 19V5M5 12l7-7 7 7"/>', arrowdown:'<path d="M12 5v14M19 12l-7 7-7-7"/>',
+  minus:'<path d="M5 12h14"/>', up:'<path d="m18 15-6-6-6 6"/>', down:'<path d="m6 9 6 6 6-6"/>',
+  brush:'<path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/>',
+  book:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>', edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  note:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  listmusic:'<path d="M21 15V6M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM12 12H3M16 6H3M12 18H3"/>',
+  msg:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M15.5 9.5a1.8 1.8 0 0 0-3 -.7 1.8 1.8 0 0 0-3 2.4L12.5 14l3-2.8a1.8 1.8 0 0 0 0-1.7Z"/>',
+};
+const ic = (n, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+
+/* ---------- grupos e categorias (configuráveis; na implementação vêm de TagGroup/Tag) ----------
+   pres = como o grupo se apresenta na home: "destaque" (cards em grade, sem rolagem lateral),
+   "prateleira" (uma linha de cards com rolagem lateral) ou "filtro" (nunca na home, só dentro da lista). */
+const GROUPS = [
+  {id:"Tipo", q:"Que tipo de música é e como a congregação participa?", mode:"multi", pres:"destaque", status:"closed", color:"#7c3aed", tags:[
+    {n:"Congregacional", c:"#059669", p:"dots",  d:"Todos cantam junto"},
+    {n:"Hino",           c:"#7c3aed", p:"cross", d:"Hinário, letra mais formal"},
+    {n:"Infantil",       c:"#f59e0b", p:"stars", d:"Para as crianças"},
+    {n:"Apresentação",   c:"#2563eb", p:"waves", d:"Cantada para a comunidade"}]},
+  {id:"Ocasião", q:"Para qual data ou ritual a música serve?", mode:"multi", pres:"prateleira", status:"closed", color:"#059669", tags:[
+    {n:"Natal",   c:"#dc2626", p:"stars", d:"O nascimento de Jesus"},
+    {n:"Páscoa",  c:"#9333ea", p:"cross", d:"Cruz e ressurreição"},
+    {n:"Ceia",    c:"#be123c", p:"dots",  d:"A mesa da comunhão"},
+    {n:"Batismo", c:"#0891b2", p:"waves", d:"Novo nascimento"},
+    {n:"Advento", c:"#4f46e5", p:"stars", d:"Esperando o Rei"}]},
+  {id:"Atmosfera", q:"Como a música faz a congregação se sentir?", mode:"single", pres:"prateleira", status:"proposed", color:"#0891b2", tags:[
+    {n:"Celebração", c:"#ea580c", p:"stars", d:"Energia alta, alegria"},
+    {n:"Adoração",   c:"#0d9488", p:"waves", d:"Intimidade, contemplação"},
+    {n:"Clamor",     c:"#475569", p:"dots",  d:"Súplica e entrega"},
+    {n:"Declaração", c:"#1d4ed8", p:"cross", d:"Afirmação de fé"},
+    {n:"Reflexão",   c:"#6d28d9", p:"waves", d:"Meditativo, narrativo"}]},
+];
+const gOf = id => GROUPS.find(g => g.id === id);
+const FEATURED = GROUPS.filter(g => g.pres === "destaque");
+const SHELVES = GROUPS.filter(g => g.pres === "prateleira");
+const SWATCHES = ["#059669","#0d9488","#2563eb","#4f46e5","#7c3aed","#be123c","#dc2626","#ea580c","#f59e0b","#475569"];
+const PATTERNS = {none:"Sem padrão", dots:"Pontos", waves:"Ondas", stars:"Estrelas", cross:"Cruz"};
+const patUrl = p => {
+  const svg = {
+    dots:`<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22'><circle cx='4' cy='4' r='1.6' fill='white' fill-opacity='.38'/></svg>`,
+    waves:`<svg xmlns='http://www.w3.org/2000/svg' width='44' height='20'><path d='M0 10Q11 0 22 10T44 10' fill='none' stroke='white' stroke-opacity='.3' stroke-width='2'/></svg>`,
+    stars:`<svg xmlns='http://www.w3.org/2000/svg' width='38' height='38'><text x='6' y='24' font-size='18' fill='white' fill-opacity='.32'>✦</text></svg>`,
+    cross:`<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34'><path d='M17 8v16M9 15h16' stroke='white' stroke-opacity='.3' stroke-width='3' stroke-linecap='round'/></svg>`}[p];
+  return svg ? `url("data:image/svg+xml,${encodeURIComponent(svg)}")` : "";
+};
+
+/* estilo por categoria (cor, padrão ou imagem), personalizável e guardado só neste navegador */
+let STYLE = {};
+const sk = (g, n) => g + ":" + n;
+const baseStyle = () => { STYLE = {}; GROUPS.forEach(g => g.tags.forEach(t => STYLE[sk(g.id, t.n)] = {color: t.c, pat: t.p, img: ""})); };
+const saveStyle = () => { try { localStorage.setItem("musicas-proto-estilo", JSON.stringify(STYLE)); } catch (e) {} };
+const loadStyle = () => { baseStyle(); try { const j = JSON.parse(localStorage.getItem("musicas-proto-estilo") || "null"); if (j) Object.assign(STYLE, j); } catch (e) {} };
+const bgOf = st => {
+  const grad = `linear-gradient(135deg, ${st.color}, color-mix(in srgb, ${st.color} 55%, #000))`;
+  if (st.img) return `background-image:url("${st.img.replace(/"/g, "")}"),${grad}`;
+  const pu = patUrl(st.pat);
+  return `background-image:${pu ? pu + "," : ""}${grad}`;
+};
+/* etiquetas usam a cor do GRUPO, como o app faz hoje */
+const groupTag = (gid, n, cls = "") => { const c = gOf(gid).color; return `<span class="tg ${cls}" style="background:${c}26;color:${c};border-color:${c}4d">${esc(n)}</span>`; };
+
+/* ---------- dados: acervo real + classificação de exemplo ---------- */
+function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+const DAY = 86400000;
+const SONG_DB = SONGS.map((r, i) => {
+  const h = hash(r.t), tg = {};
+  const a = h % 100;
+  if (a < 22) tg.Tipo = ["Congregacional"]; else if (a < 34) tg.Tipo = ["Apresentação"]; else if (a < 42) tg.Tipo = ["Hino"]; else if (a < 46) tg.Tipo = ["Infantil"];
+  const b = (h >>> 8) % 100, oc = ["Natal","Páscoa","Ceia","Batismo","Advento"];
+  if (b < 15) tg["Ocasião"] = [oc[Math.floor(b / 3)]];
+  if (((h >>> 4) % 100) < 9) tg.Atmosfera = [GROUPS[2].tags[(h >>> 12) % 5].n];
+  const multi = r.n > 1 || h % 7 === 0;
+  return {
+    id: i, title: r.t, artist: r.a || "", key: r.k, lyric: r.l, tags: tg,
+    last: r.u ? new Date(r.u + "T12:00:00") : null, uses: r.c,
+    yt: r.c >= 6 || h % 4 === 0, au: h % 9 === 0,
+    arrs: multi ? ["Arranjo original", "Acústico"] : ["Arranjo principal"],
+  };
+});
+const byId = id => SONG_DB[id];
+const allTags = s => GROUPS.flatMap(g => (s.tags[g.id] || []).map(n => ({g: g.id, n})));
+const classified = s => allTags(s).length > 0;
+
+function rel(d) {
+  if (!d) return {t: "Nunca usada", days: 9999, recent: false};
+  const days = Math.max(0, Math.round((TODAY - d) / DAY));
+  let t;
+  if (days < 1) t = "hoje"; else if (days === 1) t = "ontem"; else if (days < 14) t = `há ${days} dias`;
+  else if (days < 60) t = `há ${Math.round(days / 7)} sem`; else t = `há ${Math.round(days / 30)} meses`;
+  return {t, days, recent: days < 21};
+}
+
+/* ---------- estado ---------- */
+const idsOf = ts => ts.map(t => SONG_DB.find(s => norm(s.title) === norm(t))).filter(Boolean).map(s => s.id);
+/* liturgias de exemplo (próximas do calendário); na implementação viriam dos Service */
+const mkServices = () => [
+  {id: "08-11", date: "Dom 08/11", title: "Culto dominical", songs: idsOf(["Quão Grande É O Meu Deus", "Venha Sobre Nós", "Ajuntamento", "Muitos virão te louvar", "Sonda-me usa-me"])},
+  {id: "15-11", date: "Dom 15/11", title: "Culto dominical", songs: idsOf(["Olhos Fixos", "Ele é exaltado", "Em Cristo só"])},
+  {id: "22-11", date: "Dom 22/11", title: "Culto dominical", songs: []},
+  {id: "29-11", date: "Dom 29/11", title: "1º domingo do Advento", songs: []},
+];
+let S;
+const clearFilters = () => GROUPS.forEach(g => { S.filt[g.id].clear(); S.none[g.id] = false; });
+function freshState(keep) {
+  S = Object.assign({
+    dev: "phone", item: "new",
+    q: "", cat: null, filt: {}, none: {}, modeAll: {}, sort: loadSort(), sheet: null, open: null, menu: null, gpop: null,
+    pop: false, services: mkServices(), toast: null,
+  }, keep || {});
+  GROUPS.forEach(g => { S.filt[g.id] = new Set(); S.none[g.id] = false; S.modeAll[g.id] = false; });
+}
+
+/* ---------- filtragem ---------- */
+function passGroup(s, g) {
+  const T = S.filt[g.id], N = S.none[g.id], has = s.tags[g.id] || [];
+  if (S.cat && S.cat.g === g.id) return has.includes(S.cat.n);
+  if (!T.size && !N) return true;
+  if (N && !has.length) return true;
+  if (!T.size) return false;
+  const sel = [...T];
+  return S.modeAll[g.id] ? sel.every(n => has.includes(n)) : sel.some(n => has.includes(n));
+}
+function passQuery(s) {
+  if (!S.q.trim()) return true;
+  const q = norm(S.q);
+  return norm(s.title).includes(q) || norm(s.artist).includes(q) || norm(s.lyric).includes(q);
+}
+function match(s, ignoreG) { return passQuery(s) && GROUPS.every(g => g.id === ignoreG || passGroup(s, g)); }
+/* ordenação: o mesmo item de novo inverte o sentido; a escolha é lembrada neste aparelho */
+const SORTS = {
+  alfa: {label: "A-Z",              def: "asc",  hint: {asc: "de A a Z", desc: "de Z a A"}},
+  uso:  {label: "Uso em liturgias", def: "desc", hint: {desc: "Mais usadas", asc: "Menos usadas"}},
+  comp: {label: "Compositor",       def: "asc",  hint: {asc: "A–Z", desc: "Z–A"}},
+};
+function loadSort() { try { const j = JSON.parse(localStorage.getItem("musicas-proto-ordem") || "null"); if (j && SORTS[j.key] && (j.dir === "asc" || j.dir === "desc")) return j; } catch (e) {} return {key: "alfa", dir: "asc"}; }
+function saveSort() { try { localStorage.setItem("musicas-proto-ordem", JSON.stringify(S.sort)); } catch (e) {} }
+function pickSort(key) { if (S.sort.key === key) S.sort.dir = S.sort.dir === "asc" ? "desc" : "asc"; else S.sort = {key, dir: SORTS[key].def}; saveSort(); }
+function sorted(list) {
+  const m = S.sort.dir === "asc" ? 1 : -1, byTitle = (a, b) => norm(a.title).localeCompare(norm(b.title));
+  const f = {
+    alfa: (a, b) => m * byTitle(a, b),
+    uso: (a, b) => m * (a.uses - b.uses) || byTitle(a, b),
+    comp: (a, b) => { const x = norm(a.artist), y = norm(b.artist); if (!x && !y) return byTitle(a, b); if (!x) return 1; if (!y) return -1; return m * x.localeCompare(y) || byTitle(a, b); },
+  }[S.sort.key];
+  return list.slice().sort(f);
+}
+const mobile = () => S.dev === "phone";
+const isHome = () => !S.cat; // a busca na home não troca de tela: leva até a lista, mais abaixo
+
+/* ---------- peças ---------- */
+function hl(text) {
+  const q = S.q.trim(); if (!q) return esc(text);
+  const t = norm(text), i = t.indexOf(norm(q)); if (i < 0) return esc(text);
+  return esc(text.slice(0, i)) + "<mark>" + esc(text.slice(i, i + q.length)) + "</mark>" + esc(text.slice(i + q.length));
+}
+function actBtn(s) {
+  return `<div class="menuw"><button class="ib" data-act="menu" data-id="${s.id}" aria-label="Mais ações" style="width:40px;height:40px">${ic("more", 16)}</button>${
+    S.menu === s.id ? `<div class="menu" role="menu" data-stop>
+      <button data-act="svcopen" data-id="${s.id}">${ic("plus", 16)} Adicionar a uma liturgia…</button>
+      <button data-act="stub" data-k="Editar dados">${ic("edit", 16)} Editar dados</button>
+      <button data-act="stub" data-k="Editar arranjo">${ic("note", 16)} Editar arranjo</button></div>` : ""}</div>`;
+}
+function rowNew(s) {
+  const r = rel(s.last);
+  const tags = allTags(s);
+  const luCls = s.last ? (r.recent ? "rec" : "") : "nev";
+  const lu = `${ic("clock", 12)}<span>${s.last ? r.t : "Nunca usada"}</span>`;
+  const play = (s.yt || s.au) ? `<button class="ib r" data-act="media" data-id="${s.id}" data-k="${s.yt ? "vídeo" : "áudio"}" aria-label="Ouvir referência">${ic("play", 18)}</button>` : "";
+  /* a linha inteira abre a música (como hoje); play e ⋯ têm ações próprias */
+  return `<div class="row" data-act="open" data-id="${s.id}">
+    <div class="c-title" role="link" tabindex="0">
+      <div class="tt">${hl(s.title)}</div>
+      ${s.artist ? `<div class="sub"><span class="ar">${hl(s.artist)}</span></div>` : ""}
+      <div class="lu u-inline ${luCls}">${lu}</div>
+    </div>
+    <div class="c-lyric">${hl(s.lyric)}</div>
+    <div class="c-tags">${tags.map(t => groupTag(t.g, t.n)).join("")}</div>
+    <div class="c-used lu ${luCls}">${lu}${s.uses ? `<span style="margin-left:4px">· ${s.uses}×</span>` : ""}</div>
+    <div class="c-media">${play}</div>
+    <div class="c-act">${actBtn(s)}</div>
+  </div>`;
+}
+function rowOld(s) {
+  const tags = allTags(s);
+  return `<div class="old" data-act="stub" data-k="Abrir ${esc(s.title)}">
+    <div><div class="ot">${hl(s.title)}</div>${s.artist ? `<div class="oa">${hl(s.artist)}</div>` : ""}</div>
+    <div class="ol">${esc(s.lyric)}</div>
+    <div class="og">${tags.map(t => groupTag(t.g, t.n)).join("")}</div>
+    <div class="oi">${s.yt ? ic("play", 14) : ""}${ic("more", 14)}</div></div>`;
+}
+const rowOf = s => S.item === "new" ? rowNew(s) : rowOld(s);
+const listHead = () => S.item === "new" ? '<div class="lh"><span>Música</span><span>Início da letra</span><span>Classificação</span><span>Último uso</span><span>Ref.</span><span></span></div>' : "";
+
+/* ---------- topo, home e lista ---------- */
+/* dentro de uma categoria a busca é sempre da categoria; para buscar no acervo todo, volte para Músicas */
+function placeholder() {
+  return S.cat ? `Buscar em ${S.cat.n}` : "Buscar por título, artista ou letra";
+}
+function topView() {
+  return S.cat ? "" : `<h1 class="h1">Músicas</h1>`;
+}
+const backBtn = () => `<button class="bk" data-act="back" aria-label="Voltar para Músicas">${ic("back", 18)} Músicas</button>`;
+function heroView() {
+  if (!S.cat) return "";
+  const g = gOf(S.cat.g), t = g.tags.find(x => x.n === S.cat.n), st = STYLE[sk(g.id, t.n)];
+  return `<div class="herow" id="herow">${backBtn()}<div class="hero" style="${bgOf(st)}">
+    <span class="gl">${esc(g.id)}</span><h1>${esc(t.n)}</h1><p>${esc(t.d)}</p></div>
+    <button class="pers" data-act="pers" aria-expanded="${S.pop}" aria-label="Personalizar capa" title="Personalizar capa">${ic("brush", 16)}</button>
+    ${S.pop ? `<div class="pop" data-stop>
+      <h4>Cor</h4><div class="sw">${SWATCHES.map(c => `<button style="background:${c}" data-act="color" data-c="${c}" aria-pressed="${st.color === c}" aria-label="Cor ${c}"></button>`).join("")}</div>
+      <h4>Padrão</h4><div class="sw pt">${Object.entries(PATTERNS).map(([k, v]) => `<button data-act="pat" data-p="${k}" aria-pressed="${st.pat === k && !st.img}">${v}</button>`).join("")}</div>
+      <h4>Ou uma imagem</h4><input id="imgurl" placeholder="Endereço (URL) da imagem" value="${esc(st.img)}">
+      <button class="btn sm" data-act="img" style="width:100%">Usar imagem</button>
+      <small>Guardado só neste navegador, no protótipo. No sistema real, cor, imagem e descrição seriam dados da própria tag, iguais para todos.</small></div>` : ""}</div>`;
+}
+function tile(g, t, count) {
+  const st = STYLE[sk(g.id, t.n)];
+  return `<button class="tile" style="${bgOf(st)}" data-act="cat" data-g="${esc(g.id)}" data-n="${esc(t.n)}"><b>${esc(t.n)}</b><small>${count} música${count === 1 ? "" : "s"}</small></button>`;
+}
+function homeView() {
+  const total = SONG_DB.length;
+  const cnt = (gid, n) => SONG_DB.filter(s => (s.tags[gid] || []).includes(n)).length;
+  const hasData = g => g.tags.some(t => cnt(g.id, t.n) > 0);
+  const sec = (g, inner) => {
+    const prop = g.status === "proposed", grp = SONG_DB.filter(s => (s.tags[g.id] || []).length).length;
+    return `<div class="sec"><h3>${esc(g.id)}${prop ? ' <span class="badge">em construção</span>' : ""}</h3>
+      <p>${esc(g.q)}${prop ? ` Só ${grp} de ${total} músicas classificadas por enquanto.` : ""}</p>${inner}</div>`;
+  };
+  const featured = FEATURED.filter(hasData).map(g =>
+    sec(g, `<div class="tiles big">${g.tags.map(t => tile(g, t, cnt(g.id, t.n))).join("")}</div>`)).join("");
+  const shelves = SHELVES.filter(hasData).map(g =>
+    sec(g, `<div class="shelf">${g.tags.filter(t => cnt(g.id, t.n) > 0).map(t => tile(g, t, cnt(g.id, t.n))).join("")}</div>`)).join("");
+  return `
+    ${featured}
+    ${shelves}
+    <div class="sec" id="lista"><h3>Todas as músicas</h3>
+      ${listBlock()}</div>`;
+}
+const ICON_DIR = d => ic(d === "asc" ? "arrowup" : "arrowdown", 14);
+/* opções de um grupo: usadas no menu (tablet/desktop) e na folha (celular). Aplicam ao vivo. */
+function groupItems(g) {
+  const items = g.tags.map(t => {
+    const n = SONG_DB.filter(s => match(s, g.id) && (s.tags[g.id] || []).includes(t.n)).length, on = S.filt[g.id].has(t.n);
+    return `<button class="gi" data-act="filt" data-g="${esc(g.id)}" data-n="${esc(t.n)}" ${n === 0 && !on ? "disabled" : ""}><span>${esc(t.n)}</span><span class="r">${n}${on ? ic("check", 16) : ""}</span></button>`;
+  }).join("");
+  const nn = SONG_DB.filter(s => match(s, g.id) && !(s.tags[g.id] || []).length).length;
+  const mode = g.mode === "multi" && S.filt[g.id].size > 1 ? `<div class="minisg" role="group" aria-label="Combinar valores"><button data-act="mode" data-g="${esc(g.id)}" data-v="0" aria-pressed="${!S.modeAll[g.id]}">qualquer</button><button data-act="mode" data-g="${esc(g.id)}" data-v="1" aria-pressed="${S.modeAll[g.id]}">todas</button></div>` : "";
+  return `${mode}${items}<button class="gi sep" data-act="none" data-g="${esc(g.id)}"><span>Sem ${esc(g.id.toLowerCase())}</span><span class="r">${nn}${S.none[g.id] ? ic("check", 16) : ""}</span></button>`;
+}
+function sortOptions() {
+  return Object.entries(SORTS).map(([k, v]) => {
+    const on = S.sort.key === k, dir = on ? S.sort.dir : v.def;
+    return `<button class="gi so" data-act="sortpick" data-k="${k}" aria-pressed="${on}"><span>${v.label}</span><span class="r">${on ? ICON_DIR(dir) : ""}</span></button>`;
+  }).join("");
+}
+const visibleGroups = () => GROUPS
+  .filter(g => !(S.cat && S.cat.g === g.id) && g.tags.some(t => SONG_DB.some(s => (s.tags[g.id] || []).includes(t.n))));
+function chipsRow() {
+  const groups = visibleGroups();
+  const chips = groups.map(g => {
+    const T = [...S.filt[g.id]], n = T.length + (S.none[g.id] ? 1 : 0), on = n > 0;
+    const first = T.length ? T[0] : "sem " + g.id.toLowerCase();
+    const label = on ? `${g.id}: ${first}${n > 1 ? ` +${n - 1}` : ""}` : g.id;
+    const st = on ? `border-color:${g.color};color:${g.color};background:${g.color}1f` : "";
+    return `<div class="fchip gpw ${on ? "on" : ""}" style="${st}"><button class="fb" data-act="gpop" data-g="${esc(g.id)}" aria-haspopup="true" aria-expanded="${S.gpop === g.id || (S.sheet && S.sheet.g === g.id) || false}">${esc(label)}${on ? "" : ic("down", 14)}</button>${
+      on ? `<button class="fx" data-act="gclear" data-g="${esc(g.id)}" aria-label="Limpar ${esc(g.id)}">${ic("x", 14)}</button>` : ""}${
+      !mobile() && S.gpop === g.id ? `<div class="gpp" role="menu">${g.mode === "single" ? '<div class="q">Escolha um valor</div>' : ""}${groupItems(g)}</div>` : ""}</div>`;
+  }).join("");
+  const any = groups.some(g => S.filt[g.id].size || S.none[g.id]);
+  return chips + (any ? `<button class="fclear" data-act="clear">Limpar</button>` : "");
+}
+function sortCtl() {
+  return `<div class="gpw"><button class="sortb" data-act="sortopen" aria-haspopup="true" aria-label="Ordenar por ${SORTS[S.sort.key].label}, ${SORTS[S.sort.key].hint[S.sort.dir]}" aria-expanded="${S.gpop === "__sort" || (S.sheet && S.sheet.type === "sort") || false}">${SORTS[S.sort.key].label} ${ICON_DIR(S.sort.dir)}</button>${
+    !mobile() && S.gpop === "__sort" ? `<div class="gpp rt" role="menu">${sortOptions()}</div>` : ""}</div>`;
+}
+const initialOf = s => norm(s.title.trim()).charAt(0) || "#";
+function lettersStrip(list) {
+  if (S.sort.key !== "alfa" || !list.length) return "";
+  const have = new Set(list.map(initialOf));
+  const all = [...new Set([..."abcdefghijklmnopqrstuvwxyz", ...have])].sort();
+  if (S.sort.dir === "desc") all.reverse();
+  return `<nav class="letters" aria-label="Ir para a letra">${all.map(l => have.has(l)
+    ? `<button class="lt" data-act="letter" data-l="${esc(l)}">${esc(l.toUpperCase())}</button>`
+    : `<span class="lt off">${esc(l.toUpperCase())}</span>`).join("")}</nav>`;
+}
+function rowsWithDividers(list) {
+  if (S.sort.key !== "alfa") return list.map(rowOf).join("");
+  let last = null, out = "";
+  list.forEach(s => { const l = initialOf(s); if (l !== last) { out += `<div class="bl" id="bl-${esc(l)}"><span>${esc(l.toUpperCase())}</span><i></i></div>`; last = l; } out += rowOf(s); });
+  return out;
+}
+function listBlock() {
+  const list = sorted(SONG_DB.filter(s => match(s)));
+  const body = list.length ? `<div class="list ${S.sort.key === "alfa" ? "grp" : ""}">${listHead()}${rowsWithDividers(list)}</div>`
+    : `<div class="empty"><b>Nenhuma música com essa combinação</b>Tire algum filtro para ampliar a lista.<br><br><button class="btn sm" data-act="clear">Limpar filtros</button></div>`;
+  return `
+    <div class="fchips" role="group" aria-label="Filtros">${chipsRow()}</div>
+    <div class="cs"><div class="res"><b>${list.length}</b> música${list.length === 1 ? "" : "s"}${S.q.trim() ? ` para “${esc(S.q.trim())}”` : ""}</div>${sortCtl()}</div>
+    ${lettersStrip(list)}
+    ${body}`;
+}
+const listView = listBlock;
+function sheetView() {
+  if (!S.sheet) return "";
+  const close = `<button class="ib r" data-act="sheetclose" aria-label="Fechar">${ic("x", 20)}</button>`;
+  if (S.sheet.type === "sort") return `<div class="ov" data-act="sheetclose"></div><div class="sheet" role="dialog" aria-label="Ordenar por"><div class="grab"></div>
+    <div class="sh"><h3>Ordenar por</h3>${close}</div><div class="sb">${sortOptions()}</div><div style="height:16px"></div></div>`;
+  if (S.sheet.type === "svc") {
+    const song = byId(S.sheet.id), plural = n => `${n} música${n === 1 ? "" : "s"}`;
+    return `<div class="ov" data-act="sheetclose"></div><div class="sheet ${mobile() ? "" : "modal"}" role="dialog" aria-label="Adicionar a uma liturgia"><div class="grab"></div>
+      <div class="sh"><div><h3>Adicionar a uma liturgia</h3><p>${esc(song.title)}</p></div>${close}</div>
+      <div class="sb">${S.services.map((v, i) => { const has = v.songs.includes(song.id);
+        return `<button class="svc" data-act="svcpick" data-s="${v.id}" ${has ? "disabled" : ""}><span><b>${v.date}</b>${i === 0 ? '<span class="tg sm">Próxima</span>' : ""}<small>${esc(v.title)} · ${plural(v.songs.length)}</small></span>${has ? `<span class="r">${ic("check", 16)} Já está</span>` : ""}</button>`; }).join("")}
+        <button class="svc new" data-act="svcnew">${ic("plus", 16)} Nova liturgia</button></div><div style="height:16px"></div></div>`;
+  }
+  const g = gOf(S.sheet.g), n = SONG_DB.filter(s => match(s)).length;
+  return `<div class="ov" data-act="sheetclose"></div><div class="sheet" role="dialog" aria-label="${esc(g.id)}"><div class="grab"></div>
+    <div class="sh"><div><h3>${esc(g.id)}</h3><p>${esc(g.q)}</p></div>${close}</div>
+    <div class="sb">${groupItems(g)}</div>
+    <div class="ft"><button class="btn def lg" data-act="sheetclose" style="width:100%">Ver ${n} música${n === 1 ? "" : "s"}</button></div></div>`;
+}
+
+/* ---------- navegação e botão flutuante ---------- */
+function navItems() {
+  const it = (ico, label, on) => `<button class="ni ${on ? "on" : ""}" data-act="stub" data-k="${label}" ${on ? 'aria-current="page"' : ""}>${ic(ico, 24)}<span>${label}</span></button>`;
+  return it("listmusic", "Liturgias", false) + it("note", "Músicas", true) + it("msg", "Feedback", false);
+}
+function fabView() {
+  return `<button class="btn sec m" data-act="stub" data-k="Nova música" aria-label="Nova música">${ic("plus", 16)}</button>
+    <button class="btn sec lg d" data-act="stub" data-k="Nova música">${ic("plus", 16)} Nova música</button>`;
+}
+let toastT;
+function toast(msg, undo) {
+  S.toast = {msg, undo};
+  clearTimeout(toastT); toastT = setTimeout(() => { S.toast = null; renderToast(); }, 3800);
+  renderToast();
+}
+function renderToast() {
+  const t = S.toast;
+  $("#toast").innerHTML = t ? `<div class="toast" role="status"><span>${esc(t.msg)}</span>${t.undo ? `<button data-act="undo">Desfazer</button>` : ""}</div>` : "";
+}
+
+/* ---------- notas laterais ---------- */
+function notes() {
+  const view = isHome() ? "home" : "cat";
+  const by = {
+    home: ["O <b>Tipo</b> é o destaque: cards em grade, sem rolagem lateral (2 colunas no celular, mais colunas em telas maiores). Cada card abre a página daquele tipo.", "Os demais grupos (Ocasião, Atmosfera...) são <b>prateleiras</b> de rolagem lateral. Atmosfera está “em construção”; Assunto (0 músicas) nem aparece.", "A home termina com a <b>lista completa</b> (filtros, ordenação e letras). Digitar na busca leva até ela, sem trocar de tela: os cards continuam acima.", "Só a busca fica fixa no topo."],
+    cat: ["A página é <b>uma tag só</b>: a que você tocou. A capa ocupa a largura toda e rola junto com a página; o botão Voltar fica sobre ela. A busca vem logo abaixo (e fica presa no topo ao rolar).", "A busca daqui é sempre <b>da categoria</b> (“Buscar em Natal”); para buscar no acervo todo, volte para Músicas. Os outros grupos viram <b>chips</b> numa linha só (rolam para o lado no celular). O filtro aplicado aparece dentro do chip, com ✕ para limpar. Isso inclui o Tipo.", "No celular, o chip abre uma <b>folha de baixo</b> e o filtro vale ao vivo; “Ver N músicas” só fecha. Em telas maiores é um menu.", "<b>Ordenação</b> à direita da contagem: A-Z, Uso em liturgias ou Compositor. Tocar de novo no mesmo item inverte o sentido. Fica lembrada neste aparelho.", "A <b>faixa de letras</b> e os divisores só existem na ordem <b>A-Z</b> (e invertem em Z–A). Compositor e Uso em liturgias não têm letras. No celular a faixa é uma linha só, com rolagem lateral."],
+  };
+  const item = S.item === "new" ? [
+    "Sem tom: o tom é decisão de quem monta o culto, não de quem escolhe a música.",
+    "<b>Play</b> da referência (vídeo ou áudio) fica à direita do título, no lugar onde estava o tom.",
+    "<b>Último uso</b> com relógio, no mesmo corpo do autor e na linha de baixo; âmbar se foi nas últimas 3 semanas.",
+    "<b>⋯</b> abre o menu: “Adicionar a uma liturgia…” abre a lista de liturgias (folha no celular, janela no tablet e no desktop).",
+    "Tocar na linha <b>abre a música</b> (a cifra), como hoje. O play e o ⋯ têm ações próprias e não abrem a música.",
+  ] : ["Aproximação da lista de hoje, para comparar."];
+  return `<div class="nc"><h2>Nesta tela</h2><ul>${by[view].map(x => `<li>${x}</li>`).join("")}</ul></div>
+    <div class="nc"><h2>${S.item === "new" ? "Item da lista (proposta)" : "Item da lista (atual)"}</h2><ul>${item.map(x => `<li>${x}</li>`).join("")}</ul></div>
+    <div class="nc"><h2>Adicionar a uma liturgia</h2><ul><li>Pelo menu ⋯ da música, sempre uma liturgia por vez.</li><li>Lista só as <b>próximas</b> liturgias; a música entra no <b>fim</b> e a ordem se ajusta na própria liturgia.</li><li>Quem já tem a música aparece como “Já está”. O aviso traz “Desfazer”.</li></ul></div>
+    <div class="nc"><h2>É de exemplo</h2><p>Títulos, artistas, tons e datas de uso vêm do acervo local. Tags, referências e arranjos extras foram inventados. Cerca de metade das músicas fica sem classificação de propósito. Visual espelhado do app (cores, fontes, botões, etiquetas e navegação).</p></div>`;
+}
+
+/* ---------- render ---------- */
+function render(opts = {}) {
+  const home = isHome();
+  const dev = $("#device"); dev.dataset.dev = S.dev;
+  $("#qx").innerHTML = ic("x", 16);
+  $("#search").classList.toggle("has", !!S.q);
+  const sc = $("#body"), top = sc.scrollTop;
+  $("#top").innerHTML = topView();
+  $("#hero").innerHTML = heroView();
+  $("#q").placeholder = placeholder();
+  $("#view").innerHTML = home ? homeView() : listView();
+  sc.scrollTop = opts.resetScroll ? 0 : top;
+  const sbOld = $("#sheet .sb"), sbTop = sbOld ? sbOld.scrollTop : 0;
+  $("#sheet").innerHTML = sheetView();
+  const sbNew = $("#sheet .sb"); if (sbNew) sbNew.scrollTop = sbTop;
+  $("#side").innerHTML = navItems(); $("#bnav").innerHTML = navItems();
+  $("#fab").innerHTML = fabView();
+  $("#notes").innerHTML = notes();
+  ["dev", "item"].forEach(k => document.querySelectorAll(`#c-${k} button`).forEach(b => b.setAttribute("aria-pressed", b.dataset.v === S[k])));
+  renderToast();
+}
+
+/* ---------- eventos ---------- */
+function setSeg(id, key) { $(id).addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S[key] = b.dataset.v; S.menu = null; S.gpop = null; S.sheet = null; render(); }); }
+setSeg("#c-dev", "dev"); setSeg("#c-item", "item");
+$("#reset").addEventListener("click", () => { baseStyle(); saveStyle(); try { localStorage.removeItem("musicas-proto-ordem"); } catch (e) {} const k = {dev: S.dev, item: S.item}; freshState(k, true); $("#q").value = ""; render({resetScroll: true}); });
+function scrollToList() {
+  const el = document.getElementById("lista"), sc = $("#body");
+  if (el) sc.scrollTo({top: el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 56, behavior: "smooth"});
+}
+$("#q").addEventListener("input", e => {
+  const first = !S.q.trim();
+  S.q = e.target.value; S.menu = null; S.gpop = null; S.sheet = null;
+  render(S.cat ? {resetScroll: true} : {});
+  if (!S.cat && first && S.q.trim()) scrollToList(); // na home, a primeira letra digitada leva até a lista
+});
+$("#qx").addEventListener("click", () => { S.q = ""; $("#q").value = ""; $("#q").focus(); render(S.cat ? {resetScroll: true} : {}); });
+function goHome() { S.q = ""; $("#q").value = ""; S.cat = null; S.pop = false; S.gpop = null; S.sheet = null; clearFilters(); render({resetScroll: true}); }
+
+function addToService(svcId, id) {
+  const v = S.services.find(x => x.id === svcId); if (!v) return;
+  if (!v.songs.includes(id)) v.songs.push(id);
+  S.menu = null; S.sheet = null;
+  toast(`“${byId(id).title}” entrou na liturgia de ${v.date.replace("Dom ", "")} (${v.songs.length}ª)`, {id, svc: svcId});
+}
+document.addEventListener("click", e => {
+  let again = false;
+  if (!e.target.closest(".menuw") && S.menu !== null) { S.menu = null; again = true; }
+  if (!e.target.closest(".gpw") && S.gpop !== null) { S.gpop = null; again = true; }
+  const el = e.target.closest("[data-act]");
+  if (!el || !$("#device").contains(el)) { if (again) render(); return; }
+  if (e.target.closest("[data-stop]") && !["color", "pat", "img"].includes(el.dataset.act)) { if (again) render(); return; }
+  const a = el.dataset.act, d = el.dataset, id = d.id !== undefined ? +d.id : null;
+  switch (a) {
+    case "cat": S.cat = {g: d.g, n: d.n}; clearFilters(); S.pop = false; S.gpop = null; render({resetScroll: true}); return;
+    case "back": goHome(); return;
+    case "open": S.menu = null; toast(`Abriria a cifra de “${byId(id).title}”`); render(); return;
+    case "menu": S.menu = S.menu === id ? null : id; render(); return;
+    case "undo": { const u = S.toast && S.toast.undo; if (u) { const v = S.services.find(x => x.id === u.svc); if (v) { const i = v.songs.indexOf(u.id); if (i >= 0) v.songs.splice(i, 1); } } S.toast = null; render(); return; }
+    case "svcopen": S.menu = null; S.gpop = null; S.sheet = {type: "svc", id}; render(); return;
+    case "svcpick": addToService(d.s, S.sheet.id); render(); return;
+    case "svcnew": S.sheet = null; toast("Criaria uma nova liturgia com esta música (fora do protótipo)"); render(); return;
+    case "media": toast(`Tocaria a referência de ${d.k}: ${byId(id).title}`); return;
+    case "stub": toast(d.k + " (não faz parte do protótipo)"); S.menu = null; render(); return;
+    case "gpop": if (mobile()) S.sheet = {type: "group", g: d.g}; else S.gpop = S.gpop === d.g ? null : d.g; render(); return;
+    case "gclear": S.filt[d.g].clear(); S.none[d.g] = false; render(); return;
+    case "letter": { const el2 = document.getElementById("bl-" + d.l), sc = $("#body"); if (el2) sc.scrollTo({top: el2.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 56, behavior: "smooth"}); return; }
+    case "sortopen": if (mobile()) S.sheet = {type: "sort"}; else S.gpop = S.gpop === "__sort" ? null : "__sort"; render(); return;
+    case "sortpick": pickSort(d.k); render(); return;
+    case "sheetclose": S.sheet = null; render(); return;
+    case "filt": { const set = S.filt[d.g], g = gOf(d.g); if (set.has(d.n)) set.delete(d.n); else { if (g.mode === "single") set.clear(); set.add(d.n); } S.none[d.g] = false; render(); return; }
+    case "none": S.none[d.g] = !S.none[d.g]; if (S.none[d.g]) S.filt[d.g].clear(); render(); return;
+    case "mode": S.modeAll[d.g] = d.v === "1"; render(); return;
+    case "clear": clearFilters(); render(); return;
+    case "pers": S.pop = !S.pop; render(); return;
+    case "color": { const st = STYLE[sk(S.cat.g, S.cat.n)]; st.color = d.c; saveStyle(); render(); return; }
+    case "pat": { const st = STYLE[sk(S.cat.g, S.cat.n)]; st.pat = d.p; st.img = ""; saveStyle(); render(); return; }
+    case "img": { const st = STYLE[sk(S.cat.g, S.cat.n)]; st.img = ($("#imgurl").value || "").trim(); saveStyle(); render(); return; }
+  }
+});
+document.addEventListener("change", e => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+});
+document.addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches('.c-title[role=link]')) { e.preventDefault(); e.target.click(); }
+  if (e.key === "Escape" && (S.menu !== null || S.pop || S.gpop !== null || S.sheet)) { S.menu = null; S.pop = false; S.gpop = null; S.sheet = null; render(); }
+});
+
+loadStyle(); freshState(); render();
+</script>
+</body>
+</html>
