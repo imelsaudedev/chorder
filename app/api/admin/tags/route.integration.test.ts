@@ -183,3 +183,48 @@ describe('POST /api/admin/tags/merge', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('PATCH /api/admin/tags/:id — identidade visual', () => {
+  const ctx = (id: number) => ({ params: Promise.resolve({ id: String(id) }) });
+
+  it('grava descrição, cor, padrão e imagem sem exigir o nome', async () => {
+    const group = await createGroup('Ocasião');
+    const tag = await prisma.tag.create({ data: { name: 'Natal', tagGroupId: group.id } });
+
+    const res = await PATCH(
+      patchReq(tag.id, { description: 'O nascimento de Jesus', color: '#dc2626', pattern: 'stars', imageUrl: 'https://exemplo.com/natal.jpg' }) as any,
+      ctx(tag.id)
+    );
+    const data = await res.json();
+    expect(res.status).toBe(200);
+    expect(data).toMatchObject({ name: 'Natal', description: 'O nascimento de Jesus', color: '#dc2626', pattern: 'stars', imageUrl: 'https://exemplo.com/natal.jpg' });
+  });
+
+  it('null limpa o campo e o que não foi enviado fica como estava', async () => {
+    const group = await createGroup('Ocasião');
+    const tag = await prisma.tag.create({ data: { name: 'Natal', tagGroupId: group.id, color: '#dc2626', pattern: 'stars' } });
+
+    const res = await PATCH(patchReq(tag.id, { color: null }) as any, ctx(tag.id));
+    const data = await res.json();
+    expect(data.color).toBeNull();
+    expect(data.pattern).toBe('stars');
+  });
+
+  it('rejeita cor, padrão ou imagem inválidos (400)', async () => {
+    const group = await createGroup('Ocasião');
+    const tag = await prisma.tag.create({ data: { name: 'Natal', tagGroupId: group.id } });
+
+    for (const body of [{ color: 'vermelho' }, { pattern: 'zigzag' }, { imageUrl: 'javascript:alert(1)' }]) {
+      const res = await PATCH(patchReq(tag.id, body) as any, ctx(tag.id));
+      expect(res.status).toBe(400);
+    }
+  });
+
+  it('rejeita corpo sem nada para atualizar (400)', async () => {
+    const group = await createGroup('Ocasião');
+    const tag = await prisma.tag.create({ data: { name: 'Natal', tagGroupId: group.id } });
+
+    const res = await PATCH(patchReq(tag.id, {}) as any, ctx(tag.id));
+    expect(res.status).toBe(400);
+  });
+});

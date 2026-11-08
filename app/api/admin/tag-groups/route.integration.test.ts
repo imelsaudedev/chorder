@@ -179,3 +179,39 @@ describe('POST /api/admin/tag-groups/reorder', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('apresentação do grupo na tela de Músicas', () => {
+  it('um grupo novo nasce como filtro, múltipla escolha e não proposto', async () => {
+    const req = new Request('http://localhost/api/admin/tag-groups', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Assunto' }),
+    });
+    const data = await (await POST(req as any)).json();
+    expect(data).toMatchObject({ presentation: 'FILTER', selection: 'MULTI', isProposed: false, description: null });
+  });
+
+  it('cria já com apresentação, cardinalidade, descrição e selo "em construção"', async () => {
+    const req = new Request('http://localhost/api/admin/tag-groups', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Atmosfera', presentation: 'SHELF', selection: 'SINGLE', isProposed: true, description: 'Como a música faz a congregação se sentir?' }),
+    });
+    const res = await POST(req as any);
+    expect(res.status).toBe(201);
+    expect(await res.json()).toMatchObject({ presentation: 'SHELF', selection: 'SINGLE', isProposed: true, description: 'Como a música faz a congregação se sentir?' });
+  });
+
+  it('PATCH altera só o que foi enviado', async () => {
+    const group = await prisma.tagGroup.create({ data: { name: 'Tipo', color: '#7c3aed', presentation: 'FILTER' } });
+    const res = await PATCH(patchReq(group.id, { presentation: 'FEATURED' }) as any, { params: Promise.resolve({ id: String(group.id) }) });
+    const data = await res.json();
+    expect(data).toMatchObject({ name: 'Tipo', color: '#7c3aed', presentation: 'FEATURED', selection: 'MULTI' });
+  });
+
+  it('rejeita apresentação e cardinalidade desconhecidas (400)', async () => {
+    const group = await prisma.tagGroup.create({ data: { name: 'Tipo' } });
+    for (const body of [{ presentation: 'GRID' }, { selection: 'TWO' }, { isProposed: 'sim' }]) {
+      const res = await PATCH(patchReq(group.id, body) as any, { params: Promise.resolve({ id: String(group.id) }) });
+      expect(res.status).toBe(400);
+    }
+  });
+});

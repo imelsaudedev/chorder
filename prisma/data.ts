@@ -183,34 +183,62 @@ export async function retrieveSongs({
 
   if (withUsageStats) {
     const songIds = songs.map((s) => s.id).filter((id): id is number => id !== undefined);
-    if (songIds.length > 0) {
-      const serviceArrangements = await prisma.songArrangement.findMany({
-        where: {
-          songId: { in: songIds },
-          isServiceArrangement: true,
-          isDeleted: false,
-          serviceUnit: { service: { isDeleted: false } },
-        },
-        select: {
-          songId: true,
-          serviceUnit: { select: { service: { select: { date: true } } } },
-        },
-      });
-      const lastUsedMap = new Map<number, Date>();
-      for (const sa of serviceArrangements) {
-        const date = sa.serviceUnit?.service?.date;
-        if (!date) continue;
-        const existing = lastUsedMap.get(sa.songId);
-        if (!existing || date > existing) lastUsedMap.set(sa.songId, date);
-      }
-      songs = songs.map((song) => ({
-        ...song,
-        lastUsedAt: (song.id !== undefined ? lastUsedMap.get(song.id) : undefined) ?? null,
-      }));
-    }
+    const usage = await retrieveSongUsage(songIds);
+    songs = songs.map((song) => {
+      const stat = song.id !== undefined ? usage.get(song.id) : undefined;
+      return { ...song, lastUsedAt: stat?.lastUsedAt ?? null, usageCount: stat?.usageCount ?? 0 };
+    });
   }
 
   return songs;
+}
+
+// Último uso e quantidade de usos de cada música, lidos de Service.plan (a fonte
+// de verdade das liturgias; a tabela ServiceUnit não é mais escrita — ver
+// docs/arquitetura-plano-culto.md). Mesma fonte de retrieveStats.
+export async function retrieveSongUsage(
+  songIds: number[]
+): Promise<Map<number, { lastUsedAt: Date; usageCount: number }>> {
+  const usage = new Map<number, { lastUsedAt: Date; usageCount: number }>();
+  if (songIds.length === 0) return usage;
+
+  const services = await prisma.service.findMany({
+    where: { isDeleted: false },
+    select: { date: true, plan: true },
+  });
+  const servicesArrangementIds = services.map((service) => {
+    const ids = new Set<number>();
+    for (const section of (service.plan as ServicePlan | null)?.sections ?? []) {
+      for (const unit of section.units) {
+        if (unit.type === "SONG" && unit.arrangementId != null) ids.add(unit.arrangementId);
+      }
+    }
+    return ids;
+  });
+  const allArrangementIds = new Set(servicesArrangementIds.flatMap((ids) => [...ids]));
+  if (allArrangementIds.size === 0) return usage;
+
+  const arrangements = await prisma.songArrangement.findMany({
+    where: { id: { in: [...allArrangementIds] }, songId: { in: songIds } },
+    select: { id: true, songId: true },
+  });
+  const songByArrangementId = new Map(arrangements.map((a) => [a.id, a.songId]));
+
+  services.forEach((service, index) => {
+    const songsInService = new Set<number>();
+    for (const arrangementId of servicesArrangementIds[index]) {
+      const songId = songByArrangementId.get(arrangementId);
+      if (songId !== undefined) songsInService.add(songId);
+    }
+    for (const songId of songsInService) {
+      const current = usage.get(songId);
+      usage.set(songId, {
+        lastUsedAt: !current || service.date > current.lastUsedAt ? service.date : current.lastUsedAt,
+        usageCount: (current?.usageCount ?? 0) + 1,
+      });
+    }
+  });
+  return usage;
 }
 
 export async function archiveSong(slug: string) {
@@ -1390,8 +1418,20 @@ export async function retrieveTagGroups(): Promise<ClientTagGroup[]> {
       id: true,
       name: true,
       color: true,
+      description: true,
+      presentation: true,
+      selection: true,
+      isProposed: true,
       tags: {
-        select: { id: true, name: true, _count: { select: { songs: true } } },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          color: true,
+          pattern: true,
+          imageUrl: true,
+          _count: { select: { songs: true } },
+        },
         orderBy: { name: "asc" },
       },
     },
