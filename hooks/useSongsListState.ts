@@ -26,6 +26,7 @@ export default function useSongsListState() {
 
   return {
     ...state,
+    setQuery: (query: string) => update({ query }),
     setTagIds: (tagIds: number[]) => update({ tagIds }),
     setSort: (sort: SongsListState["sort"]) => update({ sort }),
   };
