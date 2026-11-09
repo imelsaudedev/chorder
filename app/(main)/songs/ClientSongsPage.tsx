@@ -2,6 +2,7 @@
 
 import { useFetchTagGroups } from "@/app/api/api-client";
 import FloatingAddLink from "@/components/common/FloatingAddLink";
+import SongsHome from "@/components/song/Cover/SongsHome";
 import SongsFilterBar from "@/components/song/SongsFilterBar";
 import SongMetaModal from "@/components/song/SongMetaModal";
 import ClientSongList from "@/components/song/SongList/ClientSongList";
@@ -15,9 +16,9 @@ import { useEffect, useState } from "react";
 
 const SORT_STORAGE_KEY = "musicas:sort";
 
-type ClientSongsPageProps = { query: string };
+type ClientSongsPageProps = { query: string; home?: boolean };
 
-export default function ClientSongsPage({ query }: ClientSongsPageProps) {
+export default function ClientSongsPage({ query, home = false }: ClientSongsPageProps) {
   const t = useTranslations("Messages");
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
@@ -42,6 +43,7 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
 
   return (
     <>
+      {home && <SongsHome tagGroups={tagGroups} />}
       <SongsFilterBar
         tagGroups={tagGroups}
         selectedTagIds={selectedTagIds}

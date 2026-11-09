@@ -17,6 +17,8 @@ type SongsFilterBarProps = {
   onQueryChange: (query: string) => void;
   sort: SongSort;
   onSortChange: (sort: SongSort) => void;
+  /** Página de uma categoria: a busca diz "Buscar em <categoria>". */
+  scopeLabel?: string;
 };
 
 /**
@@ -93,10 +95,13 @@ export default function SongsFilterBar({
   onQueryChange,
   sort,
   onSortChange,
+  scopeLabel,
 }: SongsFilterBarProps) {
   const { ref, hidden, stuck } = useStickyBar();
   const selectedGroupName = tagGroups.find((g) => g.tags.some((t) => selectedTagIds.includes(t.id)))?.name;
-  const placeholder = selectedGroupName
+  const placeholder = scopeLabel
+    ? `Buscar em ${scopeLabel}`
+    : selectedGroupName
     ? `Buscar em ${
         tagGroups
           .flatMap((g) => g.tags)
