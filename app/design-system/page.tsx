@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import Tag from "@/components/common/Tag";
+import { readableTint } from "@/lib/color-contrast";
 import Text from "@/components/common/Text";
 import { cn } from "@/lib/utils";
 import {
@@ -283,6 +284,7 @@ export default function DesignSystemPage() {
                   <Button variant="secondary"><Music size={15} />Secondary</Button>
                   <Button variant="outline"><Upload size={15} />Outline</Button>
                   <Button variant="ghost"><Settings size={15} />Ghost</Button>
+                  <Button variant="soft"><Settings size={15} />Soft</Button>
                   <Button variant="link"><ExternalLink size={15} />Link</Button>
                   <Button variant="destructive"><Trash2 size={15} />Destructive</Button>
                 </div>
@@ -316,6 +318,7 @@ export default function DesignSystemPage() {
                     ["secondary", "bg-secondary text-secondary-foreground"],
                     ["outline", "border bg-background hover:bg-accent"],
                     ["ghost", "hover:bg-accent hover:text-accent-foreground"],
+                    ["soft", "bg-muted/[.22] hover:bg-muted/[.38]"],
                     ["destructive", "bg-destructive text-white"],
                   ].map(([v, cls]) => (
                     <div key={v} className="flex gap-2">
@@ -539,11 +542,18 @@ export default function DesignSystemPage() {
               <div>
                 <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-4">Cor dinâmica (vinda do banco)</p>
                 <div className="flex flex-wrap gap-2 items-center">
-                  {["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"].map((color) => (
-                    <Tag key={color} label="Adoração" color={color} />
+                  {["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#eab308", "#475569"].map((color) => (
+                    <div key={color} className="flex flex-col items-start gap-1.5">
+                      <Tag label="Adoração" color={color} size="sm" />
+                      <code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">
+                        contraste {readableTint(color).ratio.toFixed(1)}
+                      </code>
+                    </div>
                   ))}
                 </div>
-                <p className="text-xs text-zinc-400 mt-2">Fundo, texto e borda gerados automaticamente com opacidade.</p>
+                <p className="text-xs text-zinc-400 mt-2">
+                  Fundo = tom claro da cor; texto = a mesma cor escurecida até o contraste chegar a 4,5 (<code>lib/color-contrast.ts</code>). Sem borda.
+                </p>
               </div>
 
               <div>
