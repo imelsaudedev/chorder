@@ -83,6 +83,8 @@ type SongListEntryProps = {
   song: ClientSong;
   query?: string;
   onSelected?: (song: ClientSong) => void;
+  /** Dentro do cartão da lista (só no item novo). */
+  flush?: boolean;
 };
 
 /** Item do seletor de músicas do editor de culto (mantém o layout antigo). */
@@ -269,5 +271,5 @@ function PickerSongEntry({
  */
 export default function SongListEntry(props: SongListEntryProps) {
   if (props.onSelected) return <PickerSongEntry {...props} />;
-  return <SongRow song={props.song} query={props.query} />;
+  return <SongRow song={props.song} query={props.query} flush={props.flush} />;
 }

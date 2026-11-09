@@ -71,7 +71,16 @@ export function LastUsed({ date, className }: { date: Date | string | null; clas
  *   ≥860px   — seis colunas: título | letra | categorias | uso | referências | ⋯
  * Alinhado pelo topo. Tocar na linha abre a música.
  */
-export default function SongRow({ song, query = "" }: { song: ClientSong; query?: string }) {
+export default function SongRow({
+  song,
+  query = "",
+  flush = false,
+}: {
+  song: ClientSong;
+  query?: string;
+  /** Dentro do cartão da lista: sem margem negativa; o respiro lateral acompanha o cabeçalho. */
+  flush?: boolean;
+}) {
   const [metaOpen, setMetaOpen] = useState(false);
   const { updateSong } = useUpdateSong(song.slug);
   const { mutate } = useSWRConfig();
@@ -94,9 +103,10 @@ export default function SongRow({ song, query = "" }: { song: ClientSong; query?
     <>
       <div
         className={cn(
-          "group relative grid items-start gap-x-4 px-3 -mx-3 py-4 transition-colors hover:bg-muted/40",
+          "group relative grid items-start gap-x-4 py-4 transition-colors hover:bg-muted/40",
+          flush ? "px-4 @[560px]:px-5 @[860px]:px-6" : "px-3 -mx-3 @[560px]:px-4 @[560px]:-mx-4",
           "grid-cols-[minmax(0,1fr)_3.5rem_2.5rem] [grid-template-areas:'id_play_act']",
-          "@[560px]:px-4 @[560px]:-mx-4 @[560px]:gap-x-5",
+          "@[560px]:gap-x-5",
           "@[560px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_3.5rem_2.5rem]",
           "@[560px]:[grid-template-areas:'id_lyric_play_act'_'id_tags_play_act']",
           "@[860px]:grid-cols-[minmax(0,2.3fr)_minmax(0,2.4fr)_minmax(0,1.6fr)_11rem_3.5rem_2.5rem]",

@@ -1,10 +1,11 @@
 "use client";
 
-import { useFetchSongs, useFetchTagGroups } from "@/app/api/api-client";
+import { useFetchTagGroups } from "@/app/api/api-client";
 import FloatingAddLink from "@/components/common/FloatingAddLink";
 import TagFilter from "@/components/song/TagFilter";
 import SongMetaModal from "@/components/song/SongMetaModal";
 import ClientSongList from "@/components/song/SongList/ClientSongList";
+import useSongsListState from "@/hooks/useSongsListState";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -16,10 +17,9 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  // Categorias e ordenação ficam na URL: ao abrir uma música e voltar, a lista retoma como estava.
+  const { tagIds: selectedTagIds, setTagIds: setSelectedTagIds, sort } = useSongsListState();
   const { tagGroups } = useFetchTagGroups();
-  const { songs } = useFetchSongs({ query, tagIds: selectedTagIds, limitLines: 6, forceIncludeFirstLine: true, withUsageStats: true });
-  const songCount = songs?.length ?? null;
 
   return (
     <>
@@ -29,11 +29,10 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
             tagGroups={tagGroups}
             selectedTagIds={selectedTagIds}
             onChange={setSelectedTagIds}
-            songCount={songCount}
           />
         </div>
       )}
-      <ClientSongList query={query} tagIds={selectedTagIds} />
+      <ClientSongList query={query} tagIds={selectedTagIds} sort={sort} />
 
       <FloatingAddLink label={t("newSong")} onClick={() => setModalOpen(true)} />
 
