@@ -1,6 +1,5 @@
 "use client";
 
-import InitialsNav from "@/components/song/SongList/InitialsNav";
 import SongListEntry from "@/components/song/SongListEntry";
 import {
   clearSongsListMemory,
@@ -99,7 +98,6 @@ export default function SongsTable({ songs, sort, query = "" }: SongsTableProps)
   let lastInitial: string | null = null;
   return (
     <>
-      {withBands && <InitialsNav existingInitials={initials} />}
       <section
         className="@container overflow-hidden rounded-xl border bg-background shadow-xs max-sm:-mx-5 max-sm:rounded-none max-sm:border-x-0"
         onClickCapture={rememberOnOpen}

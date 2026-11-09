@@ -1,7 +1,6 @@
 import Heading from "@/components/common/Heading";
 import Main from "@/components/common/Main";
 import ScrollToTopButton from "@/components/common/ScrollToTopButton";
-import UrlSearchBar from "@/components/common/SearchBar/UrlSearchBar";
 import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
 import ClientSongsPage from "./ClientSongsPage";
@@ -29,9 +28,6 @@ export default async function SongListPage(props: SongListPageProps) {
       </div>
 
       <Main className="max-w-full">
-        <div className="mb-4">
-          <UrlSearchBar />
-        </div>
         <ClientSongsPage query={query} />
       </Main>
 
