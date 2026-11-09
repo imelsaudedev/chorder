@@ -7,7 +7,7 @@ export default function ContentWrapper({ children }: { children: React.ReactNode
   const pathParts = pathname.split("/");
   const isFullPage = pathname.includes("/edit") || pathname.includes("/new") ||
     (pathname.startsWith("/admin/templates/") && pathParts.length > 3);
-  const isListPage = pathParts.length === 2;
+  const isListPage = pathParts.length === 2 || pathname.startsWith("/songs/categoria/");
 
   const marginClass = isFullPage ? "" : isListPage ? "sm:ml-20 pb-14 sm:pb-0" : "lg:ml-20";
 

@@ -17,6 +17,8 @@ type SongsFilterBarProps = {
   onQueryChange: (query: string) => void;
   sort: SongSort;
   onSortChange: (sort: SongSort) => void;
+  /** Página de uma categoria: a busca diz "Buscar em <categoria>". */
+  scopeLabel?: string;
 };
 
 /**
@@ -31,6 +33,9 @@ type SongsFilterBarProps = {
  */
 function useStickyBar() {
   const ref = useRef<HTMLDivElement>(null);
+  // Marca a posição natural da barra: "grudada" = essa marca já passou do topo. Sem isso,
+  // na home (barra no meio da página) ela esconderia antes de grudar e invadiria o conteúdo de cima.
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const [hidden, setHidden] = useState(false);
   const [stuck, setStuck] = useState(false);
 
@@ -43,10 +48,11 @@ function useStickyBar() {
       const y = window.scrollY;
       const d = y - last;
       last = y;
-      setStuck(y > 60);
-      if (desktop()) return setHidden(false);
+      const isStuck = (sentinelRef.current?.getBoundingClientRect().top ?? 1) <= 0;
+      setStuck(isStuck);
+      if (desktop() || !isStuck) return setHidden(false);
       if (performance.now() < ignoreUntil) return;
-      if (d > 6 && y > 120) setHidden(true);
+      if (d > 6) setHidden(true);
       else if (d < -6) setHidden(false);
     }
     // Pulo de letra: a faixa deve ficar no topo, com a barra escondida.
@@ -82,7 +88,7 @@ function useStickyBar() {
     []
   );
 
-  return { ref, hidden, stuck };
+  return { ref, sentinelRef, hidden, stuck };
 }
 
 export default function SongsFilterBar({
@@ -93,10 +99,13 @@ export default function SongsFilterBar({
   onQueryChange,
   sort,
   onSortChange,
+  scopeLabel,
 }: SongsFilterBarProps) {
-  const { ref, hidden, stuck } = useStickyBar();
+  const { ref, sentinelRef, hidden, stuck } = useStickyBar();
   const selectedGroupName = tagGroups.find((g) => g.tags.some((t) => selectedTagIds.includes(t.id)))?.name;
-  const placeholder = selectedGroupName
+  const placeholder = scopeLabel
+    ? `Buscar em ${scopeLabel}`
+    : selectedGroupName
     ? `Buscar em ${
         tagGroups
           .flatMap((g) => g.tags)
@@ -119,6 +128,8 @@ export default function SongsFilterBar({
   );
 
   return (
+    <>
+    <div ref={sentinelRef} aria-hidden className="h-0" />
     <div
       ref={ref}
       data-songs-filter-bar
@@ -131,5 +142,6 @@ export default function SongsFilterBar({
       </div>
       <div className="flex items-center gap-2 sm:ml-auto sm:justify-end">{tools}</div>
     </div>
+    </>
   );
 }
