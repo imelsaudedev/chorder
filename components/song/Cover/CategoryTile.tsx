@@ -15,7 +15,7 @@ export default function CategoryTile({ tagId, name, color, songCount, className 
   return (
     <Link
       href={`/songs/categoria/${tagId}`}
-      className={`relative isolate flex min-h-24 flex-col justify-end overflow-hidden rounded-lg p-3 active:scale-[.98] ${className}`}
+      className={`relative isolate flex min-h-28 flex-col justify-end overflow-hidden rounded-lg p-3 active:scale-[.98] ${className}`}
       style={{ background, color: theme.ink }}
     >
       <span

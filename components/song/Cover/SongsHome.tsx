@@ -1,11 +1,14 @@
 import { ClientTagGroup } from "@/prisma/models";
 import CategoryTile from "./CategoryTile";
 
+/** Largura do card nas telas maiores: igual na grade (destaque) e na prateleira. */
+const TILE_W = "sm:w-[180px]";
+
 type SongsHomeProps = { tagGroups: ClientTagGroup[] };
 
 function Section({ group, children }: { group: ClientTagGroup; children: React.ReactNode }) {
   return (
-    <section className="mb-7 mt-5">
+    <section className="mb-8 mt-6">
       <h2 className="flex items-center gap-2 font-display text-xl font-semibold leading-tight tracking-tight text-primary">
         {group.name}
         {group.isProposed && (
@@ -14,8 +17,8 @@ function Section({ group, children }: { group: ClientTagGroup; children: React.R
           </span>
         )}
       </h2>
-      {group.description && <p className="mb-3 mt-0.5 text-sm text-muted-foreground">{group.description}</p>}
-      {children}
+      {group.description && <p className="mt-0.5 text-sm text-muted-foreground">{group.description}</p>}
+      <div className="mt-3">{children}</div>
     </section>
   );
 }
@@ -44,15 +47,15 @@ export default function SongsHome({ tagGroups }: SongsHomeProps) {
     <>
       {featured.map((g) => (
         <Section key={g.id} group={g}>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
-            {withSongs(g).map((t) => tile(g, t, "min-h-28"))}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,180px)]">
+            {withSongs(g).map((t) => tile(g, t))}
           </div>
         </Section>
       ))}
       {shelves.map((g) => (
         <Section key={g.id} group={g}>
-          <div className="no-scrollbar -mx-5 flex snap-x snap-proximity gap-2.5 overflow-x-auto px-5 pb-2 sm:-mx-8 sm:px-8 lg:-mx-14 lg:px-14">
-            {withSongs(g).map((t) => tile(g, t, "w-[156px] shrink-0 snap-start"))}
+          <div className="no-scrollbar -mx-5 flex snap-x snap-proximity scroll-px-5 gap-3 overflow-x-auto px-5 pb-2 sm:-mx-8 sm:scroll-px-8 sm:px-8 lg:-mx-14 lg:scroll-px-14 lg:px-14">
+            {withSongs(g).map((t) => tile(g, t, `w-[160px] shrink-0 snap-start ${TILE_W}`))}
           </div>
         </Section>
       ))}
