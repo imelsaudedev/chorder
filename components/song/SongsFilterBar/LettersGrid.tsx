@@ -27,7 +27,14 @@ export default function LettersGrid() {
               <a
                 key={l}
                 href={`#${l}`}
-                onClick={() => setOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setOpen(false);
+                  // Espera o popover soltar a trava de rolagem antes de rolar.
+                  setTimeout(() => {
+                    document.getElementById(l)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }, 50);
+                }}
                 className="flex size-8 items-center justify-center rounded text-sm font-semibold uppercase text-secondary hover:bg-muted"
               >
                 {l}
