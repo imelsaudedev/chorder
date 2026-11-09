@@ -1,5 +1,6 @@
 "use client";
 
+import LetterRail from "@/components/song/SongList/LetterRail";
 import SongListEntry from "@/components/song/SongListEntry";
 import {
   clearSongsListMemory,
@@ -11,7 +12,7 @@ import { SongSort, initialOf, sortSongs } from "@/lib/songs-list-state";
 import { ClientSong } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Fragment, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 // Respiro lateral do cartão: o mesmo do item (SongRow flush), para as colunas alinharem.
 const PAD = "px-4 @[560px]:px-5 @[860px]:px-6";
@@ -35,13 +36,14 @@ function ColumnHeader({ count }: { count: number }) {
   );
 }
 
-/** Faixa contínua de ponta a ponta com a letra do grupo (só na ordem por título). */
+/** Faixa contínua com a letra do grupo (só na ordem por título); fica fixa logo abaixo da barra de filtros. */
 function LetterBand({ letter }: { letter: string }) {
   return (
     <div
       id={letter}
       data-letter-band
-      className={`flex h-8 items-center bg-zinc-50 text-sm font-semibold uppercase text-secondary scroll-mt-4 ${PAD}`}
+      style={{ top: "var(--songs-sticky-top, 0px)" }}
+      className={`sticky z-20 flex h-8 items-center bg-zinc-50 text-sm font-semibold uppercase text-secondary ${PAD}`}
     >
       {letter.toUpperCase()}
     </div>
@@ -95,26 +97,33 @@ export default function SongsTable({ songs, sort, query = "" }: SongsTableProps)
     return <p className="py-8 text-center text-muted-foreground">{t("noSongs")}</p>;
   }
 
-  let lastInitial: string | null = null;
+  // Um bloco por letra: o sticky de uma faixa só vale dentro do seu bloco, assim a seguinte empurra a anterior.
+  const groups: { initial: string | null; songs: ClientSong[] }[] = [];
+  for (const song of sorted) {
+    const initial = withBands ? initialOf(song.title) : null;
+    const last = groups[groups.length - 1];
+    if (last && last.initial === initial) last.songs.push(song);
+    else groups.push({ initial, songs: [song] });
+  }
+
   return (
     <>
+      {withBands && <LetterRail initials={groups.map((g) => g.initial ?? "")} />}
+      {/* overflow-clip (e não hidden): hidden criaria um contêiner de rolagem e quebraria o sticky */}
       <section
-        className="@container overflow-hidden rounded-xl border bg-background shadow-xs max-sm:-mx-5 max-sm:rounded-none max-sm:border-x-0"
+        className="@container overflow-clip rounded-xl border bg-background shadow-xs max-sm:-mx-5 max-sm:rounded-none max-sm:border-x-0"
         onClickCapture={rememberOnOpen}
       >
         <div className="divide-y divide-border">
           <ColumnHeader count={sorted.length} />
-          {sorted.map((song) => {
-            const initial = withBands ? initialOf(song.title) : null;
-            const band = initial !== null && initial !== lastInitial ? <LetterBand letter={initial} /> : null;
-            lastInitial = initial;
-            return (
-              <Fragment key={`song-${song.slug}`}>
-                {band}
-                <SongListEntry song={song} query={query} flush />
-              </Fragment>
-            );
-          })}
+          {groups.map((g) => (
+            <section key={g.initial ?? "all"} className="divide-y divide-border">
+              {g.initial !== null && <LetterBand letter={g.initial} />}
+              {g.songs.map((song) => (
+                <SongListEntry key={`song-${song.slug}`} song={song} query={query} flush />
+              ))}
+            </section>
+          ))}
         </div>
       </section>
     </>

@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { jumpToLetter } from "@/lib/songs-list-sticky";
 import { Letters } from "lucide-react";
 import { useState } from "react";
 
@@ -16,7 +17,7 @@ export default function LettersGrid() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="soft" size="icon" className="size-8" aria-label="Ir para a letra">
+        <Button type="button" variant="soft" size="icon" className="size-8 max-sm:hidden" aria-label="Ir para a letra">
           <Letters />
         </Button>
       </PopoverTrigger>
@@ -36,9 +37,7 @@ export default function LettersGrid() {
                   e.preventDefault();
                   setOpen(false);
                   // Espera o popover soltar a trava de rolagem antes de rolar.
-                  setTimeout(() => {
-                    document.getElementById(l)?.scrollIntoView({ behavior: "instant", block: "start" });
-                  }, 50);
+                  setTimeout(() => jumpToLetter(l), 50);
                 }}
                 className="flex size-8 items-center justify-center rounded text-sm font-semibold uppercase text-secondary hover:bg-muted"
               >
