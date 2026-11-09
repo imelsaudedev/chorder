@@ -76,6 +76,7 @@ export default function SongsTable({ songs, sort, query = "" }: SongsTableProps)
   }, [sorted, withBands]);
 
   // Volta à posição de rolagem de onde a pessoa saiu (uma vez).
+  const listRef = useRef<HTMLElement>(null);
   const restored = useRef(false);
   useEffect(() => {
     if (restored.current || sorted.length === 0) return;
@@ -108,10 +109,14 @@ export default function SongsTable({ songs, sort, query = "" }: SongsTableProps)
 
   return (
     <>
-      {withBands && <LetterRail initials={groups.map((g) => g.initial ?? "")} />}
+      {withBands && <LetterRail initials={groups.map((g) => g.initial ?? "")} listRef={listRef} />}
       {/* overflow-clip (e não hidden): hidden criaria um contêiner de rolagem e quebraria o sticky */}
       <section
-        className="@container overflow-clip rounded-xl border bg-background shadow-xs max-sm:-mx-5 max-sm:rounded-none max-sm:border-x-0"
+        ref={listRef}
+        // no celular, com o trilho de letras, reserva a faixa da direita para ele não cobrir os botões de ação
+        className={`@container overflow-clip rounded-xl border bg-background shadow-xs max-sm:-mx-5 max-sm:rounded-none max-sm:border-x-0 ${
+          withBands ? "max-sm:pr-6" : ""
+        }`}
         onClickCapture={rememberOnOpen}
       >
         <div className="divide-y divide-border">
