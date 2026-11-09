@@ -16,7 +16,7 @@ import {
   AlertCircle, ArrowLeft, Bell, BookOpen, Check, ChevronDown, ChevronRight,
   CircleMinus, CirclePlus, Copy, Edit, ExternalLink, Eye, FileAudio,
   Heart, Home, Info, Loader2, LogOut, Menu, Music, Pause, Play,
-  Plus, Search, Settings, Trash2, Upload, User, Volume2, X, Youtube,
+  Plus, Search, Settings, Trash2, Upload, User, Volume2, X, SquarePlay,
 } from "lucide-react";
 
 /* ─── helpers ────────────────────────────────────────────────────────── */
@@ -573,7 +573,7 @@ export default function DesignSystemPage() {
                 { icon: Pause, name: "Pause" },
                 { icon: Volume2, name: "Volume2" },
                 { icon: FileAudio, name: "FileAudio" },
-                { icon: Youtube, name: "Youtube" },
+                { icon: SquarePlay, name: "SquarePlay" },
                 { icon: Search, name: "Search" },
                 { icon: Plus, name: "Plus" },
                 { icon: Edit, name: "Edit" },

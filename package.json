@@ -67,7 +67,7 @@
     "date-fns": "^3.6.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.30",
-    "lucide-react": "^0.503.0",
+    "lucide-react": "^1.70.0",
     "luxon": "^3.7.1",
     "moment-timezone": "^0.5.48",
     "next": "15.3.8",
