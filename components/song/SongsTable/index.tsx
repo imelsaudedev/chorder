@@ -113,9 +113,10 @@ export default function SongsTable({ songs, sort, query = "" }: SongsTableProps)
       {/* overflow-clip (e não hidden): hidden criaria um contêiner de rolagem e quebraria o sticky */}
       <section
         ref={listRef}
-        // no celular, com o trilho de letras, reserva a faixa da direita para ele não cobrir os botões de ação
+        // a lista ocupa a largura toda; no celular, com o trilho de letras, só a linha ganha recuo à direita
+        // para o trilho não cobrir os botões de ação
         className={`@container overflow-clip rounded-xl border bg-background shadow-xs max-sm:-mx-5 max-sm:rounded-none max-sm:border-x-0 ${
-          withBands ? "max-sm:pr-6" : ""
+          withBands ? "max-sm:[&_[data-song-row]]:pr-9" : ""
         }`}
         onClickCapture={rememberOnOpen}
       >

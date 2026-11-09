@@ -102,6 +102,7 @@ export default function SongRow({
   return (
     <>
       <div
+        data-song-row
         className={cn(
           "group relative grid items-start gap-x-4 py-4 transition-colors hover:bg-muted/40",
           flush ? "px-4 @[560px]:px-5 @[860px]:px-6" : "px-3 -mx-3 @[560px]:px-4 @[560px]:-mx-4",
