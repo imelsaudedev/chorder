@@ -17,10 +17,11 @@ export default function ClientSongList({
 }: ClientSongListProps) {
   const { songs, isLoading } = useFetchSongs({
     query,
-    limitLines: 3,
+    limitLines: 6,
     forceIncludeFirstLine: true,
     excludedSongSlugs,
     tagIds,
+    withUsageStats: true,
   });
   if (!songs || isLoading) {
     return <SongListSkeleton />;

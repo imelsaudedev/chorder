@@ -18,7 +18,7 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
   const [isNavigating, setIsNavigating] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const { tagGroups } = useFetchTagGroups();
-  const { songs } = useFetchSongs({ query, tagIds: selectedTagIds, limitLines: 3, forceIncludeFirstLine: true });
+  const { songs } = useFetchSongs({ query, tagIds: selectedTagIds, limitLines: 6, forceIncludeFirstLine: true, withUsageStats: true });
   const songCount = songs?.length ?? null;
 
   return (

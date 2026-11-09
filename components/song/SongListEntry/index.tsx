@@ -27,6 +27,7 @@ import { MoreVertical, NotebookPen, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import SongRow from "./SongRow";
 import { useSWRConfig } from "swr";
 
 const BTN_SM = "h-7 w-7";
@@ -84,7 +85,8 @@ type SongListEntryProps = {
   onSelected?: (song: ClientSong) => void;
 };
 
-export default function SongListEntry({
+/** Item do seletor de músicas do editor de culto (mantém o layout antigo). */
+function PickerSongEntry({
   song,
   query = "",
   onSelected,
@@ -259,4 +261,13 @@ export default function SongListEntry({
     />
     </>
   );
+}
+
+/**
+ * Lista de músicas: o item novo (SongRow) na navegação; o item antigo no
+ * seletor do editor de culto (quando há `onSelected`).
+ */
+export default function SongListEntry(props: SongListEntryProps) {
+  if (props.onSelected) return <PickerSongEntry {...props} />;
+  return <SongRow song={props.song} query={props.query} />;
 }
