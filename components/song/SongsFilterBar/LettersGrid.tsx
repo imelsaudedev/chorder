@@ -20,7 +20,12 @@ export default function LettersGrid() {
           <Letters />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-56 p-2">
+      <PopoverContent
+        align="end"
+        className="w-56 p-2"
+        // Ao fechar, o Radix devolveria o foco ao botão e rolaria a página de volta.
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
         <div className="grid grid-cols-6 gap-1">
           {ALPHABET.map((l) =>
             present(l) ? (
@@ -32,7 +37,7 @@ export default function LettersGrid() {
                   setOpen(false);
                   // Espera o popover soltar a trava de rolagem antes de rolar.
                   setTimeout(() => {
-                    document.getElementById(l)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    document.getElementById(l)?.scrollIntoView({ behavior: "instant", block: "start" });
                   }, 50);
                 }}
                 className="flex size-8 items-center justify-center rounded text-sm font-semibold uppercase text-secondary hover:bg-muted"
