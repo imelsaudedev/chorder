@@ -76,7 +76,7 @@ h1,h2,h3,h4{margin:0}
 .back:hover{color:var(--foreground)}
 
 /* barra fixa: só a busca */
-.sticky{position:sticky;top:0;z-index:6;margin:0 calc(var(--px)*-1);padding:8px var(--px);background:var(--background)}
+.sticky{position:sticky;top:0;z-index:6;margin:0 calc(var(--px)*-1);padding:12px var(--px);background:var(--background)}
 .search{position:relative}
 .search svg.s{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted-foreground);pointer-events:none}
 .search input{width:100%;height:36px;border-radius:999px;border:1px solid var(--border);background:var(--background);padding:4px 36px;font-size:16px;box-shadow:var(--shadow-xs);outline:none}
@@ -144,21 +144,22 @@ h1,h2,h3,h4{margin:0}
 .herow{--H0:164px;position:relative;height:var(--H0);margin:0 calc(var(--px)*-1) 4px}
 @container app (min-width:560px){.herow{--H0:180px}}
 @container app (min-width:860px){.herow{--H0:208px}}
-.hero{position:absolute;inset:0;overflow:hidden;border-radius:0;padding:16px var(--px);color:#fff;isolation:isolate;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end}
-.hero:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(0,0,0,.5),rgba(0,0,0,.05))}
+.hero{position:absolute;inset:0;overflow:hidden;border-radius:0;padding:16px var(--px);color:var(--ink,#fff);isolation:isolate;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end}
+.hero:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,var(--sb,rgba(0,0,0,.5)),var(--st,rgba(0,0,0,.05)))}
 .hero .gl{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.92}
-.hero h1{font-family:"Space Grotesk",sans-serif;font-weight:600;line-height:1.1;letter-spacing:-.05em;font-size:30px;margin:2px 0;text-shadow:0 1px 3px rgba(0,0,0,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.hero h1{font-family:"Space Grotesk",sans-serif;font-weight:600;line-height:1.1;letter-spacing:-.05em;font-size:30px;margin:2px 0;text-shadow:var(--tsh,0 1px 3px rgba(0,0,0,.35));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 @container app (min-width:560px){.hero h1{font-size:36px}}
-@container app (min-width:860px){.hero h1{font-size:44px}.hero{padding-top:24px;padding-bottom:24px}}
+@container app (min-width:860px){.hero h1{font-size:44px}.hero{padding-top:24px;padding-bottom:24px}.herow .bk,.herow .pers{top:24px}.pop{top:64px}}
 .hero p{margin:0;font-size:14px;opacity:.95;max-width:100%}
 /* botões sobre a capa: fundo preto semitransparente, cantos arredondados (padrão de botão do app) */
-.herow .bk{position:absolute;left:12px;top:12px;z-index:2;height:32px;padding:0 12px 0 8px;border:0;border-radius:var(--radius-md);background:rgba(0,0,0,.4);color:#fff;display:inline-flex;align-items:center;gap:2px;font-size:14px;font-weight:500;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.herow .bk:hover{background:rgba(0,0,0,.6)}
-.herow .pers{position:absolute;right:12px;top:12px;z-index:2;width:32px;height:32px;border-radius:var(--radius-md);border:0;background:rgba(0,0,0,.4);color:#fff;display:inline-flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.herow .bk{position:absolute;left:var(--px);top:16px;margin-left:-6px;z-index:2;height:32px;padding:0 4px 0 0;border:0;border-radius:0;background:none;display:inline-flex;align-items:center;gap:2px;font-size:14px;font-weight:500;color:var(--ink,#fff);text-shadow:var(--tsh,none)}
+.herow .bk:hover{text-decoration:underline}
+.herow .bk:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:4px}
+.herow .pers{position:absolute;right:var(--px);top:16px;z-index:2;width:32px;height:32px;border-radius:var(--radius-md);border:0;background:var(--pbg,rgba(0,0,0,.4));color:var(--ink,#fff);display:inline-flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .herow:hover .pers,.herow .pers:focus-visible,.herow .pers[aria-expanded=true]{opacity:1}
-.herow .pers:hover{background:rgba(0,0,0,.6)}
+.herow .pers:hover{background:var(--pbg2,rgba(0,0,0,.6))}
 @media (hover:none){.herow .pers{opacity:.8}} /* no toque não existe hover: o ícone fica sempre visível */
-.pop{position:absolute;right:12px;top:52px;z-index:6;width:min(300px,calc(100% - 20px));background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px}
+.pop{position:absolute;right:var(--px);top:56px;z-index:6;width:min(300px,calc(100% - 20px));background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px}
 .pop h4{margin:0 0 6px;font-size:12px;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.06em}
 .sw{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
 .sw button{width:30px;height:30px;border-radius:50%;border:2px solid transparent}
@@ -184,22 +185,29 @@ h1,h2,h3,h4{margin:0}
 /* ---------- item da lista (NOVO) ---------- */
 .list{border-top:1px solid var(--border)}
 .lh{display:none}
-.row{position:relative;display:grid;column-gap:10px;row-gap:2px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);
-  grid-template-columns:minmax(0,1fr) 40px auto;
-  grid-template-areas:"title media act";cursor:pointer}
-.c-title{grid-area:title;min-width:0}
-.c-title .tt{font:600 16px/22px "Space Grotesk",sans-serif;letter-spacing:-.015em;color:var(--primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.c-title .sub{color:var(--muted-foreground);font-size:12px;line-height:18px;min-width:0}
-.c-title .sub .ar{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* último uso: relógio + texto, mesmo corpo do autor; âmbar se foi nas últimas 3 semanas */
-.lu{display:flex;align-items:center;gap:4px;font-size:12px;line-height:18px;color:var(--muted-foreground);white-space:nowrap}
+/* item novo: título 16/600; todo o resto 14px; categorias = chip 12px (fundo claro, texto escurecido p/ contraste >= 4,5, sem borda, canto 4px) */
+.row{--rpx:12px;position:relative;display:grid;align-items:start;column-gap:16px;row-gap:8px;margin:0 calc(-1*var(--rpx));padding:16px var(--rpx);
+  border-bottom:1px solid var(--border);cursor:pointer;grid-template-columns:minmax(0,1fr) 56px 40px;grid-template-areas:"id play act"}
+.row:hover{background:hsl(215 16% 72% / .14)}
+.row .id{grid-area:id;min-width:0}
+.row .tt{font:600 16px/22px "Space Grotesk",sans-serif;letter-spacing:-.015em;color:var(--primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .sub{display:flex;align-items:center;gap:6px;margin-top:2px;min-width:0;font-size:14px;line-height:20px;color:var(--muted-foreground)}
+.row .sub .ar{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .sep{flex:none}
+.lu{display:inline-flex;align-items:center;gap:4px;font-size:14px;line-height:20px;color:var(--muted-foreground);white-space:nowrap;flex:none}
 .lu.rec{color:var(--amber700)}
 .lu.nev{font-style:italic}
-.c-lyric{grid-area:lyric;display:none;color:var(--muted-foreground);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.c-tags{grid-area:tags;display:none;gap:4px;flex-wrap:wrap;min-width:0}
-.c-used{grid-area:used;display:none;font-size:13px}
-.c-media{grid-area:media;display:flex;justify-content:center}
-.c-act{grid-area:act;display:flex;align-items:center;justify-content:flex-end}
+.row .lyric,.row .tags,.row .used{display:none}
+.row .lyric{grid-area:lyric;min-width:0;font-size:14px;line-height:20px;color:var(--muted-foreground)}
+.row .lyric div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .tags{grid-area:tags;min-width:0;flex-wrap:wrap;gap:4px 6px;margin-top:8px}
+.row .tg{display:inline-flex;align-items:center;border:0;border-radius:4px;padding:2px 8px;background:var(--bg);color:var(--fg);font-size:12px;font-weight:500;line-height:16px;white-space:nowrap}
+.row .tg.more{background:hsl(215 16% 72% / .25);color:var(--muted-foreground)}
+.row .used{grid-area:used;align-items:center;gap:6px;white-space:nowrap}
+.row .play{grid-area:play;display:flex;justify-content:center;margin-top:-8px}
+.row .act{grid-area:act;display:flex;justify-content:flex-end;margin-top:-8px}
+.ib.ref{width:56px;gap:6px}
+.c-vid{color:#ef4444;display:inline-flex}.c-aud{color:hsl(221 83% 53%);display:inline-flex}
 .menuw{position:relative}
 .menu{position:absolute;right:0;top:40px;z-index:5;background:var(--background);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow);min-width:240px;padding:4px}
 .menu button{display:flex;width:100%;gap:8px;align-items:center;text-align:left;border:0;background:none;padding:8px 12px;border-radius:4px;min-height:40px;font-size:14px}
@@ -207,21 +215,26 @@ h1,h2,h3,h4{margin:0}
 mark{background:#fde68a;color:inherit;border-radius:3px;padding:0 1px}
 
 @container app (min-width:560px){
-  .row{grid-template-columns:minmax(0,1fr) 40px auto;grid-template-areas:"title media act" "lyric lyric lyric" "tags tags tags";margin:0 -8px;padding-left:8px;padding-right:8px}
-  .row:hover{background:hsl(215 16% 72% / .14)}
-  .c-lyric{display:block}
-  .c-tags{display:flex}
-  .c-tags:empty{display:none}
+  .row{--rpx:16px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 56px 40px;column-gap:20px;
+    grid-template-areas:"id lyric play act" "id tags play act";row-gap:0;align-items:start}
+  .row .id,.row .play,.row .act{align-self:start}
+  .row .lyric{display:block}
+  .row .tags{display:flex}
+  .row .tags:empty{display:none}
+  .row .sub{flex-direction:column;align-items:flex-start;gap:0}
+  .row .sub .sep{display:none}
+  .row .sub .ar{max-width:100%}
 }
 @container app (min-width:860px){
-  .row{grid-template-columns:minmax(0,2.3fr) minmax(0,2.4fr) minmax(0,1.7fr) 112px 48px 128px;
-    grid-template-areas:"title lyric tags used media act";padding-top:8px;padding-bottom:8px}
-  .c-used{display:flex}
-  .c-title .tt{font-size:18px}
-  .u-inline{display:none}
-  .lh{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(0,2.4fr) minmax(0,1.7fr) 112px 48px 128px;column-gap:10px;padding:8px 8px 8px;margin:0 -8px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
-  .lh span:nth-child(5){text-align:center}
-  .c-tags{flex-wrap:nowrap;overflow:hidden}
+  .row{grid-template-columns:minmax(0,2.3fr) minmax(0,2.4fr) minmax(0,1.6fr) 11rem 56px 40px;
+    grid-template-areas:"id lyric tags used play act";align-items:start}
+  .row .id,.row .play,.row .act{align-self:start}
+  .row .tags{margin-top:0}
+  .row .used{display:flex;padding-top:2px}
+  .row .sub .lu{display:none}
+  .row .tt{font-size:18px;line-height:24px}
+  .lh{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(0,2.4fr) minmax(0,1.6fr) 11rem 56px 40px;column-gap:20px;
+    padding:12px 16px;margin:0 -16px;background:var(--zinc50);border-bottom:1px solid var(--border);font-size:14px;font-weight:500;color:var(--muted-foreground)}
 }
 
 /* ---------- item ATUAL (comparação, aproximação do código de hoje) ---------- */
@@ -307,6 +320,80 @@ button.lt:hover{background:hsl(221 83% 53% / .08);border-radius:var(--radius-md)
 .bl span{font-size:12px;font-weight:600;color:var(--secondary);text-transform:uppercase;letter-spacing:.05em}
 .bl i{flex:1;border-top:1px solid hsl(221 83% 53% / .25)}
 .list.grp{border-top:0}
+
+/* ---------- dois blocos (referência Flowbite): FILTROS (seletores | lupa + ordenação; letras embaixo) e LISTA (começa no cabeçalho). Moldura = cartão com borda; base de 16px ---------- */
+.fblock,.lblock{--cp:0px}
+.device[data-frame=all] .fblock,.device:is([data-frame=list],[data-frame=all]) .lblock{--cp:16px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-xs);background:var(--background)}
+@container app (min-width:560px){.device[data-frame=all] .fblock,.device:is([data-frame=list],[data-frame=all]) .lblock{--cp:20px}}
+@container app (min-width:860px){.device[data-frame=all] .fblock,.device:is([data-frame=list],[data-frame=all]) .lblock{--cp:24px}}
+.fblock{margin-top:24px}
+.lblock{margin-top:24px}
+.frow{display:flex;align-items:center;gap:8px;padding:12px var(--cp)}
+.frow .fchips{flex:1;min-width:0;margin:0;padding:0;overflow-x:auto;flex-wrap:nowrap}
+@container app (min-width:560px){.frow .fchips{flex-wrap:wrap;overflow:visible}}
+.fright{display:flex;align-items:center;gap:8px;flex:none;min-width:0}
+.sx2{width:240px;flex:none}
+@container app (min-width:860px){.sx2{width:300px}}
+@container app (max-width:559px){ /* celular: 1ª linha = categorias (rolagem lateral); 2ª = lupa, letras e ordenação, à esquerda */
+  .frow{flex-wrap:wrap;row-gap:8px}
+  .frow .fchips{flex:1 1 100%;overflow-x:auto;flex-wrap:nowrap}
+  .fright{flex:1 1 100%;justify-content:flex-start}
+  .frow.open .sx2{flex:1;width:auto}
+}
+
+.sx2{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:36px;border:1px solid var(--border);border-radius:var(--radius-md);padding:0 2px 0 12px;box-shadow:var(--shadow-xs);background:var(--background)}
+.sx2:focus-within{border-color:var(--ring);box-shadow:0 0 0 3px hsl(221 83% 53% / .3)}
+.sx2 svg{color:var(--muted-foreground)}
+.sx2 input::-webkit-search-cancel-button{display:none}
+.sx2 input{flex:1;min-width:0;width:0;border:0;outline:0;background:none;font-size:16px;height:100%}
+@container app (min-width:860px){.sx2 input{font-size:14px}}
+.fblock .letters{margin:0;padding:8px max(0px,calc(var(--cp) - 4px));border-top:1px solid var(--border)}
+.lblock .list{border-top:0}
+.lblock .bl{padding:20px var(--cp) 4px}
+.lblock .empty{padding-left:var(--cp);padding-right:var(--cp)}
+/* cabeçalho da lista: acompanha as colunas de cada largura */
+.lh{display:grid;grid-template-columns:minmax(0,1fr);align-items:center;margin:0 -12px;padding:12px;background:var(--zinc50);border-bottom:1px solid var(--border);font-size:14px;font-weight:500;color:var(--muted-foreground)}
+.lh em{font-style:normal;font-weight:400}
+.lh .h2t,.lh .h2d,.lh .h3d,.lh .h4d,.lh span:empty{display:none}
+@container app (min-width:560px){
+  .lh{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 56px 40px;column-gap:20px;margin:0 -16px;padding:12px 16px}
+  .lh .h2t{display:block}.lh span:empty{display:block}
+}
+@container app (min-width:860px){
+  .lh{grid-template-columns:minmax(0,2.3fr) minmax(0,2.4fr) minmax(0,1.6fr) 11rem 56px 40px}
+  .lh .h2t{display:none}.lh .h2d,.lh .h3d,.lh .h4d{display:block}
+}
+.device:is([data-frame=list],[data-frame=all]) .lblock .lh{margin:0;padding:12px var(--cp);border-radius:11px 11px 0 0}
+.device:is([data-frame=list],[data-frame=all]) .lblock .row{margin:0;padding-left:var(--cp);padding-right:var(--cp)}
+.device:is([data-frame=list],[data-frame=all]) .lblock .row:last-child{border-bottom:0;border-radius:0 0 11px 11px}
+.device:not([data-frame=all]) .fblock .letters{padding:8px 0 0}
+.device:not([data-frame=all]) .fblock .letters .lt:first-child{margin-left:-8px}
+.device:not([data-frame=all]) .fblock .frow{padding-top:0;padding-bottom:12px}
+.device:not([data-frame=all]) .fblock.nl .frow{padding-bottom:4px} /* sem alfabeto: 8px a menos até a lista */
+.gpp.lgp{width:auto;padding:8px 8px 10px}
+.lgp .q{padding:2px 6px 6px}
+.lgp .lg{display:grid;grid-template-columns:repeat(7,36px);gap:2px}
+.lgp .lt{min-width:0;width:36px}
+/* botões sem contorno, com fundo semitransparente (teste) */
+.device[data-btn=fill] .fchip{border-width:0;box-shadow:none;background:hsl(215 16% 72% / .22)}
+.device[data-btn=fill] .fchip:not(.on) .fb:hover{background:hsl(215 16% 72% / .22)}
+.device[data-btn=fill] .fright>.ib,.device[data-btn=fill] .fright>.gpw>.ib,.device[data-btn=fill] .sortb{background:hsl(215 16% 72% / .22);border-radius:var(--radius-md)}
+.device[data-btn=fill] .sortb{padding:0 12px}
+.device[data-btn=fill] .fright>.ib:hover,.device[data-btn=fill] .fright>.gpw>.ib:hover,.device[data-btn=fill] .sortb:hover{background:hsl(215 16% 72% / .38);color:var(--foreground)}
+.device[data-btn=fill] .sx2{border-color:transparent;box-shadow:none;background:hsl(215 16% 72% / .22)}
+.device[data-btn=fill] .sx2:focus-within{border-color:var(--ring);box-shadow:0 0 0 3px hsl(221 83% 53% / .3)}
+/* lista de largura total no celular (sangra até as bordas; o texto segue alinhado ao resto da página) */
+@container app (max-width:559px){
+  .device[data-wide=on]:is([data-frame=list],[data-frame=all]) .lblock{--cp:var(--px);margin-left:calc(var(--px)*-1);margin-right:calc(var(--px)*-1);border-left-width:0;border-right-width:0;border-radius:0;box-shadow:none}
+  .device[data-wide=on]:is([data-frame=list],[data-frame=all]) .lblock .lh,
+  .device[data-wide=on]:is([data-frame=list],[data-frame=all]) .lblock .row:last-child{border-radius:0}
+}
+/* separador de letra: faixa contínua de ponta a ponta (como o cabeçalho de colunas), com a letra em destaque */
+.bl{--bpx:12px;display:flex;align-items:center;height:32px;margin:0 calc(-1*var(--bpx));padding:0 var(--bpx);background:var(--zinc50);border-bottom:1px solid var(--border)}
+@container app (min-width:560px){.bl{--bpx:16px}}
+.bl i{display:none}
+.bl span{font-size:14px;font-weight:600;letter-spacing:0;color:var(--secondary);text-transform:uppercase}
+.device:is([data-frame=list],[data-frame=all]) .lblock .bl{margin:0;padding:0 var(--cp)}
 </style>
 </head>
 <body>
@@ -318,6 +405,10 @@ button.lt:hover{background:hsl(221 83% 53% / .08);border-radius:var(--radius-md)
 <div class="ctl">
   <div class="g"><span>Tela</span><div class="seg" id="c-dev"><button data-v="phone" aria-pressed="true">Celular</button><button data-v="tablet" aria-pressed="false">Tablet</button><button data-v="desktop" aria-pressed="false">Desktop</button></div></div>
   <div class="g"><span>Item da lista</span><div class="seg" id="c-item"><button data-v="new" aria-pressed="true">Novo</button><button data-v="old" aria-pressed="false">Atual</button></div></div>
+  <div class="g"><span>Moldura</span><div class="seg" id="c-frame"><button data-v="off" aria-pressed="false">Nenhuma</button><button data-v="list" aria-pressed="true">Só a lista</button><button data-v="all" aria-pressed="false">Tudo</button></div></div>
+  <div class="g"><span>Alfabeto</span><div class="seg" id="c-alpha"><button data-v="line" aria-pressed="false">Linha</button><button data-v="icon" aria-pressed="true">Ícone</button></div></div>
+  <div class="g"><span>Botões</span><div class="seg" id="c-btn"><button data-v="line" aria-pressed="false">Contorno</button><button data-v="fill" aria-pressed="true">Fundo</button></div></div>
+  <div class="g"><span>Lista no celular</span><div class="seg" id="c-wide"><button data-v="off" aria-pressed="false">Com margem</button><button data-v="on" aria-pressed="true">Largura total</button></div></div>
   <button class="reset" id="reset">Restaurar exemplo</button>
 </div>
 
@@ -406,7 +497,8 @@ const patUrl = p => {
     waves:`<svg xmlns='http://www.w3.org/2000/svg' width='44' height='20'><path d='M0 10Q11 0 22 10T44 10' fill='none' stroke='white' stroke-opacity='.3' stroke-width='2'/></svg>`,
     stars:`<svg xmlns='http://www.w3.org/2000/svg' width='38' height='38'><text x='6' y='24' font-size='18' fill='white' fill-opacity='.32'>✦</text></svg>`,
     cross:`<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34'><path d='M17 8v16M9 15h16' stroke='white' stroke-opacity='.3' stroke-width='3' stroke-linecap='round'/></svg>`}[p];
-  return svg ? `url("data:image/svg+xml,${encodeURIComponent(svg)}")` : "";
+  /* sem aspas: o resultado vai dentro de style="..."; aspas aqui cortavam o estilo e a cor da tag nunca aparecia */
+  return svg ? `url(data:image/svg+xml,${encodeURIComponent(svg).replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29")})` : "";
 };
 
 /* estilo por categoria (cor, padrão ou imagem), personalizável e guardado só neste navegador */
@@ -417,13 +509,15 @@ const saveStyle = () => { try { localStorage.setItem("musicas-proto-estilo", JSO
 const loadStyle = () => { baseStyle(); try { const j = JSON.parse(localStorage.getItem("musicas-proto-estilo") || "null"); if (j) Object.assign(STYLE, j); } catch (e) {} };
 const bgOf = st => {
   const grad = `linear-gradient(135deg, ${st.color}, color-mix(in srgb, ${st.color} 55%, #000))`;
-  if (st.img) return `background-image:url("${st.img.replace(/"/g, "")}"),${grad}`;
+  if (st.img) return `background-image:url(${encodeURI(st.img).replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29")}),${grad}`;
   const pu = patUrl(st.pat);
   return `background-image:${pu ? pu + "," : ""}${grad}`;
 };
 /* etiquetas usam a cor do GRUPO, como o app faz hoje */
 const groupTag = (gid, n, cls = "") => { const c = gOf(gid).color; return `<span class="tg ${cls}" style="background:${c}26;color:${c};border-color:${c}4d">${esc(n)}</span>`; };
 
+/* duas primeiras linhas da letra (acervo local); no app vêm do verso 1 */
+const LYR2 = {"Abra Os Olhos do Meu Coração":["Abra os olhos do meu coração","Abra os olhos do meu coração"],"Abra os olhos do meu coração (V2)":["Abra os olhos do meu coração","Abra os olhos do meu coração , , , , , , , , , , , , , , , , , , , , , , , , ,"],"A Cada Momento":["A cada momento","Andando na presença de Jesus"],"ACENDE O FOGO EM MIM":["Não deixe o meu amor se esfriar","Acende o Fogo em mim"],"A chuva cai":["A chuva cai, pingue, pingue, pingue, pam!","Pingue, pingue, pam!"],"ACLAME AO SENHOR":["Meu Jesus, Salvador,","Outro igual não há"],"A COMEÇAR EM MIM":["A começar em mim","Quebra corações"],"A Criação":["Deus criou os bichos com muito carinho","Todos para o seu louvor"],"A Deus dai louvor":["A Deus dai louvor, com todo ser,","com todo corpo, a Cristo dai louvor!"],"A Deus demos glória":["Como agradecer a Jesus o que fez por mim?","Bênçãos sem medida vêm provar o seu amor sem fim"],"A Diferença é o Coração":["Quando se sabe","Que o que se tem não é seu"],"ADORAÇÃO":["Glorificando a Deus","Em tudo e em todo lugar"],"ADORAMOS":["Adoramos,    adoramos,","Aquele que venceu"],"A Ele a Glória":["Porque dele e por ele","Para ele são todas as coisas"],"A GLÓRIA PERTENCE AO SENHOR":["A glória pertence ao Senhor","Que é digno de todo o louvor"],"Agnus Dei":["Aleluia!","Alelu - ui - a"],"Agora é o tempo":["Agora é o tempo","de fazer diferença,"],"Agora e sempre":["Ao Deus","que nos guarda de tropeçar"],"Agradeço":["Agradeço a ti senhor","Pois tu és bondo-so"],"ÁGUA CRISTALINA":["Como água cristalina","De um rio que vai pro mar"],"ÁGUAS PURIFICADORAS":["Existe um rio, Senhor,","Que flui do teu grande amor"],"Água viva":["Cada estrada em que eu andei","Eu pensei daria certo"],"Ah, eu amo a Cristo":["Ah! Eu amo a Cristo","Ah! Eu amo a Cristo"],"Grande e largo":["Grande e largo","Grande e largo"],"A Jesus, Vem Mostrar":["Prepara o nosso coração","para receber"],"Ajuntamento":["Vem, e sopra sobre nós teu sopro","Reunidos neste ajuntamento"],"ALEGRAR-ME-EI":["Alegar-me-ei,  alegrar-me-ei","Alegrar-me, alegrar-me, alegrar-me-ei"],"ALELUIA CANTO A TI, SENHOR":["Aleluia, aleluia, aleluia","Canto a Ti, Senhor enta canção"],"ALELUIA, SALVAÇÃO E GLÓRIA":["Aleluia, salvação e glória","Honra e poder"],"Alfa e Ômega":["Tu estás assentado","no trono"],"Alguém Como Eu":["Entra Mestre, descansa um pouco","Estás cansado, estás sedento e rouco"],"ALIANÇA":["Como é precioso, irmão,","Estar bem junto a ti"],"Alto preço":["Eu sei que foi pago um alto preço","Para que contigo"],"AME AO SENHOR":["Ame ao Senhor","Com todo o seu coração"],"Amigo":["É bom amigos a gente ver","É bom amigos a gente fazer"],"Amigo de Deus":["Não existe nada melhor","Do que ser amigo de Deus"],"Bem perto está":["Bem perto está","Jesus o Senhor"],"Amigo Verdadeiro":["Tu és a fonte de vida, o centro de todas as coi-sas","Em ti eu encontro guarida, contigo eu sou vencedor"],"Antífona":["A ti, ó Deus,","fiel e bom Senhor"],"Ao Meu Lado":["Meu Pastor é o Senhor Deus","Nada há de me faltar"],"AO NOSSO DEUS":["Ao nosso Deus","Que se assenta no trono"],"Ao Orarmos, Senhor":["Ao orarmos Senhor","Vem encher-nos com teu amor"],"Ao que está assentado":["Ao que está","assentado"],"Ao único":["Ao único que é digno de receber","A honra e a glória, a força e o poder"],"A Palavra da Vida":["Antes que o mundo existisse","Antes que a luz clareasse"],"A Pedra Fundamental":["Da Igreja o fundamento é Cristo, o Salvador","Em seu poder descansa, e é forte em seu amor"],"Apelo Á Unidade":["Somos pequenos, mas sabemos","Que por nós morreu Jesus"],"Aperte A Mão":["Aperte a mão do amigo mais perto","Aperte a mão pra cantar, lá, lá"],"AQUELE QUE ME AMA":["Aquele que tem","Os meus mandamentos e os guarda"],"Deus É Bom Pra Mim":["Deus é bom pra mim, Deus é bom pra mim","Feliz estou, cantando eu vou, Deus é bom pra mim"],"A quem crer":["Essa noite escura","Não vai durar pra sempre"],"Aqui viemos te adorar":["Aqui viemos te adorar, oh Cristo,","E proclamar o teu poder"],"A Rocha E A Areia":["Não, não construa sua casa na areia;","Não, não construa na beira do mar; , ,"],"ASSIM COMO A CORÇA":["Assim como a corça","Suspira pelas águas"],"A TI NOSSA VIDA":["A ti nossa vida","Nós queremos entregar"],"A VIDA QUE CRISTO OFERECE":["A vida que Cristo oferece","O mundo não pode lhe dar"],"A VITÓRIA":["A vitória é daquele que contemplar","Ao Cordeiro, Cristo,"],"A Voz":["O sozinho e ferido, cansado e faminto","Que estão no escuro"],"Barnabé":["Não fica bem a gente passar bem e o outro carestia","ainda mais quando se sabe o que fazer e não se faz"],"Bata As Mãos E Os Pés":["Bata as mãos, bata os pés","Espalhe o amor de Cristo à todos ao redor, oh..."],"Bate palminha":["Bate palminha","Balança a cabecinha"],"BEM AVENTURADO":["Bem aventurado é o que está","Firmado em tua casa"],"Bem Supremo":["Antes eu te conhecia de ouvir falar","Mas agora de contigo andar"],"BEM-VINDO":["Tu és bem-vindo ao nosso meio","Deus bendito, eterno Pai"],"Bem Vindo À Família":["Bem vindo à família,","É bom estar aqui para compartilhar"],"BENÇÃO":["Vem derrama a paz","Vem derrama as bênçãos"],"BENDIZE, OH MIN’ALMA":["Bendize, oh min’alma ao Senhor","E tudo o que há em mim"],"BOM É ESTARMOS AQUI":["Bom é estarmos aqui louvando a Deus","Podendo exaltar Seu Santo nome"],"Bom É Louvar":["Bom é louvar","E cantar ao Senhor"],"BRILHA JESUS":["Vejo a luz do Senhor que brilha","Bem no meio das trevas brilha"],"Buscai primeiro":["Buscai primeiro o Reino de Deus","E toda a Sua justiça"],"Buscai primeiro - V2":["Buscai primeiro o Reino de Deus","E toda a Sua justiça"],"CABE AGORA":["Cabe agora, cabe à gente comprometer-se","Arregaçar as man---gas"],"CADA INSTANTE":["Cada instante   contigo, Senhor","Que passo aos teus pés"],"Oba, Jesus me ama!":["O-oba! Jesus me ama","O-oba! Jesus me a-ama"],"CADA MOMENTO":["Sendo remido por Cristo na cruz","Vivo contente no reino da luz"],"CAIAM POR TERRA":["Caiam por terra agora os inimigos de Deus","Seja estabelecida a casa do Senhor"],"Canção do Apocalipse":["Digno é o Cordeiro, que foi morto","Santo, Santo Ele é"],"CANÇÃO DO ESPÍRITO":["Oh, dei-xa   que o Senhor te envolva","Em seu Espírito de amor"],"CANTAI":["Cantai um  novo cântico ao Senhor","Celebrai uma grande festa de louvor"],"Cantai ao Senhor (Salmo 96)":["Cantai ao Senhor","um cântico novo"],"CANTAI AO SENHOR (SL.98)":["Cantai ao Senhor um cântico novo","Porque ele tem feito maravilhas"],"CANTAI AO SENHOR UM NOVO CÂNTICO":["Cantai ao Senhor um novo cântico , , , , ,","Pois sua glória está no templo"],"Cantai que o Salvador chegou":["Cantai que o salvador chegou","Acolha a Terra o Rei!"],"Cantando, Orando, Louvando":["Cantando, cantando","Cantando ao meu Senhor"],"Cantarei":["Intro:  (2x)","Cantarei Senhor a Tua força"],"Cantarei ao Senhor":["Intro:  (2x)","Cantarei ao Senhor"],"Espírito, Enche a minha vida":["Espírito, enche a minha vida","Enche-me do teu poder"],"Cantarei teu amor pra sempre":["Dos montes corre para o mar","Teu rio de amor por mim"],"CANTO DE VITÓRIA":["Eu tenho em mim um canto de vitória","Que foi escrito por Jesus na cruz"],"CASTELO FORTE":["Castelo forte é o , nosso Deus","Es-cudo e  boa  espada"],"CASTELO FORTE - acordes simplificados":["Castelo forte é o nosso  Deus","Escudo e , boa espada"],"CELEBRAI A CRISTO":["Celebrai a Cristo, celebrai","Celebrai a Cristo, celebrai"],"Celebrai com júbilo (Salmo 100)":["Celebrai com júbilo ao Senhor","Vós todos moradores da terra"],"Celebrai com júbilo - V2":["Celebrai com júbilo ao Senhor","Todos os moradores da terra"],"Colossenses 1":["Ele é a imagem do Deus invisível","Ele é Senhor sobre a criação"],"COM ALEGRIA E ADORAÇÃO":["Com alegria e adoração","Cantaremos ao Senhor, nosso Deus"],"Com Amor Eterno":["Mesmo que às vezes tenhas","Que passar por aflições"],"Com Coração":["Com coração (com coração),  meu falar","Com meu pensar, com meu viver (2x)"],"Como a corça":["Como a corça suspira, pelas águas","A minh'alma também"],"Como a corça (V2)":["Como a corça suspira, pelas águas","A minh'alma também"],"Como agradecer (A Deus Demos Glória)":["Como  agradecer  a Jesus  o , que , fez  por , mim","Bençãos  sem medida  vem , provar  o , seu , amor  sem , fim"],"Como agradecer (A Deus Demos Glória) - HCC":["Como  agradecer  a Jesus  o , que , fez   por , mim","Bençãos  sem medida  vem , provar  o , seu , amor , sem , fim"],"Como é precioso irmão":["Como é precioso irmão, estar bem junto a ti","E juntos, lado a lado, andarmos com Jesus"],"Como Jesus Cristo":["Como Jesus Cristo eu quero ser","Há tanto bem que eu quero fazer"],"COM TUDO QUE SOU":["Em tuas mãos     descansarei","Meu coração te entrego"],"COMUNHÃO":["Preciosas são as horas","Na presença de Jesus"],"Comunhão 2":["Em comunhão         quero viver","Com meus irmãos      e assim crescer"],"Confessar":["(BPM: 139)"],"CONFIANÇA":["Salvador bendito, terno e bom Senhor,","Só em ti confio,  grande Salvador!"],"Confiar e Obedecer":["(BPM: 94)"],"CONHECI UM GRANDE AMIGO":["Conheci um grande amigo","Ele é Filho de Deus Pai"],"Conheci Um Mundo Mal":["Conheci um mundo mal, , , , , , , , , , ,","E com ele seus ardis; , , , , , , , , , , , , , , ,"],"Consagração":["Ao Rei dos reis consagro","tudo o que sou"],"CONTEMPLAÇÃO":["Ao acordar, ao respirar,","Ao ver raiar um novo dia"],"CONTINUAR":["Bem sei que tudo podes, meu amado","Nenhum dos teus planos é frustrado"],"Convite à liberdade":["Oh, vinde vós os povos de todas as nações","Erguei-vos e cantai com alegria"],"Convite":["Eu te convido para cearmos","A mesa está posta, escolha lugar"],"CORAÇÃO IGUAL AO TEU":["Intr."],"Corpo e Família":["Recebi um novo coração do Pai","Coração regenerado,"],"Cresço um pouquinho":["EE-Eu","Já fui bem pequenininho"],"CRIADOR DO UNIVERSO":["Criador do Universo,","Soberano de todas as nações"],"Cria Em Mim Um Coração Puro e Bom":["Deus, cria em mim um coração puro e bom","Renova meu ser com o gozo da salvação"],"Cristo É O Número 1":["1,2, 3 abra o teu coração","Pois Cristo quer entrar"],"Cristo Nasceu":["Cristo nasceu, Cristo Nasceu!","Presente de Deus, seu filho nos deu"],"CRISTO VEM ME BUSCAR":["Cristo vem me buscar, para o céu me levará","E o Cordeiro prometido voltará"],"Cuidado de Deus":["Se Deus cuida das aves do céu , , , , , , , , , , , , , , , , , , , , , , , , ,","E dos peixes do mar"],"Damos Graças":["Damos graças ao Senhor, damos graças","Graças pelo seu amor"],"Davi E Golias":["Davi e Golias","O grande e o pequeno"],"DECLARAMOS":["Declaramos  que aqui","Reina a glória do Senhor"],"DESCANSAREI":["(Intro)"],"Desde o princípio":["Desde o princípio de todas as coisas","Era o Verbo, Jesus Cristo"],"DESDE OS CONFINS DA TERRA":["Desde os confins da terra","No mais profundo mar"],"DEUS DE AMOR":["Tantas lutas, tantas dores,","Num deserto pareço estar"],"DEUS DOS ANTIGOS":["Deus dos antigos, cuja forte mão","Rege e sustém  os , , astros na amplidão"],"Deus É Fiel":["Bm G  Em  Asus A","Em meio aos muitos problemas,"],"DEUS ESTÁ AQUI":["Deus está       aqui","Tão certo como o ar que eu respiro"],"Deus é tão bom":["Deus é tão bom","Deus é tão bom"],"Deus Eterno":["Ó Deus tú és o meu Deus forte e a minha fortaleza","A minh'alma tem sede de ti Senhor"],"Deus faz crescer o capim":["Deus faz crescer o capim, pim, pim!","Deus cuida dos passarinhos, piu, piu!"],"Deus Forte Assim":["Deus tão incrível clamam os céus","Glória e poder como ninguém"],"Deus grandão":["Meu Deus","é um Deus grandão"],"Deus Não Desiste":["Somos todos nós, Teu povo ó Deus","Viemos aqui pra Te adorar"],"DEUS, SOMENTE DEUS":["Deus, somente Deus","Criou o mundo e o que nele há"],"DEUS SUPREMO ÉS":["Deus supremo és","Soberano em glória"],"Deus Também (\"Diós También\")":["Intro: ----|----|----|----"],"Deus também":["|----|----|----|----|","|----|----|----|----|"],"Dez Mil Razões":["Com minh'alma e meu ser","Eu irei cantar,"],"DIGNO É O SENHOR 1":["Digno é o Senhor de ser exaltado","Digno é o Senhor de ser adorado"],"DIGNO É O SENHOR 2":["Graças eu te dou, Pai","Pelo preço que pagou"],"Doce nome":["Só de ouvir tua voz e sentir teu amor","Só de pronunciar o teu nome"],"Dom de Amar":["QUERO TE AMAR, QUERO AMAR SEM DISTINÇÃO"],"DONO DO MEU CORAÇÃO":["Rei do Universo, te dou meu louvor","Com tantas bênçãos me cercas, Senhor"],"É TUA GRAÇA":["É tua graça que liberta","É tua graça que me cura"],"É de Coração":["Como descrever, como explicar","O amor que vai de Leste a Oeste ,"],"EIS-ME AQUI SENHOR":["Eis-me aqui Senhor","Pronto pra te adorar"],"Eis o Cordeiro":["Eis o Cordeiro que por nossos pecados morreu","E nós lembramos"],"Veja o Cordeiro (Behold the Lamb)":["Veja o cordeiro que levou o peca----do por nós:","E nós lembramos"],"É Natal":["Um novo dia, um novo tempo , , , , , , , , , , , , , , ,","Tempo de deixar nascer"],"ENCHE-ME ESPÍRITO":["Enche-me Espírito","Mais que cheio eu quero estar"],"Ele Ali Está":["Em momentos de angústia","Em momentos de pesar"],"Ele é exaltado":["Ele é exaltado,","o Rei é exaltado nos céus."],"Ele Está Com Você":["Quando você,","Se sentir sozinho, você"],"Ele vem pra te salvar":["Verso 1Diga para os temerosos","não há nada a temer"],"Emanuel":["Numa santa noite, em Belém, brilhou , , , , , ,","No Oriente, estrela anunciou"],"EMANUEL 1":["Emanuel, Emanuel,","O Deus do céu está aqui"],"EMANUEL 2":["Emanuel, Deus conosco,","Adoramos-te  Rei Jesus."],"Em Cristo só":["Em Cristo só confiarei;","Ele é a força, luz, canção"],"EM CRISTO SÓ 2":["Em Cristo só confiarei;","Ele é a força, luz, canção"],"Em Cristo só (V3)":["Em Cristo só confiarei;","Ele é a força, luz, canção"],"Em Espírito, em Verdade":["Em espírito, em verdade","Te adoramos, te adoramos"],"Em Espírito, em Verdade (V2)":["Em espírito, em verdade","Te adoramos, te adoramos"],"EM MEMÓRIA DE TI":["Em memória de Ti partiremos o pão","E do cálice agora iremos beber"],"EM NOME DO SENHOR JESUS":["Em nome do Senhor Jesus","Quero me entregar"],"Em Teus Braços":["Intro"],"EM TEU TEMPO":["Em Teu tempo, em Teu tempo","Tudo lindo Tu o fazes, em Teu tempo"],"Em todo tempo":["||: Em todo tempo eu","louvarei o Senhor"],"Em Todo Tempo Louvarei Ao Senhor":["Em todo tempo louvarei ao senhor"],"Eu te louvarei meu bom Jesus":["És Tu única razão","Da minha adoração oh Jesus"],"Enquanto eu calei":["Enquanto eu calei,","O  meu pecado"],"ENSINA-ME 2":["Ensina-me a amar","Mesmo quando só há ódio"],"Ensina-me 2 (Purifica-me) - arr Witt":["Introd:  (repete)"],"ENTRAI NA PRESENÇA DO SENHOR":["Entrai na presença do Senhor com gratidão","E adorai de coração"],"ENTREGA":["Te dou me coração","E tudo que há em mim"],"É o teu povo":["É o Teu   povo       aqui presente","Todos numa só voz declarando"],"É O TEU POVO - Versão Ipalpha":["É o Teu   povo aqui presente","Todos numa só voz declarando"],"ERGUEREMOS NOSSA VOZ":["Sejam cheios nossos lares","De alegria e canção"],"Escolho te amar":["Uma escolha a ser feita"],"ÉS DEUS E ME CONHECES":["És Deus e me conheces como sou","Sabes onde vou, o que penso e onde estou"],"És Deus e me conheces (Salmo 139)":["És Deus e me conheces","como sou"],"Esperança - Arrais":["Que  miserável  homem que sou que me tornei","Mendigo   o pão que antes sobrava e que era meu"],"ESPÍRITO":["Espírito, Espírito","Espírito Santo de Deus     2x"],"ESPÍRITO DE DEUS":["Capo","O Espírito de Deus está aqui"],"Espírito Santo":["||: Espírito Santo, revela-me à Cristo","Eu quero mais de ti, Senhor"],"Essência De Deus":["O mundo há de passar e toda profe  ci  a","Os dons, as línguas e tudo mais que existir"],"ESTAMOS REUNIDOS AQUI SENHOR":["Estamos reunidos aqui Senhor","Porque temos conhecido o Teu amor"],"Estamos Todos Aqui":["Estamos todos aqui","Só pra louvar ao Senhor"],"ESTA PAZ QUE EU SINTO EM MINH’ALMA":["Esta paz que eu sinto em minh’alma","Não é porque tudo me vai bem"],"ESTE É O MEU CORPO":["Este é o meu corpo partido por ti","Traz salvação e dá a paz"],"Este Reino":["Jesus,","justiça de Deus"],"ESTOU PRONTO, SENHOR":["Estou pronto, Senhor,","Para ouvir-te falar"],"ESTRELA DA MANHÃ":["És a nossa estrela da manhã","Cordeiro Santo que nos trouxe a paz"],"ETERNA ALIANÇA":["Eterna, infinita, inquebrável aliança","Um compromisso tão profundo"],"Eterno Deus":["||: Nossas forças irão se renovar","Se esperarmos no Senhor, esperarmos no Senhor :||"],"EU CELEBRAREI":["Eu celebrarei","Cantando ao Senhor"],"Eu Era Orfão":["Capotraste na 2ª casa"],"Eu Gosto Do Que Deus Fez":["Eu gosto do peixinho lá no fundo do mar","Foi Jesus quem o pôs lá"],"Eu me alegro em Ti":["A ti bendirei pra sempre","Em ti confiarei, Senhor"],"Eu Preciso De Você":["Eu preciso de você, você precisa de mim","Nós precisamos de Cristo até o fim!"],"Eu Quero Crescer Com Jesus":["Eu sou tão pequeno ainda","Mas tenho um grande ideal"],"EU QUERO SER UMA BENÇÃO":["Não quero viver para mim mesmo","Eu quero o servir e o amar, irmão"],"Eu Sou Grato":["Eu sou grato por tudo o que tenho","O tesouro maior deste mundo"],"EU TE AMO, OH DEUS":["Eu te amo, oh Deus,","E com minha voz"],"EU TE BENDIREI":["Eu te bendirei","Quando Tuas bênçãos eu provar"],"EU TE LOUVO":["Eu te louvo (Eu te louvo)","Com meu coração (Com meu coração)"],"Eu Venho A Ti":["O Teu amor, é incrível para mim","Pequeno sou, me amas mesmo assim"],"Eu Vou Construir":["Digno desta canção só Tu és Senhor , , , , , , , , , , , , , , , , ,","Digno do meu louvor só Tu és Senhor , , , , , , , , , , , , , , , ,"],"EXALTAI":["Entrarei em tua presença","Com sacrifícios de louvor"],"EXALTAR-TE-EI":["Exaltar-te-ei, oh Deus meu e Rei,","E bendirei o teu nome          2x"],"Fardo":["Ai de mim","Ai de nós"],"Felizes":["Aos pobres de espírito, seu reino.","Àqueles que choram, consolação."],"Fique De Pé":["Fique de pé se você ama a Cristo","Fique de pé se você ama a Deus"],"FIRMEZA":["Em nada ponho a minha fé","Senão na graça de Jesus"],"Firmeza - Trecho (V2)":["Em nada ponho a minha fé","Senão na graça de Jesus"],"FLUA, SENHOR":["Flua, Senhor, tua presença, tua Palavra","Flua em mim tua unção e o teu poder"],"Foi Bom Conhecer Você":["Amigo, há alegria em ter você aqui , , , , , , , , , , , , , , , , , ,","Nos faz sentir vontade de cantar e de dizer"],"FORMOSA É TUA PRESENÇA":["O brilho deste mundo se apaga ante ti","A glória dessa terra nada é"],"Fruto Da Criação":["É tão bom sair correndo respirando um puro ar","Saltitando num gramado ou , num parque e pular"],"FRUTOS DE VIDA":["Frutos que a vida mostrar","Farão este mundo a Jesus conhecer"],"Glória e Força":["Cristo é Senhor","Vamos sim, declarar"],"GLÓRIA PRA SEMPRE":["Glória pra sempre ao Cordeiro de Deus","A Jesus, o Senhor, ao Leão de Judá,"],"Grande":["Grande é o Senhor mui digno de louvor","Na cidade do nosso Deus,"],"Grande Amigo":["Conheci um grande amigo","Ele é filho de Deus Pai"],"Grande (V2)":["Queremos o teu nome engrandecer","E agradecer-te"],"Grandioso Deus":["Intro","Pequeno sou, tão frágil, indefeso e carente de um cuidar"],"Há momentos":["Há momentos que na vida","Pensamos em olhar atrás"],"LAÇOS DE AMOR":["Foi Teu imenso amor, que me conquistou","Eu não pude resisitr"],"HÁ UM ANSEIO ETERNO":["Há um anseio eterno no coração do Pai","De levantar um povo para si"],"Hino 61 - Ações de Graça":["Graças dou por esta vida,","Pelo bem que revelou"],"HOJE É DIA":["Hoje é dia de dar louvor","Sinto agora o seu amor"],"HOJE É TEMPO":["Hoje é tempo de louvar a Deus","E em nós agora habita o seu Espírito"],"Hoje é tempo (arr. Tiago Costa)":["Hoje é tempo de louvar a Deus","E em nós agora habita o seu Espírito"],"Hosana":["Hosana, hosana,","Hosana ao nosso Rei"],"HOSANA NAS ALTURAS":["Grande é o Senhor, o Rei do Universo , (3x)","Oh quão grande é!"],"Infinitamente mais":["Sim, eu sei, Senhor, que tu és soberano","Tens os teus caminhos"],"Infinitamente Mais II":["Sim, eu sei, Senhor, que tu és soberano","Tens os teus caminhos, tens teu próprio plano"],"Isaias 53":["Ele não tinha qualquer beleza, ou majestade pra nos atrair","Nada havia em sua aparência, para o desejarmos"],"JAMAIS FALTE EM MIM":["Jamais falte em mim Senhor a Tua graça","Jamais falte em mim Senhor o Teu amor"],"Jesus a Rocha Eterna":["Jesus a rocha eterna, a pedra angular","Que os poderes do inferno não puderam derrotar"],"Jesus a Rocha Eterna - Asaph Borba":["Jesus a rocha eterna, a pedra angular","Que os poderes do inferno não puderam derrotar"],"JESUS CRISTO, ESPERANÇA DO MUNDO":["Um pouco além do presente","Alegre o futuro anuncia"],"JESUS CRISTO MUDOU MEU VIVER":["Jesus Cristo mudou meu viver","Jesus Cristo mudou meu viver"],"JESUS É A ALIANÇA":["Jesus é a aliança entre você e eu","Jesus é a aliança entre você e Deus"],"Jesus Em Tua Presença":["Jesus em tua presença","Reunimo-nos aqui"],"Jesus é o Rei da Glória":["Todo poder te foi dado","No céu e na terra"],"Jesus Merece":["Jesus merece todo louvor","Jesus merece todo louvor"],"Jesus, Meu Amigo":["Jesus, meu amigo","Te quero mais"],"Jesus quer nascer":["Numa noite longa","Com os pés cansados de andar"],"Jesus, Te Amamos":["A terra passará","O teu amor não mudará , , , , , , , , , , , , , , , , , , , , , ,"],"JESUS TE ENTRONIZAMOS":["Jesus te entronizamos","Declaramos que és Rei (que és Rei)"],"Jesus, Tu És Meu Bom Pastor":["Perto de ti, eu quero estar","Para escutar tua voz"],"JUNTOS":["Juntos  na mesma fé","No mesmo amor"],"LÁ ESTÁ O MEU TESOURO":["Lá está o meu tesouro","Lá    onde não há choro"],"LA MIRADA DE JESUS":["Cómo es la mirada de Jesús","Cómo es la mirada de Jesús"],"LA MIRADA DE JESUS   - Santiago Benavides":["Cómo es la mirada de Jesús                                Si él mira con el amor con que un padre mira un hijo","Cómo es la mirada de Jesús                                Y mira viendo la historia que hay detrás"],"LEÃO DA TRIBO DE JUDÁ":["Ele é o Leão da Tribo de Judá","Jesus tomou nossas cadeias e nos libertou"],"LEÃO DE JUDÁ":["Ouve-se o júbilo de todos os povos","Os reis se dobraram ao Senhor"],"LIVRE ACESSO":["Senhor, eu não sou nada","Diante do teu poder"],"LOGO DE MANHÃ":["Logo de manhã      quero te buscar","Tua voz ouvir,   teu amor sentir"],"LOUVADO SEJA":["Louvado seja,    Senhor teu nome","Entronizado   entre as nações"],"LOUVAI A DEUS  (SL.150)":["Louvai a Deus no seu santuário","E no firmamento, obra do seu poder"],"LOUVAI, LOUVAI":["Louvai, louvai,","Com vossas vozes vinde louvai"],"LOUVA OH MINH’ALMA AO SENHOR":["Louva oh min’alma ao Senhor","Louvarei ao Senhor"],"Louvemos ao Senhor":["Louvemos ao Senhor","Louvemos ao Senhor"],"LOUVORES E HONRAS":["Louvores e honras ao nome de Cristo","Convém, fica bem adorar ao Senhor"],"Luz Do Mundo":["Pregava certa vez o meu Jesus aqui","Conselhos preciosos ele então nos deu"],"Magnificar":["Magnificar o teu santo nome que é belo","Magnificar o teu santo nome eterno , ,"],"MAIS DE CRISTO":["Mais de Cristo eu quero ver","Mais do seu amor obter"],"Mais Perto Quero Estar":["Mais perto quero estar  meu  Deus  de ti","Mesmo que seja a dor  que me una a Ti"],"MAIS QUE UMA VOZ":["Eu queria  ter mais que uma voz","Mais que um amor"],"Manancial":["Senhor, estou aqui para te adorar","Em tua pre---sença desejo estar"],"MANSO E SUAVE":["Manso e suave Jesus convidando","Chama por ti e por mim"],"Mãos do Oleiro":["Lindo Senhor, maravilhoso sei muito bem","Que os meus dias todos estão dentro do"],"Maravilhoso Amor":["Nâo existe nada melhor","Do que ser teu amigo Senhor"],"MARCHAREMOS":["Nós queremos ouvir tua voz","Teu louvor sempre esteja entre nós"],"Mar do esquecimento":["Em ter misericórdia","reside o seu prazer"],"Me Convém Diminuir":["Enche o meu coração de Ti","Pois sem Ti não sou nada"],"Me Derramar":["Eis-me aqui outra vez","Diante de ti abro meu coração"],"MEDITE EM SEU AMOR":["Medite em seu amor","Medite em sua bondade"],"Melhor Amigo (Seja na Hora)":["Lara, lara, lara, lara Rei"],"MENTE E CORAÇÃO":["Ah,  como é bom poder","Aos pés da cruz depositar"],"MEU AUXÍLIO":["Por que estás abatida, oh min’alma","Por que te perturbas dentro em mim?"],"Meu Deus é bom pra mim":["Meu Deus é bom pra mim","comigo vai"],"Meu Lugar É Aqui":["De coração pra coração","Faço dos meus dias"],"Meu refúgio":["És o meu refúgio,  minha Fortaleza","Meu socorro eterno, és o meu abrigo"],"Meu Refúgio (arr.Baião)":["Cristo, tu és meu Refúgio","Em quem posso confiar"],"Meu Respirar":["Este é o meu respirar","Este é o meu respirar"],"Meu Universo":["Que sejas meu universo"],"MINHA HISTÓRIA":["Olho meus dias passados","Tantas lembranças no ar"],"Mostra-me":["Mostra-me teus caminhos oh Senhor","E ensina-me tuas sendas oh Senhor"],"Muito Obrigado":["(BPM: 110)"],"Muitos virão te louvar":["De todas as tribos, povos e raças","Muitos virão te louvar"],"Muitos virão te louvar (V2)":["De todas as tribos, povos e raças","Muitos virão te louvar"],"Nada além do Sangue":["||:Teu sangue leva-me além a todas as alturas","Onde ouço a tua voz"],"Nada além do Sangue + Liberdade":["Que nos lava dos pecados","E nos traz restauração"],"Nada se compara a Ti":["Tudo, tudo o que somos","Sonhos, dons e talentos"],"Nada se compara a Ti (V2)":["Tudo, tudo o que somos","Sonhos, dons e talentos"],"Não a minha vontade":["Não a minha vontade, mas a tua","Não a minha vontade, mas o teu querer"],"NÃO A MINHA VONTADE":["Não a minha vontade, mas a tua","Não a minha vontade, mas o teu querer"],"NÃO A NÓS":["Não a nós, Senhor, não a nós","Mas ao teu nome dá glória"],"NÃO TENHAS SOBRE TI":["Não tenhas sobre ti ,","Um só cuidado qualquer que seja"],"Naquele dia":["Vai chegar o dia","Quando o mundo inteiro verá"],"NAS ESTRELAS":["Nas estrelas vejo a sua mão","E no vento ouço a sua voz"],"Natal 2023: Medley Coral":["Surgem anjos anunciando","Paz na Terra, e a Deus, louvor"],"Natal 2023: Medley crianças":["Meu Deus é um Deus grandão","Meu Deus é um Deus grandão"],"NEM UM MOMENTO SÓ":["Nem um momento só","Deixou-me o seu olhar"],"Ninguém É Igual a Jesus":["Kakuli walisoka la Iesu","Kakuli walisoka la Iesu"],"No controle tu estás":["És meu Pastor e nada faltará","Às águas calmas me levarás"],"No Egito Escravo Fui":["No Egito escravo fui, sim, sim, oh sim , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,","No Egito escravo fui, do vil faraó"],"Natal 2023: Noite de Paz":["Noite de paz, noite de amor","Tudo dorme, em derredor"],"No poder do teu amor":["Senhor eis-me aqui","Vem transformar meu ser"],"Nos alegraremos":["Senhor Jesus, tão grande é o teu poder","E o teu amor sustenta o meu viver"],"Nos Braços Do Pai":["(BPM: 58)"],"Nossa Oração":["Caminhar con--tigo  sem--pre","Em teus átrios descansar"],"NOSSO DEUS DE TODA A GRAÇA":["Nosso Deus de toda a graça","Que nos chamou à sua glória eterna"],"Nosso Deus é soberano":["Nosso Deus é soberano","Ele reina"],"Nosso General é Cristo":["Pelo Senhor marchamos sim","E o seu exército poderoso é"],"NOVA VIDA":["Romperam-se as cadeias","Quebraram-se os grilhões"],"Novo Ser":["Nâo importa tanto o meu exterrior","Minha altura, peso ou nada tem valor"],"O amor do nosso Deus":["Jesus deixou","toda sua glória"],"ONDE ESTIVEREM DOIS OU TRÊS":["Onde estiverem dois","Ou três reunidos"],"Obedecer":["Obedecer é mais que importante","É prova de amor"],"Obrigado":["Deus nos deu uma família","Deus nos deu muita alegria"],"Obrigado Jesus":["Pelo sol da manhã"],"Oceanos":["Tua voz me chama sobre as águas"],"O Dia da Vitória":["Assim como a noite aguarda o sol","Como a brisa sonha um dia soprar"],"OFEREÇO MINHA VIDA":["Tudo que sou, tudo que tenho","Estão diante de ti, Senhor"],"OFERECO MINHA VIDA -I.B. Paz":["Tudo que sou, tudo que tenho","Estão diante de ti, Senhor"],"Oferta de amor":["Venho, Senhor, minha vida oferecer","Como oferta de amor e sacrifício"],"O Fruto do Espírito":["O fruto do espírito é o amor","O fruto do espírito é o amor"],"O Nome de Jesus":["O nome de Jesus é poderoso","O nome de Jesus é sobre todos"],"O GRANDE AMIGO":["Em Jesus amigo temos","Mais chegado que um irmão"],"Oh, graça":["Embora fosse rico","Por seu amor a nós"],"Oh, Quão Lindo Esse Nome É":["Capotraste na 2ª casa"],"Ó, vinde, adoremos!":["Ó! Vinde fiéis, triunfantes e alegres","Sim, vinde a Belém, já movidos de amor!"],"Olhando para Cristo 1":["Nem tribulação, nem provação,","Nem angústia ou a mais profunda dor"],"Olhando para Cristo 2":["Nem tribulação, nem provação, nem angústia","Ou a mais profunda dor"],"Olhos Fixos":["Que a sua voz","seja a mais ouvida"],"Olhos Fixos arr.2":["Que a sua voz seja a mais ouvida","Que todas outras, que todas outras"],"O MEU LOUVOR":["O meu louvor é fruto","Do meu amor por ti, Jesus"],"O Meu Querer":["Cada vez que eu abrir a minha boca","Cada vez que eu olhar na direção de alguém"],"O Motivo Da Nossa Alegria":["Aquele que está feliz diga: amém!","Aquele que está feliz grite: aleluia!"],"O PAI ILUMINOU":["O Pai iluminou os nossos corações","Nos libertou através da verdade"],"O Poder da Cruz":["Posso ver o dia","Na manhã sombria"],"O primeiro natal":["Um Anjo proclamou","o Primeiro Natal"],"O Primeiro Natal":["Ah, um anjo proclamou","o primeiro Natal"],"Oração":["Meu Jesus a Ti me achego com temor no coração","És o meu maior anseio, rei da minha salvação"],"OS CÉUS MANIFESTAM":["Os céus manifestam","tua glória, Senhor"],"O Senhor do Tempo":["Mestre, me veja menino","Deixa-me correr com Teus pequeninos"],"O SENHOR PODEROSO REINA":["Aleluia! Aleluia! Aleluia!","Reina o Senhor!"],"Os que levam boas-novas":["Como invocarão","àquele em quem não creram?"],"OS REIS DA TERRA":["Os reis da terra se prostrarão","Ante a ti, Senhor"],"OUVE NOSSAS VOZES":["Ouve nossas vozes","Quando te buscarmos"],"Ó, vem, Emanuel!":["Ó, vem, ó, vem, Emanuel!","Redime o povo de Israel,"],"O VERBO DIVINO":["É Jesus o Verbo divino,","Encarnação de Deus"],"O Verbo Virou Gente":["(intro 2x)"],"PAI EU TE AMO":["Pai, eu te amo, te louvo e te adoro","Glória ao teu nome em toda a terra"],"Pai Nosso (João Alexandre)":["Pai nosso que estás no céu    santificado seja o teu nome","Venha a nós o teu reino seja feita a tua vontade"],"Papai Do Céu":["Papai no céu a me olhar , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,","Sempre cuida de mim sem cansar"],"Pare!":["Pare, eu vou contar-lhe o que Cristo fez por mim , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,","Pare, eu vou contar-lhe o que Cristo fez por mim"],"Paz e Comunhão":["Cuida dos passarinhos e também da flor","Eles esperam pelo teu amor!"],"Pela Fé":["Intro"],"Pequeninos":["Deixa vir, deixa vir","Deixa vir a Cristo"],"Pequeno Coração":["Senhor eu quero ser uma benção","Ainda criança sei que posso orar"],"Perdão e graça":["Confesso a ti, Senhor","Que fraco eu sou"],"Permaneça comigo":["Quando a noite chegar","E a terra escurecer"],"Perto está o Senhor":["Perto está o Senhor","de todos os que o invocam em verdade"],"Poder do Teu Amor":["Senhor eis me aqui vem transformar meu ser","No fluir da graça que encontrei em Ti"],"Poder Pra Salvar":["Todos necessitam","De um amor perfeito"],"POR ISSO REINA":["O Rei da glória, o Rei    dos reis","Senhor dos senhores,  soberano Deus"],"Por que Ele vive - Refrão":["E porque ele vive","posso crer no amanhã"],"PORQUE ELE VIVE":["Deus enviou   seu Filho amado","Pra nos salvar    e perdoar"],"PORQUE ELE VIVE - André Valadão e Cesar e Fabiano":["E porque ele vive  possso crer no amanhã","Porque ele vive temor não há"],"POSSO ADORAR":["Posso adorar para sempre a Jesus","Por meio do sangue vertido na cruz"],"Posso Adorar Para Sempre A Jesus":["Posso adorar para sempre a Jesus","Por meio do sangue vertido na cruz"],"Postura do Reino":["Andando, vivendo","Buscando só tuas mãos"],"Pra Cima Brasil":["Como será o futuro do nosso país?","Surge a pergunta no olhar e na alma do povo."],"Pra Cumprir Teu Chamar":["Ninguém parou pra nos aplaudir","Desde o inicio chamou-nos para um caminho sem fama"],"PRECIOSA GRAÇA":["Preciosa graça  de Jesus","Que um dia me salvou"],"Preciso de Ti":["Preciso de ti, preciso do teu perdão","Preciso de ti, quebranta meu coração"],"Primeiro Amor":["Quero voltar ao início de tudo , , , , , , , , , , , , , , , , , , , , , ,","Encontrar-me contigo, Senhor"],"PROFUNDO AMOR":["Teu grande  amor derrama sobre mim","Profundo  amor  enche o coração"],"Proteção":["Seja aonde for a tua mão me guiará","Seja aonde for a tua mão me guiará"],"Purifica-me":["Ensina-me","Teu caminho Senhor"],"Puro e Simples":["Capotraste na 1ª casa (forma dos acordes no tom de C"],"Qual o seu pedido?":["Posso ouvir Jesus chamando","\"Quem quiser pode se aproximar\""],"QUANDO A GLÓRIA DO HOMEM SE VAI":["Quando a glória de um homem se vai .","quando a dor bate forte e ele cai"],"QUANDO EU OLHO A TUA SANTIDADE":["Quando eu olho tua santidade","Quando eu vejo tua formosura"],"Quanto amor":["Quanto amor, quanto amor,","Ele tem por mim"],"QUÃO FORMOSO ÉS":["Quão formoso és, Rei do Universo","Tua glória enche a terra e enche os céus"],"Quão Grande É O Meu Deus":["Quão grande é o meu Deus!","Cantarei: Quão grande é o meu Deus! ,"],"QUÃO GRANDE ÉS TU":["Tu és digno de todo louvor, Senhor","Em tua presença"],"Que as palavras dos meus lábios":["QUE AS PALAVRAS DOS MEUS LÁBIOS","E O MEDITAR DO CORAÇÃO, AGRADEM A TI, AGRADEM A TI!"],"QUE AS PALAVRAS DOS MEUS LÁBIOS (Sl. 19)":["Que as palavras dos meus lábios","E o meditar do meu coração"],"QUEBRA AS CADEIAS":["Quebra as cadeias, quebra as correntes","Quebra os grilhões e as amarras,"],"Quebrantado":["Eu olho para cruz","E para a cruz eu vou"],"Quebrantado - V2":["Eu olho para cruz","e para a cruz eu vou"],"Quem além de Ti":["Tu nos tens trazido até aqui","E não nossas forças, ou nossa bondade"],"Quem é Deus acima do Senhor?":["Quem é Deus acima do Senhor?","E quem é rocha como o nosso Deus?"],"Quem Fez":["Quem fez a linda estrela? A linda estrela? A linda estrela?","Quem fez a linda estrela? Deus nosso Pai"],"RENOVA-ME - arr. Marcos Witt":["Renova-me, Senhor Jesus","Já não quero ser igual"],"Resplandeceu":["O nosso Deus resplandeceu","Em nossos corações"],"Quem Nos Separará?":["Quem nos separará  do amor de Cristo","Será tribulação, angústia ou perseguição"],"QUEM PODE LIVRAR":["G           Bm             C   C/D"],"Quem pode ouvir?":["As paredes caíram","Mas a mesa ficou no lugar"],"Quero Agradecer":["Teu olhar me alcançou","Tua voz me atraiu"],"Quero aprender a orar":["Quero aprender a orar","De modo"],"QUERO CELEBRAR":["Quero celebrar minha nova vida","Quero celebrar minha nova vida"],"QUERO LOUVAR-TE":["Quero louvar-te, sempre mais e mais","Quero louvar-te, sempre mais e mais"],"Quero Me Mover":["Na, Na, Na,Na, Na","Na, Na, Na,Na, Na , (2x)"],"QUERO SUBIR":["Quero subir ao monte santo de Sião","E entoar um novo cântico ao meu Deus"],"Grandes obras":["Quero te adorar, oh Rei Jesus","Com todo o meu ser declarar o meu amor,"],"Raça eleita":["Somos raça eleita","Sacerdócio real"],"Rei Da Glória":["As estrelas incontáveis Tu conheces todas pelo nome","Todo o universo desenhado foi em Tua majestade"],"Rei das nações":["Grandes são as tuas obras","Senhor todo poderoso"],"REI DE SALÉM":["Toda a glória, honra e poder","Ao Rei de Salém"],"REI DOS REIS":["Misericórdia, graça e perdão","Só nele eu encontrei"],"Reina":["Reina sobre o meu ser","Reina sobre o meu viver"],"Reina em mim":["Sobre toda a terra tu és o Rei","Sobre as montanhas e o pôr do sol"],"Reina Jesus":["Que corra teu rio, que sopre alento","Que queime teu fogo por dentro"],"Rendei graças ao Senhor":["Rendei graças ao Senhor","Porque ele é bom"],"Rendido Estou":["Toma-me rendido estou","Aos pés da cruz me encontrei"],"RENOVA-ME":["Renova-me, Senhor Jesus","Já não quero ser igual"],"Restaurados":["Eu sou uma obra de arte","Planejado em cada detalhe"],"Reunidos Vem Opera":["Reunidos vem opera oh Deus bondoso","Vem cobrir-nos com tua graça e plena paz"],"REUNIDOS, VEM OPERA":["Reunidos, vem, opera oh Deus bondoso","Vem cobrir-nos com tua graça"],"RIO DE VIDA":["Há um rio de vida fluindo entre nós","Que desce do trono, do trono de Deus"],"Rude Cruz":["Rude cruz se erigiu,","dela o dia fugiu,"],"Sacrifícios de Louvor":["Sacrifícios de louvor","Sacrifícios de amor"],"SALA DO TRONO":["Pai eu quero contemplar","Tua glória e majestade"],"Sal da terra":["Eu quero sal, sal, sal","Quero sal, sal, sal"],"Salmo 1":["Como é feliz aquele que não ouve as ideias de quem faz o mal , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,","Como é feliz quem não se deixa levar pela zoeira"],"Levanta-te, Senhor! (Salmo 10)":["Em tempos difíceis","Quando o mal parece dominar"],"Salmo 139":["Senhor, tu me sondas e me conheces,","Sabes quando assento e levanto,"],"Salvos (Efésios 2)":["Antigamente","a gente estava morto"],"SANTO DEUS":["Quando eu entro em tua presença","E contemplo a tua glória"],"SANTO DEUS, SANTÍSSIMO":["Santo Deus, Santíssimo,","Só tu és digno de louvor"],"Santo Espírito":["Não há nada igual,","não há nada melhor"],"SANTO, PAI TU ÉS SANTO":["Santo, Pai tu és Santo"],"SANTO, SANTO, SANTO 1":["Santo, Santo, Santo","É o Senhor dos exércitos"],"SANTO, SANTO, SANTO 2":["Santo! Santo! Santo! Deus onipotente!","Cedo de  manhã  cantaremos teu louvor"],"Santo, Santo, Santo (Hino) V2":["Santo! Santo! Santo! Deus onipotente!","Cedo de manhã cantaremos teu louvor."],"SANTO, SANTO, SANTO 3":["Santo, Santo, Santo","Santo, Santo, Santo"],"SARA NOSSA TERRA":["Se o meu povo se humilhar,","Se humilhar e orar"],"Se confessarmos":["Se confessarmos os nossos pecados","Ele é fiel e justo"],"Se Eu Fosse Um Elefante":["Se eu fosse um elefante","Com a minha tromba eu iria louvar"],"Se Eu Fosse Um Elefante (ASSIM EU VOU LOUVAR)           arr Ruth":["Se eu fosse um elefante","Com a minha tromba louvaria ao Senhor"],"SEGURANÇA":["Que segurança, sou de Jesus!","E já desfruto o gozo da luz"],"Segurança (v2)":["Que segurança, sou de Jesus!","Eu já desfruto o gozo da luz"],"Seja Deus Gracioso":["Seja Deus gracioso","E nos abençoe"],"SEJA ENGRANDECIDO":["Seja engrandecido, oh Deus da minha vida,","Tu és o Deus da minha salvação"],"Seja o centro":["Jesus, seja o centro , , , , , , , , , , , , , , , , ,","Minha fonte, minha luz"],"Sempre Juntos":["O Senhor tem propósitos em nossas vidas","O Seu amor tem algo mais"],"SENHOR DEUS ESTÁ NO MEIO TE TI":["Senhor Deus está no meio de ti","Senhor Deus te salva"],"Senhor, Eu Preciso (Lord, I Need You)":["Venho a Ti me confessar pra minh'alma descansar","Sem Tuas mãos perdido estou guia-me      por Teu Amor"],"SENHOR, TE QUERO":["Eu te busco, te procuro, oh Deus","No silêncio tu estás"],"Ser Como Jesus":["Toma-me, Senhor, muda meu viver","Quero hoje ser, ser como Jesus"],"Seu Nome É":["Seu nome é maravilhoso conselheiro","Príncipe da paz"],"Siga-Me":["O tempo chegou","Em que Deus se tornou um de nós"],"SINAL DO REINO":["Ser um sinal do teu Reino","Vida completa em Jesus"],"SÓ A TI SERVIREI":["Com meu viver, com toda a força","Com todo o meu entendimento"],"Soberano":["Soberano Deus e Senhor da vi - da","Exaltado criador, és a nossa razão de cantar"],"Só Em Jesus":["Intro","Só em Jesus eu encontrei"],"Só me orgulho em Cristo":["Quão maravilhoso, quão grande amor:","Jesus morreu por mim!"],"SONDA-ME USA-ME":["Sonda-me, Senhor,","e me conheces"],"Sou De Jesus":["Sou tão pequeno mas sou de Jesus","Ele comprou minha vida na cruz"],"Sou feliz":["Tu és tudo que eu preciso","Tu és o meu grande amigo"],"SOU FELIZ":["Se paz a mais doce me deres gozar,","Se  dor, a mais forte  sofrer,"],"SOU GRATO, SENHOR":["Sou grato, Senhor,","Por todas as provações"],"Superabundante Graça":["Somos filhos da graça divina e sem par,","Frutos do amor que nos veio alcançar,"],"Super-herói":["Eu tenho um super-herói","Que é muito melhor que o He-man"],"Surgem Anjos Proclamando":["Surgem anjos proclamando","paz na terra e, a Deus, louvor."],"Tapeceiro":["Tapeceiro Grande artista","Vai fazendo o seu trabalho"],"TE AGRADEÇO":["Por tudo o que tens feito","Por tudo o que vais fazer"],"TE AGRADEÇO, OH PAI":["Te agradeço, oh Pai,","Pelo amor derramado,"],"Te dou meu Aleluia":["Uma coisa nova Você está fazendo","O meu dia se encheu de cor"],"teste":["oi"],"Swing Low Sweet Chariot":["Swing low, sweet chariot,","Comin’ for to carry me home."],"Teu Amor Não Falha":["Nada vai me separar","Mesmo se eu me abalar"],"Teu povo":["Somos teu povo, a tua igreja","Tua luz brilha sobre nós"],"UM SÓ REBANHO":["Um só rebanho, um só Pastor","Uma só fé em um só Salvador"],"Teus Altares (Sl.84:1-4,10,11)":["Quão amáveis são os teus tabernáculos,","Senhor dos Exércitos;"],"Teus olhos":["Teus olhos revelam que eu","Nada posso esconder"],"Time De Deus":["É , , bom   te  ver por aqui no time de Deus","Onde podemos cantar pra Jesus,"],"Toc, Toc, Toc":["Toc toc toc,","alguém me bate à porta"],"Toda a glória seja a Deus":["Graça e paz seja a nós","Por Deus Pai e Jesus"],"Toda dor é por enquanto":["Toda dor é por enquanto","A tua alegria, daqui até o fim"],"Todo olho o verá":["Eis que vem com as nuvens","Todo o olho o verá"],"Todo poder pertence a Jesus":["Todo poder pertence a Jesus","Ele é o Rei dos reis"],"TODOS QUE TEM SEDE":["Todos que tem sede","e os fracos que são"],"Toma o teu lugar":["Toma o teu lugar, toma o teu lugar","Lugar de honra, lugar de glória"],"TRAZ-ME, Ó SENHOR":["Traz-me, ó Senhor,","Para os braços teus"],"Tudo Entregarei":["Tudo, ó Cristo, a Ti entrego;","Tudo, sim, por Ti darei!"],"Traz-me, ó Senhor":["Traz-me, ó Senhor,","Para os braços teus"],"Três palavrinhas só":["Três palavrinhas só","Eu aprendi de cor"],"Tributo a Yeovah":["Eu sou grato por tudo que tenho","O tesouro maior desse mundo"],"Tributo a Yehovah - arr Tiago":["Eu sou grato por tudo que tenho","O tesouro maior desse mundo"],"Tua Fidelidade":["Tua Fidelidade é Grande","Tua Fidelidade Incomparável é"],"TUA PRESENÇA 1":["Tua presença é o meu lugar","É onde eu sinto a tua paz"],"Tua presença":["Onde quer que eu esteja, Senhor","Em um vale ou alta montanha"],"Tua presença (versão II)":["Referência: http://youtu.be/HQVmwseAgPo"],"TUA VIDA EM MINHA VIDA":["Vem em mim reinar","Em tudo que eu sou"],"Tudo Criou":["Tudo criou, somos o seu prazer","Cuida de nós, pois nos vê como um tesouro"],"Tudo o que Deus faz é bom":["Tudo o que Deus faz é bom","Tudo o que Deus faz é bom"],"Tudo O Que Sou":["Em Tuas mãos, eu descansarei","Meu coração, Te en trego"],"Tudo para ti":["||: Em cada dia, Senhor, te buscar","Cada momento, teu no - me louvar"],"Tudo Pra Ti":["Em cada dia, Senhor, te buscar,"],"Tu És Bom":["Lindo  Jesus,Rei do meu coração","Como eu amo os Teus caminhos"],"Tu és fiel":["Tu és fiel, Senhor, meu Pai celeste","Pleno poder aos teus filhos darás"],"TU ÉS SANTO":["Tu és Santo ( Tu és Santo )","Poderoso ( Poderoso )"],"Tu és soberano":["Tu és soberano","sobre a terra"],"Tu és soberano (v2)":["Tu és soberano","Sobre a Terra"],"UM HINO DE AMOR":["Tu estás pra sempre em mim","Cuidando em todo tempo"],"Um Rei Diferente":["Dentre as palhas nasceu o Rei menino Jesus.","Veio para ser a nossa paz."],"Um Só Coração":["Um, só um coração,","Um só olhar, um só sentir"],"Um só Deus":["Um só Deus, um só Senhor,","Uma só fé, um só  amor"],"Da cabeça até o pé":["Da cabeça até o pé","Eu sou criança"],"Unidade e Diversidade":["Da multidão dos que creram era só um o coração","E a alma, uma somente, uma semente"],"Vamos Adorar a Deus":["Vamos adorar a Deus","Vamos adorar a Deus"],"Vaso novo":["Eu quero ser","Senhor amado"],"Vasos Quebrados":["Em pedaços minh'alma estava","Mas por Sua graça refeito sou"],"Vejo O Senhor":["Vejo o Senhor Alto e Sublime","Reinando no trono do meu ser"],"VEM":["Vem, esta é a hora da adoração","Vem, dar a ele teu coração"],"Vem com Josué Lutar em Jericó":["Vem com Josué lutar em Jericó","Jericó, Jericó"],"Vem Espírito Santo, Vem Sobre Mim":["Vem Espírito Santo, vem sobre mim","Vem com seu amor, vem sobre mim"],"Vem Refinar":["Purifica-me como ourives refina o ouro","Purifica-me quero ser santo e puro"],"Venham, Cantemos (Salmo 95)":["Venham, cantemos","com alegria"],"Venha provar e ver":["Vem, vem clareando um novo dia","Cheio de paz e alegria,"],"Venha Sobre Nós":["Sobre nós e através de nós","Seja feita a tua vontade"],"VERDADEIRA LIBERTAÇÃO":["A verdade libertará","Todo aquele que conhecer"],"Unidade":["A começar em mim"],"Vim para adorar-te":["Do mundo a luz, tu desceste às trevas","Para meus olhos abrir"],"Vim para adorar-te 2":["Luz do mundo viestes a terra","Pra que eu pudesse te ver"],"Vinho e pão":["No nome forte de Jesus","Nos reunimos aquecidos"],"Viva Esperança":["Quão grande abismo que separa","Quão altos montes a escalar"],"Vou Me Lembrar":["Lembre-se de quem bebeu do fel amargo de uma taça","Que ainda existe quem torça pra assistir a uma desgraça"],"Zuzim":["Somente adorar a Ti, louvores vamos te dar","(Somente adorar a Ti, louvores vamos te dar)"],"A alegria está no coração":["A alegria está no coração","De quem já conhece a Jesus"],"Escuta, Senhor":["Escuta Senhor,","Escuta Senhor,"],"Mandamento":["Ame ao Senhor seu Deus","De todo o coração"],"Aleluia, cantai a Deus!":["Aleluia, Aleluia, Aleluia, Aleluia","Cantai a Deus"],"Sou Livre":["Sou livre para te servir, sou livre para caminhar","Em santidade,   em toda verdade"],"Louvor de roda":["De roda vamos brincar","e a Deus vamos louvar"],"Acredito":["Nestes dias de desespero","Incerteza e medo há"],"Teu Reino Venha, ó Deus":["A tua glória, ó Deus é a nossa paixão","Dar Cristo a conhecer em todo lugar"],"CELEBRAI A CRISTO (V2)":["Celebrai a Cristo, celebrai! (4x)"],"Quem sou eu":["Quem sou eu? Pra que o Deus de toda terra","Se preocupe com meu nome se preocupe com minha dor"],"Bem Vindo À Família v2":["Bem vindo à família,","É bom estar aqui"],"Rivugo":["Oração tomG"],"Nomes":["Como é bom ver tanta gente","Como é bom poder cantar"],"Diante de Ti":["Vem Senhor, encher este lugar","Vem Senhor, encher este lugar"],"Porque Ele vive - arr Luiz Roberto":["Deus enviou","seu Filho amado"],"Magnificat":["Meu coração","Exalta o Senhor"],"Ressurreição":["Eis morto o Salvador","na sepultura"],"Samuel":["Era uma vez um menino,","que, ainda pequenino"],"Pequena vila de Belém":["Pequena vila de Belém,","repousa em teu dormir,"],"Desenvolvendo amor":["Tua palavra é uma semente","Meu coração é uma terra boa"],"Terra boa":["Uma semente","Está procurando um lugar pra crescer"],"O Senhor não se esqueceu de nós":["O Senhor não se esqueceu de nós","O seu povo aflito redimiu"],"Medley: Vem Refinar, Eu Vou Construir, Sonda-me":["Purifica-me como ourives refina o ouro","Purifica-me quero ser santo e pu ro"],"Bondade de Deus":["Te amo, Deus","Tua graça nunca falha"],"A Vou seguir com fé":["O meu Deus é maior que os meus problemas","Eu não temerei, com Jesus eu vou além"],"Xote da glória":["Brilha, brilha,","Brilhou a glória!"],"Cantai ao Senhor (Salmo 96) - Xote":["Glória e majestade","estão diante dele"],"Vem de Ti, Senhor":["Não tenho palavras pra agradecer","tua bonda__de"],"Tua é a glória":["Tua é a  glória e o poder","Tu és pra sempre Rei"],"Falai pelas montanhas":["Falai pelas montanhas","Nos montes e por todo lugar"],"Jesus me ama":["Cristo me ama; isso eu sei","Pois a Bíblia assim me diz"],"Canção de Simeão":["Tanto esperei que já nem sei contar","o quanto sonhei com este dia tão sublime"],"Minh'alma engrandece ao Senhor":["A minh'alma engrandece","ao Senhor"]};
 /* ---------- dados: acervo real + classificação de exemplo ---------- */
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 const DAY = 86400000;
@@ -436,7 +530,7 @@ const SONG_DB = SONGS.map((r, i) => {
   if (((h >>> 4) % 100) < 9) tg.Atmosfera = [GROUPS[2].tags[(h >>> 12) % 5].n];
   const multi = r.n > 1 || h % 7 === 0;
   return {
-    id: i, title: r.t, artist: r.a || "", key: r.k, lyric: r.l, tags: tg,
+    id: i, title: r.t, artist: r.a || "", key: r.k, lyric: r.l, lyr2: LYR2[r.t] || (r.l ? [r.l] : []), tags: tg,
     last: r.u ? new Date(r.u + "T12:00:00") : null, uses: r.c,
     yt: r.c >= 6 || h % 4 === 0, au: h % 9 === 0,
     arrs: multi ? ["Arranjo original", "Acústico"] : ["Arranjo principal"],
@@ -448,10 +542,13 @@ const classified = s => allTags(s).length > 0;
 
 function rel(d) {
   if (!d) return {t: "Nunca usada", days: 9999, recent: false};
-  const days = Math.max(0, Math.round((TODAY - d) / DAY));
+  const days = Math.max(0, Math.floor((TODAY - d) / DAY)); /* escala de lib/relative-time.ts (formatTimeAgo) */
   let t;
-  if (days < 1) t = "hoje"; else if (days === 1) t = "ontem"; else if (days < 14) t = `há ${days} dias`;
-  else if (days < 60) t = `há ${Math.round(days / 7)} sem`; else t = `há ${Math.round(days / 30)} meses`;
+  if (days === 0) t = "hoje"; else if (days === 1) t = "ontem"; else if (days < 7) t = `há ${days} dias`;
+  else if (days < 30) { const w = Math.floor(days / 7); t = w === 1 ? "há 1 semana" : `há ${w} semanas`; }
+  else if (days < 365) { const m = Math.max(1, Math.floor(days / 30.44)); t = m === 1 ? "há 1 mês" : `há ${m} meses`; }
+  else { const y = Math.floor(days / 365), left = Math.floor((days - y * 365) / 30.44);
+    t = left >= 9 ? `há quase ${y + 1} anos` : left >= 4 ? (y === 1 ? "há 1 ano e meio" : `há ${y} anos e meio`) : (y === 1 ? "há 1 ano" : `há ${y} anos`); }
   return {t, days, recent: days < 21};
 }
 
@@ -468,7 +565,7 @@ let S;
 const clearFilters = () => GROUPS.forEach(g => { S.filt[g.id].clear(); S.none[g.id] = false; });
 function freshState(keep) {
   S = Object.assign({
-    dev: "phone", item: "new",
+    dev: "phone", item: "new", frame: "list", alpha: "icon", btn: "fill", wide: "on",
     q: "", cat: null, filt: {}, none: {}, modeAll: {}, sort: loadSort(), sheet: null, open: null, menu: null, gpop: null,
     pop: false, services: mkServices(), toast: null,
   }, keep || {});
@@ -493,7 +590,7 @@ function passQuery(s) {
 function match(s, ignoreG) { return passQuery(s) && GROUPS.every(g => g.id === ignoreG || passGroup(s, g)); }
 /* ordenação: o mesmo item de novo inverte o sentido; a escolha é lembrada neste aparelho */
 const SORTS = {
-  alfa: {label: "A-Z",              def: "asc",  hint: {asc: "de A a Z", desc: "de Z a A"}},
+  alfa: {label: "Título",              def: "asc",  hint: {asc: "de A a Z", desc: "de Z a A"}},
   uso:  {label: "Uso em liturgias", def: "desc", hint: {desc: "Mais usadas", asc: "Menos usadas"}},
   comp: {label: "Compositor",       def: "asc",  hint: {asc: "A–Z", desc: "Z–A"}},
 };
@@ -525,24 +622,46 @@ function actBtn(s) {
       <button data-act="stub" data-k="Editar dados">${ic("edit", 16)} Editar dados</button>
       <button data-act="stub" data-k="Editar arranjo">${ic("note", 16)} Editar arranjo</button></div>` : ""}</div>`;
 }
+const MUSIC = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+const hex2 = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const lumn = ([r, g, b]) => { const f = c => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+const cratio = (a, b) => { const x = lumn(a), y = lumn(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+const mixc = (a, b, t) => a.map((v, i) => Math.round(v * (1 - t) + b[i] * t));
+/* chip: fundo = 15% da cor sobre branco; texto = a cor escurecida até contraste >= 4,5 */
+function chipTag(gid, n) { const c = hex2(gOf(gid).color), bg = mixc(c, [255, 255, 255], .85); let fg = c, t = 0; while (cratio(fg, bg) < 4.5 && t < 1) { t += .05; fg = mixc(c, [0, 0, 0], t); }
+  return `<span class="tg" style="--bg:rgb(${bg});--fg:rgb(${fg})">${esc(n)}</span>`; }
+function fitTags(el) { /* no máximo 2 linhas; o que não couber vira "+N" */
+  el.querySelectorAll(".more").forEach(x => x.remove());
+  const tgs = [...el.querySelectorAll(".tg")]; tgs.forEach(t => t.style.display = "");
+  if (!tgs.length || !tgs[0].offsetParent) return;
+  const top = t => Math.round(t.getBoundingClientRect().top - el.getBoundingClientRect().top);
+  const tops = [...new Set(tgs.map(top))].sort((a, b) => a - b); if (tops.length <= 2) return;
+  const limit = tops[1]; let hidden = 0;
+  tgs.forEach(t => { if (top(t) > limit) { t.style.display = "none"; hidden++; } });
+  const more = document.createElement("span"); more.className = "tg more"; el.appendChild(more);
+  for (let i = tgs.length - 1; ; i--) { more.textContent = "+" + hidden; if (top(more) <= limit || i < 0) break;
+    const last = tgs.slice(0, i + 1).reverse().find(t => t.style.display !== "none"); if (!last) break; last.style.display = "none"; hidden++; }
+}
+const fitAll = () => document.querySelectorAll(".row .tags").forEach(fitTags);
 function rowNew(s) {
   const r = rel(s.last);
   const tags = allTags(s);
   const luCls = s.last ? (r.recent ? "rec" : "") : "nev";
-  const lu = `${ic("clock", 12)}<span>${s.last ? r.t : "Nunca usada"}</span>`;
-  const play = (s.yt || s.au) ? `<button class="ib r" data-act="media" data-id="${s.id}" data-k="${s.yt ? "vídeo" : "áudio"}" aria-label="Ouvir referência">${ic("play", 18)}</button>` : "";
-  /* a linha inteira abre a música (como hoje); play e ⋯ têm ações próprias */
+  const clock = ic("clock", 14);
+  const lu = `<span class="lu ${luCls}">${clock}${r.t}</span>`;
+  const refs = (s.yt ? `<span class="c-vid">${ic("play", 16)}</span>` : "") + (s.au ? `<span class="c-aud">${MUSIC}</span>` : "");
+  const play = refs ? `<button class="ib ref" data-act="media" data-id="${s.id}" data-k="${s.yt && s.au ? "vídeo e áudio" : s.yt ? "vídeo" : "áudio"}" aria-label="Ouvir referência">${refs}</button>` : "";
+  /* a linha inteira abre a música (como hoje); referências e ⋯ têm ações próprias */
   return `<div class="row" data-act="open" data-id="${s.id}">
-    <div class="c-title" role="link" tabindex="0">
+    <div class="id" role="link" tabindex="0">
       <div class="tt">${hl(s.title)}</div>
-      ${s.artist ? `<div class="sub"><span class="ar">${hl(s.artist)}</span></div>` : ""}
-      <div class="lu u-inline ${luCls}">${lu}</div>
+      <div class="sub">${s.artist ? `<span class="ar">${hl(s.artist)}</span><span class="sep" aria-hidden="true">·</span>` : ""}${lu}</div>
     </div>
-    <div class="c-lyric">${hl(s.lyric)}</div>
-    <div class="c-tags">${tags.map(t => groupTag(t.g, t.n)).join("")}</div>
-    <div class="c-used lu ${luCls}">${lu}${s.uses ? `<span style="margin-left:4px">· ${s.uses}×</span>` : ""}</div>
-    <div class="c-media">${play}</div>
-    <div class="c-act">${actBtn(s)}</div>
+    <div class="lyric">${s.lyr2.map(x => `<div>${hl(x)}</div>`).join("")}</div>
+    <div class="tags">${tags.map(t => chipTag(t.g, t.n)).join("")}</div>
+    <div class="used">${lu}${s.uses ? `<span style="color:var(--muted-foreground)">· ${s.uses}×</span>` : ""}</div>
+    <div class="play">${play}</div>
+    <div class="act">${actBtn(s)}</div>
   </div>`;
 }
 function rowOld(s) {
@@ -554,7 +673,7 @@ function rowOld(s) {
     <div class="oi">${s.yt ? ic("play", 14) : ""}${ic("more", 14)}</div></div>`;
 }
 const rowOf = s => S.item === "new" ? rowNew(s) : rowOld(s);
-const listHead = () => S.item === "new" ? '<div class="lh"><span>Música</span><span>Início da letra</span><span>Classificação</span><span>Último uso</span><span>Ref.</span><span></span></div>' : "";
+const listHead = n => S.item === "new" ? `<div class="lh"><span class="h1c">${n} música${n === 1 ? "" : "s"}</span><span class="h2t">Letra e categorias</span><span class="h2d">Letra</span><span class="h3d">Categorias</span><span class="h4d">Último uso</span><span></span><span></span></div>` : "";
 
 /* ---------- topo, home e lista ---------- */
 /* dentro de uma categoria a busca é sempre da categoria; para buscar no acervo todo, volte para Músicas */
@@ -564,11 +683,48 @@ function placeholder() {
 function topView() {
   return S.cat ? "" : `<h1 class="h1">Músicas</h1>`;
 }
+/* TEMA DA CAPA: uma tinta só para tudo que está sobre a capa (Voltar, rótulo, título, subtítulo, ícone), escolhida pelo contraste.
+   O topo (onde fica o Voltar) e a base (onde fica o texto) têm fundos diferentes; testa branco+gradiente escuro e tinta escura+gradiente claro,
+   reforçando o gradiente (k) até as duas regiões chegarem a contraste >= 4,5; vence o modo que precisa de menos reforço. */
+const WHITE = [255, 255, 255], BLACK = [0, 0, 0], INK_DARK = [11, 18, 32], INK_CACHE = {};
+function coverTheme(cT, cX) {
+  const modes = [{ink: WHITE, css: "#fff", scrim: BLACK, sh: true}, {ink: INK_DARK, css: "rgb(11,18,32)", scrim: WHITE, sh: false}];
+  let best = null;
+  for (const m of modes) for (let k = 1; k <= 1.8; k += .1) {
+    const bT = mixc(cT, m.scrim, Math.min(.9, .10 * k)), bX = mixc(cX, m.scrim, Math.min(.9, .40 * k));
+    const r = Math.min(cratio(m.ink, bT), cratio(m.ink, bX));
+    if (r >= 4.5) { if (!best || k < best.k - 1e-9) best = {m, k, r}; break; }
+  }
+  if (!best) { const m = modes[0], k = 1.8; best = {m, k, r: Math.min(cratio(m.ink, mixc(cT, m.scrim, .18)), cratio(m.ink, mixc(cX, m.scrim, .72)))}; }
+  const m = best.m, rgb = m.scrim.join(",");
+  return {css: m.css, sh: m.sh, r: best.r, k: best.k,
+    st: `rgba(${rgb},${Math.min(.9, .05 * best.k).toFixed(2)})`, sb: `rgba(${rgb},${Math.min(.9, .5 * best.k).toFixed(2)})`,
+    pbg: m.sh ? "rgba(0,0,0,.4)" : "rgba(255,255,255,.55)", pbg2: m.sh ? "rgba(0,0,0,.6)" : "rgba(255,255,255,.75)"};
+}
+const themeVars = t => `--ink:${t.css};--st:${t.st};--sb:${t.sb};--pbg:${t.pbg};--pbg2:${t.pbg2};--tsh:${t.sh ? "0 1px 3px rgba(0,0,0,.35)" : "none"}`;
+/* capa de cor: topo = cor da tag; base = cor um pouco escurecida pelo gradiente 135° da capa */
+const themeFor = st => st.img ? (INK_CACHE[st.img] || coverTheme([60, 60, 60], [60, 60, 60])) : coverTheme(hex2(st.color), mixc(hex2(st.color), BLACK, .23));
 const backBtn = () => `<button class="bk" data-act="back" aria-label="Voltar para Músicas">${ic("back", 18)} Músicas</button>`;
+function autoInk() { /* capa com imagem: amostra o canto superior esquerdo (topo) e o inferior esquerdo (texto); sem acesso (CORS) → escuro conservador */
+  if (!S.cat) return;
+  const g = gOf(S.cat.g), t = g.tags.find(x => x.n === S.cat.n), st = STYLE[sk(g.id, t.n)];
+  if (!st.img || INK_CACHE[st.img]) return;
+  const url = st.img, im = new Image(); im.crossOrigin = "anonymous";
+  const apply = th => { INK_CACHE[url] = th; const h = document.getElementById("herow"); if (h) h.setAttribute("style", themeVars(th)); };
+  im.onload = () => { try {
+    const avg = (sx, sy, sw, sh) => { const c = document.createElement("canvas"); c.width = c.height = 24; const x = c.getContext("2d");
+      x.drawImage(im, im.naturalWidth * sx, im.naturalHeight * sy, im.naturalWidth * sw, im.naturalHeight * sh, 0, 0, 24, 24);
+      const d = x.getImageData(0, 0, 24, 24).data; let r = 0, g2 = 0, b = 0; const n = d.length / 4;
+      for (let i = 0; i < d.length; i += 4) { r += d[i]; g2 += d[i + 1]; b += d[i + 2]; } return [r / n, g2 / n, b / n]; };
+    apply(coverTheme(avg(0, 0, .35, .25), avg(0, .6, .5, .4)));
+  } catch (e) { apply(coverTheme([60, 60, 60], [60, 60, 60])); } };
+  im.onerror = () => apply(coverTheme([60, 60, 60], [60, 60, 60]));
+  im.src = url;
+}
 function heroView() {
   if (!S.cat) return "";
   const g = gOf(S.cat.g), t = g.tags.find(x => x.n === S.cat.n), st = STYLE[sk(g.id, t.n)];
-  return `<div class="herow" id="herow">${backBtn()}<div class="hero" style="${bgOf(st)}">
+  return `<div class="herow" id="herow" style="${themeVars(themeFor(st))}">${backBtn()}<div class="hero" style="${bgOf(st)}">
     <span class="gl">${esc(g.id)}</span><h1>${esc(t.n)}</h1><p>${esc(t.d)}</p></div>
     <button class="pers" data-act="pers" aria-expanded="${S.pop}" aria-label="Personalizar capa" title="Personalizar capa">${ic("brush", 16)}</button>
     ${S.pop ? `<div class="pop" data-stop>
@@ -634,13 +790,31 @@ function chipsRow() {
   const any = groups.some(g => S.filt[g.id].size || S.none[g.id]);
   return chips + (any ? `<button class="fclear" data-act="clear">Limpar</button>` : "");
 }
+function searchCtl(open) {
+  if (!S.cat) return ""; /* na home a busca é a do topo */
+  return open
+    ? `<div class="sx2">${ic("search", 16)}<input id="q2" type="search" value="${esc(S.q)}" placeholder="${esc(placeholder())}" autocomplete="off" aria-label="Buscar nesta categoria"><button class="ib" data-act="sclose" aria-label="Fechar busca" style="width:32px;height:32px;border-radius:var(--radius-md)">${ic("x", 16)}</button></div>`
+    : `<button class="ib" data-act="sopen" aria-label="Buscar nesta categoria" style="width:36px;height:36px">${ic("search", 18)}</button>`;
+}
 function sortCtl() {
   return `<div class="gpw"><button class="sortb" data-act="sortopen" aria-haspopup="true" aria-label="Ordenar por ${SORTS[S.sort.key].label}, ${SORTS[S.sort.key].hint[S.sort.dir]}" aria-expanded="${S.gpop === "__sort" || (S.sheet && S.sheet.type === "sort") || false}">${SORTS[S.sort.key].label} ${ICON_DIR(S.sort.dir)}</button>${
     !mobile() && S.gpop === "__sort" ? `<div class="gpp rt" role="menu">${sortOptions()}</div>` : ""}</div>`;
 }
 const initialOf = s => norm(s.title.trim()).charAt(0) || "#";
+const ICON_LETTERS = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 8H9"/><path d="M21 15.354a4 4 0 100 5.292"/><path d="M3 18h4a2 2 0 010 4H3.5a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5H6a2 2 0 010 4"/><path d="m8 10 3.453-7.648a.6.6 0 011.094 0L16 10"/></svg>'; /* lucide "letters" (lucide-static 1.70; o app usa lucide-react 0.503, que ainda não tem esse ícone) */
+function lettersCtl(list) { /* ícone que abre a grade de letras (só na ordem A-Z) */
+  if (S.alpha !== "icon" || S.sort.key !== "alfa" || !list.length) return "";
+  const have = new Set(list.map(initialOf));
+  const all = [...new Set([..."abcdefghijklmnopqrstuvwxyz", ...have])].sort();
+  if (S.sort.dir === "desc") all.reverse();
+  const openP = S.gpop === "__letters";
+  return `<div class="gpw"><button class="ib" data-act="lpop" aria-haspopup="true" aria-expanded="${openP}" aria-label="Ir para a letra" style="width:36px;height:36px">${ICON_LETTERS}</button>${
+    openP ? `<div class="gpp rt lgp" role="menu"><div class="q">Ir para a letra</div><div class="lg">${all.map(l => have.has(l)
+      ? `<button class="lt" data-act="letter" data-l="${esc(l)}">${esc(l.toUpperCase())}</button>`
+      : `<span class="lt off">${esc(l.toUpperCase())}</span>`).join("")}</div></div>` : ""}</div>`;
+}
 function lettersStrip(list) {
-  if (S.sort.key !== "alfa" || !list.length) return "";
+  if (S.alpha !== "line" || S.sort.key !== "alfa" || !list.length) return "";
   const have = new Set(list.map(initialOf));
   const all = [...new Set([..."abcdefghijklmnopqrstuvwxyz", ...have])].sort();
   if (S.sort.dir === "desc") all.reverse();
@@ -656,13 +830,14 @@ function rowsWithDividers(list) {
 }
 function listBlock() {
   const list = sorted(SONG_DB.filter(s => match(s)));
-  const body = list.length ? `<div class="list ${S.sort.key === "alfa" ? "grp" : ""}">${listHead()}${rowsWithDividers(list)}</div>`
+  const body = list.length ? `<div class="list ${S.sort.key === "alfa" ? "grp" : ""}">${listHead(list.length)}${rowsWithDividers(list)}</div>`
     : `<div class="empty"><b>Nenhuma música com essa combinação</b>Tire algum filtro para ampliar a lista.<br><br><button class="btn sm" data-act="clear">Limpar filtros</button></div>`;
-  return `
-    <div class="fchips" role="group" aria-label="Filtros">${chipsRow()}</div>
-    <div class="cs"><div class="res"><b>${list.length}</b> música${list.length === 1 ? "" : "s"}${S.q.trim() ? ` para “${esc(S.q.trim())}”` : ""}</div>${sortCtl()}</div>
-    ${lettersStrip(list)}
-    ${body}`;
+  const open = !!S.cat && (S.sopen || !!S.q.trim());
+  const letters = lettersStrip(list);
+  return `<div class="fblock ${letters ? "" : "nl"}">
+    <div class="frow ${open ? "open" : ""}"><div class="fchips" role="group" aria-label="Filtros">${chipsRow()}</div><div class="fright">${searchCtl(open)}${lettersCtl(list)}${sortCtl()}</div></div>
+    ${letters}</div>
+    <div class="lblock">${body}</div>`;
 }
 const listView = listBlock;
 function sheetView() {
@@ -710,7 +885,7 @@ function notes() {
   const view = isHome() ? "home" : "cat";
   const by = {
     home: ["O <b>Tipo</b> é o destaque: cards em grade, sem rolagem lateral (2 colunas no celular, mais colunas em telas maiores). Cada card abre a página daquele tipo.", "Os demais grupos (Ocasião, Atmosfera...) são <b>prateleiras</b> de rolagem lateral. Atmosfera está “em construção”; Assunto (0 músicas) nem aparece.", "A home termina com a <b>lista completa</b> (filtros, ordenação e letras). Digitar na busca leva até ela, sem trocar de tela: os cards continuam acima.", "Só a busca fica fixa no topo."],
-    cat: ["A página é <b>uma tag só</b>: a que você tocou. A capa ocupa a largura toda e rola junto com a página; o botão Voltar fica sobre ela. A busca vem logo abaixo (e fica presa no topo ao rolar).", "A busca daqui é sempre <b>da categoria</b> (“Buscar em Natal”); para buscar no acervo todo, volte para Músicas. Os outros grupos viram <b>chips</b> numa linha só (rolam para o lado no celular). O filtro aplicado aparece dentro do chip, com ✕ para limpar. Isso inclui o Tipo.", "No celular, o chip abre uma <b>folha de baixo</b> e o filtro vale ao vivo; “Ver N músicas” só fecha. Em telas maiores é um menu.", "<b>Ordenação</b> à direita da contagem: A-Z, Uso em liturgias ou Compositor. Tocar de novo no mesmo item inverte o sentido. Fica lembrada neste aparelho.", "A <b>faixa de letras</b> e os divisores só existem na ordem <b>A-Z</b> (e invertem em Z–A). Compositor e Uso em liturgias não têm letras. No celular a faixa é uma linha só, com rolagem lateral."],
+    cat: ["A página é <b>uma tag só</b>: a que você tocou. A capa ocupa a largura toda e rola junto com a página; o botão Voltar fica sobre ela. A busca vem logo abaixo (e fica presa no topo ao rolar).", "A busca daqui é sempre <b>da categoria</b> (“Buscar em Natal”); para buscar no acervo todo, volte para Músicas. Os outros grupos viram <b>chips</b> numa linha só (rolam para o lado no celular). O filtro aplicado aparece dentro do chip, com ✕ para limpar. Isso inclui o Tipo.", "No celular, o chip abre uma <b>folha de baixo</b> e o filtro vale ao vivo; “Ver N músicas” só fecha. Em telas maiores é um menu.", "<b>Ordenação</b> à direita da contagem: Título, Uso em liturgias ou Compositor. Tocar de novo no mesmo item inverte o sentido. Fica lembrada neste aparelho.", "A <b>faixa de letras</b> e os divisores só existem na ordem <b>Título</b> (e invertem em Z–A). Compositor e Uso em liturgias não têm letras. No celular a faixa é uma linha só, com rolagem lateral."],
   };
   const item = S.item === "new" ? [
     "Sem tom: o tom é decisão de quem monta o culto, não de quem escolhe a música.",
@@ -726,11 +901,14 @@ function notes() {
 }
 
 /* ---------- render ---------- */
+new ResizeObserver(() => fitAll()).observe(document.querySelector(".main"));
 function render(opts = {}) {
   const home = isHome();
-  const dev = $("#device"); dev.dataset.dev = S.dev;
+  const had = document.activeElement && document.activeElement.id === "q2", caret = had ? document.activeElement.selectionStart : 0;
+  const dev = $("#device"); dev.dataset.dev = S.dev; dev.dataset.frame = S.frame; dev.dataset.btn = S.btn; dev.dataset.wide = S.wide;
   $("#qx").innerHTML = ic("x", 16);
   $("#search").classList.toggle("has", !!S.q);
+  document.querySelector(".sticky").style.display = S.cat ? "none" : "";
   const sc = $("#body"), top = sc.scrollTop;
   $("#top").innerHTML = topView();
   $("#hero").innerHTML = heroView();
@@ -743,14 +921,17 @@ function render(opts = {}) {
   $("#side").innerHTML = navItems(); $("#bnav").innerHTML = navItems();
   $("#fab").innerHTML = fabView();
   $("#notes").innerHTML = notes();
-  ["dev", "item"].forEach(k => document.querySelectorAll(`#c-${k} button`).forEach(b => b.setAttribute("aria-pressed", b.dataset.v === S[k])));
+  fitAll();
+  autoInk();
+  const q2 = document.getElementById("q2"); if (q2 && (had || S.sfocus)) { q2.focus(); const c = had ? caret : q2.value.length; q2.setSelectionRange(c, c); S.sfocus = false; }
+  ["dev", "item", "frame", "alpha", "btn", "wide"].forEach(k => document.querySelectorAll(`#c-${k} button`).forEach(b => b.setAttribute("aria-pressed", b.dataset.v === S[k])));
   renderToast();
 }
 
 /* ---------- eventos ---------- */
 function setSeg(id, key) { $(id).addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S[key] = b.dataset.v; S.menu = null; S.gpop = null; S.sheet = null; render(); }); }
-setSeg("#c-dev", "dev"); setSeg("#c-item", "item");
-$("#reset").addEventListener("click", () => { baseStyle(); saveStyle(); try { localStorage.removeItem("musicas-proto-ordem"); } catch (e) {} const k = {dev: S.dev, item: S.item}; freshState(k, true); $("#q").value = ""; render({resetScroll: true}); });
+setSeg("#c-dev", "dev"); setSeg("#c-item", "item"); setSeg("#c-frame", "frame"); setSeg("#c-alpha", "alpha"); setSeg("#c-btn", "btn"); setSeg("#c-wide", "wide");
+$("#reset").addEventListener("click", () => { baseStyle(); saveStyle(); try { localStorage.removeItem("musicas-proto-ordem"); } catch (e) {} const k = {dev: S.dev, item: S.item, frame: S.frame, alpha: S.alpha, btn: S.btn, wide: S.wide}; freshState(k, true); $("#q").value = ""; render({resetScroll: true}); });
 function scrollToList() {
   const el = document.getElementById("lista"), sc = $("#body");
   if (el) sc.scrollTo({top: el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 56, behavior: "smooth"});
@@ -761,8 +942,9 @@ $("#q").addEventListener("input", e => {
   render(S.cat ? {resetScroll: true} : {});
   if (!S.cat && first && S.q.trim()) scrollToList(); // na home, a primeira letra digitada leva até a lista
 });
+document.addEventListener("input", e => { if (e.target.id !== "q2") return; S.q = e.target.value; S.menu = null; S.gpop = null; S.sheet = null; render({resetScroll: true}); });
 $("#qx").addEventListener("click", () => { S.q = ""; $("#q").value = ""; $("#q").focus(); render(S.cat ? {resetScroll: true} : {}); });
-function goHome() { S.q = ""; $("#q").value = ""; S.cat = null; S.pop = false; S.gpop = null; S.sheet = null; clearFilters(); render({resetScroll: true}); }
+function goHome() { S.sopen = false; S.q = ""; $("#q").value = ""; S.cat = null; S.pop = false; S.gpop = null; S.sheet = null; clearFilters(); render({resetScroll: true}); }
 
 function addToService(svcId, id) {
   const v = S.services.find(x => x.id === svcId); if (!v) return;
@@ -791,7 +973,10 @@ document.addEventListener("click", e => {
     case "stub": toast(d.k + " (não faz parte do protótipo)"); S.menu = null; render(); return;
     case "gpop": if (mobile()) S.sheet = {type: "group", g: d.g}; else S.gpop = S.gpop === d.g ? null : d.g; render(); return;
     case "gclear": S.filt[d.g].clear(); S.none[d.g] = false; render(); return;
-    case "letter": { const el2 = document.getElementById("bl-" + d.l), sc = $("#body"); if (el2) sc.scrollTo({top: el2.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 56, behavior: "smooth"}); return; }
+    case "letter": { S.gpop = null; render();  const el2 = document.getElementById("bl-" + d.l), sc = $("#body"); if (el2) sc.scrollTo({top: el2.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 56, behavior: "smooth"}); return; }
+    case "lpop": S.gpop = S.gpop === "__letters" ? null : "__letters"; S.menu = null; render(); return;
+    case "sopen": S.sopen = true; S.sfocus = true; S.gpop = null; S.menu = null; render(); return;
+    case "sclose": S.sopen = false; S.q = ""; render({resetScroll: true}); return;
     case "sortopen": if (mobile()) S.sheet = {type: "sort"}; else S.gpop = S.gpop === "__sort" ? null : "__sort"; render(); return;
     case "sortpick": pickSort(d.k); render(); return;
     case "sheetclose": S.sheet = null; render(); return;
