@@ -92,6 +92,29 @@ export default function AdminTagsClient({ initialGroups }: Props) {
     });
   }
 
+  /** Sobe ou desce uma categoria dentro do seu grupo e grava a nova ordem. */
+  async function moveTag(groupId: number, tagId: number, direction: "up" | "down") {
+    const group = groups.find((g) => g.id === groupId);
+    if (!group) return;
+    const idx = group.tags.findIndex((t) => t.id === tagId);
+    const newIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (idx === -1 || newIdx < 0 || newIdx >= group.tags.length) return;
+
+    const reordered = [...group.tags];
+    [reordered[idx], reordered[newIdx]] = [reordered[newIdx], reordered[idx]];
+    setGroups((prev) => prev.map((g) => (g.id === groupId ? { ...g, tags: reordered } : g)));
+
+    const res = await fetch("/api/admin/tags/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tagGroupId: groupId, ids: reordered.map((t) => t.id) }),
+    });
+    if (!res.ok) {
+      setError("Não foi possível salvar a nova ordem.");
+      await reload();
+    }
+  }
+
   async function deleteGroup(id: number) {
     if (!confirm("Apagar este grupo e todas suas tags?")) return;
     setLoading(true);
@@ -267,6 +290,18 @@ export default function AdminTagsClient({ initialGroups }: Props) {
                   <span className="text-xs text-muted-foreground">
                     {tag._count.songs} {tag._count.songs === 1 ? "música" : "músicas"}
                   </span>
+                  <Button type="button" variant="ghost" size="icon" className="w-6 h-6"
+                    aria-label={`Subir ${tag.name}`}
+                    disabled={group.tags.indexOf(tag) === 0}
+                    onClick={() => moveTag(group.id, tag.id, "up")}>
+                    <ChevronUp className="w-3 h-3" />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="w-6 h-6"
+                    aria-label={`Descer ${tag.name}`}
+                    disabled={group.tags.indexOf(tag) === group.tags.length - 1}
+                    onClick={() => moveTag(group.id, tag.id, "down")}>
+                    <ChevronDown className="w-3 h-3" />
+                  </Button>
                   <Button type="button" variant="ghost" size="icon" className="w-6 h-6"
                     aria-label={`Editar ${tag.name}`}
                     onClick={() => setTagDialog({ tag, group })}>

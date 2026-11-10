@@ -37,7 +37,7 @@ export default async function AdminCatalogoPage() {
         id: true,
         name: true,
         color: true,
-        tags: { orderBy: { name: "asc" }, select: { id: true, name: true } },
+        tags: { orderBy: [{ order: "asc" }, { name: "asc" }], select: { id: true, name: true } },
       },
     }),
   ]);

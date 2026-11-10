@@ -21,8 +21,9 @@ export async function POST(request: NextRequest) {
     take: 3,
   });
 
+  const last = await prisma.tag.findFirst({ where: { tagGroupId }, orderBy: { order: "desc" }, select: { order: true } });
   const tag = await prisma.tag.create({
-    data: { name: name.trim(), tagGroupId },
+    data: { name: name.trim(), tagGroupId, order: (last?.order ?? -1) + 1 },
     include: { group: { select: { id: true, name: true, color: true } } },
   });
 
