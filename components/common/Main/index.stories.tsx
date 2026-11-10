@@ -31,10 +31,7 @@ export const Default: Story = {
           <Switch id="density" onCheckedChange={handleChangeDensity} />
           <Label htmlFor="density">Compact</Label>
         </div>
-        <Main
-          className="border size-[500px] border-gray-200 rounded-lg shadow-sm"
-          density={compact ? "compact" : "normal"}
-        >
+        <Main className="border size-[500px] border-gray-200 rounded-lg shadow-sm">
           <div className="size-full bg-linear-to-br from-primary to-secondary text-primary-foreground flex flex-col items-center justify-center">
             <span>CONTENT</span>
             <span>{compact ? "(Compact)" : "(Normal)"}</span>

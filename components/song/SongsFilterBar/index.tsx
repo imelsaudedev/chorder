@@ -133,7 +133,7 @@ export default function SongsFilterBar({
     <div
       ref={ref}
       data-songs-filter-bar
-      className={`sticky top-0 z-30 -mx-5 mb-6 flex flex-col gap-2 bg-background px-5 py-2 transition-[transform,box-shadow] duration-200 sm:-mx-8 sm:flex-row sm:items-center sm:gap-2 sm:px-8 lg:-mx-14 lg:px-14 ${
+      className={`sticky top-0 z-30 -mx-page mb-6 flex flex-col gap-2 bg-background px-page py-2 transition-[transform,box-shadow] duration-200 sm:flex-row sm:items-center sm:gap-2 ${
         hidden ? "max-sm:-translate-y-full" : ""
       } ${stuck && !hidden ? "shadow-[0_1px_0_var(--border),0_4px_8px_-4px_rgba(0,0,0,.12)]" : ""}`}
     >

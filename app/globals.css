@@ -72,6 +72,37 @@
   }
 }
 
+/* Margem lateral única das telas (ver docs/estudo-hierarquia-visual.md).
+   Um só valor para lista, home, capa, detalhe e admin. */
+:root {
+  --page-x: 1.25rem; /* 20px */
+  --space-title-bottom: 1rem; /* 16px: título até o primeiro elemento */
+  --space-section: 2rem; /* 32px: entre seções */
+}
+@media (min-width: 40rem) {
+  :root {
+    --page-x: 2rem; /* 32px */
+    --space-title-bottom: 1.5rem; /* 24px */
+  }
+}
+@media (min-width: 64rem) {
+  :root {
+    --page-x: 3rem; /* 48px */
+  }
+}
+
+@utility px-page {
+  padding-inline: var(--page-x);
+}
+
+@utility -mx-page {
+  margin-inline: calc(var(--page-x) * -1);
+}
+
+@utility scroll-px-page {
+  scroll-padding-inline: var(--page-x);
+}
+
 @utility container {
   margin-inline: auto;
   padding-inline: 2rem;
