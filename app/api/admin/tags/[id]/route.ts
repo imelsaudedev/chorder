@@ -34,7 +34,8 @@ export async function DELETE(
   const { id } = await params;
   const tagId = parseInt(id);
 
-  const count = await prisma.song.count({ where: { tags: { some: { id: tagId } } } });
+  // Só músicas ativas travam; as arquivadas são soltas junto (a ligação some em cascata).
+  const count = await prisma.song.count({ where: { isDeleted: false, tags: { some: { id: tagId } } } });
   if (count > 0) {
     return Response.json(
       { error: `Tag está associada a ${count} música${count > 1 ? "s" : ""}` },

@@ -29,7 +29,7 @@ export async function DELETE(
   const groupId = parseInt(id);
 
   const tagsWithSongs = await prisma.tag.findFirst({
-    where: { tagGroupId: groupId, songs: { some: {} } },
+    where: { tagGroupId: groupId, songs: { some: { isDeleted: false } } },
   });
   if (tagsWithSongs) {
     return Response.json(

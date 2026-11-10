@@ -8,7 +8,7 @@ export async function GET() {
     include: {
       tags: {
         orderBy: { name: "asc" },
-        include: { _count: { select: { songs: true } } },
+        include: { _count: { select: { songs: { where: { isDeleted: false } } } } },
       },
     },
   });

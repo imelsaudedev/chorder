@@ -1,4 +1,4 @@
-import { archiveSong, retrieveSong, updateSongInfo } from "@/prisma/data";
+import { archiveSong, restoreSong, retrieveSong, updateSongInfo } from "@/prisma/data";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -31,6 +31,11 @@ export async function PATCH(
 
   if (body.isDeleted === true) {
     await archiveSong(slugOrId);
+    return Response.json({ success: true });
+  }
+
+  if (body.isDeleted === false) {
+    await restoreSong(slugOrId);
     return Response.json({ success: true });
   }
 

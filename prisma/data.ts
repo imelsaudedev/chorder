@@ -241,6 +241,13 @@ export async function retrieveSongUsage(
   return usage;
 }
 
+export async function restoreSong(slug: string) {
+  return prisma.song.update({
+    where: { slug },
+    data: { isDeleted: false },
+  });
+}
+
 export async function archiveSong(slug: string) {
   return prisma.song.update({
     where: { slug },
@@ -1430,7 +1437,8 @@ export async function retrieveTagGroups(): Promise<ClientTagGroup[]> {
           color: true,
           pattern: true,
           imageUrl: true,
-          _count: { select: { songs: true } },
+          // músicas arquivadas (isDeleted) não contam
+          _count: { select: { songs: { where: { isDeleted: false } } } },
         },
         orderBy: { name: "asc" },
       },
