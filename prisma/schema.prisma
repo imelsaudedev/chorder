@@ -73,6 +73,8 @@ model Tag {
   color       String?
   pattern     String?
   imageUrl    String?
+  // Posição da tag dentro do grupo (escolhida na administração); empate cai para o nome.
+  order       Int      @default(0)
 
   @@unique([name, tagGroupId])
 }

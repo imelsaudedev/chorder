@@ -94,6 +94,9 @@ async function buildTagFilter(tagIds: number[]) {
   };
 }
 
+// Ordem dos chips de uma música: a do grupo e, dentro dele, a da tag.
+const SONG_TAG_ORDER: Prisma.TagOrderByWithRelationInput[] = [{ group: { order: "asc" } }, { order: "asc" }, { name: "asc" }];
+
 export async function retrieveSongs({
   query = "",
   limitLines,
@@ -167,6 +170,7 @@ export async function retrieveSongs({
         orderBy: [{ isDefault: "desc" }],
       },
       tags: {
+        orderBy: SONG_TAG_ORDER,
         select: {
           id: true,
           name: true,
@@ -291,6 +295,7 @@ export async function retrieveSong(
     where,
     include: {
       tags: {
+        orderBy: SONG_TAG_ORDER,
         select: {
           id: true,
           name: true,
@@ -415,6 +420,7 @@ export async function retrieveArrangement(
           ? {
               include: {
                 tags: {
+                  orderBy: SONG_TAG_ORDER,
                   select: {
                     id: true,
                     name: true,
@@ -455,6 +461,7 @@ export async function retrieveArrangement(
         ? {
             include: {
               tags: {
+                orderBy: SONG_TAG_ORDER,
                 select: {
                   id: true,
                   name: true,
@@ -1440,7 +1447,7 @@ export async function retrieveTagGroups(): Promise<ClientTagGroup[]> {
           // músicas arquivadas (isDeleted) não contam
           _count: { select: { songs: { where: { isDeleted: false } } } },
         },
-        orderBy: { name: "asc" },
+        orderBy: [{ order: "asc" }, { name: "asc" }],
       },
     },
   });

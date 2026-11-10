@@ -7,7 +7,7 @@ export async function GET() {
     orderBy: { order: "asc" },
     include: {
       tags: {
-        orderBy: { name: "asc" },
+        orderBy: [{ order: "asc" }, { name: "asc" }],
         include: { _count: { select: { songs: { where: { isDeleted: false } } } } },
       },
     },
