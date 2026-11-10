@@ -25,7 +25,7 @@ const PageHeader = ({
 }: PageHeaderProps) => {
   if (variant === "edit") {
     return (
-      <div className="sticky top-0 z-10 flex flex-row items-center justify-between gap-2 px-4 sm:px-5 lg:px-8 py-2 bg-white/80 backdrop-blur-lg border-b border-border">
+      <div className="sticky top-0 z-10 flex flex-row items-center justify-between gap-2 px-page py-2 bg-white/80 backdrop-blur-lg border-b border-border">
         <div className="flex flex-col min-w-0">
           <Text variant="heading-sm" className="truncate">{title}</Text>
           {subtitle && (
@@ -40,9 +40,9 @@ const PageHeader = ({
   }
 
   return (
-    <div className={`flex flex-col px-4 sm:px-5 lg:px-8 py-4 sm:py-5 bg-zinc-50${noBorder ? "" : " border-b border-border"}`}>
+    <div className={`flex flex-col px-page py-4 sm:py-5 bg-zinc-50${noBorder ? "" : " border-b border-border"}`}>
       {(backLinkHref || actions) && (
-        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+        <div className="flex items-center justify-between mb-1.5 sm:mb-2 sm:h-9">
           <div>
             {backLinkHref && backLinkText && (
               <BackLink href={backLinkHref} text={backLinkText} />

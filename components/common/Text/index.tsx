@@ -35,10 +35,14 @@ const stylesNoSize: Record<TextVariant, string> = {
 };
 
 // Tamanho padrão de cada variante (desktop = normal)
+// Escala de ~1,25 entre degraus (ver docs/estudo-hierarquia-visual.md):
+// h1 28/32/40 · h2 20/22/24 · h3 16/17/18 · item 16 · UI 14 · meta 12.
+// A densidade das cifras (compact/normal) não usa esta escala: ela só muda
+// a entrelinha das linhas de cifra (ChordProLine/Item).
 const defaultSize: Record<TextVariant, string> = {
-  "heading-xl": "text-3xl sm:text-4xl lg:text-5xl",
-  "heading-lg": "text-xl sm:text-2xl lg:text-3xl",
-  "heading-md": "text-lg lg:text-xl",
+  "heading-xl": "text-[1.75rem] leading-[1.15] sm:text-[2rem] lg:text-[2.5rem]",
+  "heading-lg": "text-xl leading-tight sm:text-[1.375rem] lg:text-2xl",
+  "heading-md": "text-base leading-snug sm:text-[1.0625rem] lg:text-lg",
   "heading-sm": "text-base",
   "body":       "text-base",
   "label":      "text-sm",

@@ -1,23 +1,25 @@
+import Section from "@/components/common/Section";
 import { ClientTagGroup } from "@/prisma/models";
 import CategoryTile from "./CategoryTile";
 import FeaturedCard from "./FeaturedCard";
 
 type SongsHomeProps = { tagGroups: ClientTagGroup[] };
 
-function Section({ group, children }: { group: ClientTagGroup; children: React.ReactNode }) {
+function GroupSection({ group, children }: { group: ClientTagGroup; children: React.ReactNode }) {
   return (
-    <section className="mb-8 mt-6">
-      <h2 className="flex items-center gap-2 font-display text-xl font-semibold leading-tight tracking-tight text-primary">
-        {group.name}
-        {group.isProposed && (
+    <Section
+      title={group.name}
+      description={group.description}
+      aside={
+        group.isProposed ? (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-px font-sans text-[11px] font-semibold text-amber-700">
             em construção
           </span>
-        )}
-      </h2>
-      {group.description && <p className="mt-0.5 text-sm text-muted-foreground">{group.description}</p>}
-      <div className="mt-3">{children}</div>
-    </section>
+        ) : undefined
+      }
+    >
+      {children}
+    </Section>
   );
 }
 
@@ -44,7 +46,7 @@ export default function SongsHome({ tagGroups }: SongsHomeProps) {
   return (
     <>
       {featured.map((g) => (
-        <Section key={g.id} group={g}>
+        <GroupSection key={g.id} group={g}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(200px,240px))]">
             {withSongs(g).map((t) => (
               <FeaturedCard
@@ -58,18 +60,16 @@ export default function SongsHome({ tagGroups }: SongsHomeProps) {
               />
             ))}
           </div>
-        </Section>
+        </GroupSection>
       ))}
       {shelves.map((g) => (
-        <Section key={g.id} group={g}>
-          <div className="no-scrollbar -mx-5 flex snap-x snap-proximity scroll-px-5 gap-3 overflow-x-auto px-5 pb-2 sm:-mx-8 sm:scroll-px-8 sm:px-8 lg:-mx-14 lg:scroll-px-14 lg:px-14">
+        <GroupSection key={g.id} group={g}>
+          <div className="no-scrollbar -mx-page flex snap-x snap-proximity scroll-px-page gap-3 overflow-x-auto px-page pb-2">
             {withSongs(g).map((t) => tile(g, t, "w-[160px] shrink-0 snap-start sm:w-[180px]"))}
           </div>
-        </Section>
+        </GroupSection>
       ))}
-      <h2 className="mb-3 mt-5 font-display text-xl font-semibold leading-tight tracking-tight text-primary">
-        Todas as músicas
-      </h2>
+      <Section title="Todas as músicas" />
     </>
   );
 }

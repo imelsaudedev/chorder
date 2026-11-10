@@ -19,7 +19,7 @@ export default function CoverHero({ groupName, name, description, color, backHre
   const shadow = theme.light ? { textShadow: "0 1px 3px rgba(0,0,0,.35)" } : undefined;
   return (
     <div
-      className="relative isolate -mx-5 mb-6 flex h-[164px] flex-col justify-end overflow-hidden px-5 py-4 sm:-mx-8 sm:h-[180px] sm:px-8 lg:-mx-14 lg:h-[208px] lg:px-14 lg:py-6"
+      className="relative isolate -mx-page mb-6 flex h-[164px] flex-col justify-end overflow-hidden px-page py-4 sm:h-[180px] lg:h-[208px] lg:py-6"
       style={{ background, color: theme.ink }}
     >
       <span
@@ -29,7 +29,7 @@ export default function CoverHero({ groupName, name, description, color, backHre
       />
       <Link
         href={backHref}
-        className="absolute left-5 top-4 -ml-1.5 inline-flex h-8 items-center gap-0.5 rounded pr-1 text-sm font-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 sm:left-8 lg:left-14 lg:top-6"
+        className="absolute left-[var(--page-x)] top-4 -ml-1.5 inline-flex h-8 items-center gap-0.5 rounded pr-1 text-sm font-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 lg:top-6"
         style={shadow}
         aria-label="Voltar para Músicas"
       >
