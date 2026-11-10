@@ -4,7 +4,7 @@ import { getLyrics } from "@/chopro/music";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronUp, Filter, Trash2, X } from "lucide-react";
+import { Archive, ArchiveRestore, ChevronDown, ChevronUp, Filter, X } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 type Tag = { id: number; name: string; group: { id: number; name: string; color: string } };
@@ -16,6 +16,7 @@ type CatalogSong = {
   artist: string | null;
   lyrics: string;
   legacyId: number | null;
+  isDeleted: boolean;
   serviceCount: number;
   tags: Tag[];
 };
@@ -42,6 +43,8 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [bulkTagGroupId, setBulkTagGroupId] = useState<number | null>(null);
+  // "Ativas" ou "Arquivadas" (músicas escondidas das listas, que dá para restaurar)
+  const [view, setView] = useState<"active" | "archived">("active");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey | null>("title");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -64,13 +67,22 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
     return () => document.removeEventListener("mousedown", handleOutside);
   }, [openFilterGroupId]);
 
+  const inView = useMemo(() => songs.filter((s) => s.isDeleted === (view === "archived")), [songs, view]);
+  const archivedCount = useMemo(() => songs.filter((s) => s.isDeleted).length, [songs]);
+
+  function changeView(next: "active" | "archived") {
+    setView(next);
+    setSelected(new Set());
+    setConfirmDelete(false);
+  }
+
   const filtered = search
-    ? songs.filter(
+    ? inView.filter(
         (s) =>
           s.title.toLowerCase().includes(search.toLowerCase()) ||
           s.artist?.toLowerCase().includes(search.toLowerCase())
       )
-    : songs;
+    : inView;
 
   const displayed = useMemo(() => {
     if (!sortKey) return filtered;
@@ -235,20 +247,21 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
     patchSong(song.slug, { tagIds: [...otherTagIds, ...newGroupTagIds] });
   }
 
-  async function bulkDelete() {
+  /** Arquivar (isDeleted = true) ou restaurar (false) as músicas selecionadas na visão atual. */
+  async function bulkSetArchived(archived: boolean) {
     const slugs = [...selected].filter((s) => finalDisplay.some((f) => f.slug === s));
     const results = await Promise.all(
       slugs.map(async (slug) => {
         const res = await fetch(`/api/songs/${slug}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ isDeleted: true }),
+          body: JSON.stringify({ isDeleted: archived }),
         });
         return { slug, ok: res.ok };
       })
     );
-    const deleted = results.filter((r) => r.ok).map((r) => r.slug);
-    setSongs((prev) => prev.filter((s) => !deleted.includes(s.slug)));
+    const done = results.filter((r) => r.ok).map((r) => r.slug);
+    setSongs((prev) => prev.map((s) => (done.includes(s.slug) ? { ...s, isDeleted: archived } : s)));
     setSelected(new Set());
     setConfirmDelete(false);
   }
@@ -315,6 +328,29 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
           onChange={(e) => setSearch(e.target.value)}
           className="h-8 text-sm max-w-sm"
         />
+
+        <div role="tablist" aria-label="Visão" className="inline-flex gap-1 rounded-md bg-muted/40 p-1">
+          {(
+            [
+              ["active", `Ativas (${songs.length - archivedCount})`],
+              ["archived", `Arquivadas (${archivedCount})`],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={view === key}
+              onClick={() => changeView(key)}
+              className={cn(
+                "rounded px-3 py-1 text-xs font-medium transition-colors",
+                view === key ? "bg-background shadow-xs" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         {someSelected && (
           <div className="flex items-center gap-2 ml-auto">
@@ -385,17 +421,28 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
               )}
             </div>
 
-            {confirmDelete ? (
+            {view === "archived" ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => bulkSetArchived(false)}
+              >
+                <ArchiveRestore size={13} className="mr-1" />
+                Restaurar
+              </Button>
+            ) : confirmDelete ? (
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-destructive">Confirmar exclusão?</span>
+                <span className="text-xs text-destructive">Arquivar {selectedCount}? Elas somem das listas.</span>
                 <Button
                   type="button"
                   variant="destructive"
                   size="sm"
                   className="h-7 text-xs"
-                  onClick={bulkDelete}
+                  onClick={() => bulkSetArchived(true)}
                 >
-                  Excluir
+                  Arquivar
                 </Button>
                 <Button
                   type="button"
@@ -415,8 +462,8 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
                 className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
                 onClick={() => setConfirmDelete(true)}
               >
-                <Trash2 size={13} className="mr-1" />
-                Excluir
+                <Archive size={13} className="mr-1" />
+                Arquivar
               </Button>
             )}
           </div>

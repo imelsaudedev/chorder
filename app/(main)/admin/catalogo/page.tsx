@@ -8,7 +8,6 @@ import CatalogoClient from "./CatalogoClient";
 export default async function AdminCatalogoPage() {
   const [songs, tagGroups] = await Promise.all([
     prisma.song.findMany({
-      where: { isDeleted: false },
       orderBy: { title: "asc" },
       select: {
         id: true,
@@ -17,6 +16,7 @@ export default async function AdminCatalogoPage() {
         artist: true,
         lyrics: true,
         legacyId: true,
+        isDeleted: true,
         _count: {
           select: {
             arrangements: { where: { isServiceArrangement: true } },

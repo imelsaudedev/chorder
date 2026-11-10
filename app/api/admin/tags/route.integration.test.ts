@@ -135,6 +135,39 @@ describe('DELETE /api/admin/tags/:id', () => {
     });
     expect(res.status).toBe(409);
   });
+
+  it('deleta tag que só tem músicas arquivadas, soltando-as (204)', async () => {
+    const group = await createGroup();
+    const tag = await prisma.tag.create({ data: { name: 'Arquivar', tagGroupId: group.id } });
+    const song = await prisma.song.create({
+      data: {
+        title: 'Arquivada', slug: 'arquivada-del', lyrics: '', isDeleted: true,
+        tags: { connect: { id: tag.id } },
+      },
+    });
+
+    const res = await DELETE(deleteReq(tag.id) as any, {
+      params: Promise.resolve({ id: String(tag.id) }),
+    });
+    expect(res.status).toBe(204);
+    expect(await prisma.tag.findUnique({ where: { id: tag.id } })).toBeNull();
+    // a música continua existindo (arquivada), só sem a tag
+    const kept = await prisma.song.findUnique({ where: { id: song.id }, include: { tags: true } });
+    expect(kept?.isDeleted).toBe(true);
+    expect(kept?.tags).toHaveLength(0);
+  });
+
+  it('mantém a trava quando há música ativa além das arquivadas (409)', async () => {
+    const group = await createGroup();
+    const tag = await prisma.tag.create({ data: { name: 'Mista', tagGroupId: group.id } });
+    await prisma.song.create({ data: { title: 'Velha', slug: 'velha-del', lyrics: '', isDeleted: true, tags: { connect: { id: tag.id } } } });
+    await prisma.song.create({ data: { title: 'Ativa', slug: 'ativa-del', lyrics: '', tags: { connect: { id: tag.id } } } });
+
+    const res = await DELETE(deleteReq(tag.id) as any, {
+      params: Promise.resolve({ id: String(tag.id) }),
+    });
+    expect(res.status).toBe(409);
+  });
 });
 
 describe('POST /api/admin/tags/merge', () => {
