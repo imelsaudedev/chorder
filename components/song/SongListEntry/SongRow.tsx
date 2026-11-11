@@ -43,7 +43,7 @@ function leadLines(lyrics: string, count: number): string[] {
 export function LastUsed({ date, className }: { date: Date | string | null; className?: string }) {
   if (!date) {
     return (
-      <span className={cn("inline-flex items-center gap-1 text-sm italic text-muted-foreground whitespace-nowrap", className)}>
+      <span className={cn("inline-flex items-center gap-1 text-sm leading-[22px] italic text-muted-foreground whitespace-nowrap", className)}>
         <Clock size={14} aria-hidden /> Nunca usada
       </span>
     );
@@ -53,7 +53,7 @@ export function LastUsed({ date, className }: { date: Date | string | null; clas
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 text-sm whitespace-nowrap",
+        "inline-flex items-center gap-1 text-sm leading-[22px] whitespace-nowrap",
         recent ? "text-amber-700" : "text-muted-foreground",
         className
       )}
@@ -137,10 +137,10 @@ export default function SongRow({
 
         {/* título, autor e último uso */}
         <div className="relative z-10 min-w-0 pointer-events-none [grid-area:id]">
-          <Text variant="heading-sm" as="p" className="truncate @[860px]:text-lg">
+          <Text variant="heading-sm" as="p" className="truncate leading-[22px] @[860px]:text-lg">
             <HighlightKeyword text={song.title} keyword={query} />
           </Text>
-          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground @[560px]:flex-col @[560px]:items-start @[560px]:gap-0">
+          <div className="flex min-w-0 items-center gap-1.5 text-sm leading-[22px] text-muted-foreground @[560px]:flex-col @[560px]:items-start @[560px]:gap-0">
             {song.artist && (
               <>
                 <span className="min-w-0 truncate max-w-full">
@@ -158,7 +158,7 @@ export default function SongRow({
         {/* letra: duas linhas, a partir do tablet */}
         <div className="relative z-10 hidden min-w-0 pointer-events-none @[560px]:block [grid-area:lyric]">
           {lyric.map((line, i) => (
-            <Text key={i} variant="caption" as="p" className="truncate text-sm leading-5">
+            <Text key={i} variant="caption" as="p" className="truncate text-sm leading-[22px]">
               <HighlightKeyword text={line} keyword={query} />
             </Text>
           ))}
@@ -166,14 +166,14 @@ export default function SongRow({
 
         {/* categorias: até 2 linhas, a partir do tablet */}
         {tags.length > 0 && (
-          <div className="relative z-10 hidden min-w-0 @[560px]:block @[560px]:mt-2 @[860px]:mt-0 [grid-area:tags]">
-            <TagList tags={tags} maxLines={2} />
+          <div className="relative z-10 hidden min-w-0 @[560px]:block @[560px]:mt-1.5 @[860px]:mt-0 [grid-area:tags]">
+            <TagList tags={tags} maxLines={2} className="gap-y-0.5" />
           </div>
         )}
 
         {/* último uso e contagem: coluna própria no desktop */}
         {hasUsage && (
-          <div className="relative z-10 hidden items-center gap-1.5 whitespace-nowrap pt-0.5 pointer-events-none @[860px]:flex [grid-area:used]">
+          <div className="relative z-10 hidden min-h-[22px] items-center gap-1.5 whitespace-nowrap pointer-events-none @[860px]:flex [grid-area:used]">
             <UsageInfo date={song.lastUsedAt ?? null} count={song.usageCount} />
           </div>
         )}
