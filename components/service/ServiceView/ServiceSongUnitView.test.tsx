@@ -18,7 +18,11 @@ vi.mock('@/components/config/SongConfig', () => ({
 }));
 
 vi.mock('./ServiceArrangementHeader', () => ({
-  default: ({ isStuck }: any) => <div data-testid="service-arrangement-header" data-stuck={String(!!isStuck)} />,
+  default: ({ isStuck, mobileControls }: any) => (
+    <div data-testid="service-arrangement-header" data-stuck={String(!!isStuck)}>
+      {mobileControls}
+    </div>
+  ),
 }));
 
 vi.mock('./ServiceArrangementMeta', () => ({

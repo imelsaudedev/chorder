@@ -38,6 +38,11 @@ type ServiceArrangementHeaderProps = {
   onCancel: () => void;
   onSaveServiceOnly: () => void;
   onSaveBoth: () => void;
+  /**
+   * Controles do celular (tom, referências, editar): linha entre o título e o mapa. No desktop
+   * (md+) esses controles ficam na linha do título; preso no topo a linha some (só título e mapa).
+   */
+  mobileControls?: React.ReactNode;
 };
 
 const ServiceArrangementHeader = forwardRef<HTMLDivElement, ServiceArrangementHeaderProps>(
@@ -55,6 +60,7 @@ function ServiceArrangementHeader({
   onCancel,
   onSaveServiceOnly,
   onSaveBoth,
+  mobileControls,
 }: ServiceArrangementHeaderProps, ref) {
   const { density } = useSongConfig();
 
@@ -131,6 +137,10 @@ function ServiceArrangementHeader({
         />
       </div>
       </div>
+
+      {/* Celular: tom, referências e editar logo abaixo do título e acima do mapa. Preso, some
+          (`hidden`, sem desmontar, para não fechar um menu aberto ao rolar). */}
+      {mobileControls && <div className={isStuck ? "hidden" : "mt-2 md:hidden"}>{mobileControls}</div>}
 
       {/* Mapa logo abaixo do título; tocar rola até o bloco. Parado: chips normais, a um vão entre
           blocos do título. Preso: uma linha de chips pequenos (como no Modo Palco). */}

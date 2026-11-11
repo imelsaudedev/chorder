@@ -159,20 +159,22 @@ export default function ServiceSongUnitView({
           onCancel={handleCancel}
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
+          mobileControls={
+            <ServiceArrangementMeta
+              arrangement={arrangement}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              isDirty={isDirty}
+              onStartEdit={handleStartEdit}
+              onCancel={handleCancel}
+              onSaveServiceOnly={() => submitRef.current?.submit("service")}
+              onSaveBoth={() => submitRef.current?.submit("both")}
+            />
+          }
         />
         {/* Espaçador: completa a altura que o cabeçalho "perde" ao grudar, pro fluxo não mudar.
             Sem `style`: a altura é ajustada direto no DOM (measureHeader), antes de pintar. */}
         <div ref={spacerRef} aria-hidden />
-        <ServiceArrangementMeta
-          arrangement={arrangement}
-          isEditing={isEditing}
-          isSaving={isSaving}
-          isDirty={isDirty}
-          onStartEdit={handleStartEdit}
-          onCancel={handleCancel}
-          onSaveServiceOnly={() => submitRef.current?.submit("service")}
-          onSaveBoth={() => submitRef.current?.submit("both")}
-        />
         {/* O vão entre o cabeçalho e o conteúdo (cifra ou editor) é o padding do próprio cabeçalho: o
             mesmo vão entre blocos na visualização e na edição. */}
         <div>
