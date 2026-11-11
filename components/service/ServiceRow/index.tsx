@@ -94,9 +94,9 @@ export default function ServiceRow({ service, badge }: ServiceRowProps) {
       <Link href={`/services/${local.slug}`} className="absolute inset-0 z-0" aria-label={title} />
 
       {/* data: dia da semana + número (o mês vem do grupo da lista) */}
-      <div className="pointer-events-none relative z-10 pt-0.5 text-center leading-none [grid-area:when]">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-secondary">{weekday}</div>
-        <div className="font-display text-[22px] font-semibold leading-[26px] tracking-tight text-primary">
+      <div className="pointer-events-none relative z-10 text-left [grid-area:when]">
+        <div className="text-xs font-medium uppercase leading-4 tracking-wider text-muted-foreground">{weekday}</div>
+        <div className="font-display text-[22px] font-semibold leading-7 tracking-tight text-primary">
           {String(date.getDate()).padStart(2, "0")}
         </div>
       </div>
