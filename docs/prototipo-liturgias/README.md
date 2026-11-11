@@ -43,3 +43,5 @@ Protótipo navegável da lista de liturgias redesenhada. Abrir `liturgias-lista.
 - Tema e texto bíblico são dois itens separados (no card de destaque, em linhas próprias).
 - No card de próximos cultos, a data do primeiro fica num quadrado branco com borda e leve sombra.
 - **Desktop (≥1000px):** colunas Data | Culto e dirigente | Pregador(a) e tema/texto | Músicas. O dirigente fica sob o título; pregador(a) em cima e "tema · texto" embaixo. Início, situação e atualizado em, quando ligados, entram como colunas depois de Músicas. No tablet (600–999px) continuam colunas separadas.
+- Sem o mês no bloco de data (só dia da semana e número); título do culto sempre em preto.
+- **Próximos cultos, duas versões** (controle "Próximos cultos" no topo): **Lista** (todos os cultos no mesmo padrão de linha; o primeiro leva o selo "Este domingo") e **Card + coluna** (card do próximo culto com data por extenso, dirigente, pregador(a), tema, texto e situação; ao lado, a coluna "Depois" com os demais). No celular a coluna vai para baixo do card.
