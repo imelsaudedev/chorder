@@ -69,10 +69,10 @@ describe("SongRow", () => {
 
   it("uso recente (menos de 3 semanas) em âmbar; antigo em cinza", () => {
     const { unmount } = renderRow(song({ lastUsedAt: new Date(Date.now() - 3 * DAY), usageCount: 2 }));
-    expect(screen.getAllByText("há 3 dias")[0].className).toContain("text-amber-700");
+    expect(screen.getAllByText("há 3 dias")[0].className).toContain("bg-amber-100");
     unmount();
     renderRow(song({ lastUsedAt: new Date(Date.now() - 100 * DAY), usageCount: 2 }));
-    expect(screen.getAllByText("há 3 meses")[0].className).toContain("text-muted-foreground");
+    expect(screen.getAllByText("há 3 meses")[0].className).toContain("bg-zinc-100");
   });
 
   it("mostra a contagem de usos no chip", () => {

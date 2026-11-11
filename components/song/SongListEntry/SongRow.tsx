@@ -39,31 +39,39 @@ function leadLines(lyrics: string, count: number): string[] {
   return out;
 }
 
-/** Relógio + "há 2 semanas"; âmbar se foi nas últimas 3 semanas, "Nunca usada" em itálico. */
+/** Chip com relógio + "há 2 semanas"; âmbar se foi nas últimas 3 semanas, "Nunca usada" em itálico. */
 export function LastUsed({ date, className }: { date: Date | string | null; className?: string }) {
   if (!date) {
     return (
-      <span className={cn("inline-flex items-center gap-1 text-sm leading-[22px] italic text-muted-foreground whitespace-nowrap", className)}>
-        <Clock size={14} aria-hidden /> Nunca usada
-      </span>
+      <Tag
+        variant="muted"
+        size="sm"
+        className={cn("gap-1 italic", className)}
+        label={
+          <>
+            <Clock size={12} aria-hidden /> Nunca usada
+          </>
+        }
+      />
     );
   }
   const d = typeof date === "string" ? new Date(date) : date;
   const recent = Date.now() - d.getTime() < RECENT_DAYS * DAY_MS;
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 text-sm leading-[22px] whitespace-nowrap",
-        recent ? "text-amber-700" : "text-muted-foreground",
-        className
-      )}
-    >
-      <Clock size={14} aria-hidden /> {formatTimeAgo(d)}
-    </span>
+    <Tag
+      variant={recent ? "warning" : "muted"}
+      size="sm"
+      className={cn("gap-1", className)}
+      label={
+        <>
+          <Clock size={12} aria-hidden /> {formatTimeAgo(d)}
+        </>
+      }
+    />
   );
 }
 
-/** [2×] em chip cinza (como as categorias) + último uso em texto. */
+/** Dois chips: [2×] e [relógio há 2 semanas]. */
 export function UsageInfo({
   date,
   count,
@@ -85,7 +93,7 @@ export function UsageInfo({
  * Item da lista de músicas (navegação).
  *
  * Largura do contêiner (a lista precisa ser `@container`):
- *   celular  — título, autor · último uso | referências | ⋯
+ *   celular  — título, autor e uso (duas linhas) | referências | ⋯
  *   ≥560px   — duas colunas: identidade | letra + categorias | referências | ⋯
  *   ≥860px   — seis colunas: título | letra | categorias | uso | referências | ⋯
  * Alinhado pelo topo. Tocar na linha abre a música.
@@ -140,17 +148,18 @@ export default function SongRow({
           <Text variant="heading-sm" as="p" className="truncate leading-[22px] @[860px]:text-lg">
             <HighlightKeyword text={song.title} keyword={query} />
           </Text>
-          <div className="flex min-w-0 items-center gap-1.5 text-sm leading-[22px] text-muted-foreground @[560px]:flex-col @[560px]:items-start @[560px]:gap-0">
+          <div className="flex min-w-0 flex-col items-start text-sm leading-[22px] text-muted-foreground">
             {song.artist && (
-              <>
-                <span className="min-w-0 truncate max-w-full">
-                  <HighlightKeyword text={song.artist} keyword={query} />
-                </span>
-                {hasUsage && <span aria-hidden className="@[560px]:hidden">·</span>}
-              </>
+              <span className="min-w-0 truncate max-w-full">
+                <HighlightKeyword text={song.artist} keyword={query} />
+              </span>
             )}
             {hasUsage && (
-              <UsageInfo date={song.lastUsedAt ?? null} count={song.usageCount} className="shrink-0 @[860px]:hidden" />
+              <UsageInfo
+                date={song.lastUsedAt ?? null}
+                count={song.usageCount}
+                className="mt-0.5 shrink-0 @[860px]:hidden"
+              />
             )}
           </div>
         </div>
