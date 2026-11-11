@@ -13,7 +13,7 @@
 :root{
   --background:hsl(0 0% 100%);--foreground:hsl(224 84% 4.9%);--primary:hsl(0 0% 9%);
   --muted:hsl(215 16% 72% / .14);--muted-foreground:hsl(215 14% 48%);--border:hsl(0 0% 89.8%);
-  --accent:#047857;--accent-soft:#ecfdf5;--amber:#b45309;--radius:12px;
+  --accent:hsl(221 83% 53%);--accent-soft:hsl(221 83% 53% / .06);--amber:#b45309;--radius:12px;
   --pg:#e9edf3;--pgline:#a3b0c2;--pgfg:#0b1220;--pgmut:#475569;--chip:#fff;
 }
 *{box-sizing:border-box}
@@ -47,7 +47,7 @@ h1.title{margin:0;font:600 28px/32px "Space Grotesk",sans-serif;letter-spacing:-
 .btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--background);font-weight:500}
 .btn:hover{background:var(--muted)}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.pri:hover{background:#065f46}
+.btn.pri:hover{background:hsl(221 83% 45%)}
 .btn .tx{display:none}
 @container app (min-width:600px){.btn .tx{display:inline}}
 .btn.icon-m{padding:0 11px}
@@ -63,7 +63,7 @@ h2.sec{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spac
 /* ---------- próximos ---------- */
 .next{border:1px solid color-mix(in srgb,var(--accent) 28%,var(--border));background:var(--accent-soft);border-radius:var(--radius);overflow:hidden}
 .hero{display:flex;gap:16px;align-items:center;padding:18px 16px;cursor:pointer}
-.hero:hover{background:rgba(4,120,87,.06)}
+.hero:hover{background:hsl(221 83% 53% / .06)}
 .hero .when{flex:none;text-align:center;min-width:64px}
 .when .wd{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
 .when .dn{font:600 36px/38px "Space Grotesk",sans-serif;color:var(--primary);letter-spacing:-.03em}
@@ -86,15 +86,16 @@ h2.sec{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spac
 .row .main{min-width:0}
 .row .tt{font:600 16px/22px "Space Grotesk",sans-serif;letter-spacing:-.015em;color:var(--primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .tt.none{font-weight:500;color:var(--muted-foreground)}
-.row .sub{display:flex;flex-wrap:wrap;align-items:center;gap:0 6px;color:var(--muted-foreground);line-height:22px}
+.row .sub{display:flex;flex-wrap:wrap;align-items:center;gap:0 12px;color:var(--muted-foreground);line-height:22px}
 .row .sub .d{opacity:.6}
 .cols{display:none}
 .more{display:inline-grid;place-items:center;width:40px;height:40px;border:0;background:none;border-radius:8px;color:var(--muted-foreground)}
 .more:hover{background:var(--muted)}
 .pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:16px;padding:2px 8px;border-radius:4px;background:#f4f4f5;color:#52525b;font-weight:500;white-space:nowrap}
 .pill.warn{background:#fef3c7;color:#92400e}
-.pill.ok{background:#d1fae5;color:#065f46}
+.pill.ok{background:#dbeafe;color:#1e40af}
 .num{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.cell .num{max-width:100%}
 
 @container app (min-width:600px){
   .row{grid-template-columns:var(--cols);padding:12px 16px}
@@ -106,24 +107,31 @@ h2.sec{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spac
 @container app (max-width:599px){.lh{display:none}}
 
 /* ---------- histórico ---------- */
-.bar{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
-.bar .r1{display:flex;gap:8px;align-items:center}
-.search{position:relative;flex:1;min-width:0}
+.bar{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{position:relative;display:inline-flex;flex:none}
+.chip select,.sortsel select{appearance:none;-webkit-appearance:none;height:32px;border:0;border-radius:6px;background:hsl(215 16% 72% / .22);padding:0 28px 0 12px;font-size:14px;font-weight:500;cursor:pointer;max-width:200px}
+.chip select:hover,.sortsel select:hover{background:hsl(215 16% 72% / .34)}
+.chip>svg{position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted-foreground)}
+.chip.on select{background:hsl(221 83% 53% / .15);color:var(--accent);padding-right:26px}
+.chip .x{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--accent);padding:2px;display:grid;place-items:center}
+.tools{display:flex;align-items:center;gap:8px}
+.sbtn{display:inline-grid;place-items:center;width:32px;height:32px;border:0;border-radius:6px;background:hsl(215 16% 72% / .22);color:var(--foreground)}
+.search{position:relative;flex:1;min-width:0;display:none}
+.search.open,.search.has{display:block}
 .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted-foreground)}
-.search input{width:100%;height:36px;border:0;border-radius:8px;background:var(--muted);padding:0 32px 0 34px}
-.search button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--muted-foreground);display:none}
-.search.has button{display:block}
-.filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
-.filters::-webkit-scrollbar{display:none}
-.filters select,.sortsel select{height:36px;border:1px solid var(--border);background:var(--background);border-radius:8px;padding:0 28px 0 12px;max-width:100%}
-.filters select.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:500}
-.sortsel{flex:none}
+.search input{width:100%;height:32px;border:0;border-radius:6px;background:hsl(215 16% 72% / .22);padding:0 30px 0 32px}
+.search .qx{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--muted-foreground);display:grid;place-items:center}
+.sortsel{flex:none;position:relative}
+.sortsel>svg{position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted-foreground)}
+.sbtn.hide{display:none}
 @container app (min-width:600px){
-  .bar{flex-direction:row;flex-wrap:wrap;align-items:center}
-  .bar .r1{display:contents}
-  .search{flex:0 0 220px}
-  .filters{overflow:visible;order:2}
-  .sortsel{order:3;margin-left:auto}
+  .bar{flex-direction:row;align-items:center}
+  .chips{flex:1;flex-wrap:wrap;overflow:visible}
+  .tools{margin-left:auto}
+  .search{display:block;flex:0 0 220px}
+  .sbtn{display:none}
 }
 .count{margin:0 0 8px;color:var(--muted-foreground);display:flex;gap:12px;align-items:center}
 .count button{border:0;background:none;color:var(--accent);padding:0;text-decoration:underline}
@@ -168,7 +176,7 @@ h2.sec{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spac
     <tr><td>Data e dia da semana</td><td><span class="tg e">já existe</span></td><td><code>Service.date</code></td><td>Ordenar, achar o culto.</td></tr>
     <tr><td>Título</td><td><span class="tg e">já existe</span></td><td><code>Service.title</code> (vazio → “Culto de domingo”)</td><td>Identificar cultos especiais.</td></tr>
     <tr><td>Dirigente</td><td><span class="tg e">já existe</span></td><td><code>Service.worshipLeader</code></td><td>Filtrar e agrupar por quem conduziu.</td></tr>
-    <tr><td>Pregador</td><td><span class="tg e">já existe</span></td><td><code>Service.preacher</code></td><td>Filtrar; o dirigente parte de quem prega.</td></tr>
+    <tr><td>Pregador(a)</td><td><span class="tg e">já existe</span></td><td><code>Service.preacher</code> (preenchido em poucos cultos; vazio some da linha no celular e vira “—” na coluna)</td><td>Filtrar; o dirigente parte de quem prega.</td></tr>
     <tr><td>Tema e texto bíblico</td><td><span class="tg e">já existe</span></td><td><code>sermonTheme</code>, <code>sermonReference</code></td><td>Buscar por assunto ou passagem.</td></tr>
     <tr><td>Nº de músicas</td><td><span class="tg c">calcular</span></td><td>Unidades do tipo SONG em <code>Service.plan</code> (a lista já recebe o <code>plan</code>, sem mudar a API)</td><td>Ver se a liturgia está montada.</td></tr>
     <tr><td>Início</td><td><span class="tg e">já existe</span></td><td><code>plan.startTime</code></td><td>Distinguir cultos de horários diferentes.</td></tr>
@@ -191,7 +199,7 @@ for(let d=new Date(2025,0,5); d<=new Date(2026,11,6); d.setDate(d.getDate()+7)){
   const th=THEMES[(i*3)%THEMES.length];
   let songs=3+((i*7+(i%3))%5);
   if(future){ songs = dt<new Date(2026,10,20)?5: dt<new Date(2026,10,27)?3:0 }
-  services.push({id:i,date:dt,title:SPECIAL[key]||null,leader:LEADERS[(i*7+1)%4],preacher:PREACH[(i*5+2)%4],
+  services.push({id:i,date:dt,title:SPECIAL[key]||null,leader:LEADERS[(i*7+1)%4],preacher:(i%4===0||i%11===3)?PREACH[(i*5+2)%4]:null,
     theme:(future&&songs===0)?null:th[0],ref:(future&&songs===0)?null:th[1],songs,start:i%9===4?"18:30":"09:30",updated:future?"há 2 dias":(i%4?"na semana":"no dia"),
     songTitles:[]});
   i++;
@@ -205,21 +213,23 @@ const icon={
   more:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>',
   chev:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>',
   note:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+  mic:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7.601-5.994 8.19a1 1 0 0 0 .1 1.298l.817.818a1 1 0 0 0 1.314.087L15.09 12"/><path d="M16.5 21.174C15.5 20.5 14.372 20 13 20c-2.058 0-3.928 2.356-6 2-2.072-.356-2.775-3.369-1.5-4.5"/><circle cx="16" cy="7" r="5"/></svg>',
+  msg:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>',
   x:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg>'
 };
 const FIELDS=[
-  ["leader","Dirigente",true],["preacher","Pregador",false],["theme","Tema e texto",false],
+  ["leader","Dirigente",true],["preacher","Pregador(a)",false],["theme","Tema e texto",false],
   ["songs","Nº de músicas",true],["start","Início",false],["status","Situação",false],["updated","Atualizado em",false]
 ];
-const S={dev:"mobile",group:"month",q:"",year:"",leader:"",preacher:"",sort:"date-desc",open:{},fields:Object.fromEntries(FIELDS.map(f=>[f[0],f[2]]))};
+const S={sopen:false,dev:"mobile",group:"month",q:"",year:"",leader:"",preacher:"",sort:"date-desc",open:{},fields:Object.fromEntries(FIELDS.map(f=>[f[0],f[2]]))};
 
 function isFuture(s){return s.date>TODAY}
 function titleOf(s){return s.title||"Culto de domingo"}
 function statusOf(s){ if(s.songs===0) return ["Rascunho","warn"]; if(isFuture(s)&&s.songs<5) return ["Incompleta","warn"]; return ["Completa","ok"]; }
 function cellsFor(s){
   const c=[];
-  if(S.fields.leader) c.push(["Dirigente",s.leader]);
-  if(S.fields.preacher) c.push(["Pregador",s.preacher]);
+  if(S.fields.leader) c.push(["Dirigente",`<span class="num">${icon.mic}${s.leader}</span>`]);
+  if(S.fields.preacher) c.push(["Pregador(a)",s.preacher?`<span class="num">${icon.msg}${s.preacher}</span>`:"—"]);
   if(S.fields.theme) c.push(["Tema e texto",s.theme?`${s.theme} · ${s.ref}`:"—"]);
   if(S.fields.songs) c.push(["Músicas",s.songs?`<span class="num">${icon.note}${s.songs}</span>`:"—"]);
   if(S.fields.start) c.push(["Início",s.start]);
@@ -236,8 +246,8 @@ function colsTemplate(){
 function whenHtml(s,big){ return `<div class="when"><div class="wd">${PT_WD[s.date.getDay()]}</div><div class="dn">${two(s.date.getDate())}</div>${big?`<div class="mo">${PT_MO[s.date.getMonth()].slice(0,3)}</div>`:""}</div>` }
 function rowHtml(s){
   const cells=cellsFor(s);
-  const stack=cells.map(([k,v])=>k==="Situação"||k==="Músicas"?v:`<span>${v}</span>`);
-  const sub=stack.map((x,i)=>(i?'<span class="d">·</span>':'')+x).join("");
+  const stack=cells.filter(([k,v])=>v!=="—").map(([k,v])=>k==="Situação"||k==="Músicas"?v:`<span>${v}</span>`);
+  const sub=stack.join("");
   return `<div class="row" role="link" tabindex="0">
     ${whenHtml(s,false)}
     <div class="main"><div class="tt ${s.title?"":"none"}">${titleOf(s)}</div>${sub?`<div class="sub stack">${sub}</div>`:""}</div>
@@ -250,7 +260,7 @@ function heroHtml(s){
   const [st,k]=statusOf(s);
   return `<div class="hero" role="link" tabindex="0">${whenHtml(s,true)}
     <div class="info"><div class="rel">${rel}</div><div class="tt">${titleOf(s)}</div>
-    <div class="meta"><span>${s.leader} dirige</span><span>·</span><span>${s.preacher} prega</span>${s.theme?`<span>·</span><span>${s.theme} (${s.ref})</span>`:""}</div>
+    <div class="meta"><span class="num">${icon.mic}${s.leader}</span>${s.preacher?`<span class="num">${icon.msg}${s.preacher}</span>`:""}${s.theme?`<span>${s.theme} (${s.ref})</span>`:""}</div>
     <div class="meta" style="margin-top:8px;align-items:center"><span class="pill ${k}">${st}</span><span class="num">${icon.note}${s.songs} músicas</span><span>Início ${s.start}</span></div></div>
     <button class="more" aria-label="Mais ações">${icon.more}</button></div>`;
 }
@@ -262,7 +272,7 @@ function filtered(){
 }
 function sorted(list){
   const [k,dir]=S.sort.split("-"); const m=dir==="asc"?1:-1;
-  const f={date:(a,b)=>a.date-b.date,title:(a,b)=>titleOf(a).localeCompare(titleOf(b)),leader:(a,b)=>a.leader.localeCompare(b.leader),songs:(a,b)=>a.songs-b.songs}[k];
+  const f={date:(a,b)=>a.date-b.date,title:(a,b)=>titleOf(a).localeCompare(titleOf(b)),leader:(a,b)=>a.leader.localeCompare(b.leader)}[k];
   return [...list].sort((a,b)=>m*f(a,b));
 }
 function groups(list){
@@ -299,18 +309,21 @@ function render(){
     <section class="section"><h2 class="sec">Próximos cultos</h2>
       <div class="next">${heroHtml(future[0])}<div class="mini">${future.slice(1).map(rowHtml).join("")}</div></div></section>
     <section><h2 class="sec">Histórico</h2>
-      <div class="bar"><div class="r1"><div class="search ${S.q?"has":""}">${icon.search}<input id="q" type="search" placeholder="Buscar por título, dirigente, tema…" value="${S.q.replace(/"/g,"&quot;")}"><button id="qx" aria-label="Limpar">${icon.x}</button></div>
-        <div class="sortsel"><select id="sort" aria-label="Ordenar"><option value="date-desc">Mais recentes</option><option value="date-asc">Mais antigos</option><option value="title-asc">Título A–Z</option><option value="leader-asc">Dirigente A–Z</option><option value="songs-desc">Mais músicas</option></select></div></div>
-        <div class="filters"><select id="fy" class="${S.year?"on":""}">${opts(years,S.year,"Ano")}</select><select id="fl" class="${S.leader?"on":""}">${opts(LEADERS,S.leader,"Dirigente")}</select><select id="fp" class="${S.preacher?"on":""}">${opts(PREACH,S.preacher,"Pregador")}</select></div></div>
+      <div class="bar"><div class="chips"><span class="chip ${S.year?"on":""}"><select id="fy" aria-label="Ano">${opts(years,S.year,"Ano")}</select>${S.year?`<button class="x" id="fyx" aria-label="Limpar">${icon.x}</button>`:icon.chev}</span><span class="chip ${S.leader?"on":""}"><select id="fl" aria-label="Dirigente">${opts(LEADERS,S.leader,"Dirigente")}</select>${S.leader?`<button class="x" id="flx" aria-label="Limpar">${icon.x}</button>`:icon.chev}</span><span class="chip ${S.preacher?"on":""}"><select id="fp" aria-label="Pregador(a)">${opts(PREACH,S.preacher,"Pregador(a)")}</select>${S.preacher?`<button class="x" id="fpx" aria-label="Limpar">${icon.x}</button>`:icon.chev}</span></div>
+        <div class="tools"><button class="sbtn ${S.q||S.sopen?"hide":""}" id="sb" aria-label="Buscar">${icon.search}</button>
+          <div class="search ${S.sopen?"open":""} ${S.q?"has":""}">${icon.search}<input id="q" type="search" placeholder="Buscar por título, dirigente, tema…" value="${S.q.replace(/"/g,"&quot;")}">${S.q||S.sopen?`<button class="qx" id="qx" aria-label="Limpar busca">${icon.x}</button>`:""}</div>
+          <div class="sortsel"><select id="sort" aria-label="Ordenar"><option value="date-desc">Mais recentes</option><option value="date-asc">Mais antigos</option><option value="title-asc">Título A–Z</option><option value="leader-asc">Dirigente A–Z</option></select>${icon.chev}</div></div></div>
       <p class="count"><span>${list.length} ${list.length===1?"culto":"cultos"}${searching?" no filtro":""}</span>${searching?'<button id="clr">Limpar filtros</button>':""}</p>
       <div class="box">${lh}${body}</div></section>
     <button class="fab">${icon.plus}Nova liturgia</button>`;
   document.getElementById("sort").value=S.sort;
   const q=document.getElementById("q");
   q.oninput=e=>{S.q=e.target.value;const p=e.target.selectionStart;render();const n=document.getElementById("q");n.focus();n.setSelectionRange(p,p)};
-  document.getElementById("qx").onclick=()=>{S.q="";render()};
+  const qx=document.getElementById("qx"); if(qx) qx.onclick=()=>{S.q="";S.sopen=false;render()};
+  const sb=document.getElementById("sb"); if(sb) sb.onclick=()=>{S.sopen=true;render();document.getElementById("q").focus()};
   document.getElementById("sort").onchange=e=>{S.sort=e.target.value;render()};
   document.getElementById("fy").onchange=e=>{S.year=e.target.value;render()};
+  [["fyx","year"],["flx","leader"],["fpx","preacher"]].forEach(([id,k])=>{const b=document.getElementById(id);if(b)b.onclick=()=>{S[k]="";render()}});
   document.getElementById("fl").onchange=e=>{S.leader=e.target.value;render()};
   document.getElementById("fp").onchange=e=>{S.preacher=e.target.value;render()};
   const clr=document.getElementById("clr"); if(clr) clr.onclick=()=>{S.q=S.year=S.leader=S.preacher="";render()};

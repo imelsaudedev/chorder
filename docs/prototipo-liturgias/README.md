@@ -31,3 +31,11 @@ Protótipo navegável da lista de liturgias redesenhada. Abrir `liturgias-lista.
 - A busca por música (título de música dentro do `plan`) entra já ou numa segunda etapa? Ela é o principal uso do histórico para "buscar algo".
 - "Situação" (rascunho/incompleta/completa) precisa de uma regra combinada; a do protótipo é só um exemplo.
 - Modelo usado exigiria um campo novo e só vale se houver uso real.
+
+## Ajustes da revisão
+
+- Sem ordenação por "mais músicas".
+- **Pregador(a)** (rótulo); o campo é pouco preenchido, então vazio some da linha no celular e vira "—" na coluna.
+- Ícones do sistema: dirigente com `MicVocal` (como na tela do culto) e pregador(a) com `MessageSquare` (como o item Sermão da liturgia).
+- Cor primária azul do sistema (`--secondary`, `hsl(221 83% 53%)`), no lugar do verde.
+- Filtros como em Músicas: chips (Ano, Dirigente, Pregador(a)) em cima e, à direita no tablet/desktop ou abaixo no celular, busca e ordenação; chip ativo em azul com ✕.
