@@ -40,4 +40,16 @@ describe('FloatingAddLink', () => {
     const wrapper = container.querySelector('.fixed')!;
     expect(wrapper.className).toMatch(/bottom-44/);
   });
+
+  it('mobileOnly mostra só o botão redondo do celular', () => {
+    const { container } = render(
+      <YoutubePlayerProvider>
+        <AudioPlayerProvider>
+          <FloatingAddLink onClick={() => {}} label="Nova liturgia" mobileOnly />
+        </AudioPlayerProvider>
+      </YoutubePlayerProvider>
+    );
+    expect(container.querySelectorAll('button')).toHaveLength(1);
+    expect(screen.queryByText('Nova liturgia')).not.toBeInTheDocument();
+  });
 });
