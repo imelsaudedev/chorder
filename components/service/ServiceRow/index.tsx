@@ -21,6 +21,10 @@ import { useSWRConfig } from "swr";
 export const SERVICE_ROW_GRID =
   "@[720px]:grid-cols-[3rem_minmax(0,1.4fr)_minmax(0,1.6fr)_5rem_2.5rem]";
 
+/** Respiro lateral e entre colunas: os mesmos da lista de músicas (SongsTable / SongRow flush). */
+export const SERVICE_ROW_PAD = "px-4 @[560px]:px-5 @[860px]:px-6";
+export const SERVICE_ROW_GAP = "gap-x-4 @[560px]:gap-x-5";
+
 type ServiceRowProps = {
   service: ServiceListItem;
   /** Selo ao lado do título (ex.: "Esta semana"), usado no próximo culto. */
@@ -79,9 +83,10 @@ export default function ServiceRow({ service, badge }: ServiceRowProps) {
     <li
       data-service-row
       className={cn(
-        "relative grid items-start gap-x-4 px-4 py-3 transition-colors hover:bg-muted/40",
+        "relative grid items-start py-4 transition-colors hover:bg-muted/40",
+        SERVICE_ROW_PAD,
+        SERVICE_ROW_GAP,
         "grid-cols-[3rem_minmax(0,1fr)_2.5rem] [grid-template-areas:'when_title_act'_'when_meta_act']",
-        "@[720px]:gap-x-5",
         SERVICE_ROW_GRID,
         "@[720px]:[grid-template-areas:'when_title_pre_songs_act'_'when_leader_tema_songs_act']"
       )}
@@ -137,7 +142,7 @@ export default function ServiceRow({ service, badge }: ServiceRowProps) {
         )}
       </div>
 
-      <div className="relative z-10 -mt-1.5 flex justify-end [grid-area:act]">
+      <div className="relative z-10 -mt-2 flex justify-end [grid-area:act]">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

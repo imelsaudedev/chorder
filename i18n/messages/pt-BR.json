@@ -65,7 +65,7 @@
     "nextService": "Próxima liturgia",
     "nextServices": "Próximas liturgias",
     "history": "Histórico",
-    "colService": "Culto",
+    "colService": "Culto e dirigente",
     "colPreacherTheme": "Pregador(a) e tema/texto",
     "colSongs": "Músicas",
     "colDate": "Data",
@@ -74,7 +74,8 @@
     "relThisWeek": "Esta semana",
     "relNextWeek": "Semana que vem",
     "relInWeeks": "Em {count} semanas",
-    "noPreacher": "Sem pregador(a)"
+    "noPreacher": "Sem pregador(a)",
+    "totalServices": "{count, plural, one {# liturgia} other {# liturgias}}"
   },
   "ServiceData": {
     "title": "Título",
