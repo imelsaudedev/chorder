@@ -16,9 +16,9 @@ import { useEffect, useState } from "react";
 
 const SORT_STORAGE_KEY = "musicas:sort";
 
-type ClientSongsPageProps = { query: string; home?: boolean };
+type ClientSongsPageProps = { query: string };
 
-export default function ClientSongsPage({ query, home = false }: ClientSongsPageProps) {
+export default function ClientSongsPage({ query }: ClientSongsPageProps) {
   const t = useTranslations("Messages");
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
@@ -43,7 +43,7 @@ export default function ClientSongsPage({ query, home = false }: ClientSongsPage
 
   return (
     <>
-      {home && <SongsHome tagGroups={tagGroups} />}
+      <SongsHome tagGroups={tagGroups} />
       <SongsFilterBar
         tagGroups={tagGroups}
         selectedTagIds={selectedTagIds}

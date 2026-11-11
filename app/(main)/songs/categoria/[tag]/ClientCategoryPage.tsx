@@ -41,7 +41,7 @@ export default function ClientCategoryPage({ tagId }: { tagId: number }) {
         name={tag.name}
         description={tag.description}
         color={tag.color ?? group.color}
-        backHref="/songs?v=2"
+        backHref="/songs"
       />
       <SongsFilterBar
         // os demais grupos viram seletores; o próprio grupo da categoria já está aplicado
