@@ -62,7 +62,19 @@
   "Service": {
     "ledBy": "Led by",
     "noTitle": "Service without title",
-    "nextService": "Next service"
+    "nextService": "Next service",
+    "nextServices": "Upcoming services",
+    "history": "History",
+    "colService": "Service",
+    "colPreacherTheme": "Preacher and theme/text",
+    "colSongs": "Songs",
+    "colDate": "Date",
+    "relToday": "Today",
+    "relTomorrow": "Tomorrow",
+    "relThisWeek": "This week",
+    "relNextWeek": "Next week",
+    "relInWeeks": "In {count} weeks",
+    "noPreacher": "No preacher"
   },
   "ServiceData": {
     "title": "Title",

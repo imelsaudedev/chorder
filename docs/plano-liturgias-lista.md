@@ -10,11 +10,12 @@ Base: protótipo em `docs/prototipo-liturgias/liturgias-lista.html` (decisões n
 - Já existem, em Músicas, os blocos reaproveitáveis: `PageTitleBlock`, `SongsFilterBar` (chips + busca + ordenação), `CategoryPicker`, `ExpandingSearch`, `SortMenu`, estado na URL (`lib/songs-list-state.ts`, `hooks/useSongsListState.ts`) e `LastUsedIndicator`.
 - Ícones do sistema: dirigente = `MicVocal` (`ServiceHeader`), pregador(a) = `MessageSquare` (item Sermão em `unitConfig.ts`). Cor primária azul = `--secondary`.
 
-## Decisões ainda abertas (precisam de resposta antes do PR C)
+## Decisões tomadas
 
-1. **Próximos cultos:** lista (todos no mesmo padrão) ou **card + coluna**. Recomendo card + coluna se sempre houver 2+ cultos futuros; com 0 ou 1, cai para o card sozinho.
-2. **Regra de "situação"** (rascunho, incompleta, completa): sugestão = sem músicas é rascunho; futura com menos de 5 músicas é incompleta; o resto, completa. Aceitar, ajustar ou tirar do primeiro corte?
-3. **Busca por música:** entra no PR B/D (precisa de endpoint) ou fica para uma segunda etapa.
+1. **Próximos cultos:** lista única (todos no mesmo padrão de linha; o primeiro leva um selo relativo, como "Esta semana"). Card + coluna ficou como alternativa testada no protótipo.
+2. **Situação** (rascunho/incompleta/completa): **fora** do primeiro corte.
+3. **Busca por música:** **entra** (o endpoint do PR B já devolve `songTitles`; a busca vem no PR D).
+4. A, B e a lista de músicas (#92) já foram mesclados.
 
 ## Ordem dos PRs (cada um pequeno, a partir do `main`, com `tsc` + `yarn test` e descrição em pt-BR)
 

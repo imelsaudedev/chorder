@@ -62,7 +62,19 @@
   "Service": {
     "ledBy": "Dirigido por",
     "noTitle": "Liturgia sem título",
-    "nextService": "Próxima liturgia"
+    "nextService": "Próxima liturgia",
+    "nextServices": "Próximas liturgias",
+    "history": "Histórico",
+    "colService": "Culto",
+    "colPreacherTheme": "Pregador(a) e tema/texto",
+    "colSongs": "Músicas",
+    "colDate": "Data",
+    "relToday": "Hoje",
+    "relTomorrow": "Amanhã",
+    "relThisWeek": "Esta semana",
+    "relNextWeek": "Semana que vem",
+    "relInWeeks": "Em {count} semanas",
+    "noPreacher": "Sem pregador(a)"
   },
   "ServiceData": {
     "title": "Título",
