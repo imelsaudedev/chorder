@@ -114,6 +114,18 @@ export type ClientServiceTemplate = Omit<ServiceTemplate, "id"> & {
 
 export type ServiceRef = Pick<Service, "slug" | "title" | "date">;
 
+/** Liturgia como a lista de Liturgias a vê: sem o plano, com o resumo pronto. */
+export type ServiceListItem = Pick<
+  Service,
+  "slug" | "title" | "date" | "worshipLeader" | "preacher" | "sermonTheme" | "sermonReference"
+> & {
+  startTime: string | null;
+  songCount: number;
+  /** Títulos das músicas, na ordem da liturgia (a busca da lista usa isto). */
+  songTitles: string[];
+  updatedAt: Date;
+};
+
 export type ServicePlan = {
   startTime?: string | null;
   sections: ClientServiceSection[];
