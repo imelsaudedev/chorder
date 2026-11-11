@@ -39,3 +39,6 @@ Protótipo navegável da lista de liturgias redesenhada. Abrir `liturgias-lista.
 - Ícones do sistema: dirigente com `MicVocal` (como na tela do culto) e pregador(a) com `MessageSquare` (como o item Sermão da liturgia).
 - Cor primária azul do sistema (`--secondary`, `hsl(221 83% 53%)`), no lugar do verde.
 - Filtros como em Músicas: chips (Ano, Dirigente, Pregador(a)) em cima e, à direita no tablet/desktop ou abaixo no celular, busca e ordenação; chip ativo em azul com ✕.
+- Itens alinhados pelo topo (data, título, colunas e ⋯); o mês aparece sempre abaixo do dia, em todo item.
+- Tema e texto bíblico são dois itens separados (no card de destaque, em linhas próprias).
+- No card de próximos cultos, a data do primeiro fica num quadrado branco com borda e leve sombra.

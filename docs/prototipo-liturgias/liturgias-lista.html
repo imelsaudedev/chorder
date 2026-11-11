@@ -62,9 +62,9 @@ h2.sec{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spac
 
 /* ---------- próximos ---------- */
 .next{border:1px solid color-mix(in srgb,var(--accent) 28%,var(--border));background:var(--accent-soft);border-radius:var(--radius);overflow:hidden}
-.hero{display:flex;gap:16px;align-items:center;padding:18px 16px;cursor:pointer}
+.hero{display:flex;gap:16px;align-items:flex-start;padding:18px 16px;cursor:pointer}
 .hero:hover{background:hsl(221 83% 53% / .06)}
-.hero .when{flex:none;text-align:center;min-width:64px}
+.hero .when{flex:none;text-align:center;width:76px;padding:10px 0 8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.10),0 1px 2px rgba(15,23,42,.06)}
 .when .wd{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
 .when .dn{font:600 36px/38px "Space Grotesk",sans-serif;color:var(--primary);letter-spacing:-.03em}
 .when .mo{font-size:12px;color:var(--muted-foreground);text-transform:uppercase}
@@ -75,21 +75,23 @@ h2.sec{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spac
 .mini{border-top:1px solid color-mix(in srgb,var(--accent) 16%,var(--border))}
 
 /* ---------- linhas ---------- */
-.row{position:relative;display:grid;align-items:center;column-gap:16px;padding:12px 16px;cursor:pointer;border-top:1px solid var(--border);
+.row{position:relative;display:grid;align-items:start;column-gap:16px;padding:12px 16px;cursor:pointer;border-top:1px solid var(--border);
   grid-template-columns:48px minmax(0,1fr) 40px}
 .row:first-child{border-top:0}
 .row:hover{background:var(--muted)}
 .next .row{border-color:color-mix(in srgb,var(--accent) 16%,var(--border))}
-.row .when{text-align:center;line-height:1}
+.row .when{text-align:center;line-height:1;padding-top:2px}
 .row .when .wd{font-size:11px}
 .row .when .dn{font-size:22px;line-height:26px}
+.row .when .mo{font-size:11px;line-height:14px}
+.row .tt{min-height:22px}
 .row .main{min-width:0}
 .row .tt{font:600 16px/22px "Space Grotesk",sans-serif;letter-spacing:-.015em;color:var(--primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .tt.none{font-weight:500;color:var(--muted-foreground)}
 .row .sub{display:flex;flex-wrap:wrap;align-items:center;gap:0 12px;color:var(--muted-foreground);line-height:22px}
 .row .sub .d{opacity:.6}
 .cols{display:none}
-.more{display:inline-grid;place-items:center;width:40px;height:40px;border:0;background:none;border-radius:8px;color:var(--muted-foreground)}
+.more{margin-top:-8px;display:inline-grid;place-items:center;width:40px;height:40px;border:0;background:none;border-radius:8px;color:var(--muted-foreground)}
 .more:hover{background:var(--muted)}
 .pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:16px;padding:2px 8px;border-radius:4px;background:#f4f4f5;color:#52525b;font-weight:500;white-space:nowrap}
 .pill.warn{background:#fef3c7;color:#92400e}
@@ -101,7 +103,7 @@ h2.sec{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spac
   .row{grid-template-columns:var(--cols);padding:12px 16px}
   .row .stack{display:none}
   .cols{display:contents}
-  .cell{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted-foreground)}
+  .cell{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted-foreground);line-height:22px}
   .lh{display:grid;grid-template-columns:var(--cols);column-gap:16px;padding:8px 16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--muted);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-foreground)}
 }
 @container app (max-width:599px){.lh{display:none}}
@@ -177,7 +179,7 @@ h2.sec{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spac
     <tr><td>Título</td><td><span class="tg e">já existe</span></td><td><code>Service.title</code> (vazio → “Culto de domingo”)</td><td>Identificar cultos especiais.</td></tr>
     <tr><td>Dirigente</td><td><span class="tg e">já existe</span></td><td><code>Service.worshipLeader</code></td><td>Filtrar e agrupar por quem conduziu.</td></tr>
     <tr><td>Pregador(a)</td><td><span class="tg e">já existe</span></td><td><code>Service.preacher</code> (preenchido em poucos cultos; vazio some da linha no celular e vira “—” na coluna)</td><td>Filtrar; o dirigente parte de quem prega.</td></tr>
-    <tr><td>Tema e texto bíblico</td><td><span class="tg e">já existe</span></td><td><code>sermonTheme</code>, <code>sermonReference</code></td><td>Buscar por assunto ou passagem.</td></tr>
+    <tr><td>Tema e texto bíblico (dois itens separados)</td><td><span class="tg e">já existe</span></td><td><code>sermonTheme</code>, <code>sermonReference</code></td><td>Buscar por assunto ou passagem.</td></tr>
     <tr><td>Nº de músicas</td><td><span class="tg c">calcular</span></td><td>Unidades do tipo SONG em <code>Service.plan</code> (a lista já recebe o <code>plan</code>, sem mudar a API)</td><td>Ver se a liturgia está montada.</td></tr>
     <tr><td>Início</td><td><span class="tg e">já existe</span></td><td><code>plan.startTime</code></td><td>Distinguir cultos de horários diferentes.</td></tr>
     <tr><td>Situação (rascunho / completa)</td><td><span class="tg c">calcular</span></td><td>Regra simples: sem músicas = rascunho; futura com poucas músicas = incompleta</td><td>Dirigente: o que ainda falta antes de sexta.</td></tr>
@@ -218,7 +220,7 @@ const icon={
   x:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg>'
 };
 const FIELDS=[
-  ["leader","Dirigente",true],["preacher","Pregador(a)",false],["theme","Tema e texto",false],
+  ["leader","Dirigente",true],["preacher","Pregador(a)",false],["theme","Tema",false],["ref","Texto bíblico",false],
   ["songs","Nº de músicas",true],["start","Início",false],["status","Situação",false],["updated","Atualizado em",false]
 ];
 const S={sopen:false,dev:"mobile",group:"month",q:"",year:"",leader:"",preacher:"",sort:"date-desc",open:{},fields:Object.fromEntries(FIELDS.map(f=>[f[0],f[2]]))};
@@ -230,7 +232,8 @@ function cellsFor(s){
   const c=[];
   if(S.fields.leader) c.push(["Dirigente",`<span class="num">${icon.mic}${s.leader}</span>`]);
   if(S.fields.preacher) c.push(["Pregador(a)",s.preacher?`<span class="num">${icon.msg}${s.preacher}</span>`:"—"]);
-  if(S.fields.theme) c.push(["Tema e texto",s.theme?`${s.theme} · ${s.ref}`:"—"]);
+  if(S.fields.theme) c.push(["Tema",s.theme||"—"]);
+  if(S.fields.ref) c.push(["Texto bíblico",s.ref||"—"]);
   if(S.fields.songs) c.push(["Músicas",s.songs?`<span class="num">${icon.note}${s.songs}</span>`:"—"]);
   if(S.fields.start) c.push(["Início",s.start]);
   if(S.fields.status){const [t,k]=statusOf(s);c.push(["Situação",`<span class="pill ${k}">${t}</span>`])}
@@ -239,7 +242,7 @@ function cellsFor(s){
 }
 function colsTemplate(){
   const parts=["56px","minmax(0,1.6fr)"];
-  FIELDS.forEach(f=>{ if(S.fields[f[0]]) parts.push(f[0]==="theme"?"minmax(0,1.6fr)":f[0]==="songs"||f[0]==="start"?"72px":"minmax(0,1fr)") });
+  FIELDS.forEach(f=>{ if(S.fields[f[0]]) parts.push(f[0]==="theme"?"minmax(0,1.6fr)":f[0]==="ref"?"110px":f[0]==="songs"||f[0]==="start"?"72px":"minmax(0,1fr)") });
   parts.push("40px");
   return parts.join(" ");
 }
@@ -249,7 +252,7 @@ function rowHtml(s){
   const stack=cells.filter(([k,v])=>v!=="—").map(([k,v])=>k==="Situação"||k==="Músicas"?v:`<span>${v}</span>`);
   const sub=stack.join("");
   return `<div class="row" role="link" tabindex="0">
-    ${whenHtml(s,false)}
+    ${whenHtml(s,true)}
     <div class="main"><div class="tt ${s.title?"":"none"}">${titleOf(s)}</div>${sub?`<div class="sub stack">${sub}</div>`:""}</div>
     <div class="cols">${cells.map(([k,v])=>`<div class="cell">${v}</div>`).join("")}</div>
     <button class="more" aria-label="Mais ações">${icon.more}</button></div>`;
@@ -260,7 +263,8 @@ function heroHtml(s){
   const [st,k]=statusOf(s);
   return `<div class="hero" role="link" tabindex="0">${whenHtml(s,true)}
     <div class="info"><div class="rel">${rel}</div><div class="tt">${titleOf(s)}</div>
-    <div class="meta"><span class="num">${icon.mic}${s.leader}</span>${s.preacher?`<span class="num">${icon.msg}${s.preacher}</span>`:""}${s.theme?`<span>${s.theme} (${s.ref})</span>`:""}</div>
+    <div class="meta"><span class="num">${icon.mic}${s.leader}</span>${s.preacher?`<span class="num">${icon.msg}${s.preacher}</span>`:""}</div>
+    ${s.theme?`<div class="meta" style="margin-top:2px"><span>Tema: ${s.theme}</span></div><div class="meta" style="margin-top:0"><span>Texto: ${s.ref}</span></div>`:""}
     <div class="meta" style="margin-top:8px;align-items:center"><span class="pill ${k}">${st}</span><span class="num">${icon.note}${s.songs} músicas</span><span>Início ${s.start}</span></div></div>
     <button class="more" aria-label="Mais ações">${icon.more}</button></div>`;
 }
@@ -268,7 +272,7 @@ function filtered(){
   const q=S.q.trim().toLowerCase();
   return services.filter(s=>!isFuture(s)).filter(s=>
     (!S.year||String(s.date.getFullYear())===S.year)&&(!S.leader||s.leader===S.leader)&&(!S.preacher||s.preacher===S.preacher)&&
-    (!q||[titleOf(s),s.leader,s.preacher,s.theme||"",s.ref||""].join(" ").toLowerCase().includes(q)));
+    (!q||[titleOf(s),s.leader,s.preacher||"",s.theme||"",s.ref||""].join(" ").toLowerCase().includes(q)));
 }
 function sorted(list){
   const [k,dir]=S.sort.split("-"); const m=dir==="asc"?1:-1;
