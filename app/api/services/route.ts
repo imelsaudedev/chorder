@@ -14,8 +14,8 @@ function invalidServiceResponse(error: import("zod").ZodError) {
 }
 
 // `?view=list` devolve o resumo leve da lista de Liturgias (sem o plano).
-export async function GET(request?: Request) {
-  if (request && new URL(request.url).searchParams.get("view") === "list") {
+export async function GET(request: Request) {
+  if (new URL(request.url).searchParams.get("view") === "list") {
     return Response.json(await retrieveServicesList());
   }
   const services = await retrieveServices();
