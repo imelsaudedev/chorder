@@ -15,7 +15,7 @@ type Props = {
 };
 
 // Linha de controles (tom + referências + lápis/salvar/cancelar), só pra
-// mobile — no desktop os mesmos controles já aparecem dentro da linha do
+// mobile, renderizada dentro do cabeçalho (entre o título e o mapa) — no desktop os mesmos controles já aparecem dentro da linha do
 // título, em ServiceArrangementHeader (ver item 5: "voltar ao padrão título
 // à esquerda, ações à direita" não cabia junto do título no celular — D1).
 export default function ServiceArrangementMeta({
@@ -33,7 +33,7 @@ export default function ServiceArrangementMeta({
   const hasOriginal = !!arrangement.originalArrangementId;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 pb-3 md:hidden">
+    <div className="flex flex-wrap items-center gap-2 md:hidden">
       {/* Visível também durante a edição — ver o mesmo achado em
           ServiceArrangementHeader.tsx. */}
       {arrangement.key && <KeySelectorButton originalKey={arrangement.key} />}
