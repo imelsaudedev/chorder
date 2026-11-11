@@ -42,3 +42,4 @@ Protótipo navegável da lista de liturgias redesenhada. Abrir `liturgias-lista.
 - Itens alinhados pelo topo (data, título, colunas e ⋯); o mês aparece sempre abaixo do dia, em todo item.
 - Tema e texto bíblico são dois itens separados (no card de destaque, em linhas próprias).
 - No card de próximos cultos, a data do primeiro fica num quadrado branco com borda e leve sombra.
+- **Desktop (≥1000px):** colunas Data | Culto e dirigente | Pregador(a) e tema/texto | Músicas. O dirigente fica sob o título; pregador(a) em cima e "tema · texto" embaixo. Início, situação e atualizado em, quando ligados, entram como colunas depois de Músicas. No tablet (600–999px) continuam colunas separadas.

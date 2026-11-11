@@ -107,6 +107,17 @@ h2.sec{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spac
   .lh{display:grid;grid-template-columns:var(--cols);column-gap:16px;padding:8px 16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--muted);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-foreground)}
 }
 @container app (max-width:599px){.lh{display:none}}
+.dcols,.dmain,.lhd{display:none}
+.dmain .num{color:var(--muted-foreground);line-height:22px}
+.cell2{min-width:0;color:var(--muted-foreground);line-height:22px}
+.cell2 .l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@container app (min-width:1000px){
+  .row{grid-template-columns:var(--dcols)}
+  .cols,.lh:not(.lhd){display:none}
+  .dcols{display:contents}
+  .dmain{display:block}
+  .lhd{display:grid;grid-template-columns:var(--dcols);column-gap:16px;padding:8px 16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--muted);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-foreground)}
+}
 
 /* ---------- histórico ---------- */
 .bar{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
@@ -246,6 +257,26 @@ function colsTemplate(){
   parts.push("40px");
   return parts.join(" ");
 }
+function dcolsTemplate(){
+  const parts=["56px","minmax(0,1.5fr)"];
+  if(S.fields.preacher||S.fields.theme||S.fields.ref) parts.push("minmax(0,1.7fr)");
+  FIELDS.forEach(f=>{ if(["songs","start","status","updated"].includes(f[0])&&S.fields[f[0]]) parts.push(f[0]==="status"?"110px":"minmax(0,.7fr)") });
+  parts.push("40px");
+  return parts.join(" ");
+}
+function dgroup2(s){
+  const lines=[];
+  if(S.fields.preacher) lines.push(s.preacher?`<span class="num">${icon.msg}${s.preacher}</span>`:"—");
+  const tt=[S.fields.theme&&s.theme,S.fields.ref&&s.ref].filter(Boolean).join(" · ");
+  if(S.fields.theme||S.fields.ref) lines.push(tt||"—");
+  return lines.map(l=>`<div class="l">${l}</div>`).join("");
+}
+function dcells(s){
+  const g=[];
+  if(S.fields.preacher||S.fields.theme||S.fields.ref) g.push(`<div class="cell2">${dgroup2(s)}</div>`);
+  cellsFor(s).forEach(([k,v])=>{ if(["Músicas","Início","Situação","Atualizado em"].includes(k)) g.push(`<div class="cell2">${v}</div>`) });
+  return g.join("");
+}
 function whenHtml(s,big){ return `<div class="when"><div class="wd">${PT_WD[s.date.getDay()]}</div><div class="dn">${two(s.date.getDate())}</div>${big?`<div class="mo">${PT_MO[s.date.getMonth()].slice(0,3)}</div>`:""}</div>` }
 function rowHtml(s){
   const cells=cellsFor(s);
@@ -253,8 +284,9 @@ function rowHtml(s){
   const sub=stack.join("");
   return `<div class="row" role="link" tabindex="0">
     ${whenHtml(s,true)}
-    <div class="main"><div class="tt ${s.title?"":"none"}">${titleOf(s)}</div>${sub?`<div class="sub stack">${sub}</div>`:""}</div>
+    <div class="main"><div class="tt ${s.title?"":"none"}">${titleOf(s)}</div>${sub?`<div class="sub stack">${sub}</div>`:""}${S.fields.leader?`<div class="dmain"><span class="num">${icon.mic}${s.leader}</span></div>`:""}</div>
     <div class="cols">${cells.map(([k,v])=>`<div class="cell">${v}</div>`).join("")}</div>
+    <div class="dcols">${dcells(s)}</div>
     <button class="more" aria-label="Mais ações">${icon.more}</button></div>`;
 }
 function heroHtml(s){
@@ -294,12 +326,16 @@ function groups(list){
 function render(){
   const app=document.getElementById("app"); app.dataset.dev=S.dev;
   app.style.setProperty("--cols",colsTemplate());
+  app.style.setProperty("--dcols",dcolsTemplate());
   const future=services.filter(isFuture).sort((a,b)=>a.date-b.date);
   const list=sorted(filtered()), gs=groups(list), searching=!!(S.q||S.year||S.leader||S.preacher);
   const years=[...new Set(services.filter(s=>!isFuture(s)).map(s=>s.date.getFullYear()))];
   const opts=(arr,cur,ph)=>`<option value="">${ph}</option>`+arr.map(v=>`<option ${String(v)===cur?"selected":""}>${v}</option>`).join("");
   const headers=FIELDS.filter(f=>S.fields[f[0]]).map(f=>`<div>${f[1].replace("Nº de músicas","Músicas")}</div>`).join("");
-  const lh=`<div class="lh"><div>Data</div><div>Culto</div>${headers}<div></div></div>`;
+  const dh=[];
+  if(S.fields.preacher||S.fields.theme||S.fields.ref) dh.push(["Pregador(a) e tema/texto"]);
+  [["songs","Músicas"],["start","Início"],["status","Situação"],["updated","Atualizado em"]].forEach(([k,l])=>{if(S.fields[k])dh.push([l])});
+  const lh=`<div class="lh"><div>Data</div><div>Culto</div>${headers}<div></div></div><div class="lhd"><div>Data</div><div>${S.fields.leader?"Culto e dirigente":"Culto"}</div>${dh.map(([l])=>`<div>${l}</div>`).join("")}<div></div></div>`;
   // grupos: no histórico por mês, só os 6 mais recentes abertos; busca/filtro abre todos
   const body=gs.length?gs.map(([key,g],idx)=>{
     const open=S.open[key]!==undefined?S.open[key]:(searching||S.group==="none"||idx<(S.group==="month"?6:2));
