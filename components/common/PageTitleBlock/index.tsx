@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type PageTitleBlockProps = {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
-  /** Ações no canto direito da linha de cima (menu, botões). */
+  /** Ações (botões) à direita da linha do título; não mudam a posição do h1. */
   actions?: React.ReactNode;
   /** Link de voltar na linha de cima, à esquerda. */
   backLink?: React.ReactNode;
@@ -15,10 +15,12 @@ type PageTitleBlockProps = {
 /**
  * Cabeçalho das telas de lista e administração.
  *
- * Desktop (sm+): a linha de cima (voltar/ações) tem altura fixa de 36px, tenha
+ * Desktop (sm+): a linha de cima (só o voltar) tem altura fixa de 36px, tenha
  * conteúdo ou não, então o h1 fica sempre na mesma posição, igual ao
  * `PageHeader` das telas de detalhe (20 + 36 + 8 = 64px do topo).
- * Mobile: sem voltar/ações o título sobe (24px do topo).
+ * Mobile: sem voltar o título sobe (24px do topo).
+ * As ações ficam na linha do título, à direita (botões de até 36px, que não
+ * empurram o h1).
  * Abaixo do título: (4/8 → subtítulo) → 16/24 → conteúdo.
  */
 export default function PageTitleBlock({
@@ -28,7 +30,7 @@ export default function PageTitleBlock({
   backLink,
   className,
 }: PageTitleBlockProps) {
-  const hasTopRow = Boolean(backLink || actions);
+  const hasTopRow = Boolean(backLink);
   return (
     <div
       className={cn(
@@ -45,11 +47,13 @@ export default function PageTitleBlock({
         )}
       >
         <div>{backLink}</div>
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
-      <Heading level={1} className="min-w-0">
-        {title}
-      </Heading>
+      <div className="flex items-center justify-between gap-3">
+        <Heading level={1} className="min-w-0">
+          {title}
+        </Heading>
+        {actions && <div className="-my-0.5 flex shrink-0 items-center gap-2">{actions}</div>}
+      </div>
       {subtitle && (
         <Text variant="caption" as="p" className="mt-1 sm:mt-2 sm:text-base">
           {subtitle}

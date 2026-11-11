@@ -9,9 +9,11 @@ type FloatingAddLinkProps = {
   label: string;
   href?: string;
   onClick?: () => void;
+  /** Só o botão redondo do celular (a ação já existe no cabeçalho em telas maiores). */
+  mobileOnly?: boolean;
 };
 
-export default function FloatingAddLink({ label, href, onClick }: FloatingAddLinkProps) {
+export default function FloatingAddLink({ label, href, onClick, mobileOnly = false }: FloatingAddLinkProps) {
   const mediaBarOpen = useMediaBarOpen();
 
   const mobile = href
@@ -29,7 +31,7 @@ export default function FloatingAddLink({ label, href, onClick }: FloatingAddLin
       }`}
     >
       {mobile}
-      {desktop}
+      {!mobileOnly && desktop}
     </div>
   );
 }
