@@ -75,9 +75,9 @@ describe("SongRow", () => {
     expect(screen.getAllByText("há 3 meses")[0].className).toContain("text-muted-foreground");
   });
 
-  it("mostra a contagem de usos na coluna de uso", () => {
+  it("mostra a contagem de usos no chip", () => {
     renderRow(song({ lastUsedAt: new Date(Date.now() - 3 * DAY), usageCount: 5 }));
-    expect(screen.getByText("· 5×")).toBeInTheDocument();
+    expect(screen.getAllByText("5×")[0]).toBeInTheDocument();
   });
 
   it("tem o menu de ações", () => {

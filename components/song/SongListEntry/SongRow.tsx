@@ -5,6 +5,7 @@ import HighlightKeyword from "@/components/common/HighlightKeyword";
 import Text from "@/components/common/Text";
 import SongMetaModal, { SongMetaSavePayload } from "@/components/song/SongMetaModal";
 import SongReferences from "@/components/song/SongReferences";
+import Tag from "@/components/common/Tag";
 import TagList from "@/components/song/TagList";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,6 +59,24 @@ export function LastUsed({ date, className }: { date: Date | string | null; clas
       )}
     >
       <Clock size={14} aria-hidden /> {formatTimeAgo(d)}
+    </span>
+  );
+}
+
+/** [2×] em chip cinza (como as categorias) + último uso em texto. */
+export function UsageInfo({
+  date,
+  count,
+  className,
+}: {
+  date: Date | string | null;
+  count?: number;
+  className?: string;
+}) {
+  return (
+    <span className={cn("inline-flex items-center gap-1.5", className)}>
+      {!!count && <Tag label={`${count}×`} variant="muted" size="sm" />}
+      <LastUsed date={date} />
     </span>
   );
 }
@@ -130,7 +149,9 @@ export default function SongRow({
                 {hasUsage && <span aria-hidden className="@[560px]:hidden">·</span>}
               </>
             )}
-            {hasUsage && <LastUsed date={song.lastUsedAt ?? null} className="shrink-0 @[860px]:hidden" />}
+            {hasUsage && (
+              <UsageInfo date={song.lastUsedAt ?? null} count={song.usageCount} className="shrink-0 @[860px]:hidden" />
+            )}
           </div>
         </div>
 
@@ -153,8 +174,7 @@ export default function SongRow({
         {/* último uso e contagem: coluna própria no desktop */}
         {hasUsage && (
           <div className="relative z-10 hidden items-center gap-1.5 whitespace-nowrap pt-0.5 pointer-events-none @[860px]:flex [grid-area:used]">
-            <LastUsed date={song.lastUsedAt ?? null} />
-            {!!song.usageCount && <span className="text-sm text-muted-foreground">· {song.usageCount}×</span>}
+            <UsageInfo date={song.lastUsedAt ?? null} count={song.usageCount} />
           </div>
         )}
 
