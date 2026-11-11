@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 type SongListPageProps = {
-  searchParams?: Promise<{ query?: string; v?: string }>;
+  searchParams?: Promise<{ query?: string }>;
 };
 
 export default async function SongListPage(props: SongListPageProps) {
@@ -24,7 +24,7 @@ export default async function SongListPage(props: SongListPageProps) {
       <PageTitleBlock title={t("Messages.songs")} />
 
       <Main className="max-w-full">
-        <ClientSongsPage query={query} home={searchParams?.v === "2"} />
+        <ClientSongsPage query={query} />
       </Main>
 
       <ScrollToTopButton />
