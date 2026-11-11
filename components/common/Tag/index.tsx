@@ -1,5 +1,6 @@
 import { readableTint } from "@/lib/color-contrast";
 import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
 
 export type TagVariant = "default" | "success" | "warning" | "error" | "info" | "muted";
 export type TagSize = "xs" | "sm";
@@ -20,7 +21,7 @@ const sizeClasses: Record<TagSize, string> = {
 };
 
 type TagProps = {
-  label: string;
+  label: ReactNode;
   // cor dinâmica (vinda do banco) — sobrepõe variant. O fundo é um tom claro da cor e
   // o texto é a mesma cor escurecida até o contraste ficar legível (>= 4,5).
   color?: string;

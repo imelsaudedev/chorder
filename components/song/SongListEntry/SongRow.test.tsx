@@ -67,17 +67,17 @@ describe("SongRow", () => {
     expect(screen.getAllByText("Nunca usada")[0].className).toContain("italic");
   });
 
-  it("uso recente (menos de 3 semanas) em âmbar; antigo em cinza", () => {
+  it("uso recente em tom quente; antigo em tom frio", () => {
     const { unmount } = renderRow(song({ lastUsedAt: new Date(Date.now() - 3 * DAY), usageCount: 2 }));
-    expect(screen.getAllByText("há 3 dias")[0].className).toContain("text-amber-700");
+    expect(screen.getAllByText("3 dias")[0].parentElement?.className).toContain("var(--accent)");
     unmount();
-    renderRow(song({ lastUsedAt: new Date(Date.now() - 100 * DAY), usageCount: 2 }));
-    expect(screen.getAllByText("há 3 meses")[0].className).toContain("text-muted-foreground");
+    renderRow(song({ lastUsedAt: new Date(Date.now() - 400 * DAY), usageCount: 2 }));
+    expect(screen.getAllByText("1 ano")[0].parentElement?.className).toContain("var(--ring)");
   });
 
-  it("mostra a contagem de usos na coluna de uso", () => {
+  it("mostra a contagem de usos antes do tempo", () => {
     renderRow(song({ lastUsedAt: new Date(Date.now() - 3 * DAY), usageCount: 5 }));
-    expect(screen.getByText("· 5×")).toBeInTheDocument();
+    expect(screen.getAllByText("5×")[0]).toBeInTheDocument();
   });
 
   it("tem o menu de ações", () => {

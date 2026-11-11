@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -14,7 +15,10 @@ type ExpandingSearchProps = {
 
 /** Lupa que expande ao lado dos seletores (nunca por cima). Tecla "/" abre e foca. */
 export default function ExpandingSearch({ value, placeholder, onSearch }: ExpandingSearchProps) {
-  const [open, setOpen] = useState(value !== "");
+  const [openState, setOpen] = useState(value !== "");
+  // Com espaço (tablet e desktop) a busca fica sempre aberta.
+  const wide = useMediaQuery("(min-width: 640px)");
+  const open = openState || wide;
   const inputRef = useRef<HTMLInputElement>(null);
   const debounced = useDebouncedCallback(onSearch, 300);
 
@@ -58,7 +62,7 @@ export default function ExpandingSearch({ value, placeholder, onSearch }: Expand
       <Input
         ref={inputRef}
         type="search"
-        autoFocus={value === ""}
+        autoFocus={value === "" && !wide}
         defaultValue={value}
         placeholder={placeholder}
         onChange={(e) => debounced(e.target.value)}
@@ -67,7 +71,8 @@ export default function ExpandingSearch({ value, placeholder, onSearch }: Expand
       />
       <button
         type="button"
-        aria-label="Fechar busca"
+        aria-label={wide ? "Limpar busca" : "Fechar busca"}
+        hidden={wide && value === ""}
         className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
         onClick={() => {
           debounced.cancel();

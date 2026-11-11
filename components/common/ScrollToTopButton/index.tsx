@@ -39,7 +39,7 @@ export default function ScrollToTopButton({
   return (
     <Button
       variant="outline"
-      className={`fixed left-1/2 transform -translate-x-1/2 transition-[opacity,bottom] duration-300 gap-1 ${
+      className={`fixed z-40 bg-background hover:bg-accent shadow-md left-1/2 transform -translate-x-1/2 transition-[opacity,bottom] duration-300 gap-1 ${
         mediaBarOpen ? "bottom-44 sm:bottom-28" : "bottom-24 sm:bottom-8"
       } ${
         isVisible

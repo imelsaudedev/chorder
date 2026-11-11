@@ -4,6 +4,7 @@ import { useUpdateSong } from "#api-client";
 import HighlightKeyword from "@/components/common/HighlightKeyword";
 import Text from "@/components/common/Text";
 import SongMetaModal, { SongMetaSavePayload } from "@/components/song/SongMetaModal";
+import LastUsedIndicator from "@/components/song/LastUsedIndicator";
 import SongReferences from "@/components/song/SongReferences";
 import TagList from "@/components/song/TagList";
 import { Button } from "@/components/ui/button";
@@ -13,17 +14,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatTimeAgo } from "@/lib/relative-time";
 import { cn } from "@/lib/utils";
 import { ClientSong } from "@/prisma/models";
-import { Clock, MoreVertical, NotebookPen, Pencil } from "lucide-react";
+import { History, MoreVertical, NotebookPen, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
-
-const RECENT_DAYS = 21;
-const DAY_MS = 86_400_000;
 
 /** Primeiras linhas cantáveis da letra (pula marcadores de seção). */
 function leadLines(lyrics: string, count: number): string[] {
@@ -38,26 +35,25 @@ function leadLines(lyrics: string, count: number): string[] {
   return out;
 }
 
-/** Relógio + "há 2 semanas"; âmbar se foi nas últimas 3 semanas, "Nunca usada" em itálico. */
-export function LastUsed({ date, className }: { date: Date | string | null; className?: string }) {
-  if (!date) {
-    return (
-      <span className={cn("inline-flex items-center gap-1 text-sm italic text-muted-foreground whitespace-nowrap", className)}>
-        <Clock size={14} aria-hidden /> Nunca usada
-      </span>
-    );
-  }
-  const d = typeof date === "string" ? new Date(date) : date;
-  const recent = Date.now() - d.getTime() < RECENT_DAYS * DAY_MS;
+/** Ícone · 2× · 3 sem (escala quente→frio do LastUsedIndicator); "Nunca usada" em itálico. */
+export function UsageInfo({
+  date,
+  count,
+  className,
+}: {
+  date: Date | string | null;
+  count?: number;
+  className?: string;
+}) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 text-sm whitespace-nowrap",
-        recent ? "text-amber-700" : "text-muted-foreground",
-        className
+    <span className={cn("inline-flex min-h-[22px] items-center", className)}>
+      {date ? (
+        <LastUsedIndicator date={date} count={count} />
+      ) : (
+        <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs italic text-muted-foreground">
+          <History className="size-3.5" aria-hidden /> Nunca usada
+        </span>
       )}
-    >
-      <Clock size={14} aria-hidden /> {formatTimeAgo(d)}
     </span>
   );
 }
@@ -66,7 +62,7 @@ export function LastUsed({ date, className }: { date: Date | string | null; clas
  * Item da lista de músicas (navegação).
  *
  * Largura do contêiner (a lista precisa ser `@container`):
- *   celular  — título, autor · último uso | referências | ⋯
+ *   celular  — título, autor e uso (duas linhas) | referências | ⋯
  *   ≥560px   — duas colunas: identidade | letra + categorias | referências | ⋯
  *   ≥860px   — seis colunas: título | letra | categorias | uso | referências | ⋯
  * Alinhado pelo topo. Tocar na linha abre a música.
@@ -118,26 +114,29 @@ export default function SongRow({
 
         {/* título, autor e último uso */}
         <div className="relative z-10 min-w-0 pointer-events-none [grid-area:id]">
-          <Text variant="heading-sm" as="p" className="truncate @[860px]:text-lg">
+          <Text variant="heading-sm" as="p" className="truncate leading-[22px] @[860px]:text-lg">
             <HighlightKeyword text={song.title} keyword={query} />
           </Text>
-          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground @[560px]:flex-col @[560px]:items-start @[560px]:gap-0">
+          <div className="flex min-w-0 flex-col items-start text-sm leading-[22px] text-muted-foreground">
             {song.artist && (
-              <>
-                <span className="min-w-0 truncate max-w-full">
-                  <HighlightKeyword text={song.artist} keyword={query} />
-                </span>
-                {hasUsage && <span aria-hidden className="@[560px]:hidden">·</span>}
-              </>
+              <span className="min-w-0 truncate max-w-full">
+                <HighlightKeyword text={song.artist} keyword={query} />
+              </span>
             )}
-            {hasUsage && <LastUsed date={song.lastUsedAt ?? null} className="shrink-0 @[860px]:hidden" />}
+            {hasUsage && (
+              <UsageInfo
+                date={song.lastUsedAt ?? null}
+                count={song.usageCount}
+                className="shrink-0 @[860px]:hidden"
+              />
+            )}
           </div>
         </div>
 
         {/* letra: duas linhas, a partir do tablet */}
         <div className="relative z-10 hidden min-w-0 pointer-events-none @[560px]:block [grid-area:lyric]">
           {lyric.map((line, i) => (
-            <Text key={i} variant="caption" as="p" className="truncate text-sm leading-5">
+            <Text key={i} variant="caption" as="p" className="truncate text-sm leading-[22px]">
               <HighlightKeyword text={line} keyword={query} />
             </Text>
           ))}
@@ -145,16 +144,15 @@ export default function SongRow({
 
         {/* categorias: até 2 linhas, a partir do tablet */}
         {tags.length > 0 && (
-          <div className="relative z-10 hidden min-w-0 @[560px]:block @[560px]:mt-2 @[860px]:mt-0 [grid-area:tags]">
-            <TagList tags={tags} maxLines={2} />
+          <div className="relative z-10 hidden min-w-0 @[560px]:block @[560px]:mt-1.5 @[860px]:mt-0 [grid-area:tags]">
+            <TagList tags={tags} maxLines={2} className="gap-y-0.5" />
           </div>
         )}
 
         {/* último uso e contagem: coluna própria no desktop */}
         {hasUsage && (
-          <div className="relative z-10 hidden items-center gap-1.5 whitespace-nowrap pt-0.5 pointer-events-none @[860px]:flex [grid-area:used]">
-            <LastUsed date={song.lastUsedAt ?? null} />
-            {!!song.usageCount && <span className="text-sm text-muted-foreground">· {song.usageCount}×</span>}
+          <div className="relative z-10 hidden min-h-[22px] items-center gap-1.5 whitespace-nowrap pointer-events-none @[860px]:flex [grid-area:used]">
+            <UsageInfo date={song.lastUsedAt ?? null} count={song.usageCount} />
           </div>
         )}
 
