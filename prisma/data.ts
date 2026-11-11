@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { getLyrics } from "@/chopro/music";
+import { summarizeServicePlan } from "@/lib/service-list";
 import prisma from "./client";
 import {
   ClientArrangement,
@@ -10,6 +11,7 @@ import {
   ClientTagGroup,
   LeaderStat,
   RecentServiceEntry,
+  ServiceListItem,
   ServicePlan,
   SongStat,
   StatsData,
@@ -1049,6 +1051,47 @@ export async function retrieveRecentServices(limit = 8): Promise<RecentServiceEn
 export async function retrieveServices(): Promise<ClientService[]> {
   const services = await prisma.service.findMany({ where: { isDeleted: false } });
   return services as unknown as ClientService[];
+}
+
+// Lista de Liturgias: só o que a tela mostra e pesquisa. Não devolve o plano
+// (que cresce com o histórico); resolve os arranjos para os títulos das músicas
+// numa única consulta.
+export async function retrieveServicesList(): Promise<ServiceListItem[]> {
+  const services = await prisma.service.findMany({
+    where: { isDeleted: false },
+    select: {
+      slug: true,
+      title: true,
+      date: true,
+      worshipLeader: true,
+      preacher: true,
+      sermonTheme: true,
+      sermonReference: true,
+      plan: true,
+      updatedAt: true,
+    },
+  });
+  const summaries = services.map((service) => summarizeServicePlan(service.plan as ServicePlan | null));
+  const arrangementIds = [...new Set(summaries.flatMap((summary) => summary.arrangementIds))];
+  const arrangements = arrangementIds.length
+    ? await prisma.songArrangement.findMany({
+        where: { id: { in: arrangementIds } },
+        select: { id: true, song: { select: { title: true } } },
+      })
+    : [];
+  const titleByArrangementId = new Map(arrangements.map((a) => [a.id, a.song.title]));
+
+  return services.map(({ plan: _plan, ...service }, index) => {
+    const summary = summaries[index];
+    return {
+      ...service,
+      startTime: summary.startTime,
+      songCount: summary.songCount,
+      songTitles: summary.arrangementIds
+        .map((id) => titleByArrangementId.get(id))
+        .filter((title): title is string => Boolean(title)),
+    };
+  });
 }
 
 // Lançado quando o culto foi salvo por outra pessoa entre o momento em que o
