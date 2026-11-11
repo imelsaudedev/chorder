@@ -67,15 +67,15 @@ describe("SongRow", () => {
     expect(screen.getAllByText("Nunca usada")[0].className).toContain("italic");
   });
 
-  it("uso recente (menos de 3 semanas) em âmbar; antigo em cinza", () => {
+  it("uso recente em tom quente; antigo em tom frio", () => {
     const { unmount } = renderRow(song({ lastUsedAt: new Date(Date.now() - 3 * DAY), usageCount: 2 }));
-    expect(screen.getAllByText("há 3 dias")[0].className).toContain("bg-amber-100");
+    expect(screen.getAllByText("3 dias")[0].parentElement?.className).toContain("var(--accent)");
     unmount();
-    renderRow(song({ lastUsedAt: new Date(Date.now() - 100 * DAY), usageCount: 2 }));
-    expect(screen.getAllByText("há 3 meses")[0].className).toContain("bg-zinc-100");
+    renderRow(song({ lastUsedAt: new Date(Date.now() - 400 * DAY), usageCount: 2 }));
+    expect(screen.getAllByText("1 ano")[0].parentElement?.className).toContain("var(--ring)");
   });
 
-  it("mostra a contagem de usos no chip", () => {
+  it("mostra a contagem de usos antes do tempo", () => {
     renderRow(song({ lastUsedAt: new Date(Date.now() - 3 * DAY), usageCount: 5 }));
     expect(screen.getAllByText("5×")[0]).toBeInTheDocument();
   });

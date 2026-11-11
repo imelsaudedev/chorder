@@ -18,9 +18,12 @@ const TONES = [
 
 export default function LastUsedIndicator({
   date,
+  count,
   className = "",
 }: {
   date: Date | string;
+  /** Quantas vezes foi usada: aparece entre o ícone e o tempo ("2× · 3 sem"). */
+  count?: number;
   className?: string;
 }) {
   const then = typeof date === "string" ? new Date(date) : date;
@@ -33,7 +36,15 @@ export default function LastUsedIndicator({
       className={`inline-flex h-4 items-center gap-1 whitespace-nowrap text-xs leading-4 tabular-nums ${tone.className} ${className}`}
     >
       <History className="w-3.5 h-3.5" aria-hidden="true" />
-      <span className="sr-only">Última vez usada {formatTimeAgo(then)}</span>
+      <span className="sr-only">
+        {count ? `Usada ${count} ${count === 1 ? "vez" : "vezes"}. ` : ""}Última vez usada {formatTimeAgo(then)}
+      </span>
+      {!!count && (
+        <>
+          <span aria-hidden="true">{count}×</span>
+          <span aria-hidden="true">·</span>
+        </>
+      )}
       <span aria-hidden="true">{formatTimeAgoShort(then)}</span>
     </span>
   );

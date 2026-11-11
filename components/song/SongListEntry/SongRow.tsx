@@ -4,8 +4,8 @@ import { useUpdateSong } from "#api-client";
 import HighlightKeyword from "@/components/common/HighlightKeyword";
 import Text from "@/components/common/Text";
 import SongMetaModal, { SongMetaSavePayload } from "@/components/song/SongMetaModal";
+import LastUsedIndicator from "@/components/song/LastUsedIndicator";
 import SongReferences from "@/components/song/SongReferences";
-import Tag from "@/components/common/Tag";
 import TagList from "@/components/song/TagList";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,17 +14,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatTimeAgo } from "@/lib/relative-time";
 import { cn } from "@/lib/utils";
 import { ClientSong } from "@/prisma/models";
-import { Clock, MoreVertical, NotebookPen, Pencil } from "lucide-react";
+import { History, MoreVertical, NotebookPen, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
-
-const RECENT_DAYS = 21;
-const DAY_MS = 86_400_000;
 
 /** Primeiras linhas cantáveis da letra (pula marcadores de seção). */
 function leadLines(lyrics: string, count: number): string[] {
@@ -39,39 +35,7 @@ function leadLines(lyrics: string, count: number): string[] {
   return out;
 }
 
-/** Chip com relógio + "há 2 semanas"; âmbar se foi nas últimas 3 semanas, "Nunca usada" em itálico. */
-export function LastUsed({ date, className }: { date: Date | string | null; className?: string }) {
-  if (!date) {
-    return (
-      <Tag
-        variant="muted"
-        size="sm"
-        className={cn("gap-1 italic", className)}
-        label={
-          <>
-            <Clock size={12} aria-hidden /> Nunca usada
-          </>
-        }
-      />
-    );
-  }
-  const d = typeof date === "string" ? new Date(date) : date;
-  const recent = Date.now() - d.getTime() < RECENT_DAYS * DAY_MS;
-  return (
-    <Tag
-      variant={recent ? "warning" : "muted"}
-      size="sm"
-      className={cn("gap-1", className)}
-      label={
-        <>
-          <Clock size={12} aria-hidden /> {formatTimeAgo(d)}
-        </>
-      }
-    />
-  );
-}
-
-/** Dois chips: [2×] e [relógio há 2 semanas]. */
+/** Ícone · 2× · 3 sem (escala quente→frio do LastUsedIndicator); "Nunca usada" em itálico. */
 export function UsageInfo({
   date,
   count,
@@ -82,9 +46,14 @@ export function UsageInfo({
   className?: string;
 }) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5", className)}>
-      {!!count && <Tag label={`${count}×`} variant="muted" size="sm" />}
-      <LastUsed date={date} />
+    <span className={cn("inline-flex min-h-[22px] items-center", className)}>
+      {date ? (
+        <LastUsedIndicator date={date} count={count} />
+      ) : (
+        <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs italic text-muted-foreground">
+          <History className="size-3.5" aria-hidden /> Nunca usada
+        </span>
+      )}
     </span>
   );
 }
@@ -158,7 +127,7 @@ export default function SongRow({
               <UsageInfo
                 date={song.lastUsedAt ?? null}
                 count={song.usageCount}
-                className="mt-0.5 shrink-0 @[860px]:hidden"
+                className="shrink-0 @[860px]:hidden"
               />
             )}
           </div>
