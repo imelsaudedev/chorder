@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liturgias (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+<style>
+/* Protótipo solto (duplo clique). Tela de Liturgias redesenhada: cabeçalho com ações, próximos cultos
+   e histórico com busca, filtros, ordenação, agrupamento e itens configuráveis.
+   Dados inventados; "hoje" é fixo (quarta, 11/11/2026) para o exemplo não mudar. */
+:root{
+  --background:hsl(0 0% 100%);--foreground:hsl(224 84% 4.9%);--primary:hsl(0 0% 9%);
+  --muted:hsl(215 16% 72% / .14);--muted-foreground:hsl(215 14% 48%);--border:hsl(0 0% 89.8%);
+  --accent:#047857;--accent-soft:#ecfdf5;--amber:#b45309;--radius:12px;
+  --pg:#e9edf3;--pgline:#a3b0c2;--pgfg:#0b1220;--pgmut:#475569;--chip:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:20px 16px 48px;background:var(--pg);color:var(--pgfg);font:400 14px/20px "IBM Plex Sans",system-ui,sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+svg{display:block;flex:none}
+.intro{max-width:80ch;margin:0 auto 14px}
+.intro h1{margin:0 0 4px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spacing:-.02em}
+.intro p{margin:0;color:var(--pgmut)}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:center;margin:0 auto 18px;max-width:1120px}
+.ctl .g{display:flex;flex-direction:column;gap:4px}
+.ctl .g>span{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--pgmut)}
+.seg{display:inline-flex;border:1px solid var(--pgline);border-radius:99px;background:var(--chip);padding:2px}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:99px;font-size:13px;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--pgfg);color:var(--pg)}
+.checks{display:flex;flex-wrap:wrap;gap:6px 14px;max-width:560px}
+.checks label{display:inline-flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap}
+.checks small{color:var(--pgmut)}
+
+/* ---------- aparelho ---------- */
+.device{margin:0 auto;background:var(--background);color:var(--foreground);border:2px solid var(--pgline);border-radius:20px;
+  --px:20px;width:390px;max-width:100%;padding:24px var(--px) 28px;container:app/inline-size;position:relative}
+.device[data-dev=tablet]{--px:32px;width:min(820px,100%)}
+.device[data-dev=desktop]{--px:48px;width:min(1120px,100%);border-radius:12px}
+h1.title{margin:0;font:600 28px/32px "Space Grotesk",sans-serif;letter-spacing:-.025em;color:var(--primary)}
+@container app (min-width:600px){h1.title{font-size:32px;line-height:36px}}
+@container app (min-width:1000px){h1.title{font-size:40px;line-height:44px}}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+.acts{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--background);font-weight:500}
+.btn:hover{background:var(--muted)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.pri:hover{background:#065f46}
+.btn .tx{display:none}
+@container app (min-width:600px){.btn .tx{display:inline}}
+.btn.icon-m{padding:0 11px}
+@container app (min-width:600px){.btn.icon-m{padding:0 14px}}
+.add-d{display:none}
+@container app (min-width:600px){.add-d{display:inline-flex}}
+.fab{position:sticky;bottom:12px;float:right;margin-top:-52px;min-height:48px;padding:0 18px;border-radius:99px;background:var(--accent);color:#fff;border:0;display:inline-flex;gap:8px;align-items:center;font-weight:600;box-shadow:0 6px 16px rgba(0,0,0,.22)}
+@container app (min-width:600px){.fab{display:none}}
+
+h2.sec{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spacing:-.02em;color:var(--primary)}
+.section{margin-bottom:32px}
+
+/* ---------- próximos ---------- */
+.next{border:1px solid color-mix(in srgb,var(--accent) 28%,var(--border));background:var(--accent-soft);border-radius:var(--radius);overflow:hidden}
+.hero{display:flex;gap:16px;align-items:center;padding:18px 16px;cursor:pointer}
+.hero:hover{background:rgba(4,120,87,.06)}
+.hero .when{flex:none;text-align:center;min-width:64px}
+.when .wd{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.when .dn{font:600 36px/38px "Space Grotesk",sans-serif;color:var(--primary);letter-spacing:-.03em}
+.when .mo{font-size:12px;color:var(--muted-foreground);text-transform:uppercase}
+.hero .info{min-width:0;flex:1}
+.hero .tt{font:600 20px/26px "Space Grotesk",sans-serif;letter-spacing:-.02em;color:var(--primary)}
+.meta{display:flex;flex-wrap:wrap;gap:2px 8px;color:var(--muted-foreground);margin-top:2px}
+.rel{display:inline-flex;align-items:center;font-size:12px;font-weight:600;color:var(--accent);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+.mini{border-top:1px solid color-mix(in srgb,var(--accent) 16%,var(--border))}
+
+/* ---------- linhas ---------- */
+.row{position:relative;display:grid;align-items:center;column-gap:16px;padding:12px 16px;cursor:pointer;border-top:1px solid var(--border);
+  grid-template-columns:48px minmax(0,1fr) 40px}
+.row:first-child{border-top:0}
+.row:hover{background:var(--muted)}
+.next .row{border-color:color-mix(in srgb,var(--accent) 16%,var(--border))}
+.row .when{text-align:center;line-height:1}
+.row .when .wd{font-size:11px}
+.row .when .dn{font-size:22px;line-height:26px}
+.row .main{min-width:0}
+.row .tt{font:600 16px/22px "Space Grotesk",sans-serif;letter-spacing:-.015em;color:var(--primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .tt.none{font-weight:500;color:var(--muted-foreground)}
+.row .sub{display:flex;flex-wrap:wrap;align-items:center;gap:0 6px;color:var(--muted-foreground);line-height:22px}
+.row .sub .d{opacity:.6}
+.cols{display:none}
+.more{display:inline-grid;place-items:center;width:40px;height:40px;border:0;background:none;border-radius:8px;color:var(--muted-foreground)}
+.more:hover{background:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:16px;padding:2px 8px;border-radius:4px;background:#f4f4f5;color:#52525b;font-weight:500;white-space:nowrap}
+.pill.warn{background:#fef3c7;color:#92400e}
+.pill.ok{background:#d1fae5;color:#065f46}
+.num{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+
+@container app (min-width:600px){
+  .row{grid-template-columns:var(--cols);padding:12px 16px}
+  .row .stack{display:none}
+  .cols{display:contents}
+  .cell{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted-foreground)}
+  .lh{display:grid;grid-template-columns:var(--cols);column-gap:16px;padding:8px 16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--muted);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-foreground)}
+}
+@container app (max-width:599px){.lh{display:none}}
+
+/* ---------- histórico ---------- */
+.bar{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.bar .r1{display:flex;gap:8px;align-items:center}
+.search{position:relative;flex:1;min-width:0}
+.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted-foreground)}
+.search input{width:100%;height:36px;border:0;border-radius:8px;background:var(--muted);padding:0 32px 0 34px}
+.search button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--muted-foreground);display:none}
+.search.has button{display:block}
+.filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filters select,.sortsel select{height:36px;border:1px solid var(--border);background:var(--background);border-radius:8px;padding:0 28px 0 12px;max-width:100%}
+.filters select.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:500}
+.sortsel{flex:none}
+@container app (min-width:600px){
+  .bar{flex-direction:row;flex-wrap:wrap;align-items:center}
+  .bar .r1{display:contents}
+  .search{flex:0 0 220px}
+  .filters{overflow:visible;order:2}
+  .sortsel{order:3;margin-left:auto}
+}
+.count{margin:0 0 8px;color:var(--muted-foreground);display:flex;gap:12px;align-items:center}
+.count button{border:0;background:none;color:var(--accent);padding:0;text-decoration:underline}
+.box{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.grp{display:flex;align-items:center;gap:8px;width:100%;border:0;border-top:1px solid var(--border);background:var(--muted);padding:6px 16px;min-height:32px;text-align:left;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
+.box>.grp:first-child{border-top:0}
+.grp .n{margin-left:auto;font-weight:500;letter-spacing:0;text-transform:none}
+.grp svg{transition:transform .15s}
+.grp[aria-expanded=false] svg{transform:rotate(-90deg)}
+.empty{padding:40px 16px;text-align:center;color:var(--muted-foreground)}
+
+/* ---------- legenda dos itens ---------- */
+.legend{max-width:1120px;margin:28px auto 0}
+.legend h2{font:600 18px/24px "Space Grotesk",sans-serif;margin:0 0 8px}
+.legend table{width:100%;border-collapse:collapse;background:var(--chip);border:1px solid var(--pgline);border-radius:8px;overflow:hidden;font-size:13px}
+.legend th,.legend td{padding:8px 12px;text-align:left;border-bottom:1px solid #d6dde7;vertical-align:top}
+.legend th{background:#f1f5f9;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--pgmut)}
+.tg{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:600}
+.tg.e{background:#d1fae5;color:#065f46}.tg.c{background:#fef3c7;color:#92400e}.tg.n{background:#fee2e2;color:#991b1b}
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>Liturgias — protótipo da lista</h1>
+  <p>Cabeçalho com ações (sem o ⋯), próximos cultos em destaque e histórico com busca, filtros, ordenação e agrupamento. Marque abaixo quais <b>itens</b> cada linha mostra; a tabela no fim diz de onde cada um viria. Dados inventados; “hoje” é quarta, 11/11/2026.</p>
+</div>
+
+<div class="ctl">
+  <div class="g"><span>Tela</span><div class="seg" id="dev">
+    <button data-v="mobile" aria-pressed="true">Celular</button><button data-v="tablet" aria-pressed="false">Tablet</button><button data-v="desktop" aria-pressed="false">Desktop</button></div></div>
+  <div class="g"><span>Agrupar histórico</span><div class="seg" id="grp">
+    <button data-v="month" aria-pressed="true">Mês</button><button data-v="year" aria-pressed="false">Ano</button><button data-v="leader" aria-pressed="false">Dirigente</button><button data-v="none" aria-pressed="false">Nada</button></div></div>
+  <div class="g"><span>Itens da linha</span><div class="checks" id="fields"></div></div>
+</div>
+
+<div class="device" id="app" data-dev="mobile"></div>
+
+<div class="legend">
+  <h2>Itens que a linha pode trazer</h2>
+  <table>
+    <tr><th>Item</th><th>Situação</th><th>De onde vem</th><th>Para que serve</th></tr>
+    <tr><td>Data e dia da semana</td><td><span class="tg e">já existe</span></td><td><code>Service.date</code></td><td>Ordenar, achar o culto.</td></tr>
+    <tr><td>Título</td><td><span class="tg e">já existe</span></td><td><code>Service.title</code> (vazio → “Culto de domingo”)</td><td>Identificar cultos especiais.</td></tr>
+    <tr><td>Dirigente</td><td><span class="tg e">já existe</span></td><td><code>Service.worshipLeader</code></td><td>Filtrar e agrupar por quem conduziu.</td></tr>
+    <tr><td>Pregador</td><td><span class="tg e">já existe</span></td><td><code>Service.preacher</code></td><td>Filtrar; o dirigente parte de quem prega.</td></tr>
+    <tr><td>Tema e texto bíblico</td><td><span class="tg e">já existe</span></td><td><code>sermonTheme</code>, <code>sermonReference</code></td><td>Buscar por assunto ou passagem.</td></tr>
+    <tr><td>Nº de músicas</td><td><span class="tg c">calcular</span></td><td>Unidades do tipo SONG em <code>Service.plan</code> (a lista já recebe o <code>plan</code>, sem mudar a API)</td><td>Ver se a liturgia está montada.</td></tr>
+    <tr><td>Início</td><td><span class="tg e">já existe</span></td><td><code>plan.startTime</code></td><td>Distinguir cultos de horários diferentes.</td></tr>
+    <tr><td>Situação (rascunho / completa)</td><td><span class="tg c">calcular</span></td><td>Regra simples: sem músicas = rascunho; futura com poucas músicas = incompleta</td><td>Dirigente: o que ainda falta antes de sexta.</td></tr>
+    <tr><td>Atualizado em</td><td><span class="tg e">já existe</span></td><td><code>Service.updatedAt</code></td><td>Saber se mudou depois de enviada ao grupo.</td></tr>
+    <tr><td>Modelo usado</td><td><span class="tg n">novo campo</span></td><td>Hoje o modelo só preenche a liturgia ao criar; nada é guardado</td><td>Comparar cultos do mesmo formato. Só vale se houver uso real.</td></tr>
+    <tr><td>Busca por música</td><td><span class="tg c">calcular</span></td><td>Títulos das músicas do <code>plan</code> (ou o <code>arrangementId</code> resolvido)</td><td>“Quando tocamos X?” — o uso principal do histórico.</td></tr>
+  </table>
+</div>
+
+<script>
+const TODAY = new Date(2026,10,11);
+const LEADERS=["Rafael","Ana","Davi","Lívia"], PREACH=["Pr. Samuel","Pra. Helena","Pr. Jonas","Convidado"];
+const THEMES=[["A graça que nos sustenta","Ef 2.8-10"],["Perseverança","Tg 1.2-4"],["O Pai que acolhe","Lc 15.11-32"],["Descanso em Cristo","Mt 11.28-30"],["Comunhão","At 2.42-47"],["Esperança","Rm 15.13"],["Gratidão","Sl 103"],["Servir com alegria","Gl 5.13"]];
+const SPECIAL={"2025-12-21":"Culto de Natal","2025-04-20":"Culto de Páscoa","2026-04-05":"Culto de Páscoa","2026-12-06":"Culto de Santa Ceia","2025-12-28":"Culto de fim de ano"};
+const services=[];
+let i=0;
+for(let d=new Date(2025,0,5); d<=new Date(2026,11,6); d.setDate(d.getDate()+7)){
+  const dt=new Date(d), key=dt.toISOString().slice(0,10), future=dt>TODAY;
+  const th=THEMES[(i*3)%THEMES.length];
+  let songs=3+((i*7+(i%3))%5);
+  if(future){ songs = dt<new Date(2026,10,20)?5: dt<new Date(2026,10,27)?3:0 }
+  services.push({id:i,date:dt,title:SPECIAL[key]||null,leader:LEADERS[(i*7+1)%4],preacher:PREACH[(i*5+2)%4],
+    theme:(future&&songs===0)?null:th[0],ref:(future&&songs===0)?null:th[1],songs,start:i%9===4?"18:30":"09:30",updated:future?"há 2 dias":(i%4?"na semana":"no dia"),
+    songTitles:[]});
+  i++;
+}
+const PT_WD=["dom","seg","ter","qua","qui","sex","sáb"],PT_MO=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const two=n=>String(n).padStart(2,"0");
+const icon={
+  search:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  plus:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+  tpl:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>',
+  more:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>',
+  chev:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>',
+  note:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+  x:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+};
+const FIELDS=[
+  ["leader","Dirigente",true],["preacher","Pregador",false],["theme","Tema e texto",false],
+  ["songs","Nº de músicas",true],["start","Início",false],["status","Situação",false],["updated","Atualizado em",false]
+];
+const S={dev:"mobile",group:"month",q:"",year:"",leader:"",preacher:"",sort:"date-desc",open:{},fields:Object.fromEntries(FIELDS.map(f=>[f[0],f[2]]))};
+
+function isFuture(s){return s.date>TODAY}
+function titleOf(s){return s.title||"Culto de domingo"}
+function statusOf(s){ if(s.songs===0) return ["Rascunho","warn"]; if(isFuture(s)&&s.songs<5) return ["Incompleta","warn"]; return ["Completa","ok"]; }
+function cellsFor(s){
+  const c=[];
+  if(S.fields.leader) c.push(["Dirigente",s.leader]);
+  if(S.fields.preacher) c.push(["Pregador",s.preacher]);
+  if(S.fields.theme) c.push(["Tema e texto",s.theme?`${s.theme} · ${s.ref}`:"—"]);
+  if(S.fields.songs) c.push(["Músicas",s.songs?`<span class="num">${icon.note}${s.songs}</span>`:"—"]);
+  if(S.fields.start) c.push(["Início",s.start]);
+  if(S.fields.status){const [t,k]=statusOf(s);c.push(["Situação",`<span class="pill ${k}">${t}</span>`])}
+  if(S.fields.updated) c.push(["Atualizado em",s.updated]);
+  return c;
+}
+function colsTemplate(){
+  const parts=["56px","minmax(0,1.6fr)"];
+  FIELDS.forEach(f=>{ if(S.fields[f[0]]) parts.push(f[0]==="theme"?"minmax(0,1.6fr)":f[0]==="songs"||f[0]==="start"?"72px":"minmax(0,1fr)") });
+  parts.push("40px");
+  return parts.join(" ");
+}
+function whenHtml(s,big){ return `<div class="when"><div class="wd">${PT_WD[s.date.getDay()]}</div><div class="dn">${two(s.date.getDate())}</div>${big?`<div class="mo">${PT_MO[s.date.getMonth()].slice(0,3)}</div>`:""}</div>` }
+function rowHtml(s){
+  const cells=cellsFor(s);
+  const stack=cells.map(([k,v])=>k==="Situação"||k==="Músicas"?v:`<span>${v}</span>`);
+  const sub=stack.map((x,i)=>(i?'<span class="d">·</span>':'')+x).join("");
+  return `<div class="row" role="link" tabindex="0">
+    ${whenHtml(s,false)}
+    <div class="main"><div class="tt ${s.title?"":"none"}">${titleOf(s)}</div>${sub?`<div class="sub stack">${sub}</div>`:""}</div>
+    <div class="cols">${cells.map(([k,v])=>`<div class="cell">${v}</div>`).join("")}</div>
+    <button class="more" aria-label="Mais ações">${icon.more}</button></div>`;
+}
+function heroHtml(s){
+  const days=Math.round((s.date-TODAY)/864e5);
+  const rel=days===4?"Este domingo":days<7?`Em ${days} dias`:`Em ${Math.round(days/7)} semanas`;
+  const [st,k]=statusOf(s);
+  return `<div class="hero" role="link" tabindex="0">${whenHtml(s,true)}
+    <div class="info"><div class="rel">${rel}</div><div class="tt">${titleOf(s)}</div>
+    <div class="meta"><span>${s.leader} dirige</span><span>·</span><span>${s.preacher} prega</span>${s.theme?`<span>·</span><span>${s.theme} (${s.ref})</span>`:""}</div>
+    <div class="meta" style="margin-top:8px;align-items:center"><span class="pill ${k}">${st}</span><span class="num">${icon.note}${s.songs} músicas</span><span>Início ${s.start}</span></div></div>
+    <button class="more" aria-label="Mais ações">${icon.more}</button></div>`;
+}
+function filtered(){
+  const q=S.q.trim().toLowerCase();
+  return services.filter(s=>!isFuture(s)).filter(s=>
+    (!S.year||String(s.date.getFullYear())===S.year)&&(!S.leader||s.leader===S.leader)&&(!S.preacher||s.preacher===S.preacher)&&
+    (!q||[titleOf(s),s.leader,s.preacher,s.theme||"",s.ref||""].join(" ").toLowerCase().includes(q)));
+}
+function sorted(list){
+  const [k,dir]=S.sort.split("-"); const m=dir==="asc"?1:-1;
+  const f={date:(a,b)=>a.date-b.date,title:(a,b)=>titleOf(a).localeCompare(titleOf(b)),leader:(a,b)=>a.leader.localeCompare(b.leader),songs:(a,b)=>a.songs-b.songs}[k];
+  return [...list].sort((a,b)=>m*f(a,b));
+}
+function groups(list){
+  const g=new Map();
+  list.forEach(s=>{
+    let key,label;
+    if(S.group==="month"){key=s.date.getFullYear()*100+s.date.getMonth();label=`${PT_MO[s.date.getMonth()]} de ${s.date.getFullYear()}`}
+    else if(S.group==="year"){key=s.date.getFullYear();label=String(key)}
+    else if(S.group==="leader"){key=s.leader;label=s.leader}
+    else {key="all";label=""}
+    if(!g.has(key)) g.set(key,{label,items:[]}); g.get(key).items.push(s);
+  });
+  return [...g.entries()];
+}
+function render(){
+  const app=document.getElementById("app"); app.dataset.dev=S.dev;
+  app.style.setProperty("--cols",colsTemplate());
+  const future=services.filter(isFuture).sort((a,b)=>a.date-b.date);
+  const list=sorted(filtered()), gs=groups(list), searching=!!(S.q||S.year||S.leader||S.preacher);
+  const years=[...new Set(services.filter(s=>!isFuture(s)).map(s=>s.date.getFullYear()))];
+  const opts=(arr,cur,ph)=>`<option value="">${ph}</option>`+arr.map(v=>`<option ${String(v)===cur?"selected":""}>${v}</option>`).join("");
+  const headers=FIELDS.filter(f=>S.fields[f[0]]).map(f=>`<div>${f[1].replace("Nº de músicas","Músicas")}</div>`).join("");
+  const lh=`<div class="lh"><div>Data</div><div>Culto</div>${headers}<div></div></div>`;
+  // grupos: no histórico por mês, só os 6 mais recentes abertos; busca/filtro abre todos
+  const body=gs.length?gs.map(([key,g],idx)=>{
+    const open=S.open[key]!==undefined?S.open[key]:(searching||S.group==="none"||idx<(S.group==="month"?6:2));
+    return (g.label?`<button class="grp" aria-expanded="${open}" data-k="${key}">${icon.chev}<span>${g.label}</span><span class="n">${g.items.length} ${g.items.length===1?"culto":"cultos"}</span></button>`:"")+
+      (open?g.items.map(rowHtml).join(""):"");
+  }).join(""):`<div class="empty">Nenhum culto encontrado.<br>Tente outro termo ou limpe os filtros.</div>`;
+  app.innerHTML=`
+    <div class="top"><h1 class="title">Liturgias</h1>
+      <div class="acts"><button class="btn icon-m" aria-label="Modelos">${icon.tpl}<span class="tx">Modelos</span></button>
+      <button class="btn pri add-d">${icon.plus}<span>Nova liturgia</span></button></div></div>
+    <section class="section"><h2 class="sec">Próximos cultos</h2>
+      <div class="next">${heroHtml(future[0])}<div class="mini">${future.slice(1).map(rowHtml).join("")}</div></div></section>
+    <section><h2 class="sec">Histórico</h2>
+      <div class="bar"><div class="r1"><div class="search ${S.q?"has":""}">${icon.search}<input id="q" type="search" placeholder="Buscar por título, dirigente, tema…" value="${S.q.replace(/"/g,"&quot;")}"><button id="qx" aria-label="Limpar">${icon.x}</button></div>
+        <div class="sortsel"><select id="sort" aria-label="Ordenar"><option value="date-desc">Mais recentes</option><option value="date-asc">Mais antigos</option><option value="title-asc">Título A–Z</option><option value="leader-asc">Dirigente A–Z</option><option value="songs-desc">Mais músicas</option></select></div></div>
+        <div class="filters"><select id="fy" class="${S.year?"on":""}">${opts(years,S.year,"Ano")}</select><select id="fl" class="${S.leader?"on":""}">${opts(LEADERS,S.leader,"Dirigente")}</select><select id="fp" class="${S.preacher?"on":""}">${opts(PREACH,S.preacher,"Pregador")}</select></div></div>
+      <p class="count"><span>${list.length} ${list.length===1?"culto":"cultos"}${searching?" no filtro":""}</span>${searching?'<button id="clr">Limpar filtros</button>':""}</p>
+      <div class="box">${lh}${body}</div></section>
+    <button class="fab">${icon.plus}Nova liturgia</button>`;
+  document.getElementById("sort").value=S.sort;
+  const q=document.getElementById("q");
+  q.oninput=e=>{S.q=e.target.value;const p=e.target.selectionStart;render();const n=document.getElementById("q");n.focus();n.setSelectionRange(p,p)};
+  document.getElementById("qx").onclick=()=>{S.q="";render()};
+  document.getElementById("sort").onchange=e=>{S.sort=e.target.value;render()};
+  document.getElementById("fy").onchange=e=>{S.year=e.target.value;render()};
+  document.getElementById("fl").onchange=e=>{S.leader=e.target.value;render()};
+  document.getElementById("fp").onchange=e=>{S.preacher=e.target.value;render()};
+  const clr=document.getElementById("clr"); if(clr) clr.onclick=()=>{S.q=S.year=S.leader=S.preacher="";render()};
+  app.querySelectorAll(".grp").forEach(b=>b.onclick=()=>{const k=b.dataset.k;S.open[k]=b.getAttribute("aria-expanded")!=="true";render()});
+}
+function seg(id,key,after){document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(`#${id} button`).forEach(x=>x.setAttribute("aria-pressed",x===b));S[key]=b.dataset.v;S.open={};if(after)after();render()})}
+seg("dev","dev"); seg("grp","group");
+document.getElementById("fields").innerHTML=FIELDS.map(f=>`<label><input type="checkbox" data-f="${f[0]}" ${f[2]?"checked":""}>${f[1]}</label>`).join("");
+document.querySelectorAll("#fields input").forEach(c=>c.onchange=()=>{S.fields[c.dataset.f]=c.checked;render()});
+render();
+</script>
+</body>
+</html>
