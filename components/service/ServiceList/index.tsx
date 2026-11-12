@@ -41,24 +41,9 @@ function MonthBand({ label, tone, first }: { label: string; tone: TimelineTone; 
   );
 }
 
-/** "Hoje" abre o trilho das próximas: o tempo corre para baixo a partir daqui. */
-function TodayMarker({ label }: { label: string }) {
-  return (
-    <div className={cn(ROW_GRID, "h-11 items-center bg-secondary/5")}>
-      <TimelineRail tone="upcoming" first inBand>
-        <span className="absolute left-1/2 top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rotate-45 border-2 border-secondary bg-background" />
-      </TimelineRail>
-      <div className="col-start-3 col-end-[-1] flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-secondary [grid-row:1]">
-        <span>{label}</span>
-        <span className="h-px flex-1 bg-secondary/30" />
-      </div>
-    </div>
-  );
-}
-
 /**
  * Lista de liturgias como linha do tempo, em dois blocos: as próximas (do mais próximo ao mais
- * distante, pontos azuis, sempre no alto) e o histórico (do mais recente ao mais antigo, pontos cinza).
+ * distante, pontos azuis, sempre no alto; o próximo culto é o primeiro) e o histórico (do mais recente ao mais antigo, pontos cinza).
  */
 export default function ServiceList({ services }: ServiceListProps) {
   const t = useTranslations("Service");
@@ -68,11 +53,6 @@ export default function ServiceList({ services }: ServiceListProps) {
   const pastMonths = useMemo(() => groupByMonth(past), [past]);
 
   const monthLabel = (date: Date) => date.toLocaleDateString(locale, { month: "long", year: "numeric" });
-  const todayLabel = `${t("today")} · ${new Date().toLocaleDateString(locale, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  })}`;
 
   function nextBadge(service: ServiceListItem) {
     const days = daysUntil(service.date);
@@ -93,10 +73,9 @@ export default function ServiceList({ services }: ServiceListProps) {
         <Section title={t("nextServices")} className="mt-0">
           <div className={cn(CARD, "border-secondary/30 bg-secondary/5")}>
             <div className="divide-y divide-secondary/15">
-              <TodayMarker label={todayLabel} />
-              {upcomingMonths.map((month) => (
+              {upcomingMonths.map((month, index) => (
                 <section key={month.key} className="divide-y divide-secondary/15">
-                  <MonthBand label={monthLabel(month.date)} tone="upcoming" />
+                  <MonthBand label={monthLabel(month.date)} tone="upcoming" first={index === 0} />
                   {month.items.map((service) => (
                     <ServiceRow
                       key={service.slug}
