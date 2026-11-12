@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
 import messages from "@/i18n/messages/pt-BR.json";
-import ServiceRow from "./index";
+import ServiceRow, { ServiceTimeline } from "./index";
 
 vi.mock("next/link", () => ({
   default: ({ children, href, ...rest }: any) => <a href={href} {...rest}>{children}</a>,
@@ -25,11 +25,11 @@ const service = (extra: Partial<ServiceListItem> = {}): ServiceListItem => ({
   ...extra,
 });
 
-function renderRow(s: ServiceListItem, badge?: string) {
+function renderRow(s: ServiceListItem, badge?: string, timeline?: ServiceTimeline) {
   return render(
     <NextIntlClientProvider locale="pt-BR" messages={messages}>
       <ul>
-        <ServiceRow service={s} badge={badge} />
+        <ServiceRow service={s} badge={badge} timeline={timeline} />
       </ul>
     </NextIntlClientProvider>
   );
@@ -68,11 +68,26 @@ describe("ServiceRow", () => {
 
   it("mostra o selo quando recebe um", () => {
     renderRow(service(), "Esta semana");
-    expect(screen.getByText("Esta semana")).toBeInTheDocument();
+    // um no título (largo) e outro na linha de baixo (estreito); o CSS esconde um deles
+    expect(screen.getAllByText("Esta semana").length).toBeGreaterThan(0);
   });
 
   it("tem o menu de ações sempre visível", () => {
     renderRow(service());
     expect(screen.getByRole("button", { name: "Mais ações" })).toBeInTheDocument();
+  });
+
+  it("liga o ponto do trilho só quando recebe a linha do tempo", () => {
+    const { container, unmount } = renderRow(service());
+    expect(container.querySelector("li .rounded-full")).toBeNull();
+    unmount();
+    const { container: withTimeline } = renderRow(service(), undefined, { tone: "upcoming", highlight: true });
+    expect(withTimeline.querySelector("li .rounded-full")).not.toBeNull();
+  });
+
+  it("data em duas partes: dia da semana em maiúscula e número com dois dígitos", () => {
+    renderRow(service({ date: new Date(2026, 10, 8, 9, 30) }));
+    expect(screen.getByText("08")).toBeInTheDocument();
+    expect(screen.getByText(/^dom/i)).toHaveClass("uppercase");
   });
 });
