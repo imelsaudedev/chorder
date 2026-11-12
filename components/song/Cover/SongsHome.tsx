@@ -69,7 +69,8 @@ export default function SongsHome({ tagGroups }: SongsHomeProps) {
           </div>
         </GroupSection>
       ))}
-      <Section title="Todas as músicas" />
+      {/* mb-2 + py-2 da barra de filtros = os 16px do padrão entre o h2 e o conteúdo */}
+      <Section title="Todas as músicas" className="mb-2" />
     </>
   );
 }

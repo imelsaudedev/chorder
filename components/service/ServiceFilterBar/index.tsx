@@ -1,6 +1,7 @@
 "use client";
 
 import ExpandingSearch from "@/components/song/SongsFilterBar/ExpandingSearch";
+import { stickyBarClasses, useStickyBar } from "@/components/song/SongsFilterBar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -39,6 +40,7 @@ type ServiceFilterBarProps = {
 export default function ServiceFilterBar({ state, onChange, options, searchKey }: ServiceFilterBarProps) {
   const t = useTranslations("Service");
   const group = effectiveGroup(state);
+  const { ref, sentinelRef, hidden, stuck } = useStickyBar();
   const Arrow = state.sort.dir === "asc" ? ArrowUp : ArrowDown;
 
   function pickSort(key: ServiceSortKey) {
@@ -63,7 +65,10 @@ export default function ServiceFilterBar({ state, onChange, options, searchKey }
   };
 
   return (
-    <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+    <>
+    <div ref={sentinelRef} aria-hidden className="h-0" />
+    {/* -mt-2 compensa o py-2 da barra: do h2 aos seletores ficam os 16px do Section */}
+    <div ref={ref} className={`${stickyBarClasses(hidden, stuck)} -mt-2 sm:flex-row sm:items-center`}>
       <div className="no-scrollbar flex gap-2 overflow-x-auto sm:flex-1 sm:flex-wrap sm:overflow-visible">
         <FilterPicker
           single
@@ -136,5 +141,6 @@ export default function ServiceFilterBar({ state, onChange, options, searchKey }
         </DropdownMenu>
       </div>
     </div>
+    </>
   );
 }

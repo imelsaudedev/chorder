@@ -31,7 +31,7 @@ type SongsFilterBarProps = {
  * continua); no desktop fica sempre. Publica a altura visível em --songs-sticky-top,
  * que a faixa da letra usa como `top`.
  */
-function useStickyBar() {
+export function useStickyBar() {
   const ref = useRef<HTMLDivElement>(null);
   // Marca a posição natural da barra: "grudada" = essa marca já passou do topo. Sem isso,
   // na home (barra no meio da página) ela esconderia antes de grudar e invadiria o conteúdo de cima.
@@ -91,6 +91,15 @@ function useStickyBar() {
   return { ref, sentinelRef, hidden, stuck };
 }
 
+/**
+ * Classes da barra fixa (a mesma nas listas de Músicas e de Liturgias): `py-2` e `mb-6` dão o
+ * respiro padrão acima e abaixo dos seletores.
+ */
+export const stickyBarClasses = (hidden: boolean, stuck: boolean) =>
+  `sticky top-0 z-30 -mx-page mb-6 flex flex-col gap-2 bg-background px-page py-2 transition-[transform,box-shadow] duration-200 ${
+    hidden ? "max-sm:-translate-y-full" : ""
+  } ${stuck && !hidden ? "shadow-[0_1px_0_var(--border),0_4px_8px_-4px_rgba(0,0,0,.12)]" : ""}`;
+
 export default function SongsFilterBar({
   tagGroups,
   selectedTagIds,
@@ -133,9 +142,7 @@ export default function SongsFilterBar({
     <div
       ref={ref}
       data-songs-filter-bar
-      className={`sticky top-0 z-30 -mx-page mb-6 flex flex-col gap-2 bg-background px-page py-2 transition-[transform,box-shadow] duration-200 sm:flex-row sm:items-center sm:gap-2 ${
-        hidden ? "max-sm:-translate-y-full" : ""
-      } ${stuck && !hidden ? "shadow-[0_1px_0_var(--border),0_4px_8px_-4px_rgba(0,0,0,.12)]" : ""}`}
+      className={`${stickyBarClasses(hidden, stuck)} sm:flex-row sm:items-center sm:gap-2`}
     >
       <div className="flex gap-2 overflow-x-auto no-scrollbar sm:flex-1 sm:flex-wrap sm:overflow-visible">
         {pickers}
