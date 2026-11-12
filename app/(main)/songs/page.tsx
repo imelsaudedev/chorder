@@ -4,6 +4,8 @@ import ScrollToTopButton from "@/components/common/ScrollToTopButton";
 import { getTranslations } from "next-intl/server";
 import { Metadata } from "next";
 import ClientSongsPage from "./ClientSongsPage";
+import NewSongProvider from "./NewSongProvider";
+import SongsHeaderActions from "./SongsHeaderActions";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Messages");
@@ -20,14 +22,14 @@ export default async function SongListPage(props: SongListPageProps) {
   const query = searchParams?.query || "";
 
   return (
-    <>
-      <PageTitleBlock title={t("Messages.songs")} />
+    <NewSongProvider>
+      <PageTitleBlock title={t("Messages.songs")} actions={<SongsHeaderActions />} />
 
       <Main className="max-w-full">
         <ClientSongsPage query={query} />
       </Main>
 
       <ScrollToTopButton />
-    </>
+    </NewSongProvider>
   );
 }
