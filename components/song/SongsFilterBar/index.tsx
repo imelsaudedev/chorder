@@ -92,11 +92,11 @@ export function useStickyBar() {
 }
 
 /**
- * Classes da barra fixa (a mesma nas listas de Músicas e de Liturgias): `py-2` e `mb-6` dão o
+ * Classes da barra fixa (a mesma nas listas de Músicas e de Liturgias): `py-2` e `mb-4` dão o
  * respiro padrão acima e abaixo dos seletores.
  */
 export const stickyBarClasses = (hidden: boolean, stuck: boolean) =>
-  `sticky top-0 z-30 -mx-page mb-6 flex flex-col gap-2 bg-background px-page py-2 transition-[transform,box-shadow] duration-200 ${
+  `sticky top-0 z-30 -mx-page mb-4 flex flex-col gap-2 bg-background px-page py-2 transition-[transform,box-shadow] duration-200 ${
     hidden ? "max-sm:-translate-y-full" : ""
   } ${stuck && !hidden ? "shadow-[0_1px_0_var(--border),0_4px_8px_-4px_rgba(0,0,0,.12)]" : ""}`;
 

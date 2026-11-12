@@ -151,7 +151,7 @@ export default function ServiceList({ services }: ServiceListProps) {
           <ServiceFilterBar state={state} onChange={update} options={options} searchKey={searchKey} />
 
           {filtering && (
-            <p className="-mt-3 mb-3 flex items-center gap-2 text-sm text-muted-foreground">
+            <p className="-mt-2 mb-4 flex items-center gap-2 text-sm text-muted-foreground">
               {t("results", { count: visible.total })}
               <Button type="button" variant="link" size="sm" className="h-auto p-0 text-sm" onClick={handleClear}>
                 {t("clearFilters")}
