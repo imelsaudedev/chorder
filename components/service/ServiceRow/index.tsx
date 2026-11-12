@@ -77,7 +77,7 @@ export function TimelineRail({
         className={cn(
           "absolute left-1/2 w-0.5 -translate-x-1/2",
           RAIL_COLOR[tone],
-          first ? (inBand ? "top-1/2" : "top-[27px]") : "top-0",
+          first ? "top-[27px]" : "top-0",
           last ? "bottom-[calc(100%-27px)]" : "bottom-0"
         )}
       />
@@ -172,9 +172,10 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
           <span
             className={cn(
               "absolute left-1/2 -translate-x-1/2 rounded-full",
+              // culto realizado: ponto cheio; culto por vir: ponto vazado
               timeline.tone === "upcoming"
-                ? "bg-secondary"
-                : "border-2 border-zinc-400 bg-background",
+                ? "border-2 border-secondary bg-background"
+                : "bg-zinc-400",
               timeline.highlight
                 ? "top-[19px] size-4 shadow-[0_0_0_5px] shadow-secondary/20"
                 : "top-[21px] size-3"
@@ -185,7 +186,7 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
 
       <div className="pointer-events-none relative z-10 min-w-0 [grid-area:title]">
         <Text variant="heading-sm" as="p" className="flex items-baseline gap-2 leading-[22px] @[860px]:text-lg">
-          <span className="truncate">{title}</span>
+          <span className="min-w-0 @[720px]:truncate">{title}</span>
           {badge && (
             <span className="hidden shrink-0 text-xs font-semibold uppercase tracking-wider text-secondary @[720px]:inline">
               {badge}
@@ -202,27 +203,27 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
           </span>
         )}
         {local.worshipLeader && (
-          <span className="inline-flex min-w-0 items-center gap-1 @[720px]:[grid-area:leader]">
-            <MicVocal className="size-3.5 shrink-0" aria-hidden />
-            <span className="truncate">{local.worshipLeader}</span>
+          <span className="inline-flex min-w-0 items-start gap-1 @[720px]:[grid-area:leader]">
+            <MicVocal className="mt-1 size-3.5 shrink-0" aria-hidden />
+            <span className="min-w-0 @[720px]:truncate">{local.worshipLeader}</span>
           </span>
         )}
         {local.preacher ? (
-          <span className="inline-flex min-w-0 items-center gap-1 @[720px]:[grid-area:pre]">
-            <MessageSquare className="size-3.5 shrink-0" aria-hidden />
-            <span className="truncate">{local.preacher}</span>
+          <span className="inline-flex min-w-0 items-start gap-1 @[720px]:[grid-area:pre]">
+            <MessageSquare className="mt-1 size-3.5 shrink-0" aria-hidden />
+            <span className="min-w-0 @[720px]:truncate">{local.preacher}</span>
           </span>
         ) : (
           placeholder("@[720px]:[grid-area:pre]")
         )}
         {themeAndText ? (
-          <span className="min-w-0 truncate @[720px]:[grid-area:tema]">{themeAndText}</span>
+          <span className="min-w-0 @[720px]:[grid-area:tema] @[720px]:truncate">{themeAndText}</span>
         ) : (
           placeholder("@[720px]:[grid-area:tema]")
         )}
         {local.songCount > 0 ? (
-          <span className="inline-flex items-center gap-1 whitespace-nowrap @[720px]:[grid-area:songs]">
-            <Music className="size-3.5 shrink-0" aria-hidden />
+          <span className="inline-flex items-start gap-1 whitespace-nowrap @[720px]:[grid-area:songs]">
+            <Music className="mt-1 size-3.5 shrink-0" aria-hidden />
             {local.songCount}
             <span className="sr-only">{t("Service.colSongs")}</span>
           </span>

@@ -12,7 +12,7 @@ type SectionProps = {
 
 /**
  * Seção de uma página. Ritmo: 32 acima (token `--space-section`) →
- * título (h2) → (4 → descrição) → 12 → elementos.
+ * título (h2) → (4 → descrição) → 16 → elementos.
  */
 export default function Section({ title, description, aside, className, children }: SectionProps) {
   return (
@@ -28,7 +28,7 @@ export default function Section({ title, description, aside, className, children
           {description}
         </Text>
       )}
-      {children && <div className="mt-3">{children}</div>}
+      {children && <div className="mt-4">{children}</div>}
     </section>
   );
 }
