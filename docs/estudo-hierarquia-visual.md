@@ -1,5 +1,7 @@
 # Estudo de hierarquia visual: topo, título, subtítulos e elementos
 
+> **Estudo histórico (10/11/2026).** A referência atual do design system é `docs/design-system.md`, que registra o que foi implementado depois deste estudo (listas, filtros, linha do tempo, ritmo vertical final) e o plano do modo escuro.
+
 Levantamento feito a partir do código (classes Tailwind; 1 unidade = 4px). Não houve medição no
 navegador: o dev server estava com erro de build (cache do Turbopack das trocas de fonte). Os valores
 abaixo vêm das classes e dos padrões do Tailwind v4, então conferir visualmente antes de migrar.

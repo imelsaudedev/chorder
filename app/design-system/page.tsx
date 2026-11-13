@@ -17,8 +17,9 @@ import {
   AlertCircle, ArrowLeft, Bell, BookOpen, Check, ChevronDown, ChevronRight,
   CircleMinus, CirclePlus, Copy, Edit, ExternalLink, Eye, FileAudio,
   Heart, Home, Info, Loader2, LogOut, Menu, Music, Pause, Play,
-  Plus, Search, Settings, Trash2, Upload, User, Volume2, X, SquarePlay,
+  Plus, Search, Settings, Trash2, Upload, User, Volume2, X, SquarePlay, ArrowDown,
 } from "lucide-react";
+import { unitColorClasses } from "@/components/song/unit-colors";
 
 /* ─── helpers ────────────────────────────────────────────────────────── */
 
@@ -68,6 +69,7 @@ const NAV = [
   { id: "cores", label: "Cores" },
   { id: "tipografia", label: "Tipografia" },
   { id: "espacamento", label: "Espaçamento" },
+  { id: "layout", label: "Layout e listas" },
   { id: "bordas", label: "Bordas & Sombras" },
   { id: "botoes", label: "Botões" },
   { id: "formularios", label: "Formulários" },
@@ -76,7 +78,24 @@ const NAV = [
   { id: "feedback", label: "Feedback" },
   { id: "tags", label: "Tags" },
   { id: "icones", label: "Ícones" },
+  { id: "blocos", label: "Blocos da cifra" },
 ];
+
+/* ─── dados: blocos da cifra ─────────────────────────────────────────── */
+
+// Escuro PROPOSTO (ainda não existe no app): ver docs/design-system.md, seção 6.3.
+const BLOCK_TYPES = [
+  { type: "INTRO", label: "Introdução", dark: { bg: "#1c2a14", bd: "#46682a", fg: "#bef264", dot: "#a3e635" } },
+  { type: "VERSE", label: "Verso", dark: { bg: "#0f2a31", bd: "#1f6d7d", fg: "#67e8f9", dot: "#22d3ee" } },
+  { type: "PRECHORUS", label: "Pré-refrão", dark: { bg: "#31200f", bd: "#7c4a1d", fg: "#fdba74", dot: "#fb923c" } },
+  { type: "CHORUS", label: "Refrão", dark: { bg: "#321a20", bd: "#7f3040", fg: "#fda4af", dot: "#fb7185" } },
+  { type: "BRIDGE", label: "Ponte", dark: { bg: "#211a38", bd: "#5b46a3", fg: "#c4b5fd", dot: "#a78bfa" } },
+  { type: "INTERLUDE", label: "Interlúdio", dark: { bg: "#30280f", bd: "#7a6420", fg: "#fcd34d", dot: "#fbbf24" } },
+  { type: "SOLO", label: "Solo", dark: { bg: "#2e1534", bd: "#8a3a94", fg: "#f0abfc", dot: "#e879f9" } },
+  { type: "ENDING", label: "Final", dark: { bg: "#10291a", bd: "#2c6e43", fg: "#86efac", dot: "#4ade80" } },
+  { type: "BLOCK", label: "Bloco", dark: { bg: "#161d2e", bd: "#33405a", fg: "#cbd5e1", dot: "#94a3b8" } },
+  { type: "TEXT", label: "Texto", dark: { bg: "#131a2a", bd: "#2b3650", fg: "#94a3b8", dot: "#64748b" } },
+] as const;
 
 /* ─── page ───────────────────────────────────────────────────────────── */
 
@@ -115,6 +134,11 @@ export default function DesignSystemPage() {
         {/* Content */}
         <main className="flex-1 min-w-0">
 
+          <p className="mb-2 rounded-lg border border-secondary/30 bg-secondary/5 px-4 py-3 text-sm text-zinc-700">
+            Atualizado em 13/11/2026 e alinhado ao código. Referência escrita: <code className="text-secondary">docs/design-system.md</code>.
+            O <strong>modo escuro ainda não existe</strong> no app: aqui ele aparece só como proposta (Cores e Blocos da cifra).
+          </p>
+
           {/* ── Cores ──────────────────────────────────────────────── */}
           <Section id="cores" title="Cores">
 
@@ -123,31 +147,41 @@ export default function DesignSystemPage() {
               <div>
                 <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Tokens semânticos</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  <ColorSwatch bg="hsl(0 0% 9%)" label="primary" twClass="bg-primary" value="hsl(0 0% 9%)" />
-                  <ColorSwatch bg="hsl(161 94% 30%)" label="secondary" twClass="bg-secondary" value="hsl(161 94% 30%)" textClass="text-white" />
+                  <ColorSwatch bg="hsl(0 0% 9%)" label="primary" twClass="bg-primary" value="hsl(0 0% 9%)" textClass="text-white" />
+                  <ColorSwatch bg="hsl(221 83% 53%)" label="secondary (azul da marca)" twClass="bg-secondary" value="hsl(221 83% 53%)" textClass="text-white" />
                   <ColorSwatch bg="hsl(23 100% 60%)" label="accent" twClass="bg-accent" value="hsl(23 100% 60%)" />
                   <ColorSwatch bg="hsl(0 84.2% 60.2%)" label="destructive" twClass="bg-destructive" value="hsl(0 84.2% 60.2%)" />
-                  <ColorSwatch bg="hsl(160 8% 72%)" label="muted" twClass="bg-muted" value="hsl(160 8% 72%)" />
-                  <ColorSwatch bg="hsl(0 0% 100%)" label="background" twClass="bg-background" value="hsl(0 0% 100%)" />
-                  <ColorSwatch bg="hsl(164 84% 4.9%)" label="foreground" twClass="text-foreground" value="hsl(164 84% 4.9%)" textClass="text-white" />
-                  <ColorSwatch bg="hsl(0 0% 89.8%)" label="border" twClass="border-border" value="hsl(0 0% 89.8%)" />
+                  <ColorSwatch bg="hsl(215 16% 72%)" label="muted" twClass="bg-muted" value="hsl(215 16% 72%)" />
+                  <ColorSwatch bg="hsl(215 14% 48%)" label="muted-foreground" twClass="text-muted-foreground" value="hsl(215 14% 48%)" textClass="text-white" />
+                  <ColorSwatch bg="hsl(0 0% 100%)" label="background / card / popover" twClass="bg-background" value="hsl(0 0% 100%)" />
+                  <ColorSwatch bg="hsl(224 84% 4.9%)" label="foreground" twClass="text-foreground" value="hsl(224 84% 4.9%)" textClass="text-white" />
+                  <ColorSwatch bg="hsl(0 0% 89.8%)" label="border / input" twClass="border-border" value="hsl(0 0% 89.8%)" />
+                  <ColorSwatch bg="hsl(221 83% 53%)" label="ring (foco)" twClass="ring-ring" value="hsl(221 83% 53%)" textClass="text-white" />
                 </div>
               </div>
 
               <div>
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Emerald — cor de destaque</p>
-                <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
-                  {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((shade) => (
-                    <div key={shade} className="flex flex-col gap-1">
-                      <div className={`h-8 rounded bg-emerald-${shade} border border-black/5`} />
-                      <span className="text-[10px] text-zinc-400 text-center">{shade}</span>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Azul da marca — transparências usadas no app</p>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                  {[
+                    { n: "5", cls: "bg-secondary/5", uso: "cartão das próximas liturgias" },
+                    { n: "10", cls: "bg-secondary/10", uso: "faixa de mês, selos" },
+                    { n: "15", cls: "bg-secondary/15", uso: "divisor das próximas" },
+                    { n: "20", cls: "bg-secondary/20", uso: "halo do próximo culto" },
+                    { n: "40", cls: "bg-secondary/40", uso: "trilho da linha do tempo" },
+                    { n: "100", cls: "bg-secondary", uso: "ação, ponto, foco" },
+                  ].map((t) => (
+                    <div key={t.n} className="flex flex-col gap-1">
+                      <div className={`h-10 rounded border border-black/5 ${t.cls}`} />
+                      <code className="text-[11px] text-secondary">{t.cls}</code>
+                      <span className="text-[11px] text-zinc-400">{t.uso}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div>
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Zinc — neutros de UI</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Zinc — neutros de UI (ainda sem token; entram na etapa 2 do plano)</p>
                 <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
                   {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((shade) => (
                     <div key={shade} className="flex flex-col gap-1">
@@ -171,7 +205,7 @@ export default function DesignSystemPage() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   {[
                     { name: "IBM Plex Sans", cls: "font-sans", desc: "Corpo de texto, UI padrão" },
-                    { name: "Space Grotesk", cls: "font-display", desc: "Headings, display" },
+                    { name: "Space Grotesk", cls: "font-display", desc: "Títulos e números de destaque (só o peso 600 é carregado)" },
                     { name: "IBM Plex Serif", cls: "font-serif", desc: "Texto editorial" },
                     { name: "IBM Plex Mono", cls: "font-mono", desc: "Código, valores técnicos" },
                   ].map((f) => (
@@ -191,14 +225,14 @@ export default function DesignSystemPage() {
                 <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-4">Variantes — componente Text</p>
                 <div className="flex flex-col divide-y divide-zinc-100">
                   {[
-                    { variant: "heading-xl" as const, sample: "Heading XL — título de página" },
-                    { variant: "heading-lg" as const, sample: "Heading LG — título de seção" },
-                    { variant: "heading-md" as const, sample: "Heading MD — subtítulo" },
-                    { variant: "heading-sm" as const, sample: "Heading SM — UI chrome" },
-                    { variant: "body" as const, sample: "Body — texto corrido, parágrafos e descrições" },
-                    { variant: "label" as const, sample: "Label — labels de formulário, metadados" },
-                    { variant: "caption" as const, sample: "Caption — datas, artistas, texto secundário" },
-                    { variant: "overline" as const, sample: "Overline — categorias em caps" },
+                    { variant: "heading-xl" as const, sample: "Heading XL · 28 / 32 / 40 — título de página" },
+                    { variant: "heading-lg" as const, sample: "Heading LG · 20 / 22 / 24 — título de seção" },
+                    { variant: "heading-md" as const, sample: "Heading MD · 16 / 17 / 18 — subtítulo" },
+                    { variant: "heading-sm" as const, sample: "Heading SM · 16 — título de item (linha, card)" },
+                    { variant: "body" as const, sample: "Body · 16 — texto corrido, parágrafos e descrições" },
+                    { variant: "label" as const, sample: "Label · 14 — rótulos de formulário, metadados" },
+                    { variant: "caption" as const, sample: "Caption · 14 — datas, autores, texto de apoio" },
+                    { variant: "overline" as const, sample: "Overline · 12 — categorias em caixa alta" },
                   ].map(({ variant, sample }) => (
                     <div key={variant} className="py-3 flex items-baseline justify-between gap-4">
                       <Text variant={variant}>{sample}</Text>
@@ -230,6 +264,120 @@ export default function DesignSystemPage() {
                   </div>
                 ))}
               </div>
+
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mt-2">Tokens de layout (globals.css)</p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-zinc-400">
+                      <th className="py-1 pr-4 font-medium">Token</th>
+                      <th className="py-1 pr-4 font-medium">Mobile / sm / lg</th>
+                      <th className="py-1 pr-4 font-medium">Utilitário</th>
+                      <th className="py-1 font-medium">Uso</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {[
+                      ["--page-x", "20 / 32 / 48", "px-page · -mx-page · scroll-px-page", "margem lateral única das telas"],
+                      ["--space-title-bottom", "16 / 24", "pb-[var(--space-title-bottom)]", "do título até o primeiro elemento"],
+                      ["--space-section", "32", "mt-[var(--space-section)]", "entre seções"],
+                    ].map(([token, vals, util, uso]) => (
+                      <tr key={token}>
+                        <td className="py-2 pr-4"><code className="text-[11px] text-secondary bg-secondary/10 px-1.5 py-0.5 rounded">{token}</code></td>
+                        <td className="py-2 pr-4 font-mono text-xs text-zinc-600">{vals}</td>
+                        <td className="py-2 pr-4 font-mono text-xs text-zinc-500">{util}</td>
+                        <td className="py-2 text-zinc-600">{uso}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </Section>
+
+          {/* ── Layout e listas ─────────────────────────────────────── */}
+          <Section id="layout" title="Layout e listas">
+            <div className="flex flex-col gap-8">
+
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Ritmo vertical de uma tela de lista</p>
+                <ol className="flex flex-col gap-1 text-sm text-zinc-600">
+                  <li><b>Título</b> (h1, ações na mesma linha) · posição fixa, 64px do topo no desktop</li>
+                  <li className="text-zinc-400">↓ 16 / 24 · <code>--space-title-bottom</code></li>
+                  <li><b>Seção</b> · título h2</li>
+                  <li className="text-zinc-400">↓ 16 · h2 até o primeiro elemento (nos filtros também: 8 do <code>py-2</code> + 8)</li>
+                  <li><b>Barra de filtros</b> · sticky</li>
+                  <li className="text-zinc-400">↓ 24 · <code>py-2</code> da barra + <code>mb-4</code></li>
+                  <li><b>Lista</b> em cartão</li>
+                  <li className="text-zinc-400">↓ 32 · <code>--space-section</code> até a próxima seção</li>
+                </ol>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Barra de filtros (sticky; seletores à esquerda, busca e ordenação à direita)</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-1 flex-wrap gap-2">
+                    <Button variant="soft" size="sm">Ano <ChevronDown className="size-3.5" /></Button>
+                    <Button variant="soft" size="sm">Dirigente <ChevronDown className="size-3.5" /></Button>
+                    <Button variant="soft" size="sm" className="bg-secondary/15 text-secondary hover:bg-secondary/20">Pregador(a)</Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input placeholder="Buscar no histórico" className="h-8 w-56 rounded-md border-0 bg-muted/[.22] pl-8 shadow-none" />
+                    </div>
+                    <Button variant="soft" size="sm"><ArrowDown className="size-3.5" /> Data</Button>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Lista em cartão com linha do tempo (próximas e histórico)</p>
+                <div className="grid gap-6 md:grid-cols-2">
+                  {[
+                    { upcoming: true, band: "Novembro de 2026", rows: [["dom", "15", "Culto dominical", "Tiago · 4 músicas", true], ["dom", "22", "Culto de ação de graças", "Riva · 6 músicas", false]] },
+                    { upcoming: false, band: "Novembro de 2026", rows: [["dom", "08", "Cristo, unidade e propósito", "Riva · 6 músicas", false], ["dom", "01", "Culto dominical", "Riva · 6 músicas", false]] },
+                  ].map((card, ci) => (
+                    <div key={ci} className={cn("overflow-clip rounded-xl border shadow-xs", card.upcoming ? "border-secondary/30 bg-secondary/5" : "bg-background")}>
+                      <div className={cn("flex h-8 items-center px-4 text-sm font-semibold uppercase text-secondary", card.upcoming ? "bg-secondary/10" : "bg-zinc-50")}>
+                        <span className="ml-[calc(3.75rem+1.5rem+2rem)]">{card.band}</span>
+                      </div>
+                      <ul className={cn("divide-y", card.upcoming ? "divide-secondary/15" : "divide-border")}>
+                        {card.rows.map(([wd, day, title, meta, next], ri) => (
+                          <li key={ri} className="grid grid-cols-[3.75rem_1.5rem_minmax(0,1fr)] gap-x-4 px-4 py-4">
+                            <div className="whitespace-nowrap text-right text-base leading-[22px] text-muted-foreground">
+                              <span className="uppercase tracking-wide">{wd}</span>{" "}
+                              <span className="font-display font-semibold tracking-tight text-primary">{day}</span>
+                            </div>
+                            <div className="relative -my-4 self-stretch" aria-hidden>
+                              <span className={cn("absolute left-1/2 w-0.5 -translate-x-1/2 bottom-0", ri === 0 ? "top-[27px]" : "top-0", card.upcoming ? "bg-secondary/40" : "bg-zinc-300")} />
+                              <span
+                                className={cn(
+                                  "absolute left-1/2 -translate-x-1/2 rounded-full",
+                                  card.upcoming ? "border-2 border-secondary bg-background" : "bg-zinc-400",
+                                  next ? "top-[19px] size-4 shadow-[0_0_0_5px] shadow-secondary/20" : "top-[21px] size-3"
+                                )}
+                              />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-display text-base font-semibold leading-[22px] tracking-tight text-primary">
+                                {title}
+                                {next && <span className="ml-2 text-xs font-semibold uppercase tracking-wider text-secondary">Esta semana</span>}
+                              </p>
+                              <p className="text-sm leading-[22px] text-muted-foreground">{meta}</p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-xs text-zinc-500">
+                  Por vir = ponto vazado; realizado = ponto cheio; próximo culto = ponto maior com halo. Cartão: <code>rounded-xl border shadow-xs</code>,
+                  linha <code>py-4</code>, recuo <code>px-4 @[560px]:px-5 @[860px]:px-6</code>, faixa de mês <code>h-8</code>.
+                </p>
+              </div>
+
             </div>
           </Section>
 
@@ -629,6 +777,49 @@ export default function DesignSystemPage() {
                 </div>
               ))}
             </div>
+          </Section>
+
+          {/* ── Blocos da cifra ────────────────────────────────────── */}
+          <Section id="blocos" title="Blocos da cifra">
+            <p className="mb-5 text-sm text-zinc-500">
+              À esquerda, as cores <b>de hoje</b> (lidas de <code className="text-secondary">unit-colors.ts</code>). À direita, a versão <b>escura proposta</b>{" "}
+              (receita: texto no tom 300, fundo ~12% de luminosidade, borda ~30%, círculo no tom 400). O modo escuro ainda não está implementado.
+            </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-white p-4">
+                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Claro (atual)</span>
+                {BLOCK_TYPES.map(({ type, label }) => {
+                  const c = unitColorClasses[type];
+                  return (
+                    <span key={type} className={cn("inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-sm font-medium", c.background, c.border, c.text)}>
+                      <span className={cn("size-2.5 rounded-full", c.circleBackground)} />
+                      {label}
+                    </span>
+                  );
+                })}
+              </div>
+              <div className="flex flex-col gap-2 rounded-lg border p-4" style={{ background: "#0c1222", borderColor: "#26314a" }}>
+                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#9aa9bf" }}>Escuro (proposta)</span>
+                {BLOCK_TYPES.map(({ type, label, dark }) => (
+                  <span
+                    key={type}
+                    className="inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-sm font-medium"
+                    style={{ background: dark.bg, borderColor: dark.bd, color: dark.fg }}
+                  >
+                    <span className="size-2.5 rounded-full" style={{ background: dark.dot }} />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <p className="mt-4 text-sm text-zinc-500">
+              <b>Decisão:</b> o <b>Final</b> muda de lime para <b>green</b> nos dois temas (hoje se confunde com a Introdução).
+              Proposta para o claro:
+            </p>
+            <span className="mt-2 inline-flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-2.5 py-1 text-sm font-medium text-green-700">
+              <span className="size-2.5 rounded-full bg-green-500" />
+              Final (claro, proposto)
+            </span>
           </Section>
 
         </main>

@@ -8,7 +8,7 @@ Fork do [chorder](https://github.com/henriquefreitassouza/chorder) adaptado para
 - Deploy: **Vercel**. Produção é atualizada a cada merge em `main`; cada PR gera um deploy de **Preview** em HTTPS (serve para testar no celular).
 - Banco de dados em **produção**: **Neon** (PostgreSQL serverless) com duas URLs (pooler + direta)
 - Banco de dados **local**: PostgreSQL local em `localhost:5432`, banco `chorder` — o mesmo que o projeto original usa. Ver seção abaixo sobre conflito de migrations.
-- Tema: emerald no lugar de azul
+- Tema: azul da marca (`--secondary`) e laranja de destaque raro (`--accent`). Design system (tokens, escala, padrões de lista/filtros, plano do modo escuro): `docs/design-system.md` e a página `/design-system`. Mudou um token ou padrão? Atualizar os dois.
 
 ## Fluxo de trabalho
 
