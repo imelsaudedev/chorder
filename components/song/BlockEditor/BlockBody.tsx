@@ -921,15 +921,16 @@ function CaretLine({
             {context && (
               <>
                 {/* Campo harmônico da grade: o tom da cifra por padrão, trocável só aqui (não muda a cifra). */}
-                <div className="flex items-center gap-2">
-                  <label htmlFor={`field-key-${lineKeyId}`} className="text-[10px] uppercase tracking-wide text-zinc-500">
+                {/* Mesma grade de 4 colunas dos botões de acordes: o seletor ocupa uma coluna, com a largura deles. */}
+                <div className="grid grid-cols-4 items-center gap-1 border-b pb-1">
+                  <label htmlFor={`field-key-${lineKeyId}`} className="col-span-3 text-[10px] uppercase tracking-wide text-zinc-500">
                     Campo harmônico
                   </label>
                   <select
                     id={`field-key-${lineKeyId}`}
                     value={fieldKey}
                     onChange={(e) => onFieldKeyChange(e.target.value)}
-                    className="h-7 rounded border border-zinc-200 bg-white px-1.5 text-xs font-mono font-semibold text-zinc-800 cursor-pointer"
+                    className="h-7 w-full min-w-0 rounded border border-zinc-200 bg-white px-1.5 text-xs font-mono font-semibold text-zinc-800 cursor-pointer"
                   >
                     {fieldOptions.map((key) => (
                       <option key={key} value={key}>
