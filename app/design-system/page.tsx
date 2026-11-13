@@ -92,7 +92,7 @@ const BLOCK_TYPES = [
   { type: "BRIDGE", label: "Ponte", dark: { bg: "#211a38", bd: "#5b46a3", fg: "#c4b5fd", dot: "#a78bfa" } },
   { type: "INTERLUDE", label: "Interlúdio", dark: { bg: "#30280f", bd: "#7a6420", fg: "#fcd34d", dot: "#fbbf24" } },
   { type: "SOLO", label: "Solo", dark: { bg: "#2e1534", bd: "#8a3a94", fg: "#f0abfc", dot: "#e879f9" } },
-  { type: "ENDING", label: "Final", dark: { bg: "#1c2a14", bd: "#5f8a2e", fg: "#a3e635", dot: "#84cc16" } },
+  { type: "ENDING", label: "Final", dark: { bg: "#10291a", bd: "#2c6e43", fg: "#86efac", dot: "#4ade80" } },
   { type: "BLOCK", label: "Bloco", dark: { bg: "#161d2e", bd: "#33405a", fg: "#cbd5e1", dot: "#94a3b8" } },
   { type: "TEXT", label: "Texto", dark: { bg: "#131a2a", bd: "#2b3650", fg: "#94a3b8", dot: "#64748b" } },
 ] as const;
@@ -812,6 +812,14 @@ export default function DesignSystemPage() {
                 ))}
               </div>
             </div>
+            <p className="mt-4 text-sm text-zinc-500">
+              <b>Decisão:</b> o <b>Final</b> muda de lime para <b>green</b> nos dois temas (hoje se confunde com a Introdução).
+              Proposta para o claro:
+            </p>
+            <span className="mt-2 inline-flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-2.5 py-1 text-sm font-medium text-green-700">
+              <span className="size-2.5 rounded-full bg-green-500" />
+              Final (claro, proposto)
+            </span>
           </Section>
 
         </main>

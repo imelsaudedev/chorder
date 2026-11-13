@@ -176,12 +176,23 @@ fundo = mistura escura do matiz (~12% de luminosidade), borda = ~30%, círculo =
 | BRIDGE | violet | `#211a38` | `#5b46a3` | `#c4b5fd` | `#a78bfa` | 9,0 |
 | INTERLUDE | amber | `#30280f` | `#7a6420` | `#fcd34d` | `#fbbf24` | 10,1 |
 | SOLO | fuchsia | `#2e1534` | `#8a3a94` | `#f0abfc` | `#e879f9` | 9,4 |
-| ENDING | lime (mais vivo) | `#1c2a14` | `#5f8a2e` | `#a3e635` | `#84cc16` | 10,0 |
+| ENDING | **green** (hoje é lime) | `#10291a` | `#2c6e43` | `#86efac` | `#4ade80` | 11,0 |
 | BLOCK | neutro | `#161d2e` | `#33405a` | `#cbd5e1` | `#94a3b8` | 11,3 |
 | TEXT | slate | `#131a2a` | `#2b3650` | `#94a3b8` | `#64748b` | 6,8 |
 
-Contrastes de texto calculados pela fórmula do WCAG (todos acima de 4,5). INTRO e ENDING são ambos lime no claro e ficam
-próximos no escuro; foi mantido assim por coerência com o claro. Decisão a confirmar na etapa 3.
+Contrastes de texto calculados pela fórmula do WCAG (todos acima de 4,5).
+
+**Decisão (13/11/2026): o Final passa de lime para green**, nos dois temas. Introdução e Final eram ambos lime e quase
+indistinguíveis (diferença perceptual ΔE de 19,9 no claro e 9,6 no escuro; abaixo de ~20 confunde). Com green, a menor
+distância do Final a qualquer outro tipo é 37,6 (claro) e 41,0 (escuro). Valores do Final:
+
+| Tema | Círculo | Fundo | Borda | Texto |
+|---|---|---|---|---|
+| Claro (a aplicar em `unit-colors.ts`) | `green-500` | `green-50` | `green-200` | `green-700` |
+| Escuro | `#4ade80` | `#10291a` | `#2c6e43` | `#86efac` |
+
+Os demais itens do tipo acompanham (comentário `green-700`, selo `green-200`/`green-700`, alça `green-100`/`green-200`, anel `green-500`).
+A cor não é o único sinal: o bloco mostra o nome ("Final", "Introdução") e a sigla no mapa da música.
 
 ### 6.4 Plano (etapas)
 1. **Documento e página no estado real** (esta etapa).
@@ -190,10 +201,20 @@ próximos no escuro; foi mantido assim por coerência com o claro. Decisão a co
      (`--success`, `--warning`, `--info`, cada um com `-foreground`, `-subtle` e `-border`), e os `--block-*` por tipo;
    - mapa: `zinc-50` → `surface-subtle`; `zinc-100/200` → `muted`/`border`; `zinc-300` → `border-strong`; `zinc-400/500` →
      `muted-foreground`; `zinc-700/900` → `foreground`; `bg-white` → `background`/`card`; `text-white` sobre cor → `*-foreground`.
-3. **Modo escuro:** reescrever `.dark` com a paleta de 6.2, provedor de tema próprio (sistema por padrão; `light`/`dark` manual em
-   `localStorage`, com script inline no `<head>` para evitar o "flash"), `color-scheme`, trocar o `bg-white` do `body`, e o
-   **alternador na barra lateral** (NavBar).
+3. **Modo escuro:** reescrever `.dark` com a paleta de 6.2 (Final em green, ver 6.3), provedor de tema próprio (sistema por
+   padrão; `light`/`dark` manual em `localStorage`, com script inline no `<head>` para evitar o "flash"), `color-scheme`, trocar o
+   `bg-white` do `body`, e o alternador (6.5).
 4. **Migração por área** (editor de cifra e blocos, barra de mídia, liturgia, Palco), conferindo claro e escuro em 390 / 768 / 1280.
+
+### 6.5 Alternador de tema (decidido em 13/11/2026)
+Um componente `ThemeToggle` com três opções: **Sistema** (padrão), **Claro** e **Escuro**; o ícone mostra o tema atual (monitor, sol ou lua).
+- **Desktop e tablet:** botão no **rodapé da barra lateral** (`NavBar`, que hoje não tem nada ali), abrindo um menu para o lado.
+- **Celular, listas:** **4º item da barra inferior**, "Tema", no mesmo estilo dos outros (sem estado "ativo"); ao tocar abre uma folha de baixo
+  (mesmo padrão dos seletores do filtro) com as três opções. Quatro itens cabem (cerca de 97px cada em 390px).
+- **Telas sem barra no celular** (detalhe e edição): seguem o tema do sistema; a escolha manual vale em todas as telas porque fica guardada no aparelho.
+- **Modo Palco:** segue o tema geral escolhido; não tem opção própria.
+- Descartados: alternador no cabeçalho (disputa a área de ações do título) e na tela de Feedback (pouco descobrível).
+- A barra inferior hoje usa `bg-white/80` e `border-gray-100`, e a lateral `bg-zinc-50`: entram na migração para tokens.
 
 Fora do escopo da tokenização: cores que são **dado** (cor de categoria e de capa, `lib/cover-theme.ts`, `readableTint`).
 
