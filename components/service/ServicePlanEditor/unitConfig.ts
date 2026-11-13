@@ -1,6 +1,7 @@
 import {
   Bell,
   BookOpen,
+  CircleEllipsis,
   Heart,
   MessageSquare,
   Mic2,
@@ -14,7 +15,8 @@ export type ServiceUnitTypeValue =
   | "LEITURA"
   | "ORACAO"
   | "AVISOS"
-  | "SERMAO";
+  | "SERMAO"
+  | "OUTRO";
 
 type UnitConfig = {
   label: string;
@@ -52,5 +54,11 @@ export const UNIT_CONFIG: Record<ServiceUnitTypeValue, UnitConfig> = {
     label: "Sermão",
     icon: MessageSquare,
     color: "text-violet-600",
+  },
+  // Item genérico (o que não cabe nos outros tipos): ícone neutro, sem cor de destaque.
+  OUTRO: {
+    label: "Outro",
+    icon: CircleEllipsis,
+    color: "text-slate-500",
   },
 };

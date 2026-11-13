@@ -5,6 +5,7 @@ import SongMap from "@/components/song/SongMap";
 import { ClientServiceUnit } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { songDisplayTitle } from "@/components/service/ServicePlanEditor/unitSummary";
 import ServiceArrangementHeader from "./ServiceArrangementHeader";
 import ServiceArrangementMeta from "./ServiceArrangementMeta";
 import ServiceSongUnitEditForm, { EditFormHandle } from "./ServiceSongUnitEditForm";
@@ -144,6 +145,7 @@ export default function ServiceSongUnitView({
         <ServiceArrangementHeader
           ref={headerRef}
           arrangement={arrangement}
+          title={songDisplayTitle(unit)}
           order={unit.order}
           isStuck={isHeaderStuck}
           // Mapa sempre no cabeçalho, logo abaixo do título, tocável: normal parado e pequeno

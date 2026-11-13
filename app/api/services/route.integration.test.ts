@@ -156,6 +156,86 @@ describe('Services API integration', () => {
         expect(data.plan.sections[0].units[0].type).toBe('SONG');
     });
 
+    it('guarda item "Outro", e o título próprio e o comentário de uma música, no plano e devolve os dois', async () => {
+        const song = await prisma.song.create({
+            data: {
+                title: 'Música com comentário',
+                slug: 'musica-com-comentario',
+                lyrics: '...',
+                arrangements: {
+                    create: { key: 'D', isDefault: true, name: 'Default', isDeleted: false, isServiceArrangement: false, originalArrangementId: null }
+                }
+            },
+            include: { arrangements: true }
+        });
+        const arrangement = song.arrangements[0];
+
+        const req = new Request('http://localhost/api/services', {
+            method: 'POST',
+            body: JSON.stringify({
+                title: 'Culto com Outro',
+                slug: 'culto-com-outro',
+                date: '2026-04-12T10:00:00Z',
+                worshipLeader: null,
+                isDeleted: false,
+                plan: {
+                    startTime: '10:00',
+                    sections: [
+                        {
+                            id: 'section-1',
+                            type: 'CULTO',
+                            label: 'Culto',
+                            order: 1,
+                            units: [
+                                {
+                                    clientId: 'outro-1',
+                                    type: 'OUTRO',
+                                    order: 1,
+                                    semitoneTranspose: null,
+                                    arrangementId: null,
+                                    durationMin: 10,
+                                    label: 'Ceia',
+                                    metadata: { description: 'Distribuir o pão e o cálice' }
+                                },
+                                {
+                                    clientId: 'song-1',
+                                    type: 'SONG',
+                                    order: 2,
+                                    semitoneTranspose: 0,
+                                    arrangementId: arrangement.id,
+                                    durationMin: 4,
+                                    label: null,
+                                    metadata: { title: 'Música com comentário (curta)', comment: 'Começar só com violão' },
+                                    arrangement: {
+                                        id: arrangement.id,
+                                        songId: song.id,
+                                        name: 'Service Version',
+                                        key: 'D',
+                                        isDefault: false,
+                                        isDeleted: false,
+                                        isServiceArrangement: true,
+                                        originalArrangementId: arrangement.id,
+                                        youtubeUrl: null,
+                                        audios: [],
+                                        units: [{ content: 'Verse 1', type: 'VERSE', order: 1, notes: null, repeatCount: 1 }]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            })
+        });
+
+        const response = await POST(req);
+        const data = await response.json();
+
+        expect(response.status).toBe(200);
+        const units = data.plan.sections[0].units;
+        expect(units[0]).toMatchObject({ type: 'OUTRO', label: 'Ceia', durationMin: 10, metadata: { description: 'Distribuir o pão e o cálice' } });
+        expect(units[1]).toMatchObject({ type: 'SONG', metadata: { title: 'Música com comentário (curta)', comment: 'Começar só com violão' } });
+    });
+
     it('rejects service without plan or units', async () => {
         const serviceData = {
             title: 'Empty Service',

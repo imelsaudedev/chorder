@@ -16,6 +16,8 @@ import { forwardRef } from "react";
 // (ver ServiceSongUnitView), e referências somem durante a edição de cifra.
 type ServiceArrangementHeaderProps = {
   arrangement: ClientArrangement | null;
+  /** Título mostrado na liturgia (o próprio do item, se houver); sem ele, o cadastrado da música. */
+  title?: string;
   order: number;
   isEditing: boolean;
   isSaving: boolean;
@@ -48,6 +50,7 @@ type ServiceArrangementHeaderProps = {
 const ServiceArrangementHeader = forwardRef<HTMLDivElement, ServiceArrangementHeaderProps>(
 function ServiceArrangementHeader({
   arrangement,
+  title,
   order,
   isEditing,
   isSaving,
@@ -102,7 +105,7 @@ function ServiceArrangementHeader({
         {/* Sempre o mesmo título (mesma fonte, peso e espaçamento): preso, só o corpo diminui. */}
         <Text variant="heading-lg" as="h2" size={isStuck ? "base" : undefined} className="truncate">
           <span>{order}. </span>
-          {arrangement.song.title}
+          {title || arrangement.song.title}
         </Text>
       </div>
 
