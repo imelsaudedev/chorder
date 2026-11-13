@@ -243,6 +243,7 @@ function SongCard({
             Trocar arranjo
           </Button>
         </div>
+        <DurationField value={duration} onChange={setDuration} />
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="song-title" className="text-xs font-medium text-muted-foreground">
             Título nesta liturgia
@@ -256,11 +257,7 @@ function SongCard({
             autoComplete="off"
             className="h-11"
           />
-          <p className="text-xs text-muted-foreground">
-            Só vale nesta liturgia; a música continua com o título cadastrado. Deixe vazio para usar o original.
-          </p>
         </div>
-        <DurationField value={duration} onChange={setDuration} />
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="song-comment" className="text-xs font-medium text-muted-foreground">
             Comentário
@@ -269,7 +266,6 @@ function SongCard({
             id="song-comment"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Ex: começar só com violão, repetir o refrão 2x, entrada da banda no 2º verso..."
             rows={4}
             className="max-h-[40dvh] resize-y"
           />

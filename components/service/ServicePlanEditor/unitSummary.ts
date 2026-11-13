@@ -76,19 +76,13 @@ export function summarizeUnit(
       }
       const songTitle = unit.arrangement?.song?.title ?? null;
       const meta = unit.metadata as SongMeta | null;
-      const customTitle = meta?.title?.trim() || null;
       const title = songTitle ? songDisplayTitle(unit) : null;
       // Sublinha: arranjo (quando tem nome) e tom, já com a transposição do plano.
       const arrangement = unit.arrangement;
       const key = arrangement?.key
         ? transposeChord(arrangement.key, arrangement.key, unit.semitoneTranspose ?? 0)
         : null;
-      // Com título próprio, a sublinha lembra qual é a música cadastrada.
-      const subtitle = [
-        customTitle && customTitle !== songTitle ? `Original: ${songTitle}` : null,
-        arrangement?.name?.trim() || null,
-        key ? `Tom ${key}` : null,
-      ]
+      const subtitle = [arrangement?.name?.trim() || null, key ? `Tom ${key}` : null]
         .filter(Boolean)
         .join(" · ");
       const comment = meta?.comment?.trim() || null;

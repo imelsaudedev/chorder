@@ -154,18 +154,17 @@ describe("título da música só nesta liturgia", () => {
       arrangement: { key: "G", name: null, song: { title: "Grande é o Senhor" } } as never,
     });
 
-  it("usa o título próprio no lugar do cadastrado e lembra o original na sublinha", () => {
+  it("usa o título próprio no lugar do cadastrado, sem mudar a sublinha", () => {
     const u = withSong({ title: " Grande é o Senhor (versão curta) " });
     const s = summarizeUnit(u, "Música");
     expect(s.title).toBe("Grande é o Senhor (versão curta)");
-    expect(s.subtitle).toBe("Original: Grande é o Senhor · Tom G");
+    expect(s.subtitle).toBe("Tom G");
     expect(songDisplayTitle(u)).toBe("Grande é o Senhor (versão curta)");
   });
 
-  it("sem título próprio (ou igual ao original) mantém o cadastrado e não repete o original", () => {
+  it("sem título próprio mantém o cadastrado", () => {
     expect(summarizeUnit(withSong(null), "Música").title).toBe("Grande é o Senhor");
     expect(songDisplayTitle(withSong({ title: "  " }))).toBe("Grande é o Senhor");
-    expect(summarizeUnit(withSong({ title: "Grande é o Senhor" }), "Música").subtitle).toBe("Tom G");
   });
 
   it("título próprio e comentário convivem", () => {
