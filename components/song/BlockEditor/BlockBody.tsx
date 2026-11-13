@@ -929,11 +929,11 @@ function CaretLine({
                     id={`field-key-${lineKeyId}`}
                     value={fieldKey}
                     onChange={(e) => onFieldKeyChange(e.target.value)}
-                    className="h-6 rounded border border-zinc-200 bg-white px-1 text-xs font-mono font-semibold text-zinc-800 cursor-pointer"
+                    className="h-7 rounded border border-zinc-200 bg-white px-1.5 text-xs font-mono font-semibold text-zinc-800 cursor-pointer"
                   >
                     {fieldOptions.map((key) => (
                       <option key={key} value={key}>
-                        {key === baseKey ? `${key} (tom da cifra)` : key}
+                        {key}
                       </option>
                     ))}
                   </select>

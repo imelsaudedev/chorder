@@ -27,7 +27,7 @@ describe("BlockBody — campo harmônico no modal de acordes", () => {
     render(<BlockBody content="[G]Aleluia" baseKey="G" onChangeContent={vi.fn()} />);
     const select = (await openChordPanel(user)) as HTMLSelectElement;
     expect(select.value).toBe("G");
-    expect(screen.getByRole("option", { name: "G (tom da cifra)" })).toBeDefined();
+    expect(screen.getByRole("option", { name: "G" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Em" })).toBeDefined(); // VIm de G
   });
 
