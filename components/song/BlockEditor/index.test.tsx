@@ -30,6 +30,15 @@ function getBlocks(): HTMLElement[] {
 }
 
 describe("BlockEditor", () => {
+  it("colchete aberto no meio da digitação não derruba o editor", () => {
+    const units: ClientSongUnit[] = [
+      { type: "VERSE", content: "[D]ok", order: 1, notes: null, repeatCount: 1 },
+      { type: "CHORUS", content: "[", order: 2, notes: null, repeatCount: 1 },
+    ];
+    expect(() => render(<BlockEditor units={units} baseKey="D" onChangeUnits={vi.fn()} />)).not.toThrow();
+    expect(screen.getAllByRole("button", { name: /^UnitTypes\./ })).toHaveLength(2);
+  });
+
   it("renderiza um bloco por unidade, com a numeração por tipo", () => {
     render(<BlockEditor units={makeUnits(["INTRO", "VERSE", "VERSE"])} baseKey="D" onChangeUnits={vi.fn()} />);
     expect(screen.getByRole("button", { name: "UnitTypes.INTRO 1" })).toBeDefined();
