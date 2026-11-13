@@ -40,7 +40,7 @@ export type ServiceTimeline = {
 
 const RAIL_COLOR: Record<TimelineTone, string> = {
   upcoming: "bg-secondary/40",
-  past: "bg-zinc-300",
+  past: "bg-border-strong",
 };
 
 /**
@@ -175,7 +175,7 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
               // culto realizado: ponto cheio; culto por vir: ponto vazado
               timeline.tone === "upcoming"
                 ? "border-2 border-secondary bg-background"
-                : "bg-zinc-400",
+                : "bg-faint-foreground",
               timeline.highlight
                 ? "top-[19px] size-4 shadow-[0_0_0_5px] shadow-secondary/20"
                 : "top-[21px] size-3"

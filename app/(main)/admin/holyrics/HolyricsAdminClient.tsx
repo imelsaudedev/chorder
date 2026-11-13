@@ -219,7 +219,7 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
   return (
     <div className="space-y-6">
       {/* Token e Host */}
-      <div className="border rounded-lg p-4 bg-zinc-50">
+      <div className="border rounded-lg p-4 bg-surface-subtle">
         <div className="flex items-center justify-between">
           <div>
             <span className="font-medium text-sm">Configuração Holyrics</span>
@@ -408,7 +408,7 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
                         <label className="flex items-center gap-2">
                           <span>Arranjo a exportar:</span>
                           <select
-                            className="border rounded px-1.5 py-0.5 text-xs bg-white"
+                            className="border rounded px-1.5 py-0.5 text-xs bg-background"
                             value={getSelectedArrangement(song)?.id}
                             onChange={(e) =>
                               setSelectedArrangementIds((prev) => ({ ...prev, [song.slug]: Number(e.target.value) }))
@@ -515,7 +515,7 @@ function WizardCard({ song, status, error, index, total, manualId, selectedArran
               <label className="flex items-center gap-2 text-sm">
                 <span className="text-muted-foreground">Arranjo a exportar:</span>
                 <select
-                  className="border rounded px-1.5 py-1 text-sm bg-white"
+                  className="border rounded px-1.5 py-1 text-sm bg-background"
                   value={selectedArrangementId}
                   onChange={(e) => onArrangementChange(Number(e.target.value))}
                 >
@@ -558,7 +558,7 @@ function WizardCard({ song, status, error, index, total, manualId, selectedArran
             </p>
             <div className="flex gap-2">
               <input
-                className="border rounded px-2 py-1 text-xs font-mono flex-1 min-w-0 bg-white"
+                className="border rounded px-2 py-1 text-xs font-mono flex-1 min-w-0 bg-background"
                 placeholder="ID do Holyrics"
                 value={manualId}
                 onChange={(e) => onManualIdChange(e.target.value)}

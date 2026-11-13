@@ -49,9 +49,9 @@ const TextInput = forwardRef<HTMLTextAreaElement, TextInputProps>(function TextI
 
   const classNames = [
     'border',
-    'border-gray-300',
-    'bg-gray-50',
-    'text-gray-900',
+    'border-border-strong',
+    'bg-surface-subtle',
+    'text-foreground',
     'grow',
     'rounded-md',
     'text-sm',

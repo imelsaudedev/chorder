@@ -40,7 +40,7 @@ export default function ArrangementInfoForm({
   const t = useTranslations();
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 bg-zinc-50 border-b border-zinc-200">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 bg-surface-subtle border-b border-border">
 
       {/* Nome · Tom · | · YouTube · Áudio */}
       <div className="flex flex-wrap gap-3 items-end justify-start">
@@ -149,7 +149,7 @@ function YoutubeField({ fieldPrefix, arrangementId }: { fieldPrefix: string; arr
           variant="outline"
           className={`gap-2 ${hasUrl ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100" : ""}`}
         >
-          <Play size={15} className={hasUrl ? "text-red-500" : "text-zinc-400"} />
+          <Play size={15} className={hasUrl ? "text-red-500" : "text-faint-foreground"} />
           YouTube
         </Button>
       </DialogTrigger>
@@ -239,7 +239,7 @@ function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
           variant="outline"
           className={`gap-2 ${hasAudios ? "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100" : ""}`}
         >
-          <Music size={15} className={hasAudios ? "text-emerald-600" : "text-zinc-400"} />
+          <Music size={15} className={hasAudios ? "text-emerald-600" : "text-faint-foreground"} />
           Áudio{hasAudios ? ` (${fields.length})` : ""}
         </Button>
       </DialogTrigger>
@@ -263,7 +263,7 @@ function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
                   <button
                     type="button"
                     onClick={() => handleRemove(idx)}
-                    className="text-zinc-400 hover:text-red-500 transition-colors shrink-0"
+                    className="text-faint-foreground hover:text-red-500 transition-colors shrink-0"
                   >
                     <Trash2 size={15} />
                   </button>
