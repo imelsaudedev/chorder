@@ -18,14 +18,14 @@ import {
   toggleChordComment,
   tokenIndexForOrdinal,
 } from "@/chopro/block-model";
-import { ChordVariant, applyEnharmonicToGrid, buildChordGrid } from "@/chopro/chord-grid";
+import { ChordVariant, fieldKeyOptions, gridForField } from "@/chopro/chord-grid";
 import { isValidChordName, parseChordPro } from "@/chopro/music";
 import { COMMENT_CHIPS } from "@/components/song/BlockEditor/commentChips";
 import { CHORD_TEXT_CLASS, COMMENT_LABEL_TEXT_CLASS } from "@/components/song/ChordProLine/chord-item-tokens";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { ChevronUp, PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 // Corpo visual editável — rearquitetado (achado em teste manual: "os
 // acordes continuam encavalando... um acorde maior empurra o outro pra
@@ -345,6 +345,10 @@ type CaretLineProps = {
   model: BlockModel;
   onMutate: (next: BlockModel) => void;
   baseKey: string;
+  // Campo harmônico da grade do modal: começa no tom da cifra e pode ser trocado no próprio
+  // modal, sem alterar o tom da cifra (só muda quais acordes a grade oferece).
+  fieldKey: string;
+  onFieldKeyChange: (key: string) => void;
   enharmonicPreference?: "sharp" | "flat" | null;
   // Fundo do chip de acorde E convenção (texto sempre preto, igual a view
   // real — ver stripTextColor). A view real não usa nenhum fundo na
@@ -361,10 +365,13 @@ function CaretLine({
   model,
   onMutate,
   baseKey,
+  fieldKey,
+  onFieldKeyChange,
   enharmonicPreference = null,
   chipClassName,
   blockWidth,
 }: CaretLineProps) {
+  const lineKeyId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const chipElRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -450,9 +457,10 @@ function CaretLine({
     [items]
   );
   const grid = useMemo(
-    () => applyEnharmonicToGrid(buildChordGrid(baseKey), enharmonicPreference),
-    [baseKey, enharmonicPreference]
+    () => gridForField(fieldKey, baseKey, enharmonicPreference),
+    [fieldKey, baseKey, enharmonicPreference]
   );
+  const fieldOptions = useMemo(() => fieldKeyOptions(baseKey), [baseKey]);
 
   const context: PositionContext | null = useMemo(() => {
     if (!toolbar) return null;
@@ -912,6 +920,26 @@ function CaretLine({
           >
             {context && (
               <>
+                {/* Campo harmônico da grade: o tom da cifra por padrão, trocável só aqui (não muda a cifra). */}
+                {/* Mesma grade de 4 colunas dos botões de acordes: o seletor ocupa uma coluna, com a largura deles. */}
+                <div className="grid grid-cols-4 items-center gap-1 border-b pb-1">
+                  <label htmlFor={`field-key-${lineKeyId}`} className="col-span-3 text-[10px] uppercase tracking-wide text-zinc-500">
+                    Campo harmônico
+                  </label>
+                  <select
+                    id={`field-key-${lineKeyId}`}
+                    value={fieldKey}
+                    onChange={(e) => onFieldKeyChange(e.target.value)}
+                    className="h-7 w-full min-w-0 rounded border border-zinc-200 bg-white px-1.5 text-xs font-mono font-semibold text-zinc-800 cursor-pointer"
+                  >
+                    {fieldOptions.map((key) => (
+                      <option key={key} value={key}>
+                        {key}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className="grid grid-cols-4 gap-1">
                   {grid.flatMap((row) => [row.triad, row.seventh]).map((value) => {
                     const disabled = context.chordTokenIndex === null && !context.insertAt;
@@ -1179,6 +1207,10 @@ export default function BlockBody({
   const t = useTranslations();
   const rootRef = useRef<HTMLDivElement>(null);
   const [blockWidth, setBlockWidth] = useState<number | null>(null);
+  // Campo harmônico escolhido no modal de acordes, compartilhado pelas linhas do bloco. Volta ao
+  // tom da cifra quando ele muda.
+  const [fieldKey, setFieldKey] = useState(baseKey);
+  useEffect(() => setFieldKey(baseKey), [baseKey]);
 
   // Critério de aceitação 8: o painel do acorde/convenção tem a largura
   // exata do bloco (com teto, ver CHORD_MODAL_MAX_WIDTH). Medida uma vez
@@ -1224,6 +1256,8 @@ export default function BlockBody({
           model={model}
           onMutate={handleMutate}
           baseKey={baseKey}
+          fieldKey={fieldKey}
+          onFieldKeyChange={setFieldKey}
           enharmonicPreference={enharmonicPreference}
           chipClassName={chipClassName}
           blockWidth={blockWidth}
