@@ -16,7 +16,7 @@ export default function OrgHeader() {
     if (logo.type === "initials") {
       return (
         <div className="w-12 h-12 sm:w-16 sm:h-16 bg-secondary rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-lg sm:text-xl">
+          <span className="text-secondary-foreground font-bold text-lg sm:text-xl">
             {logo.value}
           </span>
         </div>

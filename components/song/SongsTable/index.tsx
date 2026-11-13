@@ -21,7 +21,7 @@ const PAD = "px-4 @[560px]:px-5 @[860px]:px-6";
 function ColumnHeader({ count }: { count: number }) {
   return (
     <div
-      className={`grid items-center gap-x-4 bg-zinc-50 py-3 text-sm font-medium text-muted-foreground ${PAD} grid-cols-[minmax(0,1fr)] @[560px]:gap-x-5 @[560px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_3.5rem_2.5rem] @[860px]:grid-cols-[minmax(0,2.3fr)_minmax(0,2.4fr)_minmax(0,1.6fr)_11rem_3.5rem_2.5rem]`}
+      className={`grid items-center gap-x-4 bg-surface-subtle py-3 text-sm font-medium text-muted-foreground ${PAD} grid-cols-[minmax(0,1fr)] @[560px]:gap-x-5 @[560px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_3.5rem_2.5rem] @[860px]:grid-cols-[minmax(0,2.3fr)_minmax(0,2.4fr)_minmax(0,1.6fr)_11rem_3.5rem_2.5rem]`}
     >
       <span>
         {count} música{count === 1 ? "" : "s"}
@@ -43,7 +43,7 @@ function LetterBand({ letter }: { letter: string }) {
       id={letter}
       data-letter-band
       style={{ top: "var(--songs-sticky-top, 0px)" }}
-      className={`sticky z-20 flex h-8 items-center bg-zinc-50 text-sm font-semibold uppercase text-secondary ${PAD}`}
+      className={`sticky z-20 flex h-8 items-center bg-surface-subtle text-sm font-semibold uppercase text-secondary ${PAD}`}
     >
       {letter.toUpperCase()}
     </div>

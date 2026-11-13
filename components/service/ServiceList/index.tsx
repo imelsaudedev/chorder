@@ -46,7 +46,7 @@ function GroupBand({ label, tone, first, rail = true }: { label: string; tone: T
       className={cn(
         ROW_GRID,
         "h-8 items-center text-sm font-semibold uppercase text-secondary",
-        tone === "upcoming" ? "bg-secondary/10" : "bg-zinc-50"
+        tone === "upcoming" ? "bg-secondary/10" : "bg-surface-subtle"
       )}
     >
       {/* a faixa do primeiro mês não leva trilho: a linha começa no primeiro ponto */}
@@ -171,7 +171,7 @@ export default function ServiceList({ services }: ServiceListProps) {
             ) : (
               <div className="divide-y divide-border">
                 {/* cabeçalho de colunas, como na lista de músicas: no estreito mostra o total */}
-                <div className={cn(ROW_GRID, "items-center bg-zinc-50 py-3 text-sm font-medium text-muted-foreground")}>
+                <div className={cn(ROW_GRID, "items-center bg-surface-subtle py-3 text-sm font-medium text-muted-foreground")}>
                   <span className="col-span-3 [grid-row:1] @[720px]:hidden">
                     {t("totalServices", { count: visible.total })}
                   </span>

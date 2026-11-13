@@ -38,6 +38,20 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
 
+  /* Neutros que não tinham papel semântico (antes: zinc-50/100/200/300/400 soltos nas telas). */
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-strong: var(--surface-strong);
+  --color-border-strong: var(--border-strong);
+  --color-faint-foreground: var(--faint-foreground);
+
+  /* Superfície invertida (barra do player de mídia: escura nos dois temas). */
+  --color-surface-inverse: var(--surface-inverse);
+  --color-surface-inverse-hover: var(--surface-inverse-hover);
+  --color-on-inverse: var(--on-inverse);
+  --color-on-inverse-muted: var(--on-inverse-muted);
+  --color-border-inverse: var(--border-inverse);
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -161,6 +175,20 @@
   --input: hsl(0 0% 89.8%);
   --ring: hsl(221 83% 53%);
 
+  /* Neutros de superfície e texto fraco (claro = zinc-50/100/200/300/400 de antes). */
+  --surface-subtle: #fafafa; /* faixas, cabeçalhos de lista, hover leve */
+  --surface-muted: #f4f4f5; /* hover, chips, fundo de controle */
+  --surface-strong: #e4e4e7; /* esqueleto de carregamento, controle segmentado */
+  --border-strong: #d4d4d8; /* borda de campo, trilho da linha do tempo */
+  --faint-foreground: #a1a1aa; /* ícone e texto fraco (abaixo do muted-foreground) */
+
+  /* Barra do player: escura nos dois temas. */
+  --surface-inverse: #18181b;
+  --surface-inverse-hover: #27272a;
+  --on-inverse: #d4d4d8;
+  --on-inverse-muted: #71717a;
+  --border-inverse: #52525b;
+
   --radius: 0.5rem;
 }
 
@@ -192,6 +220,19 @@
   --border: hsl(224 32.6% 17.5%);
   --input: hsl(224 32.6% 17.5%);
   --ring: hsl(213 94% 68%);
+
+  /* Provisório até a etapa 3 (paleta de docs/design-system.md, 6.2). */
+  --surface-subtle: #111a2e;
+  --surface-muted: #18213a;
+  --surface-strong: #1f2940;
+  --border-strong: #33405a;
+  --faint-foreground: #6b7a93;
+
+  --surface-inverse: #05080f;
+  --surface-inverse-hover: #121a2b;
+  --on-inverse: #d4d4d8;
+  --on-inverse-muted: #8693a6;
+  --border-inverse: #33405a;
 }
 
 @layer base {
@@ -199,7 +240,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-white text-foreground;
+    @apply bg-background text-foreground;
   }
 }
 

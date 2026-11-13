@@ -62,7 +62,7 @@ export default function StageRoteiroItem({ unit, fontSize, spaceBefore = false, 
   const style = fontSize ? { fontSize } : undefined;
   // Em um conjunto de itens o vão é pequeno; entre uma música e o conjunto, 2em.
   const spacing = `${spaceBefore ? "mt-[2em]" : "mt-3"} ${spaceAfter ? "mb-[2em]" : "mb-3"}`;
-  const box = `rounded-lg border border-slate-200 bg-slate-50 px-[1em] leading-snug ${spacing}`;
+  const box = `rounded-lg border border-border bg-surface-subtle px-[1em] leading-snug ${spacing}`;
 
   const typeLabel = (
     <span className={`flex shrink-0 items-center gap-[0.4em] font-bold uppercase tracking-wider ${TYPE_SIZE} ${config?.color ?? "text-muted-foreground"}`}>

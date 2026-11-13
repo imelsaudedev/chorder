@@ -98,7 +98,7 @@ export default function ArrangementForm({
             <button
               type="button"
               onClick={() => setMetaModalOpen(true)}
-              className="text-left w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-5 bg-zinc-200/60 hover:bg-zinc-200/80 transition-colors"
+              className="text-left w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-5 bg-surface-strong/60 hover:bg-surface-strong/80 transition-colors"
             >
               <div className="flex items-center gap-2 min-w-0">
                 <Text variant="heading-lg" className="truncate">

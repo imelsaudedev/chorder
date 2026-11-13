@@ -230,7 +230,7 @@ export default function BlockShell({
           filho flex) deixa o campo encolher/quebrar dentro do espaço real
           do bloco em vez de empurrar os vizinhos pra fora dele. */}
       {notesExpanded && (
-        <div className={`flex items-center gap-1 rounded px-2 py-1 mb-2 border ${colorClasses.border} bg-white`}>
+        <div className={`flex items-center gap-1 rounded px-2 py-1 mb-2 border ${colorClasses.border} bg-background`}>
           <MessageSquareIcon size={11} className={`shrink-0 ${colorClasses.text}`} />
           <span className="relative flex-1 min-w-0 inline-flex items-center">
             <span className="invisible whitespace-pre-wrap break-words text-xs pointer-events-none" aria-hidden>
@@ -287,7 +287,7 @@ export default function BlockShell({
             onClick={() => setTextMode((v) => !v)}
             aria-label={textMode ? "Editar visual" : "Editar como texto"}
             title={textMode ? "Editar visual" : "Editar como texto"}
-            className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0 cursor-pointer"
+            className="p-1 text-faint-foreground hover:text-muted-foreground rounded transition-colors shrink-0 cursor-pointer"
           >
             {textMode ? <Pointer size={14} /> : <Type size={14} />}
           </button>
@@ -298,7 +298,7 @@ export default function BlockShell({
             <button
               type="button"
               aria-label="Mais opções do bloco"
-              className="p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors shrink-0 cursor-pointer"
+              className="p-1 text-faint-foreground hover:text-muted-foreground rounded transition-colors shrink-0 cursor-pointer"
             >
               <MoreVertical size={14} />
             </button>
@@ -362,7 +362,7 @@ export default function BlockShell({
             <div className="@lg:flex @lg:flex-col">
               <TextInput
                 id={contentId}
-                className="resize-none @lg:flex-1 bg-white font-mono"
+                className="resize-none @lg:flex-1 bg-background font-mono"
                 onChange={handleChangeChordpro}
                 value={unit.content}
                 minRows={1}

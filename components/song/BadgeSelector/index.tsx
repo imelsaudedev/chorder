@@ -11,7 +11,7 @@ export default function BadgeSelector({ value, onChange }: BadgeSelectorProps) {
   const t = useTranslations();
 
   return (
-    <div className="inline-flex flex-wrap gap-[1px] rounded bg-zinc-200 p-[1px]">
+    <div className="inline-flex flex-wrap gap-[1px] rounded bg-surface-strong p-[1px]">
       {SONG_UNIT_TYPES.map((type) => {
         const colorClasses = unitColorClasses[type];
 
@@ -27,7 +27,7 @@ export default function BadgeSelector({ value, onChange }: BadgeSelectorProps) {
               ${
                 type === value
                   ? `${colorClasses.circleBackground} text-white`
-                  : "bg-white text-zinc-600 hover:bg-zinc-100"
+                  : "bg-background text-muted-foreground hover:bg-surface-muted"
               }`}
           >
             {t(`UnitTypes.${type}`)}

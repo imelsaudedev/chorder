@@ -24,13 +24,13 @@ export default function SongListSkeleton() {
             {widths.map((titleWidth, idx) => (
               <div
                 key={`row-${idx}`}
-                className="flex items-center gap-3 py-3 px-1 border-b border-zinc-100"
+                className="flex items-center gap-3 py-3 px-1 border-b border-border/50"
               >
                 <div className="flex-1 space-y-1.5">
-                  <Skeleton className={`h-4 ${titleWidth} bg-zinc-200`} />
-                  <Skeleton className="h-3 w-1/4 bg-zinc-100" />
+                  <Skeleton className={`h-4 ${titleWidth} bg-surface-strong`} />
+                  <Skeleton className="h-3 w-1/4 bg-surface-muted" />
                 </div>
-                <Skeleton className="h-8 w-8 rounded shrink-0 bg-zinc-100" />
+                <Skeleton className="h-8 w-8 rounded shrink-0 bg-surface-muted" />
               </div>
             ))}
           </Fragment>

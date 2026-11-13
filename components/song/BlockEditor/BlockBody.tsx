@@ -923,14 +923,14 @@ function CaretLine({
                 {/* Campo harmônico da grade: o tom da cifra por padrão, trocável só aqui (não muda a cifra). */}
                 {/* Mesma grade de 4 colunas dos botões de acordes: o seletor ocupa uma coluna, com a largura deles. */}
                 <div className="grid grid-cols-4 items-center gap-1 border-b pb-1">
-                  <label htmlFor={`field-key-${lineKeyId}`} className="col-span-3 text-[10px] uppercase tracking-wide text-zinc-500">
+                  <label htmlFor={`field-key-${lineKeyId}`} className="col-span-3 text-[10px] uppercase tracking-wide text-muted-foreground">
                     Campo harmônico
                   </label>
                   <select
                     id={`field-key-${lineKeyId}`}
                     value={fieldKey}
                     onChange={(e) => onFieldKeyChange(e.target.value)}
-                    className="h-7 w-full min-w-0 rounded border border-zinc-200 bg-white px-1.5 text-xs font-mono font-semibold text-zinc-800 cursor-pointer"
+                    className="h-7 w-full min-w-0 rounded border border-border bg-background px-1.5 text-xs font-mono font-semibold text-foreground cursor-pointer"
                   >
                     {fieldOptions.map((key) => (
                       <option key={key} value={key}>
@@ -952,8 +952,8 @@ function CaretLine({
                         className={[
                           "h-7 rounded text-center text-xs font-mono font-semibold border transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer",
                           value === currentChordValue
-                            ? "bg-zinc-800 border-zinc-800 text-white"
-                            : "bg-white border-zinc-200 shadow-xs hover:bg-zinc-50 text-zinc-800",
+                            ? "bg-primary border-primary text-primary-foreground"
+                            : "bg-background border-border shadow-xs hover:bg-surface-subtle text-foreground",
                         ].join(" ")}
                       >
                         {value}
@@ -975,7 +975,7 @@ function CaretLine({
                           onClick={() => setGridExpanded((v) => !v)}
                           aria-label={gridExpanded ? "Menos acordes" : "Mais acordes"}
                           title={gridExpanded ? "Menos acordes" : "Mais acordes"}
-                          className="p-1 rounded text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                          className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-surface-muted disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                         >
                           {gridExpanded ? <ChevronUp size={14} /> : <PlusIcon size={14} />}
                         </button>
@@ -1005,12 +1005,12 @@ function CaretLine({
                                 className={[
                                   "h-7 min-w-10 px-1.5 rounded text-center text-xs font-mono font-semibold border transition-colors cursor-pointer",
                                   cell.chord === currentChordValue
-                                    ? "bg-zinc-800 border-zinc-800 text-white"
+                                    ? "bg-primary border-primary text-primary-foreground"
                                     : cell.variant === "secdom"
                                       ? "bg-amber-50 border-amber-200 hover:bg-amber-100 text-amber-800"
                                       : cell.variant === "aem"
-                                        ? "bg-white border-dashed border-violet-200 hover:bg-violet-50 text-violet-700"
-                                        : "bg-white border-dashed border-zinc-300 hover:bg-zinc-50 text-zinc-700",
+                                        ? "bg-background border-dashed border-violet-200 hover:bg-violet-50 text-violet-700"
+                                        : "bg-background border-dashed border-border-strong hover:bg-surface-subtle text-foreground",
                                 ].join(" ")}
                               >
                                 {cell.chord}
@@ -1040,13 +1040,13 @@ function CaretLine({
                               }
                             }}
                             placeholder="Outro acorde (ex: Dsus4)"
-                            className="flex-1 min-w-0 text-xs font-mono border border-zinc-200 rounded px-1.5 py-1 disabled:opacity-30"
+                            className="flex-1 min-w-0 text-xs font-mono border border-border rounded px-1.5 py-1 disabled:opacity-30"
                           />
                           <button
                             type="button"
                             disabled={chordSectionDisabled}
                             onClick={submitCustomChord}
-                            className="text-xs px-2 py-1 rounded bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                            className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                           >
                             OK
                           </button>
@@ -1069,7 +1069,7 @@ function CaretLine({
                         onClick={() => handlePickComment(c)}
                         className={[
                           "text-[0.85em] rounded-sm px-1.5 py-0.5 border transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer",
-                          active ? "bg-zinc-800 border-zinc-800 text-white" : "border-zinc-200 hover:bg-zinc-100",
+                          active ? "bg-primary border-primary text-primary-foreground" : "border-border hover:bg-surface-muted",
                         ].join(" ")}
                       >
                         {c}
@@ -1084,7 +1084,7 @@ function CaretLine({
                         type="button"
                         disabled={commentSectionDisabled}
                         onClick={() => setCustomCommentOpen((v) => !v)}
-                        className="text-[0.85em] text-zinc-500 hover:text-zinc-700 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                        className="text-[0.85em] text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                       >
                         outro...
                       </button>
@@ -1104,12 +1104,12 @@ function CaretLine({
                         }
                       }}
                       placeholder="Ex: Só bateria"
-                      className="flex-1 min-w-0 text-xs border border-zinc-200 rounded px-1.5 py-1"
+                      className="flex-1 min-w-0 text-xs border border-border rounded px-1.5 py-1"
                     />
                     <button
                       type="button"
                       onClick={submitCustomComment}
-                      className="text-xs px-2 py-1 rounded bg-zinc-800 text-white hover:bg-zinc-700 cursor-pointer"
+                      className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
                     >
                       OK
                     </button>
@@ -1130,7 +1130,7 @@ function CaretLine({
                           !canMoveChord(model, context.commentTokenIndex, "left", "comment")
                         }
                         onClick={() => handleMoveComment("left" as MoveDirection)}
-                        className="px-2 py-1 rounded disabled:opacity-30 disabled:pointer-events-none hover:bg-zinc-100 cursor-pointer"
+                        className="px-2 py-1 rounded disabled:opacity-30 disabled:pointer-events-none hover:bg-surface-muted cursor-pointer"
                       >
                         ◀
                       </button>
@@ -1141,7 +1141,7 @@ function CaretLine({
                           !canMoveChord(model, context.commentTokenIndex, "right", "comment")
                         }
                         onClick={() => handleMoveComment("right" as MoveDirection)}
-                        className="px-2 py-1 rounded disabled:opacity-30 disabled:pointer-events-none hover:bg-zinc-100 cursor-pointer"
+                        className="px-2 py-1 rounded disabled:opacity-30 disabled:pointer-events-none hover:bg-surface-muted cursor-pointer"
                       >
                         ▶
                       </button>
@@ -1152,7 +1152,7 @@ function CaretLine({
                         type="button"
                         disabled={context.chordTokenIndex === null || !canMoveChord(model, context.chordTokenIndex, "left")}
                         onClick={() => handleMove("left" as MoveDirection)}
-                        className="px-2 py-1 rounded disabled:opacity-30 disabled:pointer-events-none hover:bg-zinc-100 cursor-pointer"
+                        className="px-2 py-1 rounded disabled:opacity-30 disabled:pointer-events-none hover:bg-surface-muted cursor-pointer"
                       >
                         ◀
                       </button>
@@ -1160,7 +1160,7 @@ function CaretLine({
                         type="button"
                         disabled={context.chordTokenIndex === null || !canMoveChord(model, context.chordTokenIndex, "right")}
                         onClick={() => handleMove("right" as MoveDirection)}
-                        className="px-2 py-1 rounded disabled:opacity-30 disabled:pointer-events-none hover:bg-zinc-100 cursor-pointer"
+                        className="px-2 py-1 rounded disabled:opacity-30 disabled:pointer-events-none hover:bg-surface-muted cursor-pointer"
                       >
                         ▶
                       </button>
@@ -1201,8 +1201,8 @@ export default function BlockBody({
   onChangeContent,
   baseKey,
   enharmonicPreference = null,
-  commentClass = "text-zinc-600 border-zinc-600",
-  chipClassName = "bg-zinc-100 text-zinc-700",
+  commentClass = "text-muted-foreground border-muted-foreground",
+  chipClassName = "bg-surface-muted text-foreground",
 }: BlockBodyProps) {
   const t = useTranslations();
   const rootRef = useRef<HTMLDivElement>(null);

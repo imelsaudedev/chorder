@@ -46,7 +46,7 @@ export default function NavBar() {
     <>
       {/* Sidebar — sempre visível em sm+ nas listas, só em lg+ nas views */}
       <nav className={clsx(
-        "flex-col fixed left-0 top-0 h-full w-20 bg-zinc-50 border-r border-border",
+        "flex-col fixed left-0 top-0 h-full w-20 bg-surface-subtle border-r border-border",
         bottomNavVisible ? "hidden sm:flex" : "hidden lg:flex"
       )}>
         <div className="flex flex-col items-center pt-6 sm:pt-8 gap-6">
@@ -56,7 +56,7 @@ export default function NavBar() {
 
       {/* Bottom nav — só nas páginas de lista e só no mobile */}
       {bottomNavVisible && (
-        <nav className="sm:hidden fixed bottom-0 left-0 w-full z-40 bg-white/80 backdrop-blur-lg shadow-md border-t border-gray-100">
+        <nav className="sm:hidden fixed bottom-0 left-0 w-full z-40 bg-background/80 backdrop-blur-lg shadow-md border-t border-border/50">
           <div className="flex justify-around py-3">
             {items}
           </div>

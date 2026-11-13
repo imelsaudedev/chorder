@@ -7,12 +7,12 @@ export type TagSize = "xs" | "sm";
 
 // Chip: fundo claro, texto escuro da mesma família, sem borda (referência Flowbite).
 const variantClasses: Record<TagVariant, string> = {
-  default: "bg-zinc-200 text-zinc-800",
+  default: "bg-surface-strong text-foreground",
   success: "bg-emerald-100 text-emerald-800",
   warning: "bg-amber-100 text-amber-800",
   error:   "bg-red-100 text-red-800",
   info:    "bg-blue-100 text-blue-800",
-  muted:   "bg-zinc-100 text-zinc-600",
+  muted:   "bg-surface-muted text-muted-foreground",
 };
 
 const sizeClasses: Record<TagSize, string> = {
