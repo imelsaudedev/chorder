@@ -48,3 +48,31 @@ export function buildChordGrid(key: string): ChordRow[] {
     romanLabel: row.romanLabel,
   }));
 }
+
+// Tons oferecidos no seletor de campo harmônico do modal de acordes (grafias usuais, uma por semitom).
+const FIELD_KEYS = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+
+/**
+ * Opções do seletor de campo harmônico: os 12 tons e, se o tom da cifra não estiver entre eles
+ * (ex.: "C#", "Gb", ou um tom menor), ele entra primeiro, para sempre dar para voltar a ele.
+ */
+export function fieldKeyOptions(baseKey: string): string[] {
+  return baseKey && !FIELD_KEYS.includes(baseKey) ? [baseKey, ...FIELD_KEYS] : FIELD_KEYS;
+}
+
+/**
+ * Grade do modal para o campo harmônico escolhido. No tom da cifra vale a preferência de grafia
+ * da leitura; em outro tom, a grafia segue o próprio tom escolhido ("F#" em sustenidos, "Db" em bemóis).
+ */
+export function gridForField(
+  fieldKey: string,
+  baseKey: string,
+  enharmonicPreference: "sharp" | "flat" | null
+): ChordRow[] {
+  let preference = enharmonicPreference;
+  if (fieldKey !== baseKey) {
+    if (fieldKey.includes("#")) preference = "sharp";
+    else if (fieldKey.length > 1 && fieldKey.endsWith("b")) preference = "flat";
+  }
+  return applyEnharmonicToGrid(buildChordGrid(fieldKey), preference);
+}
