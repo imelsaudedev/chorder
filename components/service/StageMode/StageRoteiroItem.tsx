@@ -10,6 +10,7 @@ const TYPE_LABELS: Record<string, string> = {
   LEITURA: "Leitura",
   AVISOS: "Avisos",
   SERMAO: "Sermão",
+  OUTRO: "Outro",
 };
 
 export function roteiroTypeLabel(unit: ClientServiceUnit): string {

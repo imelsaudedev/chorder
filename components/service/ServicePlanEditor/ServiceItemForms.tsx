@@ -26,7 +26,7 @@ import {
 import { GripVertical, Minus, Plus, Trash2 } from "lucide-react";
 import { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import { usePlanMode } from "./planMode";
-import { AvisosMeta, FalaMeta, LeituraMeta, SermaoMeta } from "./unitSummary";
+import { AvisosMeta, FalaMeta, LeituraMeta, OutroMeta, SermaoMeta } from "./unitSummary";
 
 // Formulários de edição por tipo de item (exceto Música, que tem fluxo
 // próprio de busca em ServiceItemDrawer). Adicionar e editar são o mesmo
@@ -429,6 +429,65 @@ export const FalaUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps & { uni
               ? "Motivos de oração, texto a ser lido ou observações..."
               : "Roteiro da fala, pontos que não podem faltar ou observações..."
           }
+          rows={9}
+        />
+      </FormShell>
+    );
+  }
+);
+
+// --- Outro ---
+
+// Item genérico: título (o que torna o item útil), duração e uma descrição livre.
+export const OutroUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
+  function OutroUnitForm({ unit, isNew, onUpdate, onDiscard, onDone }, ref) {
+    const existingMeta = unit.metadata as OutroMeta | null;
+
+    const [label, setLabel] = useState(unit.label ?? "");
+    const [description, setDescription] = useState(existingMeta?.description ?? "");
+    const [duration, setDuration] = useState(
+      unit.durationMin != null ? String(unit.durationMin) : ""
+    );
+    const [saved, setSaved] = useState(false);
+    const mode = usePlanMode();
+
+    useImperativeHandle(ref, () => ({
+      discardIfBlank: () => {
+        if (!isNew || saved || mode === "template") return;
+        if (!label.trim() && !description.trim() && !duration) onDiscard();
+      },
+    }));
+
+    function buildChanges(): Partial<ClientServiceUnit> {
+      const metadata = { description: description.trim() || null };
+      return { label: label.trim() || null, metadata, durationMin: parseDuration(duration) };
+    }
+
+    const commit = useLiveCommit(buildChanges, onUpdate);
+
+    function handleSave() {
+      setSaved(true);
+      commit();
+      onDone();
+    }
+
+    return (
+      <FormShell onSubmit={handleSave}>
+        <FieldWithDuration duration={duration} onDurationChange={setDuration}>
+          <TextField
+            label="Título"
+            required={mode !== "template"}
+            value={label}
+            onChange={setLabel}
+            placeholder="Ex: Ceia, Batismo, Vídeo, Dinâmica..."
+            autoFocus
+          />
+        </FieldWithDuration>
+        <AreaField
+          label="Descrição"
+          value={description}
+          onChange={setDescription}
+          placeholder="Detalhes, quem conduz ou observações..."
           rows={9}
         />
       </FormShell>

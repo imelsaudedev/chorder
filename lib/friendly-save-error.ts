@@ -12,6 +12,7 @@ const UNIT_LABELS: Record<string, string> = {
   ORACAO: "Oração",
   AVISOS: "Avisos",
   SERMAO: "Sermão",
+  OUTRO: "Outro",
 };
 
 const FIELD_LABELS: Record<string, string> = {

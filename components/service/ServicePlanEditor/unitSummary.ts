@@ -9,6 +9,19 @@ export type SermaoMeta = {
   description?: string | null;
 };
 export type AvisosMeta = { items?: { id: string; text: string }[] };
+export type OutroMeta = { description?: string | null };
+/**
+ * Item de música, só para esta liturgia (a música em si não muda):
+ *  - `title`: título próprio, no lugar do título cadastrado;
+ *  - `comment`: comentário, que aparece abaixo do título como os sub-itens.
+ */
+export type SongMeta = { title?: string | null; comment?: string | null };
+
+/** Título da música nesta liturgia: o próprio, se houver; senão o cadastrado. */
+export function songDisplayTitle(unit: ClientServiceUnit): string {
+  const custom = (unit.metadata as SongMeta | null)?.title?.trim();
+  return custom || unit.arrangement?.song?.title || "";
+}
 
 /**
  * "plan": culto de verdade — um item só está completo quando tem o conteúdo que o
@@ -41,6 +54,7 @@ const PLACEHOLDER: Record<string, string> = {
   LEITURA: "Adicione uma leitura",
   SERMAO: "Adicione um sermão",
   AVISOS: "Adicione avisos",
+  OUTRO: "Adicione um item",
 };
 
 export function summarizeUnit(
@@ -60,19 +74,29 @@ export function summarizeUnit(
         // No template a música é só um espaço (com título opcional); nada é escolhido.
         return { ...base, title: typedLabel ?? typeLabel, subtitle: null };
       }
-      const title = unit.arrangement?.song?.title ?? null;
+      const songTitle = unit.arrangement?.song?.title ?? null;
+      const meta = unit.metadata as SongMeta | null;
+      const customTitle = meta?.title?.trim() || null;
+      const title = songTitle ? songDisplayTitle(unit) : null;
       // Sublinha: arranjo (quando tem nome) e tom, já com a transposição do plano.
       const arrangement = unit.arrangement;
       const key = arrangement?.key
         ? transposeChord(arrangement.key, arrangement.key, unit.semitoneTranspose ?? 0)
         : null;
-      const subtitle = [arrangement?.name?.trim() || null, key ? `Tom ${key}` : null]
+      // Com título próprio, a sublinha lembra qual é a música cadastrada.
+      const subtitle = [
+        customTitle && customTitle !== songTitle ? `Original: ${songTitle}` : null,
+        arrangement?.name?.trim() || null,
+        key ? `Tom ${key}` : null,
+      ]
         .filter(Boolean)
         .join(" · ");
+      const comment = meta?.comment?.trim() || null;
       return {
         ...base,
         title,
         subtitle: title && subtitle ? subtitle : null,
+        detail: title ? comment : null,
         // Espaço vindo de um template com título ("Música de abertura"): mostra o título na chamada.
         placeholder: !title && typedLabel ? `${placeholder} · ${typedLabel}` : placeholder,
         pending: !title,
@@ -129,6 +153,18 @@ export function summarizeUnit(
         subtitle: hasItems ? `${items.length} ${items.length === 1 ? "item" : "itens"}` : null,
         bullets: items.map((i) => i.text),
         pending: !hasItems && !isTemplate,
+      };
+    }
+    case "OUTRO": {
+      // Item genérico: o título é o que o torna útil; sem ele o item fica pendente.
+      const meta = unit.metadata as OutroMeta | null;
+      const missing = !typedLabel && !isTemplate;
+      return {
+        ...base,
+        title: typedLabel ?? (isTemplate ? typeLabel : null),
+        subtitle: null,
+        detail: meta?.description ?? null,
+        pending: missing,
       };
     }
     default:
