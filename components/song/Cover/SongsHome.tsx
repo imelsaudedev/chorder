@@ -12,7 +12,7 @@ function GroupSection({ group, children }: { group: ClientTagGroup; children: Re
       description={group.description}
       aside={
         group.isProposed ? (
-          <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-px font-sans text-[11px] font-semibold text-amber-700">
+          <span className="rounded-full border border-warning-border bg-warning-subtle px-2 py-px font-sans text-[11px] font-semibold text-warning-text">
             em construção
           </span>
         ) : undefined

@@ -29,7 +29,7 @@ export default function AudioReferenceButton({
       className={className}
       onClick={() => { closeYoutube(); play(audios, title); }}
     >
-      <Music className="text-emerald-600" />
+      <Music className="text-media-audio" />
       <span className="sr-only">Reproduzir referência de áudio</span>
     </Button>
   );

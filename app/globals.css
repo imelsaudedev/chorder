@@ -52,6 +52,36 @@
   --color-on-inverse-muted: var(--on-inverse-muted);
   --color-border-inverse: var(--border-inverse);
 
+  /* Estados (erro, aviso, sucesso, informação): sólido, texto sobre sólido, fundo suave, fundo médio, borda e texto. */
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-muted: var(--danger-muted);
+  --color-danger-border: var(--danger-border);
+  --color-danger-text: var(--danger-text);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-muted: var(--warning-muted);
+  --color-warning-border: var(--warning-border);
+  --color-warning-text: var(--warning-text);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-muted: var(--success-muted);
+  --color-success-border: var(--success-border);
+  --color-success-text: var(--success-text);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-subtle: var(--info-subtle);
+  --color-info-muted: var(--info-muted);
+  --color-info-border: var(--info-border);
+  --color-info-text: var(--info-text);
+
+  /* Cores de mídia (ícones de referência): vídeo (vermelho do YouTube) e áudio. */
+  --color-media-video: var(--media-video);
+  --color-media-audio: var(--media-audio);
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -189,6 +219,35 @@
   --on-inverse-muted: #71717a;
   --border-inverse: #52525b;
 
+  /* Estados: claro = tons 500/600, 50, 100, 200 e 700/800 das paletas red, amber, emerald e sky/blue de antes. */
+  --danger: #ef4444;
+  --danger-foreground: #ffffff;
+  --danger-subtle: #fef2f2;
+  --danger-muted: #fee2e2;
+  --danger-border: #fecaca;
+  --danger-text: #b91c1c;
+  --warning: #f59e0b;
+  --warning-foreground: #451a03;
+  --warning-subtle: #fffbeb;
+  --warning-muted: #fef3c7;
+  --warning-border: #fde68a;
+  --warning-text: #92400e;
+  --success: #059669;
+  --success-foreground: #ffffff;
+  --success-subtle: #ecfdf5;
+  --success-muted: #d1fae5;
+  --success-border: #a7f3d0;
+  --success-text: #065f46;
+  --info: #0ea5e9;
+  --info-foreground: #ffffff;
+  --info-subtle: #eff6ff;
+  --info-muted: #dbeafe;
+  --info-border: #bfdbfe;
+  --info-text: #1e40af;
+
+  --media-video: #ef4444;
+  --media-audio: #059669;
+
   --radius: 0.5rem;
 }
 
@@ -233,6 +292,35 @@
   --on-inverse: #d4d4d8;
   --on-inverse-muted: #8693a6;
   --border-inverse: #33405a;
+
+  /* Provisório até a etapa 3 (paleta de docs/design-system.md). */
+  --danger: #ff7a7a;
+  --danger-foreground: #0c1222;
+  --danger-subtle: #321a20;
+  --danger-muted: #3f1f27;
+  --danger-border: #7f3040;
+  --danger-text: #ffa2a2;
+  --warning: #fbbf24;
+  --warning-foreground: #0c1222;
+  --warning-subtle: #30280f;
+  --warning-muted: #3d3213;
+  --warning-border: #7a6420;
+  --warning-text: #fcd34d;
+  --success: #4ade80;
+  --success-foreground: #0c1222;
+  --success-subtle: #0d2b21;
+  --success-muted: #123a2c;
+  --success-border: #1f6f52;
+  --success-text: #6ee7b7;
+  --info: #38bdf8;
+  --info-foreground: #0c1222;
+  --info-subtle: #16254a;
+  --info-muted: #1c2f5c;
+  --info-border: #2f4a8a;
+  --info-text: #93c5fd;
+
+  --media-video: #ff7a7a;
+  --media-audio: #34d399;
 }
 
 @layer base {

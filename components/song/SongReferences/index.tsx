@@ -47,7 +47,7 @@ function VideoItem({ url, onPlay }: { url: string; onPlay: () => void }) {
   const videoTitle = useYoutubeTitle(url);
   return (
     <button type="button" className={itemClass} onClick={onPlay}>
-      <Play size={16} className="shrink-0 text-red-500" />
+      <Play size={16} className="shrink-0 text-media-video" />
       <span className="truncate">{videoTitle ?? "Vídeo de referência"}</span>
     </button>
   );
@@ -93,7 +93,7 @@ export default function SongReferences({ arrangements, title, className }: SongR
 
   const icons = (
     <>
-      {hasVideo && <Play size={16} className="text-red-500" />}
+      {hasVideo && <Play size={16} className="text-media-video" />}
       {hasAudio && <Music size={16} className="text-secondary" />}
     </>
   );

@@ -694,7 +694,7 @@ function CaretLine({
       {caretRect && caretDriven && (
         <div
           aria-hidden
-          className="absolute z-10 bg-sky-500 pointer-events-none animate-caret-blink"
+          className="absolute z-10 bg-info pointer-events-none animate-caret-blink"
           style={{ left: caretRect.left, top: caretRect.top, height: Math.max(caretRect.height, 16), width: 1 }}
         />
       )}
@@ -703,7 +703,7 @@ function CaretLine({
       {hoverRect && (
         <div
           aria-hidden
-          className="absolute z-10 bg-sky-500/40 pointer-events-none"
+          className="absolute z-10 bg-info/40 pointer-events-none"
           style={{ left: hoverRect.left, top: hoverRect.top, height: Math.max(hoverRect.height, 16), width: 1 }}
         />
       )}
@@ -761,7 +761,7 @@ function CaretLine({
                     COMMENT_LABEL_TEXT_CLASS,
                     "my-[0.25em] self-start rounded-sm p-1",
                     chipBg,
-                    isActive ? "ring-2 ring-sky-400" : "",
+                    isActive ? "ring-2 ring-info" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -837,7 +837,7 @@ function CaretLine({
                     COMMENT_LABEL_TEXT_CLASS,
                     "self-start rounded-sm p-1",
                     chipBg,
-                    isActiveCommentAbove ? "ring-2 ring-sky-400" : "",
+                    isActiveCommentAbove ? "ring-2 ring-info" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -879,7 +879,7 @@ function CaretLine({
                     // padding de verdade).
                     "text-sm self-start rounded-sm px-1 py-0.5 mb-0 h-5",
                     chipBg,
-                    isActiveChord ? "ring-2 ring-sky-400" : "",
+                    isActiveChord ? "ring-2 ring-info" : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -1051,7 +1051,7 @@ function CaretLine({
                             OK
                           </button>
                         </div>
-                        {customChordError && <span className="text-[10px] text-red-500">Acorde inválido</span>}
+                        {customChordError && <span className="text-[10px] text-danger">Acorde inválido</span>}
                       </div>
                     </div>
                   );
@@ -1172,7 +1172,7 @@ function CaretLine({
                       type="button"
                       disabled={context.commentTokenIndex === null}
                       onClick={handleRemoveComment}
-                      className="rounded-sm px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                      className="rounded-sm px-2 py-1 bg-danger-muted hover:bg-danger-border text-danger-text disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                     >
                       Remover
                     </button>
@@ -1181,7 +1181,7 @@ function CaretLine({
                       type="button"
                       disabled={context.chordTokenIndex === null}
                       onClick={handleRemoveChord}
-                      className="rounded-sm px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                      className="rounded-sm px-2 py-1 bg-danger-muted hover:bg-danger-border text-danger-text disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                     >
                       Remover
                     </button>
@@ -1244,7 +1244,7 @@ export default function BlockBody({
   }
 
   if (hasError) {
-    return <p className="text-red-500 text-sm">{t("Messages.invalidChordPro")}</p>;
+    return <p className="text-danger text-sm">{t("Messages.invalidChordPro")}</p>;
   }
 
   return (

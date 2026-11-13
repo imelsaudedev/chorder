@@ -276,7 +276,7 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
           <label className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer select-none">
             <input
               type="checkbox"
-              className="accent-emerald-600"
+              className="accent-success"
               checked={onlyInServices}
               onChange={(e) => { setOnlyInServices(e.target.checked); setWizardActive(false); }}
             />
@@ -315,9 +315,9 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
         />
       )}
       {wizardActive && !currentWizardSong && (
-        <div className="border-2 border-emerald-500 rounded-lg p-5 bg-emerald-50 text-center">
-          <CheckCircle2 size={24} className="text-emerald-500 mx-auto mb-2" />
-          <p className="font-medium text-emerald-800">Todas as músicas vinculadas!</p>
+        <div className="border-2 border-success rounded-lg p-5 bg-success-subtle text-center">
+          <CheckCircle2 size={24} className="text-success mx-auto mb-2" />
+          <p className="font-medium text-success-text">Todas as músicas vinculadas!</p>
         </div>
       )}
 
@@ -333,7 +333,7 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
           return (
             <div
               key={song.slug}
-              className={`px-4 py-3 ${isCurrentWizardSong ? "bg-emerald-50" : ""}`}
+              className={`px-4 py-3 ${isCurrentWizardSong ? "bg-success-subtle" : ""}`}
             >
               <div className="flex items-center gap-3">
                 <StatusIcon status={isLinked ? "linked" : status} />
@@ -343,10 +343,10 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
                     <div className="text-xs text-muted-foreground truncate">{song.artist}</div>
                   )}
                   {isLinked && (
-                    <div className="text-xs text-emerald-600">Vinculada ao Holyrics</div>
+                    <div className="text-xs text-success">Vinculada ao Holyrics</div>
                   )}
                   {errors[song.slug] && !wizardActive && (
-                    <div className="text-xs text-red-600 mt-0.5">{errors[song.slug]}</div>
+                    <div className="text-xs text-danger-text mt-0.5">{errors[song.slug]}</div>
                   )}
                 </div>
                 {/* Durante o wizard, ação só no card acima — sem botões na lista */}
@@ -460,10 +460,10 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
 }
 
 function StatusIcon({ status }: { status: SongStatus | "linked" }) {
-  if (status === "linked") return <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />;
+  if (status === "linked") return <CheckCircle2 size={18} className="text-success shrink-0" />;
   if (status === "searching" || status === "linking") return <Loader2 size={18} className="animate-spin text-muted-foreground shrink-0" />;
-  if (status === "error") return <XCircle size={18} className="text-red-500 shrink-0" />;
-  if (status === "popup_open") return <Loader2 size={18} className="animate-spin text-emerald-500 shrink-0" />;
+  if (status === "error") return <XCircle size={18} className="text-danger shrink-0" />;
+  if (status === "popup_open") return <Loader2 size={18} className="animate-spin text-success shrink-0" />;
   return <Circle size={18} className="text-muted-foreground shrink-0" />;
 }
 
@@ -486,7 +486,7 @@ type WizardCardProps = {
 
 function WizardCard({ song, status, error, index, total, manualId, selectedArrangementId, onOpenPopup, onLinkAfterSave, onRetry, onPause, onManualIdChange, onLinkManually, onArrangementChange }: WizardCardProps) {
   return (
-    <div className="border-2 border-emerald-500 rounded-lg p-5 bg-emerald-50">
+    <div className="border-2 border-success rounded-lg p-5 bg-success-subtle">
       <div className="text-xs text-muted-foreground mb-1">{index + 1} de {total}</div>
       <div className="font-semibold text-lg">{song.title}</div>
       {song.artist && <div className="text-sm text-muted-foreground">{song.artist}</div>}
@@ -500,7 +500,7 @@ function WizardCard({ song, status, error, index, total, manualId, selectedArran
         )}
 
         {status === "linked" && (
-          <p className="flex items-center gap-2 text-sm text-emerald-700">
+          <p className="flex items-center gap-2 text-sm text-success-text">
             <CheckCircle2 size={14} className="shrink-0" /> Encontrada e vinculada. Avançando…
           </p>
         )}
@@ -533,7 +533,7 @@ function WizardCard({ song, status, error, index, total, manualId, selectedArran
 
         {status === "popup_open" && (
           <div className="space-y-2">
-            <p className="text-sm text-emerald-700 font-medium">
+            <p className="text-sm text-success-text font-medium">
               O Holyrics abriu o formulário de criação.
             </p>
             <p className="text-sm text-muted-foreground">
@@ -547,7 +547,7 @@ function WizardCard({ song, status, error, index, total, manualId, selectedArran
 
         {status === "error" && (
           <div className="space-y-2">
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-danger-text">{error}</p>
             <div className="flex gap-2 flex-wrap">
               <Button type="button" variant="outline" onClick={onRetry}>
                 Tentar novamente

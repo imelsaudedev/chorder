@@ -498,13 +498,13 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
                 {includeIds.map((id) => {
                   const tag = g.tags.find((t) => t.id === id);
                   return tag ? (
-                    <span key={id} className="text-emerald-600">✓{tag.name}</span>
+                    <span key={id} className="text-success">✓{tag.name}</span>
                   ) : null;
                 })}
                 {excludeIds.map((id) => {
                   const tag = g.tags.find((t) => t.id === id);
                   return tag ? (
-                    <span key={id} className="text-red-500">✗{tag.name}</span>
+                    <span key={id} className="text-danger">✗{tag.name}</span>
                   ) : null;
                 })}
                 <button
@@ -725,9 +725,9 @@ export default function CatalogoClient({ songs: initialSongs, tagGroups }: Props
                   <span
                     className={cn(
                       mode === "include"
-                        ? "text-emerald-700"
+                        ? "text-success-text"
                         : mode === "exclude"
-                        ? "text-red-600"
+                        ? "text-danger-text"
                         : ""
                     )}
                   >
@@ -771,14 +771,14 @@ function FilterDot({
   }
   if (mode === "include") {
     return (
-      <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0 flex items-center justify-center text-white font-bold leading-none">
+      <span className="w-3.5 h-3.5 rounded-full bg-success shrink-0 flex items-center justify-center text-white font-bold leading-none">
         <span style={{ fontSize: 8 }}>✓</span>
       </span>
     );
   }
   if (mode === "exclude") {
     return (
-      <span className="w-3.5 h-3.5 rounded-full bg-red-500 shrink-0 flex items-center justify-center text-white font-bold leading-none">
+      <span className="w-3.5 h-3.5 rounded-full bg-danger shrink-0 flex items-center justify-center text-white font-bold leading-none">
         <span style={{ fontSize: 8 }}>✕</span>
       </span>
     );

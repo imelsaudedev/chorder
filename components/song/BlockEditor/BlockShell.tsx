@@ -338,7 +338,7 @@ export default function BlockShell({
               disabled={!canDelete}
               onClick={onRemove}
               title={canDelete ? undefined : "Não é possível apagar o único bloco restante"}
-              className="text-xs cursor-pointer text-red-600 focus:text-red-600"
+              className="text-xs cursor-pointer text-danger-text focus:text-danger-text"
             >
               <TrashIcon size={13} className="mr-1.5" />
               {t("Messages.delete")}
@@ -378,7 +378,7 @@ export default function BlockShell({
               } as React.CSSProperties}
             >
               {hasError ? (
-                <p className="text-red-500 text-sm">{t("Messages.invalidChordPro")}</p>
+                <p className="text-danger text-sm">{t("Messages.invalidChordPro")}</p>
               ) : (
                 <ChordProViewer chordpro={unit.content} density="compact" commentClass={colorClasses.comment} />
               )}

@@ -198,7 +198,7 @@ export default function AdminTagsClient({ initialGroups }: Props) {
       </AlertDialog>
 
       {error && (
-        <div className="flex items-start justify-between gap-2 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+        <div className="flex items-start justify-between gap-2 p-3 rounded-md bg-warning-subtle border border-warning-border text-warning-text text-sm">
           <span>{error}</span>
           <button type="button" onClick={() => setError(null)}>
             <X className="w-4 h-4 shrink-0" />
@@ -243,7 +243,7 @@ export default function AdminTagsClient({ initialGroups }: Props) {
                 {PRESENTATION_LABEL[group.presentation]} · {SELECTION_LABEL[group.selection]}
               </span>
               {group.isProposed && (
-                <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-px text-[11px] font-semibold text-amber-700">
+                <span className="rounded-full border border-warning-border bg-warning-subtle px-2 py-px text-[11px] font-semibold text-warning-text">
                   em construção
                 </span>
               )}
