@@ -14,8 +14,8 @@ describe("Tag", () => {
   it("variante fixa: fundo claro, sem borda", () => {
     render(<Tag label="Ok" variant="success" />);
     const el = screen.getByText("Ok");
-    expect(el.className).toContain("bg-emerald-100");
-    expect(el.className).toContain("text-emerald-800");
+    expect(el.className).toContain("bg-success-muted");
+    expect(el.className).toContain("text-success-text");
     expect(el.className).not.toMatch(/\bborder\b/);
   });
 

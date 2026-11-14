@@ -135,7 +135,7 @@ function Field({
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
         {label}
-        {required && <span className="font-normal text-amber-700"> · necessário</span>}
+        {required && <span className="font-normal text-warning-text"> · necessário</span>}
       </Label>
       {children(id)}
     </div>
@@ -171,7 +171,7 @@ function TextField({
           autoFocus={autoFocus}
           autoComplete="off"
           enterKeyHint="next"
-          className={missing ? "h-11 border-amber-400" : "h-11"}
+          className={missing ? "h-11 border-warning" : "h-11"}
         />
       )}
     </Field>
@@ -328,7 +328,7 @@ function VersionField({
             <SelectTrigger
               id={id}
               aria-label="Versão da Bíblia"
-              className={`w-full cursor-pointer data-[size=default]:h-11 ${missing ? "border-amber-400" : ""}`}
+              className={`w-full cursor-pointer data-[size=default]:h-11 ${missing ? "border-warning" : ""}`}
             >
               <SelectValue placeholder="Escolher" />
             </SelectTrigger>
@@ -351,7 +351,7 @@ function VersionField({
               placeholder="Qual versão?"
               aria-label="Outra versão"
               autoComplete="off"
-              className={`h-11 ${missing ? "border-amber-400" : ""}`}
+              className={`h-11 ${missing ? "border-warning" : ""}`}
               autoFocus={otherChosen && !value}
             />
           )}

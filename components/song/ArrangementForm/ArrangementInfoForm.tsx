@@ -147,9 +147,9 @@ function YoutubeField({ fieldPrefix, arrangementId }: { fieldPrefix: string; arr
         <Button
           type="button"
           variant="outline"
-          className={`gap-2 ${hasUrl ? "border-red-200 text-red-600 bg-red-50 hover:bg-red-100" : ""}`}
+          className={`gap-2 ${hasUrl ? "border-danger-border text-danger-text bg-danger-subtle hover:bg-danger-muted" : ""}`}
         >
-          <Play size={15} className={hasUrl ? "text-red-500" : "text-faint-foreground"} />
+          <Play size={15} className={hasUrl ? "text-danger" : "text-faint-foreground"} />
           YouTube
         </Button>
       </DialogTrigger>
@@ -166,7 +166,7 @@ function YoutubeField({ fieldPrefix, arrangementId }: { fieldPrefix: string; arr
         />
         <DialogFooter className="flex-row justify-between sm:justify-between">
           {hasUrl && (
-            <Button type="button" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleRemove}>
+            <Button type="button" variant="ghost" className="text-danger-text hover:text-danger-text hover:bg-danger-subtle" onClick={handleRemove}>
               Remover
             </Button>
           )}
@@ -237,9 +237,9 @@ function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
         <Button
           type="button"
           variant="outline"
-          className={`gap-2 ${hasAudios ? "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100" : ""}`}
+          className={`gap-2 ${hasAudios ? "border-success-border text-success-text bg-success-subtle hover:bg-success-muted" : ""}`}
         >
-          <Music size={15} className={hasAudios ? "text-emerald-600" : "text-faint-foreground"} />
+          <Music size={15} className={hasAudios ? "text-success" : "text-faint-foreground"} />
           Áudio{hasAudios ? ` (${fields.length})` : ""}
         </Button>
       </DialogTrigger>
@@ -252,7 +252,7 @@ function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
             <div className="flex flex-col gap-2">
               {fields.map((field, idx) => (
                 <div key={field.id} className="flex items-center gap-2">
-                  <Music size={14} className="text-emerald-600 shrink-0" />
+                  <Music size={14} className="text-success shrink-0" />
                   <Input
                     className="h-8 text-sm"
                     defaultValue={(field as any).label}
@@ -263,7 +263,7 @@ function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
                   <button
                     type="button"
                     onClick={() => handleRemove(idx)}
-                    className="text-faint-foreground hover:text-red-500 transition-colors shrink-0"
+                    className="text-faint-foreground hover:text-danger transition-colors shrink-0"
                   >
                     <Trash2 size={15} />
                   </button>
@@ -288,7 +288,7 @@ function AudioField({ fieldPrefix }: { fieldPrefix: string }) {
             <Upload size={14} />
             {isUploading ? "Enviando…" : "Adicionar áudio (MP3, M4A, AAC — máx. 10MB)"}
           </Button>
-          {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
+          {uploadError && <p className="text-xs text-danger">{uploadError}</p>}
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" className="ml-auto" onClick={() => setOpen(false)}>

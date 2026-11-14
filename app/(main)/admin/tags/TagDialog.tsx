@@ -125,7 +125,7 @@ export default function TagDialog({ tag, group, open, onOpenChange, onSave }: Ta
                 <img src={imageUrl} alt="" className="absolute inset-0 size-full object-cover" onError={() => setImageFailed(true)} />
               )}
             </div>
-            {imageFailed && <p className="text-xs text-amber-700">Não consegui carregar essa imagem; confira o endereço.</p>}
+            {imageFailed && <p className="text-xs text-warning-text">Não consegui carregar essa imagem; confira o endereço.</p>}
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}

@@ -98,7 +98,7 @@ export default function FeedbackForm() {
             )}
           />
           {formState.error && (
-            <p className="text-red-500 text-sm mt-2">
+            <p className="text-danger text-sm mt-2">
               {formState.error || t("serverError")}
             </p>
           )}

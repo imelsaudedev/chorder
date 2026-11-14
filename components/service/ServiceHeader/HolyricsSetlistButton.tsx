@@ -68,8 +68,8 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
   const triggerIcon = sending
     ? <Loader2 size={18} className="animate-spin" />
     : sent
-      ? <CheckCircle2 size={18} className="text-emerald-500" />
-      : <Radio size={18} className={!allLinked ? "text-amber-500" : ""} />;
+      ? <CheckCircle2 size={18} className="text-success" />
+      : <Radio size={18} className={!allLinked ? "text-warning" : ""} />;
 
   return (
     <Popover onOpenChange={() => { setSent(false); setSendError(""); }}>
@@ -104,27 +104,27 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
               return (
                 <li key={i} className="flex items-center gap-2 text-sm">
                   {isResyncing ? (
-                    <Loader2 size={14} className="shrink-0 animate-spin text-emerald-500" />
+                    <Loader2 size={14} className="shrink-0 animate-spin text-success" />
                   ) : linked ? (
-                    <CheckCircle2 size={14} className="shrink-0 text-emerald-500" />
+                    <CheckCircle2 size={14} className="shrink-0 text-success" />
                   ) : (
-                    <Circle size={14} className="shrink-0 text-amber-500" />
+                    <Circle size={14} className="shrink-0 text-warning" />
                   )}
-                  <span className={linked ? "" : "text-amber-700"}>{title}</span>
+                  <span className={linked ? "" : "text-warning-text"}>{title}</span>
                   {linked && !isResyncing && (
                     <button
                       type="button"
-                      className="ml-auto p-0.5 hover:bg-emerald-100 rounded transition-colors"
+                      className="ml-auto p-0.5 hover:bg-success-muted rounded transition-colors"
                       onClick={() => resyncSong(i)}
                       title="Ressincronizar arranjo no Holyrics"
                     >
-                      <RefreshCw size={13} className="text-emerald-600" />
+                      <RefreshCw size={13} className="text-success" />
                     </button>
                   )}
                   {isResyncing && (
                     <button
                       type="button"
-                      className="ml-auto text-xs px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors"
+                      className="ml-auto text-xs px-2 py-0.5 bg-success-muted text-success-text rounded hover:bg-success-border transition-colors"
                       onClick={() => completeResync(i)}
                     >
                       Concluído
@@ -137,13 +137,13 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
         )}
 
         {resyncingIndex !== null && (
-          <div className="text-xs text-emerald-700 bg-emerald-50 rounded p-2 mb-3">
+          <div className="text-xs text-success-text bg-success-subtle rounded p-2 mb-3">
             O formulário abriu no <strong>Holyrics</strong>. Atualize o arranjo e salve por lá. Depois clique em <strong>Concluído</strong> aqui.
           </div>
         )}
 
         {!allLinked && (
-          <div className="text-xs text-amber-700 bg-amber-50 rounded p-2 mb-3 flex items-start gap-1.5">
+          <div className="text-xs text-warning-text bg-warning-subtle rounded p-2 mb-3 flex items-start gap-1.5">
             <XCircle size={13} className="shrink-0 mt-0.5" />
             <span>
               Algumas músicas não estão vinculadas ao Holyrics.{" "}
@@ -155,15 +155,15 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
         )}
 
         {sendError && (
-          <p className="text-xs text-red-600 mb-3">{sendError}</p>
+          <p className="text-xs text-danger-text mb-3">{sendError}</p>
         )}
 
         {Object.entries(resyncError).map(([idx, err]) => err && (
-          <p key={idx} className="text-xs text-red-600 mb-2">{err}</p>
+          <p key={idx} className="text-xs text-danger-text mb-2">{err}</p>
         ))}
 
         {sent && (
-          <p className="text-xs text-emerald-600 mb-3">Setlist enviado com sucesso!</p>
+          <p className="text-xs text-success mb-3">Setlist enviado com sucesso!</p>
         )}
 
         <Button
