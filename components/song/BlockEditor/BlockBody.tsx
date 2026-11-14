@@ -1007,9 +1007,9 @@ function CaretLine({
                                   cell.chord === currentChordValue
                                     ? "bg-primary border-primary text-primary-foreground"
                                     : cell.variant === "secdom"
-                                      ? "bg-amber-50 border-amber-200 hover:bg-amber-100 text-amber-800"
+                                      ? "bg-chord-sec-bg border-chord-sec-border hover:bg-chord-sec-hover text-chord-sec-text"
                                       : cell.variant === "aem"
-                                        ? "bg-background border-dashed border-violet-200 hover:bg-violet-50 text-violet-700"
+                                        ? "bg-background border-dashed border-chord-rel-border hover:bg-chord-rel-hover text-chord-rel-text"
                                         : "bg-background border-dashed border-border-strong hover:bg-surface-subtle text-foreground",
                                 ].join(" ")}
                               >

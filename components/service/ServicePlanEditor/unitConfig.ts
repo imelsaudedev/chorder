@@ -28,37 +28,37 @@ export const UNIT_CONFIG: Record<ServiceUnitTypeValue, UnitConfig> = {
   SONG: {
     label: "Música",
     icon: Music,
-    color: "text-emerald-600",
+    color: "text-unit-song",
   },
   FALA: {
     label: "Fala",
     icon: Mic2,
-    color: "text-blue-500",
+    color: "text-unit-fala",
   },
   LEITURA: {
     label: "Leitura",
     icon: BookOpen,
-    color: "text-amber-600",
+    color: "text-unit-leitura",
   },
   ORACAO: {
     label: "Oração",
     icon: Heart,
-    color: "text-pink-500",
+    color: "text-unit-oracao",
   },
   AVISOS: {
     label: "Avisos",
     icon: Bell,
-    color: "text-orange-500",
+    color: "text-unit-avisos",
   },
   SERMAO: {
     label: "Sermão",
     icon: MessageSquare,
-    color: "text-violet-600",
+    color: "text-unit-sermao",
   },
   // Item genérico (o que não cabe nos outros tipos): ícone neutro, sem cor de destaque.
   OUTRO: {
     label: "Outro",
     icon: CircleEllipsis,
-    color: "text-slate-500",
+    color: "text-unit-outro",
   },
 };

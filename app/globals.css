@@ -82,6 +82,134 @@
   --color-media-video: var(--media-video);
   --color-media-audio: var(--media-audio);
 
+  /* Blocos da cifra por tipo (unit-colors.ts). Valores por tema em :root e .dark. */
+  --color-block-intro-dot: var(--block-intro-dot);
+  --color-block-intro-bg: var(--block-intro-bg);
+  --color-block-intro-border: var(--block-intro-border);
+  --color-block-intro-text: var(--block-intro-text);
+  --color-block-intro-comment: var(--block-intro-comment);
+  --color-block-intro-comment-text: var(--block-intro-comment-text);
+  --color-block-intro-badge-bg: var(--block-intro-badge-bg);
+  --color-block-intro-badge-text: var(--block-intro-badge-text);
+  --color-block-intro-handle: var(--block-intro-handle);
+  --color-block-intro-handle-hover: var(--block-intro-handle-hover);
+
+  --color-block-verse-dot: var(--block-verse-dot);
+  --color-block-verse-bg: var(--block-verse-bg);
+  --color-block-verse-border: var(--block-verse-border);
+  --color-block-verse-text: var(--block-verse-text);
+  --color-block-verse-comment: var(--block-verse-comment);
+  --color-block-verse-comment-text: var(--block-verse-comment-text);
+  --color-block-verse-badge-bg: var(--block-verse-badge-bg);
+  --color-block-verse-badge-text: var(--block-verse-badge-text);
+  --color-block-verse-handle: var(--block-verse-handle);
+  --color-block-verse-handle-hover: var(--block-verse-handle-hover);
+
+  --color-block-prechorus-dot: var(--block-prechorus-dot);
+  --color-block-prechorus-bg: var(--block-prechorus-bg);
+  --color-block-prechorus-border: var(--block-prechorus-border);
+  --color-block-prechorus-text: var(--block-prechorus-text);
+  --color-block-prechorus-comment: var(--block-prechorus-comment);
+  --color-block-prechorus-comment-text: var(--block-prechorus-comment-text);
+  --color-block-prechorus-badge-bg: var(--block-prechorus-badge-bg);
+  --color-block-prechorus-badge-text: var(--block-prechorus-badge-text);
+  --color-block-prechorus-handle: var(--block-prechorus-handle);
+  --color-block-prechorus-handle-hover: var(--block-prechorus-handle-hover);
+
+  --color-block-chorus-dot: var(--block-chorus-dot);
+  --color-block-chorus-bg: var(--block-chorus-bg);
+  --color-block-chorus-border: var(--block-chorus-border);
+  --color-block-chorus-text: var(--block-chorus-text);
+  --color-block-chorus-comment: var(--block-chorus-comment);
+  --color-block-chorus-comment-text: var(--block-chorus-comment-text);
+  --color-block-chorus-badge-bg: var(--block-chorus-badge-bg);
+  --color-block-chorus-badge-text: var(--block-chorus-badge-text);
+  --color-block-chorus-handle: var(--block-chorus-handle);
+  --color-block-chorus-handle-hover: var(--block-chorus-handle-hover);
+
+  --color-block-bridge-dot: var(--block-bridge-dot);
+  --color-block-bridge-bg: var(--block-bridge-bg);
+  --color-block-bridge-border: var(--block-bridge-border);
+  --color-block-bridge-text: var(--block-bridge-text);
+  --color-block-bridge-comment: var(--block-bridge-comment);
+  --color-block-bridge-comment-text: var(--block-bridge-comment-text);
+  --color-block-bridge-badge-bg: var(--block-bridge-badge-bg);
+  --color-block-bridge-badge-text: var(--block-bridge-badge-text);
+  --color-block-bridge-handle: var(--block-bridge-handle);
+  --color-block-bridge-handle-hover: var(--block-bridge-handle-hover);
+
+  --color-block-interlude-dot: var(--block-interlude-dot);
+  --color-block-interlude-bg: var(--block-interlude-bg);
+  --color-block-interlude-border: var(--block-interlude-border);
+  --color-block-interlude-text: var(--block-interlude-text);
+  --color-block-interlude-comment: var(--block-interlude-comment);
+  --color-block-interlude-comment-text: var(--block-interlude-comment-text);
+  --color-block-interlude-badge-bg: var(--block-interlude-badge-bg);
+  --color-block-interlude-badge-text: var(--block-interlude-badge-text);
+  --color-block-interlude-handle: var(--block-interlude-handle);
+  --color-block-interlude-handle-hover: var(--block-interlude-handle-hover);
+
+  --color-block-solo-dot: var(--block-solo-dot);
+  --color-block-solo-bg: var(--block-solo-bg);
+  --color-block-solo-border: var(--block-solo-border);
+  --color-block-solo-text: var(--block-solo-text);
+  --color-block-solo-comment: var(--block-solo-comment);
+  --color-block-solo-comment-text: var(--block-solo-comment-text);
+  --color-block-solo-badge-bg: var(--block-solo-badge-bg);
+  --color-block-solo-badge-text: var(--block-solo-badge-text);
+  --color-block-solo-handle: var(--block-solo-handle);
+  --color-block-solo-handle-hover: var(--block-solo-handle-hover);
+
+  --color-block-ending-dot: var(--block-ending-dot);
+  --color-block-ending-bg: var(--block-ending-bg);
+  --color-block-ending-border: var(--block-ending-border);
+  --color-block-ending-text: var(--block-ending-text);
+  --color-block-ending-comment: var(--block-ending-comment);
+  --color-block-ending-comment-text: var(--block-ending-comment-text);
+  --color-block-ending-badge-bg: var(--block-ending-badge-bg);
+  --color-block-ending-badge-text: var(--block-ending-badge-text);
+  --color-block-ending-handle: var(--block-ending-handle);
+  --color-block-ending-handle-hover: var(--block-ending-handle-hover);
+
+  --color-block-block-dot: var(--block-block-dot);
+  --color-block-block-bg: var(--block-block-bg);
+  --color-block-block-border: var(--block-block-border);
+  --color-block-block-text: var(--block-block-text);
+  --color-block-block-comment: var(--block-block-comment);
+  --color-block-block-comment-text: var(--block-block-comment-text);
+  --color-block-block-badge-bg: var(--block-block-badge-bg);
+  --color-block-block-badge-text: var(--block-block-badge-text);
+  --color-block-block-handle: var(--block-block-handle);
+  --color-block-block-handle-hover: var(--block-block-handle-hover);
+
+  --color-block-text-dot: var(--block-text-dot);
+  --color-block-text-bg: var(--block-text-bg);
+  --color-block-text-border: var(--block-text-border);
+  --color-block-text-text: var(--block-text-text);
+  --color-block-text-comment: var(--block-text-comment);
+  --color-block-text-comment-text: var(--block-text-comment-text);
+  --color-block-text-badge-bg: var(--block-text-badge-bg);
+  --color-block-text-badge-text: var(--block-text-badge-text);
+  --color-block-text-handle: var(--block-text-handle);
+  --color-block-text-handle-hover: var(--block-text-handle-hover);
+
+  /* Ícones dos tipos de item da liturgia e funções de acorde no editor. */
+  --color-unit-song: var(--unit-song);
+  --color-unit-fala: var(--unit-fala);
+  --color-unit-leitura: var(--unit-leitura);
+  --color-unit-oracao: var(--unit-oracao);
+  --color-unit-avisos: var(--unit-avisos);
+  --color-unit-sermao: var(--unit-sermao);
+  --color-unit-outro: var(--unit-outro);
+  --color-chord-sec-bg: var(--chord-sec-bg);
+  --color-chord-sec-border: var(--chord-sec-border);
+  --color-chord-sec-hover: var(--chord-sec-hover);
+  --color-chord-sec-text: var(--chord-sec-text);
+  --color-chord-rel-bg: var(--chord-rel-bg);
+  --color-chord-rel-border: var(--chord-rel-border);
+  --color-chord-rel-hover: var(--chord-rel-hover);
+  --color-chord-rel-text: var(--chord-rel-text);
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -248,6 +376,134 @@
   --media-video: #ef4444;
   --media-audio: #059669;
 
+  /* Blocos da cifra por tipo. Claro = paleta anterior; Final agora em green. */
+  --block-intro-dot: oklch(89.7% 0.196 126.665);
+  --block-intro-bg: oklch(98.6% 0.031 120.757);
+  --block-intro-border: oklch(93.8% 0.127 124.321);
+  --block-intro-text: oklch(64.8% 0.2 131.684);
+  --block-intro-comment: oklch(53.2% 0.157 131.589);
+  --block-intro-comment-text: #ffffff;
+  --block-intro-badge-bg: oklch(93.8% 0.127 124.321);
+  --block-intro-badge-text: oklch(53.2% 0.157 131.589);
+  --block-intro-handle: oklch(96.7% 0.067 122.328);
+  --block-intro-handle-hover: oklch(93.8% 0.127 124.321);
+
+  --block-verse-dot: oklch(78.9% 0.154 211.53);
+  --block-verse-bg: oklch(98.4% 0.019 200.873);
+  --block-verse-border: oklch(91.7% 0.08 205.041);
+  --block-verse-text: oklch(60.9% 0.126 221.723);
+  --block-verse-comment: oklch(52% 0.105 223.128);
+  --block-verse-comment-text: #ffffff;
+  --block-verse-badge-bg: oklch(91.7% 0.08 205.041);
+  --block-verse-badge-text: oklch(52% 0.105 223.128);
+  --block-verse-handle: oklch(95.6% 0.045 203.388);
+  --block-verse-handle-hover: oklch(91.7% 0.08 205.041);
+
+  --block-prechorus-dot: oklch(75% 0.183 55.934);
+  --block-prechorus-bg: oklch(98% 0.016 73.684);
+  --block-prechorus-border: oklch(90.1% 0.076 70.697);
+  --block-prechorus-text: oklch(64.6% 0.222 41.116);
+  --block-prechorus-comment: oklch(55.3% 0.195 38.402);
+  --block-prechorus-comment-text: #ffffff;
+  --block-prechorus-badge-bg: oklch(90.1% 0.076 70.697);
+  --block-prechorus-badge-text: oklch(55.3% 0.195 38.402);
+  --block-prechorus-handle: oklch(95.4% 0.038 75.164);
+  --block-prechorus-handle-hover: oklch(90.1% 0.076 70.697);
+
+  --block-chorus-dot: oklch(64.5% 0.246 16.439);
+  --block-chorus-bg: oklch(96.9% 0.015 12.422);
+  --block-chorus-border: oklch(89.2% 0.058 10.001);
+  --block-chorus-text: oklch(51.4% 0.222 16.935);
+  --block-chorus-comment: oklch(51.4% 0.222 16.935);
+  --block-chorus-comment-text: #ffffff;
+  --block-chorus-badge-bg: oklch(89.2% 0.058 10.001);
+  --block-chorus-badge-text: oklch(51.4% 0.222 16.935);
+  --block-chorus-handle: oklch(94.1% 0.03 12.58);
+  --block-chorus-handle-hover: oklch(89.2% 0.058 10.001);
+
+  --block-bridge-dot: oklch(60.6% 0.25 292.717);
+  --block-bridge-bg: oklch(96.9% 0.016 293.756);
+  --block-bridge-border: oklch(89.4% 0.057 293.283);
+  --block-bridge-text: oklch(49.1% 0.27 292.581);
+  --block-bridge-comment: oklch(49.1% 0.27 292.581);
+  --block-bridge-comment-text: #ffffff;
+  --block-bridge-badge-bg: oklch(89.4% 0.057 293.283);
+  --block-bridge-badge-text: oklch(49.1% 0.27 292.581);
+  --block-bridge-handle: oklch(94.3% 0.029 294.588);
+  --block-bridge-handle-hover: oklch(89.4% 0.057 293.283);
+
+  --block-interlude-dot: oklch(76.9% 0.188 70.08);
+  --block-interlude-bg: oklch(98.7% 0.022 95.277);
+  --block-interlude-border: oklch(92.4% 0.12 95.746);
+  --block-interlude-text: oklch(55.5% 0.163 48.998);
+  --block-interlude-comment: oklch(55.5% 0.163 48.998);
+  --block-interlude-comment-text: #ffffff;
+  --block-interlude-badge-bg: oklch(92.4% 0.12 95.746);
+  --block-interlude-badge-text: oklch(55.5% 0.163 48.998);
+  --block-interlude-handle: oklch(96.2% 0.059 95.617);
+  --block-interlude-handle-hover: oklch(92.4% 0.12 95.746);
+
+  --block-solo-dot: oklch(59.1% 0.293 322.896);
+  --block-solo-bg: oklch(97.7% 0.017 320.058);
+  --block-solo-border: oklch(90.3% 0.076 319.62);
+  --block-solo-text: oklch(51.8% 0.253 323.949);
+  --block-solo-comment: oklch(51.8% 0.253 323.949);
+  --block-solo-comment-text: #ffffff;
+  --block-solo-badge-bg: oklch(90.3% 0.076 319.62);
+  --block-solo-badge-text: oklch(51.8% 0.253 323.949);
+  --block-solo-handle: oklch(95.2% 0.037 318.852);
+  --block-solo-handle-hover: oklch(90.3% 0.076 319.62);
+
+  --block-ending-dot: oklch(72.3% 0.219 149.579);
+  --block-ending-bg: oklch(98.2% 0.018 155.826);
+  --block-ending-border: oklch(92.5% 0.084 155.995);
+  --block-ending-text: oklch(52.7% 0.154 150.069);
+  --block-ending-comment: oklch(52.7% 0.154 150.069);
+  --block-ending-comment-text: #ffffff;
+  --block-ending-badge-bg: oklch(92.5% 0.084 155.995);
+  --block-ending-badge-text: oklch(52.7% 0.154 150.069);
+  --block-ending-handle: oklch(96.2% 0.044 156.743);
+  --block-ending-handle-hover: oklch(92.5% 0.084 155.995);
+
+  --block-block-dot: oklch(70.5% 0.015 286.067);
+  --block-block-bg: oklch(98.5% 0 0);
+  --block-block-border: oklch(92% 0.004 286.32);
+  --block-block-text: oklch(44.2% 0.017 285.786);
+  --block-block-comment: oklch(37% 0.013 285.805);
+  --block-block-comment-text: #ffffff;
+  --block-block-badge-bg: oklch(92% 0.004 286.32);
+  --block-block-badge-text: oklch(37% 0.013 285.805);
+  --block-block-handle: oklch(96.7% 0.001 286.375);
+  --block-block-handle-hover: oklch(92% 0.004 286.32);
+
+  --block-text-dot: oklch(70.4% 0.04 256.788);
+  --block-text-bg: oklch(98.4% 0.003 247.858);
+  --block-text-border: oklch(92.9% 0.013 255.508);
+  --block-text-text: oklch(44.6% 0.043 257.281);
+  --block-text-comment: oklch(37.2% 0.044 257.287);
+  --block-text-comment-text: #ffffff;
+  --block-text-badge-bg: oklch(92.9% 0.013 255.508);
+  --block-text-badge-text: oklch(37.2% 0.044 257.287);
+  --block-text-handle: oklch(96.8% 0.007 247.896);
+  --block-text-handle-hover: oklch(92.9% 0.013 255.508);
+
+  /* Itens da liturgia: ícone no tom de antes. Funções de acorde: dominante secundário (âmbar), relativo (violeta). */
+  --unit-song: oklch(59.6% 0.145 163.225);
+  --unit-fala: oklch(62.3% 0.214 259.815);
+  --unit-leitura: oklch(66.6% 0.179 58.318);
+  --unit-oracao: oklch(65.6% 0.241 354.308);
+  --unit-avisos: oklch(70.5% 0.213 47.604);
+  --unit-sermao: oklch(54.1% 0.281 293.009);
+  --unit-outro: oklch(55.4% 0.046 257.417);
+  --chord-sec-bg: oklch(98.7% 0.022 95.277);
+  --chord-sec-border: oklch(92.4% 0.12 95.746);
+  --chord-sec-hover: oklch(96.2% 0.059 95.617);
+  --chord-sec-text: oklch(47.3% 0.137 46.201);
+  --chord-rel-bg: oklch(96.9% 0.016 293.756);
+  --chord-rel-border: oklch(89.4% 0.057 293.283);
+  --chord-rel-hover: oklch(94.3% 0.029 294.588);
+  --chord-rel-text: oklch(49.1% 0.27 292.581);
+
   --radius: 0.5rem;
 }
 
@@ -321,6 +577,134 @@
 
   --media-video: #ff7a7a;
   --media-audio: #34d399;
+
+  /* Blocos da cifra por tipo (6.3 do design system). Comentário: círculo com texto escuro. */
+  --block-intro-dot: #a3e635;
+  --block-intro-bg: #1c2a14;
+  --block-intro-border: #46682a;
+  --block-intro-text: #bef264;
+  --block-intro-comment: #a3e635;
+  --block-intro-comment-text: #1c2a14;
+  --block-intro-badge-bg: #46682a;
+  --block-intro-badge-text: #bef264;
+  --block-intro-handle: color-mix(in srgb, #1c2a14 50%, #46682a);
+  --block-intro-handle-hover: #46682a;
+
+  --block-verse-dot: #22d3ee;
+  --block-verse-bg: #0f2a31;
+  --block-verse-border: #1f6d7d;
+  --block-verse-text: #67e8f9;
+  --block-verse-comment: #22d3ee;
+  --block-verse-comment-text: #0f2a31;
+  --block-verse-badge-bg: #1f6d7d;
+  --block-verse-badge-text: #67e8f9;
+  --block-verse-handle: color-mix(in srgb, #0f2a31 50%, #1f6d7d);
+  --block-verse-handle-hover: #1f6d7d;
+
+  --block-prechorus-dot: #fb923c;
+  --block-prechorus-bg: #31200f;
+  --block-prechorus-border: #7c4a1d;
+  --block-prechorus-text: #fdba74;
+  --block-prechorus-comment: #fb923c;
+  --block-prechorus-comment-text: #31200f;
+  --block-prechorus-badge-bg: #7c4a1d;
+  --block-prechorus-badge-text: #fdba74;
+  --block-prechorus-handle: color-mix(in srgb, #31200f 50%, #7c4a1d);
+  --block-prechorus-handle-hover: #7c4a1d;
+
+  --block-chorus-dot: #fb7185;
+  --block-chorus-bg: #321a20;
+  --block-chorus-border: #7f3040;
+  --block-chorus-text: #fda4af;
+  --block-chorus-comment: #fb7185;
+  --block-chorus-comment-text: #321a20;
+  --block-chorus-badge-bg: #7f3040;
+  --block-chorus-badge-text: #fda4af;
+  --block-chorus-handle: color-mix(in srgb, #321a20 50%, #7f3040);
+  --block-chorus-handle-hover: #7f3040;
+
+  --block-bridge-dot: #a78bfa;
+  --block-bridge-bg: #211a38;
+  --block-bridge-border: #5b46a3;
+  --block-bridge-text: #c4b5fd;
+  --block-bridge-comment: #a78bfa;
+  --block-bridge-comment-text: #211a38;
+  --block-bridge-badge-bg: #5b46a3;
+  --block-bridge-badge-text: #c4b5fd;
+  --block-bridge-handle: color-mix(in srgb, #211a38 50%, #5b46a3);
+  --block-bridge-handle-hover: #5b46a3;
+
+  --block-interlude-dot: #fbbf24;
+  --block-interlude-bg: #30280f;
+  --block-interlude-border: #7a6420;
+  --block-interlude-text: #fcd34d;
+  --block-interlude-comment: #fbbf24;
+  --block-interlude-comment-text: #30280f;
+  --block-interlude-badge-bg: #7a6420;
+  --block-interlude-badge-text: #fcd34d;
+  --block-interlude-handle: color-mix(in srgb, #30280f 50%, #7a6420);
+  --block-interlude-handle-hover: #7a6420;
+
+  --block-solo-dot: #e879f9;
+  --block-solo-bg: #2e1534;
+  --block-solo-border: #8a3a94;
+  --block-solo-text: #f0abfc;
+  --block-solo-comment: #e879f9;
+  --block-solo-comment-text: #2e1534;
+  --block-solo-badge-bg: #8a3a94;
+  --block-solo-badge-text: #f0abfc;
+  --block-solo-handle: color-mix(in srgb, #2e1534 50%, #8a3a94);
+  --block-solo-handle-hover: #8a3a94;
+
+  --block-ending-dot: #4ade80;
+  --block-ending-bg: #10291a;
+  --block-ending-border: #2c6e43;
+  --block-ending-text: #86efac;
+  --block-ending-comment: #4ade80;
+  --block-ending-comment-text: #10291a;
+  --block-ending-badge-bg: #2c6e43;
+  --block-ending-badge-text: #86efac;
+  --block-ending-handle: color-mix(in srgb, #10291a 50%, #2c6e43);
+  --block-ending-handle-hover: #2c6e43;
+
+  --block-block-dot: #94a3b8;
+  --block-block-bg: #161d2e;
+  --block-block-border: #33405a;
+  --block-block-text: #cbd5e1;
+  --block-block-comment: #94a3b8;
+  --block-block-comment-text: #161d2e;
+  --block-block-badge-bg: #33405a;
+  --block-block-badge-text: #cbd5e1;
+  --block-block-handle: color-mix(in srgb, #161d2e 50%, #33405a);
+  --block-block-handle-hover: #33405a;
+
+  --block-text-dot: #64748b;
+  --block-text-bg: #131a2a;
+  --block-text-border: #2b3650;
+  --block-text-text: #94a3b8;
+  --block-text-comment: #64748b;
+  --block-text-comment-text: #131a2a;
+  --block-text-badge-bg: #2b3650;
+  --block-text-badge-text: #94a3b8;
+  --block-text-handle: color-mix(in srgb, #131a2a 50%, #2b3650);
+  --block-text-handle-hover: #2b3650;
+
+  /* Itens da liturgia no tom 400 no escuro. */
+  --unit-song: oklch(76.5% 0.177 163.223);
+  --unit-fala: oklch(70.7% 0.165 254.624);
+  --unit-leitura: oklch(82.8% 0.189 84.429);
+  --unit-oracao: oklch(71.8% 0.202 349.761);
+  --unit-avisos: oklch(75% 0.183 55.934);
+  --unit-sermao: oklch(70.2% 0.183 293.541);
+  --unit-outro: oklch(70.4% 0.04 256.788);
+  --chord-sec-bg: #30280f;
+  --chord-sec-border: #7a6420;
+  --chord-sec-hover: #3b3115;
+  --chord-sec-text: #fcd34d;
+  --chord-rel-bg: #211a38;
+  --chord-rel-border: #5b46a3;
+  --chord-rel-hover: #2a2147;
+  --chord-rel-text: #c4b5fd;
 }
 
 @layer base {
