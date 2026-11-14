@@ -10,6 +10,7 @@ export type Rgb = [number, number, number];
 
 const WHITE: Rgb = [255, 255, 255];
 const BLACK: Rgb = [0, 0, 0];
+const DARK_SURFACE: Rgb = [17, 17, 19]; // --background no escuro (#111113)
 const FALLBACK_HEX = "#71717a";
 
 /** Aceita #rgb e #rrggbb (com ou sem #). Devolve null se não for uma cor válida. */
@@ -68,6 +69,24 @@ export function readableTint(
   for (let t = 0; contrastRatio(fg, bg) < minContrast && t < 1; ) {
     t = Math.min(1, t + 0.05);
     fg = mixRgb(base, BLACK, t);
+  }
+  return { background: rgbCss(bg), foreground: rgbCss(fg), ratio: contrastRatio(fg, bg) };
+}
+
+/**
+ * Versão para o tema escuro: fundo = a cor bem diluída na superfície escura (`tint` = peso da cor);
+ * texto = a cor clareada em passos de 5% até chegar a `minContrast`.
+ */
+export function readableTintDark(
+  hex: string,
+  { minContrast = 4.5, tint = 0.22 }: { minContrast?: number; tint?: number } = {}
+): ReadableTint {
+  const base = parseHex(hex) ?? (parseHex(FALLBACK_HEX) as Rgb);
+  const bg = mixRgb(DARK_SURFACE, base, tint);
+  let fg = base;
+  for (let t = 0; contrastRatio(fg, bg) < minContrast && t < 1; ) {
+    t = Math.min(1, t + 0.05);
+    fg = mixRgb(base, WHITE, t);
   }
   return { background: rgbCss(bg), foreground: rgbCss(fg), ratio: contrastRatio(fg, bg) };
 }

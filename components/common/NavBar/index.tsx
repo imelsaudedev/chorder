@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useBottomNavVisible } from "@/hooks/useBottomNavVisible";
+import { ThemeMenu, ThemeSheet } from "@/components/common/Theme/ThemeToggle";
 import { ListMusic, MessageCircleHeart, Music } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -52,6 +53,9 @@ export default function NavBar() {
         <div className="flex flex-col items-center pt-6 sm:pt-8 gap-6">
           {items}
         </div>
+        <div className="mt-auto flex flex-col items-center pb-6">
+          <ThemeMenu />
+        </div>
       </nav>
 
       {/* Bottom nav — só nas páginas de lista e só no mobile */}
@@ -59,6 +63,7 @@ export default function NavBar() {
         <nav className="sm:hidden fixed bottom-0 left-0 w-full z-40 bg-background/80 backdrop-blur-lg shadow-md border-t border-border/50">
           <div className="flex justify-around py-3">
             {items}
+            <ThemeSheet />
           </div>
         </nav>
       )}

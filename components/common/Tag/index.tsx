@@ -1,4 +1,4 @@
-import { readableTint } from "@/lib/color-contrast";
+import { readableTint, readableTintDark } from "@/lib/color-contrast";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -34,11 +34,19 @@ export default function Tag({ label, color, variant = "default", size = "xs", cl
   const base = "inline-flex items-center rounded-sm font-medium whitespace-nowrap";
 
   if (color) {
-    const { background, foreground } = readableTint(color);
+    const light = readableTint(color);
+    const dark = readableTintDark(color);
+    // Cada tema lê o seu par de cores por variável CSS (a classe `dark` decide qual vale).
+    const style = {
+      "--tag-bg": light.background,
+      "--tag-fg": light.foreground,
+      "--tag-bg-dark": dark.background,
+      "--tag-fg-dark": dark.foreground,
+    } as React.CSSProperties;
     return (
       <span
-        className={cn(base, sizeClasses[size], className)}
-        style={{ backgroundColor: background, color: foreground }}
+        className={cn(base, "bg-(--tag-bg) text-(--tag-fg) dark:bg-(--tag-bg-dark) dark:text-(--tag-fg-dark)", sizeClasses[size], className)}
+        style={style}
       >
         {label}
       </span>

@@ -19,12 +19,13 @@ describe("Tag", () => {
     expect(el.className).not.toMatch(/\bborder\b/);
   });
 
-  it("cor do banco: texto legível (contraste >= 4,5) mesmo em cor clara", () => {
+  it("cor do banco: texto legível (contraste >= 4,5) nos dois temas, mesmo em cor clara", () => {
     render(<Tag label="Páscoa" color="#f59e0b" />);
     const el = screen.getByText("Páscoa");
-    const bg = rgbOf(el.style.backgroundColor);
-    const fg = rgbOf(el.style.color);
-    expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(4.5);
+    const v = (name: string) => rgbOf(el.style.getPropertyValue(name));
+    expect(contrastRatio(v("--tag-fg"), v("--tag-bg"))).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(v("--tag-fg-dark"), v("--tag-bg-dark"))).toBeGreaterThanOrEqual(4.5);
+    expect(el.className).toContain("dark:bg-(--tag-bg-dark)");
     expect(el.style.borderColor).toBe("");
   });
 

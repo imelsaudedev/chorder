@@ -4,6 +4,10 @@
     "siteDescription": "Uma ferramenta de gerenciamento de liturgias"
   },
   "Messages": {
+    "theme": "Tema",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Escuro",
     "actions": "Ações",
     "arrangement": "Arranjo",
     "defaultArrangement": "Arranjo principal",
