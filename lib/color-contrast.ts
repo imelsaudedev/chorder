@@ -10,7 +10,7 @@ export type Rgb = [number, number, number];
 
 const WHITE: Rgb = [255, 255, 255];
 const BLACK: Rgb = [0, 0, 0];
-const DARK_SURFACE: Rgb = [12, 18, 34]; // --background no escuro (#0c1222)
+const DARK_SURFACE: Rgb = [17, 17, 19]; // --background no escuro (#111113)
 const FALLBACK_HEX = "#71717a";
 
 /** Aceita #rgb e #rrggbb (com ou sem #). Devolve null se não for uma cor válida. */

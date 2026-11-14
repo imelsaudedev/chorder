@@ -512,68 +512,68 @@
 .dark {
   color-scheme: dark;
 
-  --background: #0c1222;
-  --foreground: #f2f5fb;
+  --background: #111113;
+  --foreground: #f4f4f5;
 
-  --card: #111a2e;
-  --card-foreground: #f2f5fb;
+  --card: #18181b;
+  --card-foreground: #f4f4f5;
 
-  --popover: #182134;
-  --popover-foreground: #f2f5fb;
+  --popover: #1f1f23;
+  --popover-foreground: #f4f4f5;
 
-  --primary: #f2f5fb;
-  --primary-foreground: #0c1222;
+  --primary: #f4f4f5;
+  --primary-foreground: #111113;
 
   --secondary: #4b84f7;
   --secondary-foreground: #ffffff;
 
-  --muted: #334057;
-  --muted-foreground: #9aa9bf;
+  --muted: #3f3f46;
+  --muted-foreground: #a1a1aa;
 
   --accent: hsl(23 100% 60%);
-  --accent-foreground: #0c1222;
+  --accent-foreground: #111113;
 
   --destructive: #ff7a7a;
-  --destructive-foreground: #0c1222;
+  --destructive-foreground: #111113;
 
-  --border: #26314a;
-  --input: #26314a;
+  --border: #2e2e33;
+  --input: #2e2e33;
   --ring: #4b84f7;
 
   /* Neutros de superfície no escuro (6.2 do design system). */
-  --surface-subtle: #111a2e;
-  --surface-muted: #18213a;
-  --surface-strong: #1f2940;
-  --border-strong: #33405a;
-  --faint-foreground: #6b7a93;
+  --surface-subtle: #18181b;
+  --surface-muted: #202024;
+  --surface-strong: #2a2a2f;
+  --border-strong: #3f3f46;
+  --faint-foreground: #71717a;
 
-  --surface-inverse: #05080f;
-  --surface-inverse-hover: #121a2b;
+  --surface-inverse: #09090b;
+  --surface-inverse-hover: #18181b;
   --on-inverse: #d4d4d8;
-  --on-inverse-muted: #8693a6;
-  --border-inverse: #33405a;
+  --on-inverse-muted: #8a8a93;
+  --border-inverse: #3f3f46;
 
   /* Estados no escuro (6.2 do design system). */
   --danger: #ff7a7a;
-  --danger-foreground: #0c1222;
+  --danger-foreground: #111113;
   --danger-subtle: #321a20;
   --danger-muted: #3f1f27;
   --danger-border: #7f3040;
   --danger-text: #ffa2a2;
   --warning: #fbbf24;
-  --warning-foreground: #0c1222;
+  --warning-foreground: #111113;
   --warning-subtle: #30280f;
   --warning-muted: #3d3213;
   --warning-border: #7a6420;
   --warning-text: #fcd34d;
   --success: #4ade80;
-  --success-foreground: #0c1222;
+  --success-foreground: #111113;
   --success-subtle: #0d2b21;
   --success-muted: #123a2c;
   --success-border: #1f6f52;
   --success-text: #6ee7b7;
   --info: #38bdf8;
-  --info-foreground: #0c1222;
+  --info-foreground: #111113;
   --info-subtle: #16254a;
   --info-muted: #1c2f5c;
   --info-border: #2f4a8a;
@@ -671,27 +671,27 @@
   --block-ending-handle: color-mix(in srgb, #10291a 50%, #2c6e43);
   --block-ending-handle-hover: #2c6e43;
 
-  --block-block-dot: #94a3b8;
-  --block-block-bg: #161d2e;
-  --block-block-border: #33405a;
-  --block-block-text: #cbd5e1;
-  --block-block-comment: #94a3b8;
-  --block-block-comment-text: #161d2e;
-  --block-block-badge-bg: #33405a;
-  --block-block-badge-text: #cbd5e1;
-  --block-block-handle: color-mix(in srgb, #161d2e 50%, #33405a);
-  --block-block-handle-hover: #33405a;
+  --block-block-dot: #a1a1aa;
+  --block-block-bg: #1c1c20;
+  --block-block-border: #3f3f46;
+  --block-block-text: #d4d4d8;
+  --block-block-comment: #a1a1aa;
+  --block-block-comment-text: #1c1c20;
+  --block-block-badge-bg: #3f3f46;
+  --block-block-badge-text: #d4d4d8;
+  --block-block-handle: color-mix(in srgb, #1c1c20 50%, #3f3f46);
+  --block-block-handle-hover: #3f3f46;
 
-  --block-text-dot: #64748b;
-  --block-text-bg: #131a2a;
-  --block-text-border: #2b3650;
-  --block-text-text: #94a3b8;
-  --block-text-comment: #64748b;
-  --block-text-comment-text: #131a2a;
-  --block-text-badge-bg: #2b3650;
-  --block-text-badge-text: #94a3b8;
-  --block-text-handle: color-mix(in srgb, #131a2a 50%, #2b3650);
-  --block-text-handle-hover: #2b3650;
+  --block-text-dot: #71717a;
+  --block-text-bg: #18181b;
+  --block-text-border: #34343a;
+  --block-text-text: #a1a1aa;
+  --block-text-comment: #71717a;
+  --block-text-comment-text: #18181b;
+  --block-text-badge-bg: #34343a;
+  --block-text-badge-text: #a1a1aa;
+  --block-text-handle: color-mix(in srgb, #18181b 50%, #34343a);
+  --block-text-handle-hover: #34343a;
 
   /* Itens da liturgia no tom 400 no escuro. */
   --unit-song: oklch(76.5% 0.177 163.223);

@@ -37,9 +37,9 @@ Definidos em `app/globals.css` (`:root`) e expostos ao Tailwind em `@theme inlin
 | `--secondary` | `hsl(221 83% 53%)` | **azul da marca**: ações, selos, faixas, foco |
 | `--accent` | `hsl(23 100% 60%)` | destaque raro (laranja) |
 | `--muted` | `hsl(215 16% 72%)` | fundos e linhas neutras |
-| `--muted-foreground` | `hsl(215 14% 48%)` | texto de apoio, ícones, rótulos |
+| `--muted-foreground` | `hsl(215 14% 48%)` | `#a1a1aa` |
 | `--destructive` | `hsl(0 84.2% 60.2%)` | erro e ações destrutivas |
-| `--border` / `--input` | `hsl(0 0% 89.8%)` | bordas e campos |
+| `--border` / `--input` | `hsl(0 0% 89.8%)` | `#2e2e33` |
 | `--ring` | `hsl(221 83% 53%)` | anel de foco |
 | `--radius` | `0.5rem` | base; `rounded-md` = −2px, `rounded-sm` = −4px |
 
@@ -142,21 +142,22 @@ Cores por tipo em `components/song/unit-colors.ts` (ver 6.3 para a versão escur
 ### 6.1 Estado hoje
 **Base pronta, ainda sem revisão tela a tela (etapa 3).** O `.dark` usa a paleta de 6.2 (marca azul), com `color-scheme`. O `ThemeProvider` (`components/common/Theme`) guarda a escolha em `localStorage` (`theme`) e um script inline no `<head>` aplica a classe `dark` antes da pintura. **O padrão é Claro** (decidido em 13/11/2026) até a etapa 4 revisar as telas; depois troca-se `DEFAULT_THEME` em `lib/theme.ts` para `system`. O alternador (6.5) está na barra lateral e na barra inferior do celular. As áreas fora de `components/ui` ainda podem ter cores sem versão escura (ver 8).
 
-### 6.2 Proposta de paleta base (do protótipo `docs/prototipo-cifras/cabecalho-e-edicao.html`)
-O protótipo já tem uma paleta escura com superfícies azuladas. Mapeada para os tokens existentes:
+### 6.2 Paleta base (neutros acinzentados, sem tom azulado: decidido em 13/11/2026)
+Os neutros do escuro são cinzas quase puros (família zinc); só a marca (`secondary`) e os estados trazem cor. O protótipo
+(`docs/prototipo-cifras/cabecalho-e-edicao.html`) tinha superfícies azuladas; elas foram neutralizadas. Mapeada para os tokens existentes:
 
 | Token | Claro | Escuro proposto | Contraste |
 |---|---|---|---|
-| `--background` | `hsl(0 0% 100%)` | `#0c1222` · `hsl(224 48% 9%)` | — |
-| `--card` | `hsl(0 0% 100%)` | `#111a2e` · `hsl(221 46% 12.4%)` | — |
-| `--popover` | `hsl(0 0% 100%)` | `#182134` · `hsl(221 37% 14.9%)` | — |
-| `--foreground` / `--primary` | quase preto | `#f2f5fb` · `hsl(220 53% 96.7%)` | 17,1 sobre o fundo |
+| `--background` | `hsl(0 0% 100%)` | `#111113` | — |
+| `--card` | `hsl(0 0% 100%)` | `#18181b` | — |
+| `--popover` | `hsl(0 0% 100%)` | `#1f1f23` | — |
+| `--foreground` / `--primary` | quase preto | `#f4f4f5` | 17,1 sobre o fundo |
 | `--muted-foreground` | `hsl(215 14% 48%)` | `#9aa9bf` · `hsl(216 22% 67.6%)` | 7,8 |
 | `--border` / `--input` | `hsl(0 0% 89.8%)` | `#26314a` · `hsl(222 32% 22%)` | decorativa |
 | `--secondary` (azul da marca) | `hsl(221 83% 53%)` | `#4b84f7` · `hsl(220 91% 63%)` | 5,3 |
-| `--secondary-foreground` | quase branco | `#0c1222` | 5,3 sobre o azul |
+| `--secondary-foreground` | quase branco | `#ffffff` (contraste ~3,6 sobre o azul) | 5,3 sobre o azul |
 | `--destructive` | `hsl(0 84% 60%)` | `#ff7a7a` · `hsl(0 100% 74%)` | 7,4 |
-| hover / seleção (a criar) | `zinc-100` | `#18213a` / `#16254a` | — |
+| hover / seleção | `zinc-100` | `surface-muted` `#202024` | — |
 
 Diferença importante em relação ao `.dark` atual: **a marca continua azul** (hoje o `.dark` troca por laranja).
 
@@ -174,8 +175,8 @@ fundo = mistura escura do matiz (~12% de luminosidade), borda = ~30%, círculo =
 | INTERLUDE | amber | `#30280f` | `#7a6420` | `#fcd34d` | `#fbbf24` | 10,1 |
 | SOLO | fuchsia | `#2e1534` | `#8a3a94` | `#f0abfc` | `#e879f9` | 9,4 |
 | ENDING | **green** (hoje é lime) | `#10291a` | `#2c6e43` | `#86efac` | `#4ade80` | 11,0 |
-| BLOCK | neutro | `#161d2e` | `#33405a` | `#cbd5e1` | `#94a3b8` | 11,3 |
-| TEXT | slate | `#131a2a` | `#2b3650` | `#94a3b8` | `#64748b` | 6,8 |
+| BLOCK | neutro | `#1c1c20` | `#3f3f46` | `#d4d4d8` | `#a1a1aa` | 11,3 |
+| TEXT | neutro | `#18181b` | `#34343a` | `#a1a1aa` | `#71717a` | 6,8 |
 
 Contrastes de texto calculados pela fórmula do WCAG (todos acima de 4,5).
 
