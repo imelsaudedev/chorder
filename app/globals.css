@@ -525,9 +525,9 @@
   --primary-foreground: #0c1222;
 
   --secondary: #4b84f7;
-  --secondary-foreground: #0c1222;
+  --secondary-foreground: #ffffff;
 
-  --muted: #6b7a93;
+  --muted: #334057;
   --muted-foreground: #9aa9bf;
 
   --accent: hsl(23 100% 60%);
