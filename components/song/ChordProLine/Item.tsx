@@ -38,7 +38,7 @@ export default function Item({
   mode,
   density,
   commentAbove,
-  commentClass = "text-zinc-600 border-zinc-600",
+  commentClass = "text-muted-foreground border-muted-foreground",
 }: ItemProps) {
   if (item._name === "comment") {
     if (hideLyrics) {
