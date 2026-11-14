@@ -4,6 +4,10 @@
     "siteDescription": "A tool for managing chord sheets"
   },
   "Messages": {
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
     "actions": "Actions",
     "arrangement": "Arrangement",
     "defaultArrangement": "Default arrangement",

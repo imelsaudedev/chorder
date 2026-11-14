@@ -305,6 +305,8 @@
 }
 
 :root {
+  color-scheme: light;
+
   --background: hsl(0 0% 100%);
   --foreground: hsl(224 84% 4.9%);
 
@@ -508,35 +510,37 @@
 }
 
 .dark {
-  --background: hsl(224 71% 4.9%);
-  --foreground: hsl(214 95% 99%);
+  color-scheme: dark;
 
-  --card: hsl(224 71% 4.9%);
-  --card-foreground: hsl(214 95% 99%);
+  --background: #0c1222;
+  --foreground: #f2f5fb;
 
-  --popover: hsl(224 71% 4.9%);
-  --popover-foreground: hsl(214 95% 99%);
+  --card: #111a2e;
+  --card-foreground: #f2f5fb;
 
-  --primary: hsl(0, 0%, 14.9%);
-  --primary-foreground: hsl(224 89% 14%);
+  --popover: #182134;
+  --popover-foreground: #f2f5fb;
 
-  --secondary: hsl(23 100% 60%);
-  --secondary-foreground: hsl(214 95% 99%);
+  --primary: #f2f5fb;
+  --primary-foreground: #0c1222;
 
-  --muted: hsl(224 32.6% 17.5%);
-  --muted-foreground: hsl(215 20.2% 65.1%);
+  --secondary: #4b84f7;
+  --secondary-foreground: #0c1222;
+
+  --muted: #6b7a93;
+  --muted-foreground: #9aa9bf;
 
   --accent: hsl(23 100% 60%);
-  --accent-foreground: hsl(214 95% 99%);
+  --accent-foreground: #0c1222;
 
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(214 95% 99%);
+  --destructive: #ff7a7a;
+  --destructive-foreground: #0c1222;
 
-  --border: hsl(224 32.6% 17.5%);
-  --input: hsl(224 32.6% 17.5%);
-  --ring: hsl(213 94% 68%);
+  --border: #26314a;
+  --input: #26314a;
+  --ring: #4b84f7;
 
-  /* Provisório até a etapa 3 (paleta de docs/design-system.md, 6.2). */
+  /* Neutros de superfície no escuro (6.2 do design system). */
   --surface-subtle: #111a2e;
   --surface-muted: #18213a;
   --surface-strong: #1f2940;
@@ -549,7 +553,7 @@
   --on-inverse-muted: #8693a6;
   --border-inverse: #33405a;
 
-  /* Provisório até a etapa 3 (paleta de docs/design-system.md). */
+  /* Estados no escuro (6.2 do design system). */
   --danger: #ff7a7a;
   --danger-foreground: #0c1222;
   --danger-subtle: #321a20;

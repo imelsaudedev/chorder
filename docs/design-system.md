@@ -140,10 +140,7 @@ Cores por tipo em `components/song/unit-colors.ts` (ver 6.3 para a versão escur
 ## 6. Modo escuro
 
 ### 6.1 Estado hoje
-**Não existe na prática.** O `globals.css` tem um bloco `.dark`, mas é o padrão do shadcn e está incompleto (o `primary` fica
-cinza escuro sobre fundo escuro e o `secondary` vira laranja). Nada aplica a classe `dark` (sem provedor de tema,
-alternador ou `prefers-color-scheme`); o `body` tem `bg-white`; as 33 ocorrências de `dark:` estão só em `components/ui`
-(shadcn). O resto do app usa cor direta da paleta e não tem versão escura (ver 8).
+**Base pronta, ainda sem revisão tela a tela (etapa 3).** O `.dark` usa a paleta de 6.2 (marca azul), com `color-scheme`. O `ThemeProvider` (`components/common/Theme`) guarda a escolha em `localStorage` (`theme`) e um script inline no `<head>` aplica a classe `dark` antes da pintura. **O padrão é Claro** (decidido em 13/11/2026) até a etapa 4 revisar as telas; depois troca-se `DEFAULT_THEME` em `lib/theme.ts` para `system`. O alternador (6.5) está na barra lateral e na barra inferior do celular. As áreas fora de `components/ui` ainda podem ter cores sem versão escura (ver 8).
 
 ### 6.2 Proposta de paleta base (do protótipo `docs/prototipo-cifras/cabecalho-e-edicao.html`)
 O protótipo já tem uma paleta escura com superfícies azuladas. Mapeada para os tokens existentes:
@@ -207,14 +204,14 @@ A cor não é o único sinal: o bloco mostra o nome ("Final", "Introdução") e 
 4. **Migração por área** (editor de cifra e blocos, barra de mídia, liturgia, Palco), conferindo claro e escuro em 390 / 768 / 1280.
 
 ### 6.5 Alternador de tema (decidido em 13/11/2026)
-Um componente `ThemeToggle` com três opções: **Sistema** (padrão), **Claro** e **Escuro**; o ícone mostra o tema atual (monitor, sol ou lua).
+Componentes `ThemeMenu` (barra lateral) e `ThemeSheet` (celular) com três opções: **Sistema**, **Claro** (padrão por enquanto) e **Escuro**; o ícone mostra o tema atual (monitor, sol ou lua).
 - **Desktop e tablet:** botão no **rodapé da barra lateral** (`NavBar`, que hoje não tem nada ali), abrindo um menu para o lado.
 - **Celular, listas:** **4º item da barra inferior**, "Tema", no mesmo estilo dos outros (sem estado "ativo"); ao tocar abre uma folha de baixo
   (mesmo padrão dos seletores do filtro) com as três opções. Quatro itens cabem (cerca de 97px cada em 390px).
 - **Telas sem barra no celular** (detalhe e edição): seguem o tema do sistema; a escolha manual vale em todas as telas porque fica guardada no aparelho.
 - **Modo Palco:** segue o tema geral escolhido; não tem opção própria.
 - Descartados: alternador no cabeçalho (disputa a área de ações do título) e na tela de Feedback (pouco descobrível).
-- A barra inferior hoje usa `bg-white/80` e `border-gray-100`, e a lateral `bg-zinc-50`: entram na migração para tokens.
+- A barra inferior e a lateral já usam tokens (`bg-background/80`, `bg-surface-subtle`).
 
 Fora do escopo da tokenização: cores que são **dado** (cor de categoria e de capa, `lib/cover-theme.ts`, `readableTint`).
 
