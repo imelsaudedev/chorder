@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { arrangementAudioSchema } from "./arrangement-audio";
 import { songSchema } from "./song";
 import { songUnitSchema } from "./song-unit";
 
@@ -9,14 +10,17 @@ export const arrangementSchema = z
     songId: z.number().optional(),
     originalArrangementId: z.number().nullable(),
     key: z.string(),
+    youtubeUrl: z.string().url().or(z.literal("")).nullable(),
+    audios: z.array(arrangementAudioSchema),
     isDefault: z.boolean(),
     isDeleted: z.boolean(),
     isServiceArrangement: z.boolean(),
     song: songSchema.optional(),
     units: z.array(songUnitSchema).optional(),
   })
-  .refine((data) => data.units && data.units.length > 0, {
-    message: "An arrangement must have at least one unit.",
-  });
+  .refine(
+    (data) => data.isServiceArrangement || (data.units && data.units.length > 0),
+    { message: "An arrangement must have at least one unit." }
+  );
 
 export type ArrangementSchema = z.infer<typeof arrangementSchema>;

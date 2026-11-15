@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modo Palco — controles (protótipo)</title>
+<style>
+/* Protótipo solto, sem dependências: abre com duplo clique. Compara layouts de controles do Modo Palco
+   (celular retrato e tablet paisagem). As cores dos blocos seguem cabecalho-e-edicao.html. Ícones: lucide. */
+:root{
+  --pg:#e9edf3;--chip:#fff;--pgline:#a3b0c2;--pgfg:#0b1220;--pgmut:#475569;
+  --bg:#fff;--fg:#0b1220;--mfg:#5b6b82;--line:#d9dee6;--hover:#f1f4f8;
+  --act:#2463eb;--actf:#fff;
+  --i-bg:#f4fbdd;--i-bd:#cfe89a;--i-fg:#4d7c0f;
+  --v-bg:#e6fbfe;--v-bd:#8fe0f0;--v-fg:#0e7490;
+  --r-bg:#fdeeee;--r-bd:#f6bcbc;--r-fg:#be123c;
+  --n-bg:#fff8e1;--n-bd:#f3dc9b;--n-fg:#a16207;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:20px 16px 48px;background:var(--pg);color:var(--pgfg);font:400 14px/20px system-ui,-apple-system,"Segoe UI",sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+svg{display:block;flex:none}
+h1{font-size:20px;line-height:26px;margin:0 0 4px}
+.intro{max-width:78ch;margin:0 auto 16px}
+.intro p{margin:0;color:var(--pgmut)}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:center;margin:0 auto 16px}
+.ctl .g{display:flex;flex-direction:column;gap:4px}
+.ctl .g>span{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--pgmut)}
+.seg{display:inline-flex;border:1px solid var(--pgline);border-radius:99px;background:var(--chip);padding:2px}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:99px;font-size:13px;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--pgfg);color:var(--pg)}
+.wrap{display:flex;flex-wrap:wrap;gap:24px 36px;justify-content:center;align-items:flex-start}
+.notes{flex:1 1 280px;max-width:420px;display:flex;flex-direction:column;gap:10px}
+.nc{background:var(--chip);border:1px solid var(--pgline);border-radius:10px;padding:12px 14px}
+.nc h2{margin:0 0 6px;font-size:14px}
+.nc ul{margin:0;padding-left:18px;color:var(--pgmut)}
+.nc li{margin:2px 0}
+
+/* ---------- dispositivo ---------- */
+.device{position:relative;overflow:hidden;background:var(--bg);color:var(--fg);border:2px solid var(--pgline);border-radius:28px;
+  width:390px;max-width:100%;height:760px;--top:90px;--dock:72px}
+.device[data-dev=tablet]{width:min(1000px,100%);height:600px;border-radius:20px;--top:60px}
+.device[data-mode=ler]{--top:118px}
+.device[data-dev=tablet][data-mode=ler]{--top:68px}
+.device:fullscreen{border:0;border-radius:0}
+.device:-webkit-full-screen{border:0;border-radius:0}
+.scroller{position:absolute;inset:0;overflow-y:auto;padding:calc(var(--top) + 8px) 16px calc(var(--dock) + 24px) 16px}
+.song-div{display:flex;align-items:center;gap:10px;color:var(--mfg);font-size:13px;padding:14px 0 10px}
+.song-div:before,.song-div:after{content:"";height:1px;background:var(--line);flex:1}
+.block{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:0 0 10px;background:var(--bg)}
+.block[data-t=I]{background:var(--i-bg);border-color:var(--i-bd)}
+.block[data-t=V]{background:var(--v-bg);border-color:var(--v-bd)}
+.block[data-t=R]{background:var(--r-bg);border-color:var(--r-bd)}
+.block[data-t=P]{background:var(--n-bg);border-color:var(--n-bd)}
+.block .lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin-bottom:2px}
+.ln{font-size:var(--fs,18px);line-height:1.2;margin:4px 0}
+.ln .c{display:block;font:700 .8em/1.1 ui-monospace,Menlo,Consolas,monospace;color:var(--r-fg);white-space:pre;min-height:1.1em}
+
+/* ---------- topo (informação) ---------- */
+.top{position:absolute;left:0;right:0;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);padding:14px 16px;height:var(--top);transition:transform .25s}
+.top .row1{display:flex;align-items:center;gap:8px;height:30px}
+.top .title{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .idx{font-size:12px;color:var(--mfg)}
+.device[data-mode=ler] .top .title{font-size:20px;line-height:28px}
+.device[data-mode=ler] .top .row1{height:40px}
+.map{display:flex;gap:3px;align-items:center;width:100%;height:28px;margin-top:4px}
+/* chips quadrados: largura = altura, encolhem juntos pra caber todos numa linha */
+.chip{flex:1 1 0;min-width:0;max-width:26px;aspect-ratio:1/1;border:1px solid;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;text-transform:uppercase;line-height:1;overflow:hidden;white-space:nowrap;background:none;padding:0}
+.map.tap{height:auto;margin-top:4px;overflow-x:auto;padding-bottom:4px;gap:6px}
+.map.tap .chip{flex:0 0 38px;width:38px;max-width:none;font-size:12px;border-radius:8px;cursor:pointer}
+.chip[data-t=I]{background:var(--i-bg);border-color:var(--i-bd);color:var(--i-fg)}
+.chip[data-t=V]{background:var(--v-bg);border-color:var(--v-bd);color:var(--v-fg)}
+.chip[data-t=R]{background:var(--r-bg);border-color:var(--r-bd);color:var(--r-fg)}
+.chip[data-t=P]{background:var(--n-bg);border-color:var(--n-bd);color:var(--n-fg)}
+.chip.on{box-shadow:0 0 0 2px var(--act)}
+/* tablet paisagem / desktop: título à esquerda e mapa à direita, na mesma linha — cabeçalho mais estreito */
+.device[data-dev=tablet] .top{display:flex;align-items:center;gap:8px;padding:10px 16px}
+.device[data-dev=tablet] .top .row1{flex:0 1 auto;max-width:45%;height:auto}
+.device[data-dev=tablet] #mapHost{flex:1;min-width:0}
+.device[data-dev=tablet] .map{margin-top:0;justify-content:flex-end}
+.meta{display:flex;align-items:center;height:28px;margin-top:4px;font-size:13px;font-weight:600;color:var(--mfg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.device[data-dev=tablet] .meta{margin-top:0;justify-content:flex-end}
+.device[data-dev=tablet] .map.tap{padding-bottom:0;margin-top:0}
+
+/* ---------- rodapé (zona do polegar) ----------
+   Todos os botões: mesma altura (48) e formato (retângulo arredondado com contorno).
+   Esquerda: − ▶ + (o play ocupa o espaço que sobra) · Configurações · Palco (sempre no mesmo canto). */
+.dock{position:absolute;z-index:6;left:0;right:0;bottom:0;height:var(--dock);display:flex;align-items:center;gap:8px;
+  padding:0 12px 8px;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(6px);border-top:1px solid var(--line);transition:background .25s}
+.ctrls{flex:1;min-width:0;display:flex;align-items:center;gap:8px;transition:transform .25s,opacity .25s}
+.trio{flex:none;display:flex;gap:4px}
+.ctrls #bCfg{margin-left:auto}
+.btn{height:48px;min-width:48px;border-radius:12px;border:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center;
+  padding:0;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.play{flex:none;width:88px;background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn.play.on{background:var(--act);border-color:var(--act);color:var(--actf);font-size:17px}
+/* Palco: botão retangular, sempre no mesmo canto. Fora: ícone "tela cheia" (cantos para fora). Dentro: "sair da tela cheia" (cantos para dentro). */
+.tgl{margin-left:auto;flex:none}
+.device[data-mode=ler] .ctrls{display:none}
+.device[data-mode=ler] .dock{background:none;border-top-color:transparent;backdrop-filter:none;pointer-events:none}
+.device[data-mode=ler] .tgl{pointer-events:auto;box-shadow:0 2px 10px #0002}
+.device.dim .top{transform:translateY(-100%)}
+.device.dim .ctrls{transform:translateY(160%);opacity:0;pointer-events:none}
+.device.dim .dock{background:none;border-top-color:transparent;backdrop-filter:none;pointer-events:none}
+.device.dim .tgl{pointer-events:auto}
+.hint{position:absolute;z-index:4;left:50%;transform:translateX(-50%);top:10px;font-size:11px;color:var(--mfg);background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:2px 10px;opacity:0;transition:opacity .2s;pointer-events:none}
+.device.dim .hint{opacity:1}
+
+/* ---------- modal de configurações (tom + fonte) ---------- */
+.scrim{position:absolute;inset:0;z-index:7;background:#0006;display:none}
+.scrim.open{display:block}
+.cfg{position:absolute;z-index:8;left:12px;right:12px;max-width:320px;margin-left:auto;bottom:calc(var(--dock) + 8px);background:var(--bg);border:1px solid var(--pgline);border-radius:18px;
+  box-shadow:0 12px 40px #0004;padding:14px 16px 16px;display:none}
+.cfg.open{display:block}
+.cfg header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cfg h3{margin:0;font-size:16px}
+.cfg .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.cfg .row>span{font-size:13px;color:var(--mfg);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.cfg .stp{display:flex;align-items:center;gap:6px}
+.cfg .stp .v{min-width:60px;text-align:center;font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+.sw{position:relative;width:48px;height:28px;border-radius:99px;border:0;background:#94a3b8;padding:0;flex:none;transition:background .15s}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:transform .15s}
+.sw[aria-checked=true]{background:var(--act)}
+.sw[aria-checked=true]:after{transform:translateX(20px)}
+
+/* ---------- roteiro: itens que não são música (fala, oração, leitura, avisos, sermão) ---------- */
+.rot{display:none;background:#eef1f5;border-radius:14px;padding:.7em .9em;margin:0 0 10px;font-size:var(--fs,18px);line-height:1.3}
+.device[data-rot=on] .rot{display:block}
+.rot .k{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:.62em;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mfg)}
+.device[data-rot=on] .rot.compact{display:flex;align-items:baseline;gap:.6em;padding:.5em .9em}
+.rot.compact .k1{font-size:.62em;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mfg)}
+.rot.compact .t{margin:0;flex:1;min-width:0}
+.rot.compact .m{font-size:.62em;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mfg);white-space:nowrap}
+.rot .t{font-weight:600;margin:.15em 0 0}
+.rot .b{margin:.25em 0 0}
+.rot ul{margin:.25em 0 0;padding-left:1.1em}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Modo Palco — controles</h1>
+  <p>Protótipo descartável para comparar onde ficam os controles. A rolagem automática funciona de verdade: toque na letra para pausar, espaço liga/pausa, ↑/↓ muda a velocidade.</p>
+</div>
+
+<div class="ctl">
+  <div class="g"><span>Dispositivo</span><div class="seg" data-k="dev">
+    <button data-v="phone" aria-pressed="true">Celular (retrato)</button><button data-v="tablet" aria-pressed="false">Tablet (paisagem)</button></div></div>
+  <div class="g"><span>Variante</span><div class="seg" data-k="var">
+    <button data-v="fixed" aria-pressed="true">A · Controles fixos</button><button data-v="hide" aria-pressed="false">B · Cromo que some</button></div></div>
+  <div class="g"><span>Tela cheia no Palco</span><div class="seg" data-k="fs">
+    <button data-v="on" aria-pressed="true">Ligada</button><button data-v="off" aria-pressed="false">Desligada</button></div></div>
+  <div class="g"><span>Play nos itens do roteiro</span><div class="seg" data-k="stop">
+    <button data-v="pause" aria-pressed="true">Pausa no item</button><button data-v="pass" aria-pressed="false">Passa direto</button></div></div>
+</div>
+
+<div class="wrap">
+  <div class="device" id="dv" data-dev="phone" data-var="fixed" data-mode="ler" data-rot="off">
+    <div class="scroller" id="sc"></div>
+
+    <header class="top" id="top">
+      <div class="row1"><span class="idx" id="idx"></span><span class="title" id="ttl"></span></div>
+      <div id="mapHost"></div>
+    </header>
+
+    <nav class="dock" id="dock" aria-label="Controles do Palco">
+      <div class="ctrls">
+        <div class="trio">
+          <button class="btn" id="bSlow" aria-label="Mais devagar">−</button>
+          <button class="btn play" id="bPlay"><span id="pTxt"></span></button>
+          <button class="btn" id="bFast" aria-label="Mais rápido">+</button>
+        </div>
+        <button class="btn" id="bCfg" aria-label="Configurações" title="Configurações"></button>
+      </div>
+      <button class="btn tgl" id="tgl" aria-pressed="false"></button>
+    </nav>
+    <div class="hint">Toque para mostrar os controles</div>
+
+    <div class="scrim" id="scrim"></div>
+    <section class="cfg" id="cfg" role="dialog" aria-label="Configurações">
+      <header><h3>Configurações</h3><button class="btn" id="cfgX" aria-label="Fechar" style="min-width:44px;height:44px"></button></header>
+      <div class="row"><span>Exibir roteiro</span><button class="sw" id="swRot" role="switch" aria-checked="false" aria-label="Exibir roteiro"></button></div>
+      <div class="row"><span>Tom</span><div class="stp"><button class="btn" data-k="key" data-d="-1" aria-label="Baixar o tom">−</button><span class="v" id="vKey">G</span><button class="btn" data-k="key" data-d="1" aria-label="Subir o tom">+</button></div></div>
+      <div class="row"><span>Fonte</span><div class="stp"><button class="btn" data-k="font" data-d="-2" aria-label="Diminuir a fonte" style="font-size:13px">A−</button><span class="v" id="vFont">18</span><button class="btn" data-k="font" data-d="2" aria-label="Aumentar a fonte" style="font-size:18px">A+</button></div></div>
+    </section>
+  </div>
+
+  <div class="notes">
+    <div class="nc"><h2>O que testar</h2><ul>
+      <li>O protótipo abre em <b>leitura normal</b>. Toque no ícone de <b>tela cheia</b> (canto direito) para entrar no Palco; lá ele vira o ícone de <b>sair da tela cheia</b>, no mesmo canto.</li>
+      <li>Rodapé numa linha só (zona do polegar), mesma altura e formato: à esquerda <b>− ▶ +</b> (play com largura máxima); à direita <b>Configurações</b> e <b>Palco</b>.</li>
+      <li><b>Exibir roteiro</b> (em Configurações, desligado por padrão): mostra oração, leitura, avisos e sermão em caixas cinza entre as músicas, na fonte escolhida. Teste o seletor <b>"Play nos itens do roteiro"</b> no topo.</li>
+      <li>Play: parado = preto com ▶; rolando = azul só com a velocidade (toque pausa).</li>
+      <li><b>Configurações</b> abre um modal único com tom e fonte.</li>
+      <li><b>Tela cheia</b>: ao entrar no Palco o navegador pede tela cheia de verdade; sair pelo X (ou pelo gesto do sistema) volta à leitura. Veja a nota abaixo.</li>
+      <li>Cabeçalho do celular com mais respiro embaixo. <b>No tablet</b>, título à esquerda e mapa à direita, na mesma linha (cabeçalho mais baixo).</li>
+      <li>Chips quadrados, encolhendo juntos pra caber numa linha. O mapa só informa no Palco e navega na leitura.</li>
+      <li>Variante B: com a rolagem ligada, as barras somem após 4 s; um toque na letra traz de volta (o botão Palco fica).</li>
+      <li>Qualquer toque na letra pausa. O mapa destaca o bloco que está na tela (extra do protótipo).</li>
+    </ul></div>
+    <div class="nc" id="fsNote"><h2>Tela cheia</h2><p style="margin:0;color:var(--pgmut)" id="fsTxt">Ainda não testada. Entre no Palco para ver.</p></div>
+    <div class="nc"><h2>Fora do protótipo</h2><ul><li>Bloqueio de tela, pedal Bluetooth real e persistência.</li></ul></div>
+  </div>
+</div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const SPEEDS = [0.25, 0.5, 0.75, 1];
+const KEYS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FLAT = {Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
+const NUMBERED = { V: 1, R: 1, P: 1 };
+const NAMES = { I: 'Intro', V: 'Verso', R: 'Refrão', P: 'Ponte' };
+
+// Ícones lucide (mesma biblioteca do app).
+const SVG = p => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const ICONS = {
+  monitor: SVG('<path d="M10 7.75a.75.75 0 0 1 1.142-.638l3.664 2.249a.75.75 0 0 1 0 1.278l-3.664 2.25a.75.75 0 0 1-1.142-.64z"/><path d="M12 17v4"/><path d="M8 21h8"/><rect x="2" y="3" width="20" height="14" rx="2"/>'),
+  theater: SVG('<path d="M2 10s3-3 3-8"/><path d="M22 10s-3-3-3-8"/><path d="M10 2c0 4.4-3.6 8-8 8"/><path d="M14 2c0 4.4 3.6 8 8 8"/><path d="M2 10s2 2 2 5"/><path d="M22 10s-2 2-2 5"/><path d="M8 15h8"/><path d="M2 22v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/><path d="M14 22v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/>'),
+  presentation: SVG('<path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/>'),
+  sliders: SVG('<line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/>'),
+  x: SVG('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'),
+  maximize: SVG('<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>'),
+  minimize: SVG('<path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>'),
+};
+
+// Letras de exemplo (inventadas) — só pra dar volume de rolagem.
+const L = (c, t) => ({ c, t });
+const SONGS = [
+  { title: 'Música de exemplo A', key: 'G', units: [
+    ['I', [L('G   D', '')]],
+    ['V', [L('G        D', 'Primeira linha do verso de exemplo'), L('Em       C', 'Segunda linha com mais palavras aqui'), L('G     D     C', 'Terceira linha curta')]],
+    ['R', [L('C        G', 'Refrão de exemplo, fácil de cantar'), L('D       Em', 'Repetido todas as vezes'), L('C    D    G', 'E termina aqui')]],
+    ['V', [L('G        D', 'Segundo verso de exemplo para rolar'), L('Em       C', 'Mais uma linha de teste'), L('G     D     C', 'Fim do verso')]],
+    ['R', [L('C        G', 'Refrão de exemplo, fácil de cantar'), L('D       Em', 'Repetido todas as vezes'), L('C    D    G', 'E termina aqui')]],
+    ['P', [L('Em    C', 'Ponte de exemplo, mais intensa'), L('G     D', 'Sobe a dinâmica aqui'), L('Em    C   D', 'E volta para o refrão')]],
+    ['R', [L('C        G', 'Refrão de exemplo, fácil de cantar'), L('D       Em', 'Repetido todas as vezes'), L('C    D    G', 'E termina aqui')]],
+  ]},
+  { title: 'Música de exemplo B', key: 'D', units: [
+    ['V', [L('D       A', 'Verso único de exemplo'), L('Bm      G', 'Segunda linha de exemplo'), L('D    A    G', 'Terceira linha')]],
+    ['R', [L('G       D', 'Refrão da segunda música'), L('A       Bm', 'Cantado duas vezes'), L('G   A   D', 'Fim')]],
+    ['R', [L('G       D', 'Refrão da segunda música'), L('A       Bm', 'Cantado duas vezes'), L('G   A   D', 'Fim')]],
+  ]},
+];
+
+// Itens do roteiro (não-música). Campos espelham o app: FALA/ORACAO = label + speaker + description;
+// LEITURA = label + version + text; AVISOS = items[]; SERMAO = label + preacher + description. Textos inventados.
+const ROT = {
+  oracao: { type: 'Oração', label: 'Oração inicial', who: 'Ana', min: 3, body: 'Agradecer pelo culto, pedir direção e abrir o coração da igreja para o tempo de louvor.' },
+  leitura: { type: 'Leitura', label: 'Salmo de exemplo', who: 'Bíblia — versão de exemplo', min: 4, body: 'Texto da leitura bíblica de exemplo, com algumas linhas para ver como o bloco se comporta quando o texto é mais longo e quebra em várias linhas na tela.' },
+  avisos: { type: 'Avisos', label: 'Avisos', min: 3, items: ['Reunião de jovens na sexta, às 19h.', 'Ensaio do louvor no sábado, às 16h.', 'Campanha do agasalho até o fim do mês.'] },
+  sermao: { type: 'Sermão', label: 'Tema do sermão de exemplo', who: 'Pr. Fulano', min: 30, body: 'Resumo do sermão: pontos principais para o músico acompanhar o momento da ministração.' },
+  oracaoFim: { type: 'Oração', label: 'Oração final', min: 2 }, // sem conteúdo: caixa compacta de uma linha
+};
+const BEFORE = { 0: [ROT.oracao], 1: [ROT.leitura, ROT.avisos] };
+const AFTER = [ROT.sermao, ROT.oracaoFim];
+function itemEl(it) {
+  const d = document.createElement('div');
+  const empty = !it.body && !it.items;
+  d.className = 'rot' + (empty ? ' compact' : ''); d.dataset.type = it.type; d.dataset.label = it.label;
+  const mins = it.min ? `${it.min} min` : '';
+  const meta = [it.who, mins].filter(Boolean).join(' · ');
+  d.dataset.meta = meta; // o cabeçalho reaproveita: responsável · duração
+  if (empty) {
+    d.innerHTML = `<span class="k1">${it.type}</span><span class="t">${it.label}</span><span class="m">${mins}</span>`;
+    return d;
+  }
+  d.innerHTML = `<div class="k"><span>${it.type}</span><span>${meta}</span></div><div class="t">${it.label}</div>` +
+    (it.items ? `<ul>${it.items.map(x => `<li>${x}</li>`).join('')}</ul>` : `<div class="b">${it.body}</div>`);
+  return d;
+}
+
+const st = { dev: 'phone', var: 'fixed', fs: 'on', stop: 'pause', rot: false, item: null, fsWanted: false, mode: 'ler', playing: false, spd: 1, fs: 18, song: 0, transp: SONGS.map(() => 0), hideTimer: null };
+const dv = $('#dv'), sc = $('#sc');
+let blockEls = [], songEls = [];
+
+function transposeChord(ch, n) {
+  return ch.replace(/\b([A-G](?:#|b)?)/g, (m, r) => {
+    const root = FLAT[r] || r; const i = KEYS.indexOf(root);
+    return i < 0 ? m : KEYS[(i + n + 12) % 12];
+  });
+}
+function labels(units) {
+  const count = {}; units.forEach(([t]) => count[t] = (count[t] || 0) + 1);
+  const seen = {};
+  return units.map(([t]) => { seen[t] = (seen[t] || 0) + 1; return NUMBERED[t] || count[t] > 1 ? t + seen[t] : t; });
+}
+
+function renderSongs() {
+  sc.innerHTML = ''; blockEls = []; songEls = [];
+  SONGS.forEach((s, si) => {
+    (BEFORE[si] || []).forEach(it => sc.appendChild(itemEl(it)));
+    const sec = document.createElement('section'); songEls.push(sec);
+    sec.innerHTML = `<div class="song-div">${si + 1} · ${s.title}</div>`;
+    const labs = labels(s.units); blockEls[si] = [];
+    s.units.forEach(([t, lines], ui) => {
+      const b = document.createElement('div'); b.className = 'block'; b.dataset.t = t;
+      b.innerHTML = `<div class="lbl">${NAMES[t]} ${labs[ui].replace(/\D/g, '')}</div>` +
+        lines.map(l => `<div class="ln"><span class="c">${transposeChord(l.c, st.transp[si])}</span>${l.t || '&nbsp;'}</div>`).join('');
+      b.style.scrollMarginTop = 'calc(var(--top) + 8px)';
+      sec.appendChild(b); blockEls[si].push(b);
+    });
+    sc.appendChild(sec);
+  });
+  AFTER.forEach(it => sc.appendChild(itemEl(it)));
+  dv.style.setProperty('--fs', st.fs + 'px');
+}
+
+function renderMap() {
+  // Um item do roteiro na tela: o cabeçalho mostra o tipo/título dele e some o mapa (que é da música).
+  if (st.item) {
+    $('#idx').textContent = ''; $('#ttl').textContent = `${st.item.dataset.type} · ${st.item.dataset.label}`;
+    // A segunda linha do cabeçalho não fica vazia: a altura é fixa e ela mostra responsável · duração.
+    $('#mapHost').innerHTML = `<div class="meta">${st.item.dataset.meta || '&nbsp;'}</div>`;
+    return;
+  }
+  const si = st.song, tap = st.mode === 'ler', labs = labels(SONGS[si].units);
+  $('#mapHost').innerHTML = `<div class="map${tap ? ' tap' : ''}">` + SONGS[si].units.map(([t], i) =>
+    `<${tap ? 'button' : 'span'} class="chip" data-t="${t}" data-i="${i}" title="${NAMES[t]}">${labs[i]}</${tap ? 'button' : 'span'}>`).join('') + '</div>';
+  if (tap) document.querySelectorAll('#mapHost .chip').forEach(c => c.onclick = () => blockEls[si][+c.dataset.i].scrollIntoView({ block: 'start', behavior: 'smooth' }));
+  $('#idx').textContent = `${si + 1}/${SONGS.length}`;
+  $('#ttl').textContent = SONGS[si].title;
+  $('#vKey').textContent = transposeChord(SONGS[si].key, st.transp[si]);
+  highlight();
+}
+
+function currentPos() {
+  const ref = sc.getBoundingClientRect().top + parseFloat(getComputedStyle(dv).getPropertyValue('--top')) + 24;
+  let si = 0, ui = 0;
+  songEls.forEach((s, i) => { if (s.getBoundingClientRect().top <= ref) si = i; });
+  blockEls[si].forEach((b, i) => { if (b.getBoundingClientRect().top <= ref) ui = i; });
+  return { si, ui };
+}
+function highlight() {
+  const { ui } = currentPos();
+  document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
+  const c = $(`#mapHost .chip[data-i="${ui}"]`); if (c) c.classList.add('on');
+}
+// O que está "atual" na tela: uma música (com o mapa) ou um item do roteiro (só o tipo/título).
+function currentThing() {
+  const { si } = currentPos();
+  const ref = sc.getBoundingClientRect().top + parseFloat(getComputedStyle(dv).getPropertyValue('--top')) + 24;
+  let item = null, itemTop = -Infinity;
+  if (st.rot) sc.querySelectorAll('.rot').forEach(el => {
+    if (el.offsetParent === null) return;
+    const t = el.getBoundingClientRect().top;
+    if (t <= ref && t > itemTop) { itemTop = t; item = el; }
+  });
+  const songTop = songEls[si].getBoundingClientRect().top;
+  const songStarted = songTop <= ref;
+  return { si, item: item && (!songStarted || itemTop > songTop) ? item : null };
+}
+let lastKey = '';
+function syncCurrent(force) {
+  const { si, item } = currentThing();
+  const key = item ? 'i' + [...sc.querySelectorAll('.rot')].indexOf(item) : 's' + si;
+  if (key !== lastKey || force) { lastKey = key; st.song = si; st.item = item; renderMap(); }
+  else if (!item) highlight();
+}
+sc.addEventListener('scroll', () => syncCurrent(), { passive: true });
+
+// ---------- rolagem automática ----------
+// Para onde a rolagem pausa: início de cada música (como no app hoje) e, com o roteiro ligado
+// e "Pausa no item", início de cada item do roteiro. Play de novo retoma e passa por ele.
+function stopPoint(prev, now) {
+  const top = parseFloat(getComputedStyle(dv).getPropertyValue('--top')) + 8;
+  const sel = st.rot && st.stop === 'pause' ? '.song-div, .rot' : '.song-div';
+  let hit = null;
+  sc.querySelectorAll(sel).forEach(el => {
+    if (el.offsetParent === null) return;
+    const target = el.offsetTop - top;
+    if (prev < target && target <= now && (hit === null || target < hit)) hit = target;
+  });
+  return hit;
+}
+let raf = 0, last = 0, frac = 0;
+function tick(ts) {
+  if (!st.playing) return;
+  if (last) {
+    frac += SPEEDS[st.spd] * 60 * (ts - last) / 1000;
+    const px = Math.floor(frac);
+    if (px) {
+      const prev = sc.scrollTop; sc.scrollTop = prev + px; frac -= px;
+      const stop = stopPoint(prev, sc.scrollTop);
+      if (stop != null) { sc.scrollTop = stop; st.playing = false; syncPlay(); return; }
+    }
+    if (sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 1) { st.playing = false; syncPlay(); return; }
+  }
+  last = ts; raf = requestAnimationFrame(tick);
+}
+function syncPlay() {
+  // Play: preto e só o ícone quando parado; azul e só a velocidade quando rolando.
+  $('#pTxt').textContent = st.playing ? SPEEDS[st.spd] + 'x' : '▶';
+  $('#bPlay').classList.toggle('on', st.playing);
+  $('#bPlay').setAttribute('aria-label', st.playing ? `Pausar rolagem (${SPEEDS[st.spd]}x)` : `Ligar rolagem (${SPEEDS[st.spd]}x)`);
+  $('#bSlow').disabled = st.spd <= 0;
+  $('#bFast').disabled = st.spd >= SPEEDS.length - 1;
+  cancelAnimationFrame(raf); last = 0; frac = 0;
+  if (st.playing) raf = requestAnimationFrame(tick);
+  scheduleHide();
+}
+function scheduleHide() {
+  clearTimeout(st.hideTimer); dv.classList.remove('dim');
+  if (st.var === 'hide' && st.playing && st.mode === 'palco') st.hideTimer = setTimeout(() => dv.classList.add('dim'), 4000);
+}
+$('#bSlow').onclick = () => { st.spd = Math.max(0, st.spd - 1); syncPlay(); };
+$('#bFast').onclick = () => { st.spd = Math.min(SPEEDS.length - 1, st.spd + 1); syncPlay(); };
+$('#bPlay').onclick = () => { st.playing = !st.playing; syncPlay(); };
+
+// ---------- modal de configurações ----------
+function closeCfg() { $('#cfg').classList.remove('open'); $('#scrim').classList.remove('open'); }
+$('#bCfg').onclick = () => { $('#cfg').classList.add('open'); $('#scrim').classList.add('open'); };
+$('#cfgX').onclick = closeCfg; $('#scrim').onclick = closeCfg;
+$('#swRot').onclick = e => {
+  st.rot = !st.rot; e.currentTarget.setAttribute('aria-checked', st.rot); dv.dataset.rot = st.rot ? 'on' : 'off';
+  syncCurrent(true);
+};
+$('#cfg').onclick = e => {
+  const b = e.target.closest('[data-k]'); if (!b) return; const d = +b.dataset.d;
+  if (b.dataset.k === 'key') {
+    st.transp[st.song] = (st.transp[st.song] + d + 12) % 12;
+    const y = sc.scrollTop; renderSongs(); sc.scrollTop = y; renderMap();
+  } else {
+    st.fs = Math.min(32, Math.max(14, st.fs + d)); $('#vFont').textContent = st.fs; dv.style.setProperty('--fs', st.fs + 'px');
+  }
+};
+
+// ---------- botão Palco: chavinha + "Palco" (fora) / X (dentro) ----------
+function paintTgl() {
+  const on = st.mode === 'palco';
+  $('#tgl').innerHTML = on ? ICONS.minimize : ICONS.maximize;
+  $('#tgl').title = on ? 'Sair do Modo Palco' : 'Modo Palco';
+  $('#tgl').setAttribute('aria-label', on ? 'Sair do Modo Palco' : 'Entrar no Modo Palco');
+  $('#tgl').setAttribute('aria-pressed', on);
+}
+function paintIcons() { $('#bCfg').innerHTML = ICONS.sliders; $('#cfgX').innerHTML = ICONS.x; paintTgl(); }
+function setMode(mode) {
+  st.mode = mode; dv.dataset.mode = mode;
+  if (mode === 'ler') { st.playing = false; closeCfg(); }
+  paintTgl(); renderMap(); syncPlay();
+}
+
+// ---------- tela cheia de verdade (Fullscreen API) ----------
+const fsNote = t => { $('#fsTxt').textContent = t; };
+const reqFs = dv.requestFullscreen || dv.webkitRequestFullscreen;
+async function enterFs() {
+  if (st.fs !== 'on') { fsNote('Desligada no seletor: o Palco entra sem tela cheia.'); return; }
+  try {
+    if (!reqFs) throw new Error('sem suporte');
+    await reqFs.call(dv);
+    st.fsWanted = true;
+    fsNote('Tela cheia ativa: o navegador some. Saia pelo X (ou pelo gesto/Esc do sistema).');
+  } catch (err) {
+    st.fsWanted = false;
+    fsNote('Este navegador não deixou entrar em tela cheia (o iPhone/Safari, por exemplo, não permite). No app, o Palco funcionaria igual, só que com o navegador visível.');
+  }
+}
+async function exitFs() {
+  st.fsWanted = false;
+  const ex = document.exitFullscreen || document.webkitExitFullscreen;
+  if ((document.fullscreenElement || document.webkitFullscreenElement) && ex) { try { await ex.call(document); } catch (e) {} }
+}
+$('#tgl').onclick = async () => {
+  if (st.mode === 'ler') { setMode('palco'); await enterFs(); }
+  else { await exitFs(); setMode('ler'); }
+};
+// Saiu da tela cheia por fora (Esc, gesto do sistema): o Palco fecha junto.
+const onFsChange = () => { if (!(document.fullscreenElement || document.webkitFullscreenElement) && st.fsWanted && st.mode === 'palco') { st.fsWanted = false; setMode('ler'); } };
+document.addEventListener('fullscreenchange', onFsChange);
+document.addEventListener('webkitfullscreenchange', onFsChange);
+
+// toque na letra: pausa (e mostra o cromo, se escondido)
+sc.addEventListener('click', () => {
+  if (dv.classList.contains('dim')) { scheduleHide(); dv.classList.remove('dim'); return; }
+  if (st.playing) { st.playing = false; syncPlay(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); st.playing = !st.playing; syncPlay(); }
+  if (e.code === 'ArrowUp') { e.preventDefault(); st.spd = Math.min(SPEEDS.length - 1, st.spd + 1); syncPlay(); }
+  if (e.code === 'ArrowDown') { e.preventDefault(); st.spd = Math.max(0, st.spd - 1); syncPlay(); }
+  if (e.code === 'Escape') closeCfg();
+});
+
+// controles do estudo
+document.querySelectorAll('.seg').forEach(seg => seg.onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  const k = seg.dataset.k; st[k] = b.dataset.v;
+  if (k === 'dev' || k === 'var') dv.dataset[k] = b.dataset.v;
+  closeCfg(); scheduleHide();
+});
+
+paintIcons(); renderSongs(); renderMap(); syncPlay();
+</script>
+</body>
+</html>

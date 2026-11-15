@@ -43,6 +43,64 @@ npx prisma db push
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/chorder_test?schema=e2e" npx prisma db push
 ```
 
+**Important:** If the dev server is running when you run `prisma generate`, it will fail with EPERM (DLL locked on Windows). Stop the server first, regenerate, then restart.
+
+---
+
+## 🧪 Test Patterns
+
+### ArrangementHeader (and any Popover-based header)
+
+The component calls `useSongConfig()` directly (imported from `@/components/config/SongConfig`). Tests must mock it or the hook will throw from missing context:
+
+```tsx
+vi.mock('@/components/config/SongConfig', () => ({
+  useSongConfig: () => ({ transpose: 0, setTranspose: vi.fn() }),
+}));
+
+vi.mock('@/components/config/KeyButtonSet', () => ({
+  default: () => <div data-testid="key-button-set" />,
+}));
+```
+
+`ArrangementSelector` only renders when `song.arrangements.length > 1` (`hasMultipleArrangements`). The mock arrangement must have **2+ arrangements** for selector-related assertions to pass:
+
+```tsx
+const mockArrangement: ClientArrangement = {
+  song: {
+    arrangements: [
+      { id: 1, name: 'Default', key: 'G', isDefault: true, isDeleted: false, isServiceArrangement: false, originalArrangementId: null, youtubeUrl: null },
+      { id: 2, name: 'Alt',     key: 'A', isDefault: false, isDeleted: false, isServiceArrangement: false, originalArrangementId: null, youtubeUrl: null },
+    ]
+  }
+};
+```
+
+### SongPicker — clicking "add" button
+
+`SongListEntry` uses a `<Link>` overlay covering the entire row, with `pointer-events-none` on the title. Clicking the song title does **not** trigger `onSelected`. Mock `next/link` and target the add button via its `sr-only` text:
+
+```tsx
+vi.mock('next/link', () => ({         // ← required: prevents JSDOM state update warnings
+  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+}));
+
+// In test:
+const addLabels = await screen.findAllByText('Adicionar ao service');
+await user.click(addLabels[0].closest('button')!);
+expect(onSelected).toHaveBeenCalledTimes(1);
+```
+
+### E2E seed — ArrangementSelector visibility
+
+`ArrangementSelector` only renders when `hasMultipleArrangements` (≥ 2 arrangements). If a visual test checks for arrangement selector text, the seed in `tests/e2e/e2e-utils.ts` **must** create a second arrangement after the default one:
+
+```ts
+await prisma.songArrangement.create({
+  data: { songId: song.id, key: 'A', name: 'Alternative Arrangement', isDefault: false }
+});
+```
+
 ---
 
 ## 🛠 Tech Stack Quirks

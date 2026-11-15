@@ -1,0 +1,238 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { useBottomNavVisible } from "@/hooks/useBottomNavVisible";
+import { ChevronDown, ChevronUp, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX, X } from "lucide-react";
+import { ReactNode, useState } from "react";
+
+// Barra única de rodapé, compartilhada pelo áudio enviado e pelo vídeo do
+// YouTube (só o áudio dele — sem mostrar o frame de vídeo). Cada widget
+// (AudioPlayer/Widget.tsx, YoutubePlayer/Widget.tsx) é o "motor" por trás
+// (uma tag <audio> nativa ou a API do player do YouTube) e só repassa estado
+// e callbacks pra esta barra — o visual fica idêntico nos dois casos.
+//
+// No celular abre recolhida (mini-player, 44px — o mínimo de um alvo de
+// toque, sem botão de play próprio: a faixa inteira só expande) e só mostra
+// os controles completos quando tocada; no desktop não existe recolhida,
+// é sempre a barra completa (não tem navegação inferior disputando espaço
+// lá — ver useBottomNavVisible).
+type Track = { label: string };
+
+type MediaPlayerBarProps = {
+  icon: ReactNode;
+  title: string;
+  subtitle?: string;
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+  volume: number;
+  muted: boolean;
+  onPlayPause: () => void;
+  onSeek: (time: number) => void;
+  onVolumeChange: (volume: number) => void;
+  onToggleMute: () => void;
+  onClose: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  tracks?: Track[];
+  currentTrackIndex?: number;
+  onSelectTrack?: (index: number) => void;
+};
+
+function formatTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+export default function MediaPlayerBar({
+  icon,
+  title,
+  subtitle,
+  isPlaying,
+  currentTime,
+  duration,
+  volume,
+  muted,
+  onPlayPause,
+  onSeek,
+  onVolumeChange,
+  onToggleMute,
+  onClose,
+  onPrev,
+  onNext,
+  tracks,
+  currentTrackIndex,
+  onSelectTrack,
+}: MediaPlayerBarProps) {
+  const [listVisible, setListVisible] = useState(true);
+  // Recolhida por padrão (mini-player) — só vale no celular, ver className
+  // de cada bloco abaixo; no desktop os dois ficam sempre com o completo.
+  const [expanded, setExpanded] = useState(false);
+  const bottomNavVisible = useBottomNavVisible();
+  const hasMultiple = (tracks?.length ?? 0) > 1;
+  const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+
+  return (
+    <div
+      className={`fixed left-0 right-0 z-[9999] bg-zinc-900 text-white shadow-2xl ${
+        bottomNavVisible ? "bottom-16 sm:bottom-0" : "bottom-0"
+      }`}
+    >
+      {/* Mini-player — só no celular, só quando recolhida. */}
+      <button
+        type="button"
+        data-testid="mini-player"
+        onClick={() => setExpanded(true)}
+        aria-label={`Abrir controles — ${title}`}
+        className={`relative flex h-11 w-full cursor-pointer items-center gap-2 px-3 sm:hidden ${
+          expanded ? "hidden" : "flex"
+        }`}
+      >
+        <span
+          className="absolute left-0 top-0 h-0.5 bg-secondary"
+          style={{ width: `${progress}%` }}
+          aria-hidden="true"
+        />
+        <span className="text-secondary shrink-0">{icon}</span>
+        <span className="min-w-0 flex-1 truncate text-left text-xs text-zinc-300">{title}</span>
+        <ChevronUp size={16} className="shrink-0 text-zinc-500" />
+      </button>
+
+      {/* Controles completos — sempre no desktop; no celular, só expandida. */}
+      <div
+        data-testid="expanded-player"
+        className={`flex-col gap-1 px-4 py-2 ${expanded ? "flex" : "hidden"} sm:flex`}
+      >
+        {hasMultiple && listVisible && (
+          <div className="-mx-4 -mt-2 mb-1 flex flex-wrap gap-2 bg-zinc-800 px-4 py-2">
+            {tracks!.map((track, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => onSelectTrack?.(idx)}
+                className={`cursor-pointer text-xs px-3 py-1 rounded-full border transition-colors ${
+                  idx === currentTrackIndex
+                    ? "bg-secondary border-secondary text-secondary-foreground"
+                    : "border-zinc-600 text-zinc-300 hover:border-zinc-400 hover:text-white"
+                }`}
+              >
+                {track.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setExpanded(false)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpanded(false); } }}
+            aria-label="Recolher player"
+            className="flex min-w-0 cursor-pointer items-center gap-2 sm:cursor-default"
+          >
+            {hasMultiple && (
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={(e) => { e.stopPropagation(); setListVisible((v) => !v); }}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); setListVisible((v) => !v); } }}
+                className="cursor-pointer shrink-0 text-zinc-500 hover:text-white transition-colors"
+                title={listVisible ? "Ocultar lista" : "Exibir lista"}
+              >
+                <ChevronUp size={15} className={`transition-transform ${listVisible ? "" : "rotate-180"}`} />
+              </span>
+            )}
+            {icon}
+            <span className="min-w-0 truncate text-xs text-zinc-300">
+              {title}
+              {subtitle && <span className="ml-1 text-zinc-500">({subtitle})</span>}
+            </span>
+            <ChevronDown size={14} className="shrink-0 text-zinc-500 sm:hidden" />
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar player"
+            className="cursor-pointer shrink-0 text-zinc-500 hover:text-white transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {onPrev && (
+            <button
+              type="button"
+              onClick={onPrev}
+              aria-label="Faixa anterior"
+              className="cursor-pointer shrink-0 text-zinc-300 hover:text-white transition-colors"
+            >
+              <SkipBack size={16} />
+            </button>
+          )}
+
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon"
+            onClick={onPlayPause}
+            aria-label={isPlaying ? "Pausar" : "Tocar"}
+            className="shrink-0 size-8 rounded-full"
+          >
+            {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+          </Button>
+
+          {onNext && (
+            <button
+              type="button"
+              onClick={onNext}
+              aria-label="Próxima faixa"
+              className="cursor-pointer shrink-0 text-zinc-300 hover:text-white transition-colors"
+            >
+              <SkipForward size={16} />
+            </button>
+          )}
+
+          <span className="shrink-0 text-xs tabular-nums text-zinc-400 w-10 text-right">
+            {formatTime(currentTime)}
+          </span>
+          <input
+            type="range"
+            aria-label="Posição"
+            min={0}
+            max={duration || 0}
+            step={0.1}
+            value={Math.min(currentTime, duration || 0)}
+            onChange={(e) => onSeek(Number(e.target.value))}
+            className="min-w-0 flex-1 accent-secondary cursor-pointer"
+          />
+          <span className="shrink-0 text-xs tabular-nums text-zinc-400 w-10">
+            {formatTime(duration)}
+          </span>
+
+          <button
+            type="button"
+            onClick={onToggleMute}
+            aria-label={muted ? "Ativar som" : "Mudo"}
+            className="cursor-pointer hidden sm:block shrink-0 text-zinc-300 hover:text-white transition-colors"
+          >
+            {muted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
+          </button>
+          <input
+            type="range"
+            aria-label="Volume"
+            min={0}
+            max={1}
+            step={0.05}
+            value={muted ? 0 : volume}
+            onChange={(e) => onVolumeChange(Number(e.target.value))}
+            className="hidden sm:block w-16 accent-secondary cursor-pointer"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

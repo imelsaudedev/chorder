@@ -1,5 +1,5 @@
 import {
-  Bricolage_Grotesque,
+  Space_Grotesk,
   IBM_Plex_Mono,
   IBM_Plex_Sans,
   IBM_Plex_Serif,
@@ -26,9 +26,9 @@ export const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-export const bricolageGrotesque = Bricolage_Grotesque({
-  variable: "--font-bricolage-grotesque", // Definindo a variável CSS
-  weight: ["400", "500", "600", "700"], // Definindo os pesos da fonte
+export const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  weight: ["600"],
   subsets: ["latin"],
   display: "swap",
 });

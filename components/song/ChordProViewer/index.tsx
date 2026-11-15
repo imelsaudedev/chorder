@@ -6,11 +6,13 @@ import { useMemo } from "react";
 export type ChordProViewerProps = {
   chordpro: string;
   density: "compact" | "normal";
+  commentClass?: string;
 };
 
 export default function ChordProViewer({
   chordpro,
   density,
+  commentClass,
 }: ChordProViewerProps) {
   const song = useMemo<Song>(() => parseChordPro(chordpro), [chordpro]);
 
@@ -22,6 +24,7 @@ export default function ChordProViewer({
           mode="chords"
           key={`song-line-${idx}`}
           density={density}
+          commentClass={commentClass}
         />
       ))}
     </>

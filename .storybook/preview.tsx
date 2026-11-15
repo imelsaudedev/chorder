@@ -1,11 +1,13 @@
 import type { Preview } from "@storybook/nextjs-vite";
 import { NextIntlClientProvider } from "next-intl";
+import { AudioPlayerProvider } from "../components/common/AudioPlayer/context";
+import { YoutubePlayerProvider } from "../components/common/YoutubePlayer/context";
 import {
   bricolageGrotesque,
   ibmPlexMono,
   ibmPlexSans,
   ibmPlexSerif,
-} from "../app/fonts";
+} from "./fonts";
 import "../app/globals.css";
 import en from "../i18n/messages/en.json";
 import pt from "../i18n/messages/pt-BR.json";
@@ -63,7 +65,11 @@ const preview: Preview = {
             messages={messages}
             timeZone="America/Sao_Paulo"
           >
-            <Story />
+            <YoutubePlayerProvider>
+              <AudioPlayerProvider>
+                <Story />
+              </AudioPlayerProvider>
+            </YoutubePlayerProvider>
           </NextIntlClientProvider>
         </div>
       );

@@ -6,6 +6,7 @@ import {
   SetStateAction,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { Density, Mode } from "./config";
@@ -13,6 +14,8 @@ import { Density, Mode } from "./config";
 type SongConfigContextType = {
   transpose: number;
   setTranspose: Dispatch<SetStateAction<number>>;
+  enharmonicPreference: "sharp" | "flat" | null;
+  setEnharmonicPreference: Dispatch<SetStateAction<"sharp" | "flat" | null>>;
   columns: number;
   setColumns: Dispatch<SetStateAction<number>>;
   fontSize: number;
@@ -29,6 +32,10 @@ export const SongConfigContext = createContext<SongConfigContextType | null>(
 
 type SongConfigContextProps = {
   transpose?: number | null;
+  /** Avisa quem chamou quando o tom muda, para elevar o estado além do
+   * tempo de vida deste provider (ex.: o Modo Palco precisa continuar de
+   * onde o modo normal parou, e vice-versa). */
+  onTransposeChange?: (value: number) => void;
   columns?: number | null;
   fontSize?: number | null;
   mode?: Mode | null;
@@ -38,6 +45,7 @@ type SongConfigContextProps = {
 
 export default function SongConfigProvider({
   transpose: initialTranspose,
+  onTransposeChange,
   columns: initialColumns,
   fontSize: initialFontSize,
   mode: initialMode,
@@ -45,6 +53,17 @@ export default function SongConfigProvider({
   children,
 }: SongConfigContextProps) {
   const [transpose, setTranspose] = useState(initialTranspose ?? 0);
+
+  // Avisa quem elevou o estado depois da renderização (nunca dentro do
+  // updater do setState — chamar o callback do pai ali violava as regras
+  // do React: "Cannot update a component while rendering a different
+  // component", reproduzido ao trocar o tom na liturgia).
+  const onTransposeChangeRef = useRef(onTransposeChange);
+  onTransposeChangeRef.current = onTransposeChange;
+  useEffect(() => {
+    onTransposeChangeRef.current?.(transpose);
+  }, [transpose]);
+  const [enharmonicPreference, setEnharmonicPreference] = useState<"sharp" | "flat" | null>(null);
   const [columns, setColumns, setUntouchedColumns, columnsTouched] =
     useTouchedState(initialColumns ?? 0);
   const [fontSize, setFontSize, setUntouchedFontSize, fontSizeTouched] =
@@ -56,6 +75,9 @@ export default function SongConfigProvider({
     useTouchedState<Density>(initialDensity ?? "normal");
 
   useEffect(() => {
+    // Só re-sincroniza com o valor que o próprio chamador já tem; dispara
+    // de novo o efeito de onTransposeChange acima, mas com o mesmo valor
+    // que ele já possui, então é inofensivo.
     setTranspose(initialTranspose ?? 0);
   }, [initialTranspose]);
   useEffect(() => {
@@ -84,6 +106,8 @@ export default function SongConfigProvider({
       value={{
         transpose,
         setTranspose,
+        enharmonicPreference,
+        setEnharmonicPreference,
         columns,
         setColumns,
         fontSize,

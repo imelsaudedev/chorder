@@ -1,52 +1,271 @@
 "use client";
 
-import FullScreenToggle from "@/components/common/FullScreenToggle";
+import StageMode, { StageFlowEntry } from "@/components/service/StageMode";
+import { useAudioPlayer } from "@/components/common/AudioPlayer/context";
+import { useYoutubePlayer } from "@/components/common/YoutubePlayer/context";
 import { useServiceConfig } from "@/components/config/ServiceConfig";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { useMediaBarOpen } from "@/hooks/useMediaBarOpen";
 import { ClientService, ClientServiceUnit } from "@/prisma/models";
+import { Maximize } from "lucide-react";
+import { pushStageModeEntry } from "@/components/service/StageMode/useStageModeHistory";
 import { useTranslations } from "next-intl";
-import { Fragment, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ServiceSongUnitView from "./ServiceSongUnitView";
 
 type ServiceViewProps = {
   service: ClientService | null;
 };
-export default function ServiceView({ service }: ServiceViewProps) {
-  const t = useTranslations();
-  const unitRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const { density, fontSize } = useServiceConfig();
 
-  if (!service) {
-    // TODO: SKELETON
-    return null;
+type SongEntry = {
+  /** Posição entre as músicas do culto inteiro (0, 1, 2...). */
+  songIndex: number;
+  unit: ClientServiceUnit;
+};
+
+type SectionBlock = {
+  id: string;
+  /** Nulo quando o culto não tem plano (lista simples, sem cabeçalho de seção). */
+  label: string | null;
+  entries: SongEntry[];
+};
+
+export default function ServiceView({ service }: ServiceViewProps) {
+  const t = useTranslations("Messages");
+  const { density, fontSize } = useServiceConfig();
+  const { isOpen: isAudioOpen, close: closeAudio } = useAudioPlayer();
+  const { close: closeYoutube } = useYoutubePlayer();
+  const isMediaOpen = useMediaBarOpen();
+  const [isStageMode, setIsStageMode] = useState(false);
+  // Música em que o Modo Palco abre e, ao sair, onde a tela normal volta.
+  const [stageIndex, setStageIndex] = useState(0);
+  // Elevado acima do modo normal e do Modo Palco: trocar de um pro outro não
+  // pode resetar um tom que já foi ajustado na sessão (bug: "tom volta ao
+  // original ao entrar no Modo Palco").
+  const [transposes, setTransposes] = useState(() =>
+    (service?.units ?? [])
+      .filter((u): u is ClientServiceUnit => u?.type === "SONG")
+      .map((u) => u.semitoneTranspose ?? 0)
+  );
+  // Achado em teste manual: "entrar no modo palco perde a edição e
+  // descarta o que era feito" — trocar pro Modo Palco desmonta a árvore
+  // normal inteira (ver o `if (isStageMode)` abaixo), levando junto
+  // qualquer ServiceSongUnitEditForm aberto, sem avisar. Indexado pela
+  // posição entre as músicas, igual `transposes`.
+  const [unsavedEdits, setUnsavedEdits] = useState(() =>
+    (service?.units ?? [])
+      .filter((u): u is ClientServiceUnit => u?.type === "SONG")
+      .map(() => false)
+  );
+  const [confirmStageModeOpen, setConfirmStageModeOpen] = useState(false);
+  // Indexado pela posição entre as músicas.
+  const songRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const shouldRestoreScroll = useRef(false);
+
+  useEffect(() => {
+    if (isStageMode || !shouldRestoreScroll.current) return;
+    shouldRestoreScroll.current = false;
+    songRefs.current[stageIndex]?.scrollIntoView({ block: "start" });
+  }, [isStageMode, stageIndex]);
+
+  if (!service) return null;
+  if (!service.units) throw new Error("Service units are not available");
+
+  const songUnits = service.units.filter((u): u is ClientServiceUnit => u?.type === "SONG");
+  const gapClass = density === "compact" ? "gap-4" : "gap-10";
+
+  // Agrupa as músicas pelas seções do culto. As músicas do plano casam com
+  // songUnits pela posição (ambas seguem a mesma ordem), pois o JSON do plano
+  // pode ter arrangementIds desatualizados/nulos após o primeiro save. Músicas
+  // ainda sem arranjo não entram (nem avançam a posição) e seções sem música
+  // não aparecem.
+  const blocks: SectionBlock[] = [];
+  const sections = service.plan?.sections ?? [];
+  if (sections.length === 0) {
+    const entries = songUnits.map((unit, songIndex) => ({ songIndex, unit }));
+    blocks.push({ id: "all", label: null, entries });
+  } else {
+    let songCursor = 0;
+    sections.forEach((section) => {
+      const entries: SongEntry[] = [];
+      (section.units ?? []).forEach((planUnit) => {
+        if (planUnit.type !== "SONG") return;
+        if (!planUnit.arrangement?.song) return;
+        const flat = songUnits[songCursor];
+        if (!flat) return;
+        entries.push({ songIndex: songCursor, unit: flat });
+        songCursor += 1;
+      });
+      if (entries.length > 0) {
+        blocks.push({ id: section.id, label: section.label, entries });
+      }
+    });
   }
-  if (!service.units) {
-    throw new Error("Service units are not available");
+  const hasSongs = blocks.some((block) => block.entries.length > 0);
+
+  // Ordem completa do culto pro Modo Palco: as músicas (mesma regra de casamento
+  // acima) e, entre elas, os itens que não são música (fala, oração, leitura,
+  // avisos, sermão) — o conteúdo deles vive no plano, não nas unidades planas.
+  // O Palco só mostra os itens quando "Exibir roteiro" está ligado.
+  const stageFlow: StageFlowEntry[] = [];
+  if (sections.length === 0) {
+    songUnits.forEach((_, songIndex) => stageFlow.push({ kind: "song", songIndex }));
+  } else {
+    let flowCursor = 0;
+    sections.forEach((section) => {
+      (section.units ?? []).forEach((planUnit) => {
+        if (planUnit.type === "SONG") {
+          if (!planUnit.arrangement?.song || !songUnits[flowCursor]) return;
+          stageFlow.push({ kind: "song", songIndex: flowCursor });
+          flowCursor += 1;
+        } else {
+          stageFlow.push({ kind: "item", unit: planUnit });
+        }
+      });
+    });
+  }
+
+  function doEnterStageMode() {
+    // Primeira música cujo fim ainda está na tela.
+    const visibleIndex = songRefs.current.findIndex((el) => el && el.getBoundingClientRect().bottom > 0);
+    setStageIndex(Math.max(0, visibleIndex));
+    pushStageModeEntry();
+    // Entrar no Palco fecha qualquer mídia tocando (decisão: mídia e Modo
+    // Palco não convivem — evita sobreposição e referência tocando fora de contexto).
+    closeAudio();
+    closeYoutube();
+    setIsStageMode(true);
+  }
+
+  // Só confirma quando há edição de cifra realmente ABERTA e alterada —
+  // entrar no Palco só olhando a leitura, ou com um editor aberto mas sem
+  // nenhuma alteração, não perde nada, não precisa perguntar.
+  function enterStageMode() {
+    if (unsavedEdits.some(Boolean)) {
+      setConfirmStageModeOpen(true);
+      return;
+    }
+    doEnterStageMode();
+  }
+
+  if (isStageMode) {
+    return (
+      <StageMode
+        units={songUnits}
+        flow={stageFlow}
+        initialIndex={stageIndex}
+        initialFontSize={fontSize}
+        initialTransposes={transposes}
+        onExit={(index, exitTransposes) => {
+          setStageIndex(index);
+          setTransposes(exitTransposes);
+          shouldRestoreScroll.current = true;
+          setIsStageMode(false);
+        }}
+      />
+    );
+  }
+
+  if (!hasSongs) {
+    return (
+      <p className="py-12 text-center text-sm text-muted-foreground">
+        Nenhuma música definida para este culto ainda.
+      </p>
+    );
   }
 
   return (
     <>
-      <section
-        className={`flex flex-col mx-auto ${
-          density === "compact" ? "gap-2 text-sm" : "gap-8 text-base"
-        }`}
+      <div
+        className={`flex flex-col gap-14 ${isMediaOpen ? "pb-24" : ""}`}
         style={{ fontSize: `${fontSize}px` }}
       >
-        {service.units.map((unit, index) => (
-          <Fragment key={index}>
-            {unit?.type === "SONG" && (
-              <div
-                ref={(el) => {
-                  unitRefs.current[index] = el;
-                }}
-              >
-                <ServiceSongUnitView unit={unit as ClientServiceUnit} />
-              </div>
+        {blocks.map((block) => (
+          <section key={block.id}>
+            {block.label !== null && (
+              <h2 className="mb-4 flex min-h-8 items-center border-b border-border text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                {block.label || "Seção"}
+              </h2>
             )}
-          </Fragment>
+            <div className={`flex flex-col ${gapClass}`}>
+              {block.entries.map((entry) => (
+                <div
+                  key={entry.songIndex}
+                  ref={(el) => {
+                    songRefs.current[entry.songIndex] = el;
+                  }}
+                >
+                  <ServiceSongUnitView
+                    unit={entry.unit}
+                    transpose={transposes[entry.songIndex] ?? 0}
+                    onTransposeChange={(value) =>
+                      setTransposes((prev) =>
+                        prev.map((v, i) => (i === entry.songIndex ? value : v))
+                      )
+                    }
+                    onUnsavedEditChange={(hasUnsavedEdit) =>
+                      setUnsavedEdits((prev) =>
+                        prev.map((v, i) => (i === entry.songIndex ? hasUnsavedEdit : v))
+                      )
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
         ))}
-      </section>
+      </div>
 
-      <FullScreenToggle unitRefs={unitRefs} />
+      {/* Sobe acima da barra de mídia (vídeo ou áudio — as duas usam a mesma
+          barra full-width no rodapé, ver MediaPlayerBar) em vez de disputar o
+          mesmo espaço (M2). */}
+      <div
+        className={`fixed right-4 md:right-8 z-50 transition-[bottom] ${
+          isMediaOpen ? "bottom-24 md:bottom-28" : "bottom-4 md:bottom-8"
+        }`}
+      >
+        <Button
+          // secondary = o azul de base do sistema (--secondary).
+          variant="secondary"
+          aria-label="Entrar no Modo Palco"
+          onClick={enterStageMode}
+          className="shadow-md gap-1.5"
+        >
+          <Maximize size={18} />
+          Palco
+        </Button>
+      </div>
+
+      {/* Mesmo texto/padrão do ConfirmDiscardDialog (D11), mas controlado
+          aqui em vez de via trigger — a decisão de perguntar ou não
+          (unsavedEdits.some) acontece no clique do botão Palco, antes de
+          qualquer diálogo existir. */}
+      <AlertDialog open={confirmStageModeOpen} onOpenChange={setConfirmStageModeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("discardChanges")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("discardChangesDesc")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button variant="outline" onClick={doEnterStageMode}>
+                {t("discard")}
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

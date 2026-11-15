@@ -1,6 +1,6 @@
 {
   "Metadata": {
-    "title": "Chorder",
+    "siteName": "Louvor IMeL Saúde",
     "siteDescription": "A tool for managing chord sheets"
   },
   "Messages": {
@@ -19,11 +19,24 @@
     "feedback": "Feedback",
     "scrollToTop": "Scroll to top",
     "newSong": "New song",
-    "editSong": "Edit song",
+    "editSong": "Edit data",
     "song": "Song",
     "songs": "Songs",
+    "stats": "Stats",
     "newService": "New service",
     "editService": "Edit service",
+    "editPlan": "Edit plan",
+    "share": "Share",
+    "linkCopied": "Link copied",
+    "deleteService": "Delete service",
+    "saveService": "Save service",
+    "editServiceData": "Edit details",
+    "discardChanges": "Discard changes",
+    "discardChangesDesc": "You'll lose all unsaved changes.",
+    "discard": "Discard",
+    "continue": "Continue",
+    "saveSong": "Save song",
+    "addUnitToSave": "Add at least one unit to save",
     "service": "Service",
     "services": "Services",
     "pickDate": "Pick a date",
@@ -32,6 +45,7 @@
     "fontSize": "Font size",
     "mode": "Mode",
     "config": "Configuration",
+    "layout": "Layout",
     "auto": "Automatic",
     "density": "Densidade",
     "compact": "Compact",
@@ -42,6 +56,7 @@
   "Modes": {
     "text": "Text",
     "lyrics": "Lyrics",
+    "conventions": "Conventions",
     "chords": "Chords"
   },
   "Service": {
@@ -74,7 +89,12 @@
     "lyrics": "Lyrics",
     "showLyrics": "Show lyrics",
     "editSong": "Edit song",
-    "editOriginal": "Edit original"
+    "editOriginal": "Edit original",
+    "editArrangement": "Edit arrangement",
+    "duplicateArrangement": "Duplicate arrangement",
+    "deleteArrangement": "Delete arrangement",
+    "audio": "Audio",
+    "moveArrangement": "Move arrangement"
   },
   "UnitData": {
     "content": "Chordpro",
@@ -84,7 +104,9 @@
     "titleOptional": "Title (Optional)",
     "markdownTitlePlaceholder": "e.g. Reading, Liturgy, etc.",
     "markdownPlaceholder": "Type markdown here...",
-    "markdownContent": "Markdown Content"
+    "markdownContent": "Markdown Content",
+    "addNotes": "Add instruction",
+    "notesPlaceholder": "e.g. Vocals only, no instruments"
   },
   "UnitTypes": {
     "INTRO": "Intro",
@@ -97,6 +119,57 @@
     "SOLO": "Solo",
     "BLOCK": "Block",
     "TEXT": "Text"
+  },
+  "UnitTypesShort": {
+    "BLOCK": "B",
+    "INTRO": "I",
+    "VERSE": "V",
+    "PRECHORUS": "PR",
+    "CHORUS": "R",
+    "BRIDGE": "P",
+    "INTERLUDE": "IL",
+    "SOLO": "S",
+    "ENDING": "F",
+    "TEXT": "T"
+  },
+  "SongMap": {
+    "label": "Song map",
+    "goTo": "Go to"
+  },
+  "Blocks": {
+    "collapse": "Collapse block",
+    "expand": "Expand block"
+  },
+  "ServiceView": {
+    "editChords": "Edit chords",
+    "saveScopeTitle": "Save changes",
+    "serviceOnly": "This service only",
+    "serviceAndOriginal": "This service and the original song",
+    "cancelEdit": "Cancel editing",
+    "saveChanges": "Save",
+    "saveError": "Error saving. Please try again.",
+    "mediaButtonLabelWithMedia": "Audio and video references",
+    "mediaButtonLabelEmpty": "Add reference",
+    "mediaAddVideo": "Add video",
+    "mediaAddAudio": "Add audio",
+    "mediaVideoLabel": "YouTube video",
+    "mediaVideoPlaceholder": "YouTube link",
+    "mediaVideoHint": "Applies to every service that uses this arrangement.",
+    "mediaVideoErrorEmpty": "Paste the video link to add it.",
+    "mediaVideoErrorInvalid": "That doesn't look like a YouTube link. Paste the video address.",
+    "mediaVideoAdded": "Video added. Applies to every service.",
+    "mediaAudioAdded": "Audio added. Applies to every service.",
+    "mediaAudioErrorType": "That file isn't audio. Use MP3, M4A or AAC.",
+    "mediaAudioErrorSize": "File too large. 10MB limit.",
+    "mediaAudioErrorUpload": "Error uploading the file. Try again.",
+    "mediaUploading": "Uploading…",
+    "mediaRemoved": "Reference removed from every service.",
+    "mediaUndo": "Undo",
+    "mediaRemoveVideo": "Remove video reference",
+    "mediaRemoveAudio": "Remove audio reference",
+    "mediaRenameAudio": "Rename audio",
+    "keyButtonLabel": "Key {key}",
+    "composerLabel": "Composer: {name}"
   },
   "ServiceForm": {
     "editArrangement": "Edit arrangement",
@@ -111,7 +184,7 @@
   "SongForm": {
     "addExistingUnit": "Add existing unit",
     "addUnitWithLabel": "Add unit {label}",
-    "newUnit": "New unit",
+    "newUnit": "Add unit",
     "confirmDeleteTitle": "Are you sure you want to delete this arrangement?",
     "confirmDelete": "This action cannot be undone.",
     "noSongs": "No songs found",

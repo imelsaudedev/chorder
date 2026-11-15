@@ -5,9 +5,11 @@ const globalForPrisma = (global as any) as {
   prisma: PrismaClient;
 };
 
+const useAccelerate = process.env.DATABASE_URL?.startsWith("prisma://");
+
 const prisma =
   globalForPrisma.prisma ||
-  (process.env.VITEST
+  (process.env.VITEST || !useAccelerate
     ? new PrismaClient()
     : new PrismaClient().$extends(withAccelerate()));
 

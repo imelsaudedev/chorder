@@ -26,7 +26,7 @@ export const Default: Story = {
     return (
       <div className="w-4xl">
         <ServiceConfigProvider>
-          <ServiceSongUnitView unit={unit} />
+          <ServiceSongUnitView unit={unit} transpose={unit.semitoneTranspose ?? 0} onTransposeChange={() => {}} />
         </ServiceConfigProvider>
       </div>
     );

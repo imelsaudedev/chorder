@@ -80,6 +80,18 @@ export function getChords(chordproString?: string) {
   }
 }
 
+// Validação do campo de digitar do modal do acorde (seção 8.3: "digitar um
+// acorde inválido mostra um aviso... Enter confirma o válido"). Permissivo
+// de propósito — cobre tudo que já aparece nos dados reais (M4, M9, dim,
+// 7+, sus4, m7b5...) sem tentar enumerar toda a teoria musical; a única
+// exigência rígida é a nota (A-G, com sustenido(s)/bemol(is)) no início e,
+// se houver baixo invertido, outra nota válida depois da barra.
+const CHORD_NAME_RE = /^[A-G](#{1,2}|b{1,2})?[A-Za-z0-9°+\-]*(\/[A-G](#{1,2}|b{1,2})?)?$/;
+
+export function isValidChordName(value: string): boolean {
+  return CHORD_NAME_RE.test(value.trim());
+}
+
 const KEYS = {
   C: ["C", "Dm", "Em", "F", "G", "Am", "Bdim"],
   "C#": ["C#", "D#m", "E#m", "F#", "G#", "A#m", "B#dim"],
@@ -208,6 +220,22 @@ export const harmonicIndex = (key: SongKey) => {
       return 11;
   }
 };
+
+const FLAT_TO_SHARP: Record<string, string> = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#" };
+const SHARP_TO_FLAT: Record<string, string> = { "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab", "A#": "Bb" };
+
+export function applyEnharmonic(chord: string, preferSharp: boolean): string {
+  if (!chord) return chord;
+  const table = preferSharp ? FLAT_TO_SHARP : SHARP_TO_FLAT;
+  const chordKey = keyFromChord(chord);
+  if (!chordKey || !table[chordKey]) return chord;
+  let result = table[chordKey] + chord.substring(chordKey.length);
+  const slashIdx = result.indexOf("/");
+  if (slashIdx >= 0) {
+    result = result.substring(0, slashIdx + 1) + applyEnharmonic(result.substring(slashIdx + 1), preferSharp);
+  }
+  return result;
+}
 
 export const transposeChord = (
   chord: string,

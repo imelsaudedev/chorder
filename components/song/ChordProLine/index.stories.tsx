@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { ChordProItem } from "@/chopro/music";
 import ChordProLine from "./index";
-import { items, itemsWithoutChords, itemsWithoutLyrics } from "./stories-utils";
+import { items, itemsWithoutChords, itemsWithoutLyrics, itemsWithComments } from "./stories-utils";
 
 const meta = {
   title: "song/ChordProLine/ChordProLine",
@@ -41,6 +41,16 @@ export const LyricsOnly: Story = {
   },
   args: {
     items: itemsWithoutChords,
+  },
+  render,
+};
+
+export const WithInlineComments: Story = {
+  parameters: {
+    layout: "centered",
+  },
+  args: {
+    items: itemsWithComments,
   },
   render,
 };

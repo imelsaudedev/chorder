@@ -32,3 +32,7 @@ export const useDeleteService = fn(actual.useDeleteService).mockName(
 export const useCreateOrUpdateService = fn(
   actual.useCreateOrUpdateService
 ).mockName("useCreateOrUpdateService");
+export const useUpdateSong = fn(actual.useUpdateSong).mockName("useUpdateSong");
+export const useFetchRecentServices = fn(
+  actual.useFetchRecentServices
+).mockName("useFetchRecentServices");

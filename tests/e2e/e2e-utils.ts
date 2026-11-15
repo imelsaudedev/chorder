@@ -87,6 +87,16 @@ export async function seedVisualBaseline() {
     }
   });
 
+  // Second arrangement so ArrangementSelector is visible (it only renders with 2+ arrangements)
+  await prisma.songArrangement.create({
+    data: {
+      songId: song.id,
+      key: 'A',
+      name: 'Alternative Arrangement',
+      isDefault: false,
+    }
+  });
+
   const defaultArrangement = arrangement;
 
   // Seed service with multiple units
@@ -144,6 +154,35 @@ export async function seedVisualBaseline() {
         }
       }
     }
+  });
+
+  // O culto é lido do campo `plan` (fonte única de verdade); a tabela de unidades
+  // acima não é mais exibida. Grava o plano com uma seção e as 3 músicas.
+  await prisma.service.update({
+    where: { id: service.id },
+    data: {
+      plan: {
+        startTime: null,
+        sections: [
+          {
+            id: 'e2e-section-culto',
+            type: 'CULTO',
+            label: 'Culto',
+            order: 1,
+            units: service.units.map((unit, index) => ({
+              clientId: `e2e-unit-${index + 1}`,
+              type: 'SONG',
+              arrangementId: unit.arrangementId,
+              semitoneTranspose: 0,
+              durationMin: 5,
+              label: null,
+              metadata: null,
+              order: index + 1,
+            })),
+          },
+        ],
+      },
+    },
   });
 
   return {

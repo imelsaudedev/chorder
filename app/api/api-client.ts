@@ -1,6 +1,6 @@
 "use client";
 
-import { ClientArrangement, ClientSong } from "@/prisma/models";
+import { ClientArrangement, ClientServiceTemplate, ClientSong, ClientTagGroup, RecentServiceEntry } from "@/prisma/models";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -9,12 +9,16 @@ type FetchSongsArgs = {
   limitLines?: number;
   forceIncludeFirstLine?: boolean;
   excludedSongSlugs?: string[];
+  tagIds?: number[];
+  withUsageStats?: boolean;
 };
 export function useFetchSongs({
   query,
   limitLines,
   forceIncludeFirstLine,
   excludedSongSlugs,
+  tagIds,
+  withUsageStats,
 }: FetchSongsArgs) {
   const params = new URLSearchParams();
   if (query) {
@@ -28,6 +32,12 @@ export function useFetchSongs({
   }
   if (excludedSongSlugs && excludedSongSlugs.length > 0) {
     params.set("excludedSongSlugs", excludedSongSlugs.join(","));
+  }
+  if (tagIds && tagIds.length > 0) {
+    params.set("tagIds", tagIds.join(","));
+  }
+  if (withUsageStats) {
+    params.set("withUsageStats", "true");
   }
   const queryString = params.toString();
   const { data, error, isLoading } = useSWR(
@@ -111,7 +121,14 @@ export function useFetchArrangement(
   };
 }
 
-export function useCreateOrUpdateArrangement(arrangementId?: number | null) {
+export function useCreateOrUpdateArrangement(
+  arrangementId?: number | null,
+  // Quem salva aqui nunca edita youtubeUrl/audios diretamente (isso é do
+  // ServiceMediaReferences, que salva na hora) — sem isso, um save "cheio"
+  // feito logo após inserir um vídeo sobrescreve o vídeo de volta pra
+  // vazio, com o valor desatualizado que este formulário carregava.
+  options: { preserveMedia?: boolean } = {}
+) {
   async function createOrUpdateArrangement(
     url: string,
     { arg }: { arg: ClientArrangement }
@@ -129,9 +146,10 @@ export function useCreateOrUpdateArrangement(arrangementId?: number | null) {
     return response.json();
   }
 
-  const url = arrangementId
+  const baseUrl = arrangementId
     ? `/api/arrangements/${arrangementId}`
     : "/api/arrangements";
+  const url = options.preserveMedia ? `${baseUrl}?preserveMedia=true` : baseUrl;
 
   const { data, trigger, isMutating, error } = useSWRMutation(
     url,
@@ -288,6 +306,15 @@ export function useDeleteService(slugOrId: string | number) {
   };
 }
 
+export class ServiceSaveError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ServiceSaveError";
+    this.status = status;
+  }
+}
+
 export function useCreateOrUpdateService(
   serviceIdOrSlug: string | number | null
 ) {
@@ -300,10 +327,10 @@ export function useCreateOrUpdateService(
       body: JSON.stringify(arg),
     });
     if (!response.ok) {
-      throw new Error(
-        `Failed to create or update service. Status: ${response.status}. ${
-          response.body ? await response.text() : ""
-        }`
+      const message = response.body ? await response.text() : "";
+      throw new ServiceSaveError(
+        response.status,
+        message || `Failed to create or update service. Status: ${response.status}`
       );
     }
     return response.json();
@@ -321,6 +348,115 @@ export function useCreateOrUpdateService(
   return {
     createOrUpdateService: trigger,
     isMutating,
+    isError: error,
+  };
+}
+
+export function useArchiveSong(slug: string) {
+  const { trigger, isMutating } = useSWRMutation(
+    `/api/songs/${slug}`,
+    (url: string) =>
+      fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isDeleted: true }),
+      }).then((r) => r.json())
+  );
+  return { archiveSong: trigger, isArchiving: isMutating };
+}
+
+export function useUpdateSong(slug: string) {
+  async function updateSong(
+    url: string,
+    { arg }: { arg: { title?: string; artist?: string | null; tagIds?: number[] } }
+  ) {
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) throw new Error("Failed to update song");
+    return response.json();
+  }
+
+  const { trigger } = useSWRMutation(`/api/songs/${slug}`, updateSong);
+  return { updateSong: trigger };
+}
+
+export function useFetchTagGroups() {
+  const { data, isLoading } = useSWR<ClientTagGroup[]>("/api/tags", (url: string) =>
+    fetch(url).then((res) => res.json())
+  );
+  return { tagGroups: data ?? [], isLoading };
+}
+
+export function useFetchTemplates() {
+  const { data, isLoading } = useSWR<ClientServiceTemplate[]>(
+    "/api/templates",
+    (url: string) => fetch(url).then((res) => res.json())
+  );
+  return { templates: data ?? [], isLoading };
+}
+
+export function useFetchTemplate(id: number | null) {
+  const { data, isLoading } = useSWR<ClientServiceTemplate>(
+    id ? `/api/templates/${id}` : null,
+    (url: string) => fetch(url).then((res) => res.json())
+  );
+  return { template: data, isLoading };
+}
+
+export function useCreateTemplate() {
+  async function createTemplate(
+    url: string,
+    { arg }: { arg: { name: string; items: object } }
+  ) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) throw new Error("Falha ao criar modelo");
+    return response.json() as Promise<ClientServiceTemplate>;
+  }
+  const { trigger, isMutating } = useSWRMutation("/api/templates", createTemplate);
+  return { createTemplate: trigger, isCreating: isMutating };
+}
+
+export function useUpdateTemplate(id: number) {
+  async function updateTemplate(
+    url: string,
+    { arg }: { arg: { name: string; items: object } }
+  ) {
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(arg),
+    });
+    if (!response.ok) throw new Error("Falha ao atualizar modelo");
+    return response.json() as Promise<ClientServiceTemplate>;
+  }
+  const { trigger, isMutating } = useSWRMutation(`/api/templates/${id}`, updateTemplate);
+  return { updateTemplate: trigger, isUpdating: isMutating };
+}
+
+export function useDeleteTemplate(id: number) {
+  async function deleteTemplate(url: string) {
+    const response = await fetch(url, { method: "DELETE" });
+    if (!response.ok) throw new Error("Falha ao apagar modelo");
+  }
+  const { trigger, isMutating } = useSWRMutation(`/api/templates/${id}`, deleteTemplate);
+  return { deleteTemplate: trigger, isDeleting: isMutating };
+}
+
+export function useFetchRecentServices() {
+  const { data, error, isLoading } = useSWR<RecentServiceEntry[]>(
+    "/api/services/recent",
+    (url: string) => fetch(url).then((res) => res.json())
+  );
+  return {
+    services: data ?? [],
+    isLoading,
     isError: error,
   };
 }

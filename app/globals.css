@@ -7,7 +7,7 @@
 
 @theme inline {
   --font-sans: var(--font-ibm-sans), sans-serif;
-  --font-bricolage: var(--font-bricolage-grotesque), sans-serif;
+  --font-display: var(--font-space-grotesk), sans-serif;
   --font-serif: var(--font-ibm-serif), serif;
   --font-mono: var(--font-ibm-mono), monospace;
 
@@ -44,6 +44,7 @@
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-caret-blink: caret-blink 1s step-end infinite;
 
   @keyframes accordion-down {
     from {
@@ -59,6 +60,14 @@
     }
     to {
       height: 0;
+    }
+  }
+  /* Cursor do corpo visual do editor por bloco (BlockEditor/BlockBody.tsx)
+     — traço desenhado à mão (não é o cursor nativo do contentEditable,
+     escondido via caret-color) pra poder ficar mais espesso que o padrão. */
+  @keyframes caret-blink {
+    50% {
+      opacity: 0;
     }
   }
 }
@@ -94,64 +103,64 @@
 
 :root {
   --background: hsl(0 0% 100%);
-  --foreground: hsl(232 84% 4.9%);
+  --foreground: hsl(224 84% 4.9%);
 
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(232 84% 4.9%);
+  --card-foreground: hsl(224 84% 4.9%);
 
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(232 84% 4.9%);
+  --popover-foreground: hsl(224 84% 4.9%);
 
-  --primary: hsl(240, 5.9%, 10%);
-  --primary-foreground: hsl(232 95% 99%);
+  --primary: hsl(0 0% 9%);
+  --primary-foreground: hsl(214 95% 99%);
 
-  --secondary: hsl(238.7, 83.5%, 66.7%);
-  --secondary-foreground: hsl(225.9, 100%, 96.7%);
+  --secondary: hsl(221 83% 53%);
+  --secondary-foreground: hsl(214 95% 99%);
 
-  --muted: hsl(229 8% 72%);
-  --muted-foreground: hsl(226 5% 48%);
+  --muted: hsl(215 16% 72%);
+  --muted-foreground: hsl(215 14% 48%);
 
   --accent: hsl(23 100% 60%);
   --accent-foreground: hsl(24 93% 98%);
 
   --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(232 95% 99%);
+  --destructive-foreground: hsl(214 95% 99%);
 
-  --border: hsl(214.3 31.8% 91.4%);
-  --input: hsl(214.3 31.8% 91.4%);
-  --ring: hsl(232 84% 4.9%);
+  --border: hsl(0 0% 89.8%);
+  --input: hsl(0 0% 89.8%);
+  --ring: hsl(221 83% 53%);
 
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: hsl(232 84% 4.9%);
-  --foreground: hsl(232 95% 99%);
+  --background: hsl(224 71% 4.9%);
+  --foreground: hsl(214 95% 99%);
 
-  --card: hsl(232 84% 4.9%);
-  --card-foreground: hsl(232 95% 99%);
+  --card: hsl(224 71% 4.9%);
+  --card-foreground: hsl(214 95% 99%);
 
-  --popover: hsl(232 84% 4.9%);
-  --popover-foreground: hsl(232 95% 99%);
+  --popover: hsl(224 71% 4.9%);
+  --popover-foreground: hsl(214 95% 99%);
 
   --primary: hsl(0, 0%, 14.9%);
-  --primary-foreground: hsl(232 89% 14%);
+  --primary-foreground: hsl(224 89% 14%);
 
   --secondary: hsl(23 100% 60%);
-  --secondary-foreground: hsl(232 95% 99%);
+  --secondary-foreground: hsl(214 95% 99%);
 
-  --muted: hsl(217.2 32.6% 17.5%);
+  --muted: hsl(224 32.6% 17.5%);
   --muted-foreground: hsl(215 20.2% 65.1%);
 
   --accent: hsl(23 100% 60%);
-  --accent-foreground: hsl(232 95% 99%);
+  --accent-foreground: hsl(214 95% 99%);
 
   --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(232 95% 99%);
+  --destructive-foreground: hsl(214 95% 99%);
 
-  --border: hsl(217.2 32.6% 17.5%);
-  --input: hsl(217.2 32.6% 17.5%);
-  --ring: hsl(212.7 26.8% 83.9%);
+  --border: hsl(224 32.6% 17.5%);
+  --input: hsl(224 32.6% 17.5%);
+  --ring: hsl(213 94% 68%);
 }
 
 @layer base {
@@ -163,6 +172,84 @@
   }
 }
 
-:fullscreen .fullscreen-hidden {
+/* Modo Palco: ocultação de NavBar/ServiceHeader, acionada via classe JS em
+   <html> (components/service/StageMode), não pela API Fullscreen nativa —
+   ela não é suportada de forma consistente em todos os navegadores-alvo. */
+html.stage-mode-active .stage-mode-hidden {
   display: none;
+}
+
+html.stage-mode-active main {
+  padding: 0;
+  margin-bottom: 0;
+}
+
+/* Remove a margem esquerda do ContentWrapper (reservada para a NavBar) no Modo Palco */
+html.stage-mode-active .lg\:ml-20,
+html.stage-mode-active .sm\:ml-20 {
+  margin-left: 0;
+}
+
+/* Mapa da música (SongMap) — linha rolável sem barra de rolagem visível,
+   igual ao protótipo (docs/prototipo-cifras: "scrollbar-width:none"). Sem
+   utilitário Tailwind pronto pra isso. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Todo elemento clicável mostra o cursor de mão. O Tailwind v4 deixa botões com
+   o cursor padrão, então valia a pena resolver num lugar só (em vez de lembrar
+   de cursor-pointer em cada componente): botões, controles com role (switch,
+   tab, menuitem, checkbox, radio, option, button), links, label ligado a um
+   campo, select, summary. Desabilitados voltam ao cursor padrão. Fica em
+   @layer base de propósito: classes utilitárias (disabled:cursor-default,
+   cursor-grab...) continuam ganhando desta regra. */
+@layer base {
+  button,
+  [role="button"],
+  [role="switch"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="menuitemcheckbox"],
+  [role="menuitemradio"],
+  [role="option"],
+  [role="checkbox"],
+  [role="radio"],
+  a[href],
+  label[for],
+  summary,
+  select,
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="range"] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"],
+  [data-disabled],
+  select:disabled,
+  input:disabled {
+    cursor: default;
+  }
+}
+/* Destaque breve ao rolar até um bloco pelo mapa da música (seção 8.2/9.9
+   das specs) — mesmo efeito do protótipo (anel que desaparece), parado
+   com prefers-reduced-motion em vez de global (não queremos desligar
+   TODA transição do app, só esta). */
+@keyframes scroll-target-flash {
+  0% { box-shadow: 0 0 0 4px var(--ring); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.scroll-target-flash {
+  animation: scroll-target-flash 0.9s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-target-flash {
+    animation: none;
+  }
 }

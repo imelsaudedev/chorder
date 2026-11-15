@@ -5,26 +5,52 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Song {
-  id        Int     @id @default(autoincrement())
-  legacyId  Int? @unique
-  title     String
-  slug      String @unique
-  lyrics    String
-  artist    String?
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id         Int     @id @default(autoincrement())
+  legacyId   Int? @unique
+  title      String
+  slug       String @unique
+  lyrics     String
+  artist     String?
+  isDeleted  Boolean @default(false)
+  holyricsId String?
 
   arrangements SongArrangement[]
+  tags         Tag[]
+}
+
+model HolyricsConfig {
+  id    Int    @id @default(1)
+  token String @default("")
+  host  String @default("localhost:8091")
+}
+
+model TagGroup {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  color String @default("#6b7280")
+  order Int    @default(0)
+  tags  Tag[]
+}
+
+model Tag {
+  id         Int      @id @default(autoincrement())
+  name       String
+  tagGroupId Int
+  group      TagGroup @relation(fields: [tagGroupId], references: [id])
+  songs      Song[]
+
+  @@unique([name, tagGroupId])
 }
 
 model SongArrangement {
@@ -36,14 +62,24 @@ model SongArrangement {
   isDefault Boolean @default(false)
   isDeleted Boolean @default(false)
   isServiceArrangement Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+
+  youtubeUrl   String?
 
   song      Song @relation(fields: [songId], references: [id])
   originalArrangement SongArrangement? @relation("OriginalArrangement", fields: [originalArrangementId], references: [id])
   childrenArrangements SongArrangement[] @relation("OriginalArrangement")
   serviceUnit ServiceUnit?
   units SongUnit[]
+  audios ArrangementAudio[]
+}
+
+model ArrangementAudio {
+  id            Int             @id @default(autoincrement())
+  arrangementId Int
+  arrangement   SongArrangement @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
+  url           String
+  label         String
+  order         Int             @default(0)
 }
 
 model SongUnit {
@@ -52,7 +88,9 @@ model SongUnit {
   content   String
   type      SongUnitType
   order     Int
-  
+  notes       String?
+  repeatCount Int     @default(1)
+
   arrangement SongArrangement @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
 }
 
@@ -70,33 +108,48 @@ enum SongUnitType {
 }
 
 model Service {
-  id          Int     @id @default(autoincrement())
-  legacyId  Int? @unique
-  title       String?
-  slug        String  @unique
-  worshipLeader String?
-  date        DateTime
-  isDeleted   Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id              Int      @id @default(autoincrement())
+  legacyId        Int?     @unique
+  title           String?
+  slug            String   @unique
+  worshipLeader   String?
+  date            DateTime
+  isDeleted       Boolean  @default(false)
+  preacher        String?
+  sermonTheme     String?
+  sermonReference String?
+  plan            Json?
+  updatedAt       DateTime @default(now()) @updatedAt
 
-  units      ServiceUnit[]
+  units ServiceUnit[]
+}
+
+model ServiceTemplate {
+  id    Int    @id @default(autoincrement())
+  name  String
+  items Json
 }
 
 model ServiceUnit {
-  id        Int     @id @default(autoincrement())
-  serviceId Int
-  type      ServiceUnitType
-  arrangementId Int? @unique
-  semitoneTranspose Int? @default(0)
-  order     Int
+  id                Int             @id @default(autoincrement())
+  serviceId         Int
+  type              ServiceUnitType
+  arrangementId     Int?            @unique
+  semitoneTranspose Int?            @default(0)
+  order             Int
 
-  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  arrangement  SongArrangement? @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
+  service     Service          @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  arrangement SongArrangement? @relation(fields: [arrangementId], references: [id], onDelete: Cascade)
 }
 
 enum ServiceUnitType {
   SONG
+  FALA
+  LEITURA
+  ORACAO
+  AVISOS
+  SERMAO
+  ENCERRAMENTO
 }
 
 enum UserRole {
@@ -113,11 +166,11 @@ model User {
   role          UserRole  @default(USER)
   accounts      Account[]
   sessions      Session[]
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
- 
+
 model Account {
   userId            String
   type              String
@@ -130,29 +183,29 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([provider, providerAccountId])
 }
- 
+
 model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
- 
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
- 
+
   @@id([identifier, token])
 }

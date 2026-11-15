@@ -23,8 +23,7 @@ export const Default: Story = {
       <div>
         {letters.map((letter) => (
           <Fragment key={letter}>
-            <BigLetter letter={letter} veryBig={true} />
-            <BigLetter letter={letter} veryBig={false} />
+            <BigLetter letter={letter} />
           </Fragment>
         ))}
       </div>

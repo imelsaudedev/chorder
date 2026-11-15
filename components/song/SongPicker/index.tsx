@@ -20,6 +20,7 @@ export default function SongPicker({
     limitLines: 3,
     forceIncludeFirstLine: true,
     excludedSongSlugs,
+    withUsageStats: true,
   });
   const handleSelected = useCallback(
     (song: ClientSong) => {
@@ -34,13 +35,14 @@ export default function SongPicker({
   const isReady = songs && !isLoading;
   return (
     <div>
-      <SearchBar defaultValue={query} onSearch={handleSearch} />
+      <div className="mb-3">
+        <SearchBar defaultValue={query} onSearch={handleSearch} />
+      </div>
       {!isReady && <SongListSkeleton />}
       {isReady && (
         <SongList
           songs={songs}
           query={query}
-          initialsInSeparateRow={true}
           onSelected={handleSelected}
         />
       )}

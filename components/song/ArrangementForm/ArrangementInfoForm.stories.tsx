@@ -23,8 +23,6 @@ export const Default: Story = {
   },
   args: {
     arrangementId: arrangements[1].id,
-    songSlug: arrangements[1].song.slug,
-    isDefault: false,
   },
   async beforeEach() {
     useFetchSongs.mockReturnValue({ songs, isLoading: false, isError: null });

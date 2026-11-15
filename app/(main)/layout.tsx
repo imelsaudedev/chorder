@@ -1,16 +1,17 @@
 import NavBar from "@/components/common/NavBar";
 import UserNav from "@/components/common/UserNav";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import ContentWrapper from "./ContentWrapper";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="max-w-100vw flex">
-      {/* Sidebar fixa */}
-      <NavBar userNav={<UserNav />} />
-
-      {/* Conteúdo principal com deslocamento para a direita em telas grandes */}
-      <div className="flex flex-col grow ml-0 sm:ml-20 max-w-full">
-        {children}
+    <TooltipProvider>
+      <div className="max-w-100vw flex">
+        <div className="stage-mode-hidden">
+          <NavBar userNav={<UserNav />} />
+        </div>
+        <ContentWrapper>{children}</ContentWrapper>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
