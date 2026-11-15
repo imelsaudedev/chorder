@@ -4,7 +4,7 @@ import prisma from './client';
 
 async function createArrangement() {
   const song = await prisma.song.create({
-    data: { title: 'Música de Teste', slug: `musica-teste-${Date.now()}`, lyrics: '' },
+    data: { title: 'Música de Teste', slug: `musica-teste-${Date.now()}-${Math.random().toString(36).slice(2)}`, lyrics: '' },
   });
   const arrangement = await prisma.songArrangement.create({
     data: { songId: song.id, key: 'C', isDefault: true },

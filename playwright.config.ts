@@ -10,7 +10,7 @@ if (fs.existsSync(envTestPath)) {
     const key = line.split('=')[0]; const value = line.substring(line.indexOf('=') + 1);
     if (key && value) {
       let finalValue = value.trim();
-      if (key.trim() === 'DATABASE_URL') {
+      if (key.trim() === 'DATABASE_URL' || key.trim() === 'DIRECT_URL') {
         finalValue = finalValue.replace('schema=public', 'schema=e2e');
       }
       process.env[key.trim()] = finalValue;
@@ -19,6 +19,7 @@ if (fs.existsSync(envTestPath)) {
 }
 
 const testDbUrl = process.env.DATABASE_URL;
+const testDirectUrl = process.env.DIRECT_URL || testDbUrl;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -82,6 +83,7 @@ export default defineConfig({
     stderr: 'pipe',
     env: {
       DATABASE_URL: testDbUrl || '',
+      DIRECT_URL: testDirectUrl || '',
       NODE_ENV: 'test',
       E2E_TEST: 'true',
     },
