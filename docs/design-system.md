@@ -140,7 +140,7 @@ Cores por tipo em `components/song/unit-colors.ts` (ver 6.3 para a versão escur
 ## 6. Modo escuro
 
 ### 6.1 Estado hoje
-**Base pronta, ainda sem revisão tela a tela (etapa 3).** O `.dark` usa a paleta de 6.2 (marca azul), com `color-scheme`. O `ThemeProvider` (`components/common/Theme`) guarda a escolha em `localStorage` (`theme`) e um script inline no `<head>` aplica a classe `dark` antes da pintura. **O padrão é Claro** (decidido em 13/11/2026) até a etapa 4 revisar as telas; depois troca-se `DEFAULT_THEME` em `lib/theme.ts` para `system`. O alternador (6.5) está na barra lateral e na barra inferior do celular. As áreas fora de `components/ui` ainda podem ter cores sem versão escura (ver 8).
+**Pronto e revisado (etapas 3 e 4).** O `.dark` usa a paleta de 6.2 (marca azul), com `color-scheme`. O `ThemeProvider` (`components/common/Theme`) guarda a escolha em `localStorage` (`theme`) e um script inline no `<head>` aplica a classe `dark` antes da pintura. **O padrão é Sistema** (`DEFAULT_THEME` em `lib/theme.ts`; era Claro até a revisão da etapa 4, trocado em 16/11/2026). O alternador (6.5) está na barra lateral e na barra inferior do celular. Não conferidos no escuro: modais e drawers em 390px e a administração do catálogo (ver 8).
 
 ### 6.2 Paleta base (neutros acinzentados, sem tom azulado: decidido em 13/11/2026)
 Os neutros do escuro são cinzas quase puros (família zinc); só a marca (`secondary`) e os estados trazem cor. O protótipo
@@ -205,7 +205,7 @@ A cor não é o único sinal: o bloco mostra o nome ("Final", "Introdução") e 
 4. **Migração por área** (editor de cifra e blocos, barra de mídia, liturgia, Palco), conferindo claro e escuro em 390 / 768 / 1280.
 
 ### 6.5 Alternador de tema (decidido em 13/11/2026)
-Componentes `ThemeMenu` (barra lateral) e `ThemeSheet` (celular) com três opções: **Sistema**, **Claro** (padrão por enquanto) e **Escuro**; o ícone mostra o tema atual (monitor, sol ou lua).
+Componentes `ThemeMenu` (barra lateral) e `ThemeSheet` (celular) com três opções: **Sistema** (padrão), **Claro** e **Escuro**; o ícone mostra o tema atual (monitor, sol ou lua).
 - **Desktop e tablet:** botão no **rodapé da barra lateral** (`NavBar`, que hoje não tem nada ali), abrindo um menu para o lado.
 - **Celular, listas:** **4º item da barra inferior**, "Tema", no mesmo estilo dos outros (sem estado "ativo"); ao tocar abre uma folha de baixo
   (mesmo padrão dos seletores do filtro) com as três opções. Quatro itens cabem (cerca de 97px cada em 390px).
