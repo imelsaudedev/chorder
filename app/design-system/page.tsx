@@ -136,7 +136,7 @@ export default function DesignSystemPage() {
 
           <p className="mb-2 rounded-lg border border-secondary/30 bg-secondary/5 px-4 py-3 text-sm text-zinc-700">
             Atualizado em 13/11/2026 e alinhado ao código. Referência escrita: <code className="text-secondary">docs/design-system.md</code>.
-            O <strong>modo escuro já existe no app</strong> (escolha em Tema, padrão Claro); esta página é uma referência só no tema claro, e os valores escuros estão em Cores e Blocos da cifra.
+            O <strong>modo escuro já existe no app</strong> (escolha em Tema, padrão Sistema); esta página é uma referência só no tema claro, e os valores escuros estão em Cores e Blocos da cifra.
           </p>
 
           {/* ── Cores ──────────────────────────────────────────────── */}

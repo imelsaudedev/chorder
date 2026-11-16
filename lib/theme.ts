@@ -1,7 +1,7 @@
 export type Theme = "system" | "light" | "dark";
 
 export const THEME_STORAGE_KEY = "theme";
-export const DEFAULT_THEME: Theme = "light";
+export const DEFAULT_THEME: Theme = "system";
 
 export function isTheme(value: unknown): value is Theme {
   return value === "system" || value === "light" || value === "dark";
