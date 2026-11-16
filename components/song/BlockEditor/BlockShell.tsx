@@ -370,7 +370,7 @@ export default function BlockShell({
               />
             </div>
             <div
-              className="rounded-md bg-black/5 px-2 py-2"
+              className="rounded-md bg-foreground/5 px-2 py-2"
               style={{
                 "--item-mb": "0.5em",
                 "--block-px": "0",
