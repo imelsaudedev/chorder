@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liturgias — opções para a data</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--fg:hsl(224 84% 4.9%);--primary:hsl(0 0% 9%);--mut:hsl(215 14% 48%);--border:hsl(0 0% 89.8%);--blue:hsl(221 83% 53%);--z50:#fafafa}
+*{box-sizing:border-box}body{margin:0;padding:24px 16px 48px;background:#e9edf3;color:var(--fg);font:400 14px/22px "IBM Plex Sans",system-ui,sans-serif}
+h1{font:600 20px/26px "Space Grotesk";margin:0 0 4px}p.i{margin:0 0 20px;color:#475569;max-width:80ch}
+.grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));max-width:1200px;margin:0 auto}
+.opt h2{font:600 15px/22px "Space Grotesk";margin:0 0 2px}.opt p{margin:0 0 8px;color:#475569;font-size:13px;line-height:19px}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.hd{display:grid;gap:20px;grid-template-columns:var(--c);padding:12px 24px;background:var(--z50);font-weight:500;color:var(--mut)}
+.band{height:32px;display:flex;align-items:center;padding:0 24px;background:var(--z50);font-weight:600;text-transform:uppercase;color:var(--blue);border-top:1px solid var(--border)}
+.row{display:grid;gap:20px;grid-template-columns:var(--c);padding:16px 24px;border-top:1px solid var(--border);align-items:start}
+.t{font:600 18px/22px "Space Grotesk";letter-spacing:-.015em;color:var(--primary)}
+.s{color:var(--mut);display:flex;align-items:center;gap:4px}
+.aux{color:var(--mut)}
+/* A: números e rótulo no mesmo tom; só o título em negrito */
+.A{--c:3.25rem minmax(0,1.4fr) minmax(0,1.6fr) 4rem}
+.A .wd{font-size:12px;line-height:22px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.A .dn{font-size:14px;line-height:22px;font-weight:500;color:var(--fg);font-variant-numeric:tabular-nums}
+/* B: data em uma linha, alinhada à primeira linha do título */
+.B{--c:6.5rem minmax(0,1.4fr) minmax(0,1.6fr) 4rem}
+.B .d{color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap}
+.B .d b{font-weight:500;color:var(--fg)}
+/* C: bloco com o mesmo peso do título (número semibold, dia da semana em azul-cinza) mas com a segunda linha mais leve */
+.C{--c:3.25rem minmax(0,1.4fr) minmax(0,1.6fr) 4rem}
+.C .wd{font-size:12px;line-height:22px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-weight:500}
+.C .dn{font:600 22px/22px "Space Grotesk";color:var(--primary);letter-spacing:-.02em}
+/* D: data como linha de apoio acima do título, no padrão de eventos (Meetup/Luma) */
+.D{--c:minmax(0,1.6fr) minmax(0,1.6fr) 4rem}
+.D .k{font-size:12px;line-height:18px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.mu{font-size:14px;color:var(--mut)}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+</style></head><body>
+<h1>Opções para a data da lista</h1>
+<p class="i">Problema: hoje o dia da semana é leve, o número é pesado, o título é pesado e o dirigente é leve — os pesos se alternam em zigue-zague. As opções abaixo seguem uma regra: <b>cada linha tem um peso só</b> (ou só o título é forte).</p>
+<div class="grid" id="g"></div>
+<script>
+const data=[["dom","15","Culto de domingo","Rafael","Pr. Samuel","Descanso em Cristo · Mt 11.28-30","5"],["dom","08","Culto – 2º domingo de novembro","Ana","—","—","4"],["dom","01","Culto de Santa Ceia","Davi","Pra. Helena","Comunhão · At 2.42-47","6"]];
+const mic='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7.601-5.994 8.19a1 1 0 0 0 .1 1.298l.817.818a1 1 0 0 0 1.314.087L15.09 12"/><path d="M16.5 21.174C15.5 20.5 14.372 20 13 20c-2.058 0-3.928 2.356-6 2-2.072-.356-2.775-3.369-1.5-4.5"/><circle cx="16" cy="7" r="5"/></svg>';
+const rowsB=(f)=>data.map(f).join("");
+const mid=r=>`<div><div class="aux">${r[4]}</div><div class="aux">${r[5]}</div></div><div class="aux">♫ ${r[6]}</div>`;
+const opts=[
+ ["A — Mesmo tom, título em destaque","Dia da semana e número em cinza/preto leves e pequenos; só o título é semibold. A data vira informação de apoio, como o dirigente. Alinhado ao Google Calendar na lógica (data discreta), mas sem o número gigante.",
+  "A",()=>`<div class="hd"><span>Data</span><span>Culto e dirigente</span><span>Pregador(a) e tema/texto</span><span>Músicas</span></div><div class="band">Novembro de 2026</div>`+rowsB(r=>`<div class="row"><div><div class="wd">${r[0]}</div><div class="dn">${r[1]}</div></div><div><div class="t">${r[2]}</div><div class="s">${mic}${r[3]}</div></div>${mid(r)}</div>`)],
+ ["B — Data em uma linha, na linha do título","'dom 15' numa só linha, tabular, alinhada à primeira linha do título; a segunda linha fica vazia. É o padrão de listas densas (GitHub, Linear): sem bloco, o título manda e a data é uma coluna de apoio.",
+  "B",()=>`<div class="hd"><span>Data</span><span>Culto e dirigente</span><span>Pregador(a) e tema/texto</span><span>Músicas</span></div><div class="band">Novembro de 2026</div>`+rowsB(r=>`<div class="row"><div class="d">${r[0]} <b>${r[1]}</b></div><div><div class="t">${r[2]}</div><div class="s">${mic}${r[3]}</div></div>${mid(r)}</div>`)],
+ ["C — Como está hoje (para comparar)","Dia da semana leve em cima e número semibold embaixo, ao lado do título semibold e do dirigente leve: é o zigue-zague que você apontou (leve, forte / forte, leve).",
+  "C",()=>`<div class="hd"><span>Data</span><span>Culto e dirigente</span><span>Pregador(a) e tema/texto</span><span>Músicas</span></div><div class="band">Novembro de 2026</div>`+rowsB(r=>`<div class="row"><div><div class="wd">${r[0]}</div><div class="dn">${r[1]}</div></div><div><div class="t">${r[2]}</div><div class="s">${mic}${r[3]}</div></div>${mid(r)}</div>`)],
+ ["D — Data como linha de apoio acima do título","'DOM, 15 NOV' em azul, pequeno, caixa-alta, acima do título (como Meetup/Luma). A data fica no mesmo bloco do título: sem coluna de data, sem peso concorrente. O cabeçalho 'Data' sai; o mês vem na linha (a faixa do mês pode sair).",
+  "D",()=>`<div class="hd"><span>Culto</span><span>Pregador(a) e tema/texto</span><span>Músicas</span></div><div class="band">Novembro de 2026</div>`+rowsB(r=>`<div class="row"><div><div class="k">${r[0]}, ${r[1]} nov</div><div class="t">${r[2]}</div><div class="s">${mic}${r[3]}</div></div><div><div class="aux" style="margin-top:18px">${r[4]}</div><div class="aux">${r[5]}</div></div><div class="aux" style="margin-top:18px">♫ ${r[6]}</div></div>`)]
+];
+document.getElementById("g").innerHTML=opts.map(o=>`<div class="opt"><h2>${o[0]}</h2><p>${o[1]}</p><div class="card ${o[2]}">${o[3]()}</div></div>`).join("");
+</script></body></html>

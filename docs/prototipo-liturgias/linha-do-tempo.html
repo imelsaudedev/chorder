@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liturgias — linha do tempo (proposta)</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Proposta: a própria lista vira uma linha do tempo. Uma única lista (próximas no alto, histórico embaixo)
+   com um trilho vertical: pontos azuis = próximas, pontos cinza = passadas, marcador "Hoje" entre elas.
+   Dados inventados; "hoje" é quarta, 11/11/2026. */
+:root{--fg:hsl(224 84% 4.9%);--primary:hsl(0 0% 9%);--mut:hsl(215 14% 48%);--border:hsl(0 0% 89.8%);--blue:hsl(221 83% 53%);--z50:#fafafa;--z300:#d4d4d8;--pg:#e9edf3}
+*{box-sizing:border-box}
+body{margin:0;padding:20px 16px 48px;background:var(--pg);color:var(--fg);font:400 14px/22px "IBM Plex Sans",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+.intro{max-width:80ch;margin:0 auto 14px}.intro h1{margin:0 0 4px;font:600 20px/26px "Space Grotesk"}.intro p{margin:0;color:#475569}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:center;margin:0 auto 18px}
+.ctl .g{display:flex;flex-direction:column;gap:4px}.ctl .g>span{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#475569}
+.seg{display:inline-flex;border:1px solid #a3b0c2;border-radius:99px;background:#fff;padding:2px}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:99px;font-size:13px;min-height:32px}
+.seg button[aria-pressed=true]{background:#0b1220;color:var(--pg)}
+.device{margin:0 auto;background:#fff;border:2px solid #a3b0c2;border-radius:20px;width:390px;max-width:100%;padding:24px 20px 28px;container:app/inline-size}
+.device[data-dev=tablet]{width:min(820px,100%);padding:24px 32px}
+.device[data-dev=desktop]{width:min(1120px,100%);padding:24px 48px;border-radius:12px}
+h1.t{margin:0 0 24px;font:600 28px/32px "Space Grotesk";letter-spacing:-.025em;color:var(--primary)}
+@container app (min-width:1000px){h1.t{font-size:40px;line-height:44px}}
+h2.s{margin:0 0 12px;font:600 20px/26px "Space Grotesk";letter-spacing:-.02em;color:var(--primary)}
+
+.card{border:1px solid var(--border);border-radius:12px;overflow:clip;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+@container app (max-width:599px){.card{margin:0 -20px;border-radius:0;border-left:0;border-right:0}}
+/* grade: [data] [trilho] [culto] [pregador/tema] [músicas] [⋯] */
+.r{display:grid;column-gap:12px;align-items:start;padding:0 16px;
+   grid-template-columns:var(--date) var(--rail) minmax(0,1fr) 2.5rem;grid-template-areas:"date rail main act" "date rail meta act"}
+@container app (min-width:720px){.r{column-gap:20px;padding:0 24px;grid-template-columns:var(--date) var(--rail) minmax(0,1.4fr) minmax(0,1.6fr) 5rem 2.5rem;grid-template-areas:"date rail main pre songs act" "date rail leader tema songs act"}}
+.card[data-v=dots]{--date:3.25rem;--rail:1.5rem}
+.card[data-v=nodes]{--date:0px;--rail:3.25rem}
+/* data, bolinha e título: mesmo corpo de fonte (16px; 18px no largo) e mesma linha de 22px, com o centro da bolinha no centro da linha */
+.date{grid-area:date;text-align:right;color:var(--mut);padding-top:16px;font:500 16px/22px "Space Grotesk",sans-serif;letter-spacing:-.015em;white-space:nowrap}
+@container app (min-width:860px){.date{font-size:18px}}
+.card[data-v=nodes] .date{display:none}
+.rail{grid-area:rail;position:relative;align-self:stretch;min-height:56px}
+.rail::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--z300);z-index:1}
+.up .rail::before,.r.up-line .rail::before{background:color-mix(in srgb,var(--blue) 45%,#fff)}
+.r.first .rail::before{top:27px}.r.last .rail::before{bottom:calc(100% - 27px)}
+.dot{position:absolute;left:50%;top:21px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#fff;border:2px solid #a1a1aa;z-index:2}
+.up .dot{background:var(--blue);border-color:var(--blue)}
+.up.next .dot{width:16px;height:16px;margin-left:-8px;top:19px;box-shadow:0 0 0 5px hsl(221 83% 53%/.18)}
+/* variante B: número dentro do nó */
+.card[data-v=nodes] .dot{display:none}
+.nd{display:none;position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:2;text-align:center}
+.card[data-v=nodes] .nd{display:block}
+.nd b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;border:2px solid #a1a1aa;font:600 16px/1 "Space Grotesk";color:#3f3f46}
+.up .nd b{background:var(--blue);border-color:var(--blue);color:#fff}
+.up.next .nd b{box-shadow:0 0 0 5px hsl(221 83% 53%/.18)}
+.nd i{display:block;font-style:normal;font-size:11px;line-height:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-top:3px}
+.card[data-v=nodes] .r:not(.band):not(.today){min-height:84px}
+.main{grid-area:main;padding:16px 0 0;min-width:0}
+.tt{font:600 16px/22px "Space Grotesk";letter-spacing:-.015em;color:var(--primary);display:flex;gap:8px;align-items:baseline}
+.tt span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@container app (min-width:860px){.tt{font-size:18px}}
+.badge{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);flex:none}
+.meta{grid-area:meta;display:flex;flex-wrap:wrap;gap:0 12px;color:var(--mut);padding-bottom:16px;min-width:0}
+.meta span,.leader,.pre,.tema,.songs{display:inline-flex;align-items:center;gap:4px;min-width:0}
+.leader,.tema,.pre,.songs{display:none}
+@container app (min-width:720px){
+  .meta{display:none}
+  .leader{display:inline-flex;grid-area:leader;color:var(--mut);padding-bottom:16px}
+  .pre{display:inline-flex;grid-area:pre;color:var(--mut);padding-top:16px}
+  .tema{display:inline-flex;grid-area:tema;color:var(--mut);padding-bottom:16px}
+  .songs{display:inline-flex;grid-area:songs;color:var(--mut);padding-top:16px}
+}
+.act{grid-area:act;padding-top:8px;display:flex;justify-content:flex-end}
+.act button{width:40px;height:40px;border:0;background:none;border-radius:8px;color:var(--mut)}
+.r:not(.band):not(.today):hover{background:hsl(215 16% 72%/.14)}
+.hd{display:none}
+@container app (min-width:720px){.hd{display:grid;column-gap:20px;padding:12px 24px;background:var(--z50);border-bottom:1px solid var(--border);font-weight:500;color:var(--mut);grid-template-columns:var(--date) var(--rail) minmax(0,1.4fr) minmax(0,1.6fr) 5rem 2.5rem}}
+.band{background:var(--z50);border-top:1px solid var(--border);border-bottom:1px solid var(--border);height:32px;align-items:center;grid-template-areas:"date rail main main main main"}
+.band .lbl{grid-area:main;font-weight:600;text-transform:uppercase;color:var(--blue)}
+.band .rail{min-height:32px;align-self:stretch}.band .rail::before{top:0;bottom:0}
+.today{align-items:center;height:44px;grid-template-areas:"date rail main main main main"}
+.today .rail{min-height:44px}.today .rail::before{background:linear-gradient(var(--blue) 0 50%,var(--z300) 50% 100%)}
+.today .rail::after{content:"";position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;background:#fff;border:2px solid var(--blue);transform:rotate(45deg);z-index:2}
+.today .lbl{grid-area:main;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.today .lbl::after{content:"";flex:1;height:1px;background:color-mix(in srgb,var(--blue) 35%,#fff)}
+</style></head><body>
+<div class="intro"><h1>Liturgias — linha do tempo</h1><p>A lista vira uma linha do tempo: um trilho vertical liga os cultos; pontos azuis são as próximas, cinza as passadas, e o marcador “Hoje” separa as duas. Duas formas de mostrar a data (pontos ou número dentro do nó). Dados inventados.</p></div>
+<div class="ctl">
+ <div class="g"><span>Tela</span><div class="seg" id="dev"><button data-v="mobile" aria-pressed="true">Celular</button><button data-v="tablet" aria-pressed="false">Tablet</button><button data-v="desktop" aria-pressed="false">Desktop</button></div></div>
+ <div class="g"><span>Data</span><div class="seg" id="var"><button data-v="dots" aria-pressed="true">Pontos + data ao lado</button><button data-v="nodes" aria-pressed="false">Número no nó</button></div></div>
+</div>
+<div class="device" id="app" data-dev="mobile"></div>
+<script>
+const MO=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"],WD=["dom","seg","ter","qua","qui","sex","sáb"];
+const L=["Rafael","Ana","Davi","Lívia"];
+const raw=[[2026,12,6,"Culto de Santa Ceia",3,null,null,0],[2026,11,29,null,4,null,null,0],[2026,11,22,null,3,"Pr. Samuel","Gratidão · Sl 103",0],[2026,11,15,null,5,"Pra. Helena","Descanso em Cristo · Mt 11.28-30",0],
+[2026,11,8,null,4,null,null,0],[2026,11,1,"Culto de Santa Ceia",6,"Pr. Jonas","Comunhão · At 2.42-47",0],[2026,10,25,null,5,null,null,0],[2026,10,18,null,3,"Pr. Samuel","Perseverança · Tg 1.2-4",0],[2026,10,11,null,4,null,null,0],[2026,10,4,null,6,null,null,0],[2026,9,27,"Culto de aniversário da igreja",5,"Convidado","O Pai que acolhe · Lc 15.11-32",0],[2026,9,20,null,4,null,null,0]];
+const items=raw.map((r,i)=>({d:new Date(r[0],r[1]-1,r[2]),title:r[3]||"Culto de domingo",leader:L[i%4],songs:r[4],pre:r[5],tema:r[6]}));
+const TODAY=new Date(2026,10,11);
+const mic='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7.601-5.994 8.19a1 1 0 0 0 .1 1.298l.817.818a1 1 0 0 0 1.314.087L15.09 12"/><path d="M16.5 21.174C15.5 20.5 14.372 20 13 20c-2.058 0-3.928 2.356-6 2-2.072-.356-2.775-3.369-1.5-4.5"/><circle cx="16" cy="7" r="5"/></svg>';
+const msg='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>';
+const note='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+const more='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>';
+const two=n=>String(n).padStart(2,"0");
+function rows(){
+  const out=[]; let lastMonth=null, todayDone=false, firstUp=true;
+  items.forEach((s,idx)=>{
+    const up=s.d>=TODAY;
+    const mk=s.d.getFullYear()*100+s.d.getMonth();
+    if(!up&&!todayDone){ out.push(`<div class="r today"><div class="rail"></div><div class="lbl">Hoje · quarta, 11 de novembro</div></div>`); todayDone=true }
+    if(mk!==lastMonth){ out.push(`<div class="r band"><div class="rail"></div><div class="lbl">${MO[s.d.getMonth()]} de ${s.d.getFullYear()}</div></div>`); lastMonth=mk }
+    const isNext=up&&idx===raw.findLastIndex(x=>new Date(x[0],x[1]-1,x[2])>=TODAY);
+    const first=idx===0, last=idx===items.length-1;
+    const meta=`<span>${mic}${s.leader}</span>${s.pre?`<span>${msg}${s.pre}</span>`:""}${s.tema?`<span class="m">${s.tema}</span>`:""}<span>${note}${s.songs}</span>`;
+    out.push(`<div class="r ${up?"up":""} ${isNext?"next":""} ${first?"first":""} ${last?"last":""}">
+      <div class="date">${WD[s.d.getDay()]} ${two(s.d.getDate())}</div>
+      <div class="rail"><span class="dot"></span><div class="nd"><b>${two(s.d.getDate())}</b><i>${WD[s.d.getDay()]}</i></div></div>
+      <div class="main"><div class="tt"><span>${s.title}</span>${isNext?'<span class="badge">Esta semana</span>':""}</div></div>
+      <div class="meta">${meta}</div>
+      <div class="leader">${mic}${s.leader}</div><div class="pre">${s.pre?msg+s.pre:"—"}</div><div class="tema">${s.tema||"—"}</div><div class="songs">${note}${s.songs}</div>
+      <div class="act"><button aria-label="Mais ações">${more}</button></div></div>`);
+  });
+  return out.join("");
+}
+const S={dev:"mobile",v:"dots"};
+function render(){
+  const app=document.getElementById("app");app.dataset.dev=S.dev;
+  app.innerHTML=`<h1 class="t">Liturgias</h1><div class="card" data-v="${S.v}"><div class="hd"><span></span><span></span><span>Culto e dirigente</span><span>Pregador(a) e tema/texto</span><span>Músicas</span><span></span></div>${rows()}</div>`;
+}
+function seg(id,k){document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{document.querySelectorAll(`#${id} button`).forEach(x=>x.setAttribute("aria-pressed",x===b));S[k]=b.dataset.v;render()})}
+seg("dev","dev");seg("var","v");render();
+</script></body></html>
