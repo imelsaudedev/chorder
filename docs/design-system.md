@@ -13,7 +13,7 @@ Atualizado após o #97 (13/11/2026). Ao mudar um token ou um padrão, atualize a
 - **Destaque secundário:** laranja, em `--accent` (`hsl(23 100% 60%)`), uso raro.
 - **Neutros:** `--foreground` (texto), `--muted-foreground` (texto de apoio), `--border`. Textos de título usam `--primary`
   (quase preto), não `--foreground`.
-- **Fontes** (`app/fonts.ts`, via `next/font/google`):
+- **Fontes** (`app/fonts.ts`, via `next/font/local`, arquivos em `app/fonts/`; sem buscar no Google no build):
 
 | Papel | Fonte | Classe | Pesos carregados |
 |---|---|---|---|
