@@ -1,12 +1,64 @@
 import { getLyrics } from "@/chopro/music";
+import { readStorage, writeStorage } from "@/hooks/useLocalStorageState";
 import { ClientArrangement } from "@/prisma/models";
 
 export type HolyricsConfig = { token: string; host: string };
 
-export async function fetchHolyricsConfig(): Promise<HolyricsConfig> {
-  const res = await fetch("/api/holyrics-config");
-  if (!res.ok) return { token: "", host: "localhost:8091" };
-  return res.json();
+export const HOLYRICS_DEFAULT_HOST = "localhost:8091";
+export const HOLYRICS_CONFIG_KEY = "holyrics:config";
+
+/** Aceita "http://192.168.0.5:8091/" ou "192.168.0.5:8091"; vazio volta ao padrão. */
+export function normalizeHost(raw: string | null | undefined): string {
+  const host = (raw ?? "").trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+  return host || HOLYRICS_DEFAULT_HOST;
+}
+
+/**
+ * Configuração do Holyrics DESTE aparelho (localStorage). Fica por aparelho de propósito:
+ * o Holyrics roda num computador específico, e quem fala com ele é o navegador.
+ * Sem configuração salva, o host é localhost:8091 (o operador no próprio computador do Holyrics).
+ *
+ * Migração: o token já salvo no servidor (versão anterior) é usado uma única vez como ponto
+ * de partida e copiado para o aparelho. O host do servidor NÃO é reaproveitado.
+ */
+export async function loadHolyricsConfig(): Promise<HolyricsConfig> {
+  const local = readStorage<Partial<HolyricsConfig> | null>(HOLYRICS_CONFIG_KEY, null);
+  if (local?.token) return { token: local.token, host: normalizeHost(local.host) };
+
+  let token = "";
+  try {
+    const res = await fetch("/api/holyrics-config");
+    if (res.ok) token = (await res.json())?.token ?? "";
+  } catch {
+    // sem servidor: segue sem token
+  }
+  const config = { token, host: normalizeHost(local?.host) };
+  if (token) saveHolyricsConfig(config);
+  return config;
+}
+
+export function saveHolyricsConfig(config: HolyricsConfig): HolyricsConfig {
+  const saved = { token: config.token.trim(), host: normalizeHost(config.host) };
+  writeStorage(HOLYRICS_CONFIG_KEY, saved);
+  return saved;
+}
+
+/** Chamada de leitura (não altera nada) para saber se o Holyrics responde neste host/token. */
+export async function holyricsPing(token: string, host: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(apiUrl("GetLyricsPlaylist", token, host), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };
+    const json = await res.json();
+    if (json?.status === "error") return { ok: false, error: "token sem permissão ou inválido" };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "sem resposta" };
+  }
 }
 
 function apiUrl(action: string, token: string, host: string) {
@@ -37,7 +89,7 @@ export async function holyricsPopupCreateSong(
   title: string,
   artist: string | null | undefined,
   arrangement: ClientArrangement,
-  host: string = "localhost:8091"
+  host: string = HOLYRICS_DEFAULT_HOST
 ): Promise<void> {
   const units = [...(arrangement.units ?? [])].sort((a, b) => a.order - b.order);
 

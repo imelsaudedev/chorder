@@ -2,8 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  HOLYRICS_DEFAULT_HOST,
   holyricsPopupCreateSong,
   holyricsSearchSong,
+  loadHolyricsConfig,
+  saveHolyricsConfig,
 } from "@/lib/holyrics";
 import { ClientArrangement } from "@/prisma/models";
 import { CheckCircle2, Circle, Loader2, RefreshCw, Settings, Unlink, XCircle } from "lucide-react";
@@ -40,16 +43,22 @@ type SongStatus = "idle" | "searching" | "not_found" | "popup_open" | "linking" 
 
 type Props = {
   songs: SongRow[];
-  initialToken: string;
-  initialHost: string;
 };
 
-export default function HolyricsAdminClient({ songs: initialSongs, initialToken, initialHost }: Props) {
+export default function HolyricsAdminClient({ songs: initialSongs }: Props) {
   const [songs, setSongs] = useState(initialSongs);
-  const [token, setToken] = useState(initialToken);
-  const [host, setHost] = useState(initialHost);
+  // Host e token ficam neste aparelho (localStorage), não no servidor.
+  const [token, setToken] = useState("");
+  const [host, setHost] = useState(HOLYRICS_DEFAULT_HOST);
   const [showSettings, setShowSettings] = useState(false);
-  const [savingConfig, setSavingConfig] = useState(false);
+
+  useEffect(() => {
+    loadHolyricsConfig().then((c) => {
+      setToken(c.token);
+      setHost(c.host);
+      if (!c.token) setShowSettings(true);
+    });
+  }, []);
   const [statuses, setStatuses] = useState<Record<string, SongStatus>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [manualIds, setManualIds] = useState<Record<string, string>>({});
@@ -85,14 +94,10 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
     setErrors((prev) => ({ ...prev, [slug]: msg }));
   }
 
-  async function handleSaveConfig() {
-    setSavingConfig(true);
-    await fetch("/api/holyrics-config", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, host }),
-    });
-    setSavingConfig(false);
+  function handleSaveConfig() {
+    const saved = saveHolyricsConfig({ token, host });
+    setToken(saved.token);
+    setHost(saved.host);
     setShowSettings(false);
   }
 
@@ -223,6 +228,7 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
         <div className="flex items-center justify-between">
           <div>
             <span className="font-medium text-sm">Configuração Holyrics</span>
+            <span className="ml-2 text-xs text-muted-foreground">salva só neste aparelho</span>
             <div className="ml-3 text-sm text-muted-foreground font-mono space-y-0.5">
               <div>Host: {host || "não configurado"}</div>
               <div>Token: {token ? `${token.slice(0, 6)}…` : "não configurado"}</div>
@@ -237,7 +243,7 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
           <div className="mt-4 space-y-3">
             <div>
               <label className="text-xs text-muted-foreground block mb-1">
-                Host do Holyrics (ex: localhost:8091 ou 192.168.1.100:8091)
+                Host do Holyrics. Use localhost:8091 quando este navegador está no mesmo computador do Holyrics
               </label>
               <input
                 className="border rounded px-2 py-1 text-sm w-full font-mono"
@@ -258,8 +264,7 @@ export default function HolyricsAdminClient({ songs: initialSongs, initialToken,
               />
             </div>
             <div className="flex justify-end">
-              <Button type="button" size="sm" onClick={handleSaveConfig} disabled={savingConfig}>
-                {savingConfig && <Loader2 size={14} className="mr-1 animate-spin" />}
+              <Button type="button" size="sm" onClick={handleSaveConfig}>
                 Salvar
               </Button>
             </div>
