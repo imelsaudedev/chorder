@@ -2,11 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { fetchHolyricsConfig, holyricsSetPlaylist, holyricsPopupCreateSong } from "@/lib/holyrics";
+import { HolyricsConfig, holyricsPing, holyricsPopupCreateSong, holyricsSetPlaylist, loadHolyricsConfig } from "@/lib/holyrics";
 import { ClientService } from "@/prisma/models";
 import { CheckCircle2, Circle, Loader2, Radio, RefreshCw, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+
+type Connection = "checking" | "ok" | { error: string };
 
 type Props = {
   service: ClientService;
@@ -20,6 +22,18 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
   const [sendError, setSendError] = useState("");
   const [resyncingIndex, setResyncingIndex] = useState<number | null>(null);
   const [resyncError, setResyncError] = useState<Record<number, string>>({});
+  const [config, setConfig] = useState<HolyricsConfig | null>(null);
+  const [connection, setConnection] = useState<Connection>("checking");
+
+  // Ao abrir: mostra para qual Holyrics este aparelho vai enviar e se ele responde.
+  async function checkConnection() {
+    setConnection("checking");
+    const c = await loadHolyricsConfig();
+    setConfig(c);
+    if (!c.token) return setConnection({ error: "token não configurado" });
+    const r = await holyricsPing(c.token, c.host);
+    setConnection(r.ok ? "ok" : { error: r.error });
+  }
 
   const units = (service.units ?? [])
     .filter((u) => u.arrangement?.song)
@@ -32,9 +46,9 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
     setSent(false);
     setSendError("");
     try {
-      const config = await fetchHolyricsConfig();
+      const c = await loadHolyricsConfig();
       const ids = units.map((u) => u.arrangement!.song!.holyricsId as string);
-      await holyricsSetPlaylist(config.token, config.host, ids);
+      await holyricsSetPlaylist(c.token, c.host, ids);
       setSent(true);
     } catch (e) {
       setSendError((e as Error).message);
@@ -53,7 +67,7 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
         unit.arrangement.song.title,
         unit.arrangement.song.artist,
         unit.arrangement,
-        (await fetchHolyricsConfig()).host
+        (await loadHolyricsConfig()).host
       );
     } catch (e) {
       setResyncError((prev) => ({ ...prev, [index]: (e as Error).message }));
@@ -72,7 +86,7 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
       : <Radio size={18} className={!allLinked ? "text-warning" : ""} />;
 
   return (
-    <Popover onOpenChange={() => { setSent(false); setSendError(""); }}>
+    <Popover onOpenChange={(open) => { setSent(false); setSendError(""); if (open) checkConnection(); }}>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -92,6 +106,21 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
           Setlist no Holyrics
         </p>
+
+        <div className="text-xs mb-3 flex items-center gap-1.5 flex-wrap">
+          {connection === "checking" ? (
+            <Loader2 size={12} className="animate-spin text-muted-foreground" />
+          ) : connection === "ok" ? (
+            <CheckCircle2 size={12} className="text-success" />
+          ) : (
+            <XCircle size={12} className="text-danger" />
+          )}
+          <span className={connection === "ok" ? "text-success-text" : typeof connection === "object" ? "text-danger-text" : "text-muted-foreground"}>
+            {connection === "checking" ? "Verificando" : connection === "ok" ? "Conectado a" : `${connection.error} em`}
+          </span>
+          <span className="font-mono">{config?.host ?? ""}</span>
+          <Link href="/admin/holyrics" className="underline text-muted-foreground ml-auto">alterar</Link>
+        </div>
 
         {units.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhuma música no culto.</p>

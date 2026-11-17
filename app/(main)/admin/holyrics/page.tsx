@@ -5,9 +5,7 @@ import prisma from "@/prisma/client";
 import HolyricsAdminClient from "./HolyricsAdminClient";
 
 export default async function AdminHolyricsPage() {
-  const [holyricsConfig, songs] = await Promise.all([
-    prisma.holyricsConfig.findUnique({ where: { id: 1 } }),
-    prisma.song.findMany({
+  const songs = await prisma.song.findMany({
       where: { isDeleted: false },
       orderBy: { title: "asc" },
       select: {
@@ -35,8 +33,7 @@ export default async function AdminHolyricsPage() {
           },
         },
       },
-    }),
-  ]);
+    });
 
   const songsForClient = songs
     .map((s) => ({
@@ -63,11 +60,7 @@ export default async function AdminHolyricsPage() {
         <p className="text-muted-foreground mb-8 text-sm">
           Exporte o catálogo de músicas para o Holyrics e envie setlists dos cultos.
         </p>
-        <HolyricsAdminClient
-          songs={songsForClient}
-          initialToken={holyricsConfig?.token ?? ""}
-          initialHost={holyricsConfig?.host ?? "localhost:8091"}
-        />
+        <HolyricsAdminClient songs={songsForClient} />
       </div>
     </Main>
   );
