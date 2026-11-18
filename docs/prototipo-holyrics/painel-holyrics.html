@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Holyrics — protótipo</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--fg:hsl(224 84% 4.9%);--mut:hsl(215 14% 48%);--border:hsl(0 0% 89.8%);--blue:hsl(221 83% 53%);--z50:#fafafa;
+--ok:#047857;--ok-bg:#ecfdf5;--warn:#92400e;--warn-bg:#fffbeb;--bad:#b91c1c;--bad-bg:#fef2f2}
+*{box-sizing:border-box}body{margin:0;padding:24px 16px 48px;background:#e9edf3;color:var(--fg);font:400 14px/22px "IBM Plex Sans",system-ui,sans-serif}
+h1{font:600 20px/26px "Space Grotesk";margin:0 0 4px}.i{margin:0 0 14px;color:#475569;max-width:90ch}
+.bar{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 20px}
+.bar button{font:inherit;font-size:13px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:3px 12px;cursor:pointer}
+.bar button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.frames{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+.frame h2{font:600 13px/18px "Space Grotesk";margin:0 0 6px;color:#475569;text-transform:uppercase;letter-spacing:.06em}
+.dev{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05);position:relative;background:#f4f4f5}
+.dev.d{width:760px;height:640px}.dev.m{width:390px;height:640px}
+.page{padding:16px;color:var(--mut);font-size:13px}.page b{color:var(--fg)}
+.sheet{position:absolute;top:0;right:0;bottom:0;background:#fff;border-left:1px solid var(--border);box-shadow:-8px 0 24px rgba(0,0,0,.08);display:flex;flex-direction:column}
+.d .sheet{width:380px}.m .sheet{left:0}
+.sh{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.sh h3{font:600 16px/22px "Space Grotesk";margin:0;flex:1}
+.x{border:0;background:none;font-size:18px;color:var(--mut);cursor:pointer}
+.body{flex:1;overflow:auto;padding:12px 16px}
+.conn{display:flex;align-items:center;gap:6px;font-size:13px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mut)}.dot.ok{background:#10b981}.dot.bad{background:#ef4444}
+.conn .l{margin-left:auto;color:var(--mut);text-decoration:underline;cursor:pointer;background:none;border:0;font:inherit;font-size:13px}
+.cfg{background:var(--z50);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px}
+.cfg label{display:block;font-size:12px;color:var(--mut);margin:6px 0 2px}.cfg input{width:100%;font:13px ui-monospace,monospace;border:1px solid var(--border);border-radius:6px;padding:4px 8px}
+.btn{font:inherit;font-size:13px;border:1px solid var(--border);background:#fff;border-radius:8px;padding:4px 10px;cursor:pointer}
+.btn.p{background:var(--blue);color:#fff;border-color:var(--blue)}.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn.w{width:100%;padding:8px 10px;font-weight:500}
+.song{padding:10px 0;border-bottom:1px solid var(--border)}.song:last-child{border:0}
+.top{display:flex;align-items:center;gap:8px}.top .t{font-weight:500;flex:1;min-width:0}
+.badge{font-size:12px;border-radius:999px;padding:0 8px;white-space:nowrap}
+.b-ready{background:var(--ok-bg);color:var(--ok)}.b-diff{background:var(--warn-bg);color:var(--warn)}.b-none{background:var(--bad-bg);color:var(--bad)}
+.sub{font-size:12px;color:var(--mut);margin-top:2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.note{font-size:12px;border-radius:8px;padding:8px 10px;margin-top:6px}
+.n-warn{background:var(--warn-bg);color:var(--warn)}.n-ok{background:var(--ok-bg);color:var(--ok)}.n-bad{background:var(--bad-bg);color:var(--bad)}
+.opts{margin-top:6px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.opts button{display:block;width:100%;text-align:left;font:inherit;font-size:13px;border:0;border-bottom:1px solid var(--border);background:#fff;padding:6px 10px;cursor:pointer}
+.opts button:last-child{border:0}.opts small{color:var(--mut)}
+.ft{border-top:1px solid var(--border);padding:12px 16px;background:#fff}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin:6px 0 10px}
+.cmp div{background:var(--z50);border:1px solid var(--border);border-radius:8px;padding:8px}
+.cmp h4{margin:0 0 4px;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.cmp ol{margin:0;padding-left:18px}
+.hint{font-size:12px;color:var(--mut);margin-top:6px}
+</style></head><body>
+<h1>Painel Holyrics do culto</h1>
+<p class="i">Protótipo clicável. A folha abre pelo ícone do Holyrics no topo do culto. Escolha um cenário abaixo e clique nos botões (Vincular, Atualizar, Enviar). Nada aqui fala com o Holyrics: os dados são de exemplo. Decisões já tomadas: um vínculo por música (opção B), arranjo do culto, aviso de letra diferente sem sobrescrever sozinho, sem o Plano Holyrics (criar e atualizar letra pelo formulário do Holyrics).</p>
+<div class="bar" id="bar"></div>
+<div class="frames">
+  <div class="frame"><h2>Computador do operador</h2><div class="dev d"><div class="page"><b>Culto de domingo, 22 nov</b><br>… página do culto atrás da folha …</div><div class="sheet" id="sd"></div></div></div>
+  <div class="frame"><h2>Celular (390 px)</h2><div class="dev m"><div class="page"><b>Culto de domingo, 22 nov</b></div><div class="sheet" id="sm"></div></div></div>
+</div>
+<script>
+const SCEN={
+ notoken:{label:"1. Primeiro uso (sem token)",conn:"notoken",phase:"idle",songs:()=>base("ready","ready","ready","ready","ready")},
+ down:{label:"2. Holyrics sem resposta",conn:"down",phase:"idle",songs:()=>base("ready","ready","ready","ready","ready")},
+ pend:{label:"3. Pendências (vincular e atualizar)",conn:"ok",phase:"idle",songs:()=>base("ready","diff","none","choose","ready")},
+ ready:{label:"4. Tudo pronto",conn:"ok",phase:"idle",songs:()=>base("ready","ready","ready","ready","ready")},
+};
+function base(...s){const t=["Quebrantado","Santo Espírito","Lugar Secreto","Grande é o Senhor","Aclame ao Senhor"];return t.map((title,i)=>({title,st:s[i],ver:i==1?"Mapa do culto: V1 C V2 C C (o Holyrics tem V1 C V2 C)":""}))}
+let S,cur="pend";
+function load(k){cur=k;const c=SCEN[k];S={conn:c.conn,phase:c.phase,songs:c.songs(),cfg:k==="notoken",msg:{},open:null};render();bar()}
+function bar(){document.getElementById("bar").innerHTML=Object.entries(SCEN).map(([k,c])=>`<button class="${k===cur?"on":""}" onclick="load('${k}')">${c.label}</button>`).join("")}
+const linked=()=>S.songs.every(s=>s.st==="ready"||s.st==="diff");
+const missing=()=>S.songs.filter(s=>s.st==="none"||s.st==="choose").length;
+function connHtml(){
+ const m={ok:["ok","Conectado a <b>localhost:8091</b> · Holyrics 2.30"],down:["bad","Sem resposta em <b>localhost:8091</b>"],notoken:["bad","Token não configurado"],checking:["", "Verificando…"]}[S.conn];
+ return `<div class="conn"><span class="dot ${m[0]}"></span><span>${m[1]}</span><button class="l" onclick="act('cfg')">${S.cfg?"fechar":"configurar"}</button></div>`+
+ (S.cfg?`<div class="cfg"><label>Host do Holyrics (localhost:8091 se este navegador está no computador do Holyrics)</label><input value="localhost:8091"><label>Token (Holyrics → API Server → permissões)</label><input value="${S.conn==="notoken"?"":"a1b2c3"}" placeholder="abcdef"><div style="text-align:right;margin-top:8px"><button class="btn p" onclick="act('save')">Salvar e testar</button></div></div>`:"")+
+ (S.conn==="down"?`<div class="note n-bad" style="margin:-4px 0 10px">Abra o Holyrics neste computador e confira se o API Server está ligado. Se o navegador estiver em outro aparelho, o endereço precisa ser o do computador do Holyrics (e o site em HTTPS pode bloquear endereços de rede).</div>`:"");
+}
+function songHtml(s,i){
+ const badge={ready:["b-ready","✓ Pronta"],diff:["b-diff","⟳ Letra diferente"],none:["b-none","○ Sem vínculo"],choose:["b-none","○ Sem vínculo"],busy:["b-diff","Buscando…"],form:["b-diff","Formulário aberto"]}[s.st];
+ let act="",extra="";
+ if(s.st==="diff"){act=`<button class="btn" onclick="act('upd',${i})">Atualizar letra</button>`;extra=`<div class="sub">${s.ver}</div>`}
+ if(s.st==="none"){act=`<button class="btn" onclick="act('link',${i})">Vincular</button>`}
+ if(s.st==="choose"){act=`<button class="btn" onclick="act('link',${i})">Vincular</button>`}
+ if(s.st==="form"){extra=`<div class="note n-warn">O formulário abriu no <b>Holyrics</b>. Revise e salve por lá, depois clique em <b>Concluído</b>.<div style="margin-top:6px"><button class="btn p" onclick="act('done',${i})">Concluído</button></div></div>`}
+ if(s.opts){extra=`<div class="hint">Encontrei mais de uma no Holyrics. Qual é a certa?</div><div class="opts"><button onclick="act('pick',${i})">Grande é o Senhor <small>· Hillsong · id 412</small></button><button onclick="act('pick',${i})">Grande é o Senhor (cópia) <small>· id 1033</small></button><button onclick="act('create',${i})"><small>Nenhuma delas: criar no Holyrics…</small></button></div>`}
+ if(s.nf){extra=`<div class="note n-warn">Não achei “${s.title}” no Holyrics.<div style="margin-top:6px"><button class="btn p" onclick="act('create',${i})">Criar no Holyrics…</button></div></div>`}
+ return `<div class="song"><div class="top"><span class="t">${i+1}. ${s.title}</span><span class="badge ${badge[0]}">${badge[1]}</span>${s.opts||s.nf||s.st==="form"?"":act}</div>${extra}</div>`;
+}
+function footer(){
+ if(S.phase==="confirm")return `<div class="ft"><div class="hint" style="margin:0 0 4px">Isto <b>substitui</b> a playlist de letras do Holyrics.</div><div class="cmp"><div><h4>Hoje no Holyrics (4)</h4><ol><li>Hino da semana</li><li>Quebrantado</li><li>Lugar Secreto</li><li>Aclame ao Senhor</li></ol></div><div><h4>Depois do envio (5)</h4><ol>${S.songs.map(s=>`<li>${s.title}</li>`).join("")}</ol></div></div><div style="display:flex;gap:8px"><button class="btn" onclick="act('cancel')">Cancelar</button><button class="btn p" style="flex:1" onclick="act('send')">Substituir e enviar</button></div></div>`;
+ if(S.phase==="sending")return `<div class="ft"><button class="btn w" disabled>Enviando… conferindo as músicas no Holyrics</button></div>`;
+ if(S.phase==="done")return `<div class="ft"><div class="note n-ok" style="margin:0 0 8px">✓ Enviado. Li a playlist de volta: <b>5 músicas, na ordem do culto</b>.</div><button class="btn w" onclick="act('cancel')">Fechar</button></div>`;
+ const can=S.conn==="ok"&&linked();const m=missing();
+ return `<div class="ft"><button class="btn p w" ${can?"":"disabled"} onclick="act('review')">Enviar ${S.songs.length} músicas</button>${!can?`<div class="hint">${S.conn!=="ok"?"Conecte ao Holyrics para enviar.":`Faltam ${m} música${m>1?"s":""} sem vínculo.`}</div>`:""}</div>`;
+}
+function panel(){
+ return `<div class="sh"><h3>Holyrics</h3><button class="x" aria-label="Fechar">×</button></div><div class="body">${connHtml()}${S.conn==="ok"||S.conn==="down"?S.songs.map(songHtml).join(""):`<div class="hint">Configure o token para ver o estado das músicas.</div>`}</div>${footer()}`;
+}
+function render(){document.getElementById("sd").innerHTML=panel();document.getElementById("sm").innerHTML=panel()}
+function act(a,i){
+ if(a==="cfg")S.cfg=!S.cfg;
+ if(a==="save"){S.conn="ok";S.cfg=false}
+ if(a==="link"){const s=S.songs[i];if(s.title==="Grande é o Senhor")s.opts=true;else s.nf=true}
+ if(a==="pick"){const s=S.songs[i];s.opts=false;s.st="ready"}
+ if(a==="create"){const s=S.songs[i];s.opts=false;s.nf=false;s.st="form"}
+ if(a==="upd")S.songs[i].st="form";
+ if(a==="done"){S.songs[i].st="ready"}
+ if(a==="review")S.phase="confirm";
+ if(a==="cancel")S.phase="idle";
+ if(a==="send"){S.phase="sending";render();setTimeout(()=>{S.phase="done";render()},1200);return}
+ render();
+}
+load("pend");
+</script></body></html>
