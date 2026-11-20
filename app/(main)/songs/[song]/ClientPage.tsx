@@ -21,9 +21,9 @@ export default function ClientPage({
   return (
     <SongConfigProvider>
       <ArrangementHeader arrangement={arrangement} />
-      <MainWithDensity>
+      <Main className="pb-4 sm:pb-5 lg:pb-8">
         <ArrangementBody arrangement={arrangement} />
-      </MainWithDensity>
+      </Main>
     </SongConfigProvider>
   );
 }
@@ -48,16 +48,5 @@ function ArrangementBody({ arrangement }: { arrangement: ClientArrangement | nul
       )}
       <ArrangementView ref={viewRef} arrangement={arrangement} collapsible />
     </div>
-  );
-}
-
-function MainWithDensity({ children }: { children: React.ReactNode }) {
-  const { density } = useSongConfig();
-
-  // Sem padding no topo: o espaço entre o título e o mapa é o vão de ArrangementBody.
-  return (
-    <Main density={density} className="px-4 sm:px-5 lg:px-8 pb-4 sm:pb-5 lg:pb-8">
-      {children}
-    </Main>
   );
 }

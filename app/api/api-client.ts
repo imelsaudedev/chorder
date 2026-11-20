@@ -1,6 +1,6 @@
 "use client";
 
-import { ClientArrangement, ClientServiceTemplate, ClientSong, ClientTagGroup, RecentServiceEntry } from "@/prisma/models";
+import { ClientArrangement, ClientServiceTemplate, ClientSong, ClientTagGroup, RecentServiceEntry, ServiceListItem } from "@/prisma/models";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -261,6 +261,17 @@ export function useDuplicateArrangement(arrangementId: number) {
 export function useFetchServices() {
   const { data, error, isLoading } = useSWR("/api/services", (...args) =>
     fetch(...args).then((res) => res.json())
+  );
+  return {
+    services: data,
+    isLoading,
+    isError: error,
+  };
+}
+
+export function useFetchServicesList() {
+  const { data, error, isLoading } = useSWR<ServiceListItem[]>("/api/services?view=list", (url: string) =>
+    fetch(url).then((res) => res.json())
   );
   return {
     services: data,

@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import {
   ClientArrangement,
   ClientServiceUnit,
@@ -25,6 +26,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { DurationField, useLiveCommit } from "./ServiceItemForms";
+import { SongMeta } from "./unitSummary";
 import { PanelShell } from "./ServiceItemPanel";
 
 // Fluxo de Música: buscar → escolher arranjo (com prévia da cifra, áudio e
@@ -166,6 +168,7 @@ export default function SongFlow({
         arrangementName={arrangement?.name ?? null}
         musicalKey={arrangement?.key ?? null}
         durationMin={unit?.durationMin ?? null}
+        metadata={unit?.metadata}
         onSwapSong={() => {
           setSongBack("card");
           setStep("songs");
@@ -189,6 +192,7 @@ function SongCard({
   arrangementName,
   musicalKey,
   durationMin,
+  metadata,
   onSwapSong,
   onSwapArrangement,
   onUpdate,
@@ -197,23 +201,35 @@ function SongCard({
   arrangementName: string | null;
   musicalKey: string | null;
   durationMin: number | null;
+  metadata: ClientServiceUnit["metadata"];
   onSwapSong: () => void;
   onSwapArrangement: () => void;
   onUpdate: (changes: Partial<ClientServiceUnit>) => void;
 }) {
+  const existingMeta = (metadata ?? null) as SongMeta | null;
   const [duration, setDuration] = useState(durationMin != null ? String(durationMin) : "");
+  const [customTitle, setCustomTitle] = useState(existingMeta?.title ?? "");
+  const [comment, setComment] = useState(existingMeta?.comment ?? "");
 
-  // A duração é aplicada ao plano enquanto se digita; sem botão de salvar.
+  // Duração e comentário são aplicados ao plano enquanto se digita; sem botão de salvar.
   useLiveCommit(() => {
     const parsed = duration ? parseFloat(duration) : null;
-    return { durationMin: parsed !== null && Number.isFinite(parsed) && parsed >= 0 ? parsed : null };
+    return {
+      durationMin: parsed !== null && Number.isFinite(parsed) && parsed >= 0 ? parsed : null,
+      // Preserva outras chaves do metadata; sem comentário, a chave sai.
+      metadata: {
+        ...(existingMeta ?? {}),
+        title: customTitle.trim() || null,
+        comment: comment.trim() || null,
+      },
+    };
   }, onUpdate);
 
   return (
     <form className="flex min-h-0 flex-1 flex-col" onSubmit={(e) => e.preventDefault()}>
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 py-4">
         <div className="rounded-lg border border-border p-4">
-          <p className="font-medium">{title}</p>
+          <p className="font-medium">{customTitle.trim() || title}</p>
           <p className="text-sm text-muted-foreground">
             {[arrangementName, musicalKey ? `Tom ${musicalKey}` : null].filter(Boolean).join(" · ") ||
               "Sem arranjo"}
@@ -228,6 +244,33 @@ function SongCard({
           </Button>
         </div>
         <DurationField value={duration} onChange={setDuration} />
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="song-title" className="text-xs font-medium text-muted-foreground">
+            Título nesta liturgia
+          </Label>
+          <Input
+            id="song-title"
+            type="text"
+            value={customTitle}
+            onChange={(e) => setCustomTitle(e.target.value)}
+            placeholder={title}
+            autoComplete="off"
+            className="h-11"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="song-comment" className="text-xs font-medium text-muted-foreground">
+            Comentário
+          </Label>
+          <Textarea
+            id="song-comment"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            rows={4}
+            className="max-h-[40dvh] resize-y"
+          />
+          <p className="text-xs text-muted-foreground">Aparece abaixo da música na liturgia.</p>
+        </div>
       </div>
     </form>
   );

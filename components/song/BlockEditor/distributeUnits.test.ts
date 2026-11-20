@@ -44,4 +44,13 @@ describe("distributeUnitsIntoColumns", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toHaveLength(SAMPLE_UNITS.length);
   });
+
+  it.each(["[", "Letra [G", "[D]ok\n[", "{title", "a ]", "[[", "\\"])(
+    "conteúdo incompleto enquanto se digita (%j) não quebra a distribuição",
+    (content) => {
+      const units = [makeUnit("VERSE", "[D]Primeira linha", 1), makeUnit("CHORUS", content, 2)];
+      const result = distributeUnitsIntoColumns(units, 2);
+      expect(result.flat().map((p) => p.index)).toEqual([0, 1]);
+    }
+  );
 });

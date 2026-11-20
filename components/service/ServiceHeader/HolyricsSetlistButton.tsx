@@ -2,11 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { fetchHolyricsConfig, holyricsSetPlaylist, holyricsPopupCreateSong } from "@/lib/holyrics";
+import { HolyricsConfig, holyricsPing, holyricsPopupCreateSong, holyricsSetPlaylist, loadHolyricsConfig } from "@/lib/holyrics";
 import { ClientService } from "@/prisma/models";
 import { CheckCircle2, Circle, Loader2, Radio, RefreshCw, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+
+type Connection = "checking" | "ok" | { error: string };
 
 type Props = {
   service: ClientService;
@@ -20,6 +22,18 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
   const [sendError, setSendError] = useState("");
   const [resyncingIndex, setResyncingIndex] = useState<number | null>(null);
   const [resyncError, setResyncError] = useState<Record<number, string>>({});
+  const [config, setConfig] = useState<HolyricsConfig | null>(null);
+  const [connection, setConnection] = useState<Connection>("checking");
+
+  // Ao abrir: mostra para qual Holyrics este aparelho vai enviar e se ele responde.
+  async function checkConnection() {
+    setConnection("checking");
+    const c = await loadHolyricsConfig();
+    setConfig(c);
+    if (!c.token) return setConnection({ error: "token não configurado" });
+    const r = await holyricsPing(c.token, c.host);
+    setConnection(r.ok ? "ok" : { error: r.error });
+  }
 
   const units = (service.units ?? [])
     .filter((u) => u.arrangement?.song)
@@ -32,9 +46,9 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
     setSent(false);
     setSendError("");
     try {
-      const config = await fetchHolyricsConfig();
+      const c = await loadHolyricsConfig();
       const ids = units.map((u) => u.arrangement!.song!.holyricsId as string);
-      await holyricsSetPlaylist(config.token, config.host, ids);
+      await holyricsSetPlaylist(c.token, c.host, ids);
       setSent(true);
     } catch (e) {
       setSendError((e as Error).message);
@@ -53,7 +67,7 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
         unit.arrangement.song.title,
         unit.arrangement.song.artist,
         unit.arrangement,
-        (await fetchHolyricsConfig()).host
+        (await loadHolyricsConfig()).host
       );
     } catch (e) {
       setResyncError((prev) => ({ ...prev, [index]: (e as Error).message }));
@@ -68,11 +82,11 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
   const triggerIcon = sending
     ? <Loader2 size={18} className="animate-spin" />
     : sent
-      ? <CheckCircle2 size={18} className="text-emerald-500" />
-      : <Radio size={18} className={!allLinked ? "text-amber-500" : ""} />;
+      ? <CheckCircle2 size={18} className="text-success" />
+      : <Radio size={18} className={!allLinked ? "text-warning" : ""} />;
 
   return (
-    <Popover onOpenChange={() => { setSent(false); setSendError(""); }}>
+    <Popover onOpenChange={(open) => { setSent(false); setSendError(""); if (open) checkConnection(); }}>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -93,6 +107,21 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
           Setlist no Holyrics
         </p>
 
+        <div className="text-xs mb-3 flex items-center gap-1.5 flex-wrap">
+          {connection === "checking" ? (
+            <Loader2 size={12} className="animate-spin text-muted-foreground" />
+          ) : connection === "ok" ? (
+            <CheckCircle2 size={12} className="text-success" />
+          ) : (
+            <XCircle size={12} className="text-danger" />
+          )}
+          <span className={connection === "ok" ? "text-success-text" : typeof connection === "object" ? "text-danger-text" : "text-muted-foreground"}>
+            {connection === "checking" ? "Verificando" : connection === "ok" ? "Conectado a" : `${connection.error} em`}
+          </span>
+          <span className="font-mono">{config?.host ?? ""}</span>
+          <Link href="/admin/holyrics" className="underline text-muted-foreground ml-auto">alterar</Link>
+        </div>
+
         {units.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhuma música no culto.</p>
         ) : (
@@ -104,27 +133,27 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
               return (
                 <li key={i} className="flex items-center gap-2 text-sm">
                   {isResyncing ? (
-                    <Loader2 size={14} className="shrink-0 animate-spin text-emerald-500" />
+                    <Loader2 size={14} className="shrink-0 animate-spin text-success" />
                   ) : linked ? (
-                    <CheckCircle2 size={14} className="shrink-0 text-emerald-500" />
+                    <CheckCircle2 size={14} className="shrink-0 text-success" />
                   ) : (
-                    <Circle size={14} className="shrink-0 text-amber-500" />
+                    <Circle size={14} className="shrink-0 text-warning" />
                   )}
-                  <span className={linked ? "" : "text-amber-700"}>{title}</span>
+                  <span className={linked ? "" : "text-warning-text"}>{title}</span>
                   {linked && !isResyncing && (
                     <button
                       type="button"
-                      className="ml-auto p-0.5 hover:bg-emerald-100 rounded transition-colors"
+                      className="ml-auto p-0.5 hover:bg-success-muted rounded transition-colors"
                       onClick={() => resyncSong(i)}
                       title="Ressincronizar arranjo no Holyrics"
                     >
-                      <RefreshCw size={13} className="text-emerald-600" />
+                      <RefreshCw size={13} className="text-success" />
                     </button>
                   )}
                   {isResyncing && (
                     <button
                       type="button"
-                      className="ml-auto text-xs px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors"
+                      className="ml-auto text-xs px-2 py-0.5 bg-success-muted text-success-text rounded hover:bg-success-border transition-colors"
                       onClick={() => completeResync(i)}
                     >
                       Concluído
@@ -137,13 +166,13 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
         )}
 
         {resyncingIndex !== null && (
-          <div className="text-xs text-emerald-700 bg-emerald-50 rounded p-2 mb-3">
+          <div className="text-xs text-success-text bg-success-subtle rounded p-2 mb-3">
             O formulário abriu no <strong>Holyrics</strong>. Atualize o arranjo e salve por lá. Depois clique em <strong>Concluído</strong> aqui.
           </div>
         )}
 
         {!allLinked && (
-          <div className="text-xs text-amber-700 bg-amber-50 rounded p-2 mb-3 flex items-start gap-1.5">
+          <div className="text-xs text-warning-text bg-warning-subtle rounded p-2 mb-3 flex items-start gap-1.5">
             <XCircle size={13} className="shrink-0 mt-0.5" />
             <span>
               Algumas músicas não estão vinculadas ao Holyrics.{" "}
@@ -155,15 +184,15 @@ export default function HolyricsSetlistButton({ service, iconOnly = false }: Pro
         )}
 
         {sendError && (
-          <p className="text-xs text-red-600 mb-3">{sendError}</p>
+          <p className="text-xs text-danger-text mb-3">{sendError}</p>
         )}
 
         {Object.entries(resyncError).map(([idx, err]) => err && (
-          <p key={idx} className="text-xs text-red-600 mb-2">{err}</p>
+          <p key={idx} className="text-xs text-danger-text mb-2">{err}</p>
         ))}
 
         {sent && (
-          <p className="text-xs text-emerald-600 mb-3">Setlist enviado com sucesso!</p>
+          <p className="text-xs text-success mb-3">Setlist enviado com sucesso!</p>
         )}
 
         <Button

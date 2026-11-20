@@ -213,7 +213,7 @@ function ColumnDropZone({ columnEndIndex, onMoveUnit, children }: ColumnDropZone
       // definida em ArrangementView/index.tsx). flex flex-col é exigido
       // pro `gap` funcionar (ao contrário de space-y-*, que não precisa).
       className={`flex flex-col gap-[var(--block-gap)] rounded-lg transition-colors ${
-        isDraggedOver ? "bg-zinc-100 outline-2 outline-dashed outline-zinc-300 outline-offset-4" : ""
+        isDraggedOver ? "bg-surface-muted outline-2 outline-dashed outline-border-strong outline-offset-4" : ""
       }`}
     >
       {children}

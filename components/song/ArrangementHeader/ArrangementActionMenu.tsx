@@ -98,7 +98,7 @@ export default function ArrangementActionMenu({ arrangement, onEditSong }: Arran
 
           <DropdownMenuItem
             onSelect={() => setDeleteAlertOpen(true)}
-            className="text-red-600 focus:text-red-600 focus:bg-red-50"
+            className="text-danger-text focus:text-danger-text focus:bg-danger-subtle"
             disabled={isDeleting}
           >
             {t("SongData.deleteArrangement")}

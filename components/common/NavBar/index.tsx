@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useBottomNavVisible } from "@/hooks/useBottomNavVisible";
+import { ThemeMenu, ThemeSheet } from "@/components/common/Theme/ThemeToggle";
 import { ListMusic, MessageCircleHeart, Music } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -51,23 +52,27 @@ export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
       {/* Sidebar — sempre visível em sm+ nas listas, só em lg+ nas views */}
       <nav
         className={clsx(
-          "flex-col fixed left-0 top-0 h-full w-20 bg-zinc-50 border-r border-border",
+          "flex-col fixed left-0 top-0 h-full w-20 bg-surface-subtle border-r border-border",
           bottomNavVisible ? "hidden sm:flex" : "hidden lg:flex"
         )}
       >
         <div className="flex flex-col items-center pt-6 sm:pt-8 gap-6 grow">
           {items}
         </div>
-        {userNav && (
-          <div className="pb-8 flex flex-col items-center">{userNav}</div>
-        )}
+        <div className="mt-auto flex flex-col items-center pb-6 gap-4">
+          <ThemeMenu />
+          {userNav && (
+            <div className="flex flex-col items-center">{userNav}</div>
+          )}
+        </div>
       </nav>
 
       {/* Bottom nav — só nas páginas de lista e só no mobile */}
       {bottomNavVisible && (
-        <nav className="sm:hidden fixed bottom-0 left-0 w-full z-40 bg-white/80 backdrop-blur-lg shadow-md border-t border-gray-100">
+        <nav className="sm:hidden fixed bottom-0 left-0 w-full z-40 bg-background/80 backdrop-blur-lg shadow-md border-t border-border/50">
           <div className="flex justify-around py-3 items-center">
             {items}
+            <ThemeSheet />
             {userNav && (
               <div className="flex flex-col items-center justify-center -mt-1">
                 {userNav}

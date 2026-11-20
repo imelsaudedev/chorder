@@ -76,7 +76,7 @@ export default function MediaPlayerBar({
 
   return (
     <div
-      className={`fixed left-0 right-0 z-[9999] bg-zinc-900 text-white shadow-2xl ${
+      className={`fixed left-0 right-0 z-[9999] bg-surface-inverse text-white shadow-2xl ${
         bottomNavVisible ? "bottom-16 sm:bottom-0" : "bottom-0"
       }`}
     >
@@ -96,8 +96,8 @@ export default function MediaPlayerBar({
           aria-hidden="true"
         />
         <span className="text-secondary shrink-0">{icon}</span>
-        <span className="min-w-0 flex-1 truncate text-left text-xs text-zinc-300">{title}</span>
-        <ChevronUp size={16} className="shrink-0 text-zinc-500" />
+        <span className="min-w-0 flex-1 truncate text-left text-xs text-on-inverse">{title}</span>
+        <ChevronUp size={16} className="shrink-0 text-on-inverse-muted" />
       </button>
 
       {/* Controles completos — sempre no desktop; no celular, só expandida. */}
@@ -106,7 +106,7 @@ export default function MediaPlayerBar({
         className={`flex-col gap-1 px-4 py-2 ${expanded ? "flex" : "hidden"} sm:flex`}
       >
         {hasMultiple && listVisible && (
-          <div className="-mx-4 -mt-2 mb-1 flex flex-wrap gap-2 bg-zinc-800 px-4 py-2">
+          <div className="-mx-4 -mt-2 mb-1 flex flex-wrap gap-2 bg-surface-inverse-hover px-4 py-2">
             {tracks!.map((track, idx) => (
               <button
                 key={idx}
@@ -115,7 +115,7 @@ export default function MediaPlayerBar({
                 className={`cursor-pointer text-xs px-3 py-1 rounded-full border transition-colors ${
                   idx === currentTrackIndex
                     ? "bg-secondary border-secondary text-secondary-foreground"
-                    : "border-zinc-600 text-zinc-300 hover:border-zinc-400 hover:text-white"
+                    : "border-border-inverse text-on-inverse hover:border-on-inverse hover:text-white"
                 }`}
               >
                 {track.label}
@@ -139,24 +139,24 @@ export default function MediaPlayerBar({
                 tabIndex={0}
                 onClick={(e) => { e.stopPropagation(); setListVisible((v) => !v); }}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); setListVisible((v) => !v); } }}
-                className="cursor-pointer shrink-0 text-zinc-500 hover:text-white transition-colors"
+                className="cursor-pointer shrink-0 text-on-inverse-muted hover:text-white transition-colors"
                 title={listVisible ? "Ocultar lista" : "Exibir lista"}
               >
                 <ChevronUp size={15} className={`transition-transform ${listVisible ? "" : "rotate-180"}`} />
               </span>
             )}
             {icon}
-            <span className="min-w-0 truncate text-xs text-zinc-300">
+            <span className="min-w-0 truncate text-xs text-on-inverse">
               {title}
-              {subtitle && <span className="ml-1 text-zinc-500">({subtitle})</span>}
+              {subtitle && <span className="ml-1 text-on-inverse-muted">({subtitle})</span>}
             </span>
-            <ChevronDown size={14} className="shrink-0 text-zinc-500 sm:hidden" />
+            <ChevronDown size={14} className="shrink-0 text-on-inverse-muted sm:hidden" />
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Fechar player"
-            className="cursor-pointer shrink-0 text-zinc-500 hover:text-white transition-colors"
+            className="cursor-pointer shrink-0 text-on-inverse-muted hover:text-white transition-colors"
           >
             <X size={16} />
           </button>
@@ -168,7 +168,7 @@ export default function MediaPlayerBar({
               type="button"
               onClick={onPrev}
               aria-label="Faixa anterior"
-              className="cursor-pointer shrink-0 text-zinc-300 hover:text-white transition-colors"
+              className="cursor-pointer shrink-0 text-on-inverse hover:text-white transition-colors"
             >
               <SkipBack size={16} />
             </button>
@@ -190,13 +190,13 @@ export default function MediaPlayerBar({
               type="button"
               onClick={onNext}
               aria-label="Próxima faixa"
-              className="cursor-pointer shrink-0 text-zinc-300 hover:text-white transition-colors"
+              className="cursor-pointer shrink-0 text-on-inverse hover:text-white transition-colors"
             >
               <SkipForward size={16} />
             </button>
           )}
 
-          <span className="shrink-0 text-xs tabular-nums text-zinc-400 w-10 text-right">
+          <span className="shrink-0 text-xs tabular-nums text-on-inverse-muted w-10 text-right">
             {formatTime(currentTime)}
           </span>
           <input
@@ -209,7 +209,7 @@ export default function MediaPlayerBar({
             onChange={(e) => onSeek(Number(e.target.value))}
             className="min-w-0 flex-1 accent-secondary cursor-pointer"
           />
-          <span className="shrink-0 text-xs tabular-nums text-zinc-400 w-10">
+          <span className="shrink-0 text-xs tabular-nums text-on-inverse-muted w-10">
             {formatTime(duration)}
           </span>
 
@@ -217,7 +217,7 @@ export default function MediaPlayerBar({
             type="button"
             onClick={onToggleMute}
             aria-label={muted ? "Ativar som" : "Mudo"}
-            className="cursor-pointer hidden sm:block shrink-0 text-zinc-300 hover:text-white transition-colors"
+            className="cursor-pointer hidden sm:block shrink-0 text-on-inverse hover:text-white transition-colors"
           >
             {muted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
           </button>

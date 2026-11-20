@@ -49,7 +49,7 @@ export const COMMENT_CONNECTOR_POSITION_CLASS =
   "absolute -top-[1.40625em] left-[0.25em] bottom-0 w-0 border-l border-dotted bg-transparent!";
 
 /** Cores da convenção quando quem chama não informa as do tipo do bloco (fundo escuro + texto branco). */
-export const DEFAULT_COMMENT_CLASS = "bg-zinc-700 text-white border-zinc-700";
+export const DEFAULT_COMMENT_CLASS = "bg-surface-inverse text-white border-surface-inverse";
 
 /** Recuo do item quando ele tem uma convenção emparelhada acima (abre espaço pro rótulo). */
 export const ITEM_WITH_COMMENT_PADDING_CLASS = "pl-[0.5625em]";

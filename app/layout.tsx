@@ -9,6 +9,8 @@ import AudioPlayerWidget from "@/components/common/AudioPlayer/Widget";
 import { SongMetaModalProvider } from "@/components/song/SongMetaModal/context";
 import { YoutubePlayerProvider } from "@/components/common/YoutubePlayer/context";
 import YoutubePlayerWidget from "@/components/common/YoutubePlayer/Widget";
+import { ThemeProvider } from "@/components/common/Theme/ThemeProvider";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
@@ -36,8 +38,10 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang="en">
-      <head></head>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body
         className={`${ibmPlexSans.variable} ${ibmPlexSerif.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} font-sans`}
         suppressHydrationWarning
@@ -46,6 +50,7 @@ export default async function RootLayout({
           messages={messages}
           timeZone="America/Sao_Paulo"
         >
+          <ThemeProvider>
           <YoutubePlayerProvider>
             <AudioPlayerProvider>
               <SongMetaModalProvider>
@@ -59,6 +64,7 @@ export default async function RootLayout({
               <AudioPlayerWidget />
             </AudioPlayerProvider>
           </YoutubePlayerProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -71,6 +71,35 @@ describe('ServiceArrangementHeader', () => {
     expect(screen.getByTestId('edit-or-save-cancel')).toBeDefined();
   });
 
+  it('celular: os controles ficam entre o título e o mapa', () => {
+    const units = [{ id: 1, type: 'BLOCK', label: 'Verso', order: 1 }] as never;
+    render(
+      <ServiceArrangementHeader
+        {...defaultProps}
+        mapUnits={units}
+        mobileControls={<div data-testid="mobile-controls" />}
+      />,
+    );
+    const title = screen.getByText(/Glória e Força/);
+    const controls = screen.getByTestId('mobile-controls');
+    expect(title.compareDocumentPosition(controls) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const map = controls.parentElement?.nextElementSibling;
+    expect(map).not.toBeNull();
+    expect(controls.parentElement?.className).toContain('md:hidden');
+  });
+
+  it('celular: preso no topo, a linha de controles some (sem desmontar)', () => {
+    render(
+      <ServiceArrangementHeader
+        {...defaultProps}
+        isStuck
+        mobileControls={<div data-testid="mobile-controls" />}
+      />,
+    );
+    expect(screen.getByTestId('mobile-controls').parentElement?.className).toContain('hidden');
+    expect(screen.getByTestId('mobile-controls').parentElement?.className).not.toContain('md:hidden');
+  });
+
   it('mantém o tom visível durante a edição (dá pra trocar o tom do culto editando a cifra), esconde só referências', () => {
     render(<ServiceArrangementHeader {...defaultProps} isEditing />);
     expect(screen.getByTestId('key-selector')).toBeDefined();

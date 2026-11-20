@@ -10,6 +10,7 @@ import { useSongMetaModal } from "@/components/song/SongMetaModal/context";
 import SongTags from "@/components/song/SongTags";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import useSongsListHref from "@/hooks/useSongsListHref";
 import { ClientArrangement } from "@/prisma/models";
 import { NotebookPen, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -37,6 +38,8 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
   const songTitle = arrangement.song!.title;
   const songArtist = arrangement.song!.artist ?? "";
   const songTags = arrangement.song!.tags ?? [];
+  // Voltar retoma a lista de onde a pessoa saiu (busca, categorias, ordenação).
+  const songsHref = useSongsListHref(arrangement.song!.slug);
   const originalKey = arrangement.key ?? "";
   const hasMultipleArrangements = (arrangement.song?.arrangements?.length ?? 0) > 1;
   const hasContentActions =
@@ -67,7 +70,7 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
   return (
     <Popover>
         <PageHeader
-          backLinkHref="/songs"
+          backLinkHref={songsHref}
           backLinkText={t("songs")}
           title={songTitle}
           subtitle={

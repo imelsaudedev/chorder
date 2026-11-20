@@ -23,22 +23,22 @@ export default function ServiceConfig() {
       <p className="text-sm font-semibold text-primary">{t("Messages.layout")}</p>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs text-zinc-500">{t("Messages.mode")}</span>
+        <span className="text-xs text-muted-foreground">{t("Messages.mode")}</span>
         <ModeButtonSet mode={mode} setMode={setMode} />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs text-zinc-500">{t("Messages.columns")}</span>
+        <span className="text-xs text-muted-foreground">{t("Messages.columns")}</span>
         <ColumnButtons id="service-column-count" columns={columns} setColumns={setColumns} />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs text-zinc-500">{t("Messages.fontSize")}</span>
+        <span className="text-xs text-muted-foreground">{t("Messages.fontSize")}</span>
         <FontSizeButtonSet fontSize={fontSize} setFontSize={setFontSize} />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs text-zinc-500">{t("Messages.density")}</span>
+        <span className="text-xs text-muted-foreground">{t("Messages.density")}</span>
         <DensityButtonSet density={density} setDensity={setDensity} />
       </div>
     </div>

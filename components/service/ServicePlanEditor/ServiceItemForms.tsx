@@ -26,7 +26,7 @@ import {
 import { GripVertical, Minus, Plus, Trash2 } from "lucide-react";
 import { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import { usePlanMode } from "./planMode";
-import { AvisosMeta, FalaMeta, LeituraMeta, SermaoMeta } from "./unitSummary";
+import { AvisosMeta, FalaMeta, LeituraMeta, OutroMeta, SermaoMeta } from "./unitSummary";
 
 // Formulários de edição por tipo de item (exceto Música, que tem fluxo
 // próprio de busca em ServiceItemDrawer). Adicionar e editar são o mesmo
@@ -135,7 +135,7 @@ function Field({
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
         {label}
-        {required && <span className="font-normal text-amber-700"> · necessário</span>}
+        {required && <span className="font-normal text-warning-text"> · necessário</span>}
       </Label>
       {children(id)}
     </div>
@@ -171,7 +171,7 @@ function TextField({
           autoFocus={autoFocus}
           autoComplete="off"
           enterKeyHint="next"
-          className={missing ? "h-11 border-amber-400" : "h-11"}
+          className={missing ? "h-11 border-warning" : "h-11"}
         />
       )}
     </Field>
@@ -328,7 +328,7 @@ function VersionField({
             <SelectTrigger
               id={id}
               aria-label="Versão da Bíblia"
-              className={`w-full cursor-pointer data-[size=default]:h-11 ${missing ? "border-amber-400" : ""}`}
+              className={`w-full cursor-pointer data-[size=default]:h-11 ${missing ? "border-warning" : ""}`}
             >
               <SelectValue placeholder="Escolher" />
             </SelectTrigger>
@@ -351,7 +351,7 @@ function VersionField({
               placeholder="Qual versão?"
               aria-label="Outra versão"
               autoComplete="off"
-              className={`h-11 ${missing ? "border-amber-400" : ""}`}
+              className={`h-11 ${missing ? "border-warning" : ""}`}
               autoFocus={otherChosen && !value}
             />
           )}
@@ -429,6 +429,65 @@ export const FalaUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps & { uni
               ? "Motivos de oração, texto a ser lido ou observações..."
               : "Roteiro da fala, pontos que não podem faltar ou observações..."
           }
+          rows={9}
+        />
+      </FormShell>
+    );
+  }
+);
+
+// --- Outro ---
+
+// Item genérico: título (o que torna o item útil), duração e uma descrição livre.
+export const OutroUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
+  function OutroUnitForm({ unit, isNew, onUpdate, onDiscard, onDone }, ref) {
+    const existingMeta = unit.metadata as OutroMeta | null;
+
+    const [label, setLabel] = useState(unit.label ?? "");
+    const [description, setDescription] = useState(existingMeta?.description ?? "");
+    const [duration, setDuration] = useState(
+      unit.durationMin != null ? String(unit.durationMin) : ""
+    );
+    const [saved, setSaved] = useState(false);
+    const mode = usePlanMode();
+
+    useImperativeHandle(ref, () => ({
+      discardIfBlank: () => {
+        if (!isNew || saved || mode === "template") return;
+        if (!label.trim() && !description.trim() && !duration) onDiscard();
+      },
+    }));
+
+    function buildChanges(): Partial<ClientServiceUnit> {
+      const metadata = { description: description.trim() || null };
+      return { label: label.trim() || null, metadata, durationMin: parseDuration(duration) };
+    }
+
+    const commit = useLiveCommit(buildChanges, onUpdate);
+
+    function handleSave() {
+      setSaved(true);
+      commit();
+      onDone();
+    }
+
+    return (
+      <FormShell onSubmit={handleSave}>
+        <FieldWithDuration duration={duration} onDurationChange={setDuration}>
+          <TextField
+            label="Título"
+            required={mode !== "template"}
+            value={label}
+            onChange={setLabel}
+            placeholder="Ex: Ceia, Batismo, Vídeo, Dinâmica..."
+            autoFocus
+          />
+        </FieldWithDuration>
+        <AreaField
+          label="Descrição"
+          value={description}
+          onChange={setDescription}
+          placeholder="Detalhes, quem conduz ou observações..."
           rows={9}
         />
       </FormShell>

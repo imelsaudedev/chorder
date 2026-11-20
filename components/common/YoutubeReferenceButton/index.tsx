@@ -21,7 +21,7 @@ export default function YoutubeReferenceButton({
 
   return (
     <Button type="button" variant="outline" size="icon" className={className} onClick={() => { closeAudio(); play(youtubeUrl, title); }}>
-      <Play className="text-red-500" />
+      <Play className="text-media-video" />
       <span className="sr-only">Reproduzir referência</span>
     </Button>
   );

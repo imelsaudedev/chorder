@@ -75,7 +75,7 @@ export default function ActionMenu({
               </DropdownMenuItem>
             )}
             {(editUrl || onDuplicate) && <DropdownMenuSeparator />}
-            <DropdownMenuItem asChild className="text-red-600 focus:text-red-600 focus:bg-red-50">
+            <DropdownMenuItem asChild className="text-danger-text focus:text-danger-text focus:bg-danger-subtle">
               <AlertDialogTrigger
                 className="w-full text-left"
                 disabled={isDeleting}

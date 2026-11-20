@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { getLyrics } from "@/chopro/music";
+import { summarizeServicePlan } from "@/lib/service-list";
 import prisma from "./client";
 import {
   ClientArrangement,
@@ -10,6 +11,7 @@ import {
   ClientTagGroup,
   LeaderStat,
   RecentServiceEntry,
+  ServiceListItem,
   ServicePlan,
   SongStat,
   StatsData,
@@ -94,6 +96,9 @@ async function buildTagFilter(tagIds: number[]) {
   };
 }
 
+// Ordem dos chips de uma música: a do grupo e, dentro dele, a da tag.
+const SONG_TAG_ORDER: Prisma.TagOrderByWithRelationInput[] = [{ group: { order: "asc" } }, { order: "asc" }, { name: "asc" }];
+
 export async function retrieveSongs({
   query = "",
   limitLines,
@@ -167,6 +172,7 @@ export async function retrieveSongs({
         orderBy: [{ isDefault: "desc" }],
       },
       tags: {
+        orderBy: SONG_TAG_ORDER,
         select: {
           id: true,
           name: true,
@@ -183,34 +189,69 @@ export async function retrieveSongs({
 
   if (withUsageStats) {
     const songIds = songs.map((s) => s.id).filter((id): id is number => id !== undefined);
-    if (songIds.length > 0) {
-      const serviceArrangements = await prisma.songArrangement.findMany({
-        where: {
-          songId: { in: songIds },
-          isServiceArrangement: true,
-          isDeleted: false,
-          serviceUnit: { service: { isDeleted: false } },
-        },
-        select: {
-          songId: true,
-          serviceUnit: { select: { service: { select: { date: true } } } },
-        },
-      });
-      const lastUsedMap = new Map<number, Date>();
-      for (const sa of serviceArrangements) {
-        const date = sa.serviceUnit?.service?.date;
-        if (!date) continue;
-        const existing = lastUsedMap.get(sa.songId);
-        if (!existing || date > existing) lastUsedMap.set(sa.songId, date);
-      }
-      songs = songs.map((song) => ({
-        ...song,
-        lastUsedAt: (song.id !== undefined ? lastUsedMap.get(song.id) : undefined) ?? null,
-      }));
-    }
+    const usage = await retrieveSongUsage(songIds);
+    songs = songs.map((song) => {
+      const stat = song.id !== undefined ? usage.get(song.id) : undefined;
+      return { ...song, lastUsedAt: stat?.lastUsedAt ?? null, usageCount: stat?.usageCount ?? 0 };
+    });
   }
 
   return songs;
+}
+
+// Último uso e quantidade de usos de cada música, lidos de Service.plan (a fonte
+// de verdade das liturgias; a tabela ServiceUnit não é mais escrita — ver
+// docs/arquitetura-plano-culto.md). Mesma fonte de retrieveStats.
+export async function retrieveSongUsage(
+  songIds: number[]
+): Promise<Map<number, { lastUsedAt: Date; usageCount: number }>> {
+  const usage = new Map<number, { lastUsedAt: Date; usageCount: number }>();
+  if (songIds.length === 0) return usage;
+
+  const services = await prisma.service.findMany({
+    where: { isDeleted: false },
+    select: { date: true, plan: true },
+  });
+  const servicesArrangementIds = services.map((service) => {
+    const ids = new Set<number>();
+    for (const section of (service.plan as ServicePlan | null)?.sections ?? []) {
+      for (const unit of section.units) {
+        if (unit.type === "SONG" && unit.arrangementId != null) ids.add(unit.arrangementId);
+      }
+    }
+    return ids;
+  });
+  const allArrangementIds = new Set(servicesArrangementIds.flatMap((ids) => [...ids]));
+  if (allArrangementIds.size === 0) return usage;
+
+  const arrangements = await prisma.songArrangement.findMany({
+    where: { id: { in: [...allArrangementIds] }, songId: { in: songIds } },
+    select: { id: true, songId: true },
+  });
+  const songByArrangementId = new Map(arrangements.map((a) => [a.id, a.songId]));
+
+  services.forEach((service, index) => {
+    const songsInService = new Set<number>();
+    for (const arrangementId of servicesArrangementIds[index]) {
+      const songId = songByArrangementId.get(arrangementId);
+      if (songId !== undefined) songsInService.add(songId);
+    }
+    for (const songId of songsInService) {
+      const current = usage.get(songId);
+      usage.set(songId, {
+        lastUsedAt: !current || service.date > current.lastUsedAt ? service.date : current.lastUsedAt,
+        usageCount: (current?.usageCount ?? 0) + 1,
+      });
+    }
+  });
+  return usage;
+}
+
+export async function restoreSong(slug: string) {
+  return prisma.song.update({
+    where: { slug },
+    data: { isDeleted: false },
+  });
 }
 
 export async function archiveSong(slug: string) {
@@ -256,6 +297,7 @@ export async function retrieveSong(
     where,
     include: {
       tags: {
+        orderBy: SONG_TAG_ORDER,
         select: {
           id: true,
           name: true,
@@ -380,6 +422,7 @@ export async function retrieveArrangement(
           ? {
               include: {
                 tags: {
+                  orderBy: SONG_TAG_ORDER,
                   select: {
                     id: true,
                     name: true,
@@ -420,6 +463,7 @@ export async function retrieveArrangement(
         ? {
             include: {
               tags: {
+                orderBy: SONG_TAG_ORDER,
                 select: {
                   id: true,
                   name: true,
@@ -1009,6 +1053,47 @@ export async function retrieveServices(): Promise<ClientService[]> {
   return services as unknown as ClientService[];
 }
 
+// Lista de Liturgias: só o que a tela mostra e pesquisa. Não devolve o plano
+// (que cresce com o histórico); resolve os arranjos para os títulos das músicas
+// numa única consulta.
+export async function retrieveServicesList(): Promise<ServiceListItem[]> {
+  const services = await prisma.service.findMany({
+    where: { isDeleted: false },
+    select: {
+      slug: true,
+      title: true,
+      date: true,
+      worshipLeader: true,
+      preacher: true,
+      sermonTheme: true,
+      sermonReference: true,
+      plan: true,
+      updatedAt: true,
+    },
+  });
+  const summaries = services.map((service) => summarizeServicePlan(service.plan as ServicePlan | null));
+  const arrangementIds = [...new Set(summaries.flatMap((summary) => summary.arrangementIds))];
+  const arrangements = arrangementIds.length
+    ? await prisma.songArrangement.findMany({
+        where: { id: { in: arrangementIds } },
+        select: { id: true, song: { select: { title: true } } },
+      })
+    : [];
+  const titleByArrangementId = new Map(arrangements.map((a) => [a.id, a.song.title]));
+
+  return services.map(({ plan: _plan, ...service }, index) => {
+    const summary = summaries[index];
+    return {
+      ...service,
+      startTime: summary.startTime,
+      songCount: summary.songCount,
+      songTitles: summary.arrangementIds
+        .map((id) => titleByArrangementId.get(id))
+        .filter((title): title is string => Boolean(title)),
+    };
+  });
+}
+
 // Lançado quando o culto foi salvo por outra pessoa entre o momento em que o
 // client carregou e o momento em que tentou salvar — ver createOrUpdateService.
 export class ServiceConflictError extends Error {
@@ -1390,9 +1475,22 @@ export async function retrieveTagGroups(): Promise<ClientTagGroup[]> {
       id: true,
       name: true,
       color: true,
+      description: true,
+      presentation: true,
+      selection: true,
+      isProposed: true,
       tags: {
-        select: { id: true, name: true, _count: { select: { songs: true } } },
-        orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          color: true,
+          pattern: true,
+          imageUrl: true,
+          // músicas arquivadas (isDeleted) não contam
+          _count: { select: { songs: { where: { isDeleted: false } } } },
+        },
+        orderBy: [{ order: "asc" }, { name: "asc" }],
       },
     },
   });

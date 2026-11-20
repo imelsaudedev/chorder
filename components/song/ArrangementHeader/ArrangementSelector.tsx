@@ -25,7 +25,7 @@ export default function ArrangementSelector({
   const handleArrangementChange = useHandleArrangementChange();
 
   if (!arrangementOptions.length) {
-    return <p className="text-red">Error: empty arrangement list</p>;
+    return <p className="text-danger-text">Error: empty arrangement list</p>;
   }
 
   const defaultArrangement = arrangements.find(

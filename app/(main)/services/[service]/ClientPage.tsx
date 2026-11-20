@@ -41,7 +41,7 @@ export default function ClientPage({ serviceSlug }: ClientPageProps) {
       </div>
 
       <Tabs value={view} onValueChange={handleViewChange} className="flex flex-col gap-0">
-        <div className="stage-mode-hidden flex items-center justify-between gap-2 px-4 sm:px-5 lg:px-8 pb-4">
+        <div className="stage-mode-hidden flex items-center justify-between gap-2 px-page pb-4">
           <TabsList aria-label="Visão do culto" className="h-11 p-1 bg-muted/50">
             <TabsTrigger value="liturgia" className="h-full min-w-24 px-4 cursor-pointer">
               <ListOrdered aria-hidden="true" />
@@ -56,26 +56,17 @@ export default function ClientPage({ serviceSlug }: ClientPageProps) {
         </div>
 
         <TabsContent value="liturgia" className="mt-0">
-          <Main className="px-4 sm:px-5 lg:px-8 pt-2 pb-4 sm:pb-5 lg:pb-8">
+          <Main className="pt-2 pb-4 sm:pb-5 lg:pb-8">
             <ServiceLiturgyView service={service} />
           </Main>
         </TabsContent>
 
         <TabsContent value="cifras" className="mt-0">
-          <MainWithDensity>
+          <Main className="pt-2 pb-4 sm:pb-5 lg:pb-8">
             <ServiceView service={service ?? null} />
-          </MainWithDensity>
+          </Main>
         </TabsContent>
       </Tabs>
     </ServiceConfigProvider>
-  );
-}
-
-function MainWithDensity({ children }: { children: React.ReactNode }) {
-  const { density } = useServiceConfig();
-  return (
-    <Main density={density} className="px-4 sm:px-5 lg:px-8 pt-2 pb-4 sm:pb-5 lg:pb-8">
-      {children}
-    </Main>
   );
 }

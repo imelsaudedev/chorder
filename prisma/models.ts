@@ -19,8 +19,13 @@ export type ClientTag = Pick<Tag, "id" | "name"> & {
   group: Pick<TagGroup, "id" | "name" | "color">;
 };
 
-export type ClientTagGroup = Pick<TagGroup, "id" | "name" | "color"> & {
-  tags: (Pick<Tag, "id" | "name"> & { songCount?: number })[];
+export type ClientTagGroup = Pick<
+  TagGroup,
+  "id" | "name" | "color" | "description" | "presentation" | "selection" | "isProposed"
+> & {
+  tags: (Pick<Tag, "id" | "name" | "description" | "color" | "pattern" | "imageUrl"> & {
+    songCount?: number;
+  })[];
 };
 
 export const SERVICE_UNIT_TYPES = [
@@ -30,6 +35,7 @@ export const SERVICE_UNIT_TYPES = [
   "ORACAO",
   "AVISOS",
   "SERMAO",
+  "OUTRO",
 ] as const;
 
 export const SERVICE_SECTION_TYPES = [
@@ -59,7 +65,10 @@ export type ClientSong = Omit<Song, "id" | "legacyId" | "holyricsId"> & {
   holyricsId?: string | null;
   arrangements?: ClientArrangement[];
   tags?: ClientTag[];
+  // Preenchidos quando retrieveSongs é chamado com withUsageStats.
   lastUsedAt?: Date | null;
+  // Em quantas liturgias (não apagadas) a música aparece; mais de uma vez no mesmo culto conta uma só.
+  usageCount?: number;
 };
 export type ClientArrangement = Omit<
   SongArrangement,
@@ -105,6 +114,18 @@ export type ClientServiceTemplate = Omit<ServiceTemplate, "id"> & {
 };
 
 export type ServiceRef = Pick<Service, "slug" | "title" | "date">;
+
+/** Liturgia como a lista de Liturgias a vê: sem o plano, com o resumo pronto. */
+export type ServiceListItem = Pick<
+  Service,
+  "slug" | "title" | "date" | "worshipLeader" | "preacher" | "sermonTheme" | "sermonReference"
+> & {
+  startTime: string | null;
+  songCount: number;
+  /** Títulos das músicas, na ordem da liturgia (a busca da lista usa isto). */
+  songTitles: string[];
+  updatedAt: Date;
+};
 
 export type ServicePlan = {
   startTime?: string | null;

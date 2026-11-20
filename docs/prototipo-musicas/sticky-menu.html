@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Músicas — menu fixo (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+<style>
+/* Protótipo solto: abre com duplo clique. Ilustra o menu fixo (sticky) da lista de Músicas:
+   barra de filtros + faixa da letra atual + trilho de letras (celular). Rolar DENTRO do "aparelho".
+   Títulos são de exemplo. Tokens espelham app/globals.css. */
+:root{
+  --background:#fff;--foreground:hsl(224 84% 4.9%);--secondary:hsl(221 83% 53%);
+  --muted:hsl(215 16% 72%);--muted-foreground:hsl(215 14% 48%);--border:hsl(0 0% 89.8%);--zinc50:#fafafa;
+  --pg:#e9edf3;--chip:#fff;--pgline:#a3b0c2;--pgfg:#0b1220;--pgmut:#475569;
+}
+*{box-sizing:border-box;border-color:var(--border)}
+body{margin:0;padding:20px 16px 48px;background:var(--pg);color:var(--pgfg);font:400 14px/20px "IBM Plex Sans",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+svg{display:block;flex:none}
+.intro{max-width:80ch;margin:0 auto 16px}
+.intro h1{margin:0 0 4px;font:600 20px/26px "Space Grotesk",sans-serif}
+.intro p{margin:0;color:var(--pgmut)}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:center;margin:0 auto 18px}
+.ctl .g{display:flex;flex-direction:column;gap:4px}
+.ctl .g>span{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--pgmut)}
+.seg{display:inline-flex;border:1px solid var(--pgline);border-radius:99px;background:var(--chip);padding:2px}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:99px;font-size:13px;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--pgfg);color:var(--pg)}
+.wrap{display:flex;flex-wrap:wrap;gap:24px 36px;justify-content:center;align-items:flex-start}
+.notes{flex:1 1 280px;max-width:400px;display:flex;flex-direction:column;gap:10px}
+.nc{background:var(--chip);border:1px solid var(--pgline);border-radius:10px;padding:12px 14px}
+.nc h2{margin:0 0 6px;font-size:14px}
+.nc ul{margin:0;padding-left:18px;color:var(--pgmut)}.nc li{margin:3px 0}.nc p{margin:0;color:var(--pgmut)}
+.meter{font-variant-numeric:tabular-nums}
+.meter b{color:var(--pgfg)}
+
+/* ---------- aparelho ---------- */
+.device{position:relative;overflow:hidden;background:var(--background);color:var(--foreground);border:2px solid var(--pgline);border-radius:28px;width:390px;max-width:100%;height:780px}
+.device[data-dev=desktop]{width:min(1000px,100%);height:700px;border-radius:12px}
+.app{position:absolute;inset:0;display:flex}
+.side{flex:none;width:80px;background:var(--zinc50);border-right:1px solid var(--border)}
+.device[data-dev=phone] .side{display:none}
+.bnav{display:none;position:absolute;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid #f3f4f6;justify-content:space-around;padding:12px 0;color:var(--muted-foreground);font-size:12px}
+.device[data-dev=phone] .bnav{display:flex}
+.main{flex:1;min-width:0;position:relative;container-type:inline-size;container-name:app}
+.scroll{position:absolute;inset:0;overflow-y:auto;--px:20px;padding:0 var(--px) 90px;scroll-behavior:auto}
+@container app (min-width:560px){.scroll{--px:32px}}
+.ttl{padding:24px 0 16px;font:600 28px/32px "Space Grotesk",sans-serif}
+
+/* ---------- barra de filtros (fixa) ---------- */
+.bar{position:sticky;top:0;z-index:30;margin:0 calc(var(--px)*-1);padding:8px var(--px);background:#fff;
+  display:flex;flex-direction:column;gap:8px;transition:transform .2s,box-shadow .2s}
+.bar.stuck{box-shadow:0 1px 0 var(--border),0 4px 8px -4px rgba(0,0,0,.12)}
+.bar.hidden{transform:translateY(-100%);box-shadow:none}
+.row{display:flex;gap:8px;align-items:center;min-width:0}
+.cats{overflow-x:auto;scrollbar-width:none}.cats::-webkit-scrollbar{display:none}
+.soft{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:0;border-radius:6px;background:rgba(148,163,184,.22);white-space:nowrap;font-size:14px;font-weight:500}
+.soft.ic{width:32px;padding:0;justify-content:center}
+.tools{display:flex;gap:8px;align-items:center}
+.device[data-dev=desktop] .bar{flex-direction:row;align-items:center}
+.device[data-dev=desktop] .bar .cats{flex:1}
+.device[data-dev=desktop] .tools{margin-left:auto}
+/* modo "compacta ao fixar": uma linha só, categorias viram "Filtros" */
+.bar.compact .cats{display:none}
+.bar .only-compact{display:none}
+.bar.compact .only-compact{display:inline-flex}
+
+/* ---------- cartão + faixas ---------- */
+.card{border:1px solid var(--border);border-radius:12px;background:#fff;overflow:clip} /* clip, não hidden: hidden quebraria o sticky */
+.device[data-dev=phone] .card{margin:0 calc(var(--px)*-1);border-radius:0;border-inline:0}
+.colh{padding:12px 16px;background:var(--zinc50);color:var(--muted-foreground);font-weight:500;border-bottom:1px solid var(--border)}
+.band{position:sticky;top:var(--stk,0px);z-index:20;height:32px;display:flex;align-items:center;padding:0 16px;background:var(--zinc50);
+  border-block:1px solid var(--border);font-weight:600;text-transform:uppercase;color:var(--secondary)}
+.band.nostick{position:static}
+.song{padding:10px 16px;border-bottom:1px solid var(--border)}
+.song b{display:block;font-weight:500}.song span{color:var(--muted-foreground);font-size:13px}
+
+/* ---------- trilho de letras (celular) ---------- */
+.rail{position:absolute;right:2px;top:50%;transform:translateY(-50%);z-index:35;display:flex;flex-direction:column;align-items:center;
+  padding:6px 3px;border-radius:12px;background:rgba(255,255,255,.7);touch-action:none;user-select:none}
+.rail span{font-size:10px;line-height:14px;font-weight:600;color:var(--secondary);width:18px;text-align:center}
+.rail span.off{color:var(--muted)}
+.device:not([data-dev=phone]) .rail,.rail.none{display:none}
+.bubble{position:absolute;right:40px;top:50%;z-index:36;width:56px;height:56px;margin-top:-28px;border-radius:12px;background:var(--pgfg);color:#fff;
+  font:600 28px/56px "Space Grotesk";text-align:center;text-transform:uppercase;display:none}
+.bubble.on{display:block}
+/* medidas */
+.ruler{position:absolute;left:0;right:0;z-index:50;pointer-events:none;border-bottom:1px dashed #e11d48}
+.ruler i{position:absolute;right:4px;bottom:2px;font:600 10px/12px "IBM Plex Sans";color:#e11d48;background:#fff;padding:0 3px;border-radius:3px}
+.hidden-ruler{display:none}
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>Músicas — menu fixo</h1>
+  <p>Role a lista dentro do aparelho. Compare as variantes e veja quanto da altura as camadas fixas ocupam.</p>
+</div>
+
+<div class="ctl">
+  <div class="g"><span>Aparelho</span><div class="seg" id="dev"><button data-v="phone" aria-pressed="true">Celular</button><button data-v="desktop" aria-pressed="false">Desktop</button></div></div>
+  <div class="g"><span>Barra de filtros</span><div class="seg" id="mode">
+    <button data-v="always" aria-pressed="false">A · sempre fixa</button>
+    <button data-v="autohide" aria-pressed="true">B · some ao descer</button>
+    <button data-v="compact" aria-pressed="false">C · compacta</button></div></div>
+  <div class="g"><span>Faixa da letra</span><div class="seg" id="band"><button data-v="on" aria-pressed="true">Fixa</button><button data-v="off" aria-pressed="false">Rola junto</button></div></div>
+  <div class="g"><span>Medidas</span><div class="seg" id="rul"><button data-v="on" aria-pressed="false">Mostrar</button><button data-v="off" aria-pressed="true">Ocultar</button></div></div>
+</div>
+
+<div class="wrap">
+  <div class="device" id="device" data-dev="phone">
+    <div class="app">
+      <div class="side"></div>
+      <div class="main">
+        <div class="scroll" id="scroll">
+          <div class="ttl">Músicas</div>
+          <div class="bar" id="bar">
+            <div class="row cats" id="cats">
+              <button class="soft">Tipo ▾</button><button class="soft">Ocasião ▾</button><button class="soft">Ministro ▾</button><button class="soft">Tom ▾</button>
+            </div>
+            <div class="tools">
+              <button class="soft only-compact">Filtros ▾</button>
+              <button class="soft ic" aria-label="Buscar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+              <button class="soft ic" id="lettersBtn" aria-label="Letras"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 4-10 4 10M4.5 13h5M14 7h4a2 2 0 0 1 0 4h-4zM14 11h4.5a2.5 2.5 0 0 1 0 5H14z"/></svg></button>
+              <button class="soft">↑ Título</button>
+            </div>
+          </div>
+          <div class="card" id="card"></div>
+        </div>
+        <div class="rail" id="rail"></div>
+        <div class="bubble" id="bubble"></div>
+        <div class="ruler hidden-ruler" id="rulerBar"><i></i></div>
+        <div class="ruler hidden-ruler" id="rulerBand" style="border-color:#2563eb"><i style="color:#2563eb"></i></div>
+      </div>
+    </div>
+    <div class="bnav"><span>Músicas</span><span>Cultos</span><span>Mais</span></div>
+  </div>
+
+  <div class="notes">
+    <div class="nc"><h2>Altura ocupada pelo que está fixo</h2><p class="meter" id="meter"></p></div>
+    <div class="nc"><h2>O que testar</h2><ul>
+      <li><b>A</b>: a barra fica sempre. No celular são 2 linhas (~84 px).</li>
+      <li><b>B</b> (recomendada): a barra some ao descer e volta ao subir; a faixa da letra continua.</li>
+      <li><b>C</b>: ao fixar vira uma linha só, com um botão "Filtros".</li>
+      <li>No celular, arraste o dedo/mouse no <b>trilho de letras</b> à direita.</li>
+      <li>O botão de letras da barra pula para a letra já descontando as camadas fixas.</li>
+    </ul></div>
+    <div class="nc"><h2>Notas de implementação</h2><ul>
+      <li>Cada letra precisa de um bloco próprio (<code>&lt;section&gt;</code>); com faixas irmãs na mesma lista, todas grudam juntas e nenhuma empurra a anterior.</li>
+      <li>O cartão usa <code>overflow: clip</code>; <code>hidden</code> quebraria o sticky da faixa.</li>
+      <li>A barra tem fundo sólido, sem desfoque (vaul/Drawer).</li>
+      <li>O pulo de letra e o <code>scroll-margin</code> descontam a altura fixa.</li>
+      <li>Com ordenação por Uso ou Compositor não há faixas nem trilho.</li>
+    </ul></div>
+  </div>
+</div>
+
+<script>
+const T={a:["Abre os Meus Olhos","Ao Único","Alto Preço","Amor Sem Fim"],b:["Bendito Seja","Brilha Jesus"],c:["Cantarei","Casa do Pai","Consagração","Creio"],d:["Deus de Promessas","Digno é o Cordeiro","Deserto"],e:["Eis-me aqui","Espírito Santo","Exaltado"],f:["Fiel é Deus","Fogo Consumidor","Fonte"],g:["Glória a Deus","Grande é o Senhor","Graça"],h:["Hosana","Habitação"],i:["Imensurável","Isaías 6"],j:["Jesus em Tua Presença","Jó"],l:["Lugar Secreto","Luz do Mundo","Leva-me"],m:["Maranata","Meu Abrigo","Misericórdia","Maravilhoso"],n:["Nada Além do Sangue","Noites de Glória","No Calvário"],o:["O Senhor é Bom","Oceanos","Os Céus Declaram"],p:["Poderoso Deus","Perto Quero Estar","Plenitude","Pai Nosso"],q:["Quão Grande és Tu","Quebrantado"],r:["Reina em Mim","Rocha Eterna","Rei dos Reis"],s:["Santo Espírito","Sonda-me","Senhor Eu Te Busco","Sobre Todo Nome"],t:["Tua Graça me Basta","Teu Amor","Tudo é Teu"],u:["Um Novo Dia","Único Caminho"],v:["Vem Espírito","Vitória","Vou Cantar"],x:["Xodó de Deus"],z:["Zelo"]};
+const letters=Object.keys(T), $=id=>document.getElementById(id), sc=$('scroll'), bar=$('bar'), card=$('card'), dev=$('device');
+const arts=["Ministério de Louvor","Aline Barros","Fernandinho","Diante do Trono","Gabriela Rocha"];
+let n=0,html='<div class="colh">'+Object.values(T).flat().length+' músicas</div>';
+// um bloco (section) por letra: o sticky de uma faixa só vale dentro do seu próprio bloco, então a seguinte empurra a anterior
+letters.forEach(l=>{html+=`<section><div class="band" id="${l}" data-l="${l}">${l}</div>`;T[l].forEach(t=>{html+=`<div class="song"><b>${t}</b><span>${arts[n++%arts.length]} · Tom ${"CDEFGA"[n%6]}</span></div>`});html+='</section>'});
+card.innerHTML=html;
+$('rail').innerHTML="abcdefghijlmnopqrstuvxz".split('').map(l=>`<span>${l.toUpperCase()}</span>`).join('');
+
+const S={dev:'phone',mode:'autohide',band:'on',rul:'off'};
+function seg(id,key){$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S[key]=b.dataset.v;
+  [...$(id).children].forEach(x=>x.setAttribute('aria-pressed',x===b));apply()})}
+seg('dev','dev');seg('mode','mode');seg('band','band');seg('rul','rul');
+
+function stickTop(){ // altura fixa acima da faixa da letra
+  const barVisible=!bar.classList.contains('hidden');
+  return barVisible?bar.offsetHeight:0;
+}
+function apply(){
+  dev.dataset.dev=S.dev;
+  bar.classList.toggle('compact',S.mode==='compact'&&S.dev==='phone'&&sc.scrollTop>40);
+  if(S.mode!=='autohide'||S.dev!=='phone')bar.classList.remove('hidden');
+  const bands=card.querySelectorAll('.band');
+  bands.forEach(b=>b.classList.toggle('nostick',S.band==='off'));
+  card.style.setProperty('--stk',stickTop()+'px');sc.style.setProperty('--stk',stickTop()+'px');
+  bar.classList.toggle('stuck',sc.scrollTop>60);
+  measure();
+}
+let last=0;
+sc.addEventListener('scroll',()=>{
+  const y=sc.scrollTop,d=y-last;
+  if(S.mode==='autohide'&&S.dev==='phone'){ if(d>6&&y>120)bar.classList.add('hidden'); else if(d<-6)bar.classList.remove('hidden'); }
+  last=y;apply();
+},{passive:true});
+
+function measure(){
+  const H=dev.clientHeight, b=stickTop(), l=S.band==='on'?32:0, nav=S.dev==='phone'?dev.querySelector('.bnav').offsetHeight:0;
+  const fixedTop=b+l;
+  $('meter').innerHTML=`Barra: <b>${b}px</b> · Faixa: <b>${l}px</b> · Navegação inferior: <b>${nav}px</b><br>Fixo no topo: <b>${fixedTop}px</b> = <b>${(fixedTop/H*100).toFixed(0)}%</b> da altura. Sobra <b>${H-fixedTop-nav}px</b> para a lista.`;
+  const show=S.rul==='on';
+  [$('rulerBar'),$('rulerBand')].forEach(r=>r.classList.toggle('hidden-ruler',!show));
+  $('rulerBar').style.top=b+'px';$('rulerBar').firstChild.textContent=b+'px';
+  $('rulerBand').style.top=fixedTop+'px';$('rulerBand').firstChild.textContent=fixedTop+'px';
+}
+
+function jump(l){ // desconta o que está fixo; barra pode estar escondida
+  const el=$(l); if(!el)return;
+  const top=el.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop;
+  // só a barra pode estar à frente; no modo B ela some ao descer, então desconta 0
+  const lead=(S.mode==='autohide'&&S.dev==='phone')?0:bar.offsetHeight;
+  sc.scrollTo({top:top-lead});
+}
+// trilho: arrastar escolhe a letra
+const rail=$('rail'),bubble=$('bubble');
+function railAt(e){
+  const r=rail.getBoundingClientRect(), spans=[...rail.children];
+  const i=Math.max(0,Math.min(spans.length-1,Math.floor((e.clientY-r.top-6)/14)));
+  const l=spans[i].textContent.toLowerCase(); bubble.textContent=l; bubble.classList.add('on'); jump(l);
+}
+rail.addEventListener('pointerdown',e=>{rail.setPointerCapture(e.pointerId);railAt(e)});
+rail.addEventListener('pointermove',e=>{if(rail.hasPointerCapture(e.pointerId))railAt(e)});
+['pointerup','pointercancel'].forEach(t=>rail.addEventListener(t,()=>bubble.classList.remove('on')));
+$('lettersBtn').addEventListener('click',()=>jump(letters[Math.floor(Math.random()*letters.length)]));
+$('lettersBtn').title='Protótipo: pula para uma letra qualquer (no app abre a grade de letras)';
+apply();
+</script>
+</body>
+</html>

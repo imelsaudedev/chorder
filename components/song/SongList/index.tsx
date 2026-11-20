@@ -24,7 +24,7 @@ export default function SongList({
   return (
     <>
       <InitialsNav existingInitials={existingInitials} />
-      <section>
+      <section className="@container">
         {(!existingInitials || existingInitials.length === 0) && (
           <p className="text-muted text-center">{t("noSongs")}</p>
         )}

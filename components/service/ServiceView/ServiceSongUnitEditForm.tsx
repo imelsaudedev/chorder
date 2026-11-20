@@ -123,7 +123,7 @@ export default function ServiceSongUnitEditForm({
     <Form {...form}>
       <BlockEditorFormBridge className="" />
       {saveError && (
-        <p className="text-sm text-red-500 text-right py-2 px-2">{saveError}</p>
+        <p className="text-sm text-danger text-right py-2 px-2">{saveError}</p>
       )}
     </Form>
   );

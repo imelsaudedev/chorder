@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Item da lista de músicas (protótipo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+<style>
+/* Protótipo solto (duplo clique). Só o ITEM DA LISTA, nas três larguras.
+   Referência: Flowbite "Table with users" — bloco de identidade em duas linhas, tudo o mais em 14px,
+   categorias como bolinha + texto, linhas arejadas. Dados de exemplo (usos em dias atrás, categorias inventadas). */
+:root{
+  --background:hsl(0 0% 100%);--foreground:hsl(224 84% 4.9%);--primary:hsl(0 0% 9%);
+  --muted-foreground:hsl(215 14% 48%);--border:hsl(0 0% 89.8%);--zinc50:#fafafa;
+  --amber700:#b45309;--radius:12px;
+  --pg:#e9edf3;--pgline:#a3b0c2;--pgfg:#0b1220;--pgmut:#475569;--chip:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:20px 16px 48px;background:var(--pg);color:var(--pgfg);font:400 14px/20px "IBM Plex Sans",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+svg{display:block;flex:none}
+.intro{max-width:80ch;margin:0 auto 14px}
+.intro h1{margin:0 0 4px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spacing:-.02em}
+.intro p{margin:0;color:var(--pgmut)}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:center;margin:0 auto 18px}
+.ctl .g{display:flex;flex-direction:column;gap:4px}
+.ctl .g>span{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--pgmut)}
+.seg{display:inline-flex;border:1px solid var(--pgline);border-radius:99px;background:var(--chip);padding:2px}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:99px;font-size:13px;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--pgfg);color:var(--pg)}
+
+.device{margin:0 auto;background:var(--background);color:var(--foreground);border:2px solid var(--pgline);border-radius:20px;
+  --px:16px;width:390px;max-width:100%;padding:16px var(--px) 8px;container:app/inline-size}
+.device[data-dev=tablet]{--px:20px;width:min(820px,100%)}
+.device[data-dev=desktop]{--px:20px;width:min(1120px,100%);border-radius:12px}
+h2.t{margin:0 0 12px;font:600 20px/26px "Space Grotesk",sans-serif;letter-spacing:-.02em;color:var(--primary)}
+
+/* moldura opcional, como no Flowbite */
+.list{border-top:1px solid var(--border);margin:0 calc(-1*var(--px))}
+.device[data-frame=on] .list{margin:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.device[data-frame=on] .row:last-child{border-bottom:0}
+
+/* ---------- cabeçalho de colunas (só desktop) ---------- */
+.lh{display:none}
+
+/* ---------- item ---------- */
+.row{position:relative;display:grid;align-items:center;column-gap:16px;row-gap:8px;
+  padding:16px var(--px);border-bottom:1px solid var(--border);cursor:pointer;
+  grid-template-columns:minmax(0,1fr) 56px 40px;grid-template-areas:"id play act"}
+.row:hover{background:hsl(215 16% 72% / .14)}
+.id{grid-area:id;min-width:0}
+.tt{font:600 16px/22px "Space Grotesk",sans-serif;letter-spacing:-.015em;color:var(--primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub{display:flex;align-items:center;gap:6px;margin-top:2px;min-width:0;font-size:14px;line-height:20px;color:var(--muted-foreground)}
+.sub .ar{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sep{flex:none}
+.lu{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex:none}
+.lu.rec{color:var(--amber700)}
+.lu.nev{font-style:italic}
+.lyric,.tags,.used{display:none}
+.lyric{grid-area:lyric;min-width:0;font-size:14px;line-height:20px;color:var(--muted-foreground)}
+.lyric div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tags{grid-area:tags;min-width:0;flex-wrap:wrap;gap:4px 14px;font-size:14px;line-height:20px;color:var(--muted-foreground)}
+.tg{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tg i{width:8px;height:8px;border-radius:50%;flex:none}
+.tg.more{opacity:.8}
+/* estilo "chip" (referência Flowbite): fundo claro da cor, texto escurecido p/ contraste >= 4,5, sem borda, canto 4px, 12px/500 */
+.device[data-tags=chip] .tags{gap:4px 6px}
+.device[data-tags=chip] .tg{gap:0;padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--fg);font-size:12px;font-weight:500;line-height:16px}
+.device[data-tags=chip] .tg i{display:none}
+.device[data-tags=chip] .tg.more{background:hsl(215 16% 72% / .25);color:var(--muted-foreground);opacity:1}
+.used{grid-area:used;font-size:14px;line-height:20px;color:var(--muted-foreground);align-items:center;gap:6px;white-space:nowrap}
+.play{grid-area:play;display:flex;justify-content:center}
+.act{grid-area:act;display:flex;justify-content:flex-end}
+.ib{width:40px;height:40px;border:0;background:none;border-radius:8px;display:grid;place-items:center;color:var(--primary)}
+.ib:hover{background:hsl(215 16% 72% / .3)}
+.ib.ref{width:56px;gap:6px;grid-auto-flow:column;place-content:center}
+.ib.ref.on{box-shadow:0 0 0 2px hsl(221 83% 53%);background:hsl(221 83% 53% / .08)}
+.c-vid{color:#ef4444}.c-aud{color:hsl(221 83% 53%)}
+.pop{position:fixed;z-index:50;width:340px;max-width:calc(100vw - 32px);background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.18);padding:4px}
+.ph{padding:10px 10px 4px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-foreground)}
+.ph+.pi,.pi+.ph{margin-top:0}
+.pi{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:8px 10px;border:0;background:none;border-radius:6px;text-align:left;font-size:14px}
+.pi:hover{background:hsl(215 16% 72% / .22)}
+.pi span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:60;background:var(--pgfg);color:#fff;border-radius:99px;padding:10px 18px;font-size:14px;box-shadow:0 8px 24px rgba(15,23,42,.3)}
+
+/* ---------- tablet: identidade | letra + categorias | play ⋯ ---------- */
+@container app (min-width:560px){
+  .row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 56px 40px;column-gap:20px;
+    grid-template-areas:"id lyric play act" "id tags play act";row-gap:0;align-items:start}
+  .tags{margin-top:8px}
+  /* tablet: autor e último uso empilhados (uso uma linha abaixo do autor), sem separador */
+  .sub{flex-direction:column;align-items:flex-start;gap:0}
+  .sub .sep{display:none}
+  .sub .ar{max-width:100%}
+  .play,.act{align-self:start}
+  .id{align-self:start}
+  .lyric{display:block}
+  .tags{display:flex}
+  .tags:empty{display:none}
+}
+/* ---------- desktop: colunas com cabeçalho ---------- */
+@container app (min-width:860px){
+  .row{grid-template-columns:minmax(0,2.3fr) minmax(0,2.4fr) minmax(0,1.8fr) 8rem 56px 40px;column-gap:20px;
+    grid-template-areas:"id lyric tags used play act";padding-top:12px;padding-bottom:12px;align-items:center}
+  .tags{margin-top:0}
+  .play,.act,.id{align-self:center}
+  .used{display:flex}
+  .sub .sep,.sub .lu{display:none}
+  .tt{font-size:18px;line-height:24px}
+  .lh{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(0,2.4fr) minmax(0,1.8fr) 8rem 56px 40px;column-gap:20px;
+    padding:12px var(--px);background:var(--zinc50);border-bottom:1px solid var(--border);font-size:14px;font-weight:500;color:var(--muted-foreground)}
+}
+.notes{max-width:80ch;margin:20px auto 0;background:var(--chip);border:1px solid var(--pgline);border-radius:10px;padding:12px 16px;color:var(--pgmut)}
+.notes b{color:var(--pgfg)}
+.notes ul{margin:6px 0 0;padding-left:18px}
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>Item da lista de músicas — proposta</h1>
+  <p>Mais arejado, 14px em tudo o que não é título, categorias em bolinha + texto, em até 2 linhas. Mude a tela e a moldura para comparar.</p>
+</div>
+<div class="ctl">
+  <div class="g"><span>Tela</span><div class="seg" id="segDev">
+    <button data-v="phone" aria-pressed="false">Celular</button><button data-v="tablet" aria-pressed="true">Tablet</button><button data-v="desktop" aria-pressed="false">Desktop</button></div></div>
+  <div class="g"><span>Categorias</span><div class="seg" id="segTags">
+    <button data-v="dot" aria-pressed="false">Bolinha</button><button data-v="chip" aria-pressed="true">Chip</button></div></div>
+  <div class="g"><span>Moldura</span><div class="seg" id="segFrame">
+    <button data-v="off" aria-pressed="true">Sem</button><button data-v="on" aria-pressed="false">Com borda</button></div></div>
+</div>
+
+<div class="device" id="dev" data-dev="tablet" data-frame="off" data-tags="chip">
+  <h2 class="t">Músicas</h2>
+  <div class="list" id="list"></div>
+</div>
+
+<div class="notes"><b>Medidas deste protótipo</b>
+  <ul>
+    <li>Letra: duas linhas (as duas primeiras do verso 1), cada uma cortada com reticências; título 16px/600 (18px no desktop); autor, uso, letra e categorias 14px; só o título é maior.</li>
+    <li>Linha: 16px acima/abaixo (12px no desktop), 16–20px nas laterais, 16–20px entre colunas, 2px entre título e autor.</li>
+    <li>Categoria: bolinha de 8px + nome em 14px; até 2 linhas (gap de 4px entre linhas, 14px entre itens); o que não couber vira "+N"; no celular não aparecem.</li>
+    <li>Referências: um botão só, com os ícones do que existe (vídeo vermelho, áudio azul). Uma fonte: toca direto. Duas ou mais: popover; se houver mais de um arranjo com mídia, agrupa pelo nome do arranjo. Sem seletor de arranjo na lista.</li>
+    <li>Último uso na escala do app (hoje, ontem, há N dias, semanas, meses, anos). Uso recente (menos de 3 semanas) em âmbar; no desktop vira coluna própria com cabeçalho.</li>
+    <li>Pontos de quebra aqui: 560 e 860px de largura do conteúdo; no app serão os breakpoints md e lg.</li>
+  </ul></div>
+
+<script>
+const clock = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+const play = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const music = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+const vplay = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const more = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>';
+const C = {Cong:"#059669", Hino:"#7c3aed", Natal:"#dc2626", Pascoa:"#9333ea", Ceia:"#be123c", Adv:"#4f46e5", Bat:"#0891b2", Ador:"#2563eb"};
+const SONGS = [
+  {t:"Olhos Fixos", a:"Jeremy Riddle", l:["Que a sua voz","Seja o som que me conduz"], d:3, refs:[["Principal",[["v","Olhos Fixos — Jeremy Riddle"]]]], g:[["Congregacional",C.Cong],["Adoração",C.Ador]]},
+  {t:"Quão Grande É O Meu Deus", a:null, l:["Quão grande é o meu Deus!","Cante comigo, quão grande é o meu Deus"], d:12, refs:[["Principal",[["v","Quão grande é o meu Deus — Chris Tomlin"],["a","Ensaio 12/05"]]]], g:[["Congregacional",C.Cong]]},
+  {t:"Ele é exaltado", a:"Twila Paris - Versão: Adhemar de Campos", l:["Ele é exaltado,","O Rei exaltado nas alturas"], d:40, refs:[], g:[["Congregacional",C.Cong],["Natal",C.Natal],["Páscoa",C.Pascoa],["Ceia",C.Ceia],["Advento",C.Adv],["Batismo",C.Bat],["Hino",C.Hino],["Adoração",C.Ador]]},
+  {t:"A Cada Momento", a:"Vineyard", l:["A cada momento eu preciso de ti","Senhor, cada hora, fica comigo"], d:0, refs:[["Principal",[["v","A cada momento — Vineyard"]]],["Tom em G",[["a","Versão em G (violão)"]]],["Sem a ponte",[["a","Ensaio sem a ponte"],["a","Playback"]]]], g:[["Hino",C.Hino]]},
+  {t:"Noite de Paz", a:"Franz Gruber", l:["Noite de paz, noite de amor","Tudo dorme em derredor"], d:300, refs:[], g:[["Natal",C.Natal],["Hino",C.Hino],["Congregacional",C.Cong]]},
+  {t:"Santo Espírito", a:"Laura Souguellis", l:["Santo Espírito, vem","Enche este lugar com a tua glória"], d:null, refs:[], g:[]},
+  {t:"Grande é o Senhor", a:"Marcos Witt", l:["Grande é o Senhor e muito digno de louvor","Na cidade do nosso Deus, no seu santo monte"], d:20, refs:[["Principal",[["a","Gravação do culto"]]]], g:[["Adoração",C.Ador],["Batismo",C.Bat]]},
+];
+const hex2 = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const lumn = ([r,g,b]) => { const f=c=>{c/=255;return c<=.03928?c/12.92:((c+.055)/1.055)**2.4}; return .2126*f(r)+.7152*f(g)+.0722*f(b); };
+const cratio = (a,b) => { const x=lumn(a),y=lumn(b); return (Math.max(x,y)+.05)/(Math.min(x,y)+.05); };
+const mixc = (a,b,t) => a.map((v,i)=>Math.round(v*(1-t)+b[i]*t));
+function chipColors(h){ const c=hex2(h), bg=mixc(c,[255,255,255],.85); let fg=c, t=0; while(cratio(fg,bg)<4.5 && t<1){ t+=.05; fg=mixc(c,[0,0,0],t); } return `--bg:rgb(${bg});--fg:rgb(${fg})`; }
+/* mesma escala do app (lib/relative-time.ts → formatTimeAgo): hoje · ontem · há N dias (<7) · há N semanas (<30 dias) · há N meses (<1 ano) · há 1 ano / 1 ano e meio / quase N anos */
+const rel = days => {
+  if (days===0) return "hoje"; if (days===1) return "ontem"; if (days<7) return `há ${days} dias`;
+  if (days<30){ const w=Math.floor(days/7); return w===1?"há 1 semana":`há ${w} semanas`; }
+  if (days<365){ const m=Math.max(1,Math.floor(days/30.44)); return m===1?"há 1 mês":`há ${m} meses`; }
+  const y=Math.floor(days/365), left=Math.floor((days-y*365)/30.44);
+  if (left>=9) return `há quase ${y+1} anos`; if (left>=4) return y===1?"há 1 ano e meio":`há ${y} anos e meio`; return y===1?"há 1 ano":`há ${y} anos`;
+};
+function row(s,idx){
+  const lu = s.d==null ? `<span class="lu nev">${clock}Nunca usada</span>` : `<span class="lu ${s.d<21?"rec":""}">${clock}${rel(s.d)}</span>`;
+  // todas as categorias aparecem e quebram de linha quando faltar espaço
+  const tags = s.g.map(([nm,c])=>`<span class="tg" style="${chipColors(c)}"><i style="background:${c}"></i>${nm}</span>`).join("");
+  return `<div class="row">
+    <div class="id"><div class="tt">${s.t}</div>
+      <div class="sub">${s.a?`<span class="ar">${s.a}</span><span class="sep" aria-hidden="true">·</span>`:""}${lu}</div></div>
+    <div class="lyric">${s.l.map(x=>`<div>${x}</div>`).join("")}</div>
+    <div class="tags">${tags}</div>
+    <div class="used">${lu}</div>
+    <div class="play">${refBtn(s,idx)}</div>
+    <div class="act"><button class="ib" aria-label="Mais ações">${more}</button></div>
+  </div>`;
+}
+
+/* ---------- referências: 1 fonte toca direto; 2+ abre popover (agrupado por arranjo se houver mais de um) ---------- */
+const flat = s => s.refs.flatMap(([arr,items])=>items.map(([k,t])=>({k,t,arr})));
+function refBtn(s,idx){
+  const all = flat(s); if(!all.length) return "";
+  const hasV = all.some(r=>r.k==="v"), hasA = all.some(r=>r.k==="a");
+  const icons = (hasV?`<span class="c-vid">${vplay}</span>`:"") + (hasA?`<span class="c-aud">${music}</span>`:"");
+  return `<button class="ib ref" data-ref="${idx}" aria-label="${all.length>1?"Referências":"Ouvir referência"}" aria-haspopup="${all.length>1}">${icons}</button>`;
+}
+let popEl=null;
+function closePop(){ if(popEl){popEl.remove();popEl=null;} }
+function toast(msg){ document.querySelectorAll(".toast").forEach(x=>x.remove()); const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+function playRef(r,btn){ closePop(); document.querySelectorAll(".ib.ref.on").forEach(x=>x.classList.remove("on")); btn.classList.add("on"); toast("Tocando: "+r.t); }
+document.addEventListener("click",e=>{
+  const b=e.target.closest(".ib.ref");
+  if(!b){ if(popEl && !e.target.closest(".pop")) closePop(); return; }
+  e.stopPropagation();
+  const s=SONGS[+b.dataset.ref], all=flat(s);
+  if(all.length===1){ playRef(all[0],b); return; }
+  const was=popEl && popEl.dataset.for===b.dataset.ref; closePop(); if(was) return;
+  const grouped = s.refs.length>1;
+  const item = r=>`<button class="pi" data-k="${r.k}" data-t="${r.t}"><span class="${r.k==="v"?"c-vid":"c-aud"}">${r.k==="v"?vplay:music}</span><span>${r.t}</span></button>`;
+  popEl=document.createElement("div"); popEl.className="pop"; popEl.dataset.for=b.dataset.ref; popEl.setAttribute("role","menu");
+  popEl.innerHTML = grouped ? s.refs.map(([arr,items])=>`<div class="ph">${arr}</div>`+items.map(([k,t])=>item({k,t})).join("")).join("") : all.map(item).join("");
+  document.body.appendChild(popEl);
+  const r=b.getBoundingClientRect(), w=popEl.offsetWidth;
+  popEl.style.left=Math.max(16,Math.min(r.right-w,innerWidth-w-16))+"px";
+  const below=r.bottom+6, h=popEl.offsetHeight;
+  popEl.style.top=(below+h>innerHeight-8?Math.max(8,r.top-6-h):below)+"px";
+  popEl.addEventListener("click",ev=>{ const it=ev.target.closest(".pi"); if(it) playRef({k:it.dataset.k,t:it.dataset.t},b); });
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePop(); });
+addEventListener("scroll",closePop,true);
+const dev = document.getElementById("dev");
+/* categorias: no máximo 2 linhas; o que não couber some e vira "+N" (sempre cabe na 2ª linha) */
+function fitTags(el){
+  el.querySelectorAll(".more").forEach(x=>x.remove());
+  const tgs=[...el.querySelectorAll(".tg")]; tgs.forEach(t=>t.style.display="");
+  if(!tgs.length || !tgs[0].offsetParent) return;
+  // posição relativa ao topo da própria coluna (a célula se recentraliza quando encolhe)
+  const top=t=>Math.round(t.getBoundingClientRect().top-el.getBoundingClientRect().top);
+  const tops=[...new Set(tgs.map(top))].sort((a,b)=>a-b);
+  if(tops.length<=2) return;
+  const limit=tops[1];
+  let hidden=0; tgs.forEach(t=>{ if(top(t)>limit){ t.style.display="none"; hidden++; } });
+  const more=document.createElement("span"); more.className="tg more"; el.appendChild(more);
+  for(let i=tgs.length-1;;i--){
+    more.textContent="+"+hidden;
+    if(top(more)<=limit || i<0) break;
+    const last=tgs.slice(0,i+1).reverse().find(t=>t.style.display!=="none"); if(!last) break;
+    last.style.display="none"; hidden++;
+  }
+}
+const fitAll=()=>document.querySelectorAll(".tags").forEach(fitTags);
+new ResizeObserver(fitAll).observe(dev);
+document.fonts && document.fonts.ready.then(fitAll);
+document.getElementById("list").innerHTML =
+  `<div class="lh"><span>Música</span><span>Letra</span><span>Categorias</span><span>Último uso</span><span></span><span></span></div>` + SONGS.map((s,i)=>row(s,i)).join("");
+fitAll();
+function seg(id, attr){
+  document.getElementById(id).addEventListener("click", e=>{
+    const b = e.target.closest("button"); if(!b) return;
+    dev.dataset[attr] = b.dataset.v;
+    document.querySelectorAll("#"+id+" button").forEach(x=>x.setAttribute("aria-pressed", x===b));
+    fitAll();
+  });
+}
+seg("segDev","dev"); seg("segFrame","frame"); seg("segTags","tags");
+</script>
+</body>
+</html>

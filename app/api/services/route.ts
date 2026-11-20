@@ -1,4 +1,9 @@
-import { createOrUpdateService, retrieveServices, ServiceConflictError } from "@/prisma/data";
+import {
+  createOrUpdateService,
+  retrieveServices,
+  retrieveServicesList,
+  ServiceConflictError,
+} from "@/prisma/data";
 import { serviceSchema } from "@/schemas/service";
 
 // Resposta 400 estruturada quando o corpo não passa na validação; o cliente
@@ -8,7 +13,11 @@ function invalidServiceResponse(error: import("zod").ZodError) {
   return Response.json({ error: "invalid", issues }, { status: 400 });
 }
 
-export async function GET() {
+// `?view=list` devolve o resumo leve da lista de Liturgias (sem o plano).
+export async function GET(request: Request) {
+  if (new URL(request.url).searchParams.get("view") === "list") {
+    return Response.json(await retrieveServicesList());
+  }
   const services = await retrieveServices();
   return Response.json(services);
 }

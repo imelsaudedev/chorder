@@ -17,6 +17,7 @@ import StageModeControls, {
   TOP_BAR_ID,
 } from "./StageModeControls";
 import StageOverview, { DEFAULT_OVERVIEW_SETTINGS, OverviewFit, OverviewSettings } from "./StageOverview";
+import { songDisplayTitle } from "@/components/service/ServicePlanEditor/unitSummary";
 import StageRoteiroItem, { roteiroMeta, roteiroTitle, roteiroTypeLabel } from "./StageRoteiroItem";
 import {
   DEFAULT_SCROLL_SPEED_MULTIPLIER,
@@ -389,7 +390,7 @@ export default function StageMode({
   // Cabeçalho: música (posição, título e mapa) ou item(ns) do roteiro (tipo · título
   // e, na segunda linha, responsável · duração — a altura nunca muda).
   let indexLabel: string | null = `${activeIndex + 1}/${units.length}`;
-  let title = currentArrangement?.song?.title ?? "";
+  let title = units[activeIndex] ? songDisplayTitle(units[activeIndex]) : "";
   let headerMap: React.ReactNode =
     currentArrangement?.units && currentArrangement.units.length > 0 ? (
       <SongMap fit units={currentArrangement.units} />
@@ -476,7 +477,7 @@ export default function StageMode({
                   <div className="flex items-center gap-3 py-4 text-muted-foreground select-none">
                     <div className="h-px flex-1 bg-border" />
                     <span className="text-sm font-medium truncate">
-                      {entry.songIndex + 1} · {arrangement.song?.title ?? ""}
+                      {entry.songIndex + 1} · {songDisplayTitle(unit)}
                     </span>
                     <div className="h-px flex-1 bg-border" />
                   </div>

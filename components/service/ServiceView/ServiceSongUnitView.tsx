@@ -5,6 +5,7 @@ import SongMap from "@/components/song/SongMap";
 import { ClientServiceUnit } from "@/prisma/models";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { songDisplayTitle } from "@/components/service/ServicePlanEditor/unitSummary";
 import ServiceArrangementHeader from "./ServiceArrangementHeader";
 import ServiceArrangementMeta from "./ServiceArrangementMeta";
 import ServiceSongUnitEditForm, { EditFormHandle } from "./ServiceSongUnitEditForm";
@@ -144,6 +145,7 @@ export default function ServiceSongUnitView({
         <ServiceArrangementHeader
           ref={headerRef}
           arrangement={arrangement}
+          title={songDisplayTitle(unit)}
           order={unit.order}
           isStuck={isHeaderStuck}
           // Mapa sempre no cabeçalho, logo abaixo do título, tocável: normal parado e pequeno
@@ -159,20 +161,22 @@ export default function ServiceSongUnitView({
           onCancel={handleCancel}
           onSaveServiceOnly={() => submitRef.current?.submit("service")}
           onSaveBoth={() => submitRef.current?.submit("both")}
+          mobileControls={
+            <ServiceArrangementMeta
+              arrangement={arrangement}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              isDirty={isDirty}
+              onStartEdit={handleStartEdit}
+              onCancel={handleCancel}
+              onSaveServiceOnly={() => submitRef.current?.submit("service")}
+              onSaveBoth={() => submitRef.current?.submit("both")}
+            />
+          }
         />
         {/* Espaçador: completa a altura que o cabeçalho "perde" ao grudar, pro fluxo não mudar.
             Sem `style`: a altura é ajustada direto no DOM (measureHeader), antes de pintar. */}
         <div ref={spacerRef} aria-hidden />
-        <ServiceArrangementMeta
-          arrangement={arrangement}
-          isEditing={isEditing}
-          isSaving={isSaving}
-          isDirty={isDirty}
-          onStartEdit={handleStartEdit}
-          onCancel={handleCancel}
-          onSaveServiceOnly={() => submitRef.current?.submit("service")}
-          onSaveBoth={() => submitRef.current?.submit("both")}
-        />
         {/* O vão entre o cabeçalho e o conteúdo (cifra ou editor) é o padding do próprio cabeçalho: o
             mesmo vão entre blocos na visualização e na edição. */}
         <div>

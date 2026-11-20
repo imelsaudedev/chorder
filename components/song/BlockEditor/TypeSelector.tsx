@@ -28,11 +28,11 @@ export default function TypeSelector({ value, number, onChange }: TypeSelectorPr
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-1.5 text-xs px-2 py-1 rounded-sm font-medium shrink-0 bg-white border border-zinc-200 shadow-xs text-zinc-700 hover:bg-zinc-50 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-xs px-2 py-1 rounded-sm font-medium shrink-0 bg-background border border-border shadow-xs text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
         >
           <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${colorClasses.circleBackground}`} />
           {t(`UnitTypes.${value}`)} {number}
-          <ChevronDown size={10} className="text-zinc-400" />
+          <ChevronDown size={10} className="text-faint-foreground" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-fit">

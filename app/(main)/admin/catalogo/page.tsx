@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import Heading from "@/components/common/Heading";
+import PageTitleBlock from "@/components/common/PageTitleBlock";
 import Main from "@/components/common/Main";
 import prisma from "@/prisma/client";
 import CatalogoClient from "./CatalogoClient";
@@ -8,7 +8,6 @@ import CatalogoClient from "./CatalogoClient";
 export default async function AdminCatalogoPage() {
   const [songs, tagGroups] = await Promise.all([
     prisma.song.findMany({
-      where: { isDeleted: false },
       orderBy: { title: "asc" },
       select: {
         id: true,
@@ -17,6 +16,7 @@ export default async function AdminCatalogoPage() {
         artist: true,
         lyrics: true,
         legacyId: true,
+        isDeleted: true,
         _count: {
           select: {
             arrangements: { where: { isServiceArrangement: true } },
@@ -37,7 +37,7 @@ export default async function AdminCatalogoPage() {
         id: true,
         name: true,
         color: true,
-        tags: { orderBy: { name: "asc" }, select: { id: true, name: true } },
+        tags: { orderBy: [{ order: "asc" }, { name: "asc" }], select: { id: true, name: true } },
       },
     }),
   ]);
@@ -49,9 +49,7 @@ export default async function AdminCatalogoPage() {
 
   return (
     <>
-      <div className="px-5 sm:px-8 lg:px-14 pt-6 sm:pt-8 pb-4 sm:pb-6 lg:pb-8">
-        <Heading level={1}>Catálogo</Heading>
-      </div>
+      <PageTitleBlock title="Catálogo" />
       <Main>
         <CatalogoClient songs={mappedSongs} tagGroups={tagGroups} />
       </Main>

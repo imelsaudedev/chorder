@@ -235,7 +235,7 @@ export default function StageModeControls({
           </div>
 
           {/* Mesmo padrão do ServiceConfig (tela do culto): Popover, título em
-              text-primary e grupos de rótulo text-xs text-zinc-500. */}
+              text-primary e grupos de rótulo text-xs text-muted-foreground. */}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" size="lg" aria-label="Configurações" className={ICON_BUTTON}>
@@ -247,21 +247,21 @@ export default function StageModeControls({
                 <p className="text-sm font-semibold text-primary">Configurações</p>
 
                 <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="stage-show-roteiro" className="text-xs font-normal text-zinc-500">
+                  <Label htmlFor="stage-show-roteiro" className="text-xs font-normal text-muted-foreground">
                     Exibir roteiro
                   </Label>
                   <Switch id="stage-show-roteiro" checked={showRoteiro} onCheckedChange={onShowRoteiroChange} />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-zinc-500">Tom</span>
+                  <span className="text-xs text-muted-foreground">Tom</span>
                   <KeyButtonSet originalKey={originalKey} transpose={transpose} setTranspose={setTranspose} />
                 </div>
 
                 {overview ? (
                   <>
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-xs text-zinc-500">Colunas</span>
+                      <span className="text-xs text-muted-foreground">Colunas</span>
                       <ColumnButtons
                         id="stage-overview-columns"
                         columns={overview.settings.columns}
@@ -274,7 +274,7 @@ export default function StageModeControls({
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-xs text-zinc-500">Tamanho da fonte</span>
+                      <span className="text-xs text-muted-foreground">Tamanho da fonte</span>
                       <div className="flex items-center gap-2">
                         <IncreaseDecreaseButtonSet
                           stringValue={(overview.settings.fontSize || overview.fit?.fontSize || OVERVIEW_FONT_MIN).toString()}
@@ -306,7 +306,7 @@ export default function StageModeControls({
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-xs text-zinc-500">Densidade</span>
+                      <span className="text-xs text-muted-foreground">Densidade</span>
                       <ToggleGroup
                         type="single"
                         variant="outline"
@@ -328,7 +328,7 @@ export default function StageModeControls({
                     </div>
 
                     {overview.fit && (
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-muted-foreground">
                         {overview.fit.overflow
                           ? "Não coube na tela: a música rola. Reduza a fonte ou aumente as colunas."
                           : `Agora: ${overview.fit.columns} ${overview.fit.columns === 1 ? "coluna" : "colunas"} · ${
@@ -347,7 +347,7 @@ export default function StageModeControls({
                   </>
                 ) : (
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-xs text-zinc-500">Tamanho da fonte</span>
+                    <span className="text-xs text-muted-foreground">Tamanho da fonte</span>
                     <IncreaseDecreaseButtonSet
                       stringValue={fontSize.toString()}
                       setStringValue={(value) => {

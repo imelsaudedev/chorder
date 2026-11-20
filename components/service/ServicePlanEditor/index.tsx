@@ -232,7 +232,7 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
               <button
                 type="button"
                 onClick={goToFirstPending}
-                className="cursor-pointer rounded-sm font-medium text-amber-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="cursor-pointer rounded-sm font-medium text-warning-text underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {pendingUnits.length} {pendingUnits.length === 1 ? "item pendente" : "itens pendentes"}
               </button>

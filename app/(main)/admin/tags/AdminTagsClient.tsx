@@ -11,23 +11,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronDown, ChevronUp, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ChevronDown, ChevronUp, ImageIcon, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
-
-type TagWithCount = {
-  id: number;
-  name: string;
-  tagGroupId: number;
-  group?: { id: number; name: string; color: string };
-  _count: { songs: number };
-};
-
-type GroupWithTags = {
-  id: number;
-  name: string;
-  color: string;
-  tags: TagWithCount[];
-};
+import GroupDialog, { GroupFormValues } from "./GroupDialog";
+import TagDialog, { TagFormValues } from "./TagDialog";
+import { GroupWithTags, PRESENTATION_LABEL, SELECTION_LABEL, TagWithCount } from "./types";
 
 type Props = { initialGroups: GroupWithTags[] };
 
@@ -36,11 +24,8 @@ export default function AdminTagsClient({ initialGroups }: Props) {
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupColor, setNewGroupColor] = useState("#6b7280");
   const [newTagName, setNewTagName] = useState<Record<number, string>>({});
-  const [editingGroup, setEditingGroup] = useState<number | null>(null);
-  const [editingGroupName, setEditingGroupName] = useState("");
-  const [editingGroupColor, setEditingGroupColor] = useState("#6b7280");
-  const [editingTag, setEditingTag] = useState<number | null>(null);
-  const [editingTagName, setEditingTagName] = useState("");
+  const [groupDialog, setGroupDialog] = useState<GroupWithTags | null>(null);
+  const [tagDialog, setTagDialog] = useState<{ tag: TagWithCount; group: GroupWithTags } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [blockingError, setBlockingError] = useState<string | null>(null);
@@ -71,17 +56,23 @@ export default function AdminTagsClient({ initialGroups }: Props) {
     setLoading(false);
   }
 
-  async function updateGroup(id: number) {
-    if (!editingGroupName.trim()) return;
-    setLoading(true);
-    await fetch(`/api/admin/tag-groups/${id}`, {
+  /** Salva o grupo pelo diálogo; devolve a mensagem de erro, ou null se deu certo. */
+  async function saveGroup(id: number, v: GroupFormValues): Promise<string | null> {
+    const res = await fetch(`/api/admin/tag-groups/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: editingGroupName.trim(), color: editingGroupColor }),
+      body: JSON.stringify({
+        name: v.name.trim(),
+        color: v.color,
+        description: v.description,
+        presentation: v.presentation,
+        selection: v.selection,
+        isProposed: v.isProposed,
+      }),
     });
-    setEditingGroup(null);
+    if (!res.ok) return (await res.json().catch(() => null))?.error ?? "Não foi possível salvar o grupo.";
     await reload();
-    setLoading(false);
+    return null;
   }
 
   async function moveGroup(id: number, direction: "up" | "down") {
@@ -99,6 +90,29 @@ export default function AdminTagsClient({ initialGroups }: Props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids: reordered.map((g) => g.id) }),
     });
+  }
+
+  /** Sobe ou desce uma categoria dentro do seu grupo e grava a nova ordem. */
+  async function moveTag(groupId: number, tagId: number, direction: "up" | "down") {
+    const group = groups.find((g) => g.id === groupId);
+    if (!group) return;
+    const idx = group.tags.findIndex((t) => t.id === tagId);
+    const newIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (idx === -1 || newIdx < 0 || newIdx >= group.tags.length) return;
+
+    const reordered = [...group.tags];
+    [reordered[idx], reordered[newIdx]] = [reordered[newIdx], reordered[idx]];
+    setGroups((prev) => prev.map((g) => (g.id === groupId ? { ...g, tags: reordered } : g)));
+
+    const res = await fetch("/api/admin/tags/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tagGroupId: groupId, ids: reordered.map((t) => t.id) }),
+    });
+    if (!res.ok) {
+      setError("Não foi possível salvar a nova ordem.");
+      await reload();
+    }
   }
 
   async function deleteGroup(id: number) {
@@ -138,17 +152,22 @@ export default function AdminTagsClient({ initialGroups }: Props) {
     setLoading(false);
   }
 
-  async function updateTag(id: number) {
-    if (!editingTagName.trim()) return;
-    setLoading(true);
-    await fetch(`/api/admin/tags/${id}`, {
+  /** Salva a categoria pelo diálogo; devolve a mensagem de erro, ou null se deu certo. */
+  async function saveTag(id: number, v: TagFormValues): Promise<string | null> {
+    const res = await fetch(`/api/admin/tags/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: editingTagName.trim() }),
+      body: JSON.stringify({
+        name: v.name.trim(),
+        // vazio = volta a usar a cor do grupo
+        color: v.color || null,
+        description: v.description,
+        imageUrl: v.imageUrl,
+      }),
     });
-    setEditingTag(null);
+    if (!res.ok) return (await res.json().catch(() => null))?.error ?? "Não foi possível salvar a categoria.";
     await reload();
-    setLoading(false);
+    return null;
   }
 
   async function deleteTag(id: number, songCount: number) {
@@ -179,7 +198,7 @@ export default function AdminTagsClient({ initialGroups }: Props) {
       </AlertDialog>
 
       {error && (
-        <div className="flex items-start justify-between gap-2 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+        <div className="flex items-start justify-between gap-2 p-3 rounded-md bg-warning-subtle border border-warning-border text-warning-text text-sm">
           <span>{error}</span>
           <button type="button" onClick={() => setError(null)}>
             <X className="w-4 h-4 shrink-0" />
@@ -218,85 +237,82 @@ export default function AdminTagsClient({ initialGroups }: Props) {
             className="flex items-center justify-between px-4 py-3"
             style={{ backgroundColor: `${group.color}18`, borderBottom: `2px solid ${group.color}40` }}
           >
-            {editingGroup === group.id ? (
-              <div className="flex gap-2 flex-1 items-center">
-                <Input
-                  value={editingGroupName}
-                  onChange={(e) => setEditingGroupName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && updateGroup(group.id)}
-                  className="h-7 text-sm flex-1"
-                  autoFocus
-                />
-                <input
-                  type="color"
-                  value={editingGroupColor}
-                  onChange={(e) => setEditingGroupColor(e.target.value)}
-                  className="w-7 h-7 rounded border cursor-pointer shrink-0"
-                  title="Cor do grupo"
-                />
-                <Button type="button" size="sm" onClick={() => updateGroup(group.id)} disabled={loading}>Salvar</Button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => setEditingGroup(null)}>Cancelar</Button>
-              </div>
-            ) : (
-              <>
-                <span className="font-semibold text-sm" style={{ color: group.color }}>{group.name}</span>
-                <div className="flex gap-1">
-                  <Button type="button" variant="ghost" size="icon" className="w-7 h-7"
-                    disabled={groups.indexOf(group) === 0}
-                    onClick={() => moveGroup(group.id, "up")}>
-                    <ChevronUp className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button type="button" variant="ghost" size="icon" className="w-7 h-7"
-                    disabled={groups.indexOf(group) === groups.length - 1}
-                    onClick={() => moveGroup(group.id, "down")}>
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button type="button" variant="ghost" size="icon" className="w-7 h-7"
-                    onClick={() => { setEditingGroup(group.id); setEditingGroupName(group.name); setEditingGroupColor(group.color); }}>
-                    <Pencil className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button type="button" variant="ghost" size="icon" className="w-7 h-7 text-destructive"
-                    onClick={() => deleteGroup(group.id)}>
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              </>
-            )}
+            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+              <span className="font-semibold text-sm" style={{ color: group.color }}>{group.name}</span>
+              <span className="rounded-full bg-background/70 px-2 py-px text-[11px] font-medium text-muted-foreground">
+                {PRESENTATION_LABEL[group.presentation]} · {SELECTION_LABEL[group.selection]}
+              </span>
+              {group.isProposed && (
+                <span className="rounded-full border border-warning-border bg-warning-subtle px-2 py-px text-[11px] font-semibold text-warning-text">
+                  em construção
+                </span>
+              )}
+            </div>
+            <div className="flex shrink-0 gap-1">
+              <Button type="button" variant="ghost" size="icon" className="w-7 h-7"
+                aria-label="Subir grupo"
+                disabled={groups.indexOf(group) === 0}
+                onClick={() => moveGroup(group.id, "up")}>
+                <ChevronUp className="w-3.5 h-3.5" />
+              </Button>
+              <Button type="button" variant="ghost" size="icon" className="w-7 h-7"
+                aria-label="Descer grupo"
+                disabled={groups.indexOf(group) === groups.length - 1}
+                onClick={() => moveGroup(group.id, "down")}>
+                <ChevronDown className="w-3.5 h-3.5" />
+              </Button>
+              <Button type="button" variant="ghost" size="icon" className="w-7 h-7"
+                aria-label="Editar grupo"
+                onClick={() => setGroupDialog(group)}>
+                <Pencil className="w-3.5 h-3.5" />
+              </Button>
+              <Button type="button" variant="ghost" size="icon" className="w-7 h-7 text-destructive"
+                aria-label="Apagar grupo"
+                onClick={() => deleteGroup(group.id)}>
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            </div>
           </div>
 
           <div className="p-3 space-y-1">
             {group.tags.map((tag) => (
               <div key={tag.id} className="flex items-center justify-between px-2 py-1 rounded hover:bg-muted/50">
-                {editingTag === tag.id ? (
-                  <div className="flex gap-2 flex-1">
-                    <Input
-                      value={editingTagName}
-                      onChange={(e) => setEditingTagName(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && updateTag(tag.id)}
-                      className="h-7 text-sm"
-                      autoFocus
-                    />
-                    <Button type="button" size="sm" onClick={() => updateTag(tag.id)} disabled={loading}>Salvar</Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => setEditingTag(null)}>Cancelar</Button>
-                  </div>
-                ) : (
-                  <>
-                    <span className="text-sm">{tag.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {tag._count.songs} {tag._count.songs === 1 ? "música" : "músicas"}
-                      </span>
-                      <Button type="button" variant="ghost" size="icon" className="w-6 h-6"
-                        onClick={() => { setEditingTag(tag.id); setEditingTagName(tag.name); }}>
-                        <Pencil className="w-3 h-3" />
-                      </Button>
-                      <Button type="button" variant="ghost" size="icon" className="w-6 h-6 text-destructive"
-                        onClick={() => deleteTag(tag.id, tag._count.songs)}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </>
-                )}
+                <div className="flex min-w-0 items-center gap-2">
+                  <span
+                    aria-hidden
+                    className="size-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: tag.color ?? group.color }}
+                  />
+                  <span className="truncate text-sm">{tag.name}</span>
+                  {tag.imageUrl && <ImageIcon aria-label="Tem imagem" className="size-3.5 shrink-0 text-muted-foreground" />}
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    {tag._count.songs} {tag._count.songs === 1 ? "música" : "músicas"}
+                  </span>
+                  <Button type="button" variant="ghost" size="icon" className="w-6 h-6"
+                    aria-label={`Subir ${tag.name}`}
+                    disabled={group.tags.indexOf(tag) === 0}
+                    onClick={() => moveTag(group.id, tag.id, "up")}>
+                    <ChevronUp className="w-3 h-3" />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="w-6 h-6"
+                    aria-label={`Descer ${tag.name}`}
+                    disabled={group.tags.indexOf(tag) === group.tags.length - 1}
+                    onClick={() => moveTag(group.id, tag.id, "down")}>
+                    <ChevronDown className="w-3 h-3" />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="w-6 h-6"
+                    aria-label={`Editar ${tag.name}`}
+                    onClick={() => setTagDialog({ tag, group })}>
+                    <Pencil className="w-3 h-3" />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="w-6 h-6 text-destructive"
+                    aria-label={`Apagar ${tag.name}`}
+                    onClick={() => deleteTag(tag.id, tag._count.songs)}>
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
               </div>
             ))}
 
@@ -316,6 +332,26 @@ export default function AdminTagsClient({ initialGroups }: Props) {
           </div>
         </div>
       ))}
+    
+      {groupDialog && (
+        <GroupDialog
+          key={groupDialog.id}
+          group={groupDialog}
+          open
+          onOpenChange={(o) => !o && setGroupDialog(null)}
+          onSave={(v) => saveGroup(groupDialog.id, v)}
+        />
+      )}
+      {tagDialog && (
+        <TagDialog
+          key={tagDialog.tag.id}
+          tag={tagDialog.tag}
+          group={tagDialog.group}
+          open
+          onOpenChange={(o) => !o && setTagDialog(null)}
+          onSave={(v) => saveTag(tagDialog.tag.id, v)}
+        />
+      )}
     </div>
   );
 }

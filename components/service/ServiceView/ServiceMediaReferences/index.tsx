@@ -289,7 +289,7 @@ export default function ServiceMediaReferences({
           }`}
         >
           {isEmpty && <Plus size={16} />}
-          <Play size={16} className={liveYoutubeUrl ? "text-red-500" : "text-muted-foreground/40"} />
+          <Play size={16} className={liveYoutubeUrl ? "text-media-video" : "text-muted-foreground/40"} />
           <Music
             size={16}
             className={liveAudios.length || uploading ? "text-secondary" : "text-muted-foreground/40"}
@@ -339,7 +339,7 @@ export default function ServiceMediaReferences({
                 className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2.5 text-left text-sm hover:bg-muted/50"
                 onClick={handlePlayVideo}
               >
-                <Play size={16} className="shrink-0 text-red-500" />
+                <Play size={16} className="shrink-0 text-media-video" />
                 <span className="truncate">{videoTitle ?? t("mediaVideoLabel")}</span>
               </button>
               <button

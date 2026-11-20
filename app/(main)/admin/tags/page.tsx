@@ -9,8 +9,8 @@ export default async function AdminTagsPage() {
     orderBy: { order: "asc" },
     include: {
       tags: {
-        orderBy: { name: "asc" },
-        include: { _count: { select: { songs: true } } },
+        orderBy: [{ order: "asc" }, { name: "asc" }],
+        include: { _count: { select: { songs: { where: { isDeleted: false } } } } },
       },
     },
   });
