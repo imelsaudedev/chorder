@@ -1,15 +1,15 @@
 "use client";
 
+import Text from "@/components/common/Text";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -36,63 +36,84 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 interface LoginViewProps {
-  onGoogleSignIn: () => Promise<void>;
-  onEmailSignIn: (formData: FormData) => Promise<void>;
+  callbackUrl?: string;
+  onGoogleSignIn?: () => Promise<void>;
+  onEmailSignIn?: (formData: FormData) => Promise<void>;
 }
 
 export default function LoginView({
+  callbackUrl = "/services",
   onGoogleSignIn,
   onEmailSignIn,
 }: LoginViewProps) {
   const t = useTranslations("Auth");
   const tm = useTranslations("Messages");
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 relative overflow-hidden font-sans">
-      {/* Background elements for glassmorphism */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[100px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/5 rounded-full blur-[100px]" />
+  const handleGoogleSignIn = () => {
+    if (onGoogleSignIn) {
+      void onGoogleSignIn();
+    } else {
+      void signIn("google", { callbackUrl });
+    }
+  };
 
-      <Card className="w-full max-w-md mx-4 backdrop-blur-2xl bg-white/80 border-zinc-200/50 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] relative z-10 border">
-        <CardHeader className="space-y-2 text-center pb-8">
-          <div className="mx-auto w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center mb-4 shadow-lg rotate-3 hover:rotate-0 transition-transform duration-300">
-            <span className="text-white font-bold text-2xl">C</span>
+  const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    if (onEmailSignIn) {
+      void onEmailSignIn(formData);
+    } else {
+      const email = formData.get("email") as string;
+      void signIn("resend", { email, callbackUrl });
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-surface-subtle relative overflow-hidden px-page py-12 font-sans">
+      {/* Subtle brand ambiance */}
+      <div className="pointer-events-none absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[100px]" />
+      <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/5 rounded-full blur-[100px]" />
+
+      <Card className="w-full max-w-md backdrop-blur-xl bg-card/90 border-border shadow-sm relative z-10">
+        <CardHeader className="space-y-2 text-center pb-6">
+          <div className="mx-auto w-12 h-12 bg-secondary text-secondary-foreground rounded-xl flex items-center justify-center mb-3 shadow-xs">
+            <span className="font-display font-semibold text-2xl">C</span>
           </div>
-          <CardTitle className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-br from-zinc-900 to-zinc-500">
+          <Text variant="heading-lg" as="h1">
             {t("loginTitle")}
-          </CardTitle>
-          <CardDescription className="text-zinc-500 text-base">
+          </Text>
+          <Text variant="caption" as="p" size="sm">
             {t("loginSubtitle")}
-          </CardDescription>
+          </Text>
         </CardHeader>
         <CardContent className="grid gap-6">
-          <form action={() => onGoogleSignIn()}>
-            <Button
-              variant="outline"
-              className="w-full py-6 text-base font-medium border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 transition-all duration-300 group"
-              type="submit"
-            >
-              <GoogleIcon className="mr-3 h-5 w-5 group-hover:scale-110 transition-transform" />
-              {t("signInWithGoogle")}
-            </Button>
-          </form>
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full h-11 text-sm font-medium"
+            type="button"
+            onClick={handleGoogleSignIn}
+          >
+            <GoogleIcon className="mr-2 h-5 w-5" />
+            {t("signInWithGoogle")}
+          </Button>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-zinc-100" />
+              <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white/0 px-4 text-zinc-400 backdrop-blur-sm font-medium tracking-widest">
+              <span className="bg-card px-3 text-muted-foreground font-medium tracking-wider">
                 {tm("or")}
               </span>
             </div>
           </div>
 
-          <form action={onEmailSignIn} className="grid gap-4">
-            <div className="grid gap-2.5">
+          <form onSubmit={handleEmailSubmit} className="grid gap-4">
+            <div className="grid gap-2">
               <Label
                 htmlFor="email"
-                className="text-sm font-semibold text-zinc-700 ml-1"
+                className="text-sm font-medium text-foreground"
               >
                 {t("signInWithEmail")}
               </Label>
@@ -102,20 +123,24 @@ export default function LoginView({
                 type="email"
                 placeholder={t("emailPlaceholder")}
                 required
-                className="py-6 border-zinc-200 focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all text-base px-4"
+                className="h-11 text-sm"
               />
             </div>
-            <Button className="w-full py-6 text-base font-semibold bg-zinc-900 hover:bg-zinc-800 text-white transition-all duration-300 shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2)] active:scale-[0.98]">
+            <Button
+              variant="secondary"
+              size="lg"
+              type="submit"
+              className="w-full h-11 text-sm font-semibold"
+            >
               {t("sendMagicLink")}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      {/* Decorative footer text */}
-      <div className="absolute bottom-8 text-zinc-400 text-sm font-medium">
+      <Text variant="caption" size="xs" as="footer" className="mt-8 relative z-10">
         © {new Date().getFullYear()} Chorder
-      </div>
+      </Text>
     </div>
   );
 }

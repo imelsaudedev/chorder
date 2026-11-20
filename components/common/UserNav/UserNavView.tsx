@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Settings, User } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 interface UserNavViewProps {
@@ -19,7 +20,7 @@ interface UserNavViewProps {
     email?: string | null;
     image?: string | null;
   };
-  onSignOut: () => Promise<void>;
+  onSignOut?: () => Promise<void>;
 }
 
 export default function UserNavView({ user, onSignOut }: UserNavViewProps) {
@@ -32,16 +33,24 @@ export default function UserNavView({ user, onSignOut }: UserNavViewProps) {
         .toUpperCase()
     : user.email?.slice(0, 2).toUpperCase();
 
+  const handleSignOut = () => {
+    if (onSignOut) {
+      void onSignOut();
+    } else {
+      void signOut({ callbackUrl: "/login" });
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-10 w-10 rounded-full ring-2 ring-zinc-100 hover:ring-zinc-200 transition-all focus-visible:ring-zinc-400"
+          className="relative h-10 w-10 rounded-full ring-2 ring-border hover:ring-border-strong transition-all focus-visible:ring-ring"
         >
           <Avatar className="h-10 w-10">
             <AvatarImage src={user.image || ""} alt={user.name || ""} />
-            <AvatarFallback className="bg-zinc-900 text-white text-xs font-bold">
+            <AvatarFallback className="bg-secondary text-secondary-foreground text-xs font-display font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -50,10 +59,12 @@ export default function UserNavView({ user, onSignOut }: UserNavViewProps) {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-semibold leading-none text-zinc-900">
+            <p className="text-sm font-semibold leading-none text-foreground">
               {user.name}
             </p>
-            <p className="text-xs leading-none text-zinc-500">{user.email}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {user.email}
+            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -67,8 +78,8 @@ export default function UserNavView({ user, onSignOut }: UserNavViewProps) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="w-full flex items-center text-red-600 hover:text-red-700 transition-colors cursor-pointer focus:bg-red-50"
-          onClick={() => onSignOut()}
+          className="w-full flex items-center text-danger-text focus:bg-danger-subtle focus:text-danger-text transition-colors cursor-pointer"
+          onClick={handleSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span className="font-medium">{t("logout")}</span>
