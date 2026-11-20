@@ -15,10 +15,11 @@ export default auth((req) => {
     response.cookies.set("NEXT_LOCALE", "pt-BR");
   }
 
-  // 2. Route Protection Logic
+  // 2. Route Protection Logic (first iteration: protect /admin/* routes only)
   const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
   const isAuthRoute = nextUrl.pathname === "/login";
-  const isPublicRoute = ["/", "/login"].includes(nextUrl.pathname);
+  const isProtectedRoute =
+    nextUrl.pathname === "/admin" || nextUrl.pathname.startsWith("/admin/");
 
   // Check if authenticated or running E2E test with mock session cookie
   const isE2ETestSession =
@@ -35,7 +36,7 @@ export default auth((req) => {
     return response;
   }
 
-  if (!isLoggedIn && !isPublicRoute) {
+  if (!isLoggedIn && isProtectedRoute) {
     let callbackUrl = nextUrl.pathname;
     if (nextUrl.search) {
       callbackUrl += nextUrl.search;
