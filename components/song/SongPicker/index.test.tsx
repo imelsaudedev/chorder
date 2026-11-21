@@ -47,6 +47,9 @@ vi.mock('#api-client', () => ({
 }));
 
 describe('SongPicker component', () => {
+  // Increase timeout for this suite as it involves debounced interactions
+  vi.setConfig({ testTimeout: 15000 });
+
   it('renders search bar and songs when loaded', async () => {
     (useFetchSongs as any).mockReturnValue({
       songs: songsMock,

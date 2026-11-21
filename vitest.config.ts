@@ -58,6 +58,9 @@ export default defineConfig({
       },
       {
         extends: true,
+        optimizeDeps: {
+          include: ['next-auth/react'],
+        },
         plugins: [
           storybookTest({ configDir: path.join(dirname, '.storybook') }),
         ],
