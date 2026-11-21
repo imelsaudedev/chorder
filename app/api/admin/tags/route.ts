@@ -1,7 +1,11 @@
+import { requireAuth } from "@/lib/auth-guard";
 import prisma from "@/prisma/client";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth();
+  if (authError) return authError;
+
   const { name, tagGroupId } = await request.json();
   if (!name?.trim() || !tagGroupId) {
     return Response.json({ error: "Nome e grupo são obrigatórios" }, { status: 400 });

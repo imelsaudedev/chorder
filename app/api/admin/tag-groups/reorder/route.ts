@@ -1,8 +1,12 @@
+import { requireAuth } from "@/lib/auth-guard";
 import prisma from "@/prisma/client";
 import { NextRequest } from "next/server";
 
 // Body: { ids: number[] } — nova ordem desejada (do primeiro ao último)
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth();
+  if (authError) return authError;
+
   const { ids } = await request.json();
   if (!Array.isArray(ids)) return Response.json({ error: "ids obrigatório" }, { status: 400 });
 

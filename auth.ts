@@ -1,39 +1,23 @@
-import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { E2E_SESSION_COOKIE_NAME, isE2ETestMode } from "@/lib/auth-utils";
 import prisma from "@/prisma/client";
-import authConfig from "./auth.config";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import type { PrismaClient } from "@prisma/client";
+import NextAuth, { type Session } from "next-auth";
 import { cookies } from "next/headers";
+import authConfig from "./auth.config";
 
 const nextAuthResult = NextAuth({
-  adapter: PrismaAdapter(prisma as any),
+  adapter: PrismaAdapter(prisma as unknown as PrismaClient),
   session: { strategy: "jwt" },
   ...authConfig,
-  callbacks: {
-    async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).role = token.role;
-        (session.user as any).id = token.sub;
-      }
-      return session;
-    },
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = (user as any).role;
-      }
-      return token;
-    },
-  },
-  pages: {
-    signIn: "/login",
-  },
 });
 
 export const { handlers, signIn, signOut } = nextAuthResult;
 
-export const auth = async (...args: any[]) => {
-  if (process.env.E2E_TEST === "true" || process.env.NODE_ENV === "test") {
+export async function auth(): Promise<Session | null> {
+  if (isE2ETestMode()) {
     const cookieStore = await cookies();
-    if (cookieStore.has("next-auth.session-token")) {
+    if (cookieStore.has(E2E_SESSION_COOKIE_NAME)) {
       return {
         user: {
           id: "test-user-id",
@@ -45,5 +29,5 @@ export const auth = async (...args: any[]) => {
       };
     }
   }
-  return (nextAuthResult.auth as any)(...args);
-};
+  return nextAuthResult.auth();
+}

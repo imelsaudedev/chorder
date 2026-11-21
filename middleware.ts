@@ -1,9 +1,17 @@
+import { authSharedConfig } from "@/auth.config";
+import {
+  E2E_SESSION_COOKIE_NAME,
+  getSafeCallbackUrl,
+  isAdminRoute,
+  isE2ETestMode,
+} from "@/lib/auth-utils";
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 
 const { auth } = NextAuth({
+  ...authSharedConfig,
   secret: process.env.AUTH_SECRET,
-  providers: [], // No providers needed for route protection middleware
+  providers: [], // No providers needed in Edge middleware
 });
 
 export default auth((req) => {
@@ -12,26 +20,24 @@ export default auth((req) => {
   // 1. Handle NEXT_LOCALE
   const response = NextResponse.next();
   if (!req.cookies.has("NEXT_LOCALE")) {
-    response.cookies.set("NEXT_LOCALE", "pt-BR");
+    response.cookies.set("NEXT_LOCALE", "pt-BR", {
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
   }
 
-  // 2. Route Protection Logic (first iteration: protect /admin/* routes only)
-  const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
+  // 2. Route Protection Logic (first iteration: protect /admin/* pages only)
   const isAuthRoute = nextUrl.pathname === "/login";
-  const isProtectedRoute =
-    nextUrl.pathname === "/admin" || nextUrl.pathname.startsWith("/admin/");
+  const isProtectedRoute = isAdminRoute(nextUrl.pathname);
 
-  // Check if authenticated or running E2E test with mock session cookie
   const isE2ETestSession =
-    (process.env.E2E_TEST === "true" || process.env.NODE_ENV === "test") &&
-    req.cookies.has("next-auth.session-token");
+    isE2ETestMode() && req.cookies.has(E2E_SESSION_COOKIE_NAME);
   const isLoggedIn = !!req.auth || isE2ETestSession;
-
-  if (isApiAuthRoute) return response;
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return NextResponse.redirect(new URL("/services", nextUrl));
+      const target = getSafeCallbackUrl(nextUrl.searchParams.get("callbackUrl"));
+      return NextResponse.redirect(new URL(target, nextUrl));
     }
     return response;
   }

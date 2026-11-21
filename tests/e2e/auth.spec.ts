@@ -16,8 +16,35 @@ test.describe("Authentication", () => {
     await expect(page).toHaveURL(/\/services/);
   });
 
+  test("Allows authenticated user to access admin page and redirects away from /login", async ({
+    context,
+    page,
+  }) => {
+    await context.addCookies([
+      {
+        name: "next-auth.session-token",
+        value: "mock-session-token",
+        domain: "127.0.0.1",
+        path: "/",
+      },
+      {
+        name: "next-auth.session-token",
+        value: "mock-session-token",
+        domain: "localhost",
+        path: "/",
+      },
+    ]);
+
+    await page.goto("/admin/tags");
+    await expect(page).toHaveURL(/\/admin\/tags/);
+
+    await page.goto("/login?callbackUrl=%2Fadmin%2Ftags");
+    await expect(page).toHaveURL(/\/admin\/tags/);
+  });
+
   test("Login page renders correctly (Visual)", async ({ page }) => {
     await page.goto("/login");
+    await page.waitForLoadState("networkidle");
     await expect(page.getByRole("button", { name: /Google/ })).toBeVisible();
     await expect(page).toHaveScreenshot("login-page.png");
   });

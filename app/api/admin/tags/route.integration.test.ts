@@ -1,8 +1,28 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from './route';
 import { PATCH, DELETE } from './[id]/route';
 import { POST as MERGE } from './merge/route';
 import prisma from '@/prisma/client';
+import { auth } from '@/auth';
+
+vi.mock('@/auth', () => ({
+  auth: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.mocked(auth).mockResolvedValue({
+    user: { id: 'test-user', name: 'Test User', email: 'test@example.com', role: 'USER' },
+    expires: new Date(Date.now() + 60_000).toISOString(),
+  });
+});
+
+describe('Auth guard on /api/admin/tags/*', () => {
+  it('returns 401 when unauthenticated', async () => {
+    vi.mocked(auth).mockResolvedValueOnce(null);
+    const res = await POST(postTagReq({ name: 'Test', tagGroupId: 1 }) as any);
+    expect(res.status).toBe(401);
+  });
+});
 
 async function createGroup(name = 'Tema') {
   return prisma.tagGroup.create({ data: { name, color: '#10b981' } });

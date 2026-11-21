@@ -250,7 +250,6 @@
     "serverError": "Erro no servidor. Por favor, tente novamente mais tarde."
   },
   "Auth": {
-    "login": "Entrar",
     "signInWithGoogle": "Entrar com Google",
     "signInWithEmail": "Entrar com E-mail",
     "emailPlaceholder": "seu@email.com",
@@ -259,7 +258,13 @@
     "loginSubtitle": "Entre para gerenciar suas músicas e liturgias",
     "signingIn": "Entrando...",
     "logout": "Sair",
-    "profile": "Perfil",
-    "settings": "Configurações"
+    "userMenu": "Menu da conta",
+    "checkEmailTitle": "Confira seu e-mail",
+    "checkEmailDescription": "Enviamos um link de acesso para {email}. Abra-o para continuar.",
+    "backToLogin": "Usar outro método",
+    "authErrorGeneric": "Não foi possível entrar. Tente novamente.",
+    "authErrorOAuthAccountNotLinked": "Este e-mail já está associado a outro método de entrada.",
+    "authErrorAccessDenied": "Acesso negado. Tente novamente.",
+    "authErrorVerification": "O link de acesso é inválido ou expirou."
   }
 }

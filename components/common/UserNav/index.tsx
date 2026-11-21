@@ -5,5 +5,6 @@ export default async function UserNav() {
   const session = await auth();
   if (!session?.user) return null;
 
-  return <UserNavView user={session.user} />;
+  const { name, email, image } = session.user;
+  return <UserNavView user={{ name, email, image }} />;
 }

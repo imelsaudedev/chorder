@@ -3,7 +3,7 @@ import UserNav from "@/components/common/UserNav";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ContentWrapper from "./ContentWrapper";
 
-export default async function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <TooltipProvider>
       <div className="max-w-100vw flex">
