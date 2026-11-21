@@ -8,12 +8,14 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function NavBar() {
+export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
   const t = useTranslations("Messages");
   const pathname = usePathname();
   const pathParts = pathname.split("/");
   const currentPage = pathParts[1];
-  const isEditPage = pathname.includes("/edit") || pathname.endsWith("/new") ||
+  const isEditPage =
+    pathname.includes("/edit") ||
+    pathname.endsWith("/new") ||
     (pathname.startsWith("/admin/templates/") && pathParts.length > 3);
   const bottomNavVisible = useBottomNavVisible();
 
@@ -26,7 +28,9 @@ export default function NavBar() {
         icon={<ListMusic size={24} />}
         label={t("services")}
         // Os modelos são acessados pelo menu da lista de liturgias, então ficam sob "Liturgias".
-        active={currentPage === "services" || pathname.startsWith("/admin/templates")}
+        active={
+          currentPage === "services" || pathname.startsWith("/admin/templates")
+        }
       />
       <NavItem
         href="/songs"
@@ -46,24 +50,34 @@ export default function NavBar() {
   return (
     <>
       {/* Sidebar — sempre visível em sm+ nas listas, só em lg+ nas views */}
-      <nav className={clsx(
-        "flex-col fixed left-0 top-0 h-full w-20 bg-surface-subtle border-r border-border",
-        bottomNavVisible ? "hidden sm:flex" : "hidden lg:flex"
-      )}>
-        <div className="flex flex-col items-center pt-6 sm:pt-8 gap-6">
+      <nav
+        className={clsx(
+          "flex-col fixed left-0 top-0 h-full w-20 bg-surface-subtle border-r border-border",
+          bottomNavVisible ? "hidden sm:flex" : "hidden lg:flex"
+        )}
+      >
+        <div className="flex flex-col items-center pt-6 sm:pt-8 gap-6 grow">
           {items}
         </div>
-        <div className="mt-auto flex flex-col items-center pb-6">
+        <div className="mt-auto flex flex-col items-center pb-6 gap-4">
           <ThemeMenu />
+          {userNav && (
+            <div className="flex flex-col items-center">{userNav}</div>
+          )}
         </div>
       </nav>
 
       {/* Bottom nav — só nas páginas de lista e só no mobile */}
       {bottomNavVisible && (
         <nav className="sm:hidden fixed bottom-0 left-0 w-full z-40 bg-background/80 backdrop-blur-lg shadow-md border-t border-border/50">
-          <div className="flex justify-around py-3">
+          <div className="flex justify-around py-3 items-center">
             {items}
             <ThemeSheet />
+            {userNav && (
+              <div className="flex flex-col items-center justify-center -mt-1">
+                {userNav}
+              </div>
+            )}
           </div>
         </nav>
       )}

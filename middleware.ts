@@ -1,20 +1,45 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { authSharedConfig } from "@/auth.config";
+import {
+  E2E_SESSION_COOKIE_NAME,
+  getSafeCallbackUrl,
+  isE2ETestMode,
+} from "@/lib/auth-utils";
+import NextAuth from "next-auth";
+import { NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
-  // Simple middleware that ensures NEXT_LOCALE is set to pt-BR if missing
-  // This satisfies next-intl's getLocale() without requiring URL rewrites or localized folders.
-  const locale = request.cookies.get('NEXT_LOCALE')?.value || 'pt-BR';
-  
+const { auth } = NextAuth({
+  ...authSharedConfig,
+  secret: process.env.AUTH_SECRET,
+  providers: [], // No providers needed in Edge middleware
+});
+
+export default auth((req) => {
+  const { nextUrl } = req;
+
+  // 1. Handle NEXT_LOCALE
   const response = NextResponse.next();
-  
-  if (!request.cookies.has('NEXT_LOCALE')) {
-    response.cookies.set('NEXT_LOCALE', 'pt-BR');
+  if (!req.cookies.has("NEXT_LOCALE")) {
+    response.cookies.set("NEXT_LOCALE", "pt-BR", {
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
   }
-  
+
+  // 2. First iteration: no pages are auth-gated yet; only redirect
+  // already-authenticated users away from /login.
+  const isAuthRoute = nextUrl.pathname === "/login";
+  const isE2ETestSession =
+    isE2ETestMode() && req.cookies.has(E2E_SESSION_COOKIE_NAME);
+  const isLoggedIn = !!req.auth || isE2ETestSession;
+
+  if (isAuthRoute && isLoggedIn) {
+    const target = getSafeCallbackUrl(nextUrl.searchParams.get("callbackUrl"));
+    return NextResponse.redirect(new URL(target, nextUrl));
+  }
+
   return response;
-}
+});
 
 export const config = {
-  matcher: ['/((?!api|_next|_static|_vercel|[\\w-]+\\.\\w+).*)']
+  matcher: ["/((?!api|_next|_static|_vercel|[\\w-]+\\.\\w+).*)"],
 };

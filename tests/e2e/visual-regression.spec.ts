@@ -14,6 +14,17 @@ test.beforeAll(async () => {
 });
 
 test.describe('Visual Regression Suite', () => {
+  test.beforeEach(async ({ context }) => {
+    await context.addCookies([
+      {
+        name: 'next-auth.session-token',
+        value: 'mock-session-token',
+        domain: '127.0.0.1',
+        path: '/',
+      },
+    ]);
+  });
+
   // Utility to ensure we are not on an error page and the app is ready
   async function ensureAppReady(page: any) {
     await page.waitForLoadState('networkidle');
