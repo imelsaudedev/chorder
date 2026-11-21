@@ -6,6 +6,7 @@ import Resend from "next-auth/providers/resend";
  * Edge-compatible shared callbacks and pages used by both `auth.ts` and `middleware.ts`.
  */
 export const authSharedConfig = {
+  trustHost: true,
   callbacks: {
     async session({ session, token }) {
       if (session.user) {
