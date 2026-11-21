@@ -2,7 +2,6 @@ import { authSharedConfig } from "@/auth.config";
 import {
   E2E_SESSION_COOKIE_NAME,
   getSafeCallbackUrl,
-  isAdminRoute,
   isE2ETestMode,
 } from "@/lib/auth-utils";
 import NextAuth from "next-auth";
@@ -26,31 +25,16 @@ export default auth((req) => {
     });
   }
 
-  // 2. Route Protection Logic (first iteration: protect /admin/* pages only)
+  // 2. First iteration: no pages are auth-gated yet; only redirect
+  // already-authenticated users away from /login.
   const isAuthRoute = nextUrl.pathname === "/login";
-  const isProtectedRoute = isAdminRoute(nextUrl.pathname);
-
   const isE2ETestSession =
     isE2ETestMode() && req.cookies.has(E2E_SESSION_COOKIE_NAME);
   const isLoggedIn = !!req.auth || isE2ETestSession;
 
-  if (isAuthRoute) {
-    if (isLoggedIn) {
-      const target = getSafeCallbackUrl(nextUrl.searchParams.get("callbackUrl"));
-      return NextResponse.redirect(new URL(target, nextUrl));
-    }
-    return response;
-  }
-
-  if (!isLoggedIn && isProtectedRoute) {
-    let callbackUrl = nextUrl.pathname;
-    if (nextUrl.search) {
-      callbackUrl += nextUrl.search;
-    }
-    const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-    return NextResponse.redirect(
-      new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl)
-    );
+  if (isAuthRoute && isLoggedIn) {
+    const target = getSafeCallbackUrl(nextUrl.searchParams.get("callbackUrl"));
+    return NextResponse.redirect(new URL(target, nextUrl));
   }
 
   return response;

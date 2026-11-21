@@ -41,10 +41,3 @@ export function getSafeCallbackUrl(
     return fallback;
   }
 }
-
-/**
- * First-iteration route protection: requires authentication only for /admin pages.
- */
-export function isAdminRoute(pathname: string): boolean {
-  return pathname === "/admin" || pathname.startsWith("/admin/");
-}

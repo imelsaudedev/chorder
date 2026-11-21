@@ -1,9 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  getSafeCallbackUrl,
-  isAdminRoute,
-  isE2ETestMode,
-} from "./auth-utils";
+import { getSafeCallbackUrl, isE2ETestMode } from "./auth-utils";
 
 describe("getSafeCallbackUrl", () => {
   it("allows safe relative paths with query strings and hashes", () => {
@@ -29,20 +25,6 @@ describe("getSafeCallbackUrl", () => {
     expect(getSafeCallbackUrl(null)).toBe("/services");
     expect(getSafeCallbackUrl("")).toBe("/services");
     expect(getSafeCallbackUrl("", "/custom")).toBe("/custom");
-  });
-});
-
-describe("isAdminRoute", () => {
-  it("matches /admin and nested /admin/* routes", () => {
-    expect(isAdminRoute("/admin")).toBe(true);
-    expect(isAdminRoute("/admin/tags")).toBe(true);
-    expect(isAdminRoute("/admin/templates/123")).toBe(true);
-  });
-
-  it("does not match non-admin routes or prefix collisions", () => {
-    expect(isAdminRoute("/services")).toBe(false);
-    expect(isAdminRoute("/songs")).toBe(false);
-    expect(isAdminRoute("/administrator")).toBe(false);
   });
 });
 
