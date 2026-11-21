@@ -41,3 +41,28 @@ export function getSafeCallbackUrl(
     return fallback;
   }
 }
+
+/**
+ * Parses a comma-separated list of bootstrap admin emails (e.g. from ADMIN_EMAILS)
+ * into a normalized lowercase Set.
+ */
+export function parseAdminEmails(raw?: string | null): Set<string> {
+  if (!raw) return new Set();
+  return new Set(
+    raw
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean)
+  );
+}
+
+/**
+ * Returns true if the given email is configured as a bootstrap admin via ADMIN_EMAILS.
+ */
+export function isBootstrapAdminEmail(
+  email?: string | null,
+  rawEnv: string | undefined = process.env.ADMIN_EMAILS
+): boolean {
+  if (!email) return false;
+  return parseAdminEmails(rawEnv).has(email.trim().toLowerCase());
+}

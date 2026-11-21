@@ -1,4 +1,8 @@
-import { E2E_SESSION_COOKIE_NAME, isE2ETestMode } from "@/lib/auth-utils";
+import {
+  E2E_SESSION_COOKIE_NAME,
+  isBootstrapAdminEmail,
+  isE2ETestMode,
+} from "@/lib/auth-utils";
 import prisma from "@/prisma/client";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { PrismaClient } from "@prisma/client";
@@ -10,6 +14,28 @@ const nextAuthResult = NextAuth({
   adapter: PrismaAdapter(prisma as unknown as PrismaClient),
   session: { strategy: "jwt" },
   ...authConfig,
+  callbacks: {
+    ...authConfig.callbacks,
+    async jwt({ token, user }) {
+      if (user) {
+        if (
+          user.id &&
+          user.email &&
+          user.role !== "ADMIN" &&
+          isBootstrapAdminEmail(user.email)
+        ) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: "ADMIN" },
+          });
+          token.role = "ADMIN";
+        } else if (user.role) {
+          token.role = user.role;
+        }
+      }
+      return token;
+    },
+  },
 });
 
 export const { handlers, signIn, signOut } = nextAuthResult;
