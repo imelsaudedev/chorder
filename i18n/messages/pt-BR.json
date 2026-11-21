@@ -266,5 +266,23 @@
     "authErrorOAuthAccountNotLinked": "Este e-mail já está associado a outro método de entrada.",
     "authErrorAccessDenied": "Acesso negado. Tente novamente.",
     "authErrorVerification": "O link de acesso é inválido ou expirou."
+  },
+  "AdminUsers": {
+    "title": "Usuários",
+    "subtitle": "Contas cadastradas no Chorder.",
+    "totalCount": "{count, plural, =0 {Nenhum usuário} =1 {1 usuário} other {# usuários}}",
+    "searchPlaceholder": "Filtrar por nome ou e-mail...",
+    "columnUser": "Usuário",
+    "columnRole": "Perfil",
+    "columnProviders": "Acesso",
+    "columnCreatedAt": "Cadastro",
+    "roleAdmin": "Admin",
+    "roleUser": "Usuário",
+    "providerGoogle": "Google",
+    "providerResend": "E-mail",
+    "unnamed": "Sem nome",
+    "emptyTitle": "Nenhum usuário cadastrado",
+    "emptyDescription": "Os usuários aparecerão aqui assim que fizerem login.",
+    "noResults": "Nenhum usuário encontrado para \"{query}\"."
   }
 }

@@ -265,5 +265,23 @@
     "authErrorOAuthAccountNotLinked": "This email is already linked to another sign-in method.",
     "authErrorAccessDenied": "Access was denied. Please try again.",
     "authErrorVerification": "The sign-in link is invalid or has expired."
+  },
+  "AdminUsers": {
+    "title": "Users",
+    "subtitle": "Accounts registered in Chorder.",
+    "totalCount": "{count, plural, =0 {No users} =1 {1 user} other {# users}}",
+    "searchPlaceholder": "Filter by name or email...",
+    "columnUser": "User",
+    "columnRole": "Role",
+    "columnProviders": "Sign-in",
+    "columnCreatedAt": "Joined",
+    "roleAdmin": "Admin",
+    "roleUser": "User",
+    "providerGoogle": "Google",
+    "providerResend": "Email",
+    "unnamed": "Unnamed user",
+    "emptyTitle": "No users registered yet",
+    "emptyDescription": "Users will appear here once they sign in.",
+    "noResults": "No users match \"{query}\"."
   }
 }
