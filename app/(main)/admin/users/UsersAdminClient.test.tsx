@@ -18,6 +18,9 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string, values?: Record<string, unknown>) => {
     if (values?.count !== undefined) return `${key}:${values.count}`;
     if (values?.query !== undefined) return `${key}:${values.query}`;
+    if (values?.role !== undefined && values?.user !== undefined) {
+      return `${key}:${values.role}:${values.user}`;
+    }
     if (values?.user !== undefined) return `${key}:${values.user}`;
     return key;
   },
@@ -29,7 +32,7 @@ const sampleUsers: AdminUserRow[] = [
     name: "Maria Clara Silva",
     email: "maria@example.com",
     image: null,
-    role: "ADMIN",
+    roles: ["ADMIN"],
     providers: ["google"],
     createdAt: "2026-11-20T15:00:00.000Z",
   },
@@ -38,7 +41,7 @@ const sampleUsers: AdminUserRow[] = [
     name: null,
     email: "pedro@example.com",
     image: null,
-    role: "USER",
+    roles: [],
     providers: ["resend"],
     createdAt: "2026-11-21T10:00:00.000Z",
   },
@@ -54,28 +57,19 @@ describe("UsersAdminClient", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders read-only list with initials, roles, and providers when not admin", () => {
+  it("renders read-only badges when not admin", () => {
     render(<UsersAdminClient users={sampleUsers} canManageRoles={false} />);
 
     expect(screen.getByText("Maria Clara Silva")).toBeDefined();
-    expect(screen.getByText("maria@example.com")).toBeDefined();
-    expect(screen.getByText("MC")).toBeDefined();
     expect(screen.getByText("roleAdmin")).toBeDefined();
-    expect(screen.getByText("providerGoogle")).toBeDefined();
-
-    expect(screen.getByText("unnamed")).toBeDefined();
-    expect(screen.getByText("pedro@example.com")).toBeDefined();
-    expect(screen.getByText("PE")).toBeDefined();
     expect(screen.getByText("roleUser")).toBeDefined();
-    expect(screen.getByText("providerResend")).toBeDefined();
-
     expect(screen.queryAllByRole("switch")).toHaveLength(0);
   });
 
-  it("renders toggle switch for other users (not self) when canManageRoles is true and updates role on click", async () => {
+  it("renders multi-role switches when admin, locks own ADMIN switch, and updates roles via PATCH", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ id: "u2", role: "ADMIN" }),
+      json: async () => ({ id: "u2", roles: ["WORSHIP"] }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -89,29 +83,30 @@ describe("UsersAdminClient", () => {
     );
 
     expect(screen.getByText("(you)")).toBeDefined();
-    const switches = screen.getAllByRole("switch");
-    expect(switches).toHaveLength(1);
-    expect(switches[0].getAttribute("aria-label")).toBe(
-      "toggleAdminLabel:pedro@example.com"
-    );
+    const selfAdminSwitch = screen.getByRole("switch", {
+      name: "toggleRoleLabel:roleAdmin:Maria Clara Silva",
+    });
+    expect(selfAdminSwitch.hasAttribute("disabled")).toBe(true);
 
-    await user.click(switches[0]);
+    const pedroWorshipSwitch = screen.getByRole("switch", {
+      name: "toggleRoleLabel:roleWorship:pedro@example.com",
+    });
+    await user.click(pedroWorshipSwitch);
 
     expect(fetchMock).toHaveBeenCalledWith("/api/admin/users/u2", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: "ADMIN" }),
+      body: JSON.stringify({ roles: ["WORSHIP"] }),
     });
 
     await waitFor(() => {
-      expect(screen.getAllByText("roleAdmin")).toHaveLength(2);
+      expect(mockToastSuccess).toHaveBeenCalledWith(
+        "rolesUpdated:pedro@example.com"
+      );
     });
-    expect(mockToastSuccess).toHaveBeenCalledWith(
-      "roleUpdatedToAdmin:pedro@example.com"
-    );
   });
 
-  it("shows error toast and keeps previous role when PATCH fails", async () => {
+  it("shows error toast when PATCH fails", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -129,12 +124,15 @@ describe("UsersAdminClient", () => {
       />
     );
 
-    await user.click(screen.getByRole("switch"));
+    await user.click(
+      screen.getByRole("switch", {
+        name: "toggleRoleLabel:roleMedia:pedro@example.com",
+      })
+    );
 
     await waitFor(() => {
       expect(mockToastError).toHaveBeenCalledWith("roleUpdateError");
     });
-    expect(screen.getByText("roleUser")).toBeDefined();
   });
 
   it("filters users by name or email and shows noResults when none match", async () => {

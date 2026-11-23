@@ -4,6 +4,10 @@ import Text from "@/components/common/Text";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import {
+  ASSIGNABLE_ROLES,
+  type AssignableRole,
+} from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@prisma/client";
 import { Search, Users } from "lucide-react";
@@ -16,7 +20,7 @@ export type AdminUserRow = {
   name: string | null;
   email: string;
   image: string | null;
-  role: UserRole;
+  roles: UserRole[];
   providers: string[];
   createdAt: string;
 };
@@ -76,32 +80,49 @@ export default function UsersAdminClient({
     return provider;
   };
 
-  const handleToggleRole = async (user: AdminUserRow, checked: boolean) => {
-    const nextRole: UserRole = checked ? "ADMIN" : "USER";
+  const roleLabel = (role: AssignableRole) => {
+    if (role === "ADMIN") return t("roleAdmin");
+    if (role === "WORSHIP") return t("roleWorship");
+    return t("roleMedia");
+  };
+
+  const handleToggleRole = async (
+    user: AdminUserRow,
+    role: AssignableRole,
+    checked: boolean
+  ) => {
+    const currentAssignable = user.roles.filter((r): r is AssignableRole =>
+      (ASSIGNABLE_ROLES as readonly string[]).includes(r)
+    );
+    const nextRoles = checked
+      ? Array.from(new Set([...currentAssignable, role]))
+      : currentAssignable.filter((r) => r !== role);
+
     const displayName = user.name || user.email;
     setPendingUserId(user.id);
 
     try {
-      const res = await fetch(`/api/admin/users/${encodeURIComponent(user.id)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: nextRole }),
-      });
+      const res = await fetch(
+        `/api/admin/users/${encodeURIComponent(user.id)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roles: nextRoles }),
+        }
+      );
 
       if (!res.ok) {
         toast.error(t("roleUpdateError"));
         return;
       }
 
-      const updated: { id: string; role: UserRole } = await res.json();
+      const updated: { id: string; roles: UserRole[] } = await res.json();
       setUsers((prev) =>
-        prev.map((u) => (u.id === updated.id ? { ...u, role: updated.role } : u))
+        prev.map((u) =>
+          u.id === updated.id ? { ...u, roles: updated.roles } : u
+        )
       );
-      toast.success(
-        updated.role === "ADMIN"
-          ? t("roleUpdatedToAdmin", { user: displayName })
-          : t("roleUpdatedToUser", { user: displayName })
-      );
+      toast.success(t("rolesUpdated", { user: displayName }));
     } catch {
       toast.error(t("roleUpdateError"));
     } finally {
@@ -156,7 +177,7 @@ export default function UsersAdminClient({
       ) : (
         <div className="@container overflow-clip rounded-xl border border-border bg-card shadow-xs max-sm:-mx-page max-sm:rounded-none max-sm:border-x-0">
           {/* Header row (shown on wider containers) */}
-          <div className="hidden @[560px]:grid @[560px]:grid-cols-[minmax(0,1fr)_8.5rem_7.5rem_7.5rem] items-center gap-x-4 bg-surface-subtle px-5 py-3 border-b border-border text-sm font-medium text-muted-foreground">
+          <div className="hidden @[720px]:grid @[720px]:grid-cols-[minmax(0,1fr)_19rem_6.5rem_7rem] items-center gap-x-4 bg-surface-subtle px-5 py-3 border-b border-border text-sm font-medium text-muted-foreground">
             <span>{t("columnUser")}</span>
             <span>{t("columnRole")}</span>
             <span>{t("columnProviders")}</span>
@@ -168,11 +189,14 @@ export default function UsersAdminClient({
               const isSelf = currentUserId !== null && user.id === currentUserId;
               const isPending = pendingUserId === user.id;
               const displayName = user.name || user.email;
+              const activeAssignableRoles = ASSIGNABLE_ROLES.filter((r) =>
+                user.roles.includes(r)
+              );
 
               return (
                 <li
                   key={user.id}
-                  className="px-4 @[560px]:px-5 py-4 grid grid-cols-1 @[560px]:grid-cols-[minmax(0,1fr)_8.5rem_7.5rem_7.5rem] items-start @[560px]:items-center gap-3 @[560px]:gap-x-4"
+                  className="px-4 @[720px]:px-5 py-4 grid grid-cols-1 @[720px]:grid-cols-[minmax(0,1fr)_19rem_6.5rem_7rem] items-start @[720px]:items-center gap-3 @[720px]:gap-x-4"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <Avatar className="h-9 w-9 shrink-0">
@@ -210,30 +234,60 @@ export default function UsersAdminClient({
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 @[560px]:contents">
-                    <div className="flex items-center gap-2">
-                      {canManageRoles && !isSelf && (
-                        <Switch
-                          checked={user.role === "ADMIN"}
-                          disabled={isPending}
-                          aria-label={t("toggleAdminLabel", {
-                            user: displayName,
-                          })}
-                          onCheckedChange={(checked) =>
-                            void handleToggleRole(user, checked)
-                          }
-                        />
+                  <div className="flex flex-wrap items-center gap-3 @[720px]:contents">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {canManageRoles ? (
+                        ASSIGNABLE_ROLES.map((role) => {
+                          const checked = user.roles.includes(role);
+                          const lockSelfAdmin = isSelf && role === "ADMIN";
+                          const label = roleLabel(role);
+                          return (
+                            <label
+                              key={role}
+                              className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground select-none"
+                            >
+                              <Switch
+                                checked={checked}
+                                disabled={isPending || lockSelfAdmin}
+                                aria-label={t("toggleRoleLabel", {
+                                  role: label,
+                                  user: displayName,
+                                })}
+                                onCheckedChange={(next) =>
+                                  void handleToggleRole(user, role, next)
+                                }
+                              />
+                              <span
+                                className={cn(
+                                  checked
+                                    ? "text-foreground"
+                                    : "text-muted-foreground"
+                                )}
+                              >
+                                {label}
+                              </span>
+                            </label>
+                          );
+                        })
+                      ) : activeAssignableRoles.length > 0 ? (
+                        activeAssignableRoles.map((role) => (
+                          <span
+                            key={role}
+                            className={cn(
+                              "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                              role === "ADMIN"
+                                ? "bg-secondary/10 text-secondary"
+                                : "bg-surface-muted text-foreground"
+                            )}
+                          >
+                            {roleLabel(role)}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-surface-muted text-muted-foreground">
+                          {t("roleUser")}
+                        </span>
                       )}
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
-                          user.role === "ADMIN"
-                            ? "bg-secondary/10 text-secondary"
-                            : "bg-surface-muted text-muted-foreground"
-                        )}
-                      >
-                        {user.role === "ADMIN" ? t("roleAdmin") : t("roleUser")}
-                      </span>
                     </div>
 
                     <div className="flex flex-wrap gap-1.5">
@@ -254,7 +308,7 @@ export default function UsersAdminClient({
                     <Text
                       variant="caption"
                       size="xs"
-                      className="ml-auto @[560px]:ml-0 @[560px]:text-right tabular-nums"
+                      className="ml-auto @[720px]:ml-0 @[720px]:text-right tabular-nums"
                     >
                       {dateFormatter.format(new Date(user.createdAt))}
                     </Text>

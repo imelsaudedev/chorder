@@ -10,9 +10,7 @@ export const authSharedConfig = {
   callbacks: {
     async session({ session, token }) {
       if (session.user) {
-        if (token.role) {
-          session.user.role = token.role;
-        }
+        session.user.roles = Array.isArray(token.roles) ? token.roles : [];
         if (token.sub) {
           session.user.id = token.sub;
         }
@@ -20,8 +18,8 @@ export const authSharedConfig = {
       return session;
     },
     async jwt({ token, user }) {
-      if (user?.role) {
-        token.role = user.role;
+      if (user) {
+        token.roles = Array.isArray(user.roles) ? user.roles : [];
       }
       return token;
     },

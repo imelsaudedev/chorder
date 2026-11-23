@@ -1,10 +1,11 @@
 import { requireAdmin } from "@/lib/auth-guard";
+import { ASSIGNABLE_ROLES } from "@/lib/permissions";
 import prisma from "@/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-const updateUserRoleSchema = z.object({
-  role: z.enum(["ADMIN", "USER"]),
+const updateUserRolesSchema = z.object({
+  roles: z.array(z.enum(ASSIGNABLE_ROLES)),
 });
 
 export async function PATCH(
@@ -23,17 +24,17 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const parsed = updateUserRoleSchema.safeParse(body);
+  const parsed = updateUserRolesSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Role must be ADMIN or USER" },
+      { error: "Roles must be an array of ADMIN, WORSHIP, or MEDIA" },
       { status: 400 }
     );
   }
 
-  const { role } = parsed.data;
+  const roles = Array.from(new Set(parsed.data.roles));
 
-  if (id === admin.userId && role !== "ADMIN") {
+  if (id === admin.userId && !roles.includes("ADMIN")) {
     return NextResponse.json(
       { error: "Cannot remove your own admin role" },
       { status: 400 }
@@ -50,8 +51,8 @@ export async function PATCH(
 
   const updated = await prisma.user.update({
     where: { id },
-    data: { role },
-    select: { id: true, role: true },
+    data: { roles },
+    select: { id: true, roles: true },
   });
 
   return NextResponse.json(updated);

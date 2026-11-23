@@ -5,7 +5,7 @@ import {
 } from "@/lib/auth-utils";
 import prisma from "@/prisma/client";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient, UserRole } from "@prisma/client";
 import NextAuth, { type Session } from "next-auth";
 import { cookies } from "next/headers";
 import authConfig from "./auth.config";
@@ -18,20 +18,20 @@ const nextAuthResult = NextAuth({
     ...authConfig.callbacks,
     async jwt({ token, user }) {
       if (user) {
+        let roles: UserRole[] = Array.isArray(user.roles) ? [...user.roles] : [];
         if (
           user.id &&
           user.email &&
-          user.role !== "ADMIN" &&
+          !roles.includes("ADMIN") &&
           isBootstrapAdminEmail(user.email)
         ) {
+          roles = Array.from(new Set([...roles, "ADMIN"]));
           await prisma.user.update({
             where: { id: user.id },
-            data: { role: "ADMIN" },
+            data: { roles },
           });
-          token.role = "ADMIN";
-        } else if (user.role) {
-          token.role = user.role;
         }
+        token.roles = roles;
       }
       return token;
     },
@@ -49,7 +49,7 @@ export async function auth(): Promise<Session | null> {
           id: "test-user-id",
           name: "Test User",
           email: "test@example.com",
-          role: "USER",
+          roles: ["ADMIN"],
         },
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       };
