@@ -1,5 +1,9 @@
+import AccessDeniedView from "@/components/auth/AccessDeniedView";
+import { getLiveUserAuth } from "@/lib/auth-guard";
+import { canManageChurchServices } from "@/lib/permissions";
 import { buildSectionsFromTemplate } from "@/lib/template-utils";
 import { retrieveTemplate } from "@/prisma/data";
+import { redirect } from "next/navigation";
 import ClientServiceFormPage from "../ClientServiceFormPage";
 
 export default async function NewServicePage({
@@ -13,11 +17,18 @@ export default async function NewServicePage({
     templateId?: string;
   }>;
 }) {
+  const live = await getLiveUserAuth();
+  if (!live.authenticated) {
+    redirect("/login?callbackUrl=%2Fservices%2Fnew");
+  }
+  if (!canManageChurchServices(live.roles)) {
+    return <AccessDeniedView />;
+  }
+
   const { title, worshipLeader, preacher, date, templateId } =
     await searchParams;
 
-  const template =
-    templateId ? await retrieveTemplate(Number(templateId)) : null;
+  const template = templateId ? await retrieveTemplate(Number(templateId)) : null;
 
   const defaultSections = template
     ? buildSectionsFromTemplate(template)

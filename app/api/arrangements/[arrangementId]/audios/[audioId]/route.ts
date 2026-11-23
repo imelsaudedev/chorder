@@ -1,3 +1,4 @@
+import { requireSongEditor } from "@/lib/auth-guard";
 import { removeArrangementAudio, renameArrangementAudio } from "@/prisma/data";
 import { NextRequest } from "next/server";
 
@@ -5,6 +6,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ arrangementId: string; audioId: string }> }
 ) {
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
+
   const { arrangementId: arrangementIdStr, audioId: audioIdStr } = await params;
   const arrangementId = parseInt(arrangementIdStr);
   const audioId = parseInt(audioIdStr);
@@ -27,6 +31,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ arrangementId: string; audioId: string }> }
 ) {
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
+
   const { arrangementId: arrangementIdStr, audioId: audioIdStr } = await params;
   const arrangementId = parseInt(arrangementIdStr);
   const audioId = parseInt(audioIdStr);

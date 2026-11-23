@@ -1,4 +1,8 @@
 import {
+  requireChurchServiceManager,
+  requireChurchServiceViewer,
+} from "@/lib/auth-guard";
+import {
   createOrUpdateService,
   retrieveServices,
   retrieveServicesList,
@@ -15,6 +19,9 @@ function invalidServiceResponse(error: import("zod").ZodError) {
 
 // `?view=list` devolve o resumo leve da lista de Liturgias (sem o plano).
 export async function GET(request: Request) {
+  const guard = await requireChurchServiceViewer();
+  if (!guard.ok) return guard.response;
+
   if (new URL(request.url).searchParams.get("view") === "list") {
     return Response.json(await retrieveServicesList());
   }
@@ -23,6 +30,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const guard = await requireChurchServiceManager();
+  if (!guard.ok) return guard.response;
+
   const body = await request.json();
   const parsed = serviceSchema.safeParse({
     sermonTheme: null,

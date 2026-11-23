@@ -1,3 +1,4 @@
+import { requireSongEditor } from "@/lib/auth-guard";
 import { put, del } from "@vercel/blob";
 import { NextRequest } from "next/server";
 
@@ -5,6 +6,9 @@ const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["audio/mpeg", "audio/mp4", "audio/aac", "audio/x-m4a"];
 
 export async function POST(request: NextRequest) {
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
+
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
 
@@ -34,6 +38,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
+
   const { url } = await request.json();
   if (!url) {
     return new Response("URL não fornecida", { status: 400 });

@@ -1,6 +1,16 @@
+import { auth } from '@/auth';
 import prisma from '@/prisma/client';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PATCH } from './route';
+
+vi.mock('@/auth', () => ({ auth: vi.fn() }));
+
+beforeEach(() => {
+  vi.mocked(auth).mockResolvedValue({
+    user: { id: 'test-user-id', email: 'admin@test.com', roles: ['ADMIN'] },
+    expires: new Date(Date.now() + 60_000).toISOString(),
+  });
+});
 
 const patch = (slug: string, body: object) =>
   PATCH(new Request(`http://localhost/api/songs/${slug}`, { method: 'PATCH', body: JSON.stringify(body) }) as any, {

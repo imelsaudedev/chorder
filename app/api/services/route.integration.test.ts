@@ -1,6 +1,35 @@
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { GET, POST } from './route';
 import prisma from '../../../prisma/client';
+import { auth } from '@/auth';
+
+vi.mock('@/auth', () => ({ auth: vi.fn() }));
+
+beforeEach(() => {
+  vi.mocked(auth).mockResolvedValue({
+    user: { id: 'test-user-id', email: 'admin@test.com', roles: ['ADMIN'] },
+    expires: new Date(Date.now() + 60_000).toISOString(),
+  });
+});
+
+describe('Services API role guards', () => {
+  it('blocks unauthenticated and regular users from GET /api/services, allows MEDIA', async () => {
+    vi.mocked(auth).mockResolvedValueOnce(null);
+    expect((await GET(new Request('http://localhost/api/services'))).status).toBe(401);
+
+    vi.mocked(auth).mockResolvedValueOnce({
+      user: { id: 'test-user-id', email: 'regular@test.com', roles: [] },
+      expires: new Date(Date.now() + 60_000).toISOString(),
+    });
+    expect((await GET(new Request('http://localhost/api/services'))).status).toBe(403);
+
+    vi.mocked(auth).mockResolvedValueOnce({
+      user: { id: 'test-user-id', email: 'media@test.com', roles: ['MEDIA'] },
+      expires: new Date(Date.now() + 60_000).toISOString(),
+    });
+    expect((await GET(new Request('http://localhost/api/services'))).status).toBe(200);
+  });
+});
 
 describe('Services API integration', () => {
     it('returns services via GET', async () => {

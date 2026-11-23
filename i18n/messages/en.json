@@ -273,7 +273,10 @@
     "rolePreviewError": "Could not update preview roles.",
     "roleAdmin": "Admin",
     "roleWorship": "Worship",
-    "roleMedia": "Media"
+    "roleMedia": "Media",
+    "accessDeniedTitle": "Restricted access",
+    "accessDeniedDescription": "Your account does not have permission to view this page. Contact an administrator if you need access.",
+    "backToSongs": "Go to Songs"
   },
   "AdminUsers": {
     "title": "Users",

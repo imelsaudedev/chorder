@@ -1,8 +1,12 @@
+import { requireAdmin } from "@/lib/auth-guard";
 import prisma from "@/prisma/client";
 import { NextRequest } from "next/server";
 
 // POST /api/admin/tags/merge — move todas as associações de sourceId para targetId e deleta sourceId
 export async function POST(request: NextRequest) {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
   const { sourceId, targetId } = await request.json();
   if (!sourceId || !targetId || sourceId === targetId) {
     return Response.json({ error: "sourceId e targetId distintos são obrigatórios" }, { status: 400 });

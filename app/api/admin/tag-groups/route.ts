@@ -1,8 +1,12 @@
+import { requireAdmin } from "@/lib/auth-guard";
 import { parseTagGroupFields } from "@/lib/tag-fields";
 import prisma from "@/prisma/client";
 import { NextRequest } from "next/server";
 
 export async function GET() {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
   const groups = await prisma.tagGroup.findMany({
     orderBy: { order: "asc" },
     include: {
@@ -16,6 +20,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
   const body = await request.json();
   const { name, color } = body;
   if (!name?.trim()) return Response.json({ error: "Nome obrigatório" }, { status: 400 });
