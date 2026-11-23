@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { auth } from "@/auth";
 import Main from "@/components/common/Main";
 import PageTitleBlock from "@/components/common/PageTitleBlock";
 import prisma from "@/prisma/client";
@@ -7,8 +8,9 @@ import { getTranslations } from "next-intl/server";
 import UsersAdminClient, { type AdminUserRow } from "./UsersAdminClient";
 
 export default async function AdminUsersPage() {
-  const [t, users] = await Promise.all([
+  const [t, session, users] = await Promise.all([
     getTranslations("AdminUsers"),
+    auth(),
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       select: {
@@ -27,6 +29,12 @@ export default async function AdminUsersPage() {
       },
     }),
   ]);
+
+  const currentUserId = session?.user?.id ?? null;
+  const currentDbUser = currentUserId
+    ? users.find((u) => u.id === currentUserId)
+    : null;
+  const canManageRoles = currentDbUser?.role === "ADMIN";
 
   const mappedUsers: AdminUserRow[] = users.map((u) => {
     const providers = Array.from(new Set(u.accounts.map((a) => a.provider)));
@@ -48,7 +56,11 @@ export default async function AdminUsersPage() {
     <>
       <PageTitleBlock title={t("title")} />
       <Main>
-        <UsersAdminClient users={mappedUsers} />
+        <UsersAdminClient
+          users={mappedUsers}
+          currentUserId={currentUserId}
+          canManageRoles={canManageRoles}
+        />
       </Main>
     </>
   );

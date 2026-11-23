@@ -281,6 +281,11 @@
     "providerGoogle": "Google",
     "providerResend": "E-mail",
     "unnamed": "Sem nome",
+    "you": "você",
+    "toggleAdminLabel": "Alternar perfil de administrador para {user}",
+    "roleUpdatedToAdmin": "{user} agora é Admin.",
+    "roleUpdatedToUser": "{user} agora é Usuário.",
+    "roleUpdateError": "Não foi possível atualizar o perfil. Tente novamente.",
     "emptyTitle": "Nenhum usuário cadastrado",
     "emptyDescription": "Os usuários aparecerão aqui assim que fizerem login.",
     "noResults": "Nenhum usuário encontrado para \"{query}\"."

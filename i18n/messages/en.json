@@ -280,6 +280,11 @@
     "providerGoogle": "Google",
     "providerResend": "Email",
     "unnamed": "Unnamed user",
+    "you": "you",
+    "toggleAdminLabel": "Toggle admin role for {user}",
+    "roleUpdatedToAdmin": "{user} is now an Admin.",
+    "roleUpdatedToUser": "{user} is now a regular User.",
+    "roleUpdateError": "Could not update user role. Please try again.",
     "emptyTitle": "No users registered yet",
     "emptyDescription": "Users will appear here once they sign in.",
     "noResults": "No users match \"{query}\"."
