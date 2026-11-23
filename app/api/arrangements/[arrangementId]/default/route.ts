@@ -1,3 +1,4 @@
+import { requireSongEditor } from "@/lib/auth-guard";
 import { makeArrangementDefault } from "@/prisma/data";
 import { NextRequest } from "next/server";
 
@@ -5,6 +6,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ arrangementId: string }> }
 ) {
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
+
   const { arrangementId: arrangementIdStr } = await params;
   const arrangementId = parseInt(arrangementIdStr);
   if (isNaN(arrangementId)) {

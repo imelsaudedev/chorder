@@ -1,8 +1,18 @@
 import prisma from '@/prisma/client';
 import { retrieveTagGroups } from '@/prisma/data';
-import { describe, expect, it } from 'vitest';
+import { auth } from '@/auth';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { POST as CREATE } from '../route';
 import { POST } from './route';
+
+vi.mock('@/auth', () => ({ auth: vi.fn() }));
+
+beforeEach(() => {
+  vi.mocked(auth).mockResolvedValue({
+    user: { id: 'test-user-id', email: 'admin@test.com', roles: ['ADMIN'] },
+    expires: new Date(Date.now() + 60_000).toISOString(),
+  });
+});
 
 const reorderReq = (body: object) =>
   new Request('http://localhost/api/admin/tags/reorder', { method: 'POST', body: JSON.stringify(body) });

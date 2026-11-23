@@ -1,4 +1,9 @@
 import {
+  requireChurchServiceEditor,
+  requireChurchServiceManager,
+  requireChurchServiceViewer,
+} from "@/lib/auth-guard";
+import {
   createOrUpdateService,
   deleteService,
   retrieveService,
@@ -22,6 +27,9 @@ export async function GET(
     params: Promise<{ slugOrId: string; arrangementId: string | "default" }>;
   }
 ) {
+  const guard = await requireChurchServiceViewer();
+  if (!guard.ok) return guard.response;
+
   const { slugOrId } = await params;
   const service = await retrieveService(slugOrId);
   if (!service) {
@@ -39,6 +47,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
+  const guard = await requireChurchServiceManager();
+  if (!guard.ok) return guard.response;
+
   const { slugOrId } = await params;
   const success = await deleteService(slugOrId);
   if (!success) {
@@ -51,6 +62,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
+  const guard = await requireChurchServiceEditor();
+  if (!guard.ok) return guard.response;
+
   const { slugOrId } = await params;
   const body = await request.json();
 
@@ -83,6 +97,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
+  const guard = await requireChurchServiceEditor();
+  if (!guard.ok) return guard.response;
+
   const { slugOrId } = await params;
   const parsed = serviceSchema.safeParse(await request.json());
   if (!parsed.success) return invalidServiceResponse(parsed.error);

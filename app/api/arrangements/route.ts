@@ -1,8 +1,12 @@
+import { requireSongEditor } from "@/lib/auth-guard";
 import { createArrangementWithSong } from "@/prisma/data";
 import { arrangementSchema } from "@/schemas/arrangement";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
+
   const arrangement = arrangementSchema.parse(await request.json());
 
   if (!arrangement || !arrangement.song || !arrangement.units) {

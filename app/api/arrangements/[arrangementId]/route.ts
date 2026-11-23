@@ -1,3 +1,4 @@
+import { requireSongEditor } from "@/lib/auth-guard";
 import {
   deleteArrangement,
   retrieveArrangement,
@@ -34,6 +35,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ arrangementId: string }> }
 ) {
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
+
   const { arrangementId } = await params;
   const success = await deleteArrangement(parseInt(arrangementId));
   if (!success) {
@@ -46,6 +50,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ arrangementId: string }> }
 ) {
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
+
   const { arrangementId } = await params;
   const id = parseInt(arrangementId);
   const body = await request.json();
@@ -58,7 +65,8 @@ export async function PATCH(
   }
 
   if (Array.isArray(body.audios)) {
-    const audios: { id?: number; url: string; label: string; order: number }[] = body.audios;
+    const audios: { id?: number; url: string; label: string; order: number }[] =
+      body.audios;
     const keptIds = audios.filter((a) => a.id).map((a) => a.id!);
     await prisma.arrangementAudio.deleteMany({
       where: {
@@ -74,7 +82,12 @@ export async function PATCH(
         });
       } else {
         await prisma.arrangementAudio.create({
-          data: { arrangementId: id, url: audio.url, label: audio.label, order: audio.order },
+          data: {
+            arrangementId: id,
+            url: audio.url,
+            label: audio.label,
+            order: audio.order,
+          },
         });
       }
     }
@@ -87,6 +100,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ arrangementId: string }> }
 ) {
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
+
   const { arrangementId } = await params;
   const arrangement = arrangementSchema.parse(await request.json());
   if (arrangement.id !== parseInt(arrangementId)) {
@@ -101,7 +117,8 @@ export async function POST(
     return new Response("Invalid arrangement data", { status: 400 });
   }
 
-  const preserveMedia = request.nextUrl.searchParams.get("preserveMedia") === "true";
+  const preserveMedia =
+    request.nextUrl.searchParams.get("preserveMedia") === "true";
   const createdArrangement = await updateArrangement(arrangement, {
     includeSong: true,
     includeUnits: true,

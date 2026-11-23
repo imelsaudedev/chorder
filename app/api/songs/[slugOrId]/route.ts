@@ -1,3 +1,4 @@
+import { requireAdmin, requireSongEditor } from "@/lib/auth-guard";
 import { archiveSong, restoreSong, retrieveSong, updateSongInfo } from "@/prisma/data";
 import { NextRequest } from "next/server";
 
@@ -29,15 +30,20 @@ export async function PATCH(
   const { slugOrId } = await params;
   const body = await request.json();
 
-  if (body.isDeleted === true) {
-    await archiveSong(slugOrId);
+  if (body.isDeleted === true || body.isDeleted === false) {
+    const guard = await requireAdmin();
+    if (!guard.ok) return guard.response;
+
+    if (body.isDeleted === true) {
+      await archiveSong(slugOrId);
+    } else {
+      await restoreSong(slugOrId);
+    }
     return Response.json({ success: true });
   }
 
-  if (body.isDeleted === false) {
-    await restoreSong(slugOrId);
-    return Response.json({ success: true });
-  }
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
 
   if (body.title !== undefined || "artist" in body || Array.isArray(body.tagIds) || "holyricsId" in body) {
     const data: { title?: string; artist?: string | null; tagIds?: number[]; holyricsId?: string | null } = {};

@@ -13,6 +13,14 @@ const { auth } = NextAuth({
   providers: [], // No providers needed in Edge middleware
 });
 
+function requiresAuthentication(pathname: string): boolean {
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return true;
+  if (pathname === "/services" || pathname.startsWith("/services/")) return true;
+  if (pathname === "/songs/new") return true;
+  if (/^\/songs\/[^/]+\/edit$/.test(pathname)) return true;
+  return false;
+}
+
 export default auth((req) => {
   const { nextUrl } = req;
 
@@ -25,8 +33,7 @@ export default auth((req) => {
     });
   }
 
-  // 2. First iteration: no pages are auth-gated yet; only redirect
-  // already-authenticated users away from /login.
+  // 2. Auth routing (fine-grained role enforcement runs in Server Components & API guards)
   const isAuthRoute = nextUrl.pathname === "/login";
   const isE2ETestSession =
     isE2ETestMode() && req.cookies.has(E2E_SESSION_COOKIE_NAME);
@@ -35,6 +42,18 @@ export default auth((req) => {
   if (isAuthRoute && isLoggedIn) {
     const target = getSafeCallbackUrl(nextUrl.searchParams.get("callbackUrl"));
     return NextResponse.redirect(new URL(target, nextUrl));
+  }
+
+  if (!isLoggedIn && requiresAuthentication(nextUrl.pathname)) {
+    const callbackUrl = nextUrl.search
+      ? `${nextUrl.pathname}${nextUrl.search}`
+      : nextUrl.pathname;
+    return NextResponse.redirect(
+      new URL(
+        `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`,
+        nextUrl
+      )
+    );
   }
 
   return response;

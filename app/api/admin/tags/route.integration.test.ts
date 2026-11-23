@@ -1,8 +1,31 @@
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { POST } from './route';
 import { PATCH, DELETE } from './[id]/route';
 import { POST as MERGE } from './merge/route';
 import prisma from '@/prisma/client';
+import { auth } from '@/auth';
+
+vi.mock('@/auth', () => ({ auth: vi.fn() }));
+
+beforeEach(() => {
+  vi.mocked(auth).mockResolvedValue({
+    user: { id: 'test-user-id', email: 'admin@test.com', roles: ['ADMIN'] },
+    expires: new Date(Date.now() + 60_000).toISOString(),
+  });
+});
+
+describe('Role guard on /api/admin/tags', () => {
+  it('returns 401 when unauthenticated and 403 for non-ADMIN', async () => {
+    vi.mocked(auth).mockResolvedValueOnce(null);
+    expect((await POST(postTagReq({ name: 'Test', tagGroupId: 1 }) as any)).status).toBe(401);
+
+    vi.mocked(auth).mockResolvedValueOnce({
+      user: { id: 'test-user-id', email: 'worship@test.com', roles: ['WORSHIP'] },
+      expires: new Date(Date.now() + 60_000).toISOString(),
+    });
+    expect((await POST(postTagReq({ name: 'Test', tagGroupId: 1 }) as any)).status).toBe(403);
+  });
+});
 
 async function createGroup(name = 'Tema') {
   return prisma.tagGroup.create({ data: { name, color: '#10b981' } });
