@@ -22,6 +22,7 @@ import { pushStageModeEntry } from "@/components/service/StageMode/useStageModeH
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import ServiceSongUnitView from "./ServiceSongUnitView";
+import { useServiceTransposes } from "./useServiceTransposes";
 
 type ServiceViewProps = {
   service: ClientService | null;
@@ -51,11 +52,10 @@ export default function ServiceView({ service }: ServiceViewProps) {
   const [stageIndex, setStageIndex] = useState(0);
   // Elevado acima do modo normal e do Modo Palco: trocar de um pro outro não
   // pode resetar um tom que já foi ajustado na sessão (bug: "tom volta ao
-  // original ao entrar no Modo Palco").
-  const [transposes, setTransposes] = useState(() =>
-    (service?.units ?? [])
-      .filter((u): u is ClientServiceUnit => u?.type === "SONG")
-      .map((u) => u.semitoneTranspose ?? 0)
+  // original ao entrar no Modo Palco"). O tom do culto é decidido em grupo; o ajuste de cada
+  // pessoa fica só no aparelho (localStorage) e sobrevive a recarregar a página.
+  const { transposes, setTranspose } = useServiceTransposes(
+    (service?.units ?? []).filter((u): u is ClientServiceUnit => u?.type === "SONG")
   );
   // Achado em teste manual: "entrar no modo palco perde a edição e
   // descarta o que era feito" — trocar pro Modo Palco desmonta a árvore
@@ -166,9 +166,9 @@ export default function ServiceView({ service }: ServiceViewProps) {
         initialIndex={stageIndex}
         initialFontSize={fontSize}
         initialTransposes={transposes}
-        onExit={(index, exitTransposes) => {
+        onTransposeChange={setTranspose}
+        onExit={(index) => {
           setStageIndex(index);
-          setTransposes(exitTransposes);
           shouldRestoreScroll.current = true;
           setIsStageMode(false);
         }}
@@ -208,11 +208,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
                   <ServiceSongUnitView
                     unit={entry.unit}
                     transpose={transposes[entry.songIndex] ?? 0}
-                    onTransposeChange={(value) =>
-                      setTransposes((prev) =>
-                        prev.map((v, i) => (i === entry.songIndex ? value : v))
-                      )
-                    }
+                    onTransposeChange={(value) => setTranspose(entry.songIndex, value)}
                     onUnsavedEditChange={(hasUnsavedEdit) =>
                       setUnsavedEdits((prev) =>
                         prev.map((v, i) => (i === entry.songIndex ? hasUnsavedEdit : v))

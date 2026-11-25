@@ -148,6 +148,7 @@ export default function ServiceSongUnitView({
           title={songDisplayTitle(unit)}
           order={unit.order}
           isStuck={isHeaderStuck}
+          cultoTranspose={unit.semitoneTranspose ?? 0}
           // Mapa sempre no cabeçalho, logo abaixo do título, tocável: normal parado e pequeno
           // (como no Modo Palco) quando preso no topo. Na edição some: o editor tem o próprio
           // mapa, com o rascunho.
@@ -164,6 +165,7 @@ export default function ServiceSongUnitView({
           mobileControls={
             <ServiceArrangementMeta
               arrangement={arrangement}
+              cultoTranspose={unit.semitoneTranspose ?? 0}
               isEditing={isEditing}
               isSaving={isSaving}
               isDirty={isDirty}

@@ -18,7 +18,7 @@ vi.mock('@/components/config/SongConfig', () => ({
   }),
 }));
 
-vi.mock('@/components/config/KeyButtonSet', () => ({
+vi.mock('@/components/config/KeySelectorButton', () => ({
   default: () => <div data-testid="key-button-set" />,
 }));
 

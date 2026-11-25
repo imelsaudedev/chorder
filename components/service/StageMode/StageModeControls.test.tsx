@@ -219,6 +219,25 @@ describe("StageModeControls — modo de exibição (Convenções)", () => {
   });
 });
 
+describe("StageModeControls — tom do culto", () => {
+  it("em outro tom do que o do culto, as configurações avisam e voltam ao do culto", async () => {
+    const user = userEvent.setup();
+    const setTranspose = vi.fn();
+    render(<StageModeControls {...baseProps} transpose={2} cultoTranspose={0} setTranspose={setTranspose} />);
+    await user.click(screen.getByRole("button", { name: /configurações/i }));
+    await user.click(await screen.findByRole("button", { name: /backToOriginalKey/ }));
+    expect(setTranspose).toHaveBeenCalledWith(0);
+  });
+
+  it("no tom do culto não mostra o aviso", async () => {
+    const user = userEvent.setup();
+    render(<StageModeControls {...baseProps} transpose={0} cultoTranspose={0} />);
+    await user.click(screen.getByRole("button", { name: /configurações/i }));
+    await screen.findByTestId("key-button-set");
+    expect(screen.queryByRole("button", { name: /backToOriginalKey/ })).toBeNull();
+  });
+});
+
 describe("StageModeControls — exibir roteiro", () => {
   it("o interruptor nas configurações liga o roteiro", async () => {
     const user = userEvent.setup();

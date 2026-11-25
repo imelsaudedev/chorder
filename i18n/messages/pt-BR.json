@@ -208,6 +208,8 @@
     "mediaRemoveAudio": "Remover áudio de referência",
     "mediaRenameAudio": "Renomear áudio",
     "keyButtonLabel": "Tom {key}",
+    "backToOriginalKey": "Voltar ao original: {key}",
+    "keyDiffersFromService": "Diferente do tom do culto ({key}). Só neste aparelho.",
     "composerLabel": "Compositor: {name}"
   },
   "ServiceForm": {
