@@ -1,16 +1,17 @@
 export const dynamic = "force-dynamic";
 
-import { auth } from "@/auth";
 import Main from "@/components/common/Main";
 import PageTitleBlock from "@/components/common/PageTitleBlock";
+import { getLiveUserAuth } from "@/lib/auth-guard";
+import { canAccessAdmin } from "@/lib/permissions";
 import prisma from "@/prisma/client";
 import { getTranslations } from "next-intl/server";
 import UsersAdminClient, { type AdminUserRow } from "./UsersAdminClient";
 
 export default async function AdminUsersPage() {
-  const [t, session, users] = await Promise.all([
+  const [t, live, users] = await Promise.all([
     getTranslations("AdminUsers"),
-    auth(),
+    getLiveUserAuth(),
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       select: {
@@ -18,7 +19,7 @@ export default async function AdminUsersPage() {
         name: true,
         email: true,
         image: true,
-        role: true,
+        roles: true,
         emailVerified: true,
         createdAt: true,
         accounts: {
@@ -30,12 +31,6 @@ export default async function AdminUsersPage() {
     }),
   ]);
 
-  const currentUserId = session?.user?.id ?? null;
-  const currentDbUser = currentUserId
-    ? users.find((u) => u.id === currentUserId)
-    : null;
-  const canManageRoles = currentDbUser?.role === "ADMIN";
-
   const mappedUsers: AdminUserRow[] = users.map((u) => {
     const providers = Array.from(new Set(u.accounts.map((a) => a.provider)));
     if (providers.length === 0 && u.emailVerified) {
@@ -46,7 +41,7 @@ export default async function AdminUsersPage() {
       name: u.name,
       email: u.email,
       image: u.image,
-      role: u.role,
+      roles: u.roles,
       providers,
       createdAt: u.createdAt.toISOString(),
     };
@@ -58,8 +53,8 @@ export default async function AdminUsersPage() {
       <Main>
         <UsersAdminClient
           users={mappedUsers}
-          currentUserId={currentUserId}
-          canManageRoles={canManageRoles}
+          currentUserId={live.userId}
+          canManageRoles={canAccessAdmin(live.roles)}
         />
       </Main>
     </>
