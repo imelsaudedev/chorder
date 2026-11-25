@@ -19,6 +19,15 @@ export function writeStorage<T>(key: string, value: T) {
   }
 }
 
+export function removeStorage(key: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    // Armazenamento indisponível — nada a remover.
+  }
+}
+
 /**
  * Estado persistido no localStorage do aparelho, sem sincronização entre
  * abas/dispositivos. Nunca lança erro se o armazenamento estiver

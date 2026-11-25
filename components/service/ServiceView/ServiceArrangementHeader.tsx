@@ -23,6 +23,8 @@ type ServiceArrangementHeaderProps = {
   isSaving: boolean;
   isDirty: boolean;
   isStuck?: boolean;
+  /** Tom decidido para o culto (semitons): o seletor avisa quando o deste aparelho é outro. */
+  cultoTranspose?: number;
   /**
    * Blocos da música: viram o mapa (chips) logo abaixo do título. Parado: título grande e chips
    * normais (quebram em linhas). Preso no topo: o MESMO título, só com o corpo menor, e chips
@@ -56,6 +58,7 @@ function ServiceArrangementHeader({
   isSaving,
   isDirty,
   isStuck = false,
+  cultoTranspose,
   mapUnits,
   onSelectMapUnit,
   blockGapPx = 16,
@@ -116,7 +119,7 @@ function ServiceArrangementHeader({
             trocar o tom do culto aqui só muda o aviso "o tom do culto
             volta ao salvar" exibido no editor, não o que está sendo
             editado. */}
-        {arrangement.key && <KeySelectorButton originalKey={arrangement.key} />}
+        {arrangement.key && <KeySelectorButton originalKey={arrangement.key} cultoTranspose={cultoTranspose} />}
 
         {!isEditing && arrangement.songId && (
           <ServiceMediaReferences

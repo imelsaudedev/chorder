@@ -5,6 +5,8 @@ import { ClientArrangement } from "@/prisma/models";
 
 type Props = {
   arrangement: ClientArrangement;
+  /** Tom decidido para o culto (semitons). */
+  cultoTranspose?: number;
   isEditing: boolean;
   isSaving: boolean;
   isDirty: boolean;
@@ -20,6 +22,7 @@ type Props = {
 // à esquerda, ações à direita" não cabia junto do título no celular — D1).
 export default function ServiceArrangementMeta({
   arrangement,
+  cultoTranspose,
   isEditing,
   isSaving,
   isDirty,
@@ -36,7 +39,7 @@ export default function ServiceArrangementMeta({
     <div className="flex flex-wrap items-center gap-2 md:hidden">
       {/* Visível também durante a edição — ver o mesmo achado em
           ServiceArrangementHeader.tsx. */}
-      {arrangement.key && <KeySelectorButton originalKey={arrangement.key} />}
+      {arrangement.key && <KeySelectorButton originalKey={arrangement.key} cultoTranspose={cultoTranspose} />}
 
       {!isEditing && arrangement.songId && (
         <ServiceMediaReferences

@@ -49,6 +49,9 @@ type StageModeProps = {
   /** Tom por música, elevado pelo ServiceView — ponto de partida do Modo
    * Palco, e devolvido em onExit para a tela normal continuar dali. */
   initialTransposes: number[];
+  /** Avisa a cada troca de tom (índice da música e novo valor), na hora: quem guarda o ajuste no
+   * aparelho não pode esperar a saída do Palco, senão recarregar dentro dele perderia a troca. */
+  onTransposeChange?: (songIndex: number, value: number) => void;
   /** Recebe a música em que o músico estava e o tom de cada uma, pra tela
    * normal voltar no mesmo ponto. */
   onExit: (currentIndex: number, transposes: number[]) => void;
@@ -143,6 +146,7 @@ export default function StageMode({
   initialIndex,
   initialFontSize,
   initialTransposes,
+  onTransposeChange,
   onExit,
 }: StageModeProps) {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -371,9 +375,13 @@ export default function StageMode({
   }, []);
 
   function setCurrentTranspose(action: SetStateAction<number>) {
-    setTransposes((prev) =>
-      prev.map((value, i) => (i === activeIndex ? (typeof action === "function" ? action(value) : action) : value))
-    );
+    // O novo valor sai do estado atual (e não de dentro do updater): chamar o callback do pai
+    // dentro dele violaria as regras do React (atualizar outro componente durante a renderização).
+    const current = transposes[activeIndex] ?? 0;
+    const next = typeof action === "function" ? action(current) : action;
+    if (next === current) return;
+    setTransposes((prev) => prev.map((value, i) => (i === activeIndex ? next : value)));
+    onTransposeChange?.(activeIndex, next);
   }
 
   function changeCurrentScrollSpeed(direction: 1 | -1) {
@@ -539,6 +547,7 @@ export default function StageMode({
           originalKey={currentArrangement?.key ?? ""}
           transpose={transposes[activeIndex] ?? 0}
           setTranspose={setCurrentTranspose}
+          cultoTranspose={units[activeIndex]?.semitoneTranspose ?? 0}
           mode={mode}
           onModeChange={setMode}
           fontSize={fontSize}

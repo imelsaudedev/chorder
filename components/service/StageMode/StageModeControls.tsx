@@ -6,6 +6,7 @@ import { Mode } from "@/components/config/config";
 import ColumnButtons from "@/components/config/ColumnButtons";
 import KeyButtonSet from "@/components/config/KeyButtonSet";
 import ModeButtonSet from "@/components/config/ModeButtonSet";
+import ServiceKeyNotice from "@/components/service/ServiceView/ServiceKeyNotice";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -73,6 +74,8 @@ type StageModeControlsProps = {
   originalKey: string;
   transpose: number;
   setTranspose: Dispatch<SetStateAction<number>>;
+  /** Tom decidido para o culto (semitons): quando o deste aparelho é outro, avisa e oferece voltar. */
+  cultoTranspose?: number;
   /** Cifra, letra, convenções ou texto — vale para todas as músicas. */
   mode: Mode;
   onModeChange: Dispatch<SetStateAction<Mode>>;
@@ -104,6 +107,7 @@ export default function StageModeControls({
   originalKey,
   transpose,
   setTranspose,
+  cultoTranspose,
   mode,
   onModeChange,
   fontSize,
@@ -268,6 +272,14 @@ export default function StageModeControls({
                 <div className="flex flex-col gap-1.5">
                   <span className="text-xs text-muted-foreground">Tom</span>
                   <KeyButtonSet originalKey={originalKey} transpose={transpose} setTranspose={setTranspose} />
+                  {cultoTranspose !== undefined && (
+                    <ServiceKeyNotice
+                      originalKey={originalKey}
+                      transpose={transpose}
+                      cultoTranspose={cultoTranspose}
+                      onReset={() => setTranspose(cultoTranspose)}
+                    />
+                  )}
                 </div>
 
                 {overview ? (
