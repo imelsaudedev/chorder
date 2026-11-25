@@ -189,6 +189,8 @@ export default function SongRow({
         onOpenChange={setMetaOpen}
         isNew={false}
         defaultValues={{ title: song.title, artist: song.artist ?? "" }}
+        // Sem as tags atuais o modal abre com nenhuma marcada e o salvar (set) apaga as que a música já tem.
+        defaultTags={song.tags ?? []}
         onSave={handleMetaSave}
       />
     </>

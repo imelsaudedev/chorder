@@ -12,7 +12,14 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
 }));
 vi.mock("#api-client", () => ({ useUpdateSong: () => ({ updateSong: vi.fn(() => Promise.resolve()) }) }));
-vi.mock("@/components/song/SongMetaModal", () => ({ default: () => null }));
+// Registra as props do modal: o que o "Editar dados" entrega a ele (tags atuais, em especial) é o que se testa.
+const metaModal = vi.hoisted(() => ({ props: [] as any[] }));
+vi.mock("@/components/song/SongMetaModal", () => ({
+  default: (props: any) => {
+    metaModal.props.push(props);
+    return null;
+  },
+}));
 
 const DAY = 86_400_000;
 const song = (extra: Partial<ClientSong> = {}): ClientSong =>
@@ -36,6 +43,26 @@ const renderRow = (s: ClientSong, query = "") =>
       </YoutubePlayerProvider>
     </AudioPlayerProvider>
   );
+
+describe("SongRow — Editar dados", () => {
+  it("entrega as tags atuais da música ao modal, para não abrir sem nenhuma marcada e sobrescrevê-las ao salvar", () => {
+    metaModal.props.length = 0;
+    const tags = [
+      { id: 3, name: "Infantis", group: { id: 1, name: "Tipo", color: "#2563eb" } },
+      { id: 5, name: "Ceia do Senhor", group: { id: 2, name: "Ocasião", color: "#f97316" } },
+    ];
+    renderRow(song({ tags }));
+    const last = metaModal.props[metaModal.props.length - 1];
+    expect(last.defaultTags).toEqual(tags);
+  });
+
+  it("música sem tags entrega lista vazia (não undefined)", () => {
+    metaModal.props.length = 0;
+    renderRow(song({ tags: undefined }));
+    const last = metaModal.props[metaModal.props.length - 1];
+    expect(last.defaultTags).toEqual([]);
+  });
+});
 
 describe("SongRow", () => {
   it("abre a música ao tocar na linha", () => {
