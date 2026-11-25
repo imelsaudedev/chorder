@@ -1103,8 +1103,16 @@ export class ServiceConflictError extends Error {
   }
 }
 
+export class ServiceSlugExistsError extends Error {
+  constructor() {
+    super("A service with this slug already exists");
+    this.name = "ServiceSlugExistsError";
+  }
+}
+
 export async function createOrUpdateService(
-  service: ClientService
+  service: ClientService,
+  options?: { mode?: "create" | "update" }
 ): Promise<ClientService> {
   const serviceSlug = service.slug?.length ? service.slug : await slugForService();
 
@@ -1113,6 +1121,10 @@ export async function createOrUpdateService(
       where: { slug: serviceSlug },
       select: { plan: true, updatedAt: true },
     });
+
+    if (options?.mode === "create" && existing) {
+      throw new ServiceSlugExistsError();
+    }
 
     // Culto já existente: o client precisa ter carregado a versão mais recente.
     // A checagem aqui é só pra falhar cedo sem gastar trabalho de sincronizar

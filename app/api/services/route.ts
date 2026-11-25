@@ -7,6 +7,7 @@ import {
   retrieveServices,
   retrieveServicesList,
   ServiceConflictError,
+  ServiceSlugExistsError,
 } from "@/prisma/data";
 import { serviceSchema } from "@/schemas/service";
 
@@ -51,12 +52,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const createdService = await createOrUpdateService(service);
+    const createdService = await createOrUpdateService(service, { mode: "create" });
     return new Response(JSON.stringify(createdService), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
+    if (err instanceof ServiceSlugExistsError) {
+      return Response.json({ error: "Service slug already exists" }, { status: 409 });
+    }
     if (err instanceof ServiceConflictError) {
       return new Response(
         "Este culto foi atualizado por outra pessoa enquanto você editava. Recarregue a página antes de salvar novamente.",
