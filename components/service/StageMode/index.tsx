@@ -52,6 +52,8 @@ type StageModeProps = {
   /** Avisa a cada troca de tom (índice da música e novo valor), na hora: quem guarda o ajuste no
    * aparelho não pode esperar a saída do Palco, senão recarregar dentro dele perderia a troca. */
   onTransposeChange?: (songIndex: number, value: number) => void;
+  /** Avisa quando a rolagem automática liga ou desliga (quem atualiza o conteúdo espera ela parar). */
+  onAutoScrollChange?: (active: boolean) => void;
   /** Recebe a música em que o músico estava e o tom de cada uma, pra tela
    * normal voltar no mesmo ponto. */
   onExit: (currentIndex: number, transposes: number[]) => void;
@@ -147,6 +149,7 @@ export default function StageMode({
   initialFontSize,
   initialTransposes,
   onTransposeChange,
+  onAutoScrollChange,
   onExit,
 }: StageModeProps) {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -245,6 +248,14 @@ export default function StageMode({
     setCurrentIndex(songIndex);
     setCurrentItem(null);
   }
+
+  const onAutoScrollChangeRef = useRef(onAutoScrollChange);
+  onAutoScrollChangeRef.current = onAutoScrollChange;
+  const isAutoScrolling = isScrollEnabled && !isOverview;
+  useEffect(() => {
+    onAutoScrollChangeRef.current?.(isAutoScrolling);
+    return () => onAutoScrollChangeRef.current?.(false);
+  }, [isAutoScrolling]);
 
   useAutoScroll({
     containerRef: contentRef,
