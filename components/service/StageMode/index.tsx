@@ -29,6 +29,7 @@ import {
   useAutoScroll,
 } from "./useAutoScroll";
 import { requestStageModeExit, useStageModeBack } from "./useStageModeHistory";
+import { useStageKeyboard } from "./useStageKeyboard";
 import { useWakeLock } from "./useWakeLock";
 
 /** Ordem do culto no Palco: músicas (índice entre as músicas) e, quando "Exibir roteiro" está ligado, os demais itens. */
@@ -359,24 +360,19 @@ export default function StageMode({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layoutMode]);
 
-  // Visão geral: setas e PageUp/PageDown (e pedal Bluetooth, que manda essas teclas) trocam de tela.
-  useEffect(() => {
-    if (!isOverview) return;
-    const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (target?.closest('input, textarea, [role="dialog"], [data-radix-popper-content-wrapper]')) return;
-      if (event.key === "ArrowRight" || event.key === "PageDown") {
-        event.preventDefault();
-        goScreen(1);
-      } else if (event.key === "ArrowLeft" || event.key === "PageUp") {
-        event.preventDefault();
-        goScreen(-1);
+  // Teclado e pedal: ↑↓ trocam de música (de tela, na visão geral), ←→ mudam a velocidade da rolagem
+  // (na visão geral trocam de tela). Ver useStageKeyboard.
+  useStageKeyboard({
+    layout: isOverview ? "overview" : "scroll",
+    onSong: (delta) => {
+      if (isOverview) goScreen(delta);
+      else {
+        const target = activeIndexRef.current + delta;
+        if (target >= 0 && target < units.length) scrollToSong(target);
       }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOverview, screens.length]);
+    },
+    onSpeed: (direction) => changeCurrentScrollSpeed(direction),
+  });
 
   // Esconde NavBar/ServiceHeader (fora da árvore do ServiceView) via classe
   // global.
