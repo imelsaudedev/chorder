@@ -86,4 +86,27 @@ describe("useAutoRevalidate", () => {
     await act(async () => void vi.advanceTimersByTime(1100));
     expect(mutate).toHaveBeenCalledTimes(1);
   });
+
+  it("sem interação por idleMs para de consultar; ao tocar na tela consulta na hora e retoma", () => {
+    renderHook(() => useAutoRevalidate(() => true, { intervalMs: 1000, idleMs: 5000 }), { wrapper });
+    act(() => void vi.advanceTimersByTime(7000));
+    const before = mutate.mock.calls.length;
+    act(() => void vi.advanceTimersByTime(3000));
+    expect(mutate.mock.calls.length).toBe(before); // parou
+    act(() => void window.dispatchEvent(new Event("pointerdown")));
+    expect(mutate.mock.calls.length).toBe(before + 1); // consulta imediata
+    act(() => void vi.advanceTimersByTime(1100));
+    expect(mutate.mock.calls.length).toBe(before + 2); // retomou o ritmo
+  });
+
+  it("interação mantém ativo além do idleMs", () => {
+    renderHook(() => useAutoRevalidate(() => true, { intervalMs: 1000, idleMs: 5000 }), { wrapper });
+    for (let i = 0; i < 4; i++) {
+      act(() => void vi.advanceTimersByTime(3000));
+      act(() => void window.dispatchEvent(new Event("keydown")));
+    }
+    const before = mutate.mock.calls.length;
+    act(() => void vi.advanceTimersByTime(1100));
+    expect(mutate.mock.calls.length).toBe(before + 1);
+  });
 });
