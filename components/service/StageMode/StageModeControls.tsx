@@ -2,8 +2,10 @@
 
 import IncreaseDecreaseButtonSet from "@/components/common/IncreaseDecreaseButtonSet";
 import Text from "@/components/common/Text";
+import { Mode } from "@/components/config/config";
 import ColumnButtons from "@/components/config/ColumnButtons";
 import KeyButtonSet from "@/components/config/KeyButtonSet";
+import ModeButtonSet from "@/components/config/ModeButtonSet";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -71,6 +73,9 @@ type StageModeControlsProps = {
   originalKey: string;
   transpose: number;
   setTranspose: Dispatch<SetStateAction<number>>;
+  /** Cifra, letra, convenções ou texto — vale para todas as músicas. */
+  mode: Mode;
+  onModeChange: Dispatch<SetStateAction<Mode>>;
   fontSize: number;
   onFontSizeChange: (size: number) => void;
   showRoteiro: boolean;
@@ -99,6 +104,8 @@ export default function StageModeControls({
   originalKey,
   transpose,
   setTranspose,
+  mode,
+  onModeChange,
   fontSize,
   onFontSizeChange,
   showRoteiro,
@@ -251,6 +258,11 @@ export default function StageModeControls({
                     Exibir roteiro
                   </Label>
                   <Switch id="stage-show-roteiro" checked={showRoteiro} onCheckedChange={onShowRoteiroChange} />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-muted-foreground">Modo</span>
+                  <ModeButtonSet mode={mode} setMode={onModeChange} />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
