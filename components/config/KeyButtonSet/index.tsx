@@ -107,7 +107,8 @@ export default function KeyButtonSet({ originalKey, transpose, setTranspose, siz
             );
           })}
         </div>
-        <span className="ml-auto text-sm font-semibold" aria-live="polite" data-testid="key-readout">
+        {/* O tom atual já aparece no botão que abre o seletor: aqui só para leitor de tela. */}
+        <span className="sr-only" aria-live="polite" data-testid="key-readout">
           {formatKey(root)}
         </span>
       </div>

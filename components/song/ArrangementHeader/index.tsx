@@ -109,7 +109,7 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
                 )}
                 {originalKey && (
                   // Mesmo botão da tela do culto: mostra o tom e abre o seletor num popover.
-                  <KeySelectorButton originalKey={originalKey} />
+                  <KeySelectorButton originalKey={originalKey} desktopAlign="start" />
                 )}
                 {arrangement.youtubeUrl && (
                   <YoutubeReferenceButton
