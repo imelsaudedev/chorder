@@ -1,7 +1,7 @@
 import Text from "@/components/common/Text";
 import { useSongConfig } from "@/components/config/SongConfig";
 import EditOrSaveCancelGroup from "@/components/service/ServiceView/EditOrSaveCancelGroup";
-import KeySelectorButton from "@/components/service/ServiceView/KeySelectorButton";
+import KeySelectorButton from "@/components/config/KeySelectorButton";
 import ServiceMediaReferences from "@/components/service/ServiceView/ServiceMediaReferences";
 import SongMap, { SongMapUnit } from "@/components/song/SongMap";
 import { Skeleton } from "@/components/ui/skeleton";

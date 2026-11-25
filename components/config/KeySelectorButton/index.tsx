@@ -8,6 +8,7 @@ import { transposeChord } from "@/chopro/music";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { currentRoot, formatKey, isSameShift } from "../KeyButtonSet/key-utils";
 import ServiceKeyNotice from "./ServiceKeyNotice";
 
 type Props = {
@@ -21,11 +22,14 @@ type Props = {
 // botão de referências). O texto visível é só o tom atual; a descrição
 // completa ("Tom D") vira aria-label.
 export default function KeySelectorButton({ originalKey, cultoTranspose }: Props) {
-  const { transpose, setTranspose } = useSongConfig();
+  const { transpose, setTranspose, enharmonicPreference } = useSongConfig();
   const t = useTranslations("ServiceView");
   const [open, setOpen] = useState(false);
-  const effectiveKey = transposeChord(originalKey, originalKey, transpose);
-  const differsFromService = cultoTranspose !== undefined && cultoTranspose !== transpose;
+  // Mesma grafia do seletor (A♯ ou B♭, conforme a escolha), e não a padrão da transposição.
+  const effectiveRoot = currentRoot(originalKey, transpose, enharmonicPreference ?? null);
+  const effectiveKey = effectiveRoot ? formatKey(effectiveRoot) : transposeChord(originalKey, originalKey, transpose);
+  const cultoRoot = cultoTranspose === undefined ? null : currentRoot(originalKey, cultoTranspose, null);
+  const differsFromService = cultoTranspose !== undefined && !isSameShift(cultoTranspose, transpose);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -42,7 +46,7 @@ export default function KeySelectorButton({ originalKey, cultoTranspose }: Props
             // Ponto de destaque: o tom deste aparelho não é o do culto (o motivo está no popover).
             <span
               role="img"
-              aria-label={t("keyDiffersFromService", { key: transposeChord(originalKey, originalKey, cultoTranspose) })}
+              aria-label={t("keyDiffersFromService", { key: cultoRoot ? formatKey(cultoRoot) : transposeChord(originalKey, originalKey, cultoTranspose) })}
               className="h-1.5 w-1.5 rounded-full bg-accent"
             />
           )}

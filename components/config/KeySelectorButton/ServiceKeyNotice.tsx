@@ -3,6 +3,7 @@
 import { transposeChord } from "@/chopro/music";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { currentRoot, formatKey, isSameShift } from "../KeyButtonSet/key-utils";
 
 type Props = {
   originalKey: string;
@@ -20,8 +21,10 @@ type Props = {
  */
 export default function ServiceKeyNotice({ originalKey, transpose, cultoTranspose, onReset }: Props) {
   const t = useTranslations("ServiceView");
-  if (transpose === cultoTranspose) return null;
-  const cultoKey = transposeChord(originalKey, originalKey, cultoTranspose);
+  // Módulo 12: -17 e +7 são o mesmo tom (o deslocamento do culto vem do banco sem normalização).
+  if (isSameShift(transpose, cultoTranspose)) return null;
+  const cultoRoot = currentRoot(originalKey, cultoTranspose, null);
+  const cultoKey = cultoRoot ? formatKey(cultoRoot) : transposeChord(originalKey, originalKey, cultoTranspose);
   return (
     <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
       <span>{t("keyOfService", { key: cultoKey })}</span>

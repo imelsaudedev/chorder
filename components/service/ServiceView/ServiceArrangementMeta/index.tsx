@@ -1,5 +1,5 @@
 import EditOrSaveCancelGroup from "@/components/service/ServiceView/EditOrSaveCancelGroup";
-import KeySelectorButton from "@/components/service/ServiceView/KeySelectorButton";
+import KeySelectorButton from "@/components/config/KeySelectorButton";
 import ServiceMediaReferences from "@/components/service/ServiceView/ServiceMediaReferences";
 import { ClientArrangement } from "@/prisma/models";
 

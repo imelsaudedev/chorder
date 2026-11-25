@@ -7,7 +7,7 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@/components/service/ServiceView/KeySelectorButton', () => ({
+vi.mock('@/components/config/KeySelectorButton', () => ({
   default: () => <div data-testid="key-selector" />,
 }));
 

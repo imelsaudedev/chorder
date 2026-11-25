@@ -6,7 +6,7 @@ import { Mode } from "@/components/config/config";
 import ColumnButtons from "@/components/config/ColumnButtons";
 import KeyButtonSet from "@/components/config/KeyButtonSet";
 import ModeButtonSet from "@/components/config/ModeButtonSet";
-import ServiceKeyNotice from "@/components/service/ServiceView/ServiceKeyNotice";
+import ServiceKeyNotice from "@/components/config/KeySelectorButton/ServiceKeyNotice";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

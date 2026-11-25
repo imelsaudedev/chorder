@@ -4,8 +4,7 @@ import { useUpdateSong } from "#api-client";
 import PageHeader from "@/components/common/PageHeader";
 import AudioReferenceButton from "@/components/common/AudioReferenceButton";
 import YoutubeReferenceButton from "@/components/common/YoutubeReferenceButton";
-import KeyButtonSet from "@/components/config/KeyButtonSet";
-import { useSongConfig } from "@/components/config/SongConfig";
+import KeySelectorButton from "@/components/config/KeySelectorButton";
 import { useSongMetaModal } from "@/components/song/SongMetaModal/context";
 import SongTags from "@/components/song/SongTags";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,6 @@ export default function ArrangementHeader({ arrangement }: ArrangementHeaderProp
 
 function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangement }) {
   const t = useTranslations("Messages");
-  const { transpose, setTranspose } = useSongConfig();
   const { updateSong } = useUpdateSong(arrangement.song!.slug);
   const { openSongMetaModal } = useSongMetaModal();
 
@@ -110,11 +108,8 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
                   />
                 )}
                 {originalKey && (
-                  <KeyButtonSet
-                    originalKey={originalKey}
-                    transpose={transpose}
-                    setTranspose={setTranspose}
-                  />
+                  // Mesmo botão da tela do culto: mostra o tom e abre o seletor num popover.
+                  <KeySelectorButton originalKey={originalKey} />
                 )}
                 {arrangement.youtubeUrl && (
                   <YoutubeReferenceButton

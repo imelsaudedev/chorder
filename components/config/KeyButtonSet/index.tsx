@@ -1,22 +1,17 @@
-import { Button } from "@/components/ui/button";
-import { transposeChord } from "@/chopro/music";
 import { useSongConfig } from "@/components/config/SongConfig";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { CircleMinus, CirclePlus } from "lucide-react";
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
-
-// Par [sustenido, bemol] — ordem fixa no seletor
-const ENHARMONIC_PAIRS: [string, string][] = [
-  ["C#", "Db"],
-  ["D#", "Eb"],
-  ["F#", "Gb"],
-  ["G#", "Ab"],
-  ["A#", "Bb"],
-];
-
-function findPair(key: string): [string, string] | null {
-  return ENHARMONIC_PAIRS.find(([s, f]) => s === key || f === key) ?? null;
-}
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import {
+  Accidental,
+  currentRoot,
+  formatKey,
+  isAccidentalAllowed,
+  isSameShift,
+  NATURAL_NOTES,
+  NaturalNote,
+  shiftToRoot,
+} from "./key-utils";
 
 type KeyButtonSetProps = {
   originalKey: string;
@@ -25,84 +20,97 @@ type KeyButtonSetProps = {
   size?: "default" | "sm";
 };
 
-export default function KeyButtonSet({
-  originalKey,
-  transpose,
-  setTranspose,
-  size = "default",
-}: KeyButtonSetProps) {
-  const { setEnharmonicPreference } = useSongConfig();
-  const [songKey, setSongKey] = useState(() => transposeChord(originalKey, originalKey, transpose));
+/**
+ * Seletor de tom: uma linha com as sete notas (tocar = tom natural) e outra com ♭ e ♯ (tocar liga o
+ * acidente sobre a nota escolhida; tocar de novo desliga). Escolhe a raiz do tom: o sufixo do tom
+ * original (m, 9…) é mantido. O resultado vira um deslocamento em semitons sobre o tom original, que
+ * é o que o resto do sistema guarda e usa.
+ */
+export default function KeyButtonSet({ originalKey, transpose, setTranspose, size = "default" }: KeyButtonSetProps) {
+  const { enharmonicPreference, setEnharmonicPreference } = useSongConfig();
 
+  // Trocar o tom por outro caminho (ex.: "Voltar ao do culto") limpa a preferência de grafia; as trocas
+  // feitas aqui já definem a sua. Sem este marcador, o efeito apagaria a preferência recém-escolhida.
+  const ownChange = useRef(false);
   useEffect(() => {
-    setSongKey(transposeChord(originalKey, originalKey, transpose));
+    if (ownChange.current) {
+      ownChange.current = false;
+      return;
+    }
     setEnharmonicPreference(null);
   }, [transpose, originalKey, setEnharmonicPreference]);
 
-  const handleIncrease = useCallback(() => setTranspose((prev) => prev + 1), [setTranspose]);
-  const handleDecrease = useCallback(() => setTranspose((prev) => prev - 1), [setTranspose]);
+  const root = currentRoot(originalKey, transpose, enharmonicPreference);
+  if (!root) return null;
 
-  const pair = findPair(songKey);
+  function choose(letter: NaturalNote, accidental: Accidental) {
+    const shift = shiftToRoot(originalKey, letter, accidental);
+    if (shift === null) return;
+    const preference = accidental === "#" ? "sharp" : accidental === "b" ? "flat" : null;
+    // Mesmo tom (ex.: só mudou a grafia, C♯ → D♭): mantém o deslocamento que já existe.
+    if (!isSameShift(shift, transpose)) {
+      ownChange.current = true;
+      setTranspose(shift);
+    }
+    setEnharmonicPreference(preference);
+  }
 
-  const midH   = size === "sm" ? "h-8"  : "h-9";
-  const midW   = size === "sm" ? "w-14" : "w-16";
-  const midText = size === "sm" ? "text-xs" : "text-sm";
+  const buttonSize = size === "sm" ? "sm" : "default";
+  const cell = size === "sm" ? "h-8 text-xs" : "h-9 text-sm";
 
   return (
-    <div className="flex flex-row">
-      <Button
-        type="button"
-        variant="outline"
-        size={size}
-        className="rounded-l-md rounded-r-none"
-        onClick={handleDecrease}
-        aria-label="Diminuir o tom em um semitom"
-      >
-        <CircleMinus size={14} />
-      </Button>
-
-      {/* Slot central — largura fixa, não muda com enarmônico */}
-      <div className={cn("border border-input flex items-stretch", midW, midH)}>
-        {pair ? (
-          <>
-            {pair.map((key) => (
-              <button
-                key={key}
-                type="button"
-                onPointerDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  setSongKey(key);
-                  setEnharmonicPreference(key === pair[0] ? "sharp" : "flat");
-                }}
-                className={cn(
-                  "flex-1 flex items-center justify-center font-semibold transition-colors border-r last:border-r-0 border-input",
-                  midText,
-                  key === songKey
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                {key}
-              </button>
-            ))}
-          </>
-        ) : (
-          <span className={cn("flex-1 flex items-center justify-center select-none font-semibold", midText)}>
-            {songKey}
-          </span>
-        )}
+    <div className="flex flex-col gap-2">
+      <div role="group" aria-label="Nota do tom" className="flex">
+        {NATURAL_NOTES.map((letter) => {
+          const highlighted = root.letter === letter;
+          return (
+            <Button
+              key={letter}
+              type="button"
+              variant={highlighted ? "default" : "outline"}
+              size={buttonSize}
+              aria-pressed={highlighted}
+              aria-label={`Nota ${letter}`}
+              onClick={() => choose(letter, "")}
+              className={cn(
+                "min-w-9 flex-1 rounded-none px-0 font-semibold first:rounded-l-md last:rounded-r-md [&:not(:first-child)]:-ml-px",
+                cell
+              )}
+            >
+              {letter}
+            </Button>
+          );
+        })}
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        size={size}
-        className="rounded-r-md rounded-l-none"
-        onClick={handleIncrease}
-        aria-label="Aumentar o tom em um semitom"
-      >
-        <CirclePlus size={14} />
-      </Button>
+      <div className="flex items-center gap-3">
+        <div role="group" aria-label="Acidente" className="flex">
+          {([
+            { accidental: "b", glyph: "♭", label: "Bemol" },
+            { accidental: "#", glyph: "♯", label: "Sustenido" },
+          ] as const).map(({ accidental, glyph, label }, i) => {
+            const active = root.accidental === accidental;
+            return (
+              <Button
+                key={accidental}
+                type="button"
+                variant={active ? "default" : "outline"}
+                size={buttonSize}
+                aria-pressed={active}
+                aria-label={label}
+                disabled={!active && !isAccidentalAllowed(root.letter, accidental)}
+                onClick={() => choose(root.letter, active ? "" : accidental)}
+                className={cn("w-11 px-0 text-base font-semibold", i === 0 ? "rounded-r-none" : "-ml-px rounded-l-none", cell)}
+              >
+                {glyph}
+              </Button>
+            );
+          })}
+        </div>
+        <span className="ml-auto text-sm font-semibold" aria-live="polite" data-testid="key-readout">
+          {formatKey(root)}
+        </span>
+      </div>
     </div>
   );
 }

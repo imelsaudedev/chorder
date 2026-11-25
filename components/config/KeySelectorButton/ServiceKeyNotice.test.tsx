@@ -24,4 +24,9 @@ describe("ServiceKeyNotice", () => {
     await userEvent.setup().click(screen.getByRole("button", { name: "backToServiceKey" }));
     expect(onReset).toHaveBeenCalledTimes(1);
   });
+
+  it("deslocamentos equivalentes (-17 e +7) são o mesmo tom: não mostra nada", () => {
+    const { container } = render(<ServiceKeyNotice originalKey="G" transpose={7} cultoTranspose={-17} onReset={vi.fn()} />);
+    expect(container).toBeEmptyDOMElement();
+  });
 });
