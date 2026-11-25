@@ -8,6 +8,7 @@ import SongConfigProvider, {
 import ArrangementHeader from "@/components/song/ArrangementHeader";
 import ArrangementView, { ArrangementViewHandle } from "@/components/song/ArrangementView";
 import SongMap from "@/components/song/SongMap";
+import { useAutoRevalidate } from "@/hooks/useAutoRevalidate";
 import { ClientArrangement } from "@/prisma/models";
 import { useRef } from "react";
 
@@ -17,6 +18,10 @@ export default function ClientPage({
   arrangementId,
 }: ClientPageProps) {
   const { arrangement } = useFetchArrangement(songSlug, arrangementId);
+  // Cifra corrigida em outro aparelho aparece aqui sem recarregar.
+  useAutoRevalidate(
+    (key) => Array.isArray(key) && typeof key[0] === "string" && key[0].startsWith(`/api/songs/${songSlug}/arrangements/`)
+  );
 
   return (
     <SongConfigProvider>

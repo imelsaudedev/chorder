@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useAutoRevalidate } from "@/hooks/useAutoRevalidate";
 import { useMediaBarOpen } from "@/hooks/useMediaBarOpen";
 import { ClientService, ClientServiceUnit } from "@/prisma/models";
 import { Maximize } from "lucide-react";
@@ -68,6 +69,15 @@ export default function ServiceView({ service }: ServiceViewProps) {
       .map(() => false)
   );
   const [confirmStageModeOpen, setConfirmStageModeOpen] = useState(false);
+  // Rolagem automática do Palco ligada: trocar o conteúdo no meio dela faria o texto pular.
+  const [isStageScrolling, setIsStageScrolling] = useState(false);
+
+  // Cifra corrigida em outro aparelho aparece aqui sem recarregar. Pausa com edição com alterações
+  // abertas e com a rolagem automática do Palco rodando; a atualização vem na consulta seguinte.
+  useAutoRevalidate(
+    (key) => !!service && (key === `/api/services/${service.slug}` || key === `/api/services/${service.id}`),
+    { enabled: !!service && !unsavedEdits.some(Boolean) && !isStageScrolling }
+  );
   // Indexado pela posição entre as músicas.
   const songRefs = useRef<(HTMLDivElement | null)[]>([]);
   const shouldRestoreScroll = useRef(false);
@@ -167,6 +177,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
         initialFontSize={fontSize}
         initialTransposes={transposes}
         onTransposeChange={setTranspose}
+        onAutoScrollChange={setIsStageScrolling}
         onExit={(index) => {
           setStageIndex(index);
           shouldRestoreScroll.current = true;
