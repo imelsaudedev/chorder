@@ -1,8 +1,4 @@
-import {
-  requireChurchServiceEditor,
-  requireChurchServiceManager,
-  requireChurchServiceViewer,
-} from "@/lib/auth-guard";
+import { getLiveUserAuth } from "@/lib/auth-guard";
 import { canManageChurchServices } from "@/lib/permissions";
 import {
   createOrUpdateService,
@@ -12,7 +8,7 @@ import {
 } from "@/prisma/data";
 import { serviceSchema } from "@/schemas/service";
 import type { ServiceStatus } from "@prisma/client";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // Resposta 400 estruturada quando o corpo não passa na validação; o cliente
 // traduz os problemas para uma mensagem amigável (lib/friendly-save-error).
@@ -29,14 +25,22 @@ export async function GET(
     params: Promise<{ slugOrId: string; arrangementId: string | "default" }>;
   }
 ) {
-  const guard = await requireChurchServiceViewer();
-  if (!guard.ok) return guard.response;
+  const [live, { slugOrId }] = await Promise.all([getLiveUserAuth(), params]);
+  const shareToken = new URL(request.url).searchParams.get("share");
 
-  const { slugOrId } = await params;
-  const service = await retrieveService(slugOrId, guard.userId);
+  const service = await retrieveService(slugOrId, {
+    userId: live.userId,
+    roles: live.roles,
+    shareToken,
+  });
+
   if (!service) {
+    if (!live.authenticated && !shareToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return new Response("Service not found", { status: 404 });
   }
+
   return new Response(JSON.stringify(service), {
     status: 200,
     headers: {
@@ -49,11 +53,27 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
-  const guard = await requireChurchServiceManager();
-  if (!guard.ok) return guard.response;
+  const live = await getLiveUserAuth();
+  if (!live.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const { slugOrId } = await params;
-  const success = await deleteService(slugOrId, guard.userId);
+  const existing = await retrieveService(slugOrId, {
+    userId: live.userId,
+    roles: live.roles,
+  });
+  if (!existing) {
+    return new Response("Service not found", { status: 404 });
+  }
+  if (!existing.canDelete) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const success = await deleteService(slugOrId, {
+    userId: live.userId,
+    roles: live.roles,
+  });
   if (!success) {
     return new Response("Service not found", { status: 404 });
   }
@@ -64,14 +84,24 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
-  const guard = await requireChurchServiceEditor();
-  if (!guard.ok) return guard.response;
+  const live = await getLiveUserAuth();
+  if (!live.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const { slugOrId } = await params;
   const body = await request.json();
 
-  const service = await retrieveService(slugOrId, guard.userId);
-  if (!service) return new Response("Service not found", { status: 404 });
+  const service = await retrieveService(slugOrId, {
+    userId: live.userId,
+    roles: live.roles,
+  });
+  if (!service || !service.id) {
+    return new Response("Service not found", { status: 404 });
+  }
+  if (!service.canEdit) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const data: {
     title?: string | null;
@@ -88,11 +118,11 @@ export async function PATCH(
   if ("preacher" in body) data.preacher = body.preacher ?? null;
   if ("sermonTheme" in body) data.sermonTheme = body.sermonTheme ?? null;
   if ("sermonReference" in body) data.sermonReference = body.sermonReference ?? null;
-  if ("status" in body) {
+  if ("status" in body && service.scope !== "PERSONAL") {
     if (body.status !== "DRAFT" && body.status !== "PUBLISHED") {
       return Response.json({ error: "Invalid status" }, { status: 400 });
     }
-    if (!canManageChurchServices(guard.roles)) {
+    if (!canManageChurchServices(live.roles)) {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
     if (service.status === "PUBLISHED" && body.status === "DRAFT") {
@@ -115,13 +145,21 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
-  const guard = await requireChurchServiceEditor();
-  if (!guard.ok) return guard.response;
+  const live = await getLiveUserAuth();
+  if (!live.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const { slugOrId } = await params;
-  const existing = await retrieveService(slugOrId, guard.userId);
+  const existing = await retrieveService(slugOrId, {
+    userId: live.userId,
+    roles: live.roles,
+  });
   if (!existing || !existing.id) {
     return new Response("Service not found", { status: 404 });
+  }
+  if (!existing.canEdit) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const parsed = serviceSchema.safeParse(await request.json());
@@ -138,8 +176,12 @@ export async function POST(
   if (!service?.id || !hasContent) {
     return new Response("Invalid service data", { status: 400 });
   }
-  if (service.status && service.status !== existing.status) {
-    if (!canManageChurchServices(guard.roles)) {
+  if (
+    existing.scope === "CHURCH" &&
+    service.status &&
+    service.status !== existing.status
+  ) {
+    if (!canManageChurchServices(live.roles)) {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
     if (existing.status === "PUBLISHED" && service.status === "DRAFT") {
@@ -153,7 +195,7 @@ export async function POST(
   try {
     const updatedService = await createOrUpdateService(
       { ...service, id: existing.id, slug: existing.slug },
-      { mode: "update", actorUserId: guard.userId }
+      { mode: "update", actorUserId: live.userId, actorRoles: live.roles }
     );
     return new Response(JSON.stringify(updatedService), {
       status: 200,

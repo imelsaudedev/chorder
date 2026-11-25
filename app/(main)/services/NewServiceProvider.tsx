@@ -1,10 +1,15 @@
 "use client";
 
 import ServicePlanDrawer, { ServicePlanConfig } from "@/components/service/ServicePlanDrawer";
+import type { ServiceScope } from "@/prisma/models";
 import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
-type NewServiceContextValue = { openNewService: () => void };
+type NewServiceContextValue = {
+  activeScope: ServiceScope;
+  setActiveScope: (scope: ServiceScope) => void;
+  openNewService: (scope?: ServiceScope) => void;
+};
 
 const NewServiceContext = createContext<NewServiceContextValue | null>(null);
 
@@ -15,12 +20,31 @@ export function useNewService(): NewServiceContextValue {
   return ctx;
 }
 
-export default function NewServiceProvider({ children }: { children: React.ReactNode }) {
+export default function NewServiceProvider({
+  children,
+  defaultScope = "CHURCH",
+}: {
+  children: React.ReactNode;
+  defaultScope?: ServiceScope;
+}) {
   const router = useRouter();
+  const [activeScope, setActiveScope] = useState<ServiceScope>(defaultScope);
+  const [drawerScope, setDrawerScope] = useState<ServiceScope>(defaultScope);
   const [open, setOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const openNewService = useCallback(() => setOpen(true), []);
-  const value = useMemo(() => ({ openNewService }), [openNewService]);
+
+  const openNewService = useCallback(
+    (scope?: ServiceScope) => {
+      setDrawerScope(scope ?? activeScope);
+      setOpen(true);
+    },
+    [activeScope]
+  );
+
+  const value = useMemo(
+    () => ({ activeScope, setActiveScope, openNewService }),
+    [activeScope, openNewService]
+  );
 
   function handleSave(config: ServicePlanConfig) {
     const params = new URLSearchParams();
@@ -28,6 +52,7 @@ export default function NewServiceProvider({ children }: { children: React.React
     if (config.worshipLeader) params.set("worshipLeader", config.worshipLeader);
     if (config.preacher) params.set("preacher", config.preacher);
     if (config.templateId) params.set("templateId", String(config.templateId));
+    if (drawerScope === "PERSONAL") params.set("scope", "personal");
     params.set("date", config.date.toISOString());
     setIsNavigating(true);
     setTimeout(() => router.push(`/services/new?${params.toString()}`), 0);
@@ -37,7 +62,14 @@ export default function NewServiceProvider({ children }: { children: React.React
   return (
     <NewServiceContext.Provider value={value}>
       {children}
-      <ServicePlanDrawer open={open} onOpenChange={setOpen} isNew loading={isNavigating} onSave={handleSave} />
+      <ServicePlanDrawer
+        open={open}
+        onOpenChange={setOpen}
+        isNew
+        isPersonal={drawerScope === "PERSONAL"}
+        loading={isNavigating}
+        onSave={handleSave}
+      />
     </NewServiceContext.Provider>
   );
 }

@@ -99,7 +99,8 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
     editor.setDrawer(next);
   }
 
-  const isNewOrDraft = !editor.service.id || editor.service.status === "DRAFT";
+  const isPersonal = editor.service.scope === "PERSONAL";
+  const isNewOrDraft = !isPersonal && (!editor.service.id || editor.service.status === "DRAFT");
   const hasSections = (editor.service.plan?.sections?.length ?? 0) > 0;
 
   async function handleSave(targetStatus?: ServiceStatus) {

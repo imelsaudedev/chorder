@@ -15,6 +15,7 @@ export const serviceSchema = z.object({
   sermonReference: z.string().nullable(),
   isDeleted: z.boolean(),
   status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
+  scope: z.enum(["CHURCH", "PERSONAL"]).optional(),
   updatedAt: z.coerce.date().optional(),
 });
 

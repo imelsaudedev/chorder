@@ -13,8 +13,17 @@ const { auth } = NextAuth({
   providers: [], // No providers needed in Edge middleware
 });
 
-function requiresAuthentication(pathname: string): boolean {
+function requiresAuthentication(
+  pathname: string,
+  searchParams: URLSearchParams
+): boolean {
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return true;
+  if (
+    /^\/services\/(?!new$)[^/]+$/.test(pathname) &&
+    searchParams.has("share")
+  ) {
+    return false;
+  }
   if (pathname === "/services" || pathname.startsWith("/services/")) return true;
   if (pathname === "/songs/new") return true;
   if (/^\/songs\/[^/]+\/edit$/.test(pathname)) return true;
@@ -44,7 +53,7 @@ export default auth((req) => {
     return NextResponse.redirect(new URL(target, nextUrl));
   }
 
-  if (!isLoggedIn && requiresAuthentication(nextUrl.pathname)) {
+  if (!isLoggedIn && requiresAuthentication(nextUrl.pathname, nextUrl.searchParams)) {
     const callbackUrl = nextUrl.search
       ? `${nextUrl.pathname}${nextUrl.search}`
       : nextUrl.pathname;

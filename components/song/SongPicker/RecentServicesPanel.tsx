@@ -12,8 +12,12 @@ function formatDate(date: Date | string): string {
 }
 
 export default function RecentServicesPanel() {
-  const { services, isLoading } = useFetchRecentServices();
+  const { services, isLoading, isError } = useFetchRecentServices();
   const [query, setQuery] = useState("");
+
+  if (isError) {
+    return null;
+  }
 
   const filtered = query
     ? services.filter((s) => {
