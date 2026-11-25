@@ -1,3 +1,4 @@
+import { requireSongEditor } from "@/lib/auth-guard";
 import { createMinimalArrangementForSong, retrieveSongArrangements } from "@/prisma/data";
 import { NextRequest } from "next/server";
 
@@ -31,6 +32,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
+  const guard = await requireSongEditor();
+  if (!guard.ok) return guard.response;
+
   const { slugOrId } = await params;
   const arrangement = await createMinimalArrangementForSong(slugOrId);
   return new Response(JSON.stringify(arrangement), {
