@@ -1,10 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { Mode } from "@/components/config/config";
 import StageModeControls from "./StageModeControls";
 
 vi.mock("@/components/config/KeyButtonSet", () => ({
   default: () => <div data-testid="key-button-set" />,
+}));
+
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => ({ chords: "Cifra", lyrics: "Letra", conventions: "Convenções", text: "Texto" })[key] ?? key,
 }));
 
 const baseProps = {
@@ -18,6 +23,8 @@ const baseProps = {
   originalKey: "C",
   transpose: 0,
   setTranspose: vi.fn(),
+  mode: "chords" as Mode,
+  onModeChange: vi.fn(),
   fontSize: 24,
   onFontSizeChange: vi.fn(),
   isScrollEnabled: false,
@@ -186,6 +193,29 @@ describe("StageModeControls — visão geral", () => {
     );
     expect(screen.getByRole("button", { name: /tela anterior/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /próxima tela/i })).toBeDisabled();
+  });
+});
+
+describe("StageModeControls — modo de exibição (Convenções)", () => {
+  async function openConfig(props = baseProps) {
+    const user = userEvent.setup();
+    render(<StageModeControls {...props} />);
+    await user.click(screen.getByRole("button", { name: /configurações/i }));
+    return user;
+  }
+
+  it("a bandeja de configurações mostra os quatro modos, com o atual marcado", async () => {
+    await openConfig({ ...baseProps, mode: "conventions" });
+    const radios = await screen.findAllByRole("radio", { name: /cifra|letra|convenções|texto/i });
+    expect(radios.map((el) => el.textContent)).toEqual(["Cifra", "Letra", "Convenções", "Texto"]);
+    expect(screen.getByRole("radio", { name: "Convenções" })).toHaveAttribute("data-state", "on");
+  });
+
+  it("escolher Convenções chama onModeChange('conventions')", async () => {
+    const onModeChange = vi.fn();
+    const user = await openConfig({ ...baseProps, onModeChange });
+    await user.click(await screen.findByRole("radio", { name: "Convenções" }));
+    expect(onModeChange).toHaveBeenCalledWith("conventions");
   });
 });
 

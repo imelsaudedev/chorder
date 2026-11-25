@@ -1,5 +1,6 @@
 "use client";
 
+import { Mode } from "@/components/config/config";
 import SongConfigProvider from "@/components/config/SongConfig";
 import ArrangementView from "@/components/song/ArrangementView";
 import SongMap from "@/components/song/SongMap";
@@ -61,6 +62,10 @@ const FONT_SIZE_KEY = "modo-palco:fontSize";
 const SHOW_ROTEIRO_KEY = "modo-palco:showRoteiro";
 // Layout do Palco: "scroll" (rolagem, 1 coluna) ou "overview" (visão geral: a música inteira numa tela).
 const LAYOUT_KEY = "modo-palco:layout";
+// Modo de exibição (cifra, letra, convenções, texto): único pro Palco inteiro e do aparelho, como a fonte —
+// o baterista, por exemplo, deixa em "Convenções" sem precisar trocar a cada música.
+const MODE_KEY = "modo-palco:mode";
+const STAGE_MODES: readonly Mode[] = ["chords", "lyrics", "conventions", "text"];
 
 function arrangementKey(unit: ClientServiceUnit) {
   const arrangement = unit.arrangement;
@@ -162,6 +167,9 @@ export default function StageMode({
   );
   const [showRoteiro, setShowRoteiro] = useLocalStorageState(SHOW_ROTEIRO_KEY, false);
   const [layoutMode, setLayoutMode] = useLocalStorageState<StageLayoutMode>(LAYOUT_KEY, "scroll");
+  const [storedMode, setMode] = useLocalStorageState<Mode>(MODE_KEY, "chords");
+  // Valor salvo que não é um modo conhecido (edição manual, versão antiga) volta ao padrão.
+  const mode: Mode = STAGE_MODES.includes(storedMode) ? storedMode : "chords";
   const isOverview = layoutMode === "overview";
   const [scrollSpeeds, setScrollSpeeds] = useState(() =>
     units.map((unit) => readStorage(scrollSpeedKey(unit), DEFAULT_SCROLL_SPEED_MULTIPLIER))
@@ -429,6 +437,7 @@ export default function StageMode({
             arrangement={screen.kind === "song" ? units[screen.songIndex]?.arrangement : null}
             items={screen.kind === "items" ? screen.units : undefined}
             transpose={screen.kind === "song" ? (transposes[screen.songIndex] ?? 0) : 0}
+            mode={mode}
             settings={screen.kind === "song" ? (overviewSettings[screen.songIndex] ?? DEFAULT_OVERVIEW_SETTINGS) : DEFAULT_OVERVIEW_SETTINGS}
             maxFontSize={fontSize}
             topInset={topBarHeight}
@@ -481,7 +490,7 @@ export default function StageMode({
                     </span>
                     <div className="h-px flex-1 bg-border" />
                   </div>
-                  <SongConfigProvider transpose={transposes[entry.songIndex] ?? 0} columns={1} fontSize={fontSize}>
+                  <SongConfigProvider transpose={transposes[entry.songIndex] ?? 0} columns={1} fontSize={fontSize} mode={mode}>
                     <ArrangementView arrangement={arrangement} collapsible />
                   </SongConfigProvider>
                 </section>
@@ -505,7 +514,7 @@ export default function StageMode({
 
       {/* StageModeControls renderiza KeyButtonSet, que precisa de um
           SongConfigProvider ancestral — o da música ativa. */}
-      <SongConfigProvider transpose={transposes[activeIndex] ?? 0} columns={1} fontSize={fontSize}>
+      <SongConfigProvider transpose={transposes[activeIndex] ?? 0} columns={1} fontSize={fontSize} mode={mode}>
         <StageModeControls
           indexLabel={indexLabel}
           title={title}
@@ -530,6 +539,8 @@ export default function StageMode({
           originalKey={currentArrangement?.key ?? ""}
           transpose={transposes[activeIndex] ?? 0}
           setTranspose={setCurrentTranspose}
+          mode={mode}
+          onModeChange={setMode}
           fontSize={fontSize}
           onFontSizeChange={setFontSize}
           showRoteiro={showRoteiro}

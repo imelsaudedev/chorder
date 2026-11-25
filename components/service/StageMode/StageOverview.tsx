@@ -1,5 +1,6 @@
 "use client";
 
+import { Mode } from "@/components/config/config";
 import ColumnViewer from "@/components/song/ArrangementView/ColumnViewer";
 import { useCollapsedUnits } from "@/hooks/useCollapsedUnits";
 import { ClientArrangement, ClientServiceUnit } from "@/prisma/models";
@@ -77,6 +78,8 @@ type StageOverviewProps = {
   /** Tela de itens do roteiro (itens seguidos ficam juntos na mesma tela). */
   items?: ClientServiceUnit[];
   transpose: number;
+  /** Cifra, letra, convenções ou texto — o mesmo da rolagem. Muda a altura do conteúdo, então refaz o encaixe. */
+  mode?: Mode;
   settings: OverviewSettings;
   /** Teto da fonte no automático (a preferência de tamanho do músico): o texto só diminui pra caber, nunca passa disso. */
   maxFontSize: number;
@@ -105,6 +108,7 @@ export default function StageOverview({
   arrangement,
   items,
   transpose,
+  mode = "chords",
   settings,
   maxFontSize,
   topInset,
@@ -159,7 +163,7 @@ export default function StageOverview({
 
   // Começa uma busca nova sempre que algo que muda o encaixe muda: tela, tom,
   // ajustes ou tamanho da área (girar o aparelho, por exemplo).
-  const searchKey = `${screenKey}|${transpose}|${settings.columns}|${settings.fontSize}|${settings.density}|${maxFontSize}|${collapsedKey}|${size.w}x${size.h}`;
+  const searchKey = `${screenKey}|${transpose}|${mode}|${settings.columns}|${settings.fontSize}|${settings.density}|${maxFontSize}|${collapsedKey}|${size.w}x${size.h}`;
   useLayoutEffect(() => {
     if (size.w === 0 || size.h === 0) return;
     let columnsList: number[];
@@ -301,7 +305,7 @@ export default function StageOverview({
               transpose={transpose}
               originalKey={arrangement.key}
               enharmonicPreference={null}
-              mode="chords"
+              mode={mode}
               density={cfg.density}
               collapsedUnits={collapsedUnits}
               onToggleCollapse={toggleCollapse}
