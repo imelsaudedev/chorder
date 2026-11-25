@@ -63,7 +63,17 @@ function GroupBand({ label, tone, first, rail = true }: { label: string; tone: T
 export default function ServiceList({ services }: ServiceListProps) {
   const t = useTranslations("Service");
   const locale = useLocale();
-  const { upcoming, past } = useMemo(() => splitUpcomingAndPast(services), [services]);
+  const { drafts, published } = useMemo(() => {
+    const draftItems: ServiceListItem[] = [];
+    const publishedItems: ServiceListItem[] = [];
+    for (const s of services) {
+      if (s.status === "DRAFT") draftItems.push(s);
+      else publishedItems.push(s);
+    }
+    draftItems.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    return { drafts: draftItems, published: publishedItems };
+  }, [services]);
+  const { upcoming, past } = useMemo(() => splitUpcomingAndPast(published), [published]);
   const upcomingMonths = useMemo(() => groupByMonth(upcoming), [upcoming]);
   const { state, update, clearFilters } = useServicesListState();
   const [expanded, setExpanded] = useState(false);
@@ -119,6 +129,21 @@ export default function ServiceList({ services }: ServiceListProps) {
 
   return (
     <div className="@container">
+      {drafts.length > 0 && (
+        <Section title={t("myDrafts")}>
+          <div className={cn(CARD, "border-warning-border bg-warning-bg/40")}>
+            <div className="divide-y divide-border">
+              {drafts.map((service) => (
+                <ServiceRow
+                  key={service.slug}
+                  service={service}
+                  badge={t("draftBadge")}
+                />
+              ))}
+            </div>
+          </div>
+        </Section>
+      )}
       {upcoming.length > 0 && (
         <Section title={t("nextServices")}>
           <div className={cn(CARD, "border-secondary/30 bg-secondary/5")}>

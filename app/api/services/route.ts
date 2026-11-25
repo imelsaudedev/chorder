@@ -24,9 +24,9 @@ export async function GET(request: Request) {
   if (!guard.ok) return guard.response;
 
   if (new URL(request.url).searchParams.get("view") === "list") {
-    return Response.json(await retrieveServicesList());
+    return Response.json(await retrieveServicesList(guard.userId));
   }
-  const services = await retrieveServices();
+  const services = await retrieveServices(guard.userId);
   return Response.json(services);
 }
 
@@ -52,7 +52,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const createdService = await createOrUpdateService(service, { mode: "create" });
+    const createdService = await createOrUpdateService(service, {
+      mode: "create",
+      actorUserId: guard.userId,
+    });
     return new Response(JSON.stringify(createdService), {
       status: 200,
       headers: { "Content-Type": "application/json" },

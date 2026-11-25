@@ -100,7 +100,16 @@
     "clearFilters": "Clear filters",
     "emptyTitle": "No services found",
     "emptyHint": "Try another search or clear the filters.",
-    "showMore": "Show {count} more"
+    "showMore": "Show {count} more",
+    "myDrafts": "My drafts",
+    "draftBadge": "Draft",
+    "privateDraftBadge": "Private draft",
+    "saveDraft": "Save draft",
+    "publishService": "Publish",
+    "draftBannerText": "Private draft — visible only to you until published.",
+    "draftPublishedToast": "Service published!",
+    "draftSavedToast": "Draft saved.",
+    "publishError": "Could not publish the service. Please try again."
   },
   "ServiceData": {
     "title": "Title",

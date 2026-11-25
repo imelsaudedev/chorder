@@ -6,7 +6,7 @@ import FormFooter from "@/components/common/FormFooter";
 import ServicePlanDrawer, { ServicePlanConfig } from "@/components/service/ServicePlanDrawer";
 import { Button } from "@/components/ui/button";
 import { friendlySaveError } from "@/lib/friendly-save-error";
-import { ClientService } from "@/prisma/models";
+import { ClientService, ServiceStatus } from "@/prisma/models";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -33,8 +33,9 @@ type ServicePlanEditorProps = {
 
 export default function ServicePlanEditor({ service, onSaved }: ServicePlanEditorProps) {
   const t = useTranslations("Messages");
+  const tService = useTranslations("Service");
   const router = useRouter();
-  const viewUrl = `/services/${service.slug}`;
+  const viewUrl = service.slug ? `/services/${service.slug}` : "/services";
 
   const editor = usePlanEditor(service);
   const draft = usePlanDraft(service, editor.service, editor.isDirty);
@@ -98,10 +99,18 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
     editor.setDrawer(next);
   }
 
-  async function handleSave() {
+  const isNewOrDraft = !editor.service.id || editor.service.status === "DRAFT";
+  const hasSections = (editor.service.plan?.sections?.length ?? 0) > 0;
+
+  async function handleSave(targetStatus?: ServiceStatus) {
     try {
-      const saved = await editor.save();
+      const saved = await editor.save(targetStatus ? { status: targetStatus } : undefined);
       draft.clear();
+      if (targetStatus === "DRAFT") {
+        toast.success(tService("draftSavedToast"));
+      } else if (targetStatus === "PUBLISHED" && editor.service.status === "DRAFT") {
+        toast.success(tService("draftPublishedToast"));
+      }
       if (onSaved) onSaved(saved);
     } catch (err) {
       if (err instanceof ServiceSaveError && err.status === 409) {
@@ -212,10 +221,27 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
       </div>
 
       <FormFooter
-        disabled={!editor.isDirty || !(editor.service.plan?.sections?.length)}
+        disabled={
+          !hasSections ||
+          (isNewOrDraft
+            ? !editor.service.id && !editor.isDirty
+            : !editor.isDirty)
+        }
         loading={editor.isSaving}
-        label={t("saveService")}
-        onSave={handleSave}
+        label={isNewOrDraft ? tService("publishService") : t("saveService")}
+        onSave={() => handleSave(isNewOrDraft ? "PUBLISHED" : undefined)}
+        secondaryAction={
+          isNewOrDraft ? (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={editor.isSaving || !hasSections || (!editor.isDirty && !!editor.service.id)}
+              onClick={() => handleSave("DRAFT")}
+            >
+              {tService("saveDraft")}
+            </Button>
+          ) : undefined
+        }
         status={
           <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
             {editor.isSaving ? (

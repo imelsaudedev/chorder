@@ -1,6 +1,11 @@
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { GET, POST } from './route';
-import { POST as POST_ONE } from './[slugOrId]/route';
+import {
+  DELETE as DELETE_ONE,
+  GET as GET_ONE,
+  PATCH as PATCH_ONE,
+  POST as POST_ONE,
+} from './[slugOrId]/route';
 import { POST as POST_MINIMAL_ARRANGEMENT } from '../songs/[slugOrId]/arrangements/route';
 import prisma from '../../../prisma/client';
 import { auth } from '@/auth';
@@ -8,7 +13,8 @@ import { NextRequest } from 'next/server';
 
 vi.mock('@/auth', () => ({ auth: vi.fn() }));
 
-beforeEach(() => {
+beforeEach(async () => {
+  await prisma.user.deleteMany();
   vi.mocked(auth).mockResolvedValue({
     user: { id: 'test-user-id', email: 'admin@test.com', roles: ['ADMIN'] },
     expires: new Date(Date.now() + 60_000).toISOString(),
@@ -362,5 +368,119 @@ describe('Services API integration', () => {
 
         const response = await POST(req);
         expect(response.status).toBe(400);
+    });
+});
+
+describe('Private drafts integration', () => {
+    it('keeps DRAFT services private to the creator until published', async () => {
+        const author = await prisma.user.create({
+            data: { email: 'author@test.com', name: 'Author', roles: ['WORSHIP'] },
+        });
+        const otherAdmin = await prisma.user.create({
+            data: { email: 'other-admin@test.com', name: 'Other Admin', roles: ['ADMIN'] },
+        });
+        const mediaUser = await prisma.user.create({
+            data: { email: 'media-user@test.com', name: 'Media', roles: ['MEDIA'] },
+        });
+
+        const sessionFor = (u: { id: string; email: string; roles: ('ADMIN' | 'WORSHIP' | 'MEDIA' | 'USER')[] }) => ({
+            user: { id: u.id, email: u.email, roles: u.roles },
+            expires: new Date(Date.now() + 60_000).toISOString(),
+        });
+
+        // 1. Author creates a DRAFT service
+        vi.mocked(auth).mockResolvedValue(sessionFor(author));
+        const createRes = await POST(
+            new Request('http://localhost/api/services', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: 'Rascunho do Dirigente',
+                    slug: 'rascunho-dirigente',
+                    date: '2026-06-01T10:00:00Z',
+                    worshipLeader: 'Author',
+                    isDeleted: false,
+                    status: 'DRAFT',
+                    plan: {
+                        startTime: '10:00',
+                        sections: [
+                            { id: 's1', type: 'CULTO', label: 'Culto', order: 1, units: [] },
+                        ],
+                    },
+                }),
+            })
+        );
+        expect(createRes.status).toBe(200);
+        const created = await createRes.json();
+        expect(created.status).toBe('DRAFT');
+        expect(created.createdById).toBe(author.id);
+
+        // 2. Author sees their own draft in list & single GET
+        const authorList = await (await GET(new Request('http://localhost/api/services?view=list'))).json();
+        expect(authorList.map((s: { slug: string }) => s.slug)).toContain('rascunho-dirigente');
+
+        const authorGet = await GET_ONE(new Request('http://localhost/api/services/rascunho-dirigente'), {
+            params: Promise.resolve({ slugOrId: 'rascunho-dirigente', arrangementId: 'default' }),
+        });
+        expect(authorGet.status).toBe(200);
+
+        // 3. Another ADMIN does NOT see the author's private draft and gets 404 on GET/PATCH/DELETE
+        vi.mocked(auth).mockResolvedValue(sessionFor(otherAdmin));
+        const otherList = await (await GET(new Request('http://localhost/api/services?view=list'))).json();
+        expect(otherList.map((s: { slug: string }) => s.slug)).not.toContain('rascunho-dirigente');
+
+        const otherGet = await GET_ONE(new Request('http://localhost/api/services/rascunho-dirigente'), {
+            params: Promise.resolve({ slugOrId: 'rascunho-dirigente', arrangementId: 'default' }),
+        });
+        expect(otherGet.status).toBe(404);
+
+        const otherPatch = await PATCH_ONE(
+            new NextRequest('http://localhost/api/services/rascunho-dirigente', {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'PUBLISHED' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'rascunho-dirigente' }) }
+        );
+        expect(otherPatch.status).toBe(404);
+
+        const otherDelete = await DELETE_ONE(new Request('http://localhost/api/services/rascunho-dirigente', { method: 'DELETE' }), {
+            params: Promise.resolve({ slugOrId: 'rascunho-dirigente' }),
+        });
+        expect(otherDelete.status).toBe(404);
+
+        // 4. Author publishes the draft via PATCH
+        vi.mocked(auth).mockResolvedValue(sessionFor(author));
+        const publishRes = await PATCH_ONE(
+            new NextRequest('http://localhost/api/services/rascunho-dirigente', {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'PUBLISHED' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'rascunho-dirigente' }) }
+        );
+        expect(publishRes.status).toBe(200);
+
+        // 5. Now MEDIA and other ADMIN can see the published service, but MEDIA cannot change status
+        vi.mocked(auth).mockResolvedValue(sessionFor(mediaUser));
+        const mediaList = await (await GET(new Request('http://localhost/api/services?view=list'))).json();
+        expect(mediaList.map((s: { slug: string }) => s.slug)).toContain('rascunho-dirigente');
+
+        const mediaUnpublish = await PATCH_ONE(
+            new NextRequest('http://localhost/api/services/rascunho-dirigente', {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'DRAFT' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'rascunho-dirigente' }) }
+        );
+        expect(mediaUnpublish.status).toBe(403);
+
+        // 6. Even the author/ADMIN cannot revert a PUBLISHED service back to DRAFT (prevents orphaning)
+        vi.mocked(auth).mockResolvedValue(sessionFor(author));
+        const authorUnpublish = await PATCH_ONE(
+            new NextRequest('http://localhost/api/services/rascunho-dirigente', {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'DRAFT' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'rascunho-dirigente' }) }
+        );
+        expect(authorUnpublish.status).toBe(400);
     });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCreateOrUpdateService } from "@/app/api/api-client";
-import { ClientService, ClientServiceSection, ClientServiceUnit, ServicePlan } from "@/prisma/models";
+import { ClientService, ClientServiceSection, ClientServiceUnit, ServicePlan, ServiceStatus } from "@/prisma/models";
 import { useCallback, useState } from "react";
 
 export type DrawerState =
@@ -189,11 +189,16 @@ export function usePlanEditor(initialService: ClientService) {
     setIsDirty(true);
   }, []);
 
-  const save = useCallback(async () => {
-    const saved = await createOrUpdateService(service);
-    setIsDirty(false);
-    return saved;
-  }, [service, createOrUpdateService]);
+  const save = useCallback(
+    async (overrides?: { status?: ServiceStatus }) => {
+      const payload = overrides?.status ? { ...service, status: overrides.status } : service;
+      const saved = await createOrUpdateService(payload);
+      setService(saved);
+      setIsDirty(false);
+      return saved;
+    },
+    [service, createOrUpdateService]
+  );
 
   return {
     service,

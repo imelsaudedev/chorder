@@ -100,7 +100,16 @@
     "clearFilters": "Limpar filtros",
     "emptyTitle": "Nenhuma liturgia encontrada",
     "emptyHint": "Tente outra busca ou limpe os filtros.",
-    "showMore": "Mostrar mais {count}"
+    "showMore": "Mostrar mais {count}",
+    "myDrafts": "Meus rascunhos",
+    "draftBadge": "Rascunho",
+    "privateDraftBadge": "Rascunho privado",
+    "saveDraft": "Salvar rascunho",
+    "publishService": "Publicar",
+    "draftBannerText": "Rascunho privado — visível apenas para você até publicar.",
+    "draftPublishedToast": "Liturgia publicada!",
+    "draftSavedToast": "Rascunho salvo.",
+    "publishError": "Não foi possível publicar a liturgia. Tente novamente."
   },
   "ServiceData": {
     "title": "Título",

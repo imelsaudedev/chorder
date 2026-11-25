@@ -133,21 +133,31 @@ enum SongUnitType {
   TEXT
 }
 
+enum ServiceStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model Service {
-  id              Int      @id @default(autoincrement())
-  legacyId        Int?     @unique
+  id              Int           @id @default(autoincrement())
+  legacyId        Int?          @unique
   title           String?
-  slug            String   @unique
+  slug            String        @unique
   worshipLeader   String?
   date            DateTime
-  isDeleted       Boolean  @default(false)
+  isDeleted       Boolean       @default(false)
+  status          ServiceStatus @default(PUBLISHED)
+  createdById     String?
   preacher        String?
   sermonTheme     String?
   sermonReference String?
   plan            Json?
-  updatedAt       DateTime @default(now()) @updatedAt
+  updatedAt       DateTime      @default(now()) @updatedAt
 
-  units ServiceUnit[]
+  createdBy User?         @relation("CreatedServices", fields: [createdById], references: [id], onDelete: SetNull)
+  units     ServiceUnit[]
+
+  @@index([createdById])
 }
 
 model ServiceTemplate {
@@ -191,9 +201,10 @@ model User {
   email         String     @unique
   emailVerified DateTime?
   image         String?
-  roles         UserRole[] @default([])
-  accounts      Account[]
-  sessions      Session[]
+  roles           UserRole[] @default([])
+  accounts        Account[]
+  sessions        Session[]
+  createdServices Service[]  @relation("CreatedServices")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

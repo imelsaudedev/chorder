@@ -4,7 +4,8 @@ import Text from "@/components/common/Text";
 import { ClientService } from "@/prisma/models";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, Mic2, MicVocal, Pencil } from "lucide-react";
+import { Calendar, Lock, Mic2, MicVocal, Pencil } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { countPlanProgress } from "./unitSummary";
 
 type ServicePlanHeaderProps = {
@@ -18,10 +19,12 @@ type ServicePlanHeaderProps = {
 // No topo mostra título, data, dirigente e pregador; ao rolar, encolhe para
 // uma barra só com título e progresso (o clique continua abrindo as informações).
 export default function ServicePlanHeader({ service, onEdit, compact = false }: ServicePlanHeaderProps) {
+  const t = useTranslations("Service");
   const date = new Date(service.date);
   const dateStr = format(date, "d 'de' MMM. yyyy · HH:mm", { locale: ptBR });
   const { filled, total } = countPlanProgress(service.plan?.sections ?? []);
   const percent = total > 0 ? Math.round((filled / total) * 100) : 0;
+  const isDraft = service.status === "DRAFT";
 
   return (
     <button
@@ -42,6 +45,12 @@ export default function ServicePlanHeader({ service, onEdit, compact = false }: 
           >
             {service.title ?? "Sem título"}
           </Text>
+          {isDraft && (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-warning-border bg-warning-bg px-2 py-0.5 text-xs font-medium text-warning-text">
+              <Lock className="size-3" aria-hidden="true" />
+              {t("privateDraftBadge")}
+            </span>
+          )}
           <Pencil className="w-4 h-4 shrink-0 text-muted-foreground" />
         </div>
         {total > 0 && (

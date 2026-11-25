@@ -209,7 +209,7 @@ export async function retrieveSongUsage(
   if (songIds.length === 0) return usage;
 
   const services = await prisma.service.findMany({
-    where: { isDeleted: false },
+    where: { isDeleted: false, status: "PUBLISHED" },
     select: { date: true, plan: true },
   });
   const servicesArrangementIds = services.map((service) => {
@@ -920,13 +920,27 @@ function hydrateArrangement(row: any): ClientArrangement {
   };
 }
 
+function visibleServicesWhere(viewerUserId?: string | null): Prisma.ServiceWhereInput {
+  if (!viewerUserId) {
+    return { isDeleted: false, status: "PUBLISHED" };
+  }
+  return {
+    isDeleted: false,
+    OR: [
+      { status: "PUBLISHED" },
+      { status: "DRAFT", createdById: viewerUserId },
+    ],
+  };
+}
+
 export async function retrieveService(
-  slugOrId: string | number
+  slugOrId: string | number,
+  viewerUserId?: string | null
 ): Promise<ClientService | null> {
   const service = await prisma.service.findFirst({
     where: {
       ...selectSlugOrId(slugOrId),
-      isDeleted: false,
+      ...visibleServicesWhere(viewerUserId),
     },
   });
 
@@ -935,12 +949,12 @@ export async function retrieveService(
   const adjacentSelect = { select: { slug: true, title: true, date: true } } as const;
   const [prevService, nextService] = await Promise.all([
     prisma.service.findFirst({
-      where: { isDeleted: false, date: { lt: service.date } },
+      where: { isDeleted: false, status: "PUBLISHED", date: { lt: service.date } },
       orderBy: { date: "desc" },
       ...adjacentSelect,
     }),
     prisma.service.findFirst({
-      where: { isDeleted: false, date: { gt: service.date } },
+      where: { isDeleted: false, status: "PUBLISHED", date: { gt: service.date } },
       orderBy: { date: "asc" },
       ...adjacentSelect,
     }),
@@ -1007,7 +1021,7 @@ export async function retrieveService(
 
 export async function retrieveRecentServices(limit = 8): Promise<RecentServiceEntry[]> {
   const services = await prisma.service.findMany({
-    where: { isDeleted: false },
+    where: { isDeleted: false, status: "PUBLISHED" },
     orderBy: { date: "desc" },
     take: limit,
     select: { slug: true, title: true, date: true, worshipLeader: true, plan: true },
@@ -1048,17 +1062,23 @@ export async function retrieveRecentServices(limit = 8): Promise<RecentServiceEn
   });
 }
 
-export async function retrieveServices(): Promise<ClientService[]> {
-  const services = await prisma.service.findMany({ where: { isDeleted: false } });
+export async function retrieveServices(
+  viewerUserId?: string | null
+): Promise<ClientService[]> {
+  const services = await prisma.service.findMany({
+    where: visibleServicesWhere(viewerUserId),
+  });
   return services as unknown as ClientService[];
 }
 
 // Lista de Liturgias: só o que a tela mostra e pesquisa. Não devolve o plano
 // (que cresce com o histórico); resolve os arranjos para os títulos das músicas
 // numa única consulta.
-export async function retrieveServicesList(): Promise<ServiceListItem[]> {
+export async function retrieveServicesList(
+  viewerUserId?: string | null
+): Promise<ServiceListItem[]> {
   const services = await prisma.service.findMany({
-    where: { isDeleted: false },
+    where: visibleServicesWhere(viewerUserId),
     select: {
       slug: true,
       title: true,
@@ -1067,6 +1087,7 @@ export async function retrieveServicesList(): Promise<ServiceListItem[]> {
       preacher: true,
       sermonTheme: true,
       sermonReference: true,
+      status: true,
       plan: true,
       updatedAt: true,
     },
@@ -1112,14 +1133,14 @@ export class ServiceSlugExistsError extends Error {
 
 export async function createOrUpdateService(
   service: ClientService,
-  options?: { mode?: "create" | "update" }
+  options?: { mode?: "create" | "update"; actorUserId?: string | null }
 ): Promise<ClientService> {
   const serviceSlug = service.slug?.length ? service.slug : await slugForService();
 
   const serviceId = await prisma.$transaction(async (tx) => {
     const existing = await tx.service.findUnique({
       where: { slug: serviceSlug },
-      select: { plan: true, updatedAt: true },
+      select: { plan: true, updatedAt: true, status: true, createdById: true },
     });
 
     if (options?.mode === "create" && existing) {
@@ -1147,10 +1168,22 @@ export async function createOrUpdateService(
       sermonTheme: service.sermonTheme ?? null,
       sermonReference: service.sermonReference ?? null,
       plan: (resolvedPlan as object) ?? Prisma.DbNull,
+      ...(service.status ? { status: service.status } : {}),
     };
 
     if (!existing) {
-      const created = await tx.service.create({ data: { ...data, slug: serviceSlug, isDeleted: false } });
+      const actorExists = options?.actorUserId
+        ? await tx.user.findUnique({ where: { id: options.actorUserId }, select: { id: true } })
+        : null;
+      const created = await tx.service.create({
+        data: {
+          ...data,
+          slug: serviceSlug,
+          isDeleted: false,
+          status: service.status ?? "PUBLISHED",
+          createdById: actorExists?.id ?? null,
+        },
+      });
       return created.id;
     }
 
@@ -1170,7 +1203,7 @@ export async function createOrUpdateService(
     return current.id;
   });
 
-  const retService = await retrieveService(serviceId);
+  const retService = await retrieveService(serviceId, options?.actorUserId);
   if (!retService) throw new Error("Service not found after creation or update");
   return retService;
 }
@@ -1300,12 +1333,13 @@ async function syncPlanArrangements(
 }
 
 export async function deleteService(
-  slugOrId: string | number
+  slugOrId: string | number,
+  viewerUserId?: string | null
 ): Promise<boolean> {
   const service = await prisma.service.findFirst({
     where: {
       ...selectSlugOrId(slugOrId),
-      isDeleted: false,
+      ...visibleServicesWhere(viewerUserId),
     },
   });
   if (!service) {
@@ -1416,7 +1450,7 @@ export async function retrieveStats(): Promise<StatsData> {
   const [totalSongs, services] = await Promise.all([
     prisma.song.count({ where: { isDeleted: false } }),
     prisma.service.findMany({
-      where: { isDeleted: false },
+      where: { isDeleted: false, status: "PUBLISHED" },
       select: { slug: true, worshipLeader: true, plan: true },
     }),
   ]);
