@@ -967,6 +967,7 @@ function visibleServicesWhere(
     OR: [
       { status: "PUBLISHED" },
       { status: "DRAFT", createdById: viewerUserId },
+      { status: "DRAFT", shares: { some: { userId: viewerUserId } } },
     ],
   };
 }
@@ -997,52 +998,73 @@ export async function retrieveService(
   let isOwner = false;
   let canEdit = false;
   let canDelete = false;
+  let canPublish = false;
+  let canManageShareLink = false;
+  let canManagePeopleShares = false;
+  let allowAdjacentNav = false;
 
   if (ctx !== undefined) {
     isOwner = Boolean(ctx.userId && service.createdById === ctx.userId);
+    const userShare = Array.isArray(service.shares) ? service.shares[0] : undefined;
+    const hasValidShareToken = Boolean(
+      service.shareToken &&
+        ctx.shareToken &&
+        timingSafeTokenMatch(service.shareToken, ctx.shareToken)
+    );
+
     if (service.scope === "CHURCH") {
-      if (!canViewChurchServices(ctx.roles)) return null;
-      if (service.status === "DRAFT" && !isOwner) return null;
-      canEdit =
-        canEditChurchServices(ctx.roles) &&
-        (service.status === "PUBLISHED" || isOwner);
-      canDelete =
-        canManageChurchServices(ctx.roles) &&
-        (service.status === "PUBLISHED" || isOwner);
+      if (service.status === "PUBLISHED") {
+        const hasChurchAccess = canViewChurchServices(ctx.roles);
+        if (!hasChurchAccess && !hasValidShareToken) return null;
+        if (hasChurchAccess) {
+          canEdit = canEditChurchServices(ctx.roles);
+          canDelete = canManageChurchServices(ctx.roles);
+          canManageShareLink = canManageChurchServices(ctx.roles);
+          allowAdjacentNav = true;
+        }
+      } else {
+        // CHURCH DRAFT: visible to creator, explicitly shared collaborators, or valid share link
+        if (!isOwner && !userShare && !hasValidShareToken) return null;
+        const canCoManageDraft =
+          isOwner ||
+          (userShare?.permission === "EDIT" && canManageChurchServices(ctx.roles));
+        canEdit = isOwner || userShare?.permission === "EDIT";
+        canDelete = isOwner && canManageChurchServices(ctx.roles);
+        canPublish = canManageChurchServices(ctx.roles) && canCoManageDraft;
+        canManageShareLink = canCoManageDraft;
+        canManagePeopleShares = canCoManageDraft;
+      }
     } else {
-      const userShare = Array.isArray(service.shares) ? service.shares[0] : undefined;
-      const hasValidShareToken = Boolean(
-        service.shareToken &&
-          ctx.shareToken &&
-          timingSafeTokenMatch(service.shareToken, ctx.shareToken)
-      );
+      // PERSONAL service
       if (!isOwner && !userShare && !hasValidShareToken) return null;
       canEdit = isOwner || userShare?.permission === "EDIT";
       canDelete = isOwner;
+      canManageShareLink = isOwner;
+      canManagePeopleShares = isOwner;
     }
   } else {
     // Internal / legacy calls without viewer context only access published church services
     if (service.scope !== "CHURCH" || service.status !== "PUBLISHED") return null;
     canEdit = true;
     canDelete = true;
+    allowAdjacentNav = true;
   }
 
   const adjacentSelect = { select: { slug: true, title: true, date: true } } as const;
-  const [prevService, nextService] =
-    service.scope === "CHURCH" && service.status === "PUBLISHED"
-      ? await Promise.all([
-          prisma.service.findFirst({
-            where: { isDeleted: false, scope: "CHURCH", status: "PUBLISHED", date: { lt: service.date } },
-            orderBy: { date: "desc" },
-            ...adjacentSelect,
-          }),
-          prisma.service.findFirst({
-            where: { isDeleted: false, scope: "CHURCH", status: "PUBLISHED", date: { gt: service.date } },
-            orderBy: { date: "asc" },
-            ...adjacentSelect,
-          }),
-        ])
-      : [null, null];
+  const [prevService, nextService] = allowAdjacentNav
+    ? await Promise.all([
+        prisma.service.findFirst({
+          where: { isDeleted: false, scope: "CHURCH", status: "PUBLISHED", date: { lt: service.date } },
+          orderBy: { date: "desc" },
+          ...adjacentSelect,
+        }),
+        prisma.service.findFirst({
+          where: { isDeleted: false, scope: "CHURCH", status: "PUBLISHED", date: { gt: service.date } },
+          orderBy: { date: "asc" },
+          ...adjacentSelect,
+        }),
+      ])
+    : [null, null];
 
   const rawPlan = service.plan as ServicePlan | null;
 
@@ -1097,10 +1119,13 @@ export async function retrieveService(
   const { shares: _shares, shareToken, ...serviceFields } = service;
   return {
     ...serviceFields,
-    shareToken: isOwner ? shareToken : null,
+    shareToken: canManageShareLink ? shareToken : null,
     isOwner,
     canEdit,
     canDelete,
+    canPublish,
+    canManageShareLink,
+    canManagePeopleShares,
     prevService: prevService ?? null,
     nextService: nextService ?? null,
     units: flatUnits,

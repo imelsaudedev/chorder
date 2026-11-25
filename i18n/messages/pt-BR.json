@@ -324,6 +324,7 @@
     "shareButton": "Compartilhar",
     "title": "Compartilhar liturgia",
     "description": "Escolha pessoas específicas ou ative um link compartilhável para visualização.",
+    "descriptionLinkOnly": "Ative um link compartilhável para enviar a pastores ou convidados sem listar a liturgia no site.",
     "emailPlaceholder": "E-mail da pessoa cadastrada...",
     "permissionLabel": "Permissão",
     "permissionView": "Visualizar",

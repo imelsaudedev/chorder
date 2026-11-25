@@ -79,7 +79,7 @@ export default function ClientPage({ serviceSlug, shareToken = null }: ClientPag
               <Lock className="size-4 shrink-0" aria-hidden="true" />
               {t("draftBannerText")}
             </span>
-            {service.canDelete !== false && (
+            {service.canPublish === true && (
               <Button
                 type="button"
                 size="sm"

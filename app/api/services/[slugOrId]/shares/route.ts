@@ -16,7 +16,7 @@ const sharePostSchema = z.union([
   }),
 ]);
 
-async function loadOwnedPersonalService(
+async function loadShareableService(
   slugOrId: string,
   userId: string,
   roles: readonly UserRole[]
@@ -25,7 +25,7 @@ async function loadOwnedPersonalService(
   if (!service || !service.id) {
     return { ok: false as const, error: NextResponse.json({ error: "Not found" }, { status: 404 }) };
   }
-  if (service.scope !== "PERSONAL" || !service.isOwner) {
+  if (!service.canManageShareLink) {
     return { ok: false as const, error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
   }
   return { ok: true as const, service };
@@ -60,13 +60,15 @@ export async function GET(
   }
 
   const { slugOrId } = await params;
-  const loaded = await loadOwnedPersonalService(slugOrId, live.userId, live.roles);
+  const loaded = await loadShareableService(slugOrId, live.userId, live.roles);
   if (!loaded.ok) return loaded.error;
 
-  const shares = await listShares(loaded.service.id!);
+  const allowPeopleShares = loaded.service.canManagePeopleShares === true;
+  const shares = allowPeopleShares ? await listShares(loaded.service.id!) : [];
   return NextResponse.json({
     shareToken: loaded.service.shareToken ?? null,
     shares,
+    allowPeopleShares,
   });
 }
 
@@ -80,7 +82,7 @@ export async function POST(
   }
 
   const { slugOrId } = await params;
-  const loaded = await loadOwnedPersonalService(slugOrId, live.userId, live.roles);
+  const loaded = await loadShareableService(slugOrId, live.userId, live.roles);
   if (!loaded.ok) return loaded.error;
 
   const parsed = sharePostSchema.safeParse(await request.json());
@@ -89,6 +91,7 @@ export async function POST(
   }
 
   const serviceId = loaded.service.id!;
+  const allowPeopleShares = loaded.service.canManagePeopleShares === true;
 
   if ("linkSharing" in parsed.data) {
     let nextToken: string | null = loaded.service.shareToken ?? null;
@@ -105,8 +108,13 @@ export async function POST(
 
     return NextResponse.json({
       shareToken: nextToken,
-      shares: await listShares(serviceId),
+      shares: allowPeopleShares ? await listShares(serviceId) : [],
+      allowPeopleShares,
     });
+  }
+
+  if (!allowPeopleShares) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const targetUser = await prisma.user.findFirst({
@@ -118,7 +126,7 @@ export async function POST(
     return NextResponse.json({ error: "user_not_found" }, { status: 404 });
   }
 
-  if (targetUser.id === live.userId) {
+  if (targetUser.id === live.userId || targetUser.id === loaded.service.createdById) {
     return NextResponse.json({ error: "cannot_share_with_self" }, { status: 400 });
   }
 
@@ -139,6 +147,7 @@ export async function POST(
   return NextResponse.json({
     shareToken: loaded.service.shareToken ?? null,
     shares: await listShares(serviceId),
+    allowPeopleShares,
   });
 }
 
@@ -152,8 +161,12 @@ export async function DELETE(
   }
 
   const { slugOrId } = await params;
-  const loaded = await loadOwnedPersonalService(slugOrId, live.userId, live.roles);
+  const loaded = await loadShareableService(slugOrId, live.userId, live.roles);
   if (!loaded.ok) return loaded.error;
+
+  if (!loaded.service.canManagePeopleShares) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const userId = new URL(request.url).searchParams.get("userId");
   if (!userId) {
@@ -167,5 +180,6 @@ export async function DELETE(
   return NextResponse.json({
     shareToken: loaded.service.shareToken ?? null,
     shares: await listShares(loaded.service.id!),
+    allowPeopleShares: true,
   });
 }

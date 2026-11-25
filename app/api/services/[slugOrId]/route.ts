@@ -122,14 +122,17 @@ export async function PATCH(
     if (body.status !== "DRAFT" && body.status !== "PUBLISHED") {
       return Response.json({ error: "Invalid status" }, { status: 400 });
     }
-    if (!canManageChurchServices(live.roles)) {
-      return Response.json({ error: "Forbidden" }, { status: 403 });
-    }
     if (service.status === "PUBLISHED" && body.status === "DRAFT") {
+      if (!canManageChurchServices(live.roles)) {
+        return Response.json({ error: "Forbidden" }, { status: 403 });
+      }
       return Response.json(
         { error: "Cannot revert a published service to draft" },
         { status: 400 }
       );
+    }
+    if (service.status === "DRAFT" && body.status === "PUBLISHED" && !service.canPublish) {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
     }
     data.status = body.status;
   }
@@ -181,14 +184,17 @@ export async function POST(
     service.status &&
     service.status !== existing.status
   ) {
-    if (!canManageChurchServices(live.roles)) {
-      return Response.json({ error: "Forbidden" }, { status: 403 });
-    }
     if (existing.status === "PUBLISHED" && service.status === "DRAFT") {
+      if (!canManageChurchServices(live.roles)) {
+        return Response.json({ error: "Forbidden" }, { status: 403 });
+      }
       return Response.json(
         { error: "Cannot revert a published service to draft" },
         { status: 400 }
       );
+    }
+    if (existing.status === "DRAFT" && service.status === "PUBLISHED" && !existing.canPublish) {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
     }
   }
 

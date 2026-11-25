@@ -162,6 +162,9 @@ export type ClientService = Omit<
   isOwner?: boolean;
   canEdit?: boolean;
   canDelete?: boolean;
+  canPublish?: boolean;
+  canManageShareLink?: boolean;
+  canManagePeopleShares?: boolean;
   units?: ClientServiceUnit[];
   plan?: ServicePlan | null;
   prevService?: ServiceRef | null;

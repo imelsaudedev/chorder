@@ -323,6 +323,7 @@
     "shareButton": "Share",
     "title": "Share liturgy",
     "description": "Choose specific people or enable a view-only shareable link.",
+    "descriptionLinkOnly": "Enable a view-only shareable link to send to pastors or guests without listing the liturgy publicly.",
     "emailPlaceholder": "Registered user's email...",
     "permissionLabel": "Permission",
     "permissionView": "View",

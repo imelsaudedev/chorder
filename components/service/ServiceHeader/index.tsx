@@ -28,7 +28,8 @@ export default function ServiceHeader({ service }: ServiceHeaderProps) {
   }
 
   const isPersonal = service.scope === "PERSONAL";
-  const canShare = isPersonal && service.isOwner === true;
+  const canShare = service.canManageShareLink === true;
+  const allowPeopleShares = service.canManagePeopleShares === true;
   const showActionsMenu = service.canDelete !== false;
 
   return (
@@ -72,6 +73,7 @@ export default function ServiceHeader({ service }: ServiceHeaderProps) {
       {canShare && (
         <ShareServiceDialog
           serviceSlug={service.slug}
+          allowPeopleShares={allowPeopleShares}
           open={shareOpen}
           onOpenChange={setShareOpen}
         />

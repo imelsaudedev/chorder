@@ -34,12 +34,14 @@ type ShareRow = {
 
 type ShareServiceDialogProps = {
   serviceSlug: string;
+  allowPeopleShares?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
 export default function ShareServiceDialog({
   serviceSlug,
+  allowPeopleShares = true,
   open,
   onOpenChange,
 }: ShareServiceDialogProps) {
@@ -179,106 +181,112 @@ export default function ShareServiceDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
+          <DialogDescription>
+            {allowPeopleShares ? t("description") : t("descriptionLinkOnly")}
+          </DialogDescription>
         </DialogHeader>
 
-        {/* Share with specific registered accounts */}
-        <form onSubmit={handleAddShare} className="flex flex-col gap-2 sm:flex-row">
-          <Input
-            type="email"
-            required
-            placeholder={t("emailPlaceholder")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="flex-1"
-            disabled={submitting}
-          />
-          <div className="flex gap-2">
-            <select
-              aria-label={t("permissionLabel")}
-              value={permission}
-              onChange={(e) =>
-                setPermission(e.target.value as ServiceSharePermission)
-              }
-              disabled={submitting}
-              className="h-9 rounded-md border border-input bg-background px-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="VIEW">{t("permissionView")}</option>
-              <option value="EDIT">{t("permissionEdit")}</option>
-            </select>
-            <Button type="submit" variant="secondary" disabled={submitting}>
-              {submitting ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <UserPlus className="size-4" />
-              )}
-              {t("addPerson")}
-            </Button>
-          </div>
-        </form>
-
-        {/* Shared users list */}
-        <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {t("peopleWithAccess")}
-          </p>
-          {loading ? (
-            <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" />
-              {t("loading")}
-            </div>
-          ) : shares.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-border px-3 py-3 text-sm text-muted-foreground">
-              {t("noPeopleYet")}
-            </p>
-          ) : (
-            <ul className="divide-y divide-border rounded-lg border border-border">
-              {shares.map((share) => (
-                <li
-                  key={share.userId}
-                  className="flex items-center justify-between gap-3 px-3 py-2.5"
+        {allowPeopleShares && (
+          <>
+            {/* Share with specific registered accounts */}
+            <form onSubmit={handleAddShare} className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                type="email"
+                required
+                placeholder={t("emailPlaceholder")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1"
+                disabled={submitting}
+              />
+              <div className="flex gap-2">
+                <select
+                  aria-label={t("permissionLabel")}
+                  value={permission}
+                  onChange={(e) =>
+                    setPermission(e.target.value as ServiceSharePermission)
+                  }
+                  disabled={submitting}
+                  className="h-9 rounded-md border border-input bg-background px-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-foreground">
-                      {share.name || share.email}
-                    </p>
-                    {share.name && (
-                      <p className="truncate text-xs text-muted-foreground">
-                        {share.email}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex shrink-0 items-center gap-1.5">
-                    <select
-                      aria-label={t("permissionLabel")}
-                      value={share.permission}
-                      onChange={(e) =>
-                        handleChangePermission(
-                          share.email,
-                          e.target.value as ServiceSharePermission
-                        )
-                      }
-                      className="h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground"
+                  <option value="VIEW">{t("permissionView")}</option>
+                  <option value="EDIT">{t("permissionEdit")}</option>
+                </select>
+                <Button type="submit" variant="secondary" disabled={submitting}>
+                  {submitting ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="size-4" />
+                  )}
+                  {t("addPerson")}
+                </Button>
+              </div>
+            </form>
+
+            {/* Shared users list */}
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {t("peopleWithAccess")}
+              </p>
+              {loading ? (
+                <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+                  <Loader2 className="size-4 animate-spin" />
+                  {t("loading")}
+                </div>
+              ) : shares.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-border px-3 py-3 text-sm text-muted-foreground">
+                  {t("noPeopleYet")}
+                </p>
+              ) : (
+                <ul className="divide-y divide-border rounded-lg border border-border">
+                  {shares.map((share) => (
+                    <li
+                      key={share.userId}
+                      className="flex items-center justify-between gap-3 px-3 py-2.5"
                     >
-                      <option value="VIEW">{t("permissionView")}</option>
-                      <option value="EDIT">{t("permissionEdit")}</option>
-                    </select>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 text-muted-foreground hover:text-destructive"
-                      aria-label={t("removePerson")}
-                      onClick={() => handleRemoveShare(share.userId)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {share.name || share.email}
+                        </p>
+                        {share.name && (
+                          <p className="truncate text-xs text-muted-foreground">
+                            {share.email}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <select
+                          aria-label={t("permissionLabel")}
+                          value={share.permission}
+                          onChange={(e) =>
+                            handleChangePermission(
+                              share.email,
+                              e.target.value as ServiceSharePermission
+                            )
+                          }
+                          className="h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground"
+                        >
+                          <option value="VIEW">{t("permissionView")}</option>
+                          <option value="EDIT">{t("permissionEdit")}</option>
+                        </select>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-muted-foreground hover:text-destructive"
+                          aria-label={t("removePerson")}
+                          onClick={() => handleRemoveShare(share.userId)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Anyone with the link (Google Docs style) */}
         <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3.5">
