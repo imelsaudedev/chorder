@@ -13,15 +13,16 @@ describe("ServiceKeyNotice", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("em outro tom mostra o tom do culto (não o do aparelho)", () => {
+  it("em outro tom é um único botão que diz para qual tom volta (o do culto, não o do aparelho)", () => {
     render(<ServiceKeyNotice originalKey="G" transpose={2} cultoTranspose={0} onReset={vi.fn()} />);
-    expect(screen.getByText("keyOfService:G")).toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "backToOriginalKey:G" })).toBeInTheDocument();
   });
 
-  it("Voltar ao do culto chama onReset", async () => {
+  it("Voltar ao original chama onReset", async () => {
     const onReset = vi.fn();
     render(<ServiceKeyNotice originalKey="G" transpose={-1} cultoTranspose={0} onReset={onReset} />);
-    await userEvent.setup().click(screen.getByRole("button", { name: "backToServiceKey" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "backToOriginalKey:G" }));
     expect(onReset).toHaveBeenCalledTimes(1);
   });
 

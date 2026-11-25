@@ -225,8 +225,7 @@ describe("StageModeControls — tom do culto", () => {
     const setTranspose = vi.fn();
     render(<StageModeControls {...baseProps} transpose={2} cultoTranspose={0} setTranspose={setTranspose} />);
     await user.click(screen.getByRole("button", { name: /configurações/i }));
-    expect(await screen.findByText(/keyOfService/)).toBeDefined();
-    await user.click(screen.getByRole("button", { name: "backToServiceKey" }));
+    await user.click(await screen.findByRole("button", { name: /backToOriginalKey/ }));
     expect(setTranspose).toHaveBeenCalledWith(0);
   });
 
@@ -235,7 +234,7 @@ describe("StageModeControls — tom do culto", () => {
     render(<StageModeControls {...baseProps} transpose={0} cultoTranspose={0} />);
     await user.click(screen.getByRole("button", { name: /configurações/i }));
     await screen.findByTestId("key-button-set");
-    expect(screen.queryByText(/keyOfService/)).toBeNull();
+    expect(screen.queryByRole("button", { name: /backToOriginalKey/ })).toBeNull();
   });
 });
 

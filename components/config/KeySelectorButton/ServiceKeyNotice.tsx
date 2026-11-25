@@ -15,9 +15,9 @@ type Props = {
 };
 
 /**
- * Aviso de que o tom deste aparelho é diferente do decidido para o culto, com a saída de um toque.
- * O ajuste é só local; esta é a rede de segurança contra tocar sem querer num tom diferente do grupo.
- * Não renderiza nada quando os dois são iguais.
+ * Botão "Voltar ao original: G", que leva ao tom decidido para o culto (o tom mostra para onde volta).
+ * O ajuste de tom é só local; esta é a rede de segurança contra ficar sem querer num tom diferente do
+ * grupo. Não renderiza nada quando o tom deste aparelho já é o do culto.
  */
 export default function ServiceKeyNotice({ originalKey, transpose, cultoTranspose, onReset }: Props) {
   const t = useTranslations("ServiceView");
@@ -26,11 +26,8 @@ export default function ServiceKeyNotice({ originalKey, transpose, cultoTranspos
   const cultoRoot = currentRoot(originalKey, cultoTranspose, null);
   const cultoKey = cultoRoot ? formatKey(cultoRoot) : transposeChord(originalKey, originalKey, cultoTranspose);
   return (
-    <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-      <span>{t("keyOfService", { key: cultoKey })}</span>
-      <Button type="button" variant="outline" size="sm" onClick={onReset}>
-        {t("backToServiceKey")}
-      </Button>
-    </div>
+    <Button type="button" variant="outline" size="sm" onClick={onReset} className="w-full">
+      {t("backToOriginalKey", { key: cultoKey })}
+    </Button>
   );
 }

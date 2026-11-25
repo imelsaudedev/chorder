@@ -207,8 +207,7 @@
     "mediaRemoveAudio": "Remove audio reference",
     "mediaRenameAudio": "Rename audio",
     "keyButtonLabel": "Key {key}",
-    "keyOfService": "Service key: {key}",
-    "backToServiceKey": "Back to the service key",
+    "backToOriginalKey": "Back to original: {key}",
     "keyDiffersFromService": "Different from the service key ({key}). On this device only.",
     "composerLabel": "Composer: {name}"
   },

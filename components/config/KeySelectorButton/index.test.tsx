@@ -39,7 +39,7 @@ describe('KeySelectorButton', () => {
     render(<KeySelectorButton originalKey="D" cultoTranspose={2} />);
     expect(screen.queryByRole('img')).toBeNull();
     await user.click(screen.getByRole('button', { name: 'keyButtonLabel:{"key":"E"}' }));
-    expect(screen.queryByText(/backToServiceKey/)).toBeNull();
+    expect(screen.queryByText(/backToOriginalKey/)).toBeNull();
   });
 
   it('em outro tom do que o do culto mostra o ponto e oferece voltar ao do culto', async () => {
@@ -49,8 +49,7 @@ describe('KeySelectorButton', () => {
     render(<KeySelectorButton originalKey="D" cultoTranspose={0} />);
     expect(screen.getByRole('img', { name: 'keyDiffersFromService:{"key":"D"}' })).toBeDefined();
     await user.click(screen.getByRole('button', { name: 'keyButtonLabel:{"key":"E"}' }));
-    expect(screen.getByText('keyOfService:{"key":"D"}')).toBeDefined();
-    await user.click(screen.getByRole('button', { name: 'backToServiceKey' }));
+    await user.click(screen.getByRole('button', { name: 'backToOriginalKey:{"key":"D"}' }));
     expect(setTranspose).toHaveBeenCalledWith(0);
   });
 
