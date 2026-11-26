@@ -109,7 +109,13 @@
     "draftBannerText": "Private draft — visible only to you until published.",
     "draftPublishedToast": "Service published!",
     "draftSavedToast": "Draft saved.",
-    "publishError": "Could not publish the service. Please try again."
+    "publishError": "Could not publish the service. Please try again.",
+    "tabChurch": "Church",
+    "tabPersonal": "My liturgies",
+    "sharedBadge": "Shared",
+    "personalEmptyTitle": "No personal liturgies yet",
+    "personalEmptyDescription": "Create liturgies for small groups or gatherings and share them with whoever you choose.",
+    "newPersonalService": "Create personal liturgy"
   },
   "ServiceData": {
     "title": "Title",
@@ -312,5 +318,35 @@
     "emptyTitle": "No users registered yet",
     "emptyDescription": "Users will appear here once they sign in.",
     "noResults": "No users match \"{query}\"."
+  },
+  "ShareService": {
+    "shareButton": "Share",
+    "title": "Share liturgy",
+    "description": "Choose specific people or enable a view-only shareable link.",
+    "descriptionLinkOnly": "Enable a view-only shareable link to send to pastors or guests without listing the liturgy publicly.",
+    "emailPlaceholder": "Registered user's email...",
+    "permissionLabel": "Permission",
+    "permissionView": "View",
+    "permissionEdit": "Edit",
+    "addPerson": "Add",
+    "peopleWithAccess": "People with access",
+    "loading": "Loading…",
+    "noPeopleYet": "Not shared with any specific account yet.",
+    "removePerson": "Remove access",
+    "linkSharingTitle": "Anyone with the link can view",
+    "linkSharingDescription": "Great for sharing in a group chat without adding each person individually.",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "regenerateLink": "Generate new link",
+    "linkCopied": "Link copied!",
+    "copyError": "Could not copy the link.",
+    "linkRegenerated": "New link generated. The previous link is no longer valid.",
+    "personAdded": "Access granted!",
+    "permissionUpdated": "Permission updated.",
+    "personRemoved": "Access removed.",
+    "userNotFound": "No account found with that email. The person needs to sign in at least once.",
+    "cannotShareWithSelf": "You already own this liturgy.",
+    "loadError": "Could not load sharing settings.",
+    "updateError": "Could not update sharing settings."
   }
 }

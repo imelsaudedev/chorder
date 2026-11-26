@@ -1,6 +1,6 @@
 "use client";
 
-import { ClientArrangement, ClientServiceTemplate, ClientSong, ClientTagGroup, RecentServiceEntry, ServiceListItem } from "@/prisma/models";
+import { ClientArrangement, ClientService, ClientServiceTemplate, ClientSong, ClientTagGroup, RecentServiceEntry, ServiceListItem } from "@/prisma/models";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -258,34 +258,49 @@ export function useDuplicateArrangement(arrangementId: number) {
   };
 }
 
-export function useFetchServices() {
-  const { data, error, isLoading } = useSWR("/api/services", (...args) =>
-    fetch(...args).then((res) => res.json())
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Request failed with status ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+export function useFetchServices(enabled = true) {
+  const { data, error, isLoading } = useSWR<ClientService[]>(
+    enabled ? "/api/services" : null,
+    (u: string) => fetchJson<ClientService[]>(u)
   );
   return {
-    services: data,
+    services: Array.isArray(data) ? data : undefined,
     isLoading,
     isError: error,
   };
 }
 
-export function useFetchServicesList() {
-  const { data, error, isLoading } = useSWR<ServiceListItem[]>("/api/services?view=list", (url: string) =>
-    fetch(url).then((res) => res.json())
+export function useFetchServicesList(scope: "church" | "personal" = "church") {
+  const url =
+    scope === "personal"
+      ? "/api/services?view=list&scope=personal"
+      : "/api/services?view=list";
+  const { data, error, isLoading } = useSWR<ServiceListItem[]>(url, (u: string) =>
+    fetchJson<ServiceListItem[]>(u)
   );
   return {
-    services: data,
+    services: Array.isArray(data) ? data : undefined,
     isLoading,
     isError: error,
   };
 }
 
-export function useFetchService(slugOrId: string | number | null) {
-  const url = `/api/services/${slugOrId}`;
-  const { data, error, isLoading } = useSWR(url, (...args) =>
-    slugOrId === null
-      ? Promise.resolve(null)
-      : fetch(...args).then((res) => res.json())
+export function useFetchService(
+  slugOrId: string | number | null,
+  shareToken?: string | null
+) {
+  const query = shareToken ? `?share=${encodeURIComponent(shareToken)}` : "";
+  const url = slugOrId === null ? null : `/api/services/${slugOrId}${query}`;
+  const { data, error, isLoading } = useSWR<ClientService>(url, (u: string) =>
+    fetchJson<ClientService>(u)
   );
   return {
     service: data,
@@ -401,12 +416,12 @@ export function useFetchTagGroups() {
   return { tagGroups: data ?? [], isLoading };
 }
 
-export function useFetchTemplates() {
+export function useFetchTemplates(enabled = true) {
   const { data, isLoading } = useSWR<ClientServiceTemplate[]>(
-    "/api/templates",
-    (url: string) => fetch(url).then((res) => res.json())
+    enabled ? "/api/templates" : null,
+    (url: string) => fetchJson<ClientServiceTemplate[]>(url)
   );
-  return { templates: data ?? [], isLoading };
+  return { templates: Array.isArray(data) ? data : [], isLoading };
 }
 
 export function useFetchTemplate(id: number | null) {
@@ -463,10 +478,10 @@ export function useDeleteTemplate(id: number) {
 export function useFetchRecentServices() {
   const { data, error, isLoading } = useSWR<RecentServiceEntry[]>(
     "/api/services/recent",
-    (url: string) => fetch(url).then((res) => res.json())
+    (url: string) => fetchJson<RecentServiceEntry[]>(url)
   );
   return {
-    services: data ?? [],
+    services: Array.isArray(data) ? data : [],
     isLoading,
     isError: error,
   };

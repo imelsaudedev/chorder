@@ -63,6 +63,7 @@ type ServicePlanDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isNew?: boolean;
+  isPersonal?: boolean;
   defaultValues?: {
     title?: string;
     worshipLeader?: string | null;
@@ -92,6 +93,7 @@ export default function ServicePlanDrawer({
   open,
   onOpenChange,
   isNew = false,
+  isPersonal = false,
   defaultValues,
   loading = false,
   onSave,
@@ -208,6 +210,7 @@ export default function ServicePlanDrawer({
               {isNew ? (
                 <CreationFields
                   form={form}
+                  isPersonal={isPersonal}
                   selectedTemplate={selectedTemplate}
                   onSelectTemplate={handleTemplateSelect}
                   onTitleChange={() => {
@@ -258,6 +261,7 @@ export default function ServicePlanDrawer({
 
 type CreationFieldsProps = {
   form: ReturnType<typeof useForm<FormValues>>;
+  isPersonal?: boolean;
   selectedTemplate: ClientServiceTemplate | null | undefined;
   onSelectTemplate: (t: ClientServiceTemplate | null) => void;
   onTitleChange: () => void;
@@ -295,13 +299,14 @@ function isSameDay(a: Date, b: Date): boolean {
 
 function CreationFields({
   form,
+  isPersonal = false,
   selectedTemplate,
   onSelectTemplate,
   onTitleChange,
   onTimeChange,
 }: CreationFieldsProps) {
   const t = useTranslations();
-  const { services } = useFetchServices();
+  const { services } = useFetchServices(!isPersonal);
 
   // Liturgias existentes, para avisar quando o dia escolhido já tem uma.
   const existingServices = useMemo<{ slug: string; title: string | null; date: Date }[]>(
@@ -329,11 +334,13 @@ function CreationFields({
 
   return (
     <>
-      {/* 1. Modelo */}
-      <div>
-        <p className="text-sm font-medium mb-2">Modelo</p>
-        <TemplateSelector selected={selectedTemplate} onSelect={onSelectTemplate} />
-      </div>
+      {/* 1. Modelo (apenas para liturgias da igreja) */}
+      {!isPersonal && (
+        <div>
+          <p className="text-sm font-medium mb-2">Modelo</p>
+          <TemplateSelector selected={selectedTemplate} onSelect={onSelectTemplate} />
+        </div>
+      )}
 
       {/* 2. Data */}
       <FormField

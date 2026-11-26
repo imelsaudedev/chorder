@@ -1,7 +1,8 @@
+import { getLiveUserAuth } from "@/lib/auth-guard";
 import {
-  requireChurchServiceManager,
-  requireChurchServiceViewer,
-} from "@/lib/auth-guard";
+  canManageChurchServices,
+  canViewChurchServices,
+} from "@/lib/permissions";
 import {
   createOrUpdateService,
   retrieveServices,
@@ -10,6 +11,8 @@ import {
   ServiceSlugExistsError,
 } from "@/prisma/data";
 import { serviceSchema } from "@/schemas/service";
+import type { ServiceScope } from "@prisma/client";
+import { NextResponse } from "next/server";
 
 // Resposta 400 estruturada quando o corpo não passa na validação; o cliente
 // traduz os problemas para uma mensagem amigável (lib/friendly-save-error).
@@ -19,20 +22,34 @@ function invalidServiceResponse(error: import("zod").ZodError) {
 }
 
 // `?view=list` devolve o resumo leve da lista de Liturgias (sem o plano).
+// `?scope=personal` devolve as liturgias pessoais do usuário (próprias e compartilhadas).
 export async function GET(request: Request) {
-  const guard = await requireChurchServiceViewer();
-  if (!guard.ok) return guard.response;
-
-  if (new URL(request.url).searchParams.get("view") === "list") {
-    return Response.json(await retrieveServicesList(guard.userId));
+  const live = await getLiveUserAuth();
+  if (!live.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const services = await retrieveServices(guard.userId);
+
+  const url = new URL(request.url);
+  const scopeParam = url.searchParams.get("scope");
+  const scope: ServiceScope =
+    scopeParam === "personal" ? "PERSONAL" : "CHURCH";
+
+  if (scope === "CHURCH" && !canViewChurchServices(live.roles)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (url.searchParams.get("view") === "list") {
+    return Response.json(await retrieveServicesList(live.userId, scope));
+  }
+  const services = await retrieveServices(live.userId, scope);
   return Response.json(services);
 }
 
 export async function POST(request: Request) {
-  const guard = await requireChurchServiceManager();
-  if (!guard.ok) return guard.response;
+  const live = await getLiveUserAuth();
+  if (!live.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await request.json();
   const parsed = serviceSchema.safeParse({
@@ -45,6 +62,11 @@ export async function POST(request: Request) {
   if (!parsed.success) return invalidServiceResponse(parsed.error);
   const service = parsed.data;
 
+  const targetScope: ServiceScope = service.scope ?? "CHURCH";
+  if (targetScope === "CHURCH" && !canManageChurchServices(live.roles)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const hasContent =
     (service.plan?.sections?.length ?? 0) > 0 || (service.units?.length ?? 0) > 0;
   if (!hasContent) {
@@ -52,10 +74,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const createdService = await createOrUpdateService(service, {
-      mode: "create",
-      actorUserId: guard.userId,
-    });
+    const createdService = await createOrUpdateService(
+      { ...service, scope: targetScope },
+      { mode: "create", actorUserId: live.userId, actorRoles: live.roles }
+    );
     return new Response(JSON.stringify(createdService), {
       status: 200,
       headers: { "Content-Type": "application/json" },

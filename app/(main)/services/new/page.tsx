@@ -3,6 +3,7 @@ import { getLiveUserAuth } from "@/lib/auth-guard";
 import { canManageChurchServices } from "@/lib/permissions";
 import { buildSectionsFromTemplate } from "@/lib/template-utils";
 import { retrieveTemplate } from "@/prisma/data";
+import type { ServiceScope } from "@prisma/client";
 import { redirect } from "next/navigation";
 import ClientServiceFormPage from "../ClientServiceFormPage";
 
@@ -15,18 +16,22 @@ export default async function NewServicePage({
     preacher?: string;
     date?: string;
     templateId?: string;
+    scope?: string;
   }>;
 }) {
-  const live = await getLiveUserAuth();
+  const [{ title, worshipLeader, preacher, date, templateId, scope }, live] =
+    await Promise.all([searchParams, getLiveUserAuth()]);
+
   if (!live.authenticated) {
     redirect("/login?callbackUrl=%2Fservices%2Fnew");
   }
-  if (!canManageChurchServices(live.roles)) {
+
+  const targetScope: ServiceScope =
+    scope?.toLowerCase() === "personal" ? "PERSONAL" : "CHURCH";
+
+  if (targetScope === "CHURCH" && !canManageChurchServices(live.roles)) {
     return <AccessDeniedView />;
   }
-
-  const { title, worshipLeader, preacher, date, templateId } =
-    await searchParams;
 
   const template = templateId ? await retrieveTemplate(Number(templateId)) : null;
 
@@ -43,6 +48,7 @@ export default async function NewServicePage({
         preacher: preacher ?? "",
         date: date ? new Date(date) : new Date(),
         sections: defaultSections,
+        scope: targetScope,
       }}
     />
   );

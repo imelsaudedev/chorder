@@ -155,7 +155,13 @@ export default function ServiceList({ services }: ServiceListProps) {
                     <ServiceRow
                       key={service.slug}
                       service={service}
-                      badge={service === upcoming[0] ? nextBadge(service) : undefined}
+                      badge={
+                        service.isSharedWithMe
+                          ? t("sharedBadge")
+                          : service === upcoming[0]
+                            ? nextBadge(service)
+                            : undefined
+                      }
                       timeline={{
                         tone: "upcoming",
                         first: service === upcoming[0],
@@ -216,6 +222,7 @@ export default function ServiceList({ services }: ServiceListProps) {
                       <ServiceRow
                         key={service.slug}
                         service={service}
+                        badge={service.isSharedWithMe ? t("sharedBadge") : undefined}
                         timeline={
                           showRail
                             ? { tone: "past", first: service === firstShown, last: service === lastShown }

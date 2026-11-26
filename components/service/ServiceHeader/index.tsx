@@ -1,29 +1,40 @@
+"use client";
+
 import PageHeader from "@/components/common/PageHeader";
+import ShareServiceDialog from "@/components/service/ShareServiceDialog";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useFormattedDate } from "@/hooks/useFormattedDate";
 import { ClientService, ServiceRef } from "@/prisma/models";
-import { Calendar, ChevronLeft, ChevronRight, MicVocal } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, MicVocal, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import HolyricsSetlistButton from "./HolyricsSetlistButton";
 import ServiceActionMenu from "./ServiceActionMenu";
 import Skeleton from "./Skeleton";
 
 type ServiceHeaderProps = {
-  service: ClientService;
+  service?: ClientService | null;
 };
 
 export default function ServiceHeader({ service }: ServiceHeaderProps) {
   const t = useTranslations();
+  const [shareOpen, setShareOpen] = useState(false);
   const serviceTitle = service?.title?.trim() || t("Service.noTitle");
 
   if (!service) {
     return <Skeleton />;
   }
 
+  const isPersonal = service.scope === "PERSONAL";
+  const canShare = service.canManageShareLink === true;
+  const allowPeopleShares = service.canManagePeopleShares === true;
+  const showActionsMenu = service.canDelete !== false;
+
   return (
-    <PageHeader
+    <>
+      <PageHeader
         backLinkHref="/services"
         backLinkText={t("Messages.services")}
         title={serviceTitle}
@@ -31,15 +42,43 @@ export default function ServiceHeader({ service }: ServiceHeaderProps) {
         noBorder
         actions={
           <div className="flex gap-1 items-center">
-            <ServiceNavButton dir="prev" serviceRef={service.prevService} />
-            <ServiceNavButton dir="next" serviceRef={service.nextService} />
-            {/* Holyrics: ícone ao lado das setinhas, em qualquer aba. */}
-            <HolyricsSetlistButton service={service} iconOnly />
-            <div className="w-px h-5 bg-border mx-1" />
-            <ServiceActionMenu service={service} />
+            {!isPersonal && (
+              <>
+                <ServiceNavButton dir="prev" serviceRef={service.prevService} />
+                <ServiceNavButton dir="next" serviceRef={service.nextService} />
+                {/* Holyrics: ícone ao lado das setinhas, em qualquer aba. */}
+                <HolyricsSetlistButton service={service} iconOnly />
+              </>
+            )}
+            {canShare && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShareOpen(true)}
+              >
+                <Share2 className="size-4" />
+                <span className="hidden sm:inline">{t("ShareService.shareButton")}</span>
+              </Button>
+            )}
+            {showActionsMenu && (
+              <>
+                <div className="w-px h-5 bg-border mx-1" />
+                <ServiceActionMenu service={service} />
+              </>
+            )}
           </div>
         }
       />
+      {canShare && (
+        <ShareServiceDialog
+          serviceSlug={service.slug}
+          allowPeopleShares={allowPeopleShares}
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+        />
+      )}
+    </>
   );
 }
 

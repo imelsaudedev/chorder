@@ -1,5 +1,11 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, ServiceScope, UserRole } from "@prisma/client";
+import { timingSafeEqual } from "crypto";
 import { getLyrics } from "@/chopro/music";
+import {
+  canEditChurchServices,
+  canManageChurchServices,
+  canViewChurchServices,
+} from "@/lib/permissions";
 import { summarizeServicePlan } from "@/lib/service-list";
 import prisma from "./client";
 import {
@@ -209,7 +215,7 @@ export async function retrieveSongUsage(
   if (songIds.length === 0) return usage;
 
   const services = await prisma.service.findMany({
-    where: { isDeleted: false, status: "PUBLISHED" },
+    where: { isDeleted: false, scope: "CHURCH", status: "PUBLISHED" },
     select: { date: true, plan: true },
   });
   const servicesArrangementIds = services.map((service) => {
@@ -920,45 +926,145 @@ function hydrateArrangement(row: any): ClientArrangement {
   };
 }
 
-function visibleServicesWhere(viewerUserId?: string | null): Prisma.ServiceWhereInput {
+export type ServiceViewerContext = {
+  userId?: string | null;
+  roles?: readonly UserRole[];
+  shareToken?: string | null;
+};
+
+function timingSafeTokenMatch(expected: string, provided: string): boolean {
+  const a = Buffer.from(expected, "utf8");
+  const b = Buffer.from(provided, "utf8");
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
+function visibleServicesWhere(
+  viewerUserId?: string | null,
+  scope: ServiceScope = "CHURCH"
+): Prisma.ServiceWhereInput {
+  if (scope === "PERSONAL") {
+    if (!viewerUserId) {
+      // No personal services are visible without an authenticated user in list queries
+      return { id: -1 };
+    }
+    return {
+      isDeleted: false,
+      scope: "PERSONAL",
+      OR: [
+        { createdById: viewerUserId },
+        { shares: { some: { userId: viewerUserId } } },
+      ],
+    };
+  }
+
   if (!viewerUserId) {
-    return { isDeleted: false, status: "PUBLISHED" };
+    return { isDeleted: false, scope: "CHURCH", status: "PUBLISHED" };
   }
   return {
     isDeleted: false,
+    scope: "CHURCH",
     OR: [
       { status: "PUBLISHED" },
       { status: "DRAFT", createdById: viewerUserId },
+      { status: "DRAFT", shares: { some: { userId: viewerUserId } } },
     ],
   };
 }
 
 export async function retrieveService(
   slugOrId: string | number,
-  viewerUserId?: string | null
+  viewer?: ServiceViewerContext | string | null
 ): Promise<ClientService | null> {
+  const ctx: ServiceViewerContext | undefined =
+    typeof viewer === "string" || viewer === null
+      ? { userId: viewer, roles: ["ADMIN"] }
+      : viewer;
+
   const service = await prisma.service.findFirst({
     where: {
       ...selectSlugOrId(slugOrId),
-      ...visibleServicesWhere(viewerUserId),
+      isDeleted: false,
+    },
+    include: {
+      shares: ctx?.userId
+        ? { where: { userId: ctx.userId }, select: { userId: true, permission: true } }
+        : false,
     },
   });
 
   if (!service) return null;
 
+  let isOwner = false;
+  let canEdit = false;
+  let canDelete = false;
+  let canPublish = false;
+  let canManageShareLink = false;
+  let canManagePeopleShares = false;
+  let allowAdjacentNav = false;
+
+  if (ctx !== undefined) {
+    isOwner = Boolean(ctx.userId && service.createdById === ctx.userId);
+    const userShare = Array.isArray(service.shares) ? service.shares[0] : undefined;
+    const hasValidShareToken = Boolean(
+      service.shareToken &&
+        ctx.shareToken &&
+        timingSafeTokenMatch(service.shareToken, ctx.shareToken)
+    );
+
+    if (service.scope === "CHURCH") {
+      if (service.status === "PUBLISHED") {
+        const hasChurchAccess = canViewChurchServices(ctx.roles);
+        if (!hasChurchAccess && !hasValidShareToken) return null;
+        if (hasChurchAccess) {
+          canEdit = canEditChurchServices(ctx.roles);
+          canDelete = canManageChurchServices(ctx.roles);
+          canManageShareLink = canManageChurchServices(ctx.roles);
+          allowAdjacentNav = true;
+        }
+      } else {
+        // CHURCH DRAFT: visible to creator, explicitly shared collaborators, or valid share link
+        if (!isOwner && !userShare && !hasValidShareToken) return null;
+        const canCoManageDraft =
+          isOwner ||
+          (userShare?.permission === "EDIT" && canManageChurchServices(ctx.roles));
+        canEdit = isOwner || userShare?.permission === "EDIT";
+        canDelete = isOwner && canManageChurchServices(ctx.roles);
+        canPublish = canManageChurchServices(ctx.roles) && canCoManageDraft;
+        canManageShareLink = canCoManageDraft;
+        canManagePeopleShares = canCoManageDraft;
+      }
+    } else {
+      // PERSONAL service
+      if (!isOwner && !userShare && !hasValidShareToken) return null;
+      canEdit = isOwner || userShare?.permission === "EDIT";
+      canDelete = isOwner;
+      canManageShareLink = isOwner;
+      canManagePeopleShares = isOwner;
+    }
+  } else {
+    // Internal / legacy calls without viewer context only access published church services
+    if (service.scope !== "CHURCH" || service.status !== "PUBLISHED") return null;
+    canEdit = true;
+    canDelete = true;
+    allowAdjacentNav = true;
+  }
+
   const adjacentSelect = { select: { slug: true, title: true, date: true } } as const;
-  const [prevService, nextService] = await Promise.all([
-    prisma.service.findFirst({
-      where: { isDeleted: false, status: "PUBLISHED", date: { lt: service.date } },
-      orderBy: { date: "desc" },
-      ...adjacentSelect,
-    }),
-    prisma.service.findFirst({
-      where: { isDeleted: false, status: "PUBLISHED", date: { gt: service.date } },
-      orderBy: { date: "asc" },
-      ...adjacentSelect,
-    }),
-  ]);
+  const [prevService, nextService] = allowAdjacentNav
+    ? await Promise.all([
+        prisma.service.findFirst({
+          where: { isDeleted: false, scope: "CHURCH", status: "PUBLISHED", date: { lt: service.date } },
+          orderBy: { date: "desc" },
+          ...adjacentSelect,
+        }),
+        prisma.service.findFirst({
+          where: { isDeleted: false, scope: "CHURCH", status: "PUBLISHED", date: { gt: service.date } },
+          orderBy: { date: "asc" },
+          ...adjacentSelect,
+        }),
+      ])
+    : [null, null];
 
   const rawPlan = service.plan as ServicePlan | null;
 
@@ -1010,8 +1116,16 @@ export async function retrieveService(
     .filter((unit) => unit.type === "SONG" && unit.arrangement != null)
     .map((unit) => ({ ...unit, order: order++ }));
 
+  const { shares: _shares, shareToken, ...serviceFields } = service;
   return {
-    ...service,
+    ...serviceFields,
+    shareToken: canManageShareLink ? shareToken : null,
+    isOwner,
+    canEdit,
+    canDelete,
+    canPublish,
+    canManageShareLink,
+    canManagePeopleShares,
     prevService: prevService ?? null,
     nextService: nextService ?? null,
     units: flatUnits,
@@ -1021,7 +1135,7 @@ export async function retrieveService(
 
 export async function retrieveRecentServices(limit = 8): Promise<RecentServiceEntry[]> {
   const services = await prisma.service.findMany({
-    where: { isDeleted: false, status: "PUBLISHED" },
+    where: { isDeleted: false, scope: "CHURCH", status: "PUBLISHED" },
     orderBy: { date: "desc" },
     take: limit,
     select: { slug: true, title: true, date: true, worshipLeader: true, plan: true },
@@ -1063,22 +1177,30 @@ export async function retrieveRecentServices(limit = 8): Promise<RecentServiceEn
 }
 
 export async function retrieveServices(
-  viewerUserId?: string | null
+  viewerUserId?: string | null,
+  scope: ServiceScope = "CHURCH"
 ): Promise<ClientService[]> {
   const services = await prisma.service.findMany({
-    where: visibleServicesWhere(viewerUserId),
+    where: visibleServicesWhere(viewerUserId, scope),
   });
-  return services as unknown as ClientService[];
+  return services.map((service) => ({
+    ...service,
+    shareToken:
+      viewerUserId && service.createdById === viewerUserId
+        ? service.shareToken
+        : null,
+  })) as unknown as ClientService[];
 }
 
 // Lista de Liturgias: só o que a tela mostra e pesquisa. Não devolve o plano
 // (que cresce com o histórico); resolve os arranjos para os títulos das músicas
 // numa única consulta.
 export async function retrieveServicesList(
-  viewerUserId?: string | null
+  viewerUserId?: string | null,
+  scope: ServiceScope = "CHURCH"
 ): Promise<ServiceListItem[]> {
   const services = await prisma.service.findMany({
-    where: visibleServicesWhere(viewerUserId),
+    where: visibleServicesWhere(viewerUserId, scope),
     select: {
       slug: true,
       title: true,
@@ -1088,6 +1210,8 @@ export async function retrieveServicesList(
       sermonTheme: true,
       sermonReference: true,
       status: true,
+      scope: true,
+      createdById: true,
       plan: true,
       updatedAt: true,
     },
@@ -1102,10 +1226,14 @@ export async function retrieveServicesList(
     : [];
   const titleByArrangementId = new Map(arrangements.map((a) => [a.id, a.song.title]));
 
-  return services.map(({ plan: _plan, ...service }, index) => {
+  return services.map(({ plan: _plan, createdById, ...service }, index) => {
     const summary = summaries[index];
     return {
       ...service,
+      isSharedWithMe:
+        service.scope === "PERSONAL" &&
+        Boolean(viewerUserId) &&
+        createdById !== viewerUserId,
       startTime: summary.startTime,
       songCount: summary.songCount,
       songTitles: summary.arrangementIds
@@ -1133,14 +1261,18 @@ export class ServiceSlugExistsError extends Error {
 
 export async function createOrUpdateService(
   service: ClientService,
-  options?: { mode?: "create" | "update"; actorUserId?: string | null }
+  options?: {
+    mode?: "create" | "update";
+    actorUserId?: string | null;
+    actorRoles?: readonly UserRole[];
+  }
 ): Promise<ClientService> {
   const serviceSlug = service.slug?.length ? service.slug : await slugForService();
 
   const serviceId = await prisma.$transaction(async (tx) => {
     const existing = await tx.service.findUnique({
       where: { slug: serviceSlug },
-      select: { plan: true, updatedAt: true, status: true, createdById: true },
+      select: { plan: true, updatedAt: true, status: true, scope: true, createdById: true },
     });
 
     if (options?.mode === "create" && existing) {
@@ -1168,19 +1300,21 @@ export async function createOrUpdateService(
       sermonTheme: service.sermonTheme ?? null,
       sermonReference: service.sermonReference ?? null,
       plan: (resolvedPlan as object) ?? Prisma.DbNull,
-      ...(service.status ? { status: service.status } : {}),
+      ...(service.status && existing?.scope !== "PERSONAL" ? { status: service.status } : {}),
     };
 
     if (!existing) {
       const actorExists = options?.actorUserId
         ? await tx.user.findUnique({ where: { id: options.actorUserId }, select: { id: true } })
         : null;
+      const targetScope: ServiceScope = service.scope ?? "CHURCH";
       const created = await tx.service.create({
         data: {
           ...data,
           slug: serviceSlug,
           isDeleted: false,
-          status: service.status ?? "PUBLISHED",
+          scope: targetScope,
+          status: targetScope === "PERSONAL" ? "PUBLISHED" : (service.status ?? "PUBLISHED"),
           createdById: actorExists?.id ?? null,
         },
       });
@@ -1203,7 +1337,12 @@ export async function createOrUpdateService(
     return current.id;
   });
 
-  const retService = await retrieveService(serviceId, options?.actorUserId);
+  const retService = await retrieveService(
+    serviceId,
+    options?.actorUserId
+      ? { userId: options.actorUserId, roles: options.actorRoles ?? ["ADMIN"] }
+      : undefined
+  );
   if (!retService) throw new Error("Service not found after creation or update");
   return retService;
 }
@@ -1334,16 +1473,10 @@ async function syncPlanArrangements(
 
 export async function deleteService(
   slugOrId: string | number,
-  viewerUserId?: string | null
+  viewer?: ServiceViewerContext | string | null
 ): Promise<boolean> {
-  const service = await prisma.service.findFirst({
-    where: {
-      ...selectSlugOrId(slugOrId),
-      ...visibleServicesWhere(viewerUserId),
-    },
-  });
-  if (!service) {
-    console.error("Service not found");
+  const service = await retrieveService(slugOrId, viewer);
+  if (!service || !service.id || !service.canDelete) {
     return false;
   }
   await prisma.service.update({
@@ -1450,7 +1583,7 @@ export async function retrieveStats(): Promise<StatsData> {
   const [totalSongs, services] = await Promise.all([
     prisma.song.count({ where: { isDeleted: false } }),
     prisma.service.findMany({
-      where: { isDeleted: false, status: "PUBLISHED" },
+      where: { isDeleted: false, scope: "CHURCH", status: "PUBLISHED" },
       select: { slug: true, worshipLeader: true, plan: true },
     }),
   ]);

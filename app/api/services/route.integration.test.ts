@@ -7,6 +7,11 @@ import {
   POST as POST_ONE,
 } from './[slugOrId]/route';
 import { POST as POST_MINIMAL_ARRANGEMENT } from '../songs/[slugOrId]/arrangements/route';
+import {
+  DELETE as DELETE_SHARE,
+  GET as GET_SHARES,
+  POST as POST_SHARE,
+} from './[slugOrId]/shares/route';
 import prisma from '../../../prisma/client';
 import { auth } from '@/auth';
 import { NextRequest } from 'next/server';
@@ -14,6 +19,7 @@ import { NextRequest } from 'next/server';
 vi.mock('@/auth', () => ({ auth: vi.fn() }));
 
 beforeEach(async () => {
+  await prisma.serviceShare.deleteMany();
   await prisma.user.deleteMany();
   vi.mocked(auth).mockResolvedValue({
     user: { id: 'test-user-id', email: 'admin@test.com', roles: ['ADMIN'] },
@@ -482,5 +488,349 @@ describe('Private drafts integration', () => {
             { params: Promise.resolve({ slugOrId: 'rascunho-dirigente' }) }
         );
         expect(authorUnpublish.status).toBe(400);
+    });
+});
+
+describe('Personal services & sharing integration', () => {
+    it('supports personal services, selective user shares (VIEW/EDIT), and Google-Docs-style share links', async () => {
+        const owner = await prisma.user.create({
+            data: { email: 'owner@test.com', name: 'Owner', roles: [] },
+        });
+        const viewer = await prisma.user.create({
+            data: { email: 'viewer@test.com', name: 'Viewer', roles: [] },
+        });
+        const editor = await prisma.user.create({
+            data: { email: 'editor@test.com', name: 'Editor', roles: [] },
+        });
+        const admin = await prisma.user.create({
+            data: { email: 'admin-outsider@test.com', name: 'Admin', roles: ['ADMIN'] },
+        });
+
+        const sessionFor = (u: { id: string; email: string; roles: ('ADMIN' | 'WORSHIP' | 'MEDIA' | 'USER')[] }) => ({
+            user: { id: u.id, email: u.email, roles: u.roles },
+            expires: new Date(Date.now() + 60_000).toISOString(),
+        });
+
+        // 1. Regular user cannot create CHURCH service, but CAN create PERSONAL service
+        vi.mocked(auth).mockResolvedValue(sessionFor(owner));
+        const churchRes = await POST(
+            new Request('http://localhost/api/services', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: 'Unauthorized Church',
+                    slug: 'unauth-church',
+                    date: '2026-07-01T10:00:00Z',
+                    worshipLeader: null,
+                    isDeleted: false,
+                    scope: 'CHURCH',
+                    plan: { startTime: '10:00', sections: [{ id: 's1', type: 'CULTO', label: 'Culto', order: 1, units: [] }] },
+                }),
+            })
+        );
+        expect(churchRes.status).toBe(403);
+
+        const personalRes = await POST(
+            new Request('http://localhost/api/services', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: 'Grupo Pequeno Quinta',
+                    slug: 'gp-quinta',
+                    date: '2026-07-02T20:00:00Z',
+                    worshipLeader: 'Owner',
+                    isDeleted: false,
+                    scope: 'PERSONAL',
+                    plan: { startTime: '20:00', sections: [{ id: 's1', type: 'CULTO', label: 'Encontro', order: 1, units: [] }] },
+                }),
+            })
+        );
+        expect(personalRes.status).toBe(200);
+        const created = await personalRes.json();
+        expect(created.scope).toBe('PERSONAL');
+        expect(created.isOwner).toBe(true);
+
+        // 2. Private by default: even an ADMIN outsider cannot see it
+        vi.mocked(auth).mockResolvedValue(sessionFor(admin));
+        const adminChurchList = await (await GET(new Request('http://localhost/api/services?view=list&scope=church'))).json();
+        expect(adminChurchList.map((s: { slug: string }) => s.slug)).not.toContain('gp-quinta');
+        const adminGet = await GET_ONE(new Request('http://localhost/api/services/gp-quinta'), {
+            params: Promise.resolve({ slugOrId: 'gp-quinta', arrangementId: 'default' }),
+        });
+        expect(adminGet.status).toBe(404);
+
+        // 3. Owner shares with viewer (VIEW) and editor (EDIT)
+        vi.mocked(auth).mockResolvedValue(sessionFor(owner));
+        const addViewer = await POST_SHARE(
+            new NextRequest('http://localhost/api/services/gp-quinta/shares', {
+                method: 'POST',
+                body: JSON.stringify({ email: 'viewer@test.com', permission: 'VIEW' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'gp-quinta' }) }
+        );
+        expect(addViewer.status).toBe(200);
+
+        const addEditor = await POST_SHARE(
+            new NextRequest('http://localhost/api/services/gp-quinta/shares', {
+                method: 'POST',
+                body: JSON.stringify({ email: 'editor@test.com', permission: 'EDIT' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'gp-quinta' }) }
+        );
+        expect(addEditor.status).toBe(200);
+
+        // Viewer sees it with isSharedWithMe=true, can GET, cannot PATCH or DELETE
+        vi.mocked(auth).mockResolvedValue(sessionFor(viewer));
+        const viewerList = await (await GET(new Request('http://localhost/api/services?view=list&scope=personal'))).json();
+        expect(viewerList).toEqual(
+            expect.arrayContaining([expect.objectContaining({ slug: 'gp-quinta', isSharedWithMe: true })])
+        );
+        expect(
+            (await PATCH_ONE(
+                new NextRequest('http://localhost/api/services/gp-quinta', { method: 'PATCH', body: JSON.stringify({ title: 'Hack' }) }),
+                { params: Promise.resolve({ slugOrId: 'gp-quinta' }) }
+            )).status
+        ).toBe(403);
+
+        // Editor can PATCH, cannot DELETE or manage shares
+        vi.mocked(auth).mockResolvedValue(sessionFor(editor));
+        expect(
+            (await PATCH_ONE(
+                new NextRequest('http://localhost/api/services/gp-quinta', { method: 'PATCH', body: JSON.stringify({ title: 'GP Quinta Atualizado' }) }),
+                { params: Promise.resolve({ slugOrId: 'gp-quinta' }) }
+            )).status
+        ).toBe(200);
+        expect(
+            (await DELETE_ONE(new Request('http://localhost/api/services/gp-quinta', { method: 'DELETE' }), {
+                params: Promise.resolve({ slugOrId: 'gp-quinta' }),
+            })).status
+        ).toBe(403);
+        expect(
+            (await GET_SHARES(new NextRequest('http://localhost/api/services/gp-quinta/shares'), {
+                params: Promise.resolve({ slugOrId: 'gp-quinta' }),
+            })).status
+        ).toBe(403);
+
+        // 4. Owner enables shareable link -> unauthenticated visitor can view with token, not without
+        vi.mocked(auth).mockResolvedValue(sessionFor(owner));
+        const enableRes = await POST_SHARE(
+            new NextRequest('http://localhost/api/services/gp-quinta/shares', {
+                method: 'POST',
+                body: JSON.stringify({ linkSharing: 'enable' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'gp-quinta' }) }
+        );
+        expect(enableRes.status).toBe(200);
+        const { shareToken } = await enableRes.json();
+        expect(typeof shareToken).toBe('string');
+
+        // Shared non-owner calling GET /api/services?scope=personal must NOT receive shareToken
+        vi.mocked(auth).mockResolvedValue(sessionFor(viewer));
+        const viewerFullList = await (await GET(new Request('http://localhost/api/services?scope=personal'))).json();
+        const sharedEntry = viewerFullList.find((s: { slug: string }) => s.slug === 'gp-quinta');
+        expect(sharedEntry).toBeDefined();
+        expect(sharedEntry.shareToken).toBeNull();
+
+        // Regular user cannot overwrite an existing church service via POST /api/services with scope=PERSONAL
+        const churchVictim = await prisma.service.create({
+            data: {
+                title: 'Official Church Liturgy',
+                slug: 'official-church-liturgy',
+                date: new Date('2026-07-05T10:00:00Z'),
+                isDeleted: false,
+                scope: 'CHURCH',
+                status: 'PUBLISHED',
+            },
+        });
+        const overwriteAttempt = await POST(
+            new Request('http://localhost/api/services', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: 'Hijacked',
+                    slug: 'official-church-liturgy',
+                    date: '2026-07-05T10:00:00Z',
+                    worshipLeader: null,
+                    isDeleted: false,
+                    scope: 'PERSONAL',
+                    plan: { startTime: '10:00', sections: [{ id: 's1', type: 'CULTO', label: 'Culto', order: 1, units: [] }] },
+                }),
+            })
+        );
+        expect(overwriteAttempt.status).toBe(409);
+        const untouchedChurch = await prisma.service.findUnique({ where: { id: churchVictim.id } });
+        expect(untouchedChurch?.title).toBe('Official Church Liturgy');
+
+        vi.mocked(auth).mockResolvedValue(null);
+        const anonValid = await GET_ONE(
+            new Request(`http://localhost/api/services/gp-quinta?share=${shareToken}`),
+            { params: Promise.resolve({ slugOrId: 'gp-quinta', arrangementId: 'default' }) }
+        );
+        expect(anonValid.status).toBe(200);
+        const anonData = await anonValid.json();
+        expect(anonData.title).toBe('GP Quinta Atualizado');
+        expect(anonData.shareToken).toBeNull();
+        expect(anonData.canEdit).toBe(false);
+
+        const anonInvalid = await GET_ONE(
+            new Request('http://localhost/api/services/gp-quinta?share=wrong-token'),
+            { params: Promise.resolve({ slugOrId: 'gp-quinta', arrangementId: 'default' }) }
+        );
+        expect(anonInvalid.status).toBe(404);
+
+        // 5. Owner disables link and removes viewer share -> both lose access
+        vi.mocked(auth).mockResolvedValue(sessionFor(owner));
+        await POST_SHARE(
+            new NextRequest('http://localhost/api/services/gp-quinta/shares', {
+                method: 'POST',
+                body: JSON.stringify({ linkSharing: 'disable' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'gp-quinta' }) }
+        );
+        await DELETE_SHARE(
+            new NextRequest(`http://localhost/api/services/gp-quinta/shares?userId=${viewer.id}`, { method: 'DELETE' }),
+            { params: Promise.resolve({ slugOrId: 'gp-quinta' }) }
+        );
+
+        vi.mocked(auth).mockResolvedValue(null);
+        expect(
+            (await GET_ONE(new Request(`http://localhost/api/services/gp-quinta?share=${shareToken}`), {
+                params: Promise.resolve({ slugOrId: 'gp-quinta', arrangementId: 'default' }),
+            })).status
+        ).toBe(404);
+
+        vi.mocked(auth).mockResolvedValue(sessionFor(viewer));
+        expect(
+            (await GET_ONE(new Request('http://localhost/api/services/gp-quinta'), {
+                params: Promise.resolve({ slugOrId: 'gp-quinta', arrangementId: 'default' }),
+            })).status
+        ).toBe(404);
+    });
+
+    it('supports sharing church DRAFTs (with WORSHIP collaborator publishing) and link sharing on church liturgies', async () => {
+        const leaderA = await prisma.user.create({
+            data: { email: 'leader-a@test.com', name: 'Leader A', roles: ['WORSHIP'] },
+        });
+        const leaderB = await prisma.user.create({
+            data: { email: 'leader-b@test.com', name: 'Leader B', roles: ['WORSHIP'] },
+        });
+        const mediaCollab = await prisma.user.create({
+            data: { email: 'media-collab@test.com', name: 'Media Collab', roles: ['MEDIA'] },
+        });
+
+        const sessionFor = (u: { id: string; email: string; roles: ('ADMIN' | 'WORSHIP' | 'MEDIA' | 'USER')[] }) => ({
+            user: { id: u.id, email: u.email, roles: u.roles },
+            expires: new Date(Date.now() + 60_000).toISOString(),
+        });
+
+        // 1. Leader A creates a church DRAFT
+        vi.mocked(auth).mockResolvedValue(sessionFor(leaderA));
+        const createDraft = await POST(
+            new Request('http://localhost/api/services', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: 'Culto Compartilhado',
+                    slug: 'culto-rascunho-compartilhado',
+                    date: '2026-09-01T10:00:00Z',
+                    worshipLeader: 'Leader A',
+                    isDeleted: false,
+                    scope: 'CHURCH',
+                    status: 'DRAFT',
+                    plan: { startTime: '10:00', sections: [{ id: 's1', type: 'CULTO', label: 'Culto', order: 1, units: [] }] },
+                }),
+            })
+        );
+        expect(createDraft.status).toBe(200);
+
+        // 2. Leader A shares the draft with Leader B (WORSHIP, EDIT) and Media Collab (MEDIA, EDIT) + enables link
+        const shareB = await POST_SHARE(
+            new NextRequest('http://localhost/api/services/culto-rascunho-compartilhado/shares', {
+                method: 'POST',
+                body: JSON.stringify({ email: 'leader-b@test.com', permission: 'EDIT' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'culto-rascunho-compartilhado' }) }
+        );
+        expect(shareB.status).toBe(200);
+
+        const shareMedia = await POST_SHARE(
+            new NextRequest('http://localhost/api/services/culto-rascunho-compartilhado/shares', {
+                method: 'POST',
+                body: JSON.stringify({ email: 'media-collab@test.com', permission: 'EDIT' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'culto-rascunho-compartilhado' }) }
+        );
+        expect(shareMedia.status).toBe(200);
+
+        const enableLink = await POST_SHARE(
+            new NextRequest('http://localhost/api/services/culto-rascunho-compartilhado/shares', {
+                method: 'POST',
+                body: JSON.stringify({ linkSharing: 'enable' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'culto-rascunho-compartilhado' }) }
+        );
+        expect(enableLink.status).toBe(200);
+        const { shareToken } = await enableLink.json();
+
+        // 3. Anonymous pastor can view the church DRAFT read-only via ?share= link
+        vi.mocked(auth).mockResolvedValue(null);
+        const pastorView = await GET_ONE(
+            new Request(`http://localhost/api/services/culto-rascunho-compartilhado?share=${shareToken}`),
+            { params: Promise.resolve({ slugOrId: 'culto-rascunho-compartilhado', arrangementId: 'default' }) }
+        );
+        expect(pastorView.status).toBe(200);
+        const pastorData = await pastorView.json();
+        expect(pastorData.canEdit).toBe(false);
+        expect(pastorData.canPublish).toBe(false);
+        expect(pastorData.shareToken).toBeNull();
+        expect(pastorData.prevService).toBeNull();
+
+        // 4. Media collaborator (EDIT, but not WORSHIP/ADMIN) can edit draft title, but CANNOT publish (403)
+        vi.mocked(auth).mockResolvedValue(sessionFor(mediaCollab));
+        expect(
+            (await PATCH_ONE(
+                new NextRequest('http://localhost/api/services/culto-rascunho-compartilhado', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ title: 'Culto Editado Mídia' }),
+                }),
+                { params: Promise.resolve({ slugOrId: 'culto-rascunho-compartilhado' }) }
+            )).status
+        ).toBe(200);
+        expect(
+            (await PATCH_ONE(
+                new NextRequest('http://localhost/api/services/culto-rascunho-compartilhado', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ status: 'PUBLISHED' }),
+                }),
+                { params: Promise.resolve({ slugOrId: 'culto-rascunho-compartilhado' }) }
+            )).status
+        ).toBe(403);
+
+        // 5. Leader B (WORSHIP + EDIT) sees it in church list AND CAN publish it
+        vi.mocked(auth).mockResolvedValue(sessionFor(leaderB));
+        const leaderBList = await (await GET(new Request('http://localhost/api/services?view=list&scope=church'))).json();
+        expect(leaderBList.map((s: { slug: string }) => s.slug)).toContain('culto-rascunho-compartilhado');
+
+        const publishByB = await PATCH_ONE(
+            new NextRequest('http://localhost/api/services/culto-rascunho-compartilhado', {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'PUBLISHED' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'culto-rascunho-compartilhado' }) }
+        );
+        expect(publishByB.status).toBe(200);
+
+        // 6. Once PUBLISHED, people-sharing is rejected (403), while link-sharing still works for anonymous pastor
+        const peopleOnPublished = await POST_SHARE(
+            new NextRequest('http://localhost/api/services/culto-rascunho-compartilhado/shares', {
+                method: 'POST',
+                body: JSON.stringify({ email: 'media-collab@test.com', permission: 'VIEW' }),
+            }),
+            { params: Promise.resolve({ slugOrId: 'culto-rascunho-compartilhado' }) }
+        );
+        expect(peopleOnPublished.status).toBe(403);
+
+        vi.mocked(auth).mockResolvedValue(null);
+        const pastorPublishedView = await GET_ONE(
+            new Request(`http://localhost/api/services/culto-rascunho-compartilhado?share=${shareToken}`),
+            { params: Promise.resolve({ slugOrId: 'culto-rascunho-compartilhado', arrangementId: 'default' }) }
+        );
+        expect(pastorPublishedView.status).toBe(200);
     });
 });

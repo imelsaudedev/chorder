@@ -1,8 +1,15 @@
-import PageTitleBlock from "@/components/common/PageTitleBlock";
 import Main from "@/components/common/Main";
+import PageTitleBlock from "@/components/common/PageTitleBlock";
 import ScrollToTopButton from "@/components/common/ScrollToTopButton";
-import { getTranslations } from "next-intl/server";
+import { getLiveUserAuth } from "@/lib/auth-guard";
+import {
+  canAccessAdmin,
+  canManageChurchServices,
+  canViewChurchServices,
+} from "@/lib/permissions";
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import ClientServicesPage from "./ClientServicesPage";
 import NewServiceProvider from "./NewServiceProvider";
 import ServicesHeaderActions from "./ServicesHeaderActions";
@@ -13,14 +20,32 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ServiceListPage() {
-  const t = await getTranslations();
+  const [t, live] = await Promise.all([getTranslations(), getLiveUserAuth()]);
+  if (!live.authenticated) {
+    redirect("/login?callbackUrl=%2Fservices");
+  }
+
+  const canViewChurch = canViewChurchServices(live.roles);
+  const canManageChurch = canManageChurchServices(live.roles);
+  const isAdmin = canAccessAdmin(live.roles);
 
   return (
-    <NewServiceProvider>
-      <PageTitleBlock title={t("Messages.services")} actions={<ServicesHeaderActions />} />
+    <NewServiceProvider defaultScope={canViewChurch ? "CHURCH" : "PERSONAL"}>
+      <PageTitleBlock
+        title={t("Messages.services")}
+        actions={
+          <ServicesHeaderActions
+            canManageChurch={canManageChurch}
+            isAdmin={isAdmin}
+          />
+        }
+      />
 
       <Main>
-        <ClientServicesPage />
+        <ClientServicesPage
+          canViewChurch={canViewChurch}
+          canManageChurch={canManageChurch}
+        />
       </Main>
 
       <ScrollToTopButton />

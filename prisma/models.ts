@@ -2,6 +2,8 @@ import {
   ArrangementAudio,
   Prisma,
   Service,
+  ServiceScope,
+  ServiceSharePermission,
   ServiceStatus,
   ServiceTemplate,
   Song,
@@ -12,7 +14,19 @@ import {
   TagGroup,
 } from "@prisma/client";
 
-export type { ArrangementAudio, ServiceStatus, ServiceTemplate, Song, SongArrangement, SongUnit, SongUnitType, Tag, TagGroup };
+export type {
+  ArrangementAudio,
+  ServiceScope,
+  ServiceSharePermission,
+  ServiceStatus,
+  ServiceTemplate,
+  Song,
+  SongArrangement,
+  SongUnit,
+  SongUnitType,
+  Tag,
+  TagGroup,
+};
 
 export type ClientArrangementAudio = Omit<Pick<ArrangementAudio, "id" | "url" | "label" | "order">, "id"> & { id?: number };
 
@@ -122,6 +136,8 @@ export type ServiceListItem = Pick<
   "slug" | "title" | "date" | "worshipLeader" | "preacher" | "sermonTheme" | "sermonReference"
 > & {
   status?: ServiceStatus;
+  scope?: ServiceScope;
+  isSharedWithMe?: boolean;
   startTime: string | null;
   songCount: number;
   /** Títulos das músicas, na ordem da liturgia (a busca da lista usa isto). */
@@ -136,11 +152,19 @@ export type ServicePlan = {
 
 export type ClientService = Omit<
   Service,
-  "id" | "legacyId" | "preacher" | "sermonTheme" | "sermonReference" | "plan" | "updatedAt" | "status" | "createdById"
+  "id" | "legacyId" | "preacher" | "sermonTheme" | "sermonReference" | "plan" | "updatedAt" | "status" | "scope" | "createdById" | "shareToken"
 > & {
   id?: number;
   status?: ServiceStatus;
+  scope?: ServiceScope;
   createdById?: string | null;
+  shareToken?: string | null;
+  isOwner?: boolean;
+  canEdit?: boolean;
+  canDelete?: boolean;
+  canPublish?: boolean;
+  canManageShareLink?: boolean;
+  canManagePeopleShares?: boolean;
   units?: ClientServiceUnit[];
   plan?: ServicePlan | null;
   prevService?: ServiceRef | null;

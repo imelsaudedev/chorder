@@ -99,7 +99,9 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
     editor.setDrawer(next);
   }
 
-  const isNewOrDraft = !editor.service.id || editor.service.status === "DRAFT";
+  const isPersonal = editor.service.scope === "PERSONAL";
+  const isNewOrDraft = !isPersonal && (!editor.service.id || editor.service.status === "DRAFT");
+  const canPublishDraft = !editor.service.id || editor.service.canPublish !== false;
   const hasSections = (editor.service.plan?.sections?.length ?? 0) > 0;
 
   async function handleSave(targetStatus?: ServiceStatus) {
@@ -223,15 +225,29 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
       <FormFooter
         disabled={
           !hasSections ||
-          (isNewOrDraft
+          (isNewOrDraft && canPublishDraft
             ? !editor.service.id && !editor.isDirty
             : !editor.isDirty)
         }
         loading={editor.isSaving}
-        label={isNewOrDraft ? tService("publishService") : t("saveService")}
-        onSave={() => handleSave(isNewOrDraft ? "PUBLISHED" : undefined)}
+        label={
+          isNewOrDraft
+            ? canPublishDraft
+              ? tService("publishService")
+              : tService("saveDraft")
+            : t("saveService")
+        }
+        onSave={() =>
+          handleSave(
+            isNewOrDraft
+              ? canPublishDraft
+                ? "PUBLISHED"
+                : "DRAFT"
+              : undefined
+          )
+        }
         secondaryAction={
-          isNewOrDraft ? (
+          isNewOrDraft && canPublishDraft ? (
             <Button
               type="button"
               variant="outline"

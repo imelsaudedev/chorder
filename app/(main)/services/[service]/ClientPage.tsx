@@ -21,11 +21,11 @@ import { useSWRConfig } from "swr";
 type ServiceViewTab = "liturgia" | "cifras";
 const VIEW_STORAGE_KEY = "liturgia:visao";
 
-type ClientPageProps = { serviceSlug: string };
-export default function ClientPage({ serviceSlug }: ClientPageProps) {
+type ClientPageProps = { serviceSlug: string; shareToken?: string | null };
+export default function ClientPage({ serviceSlug, shareToken = null }: ClientPageProps) {
   const t = useTranslations("Service");
   const { mutate } = useSWRConfig();
-  const { service } = useFetchService(serviceSlug);
+  const { service } = useFetchService(serviceSlug, shareToken);
   const [publishing, setPublishing] = useState(false);
   // Começa em Liturgia (igual no servidor) e aplica a última visão do aparelho após montar.
   const [view, setView] = useState<ServiceViewTab>("liturgia");
@@ -79,19 +79,21 @@ export default function ClientPage({ serviceSlug }: ClientPageProps) {
               <Lock className="size-4 shrink-0" aria-hidden="true" />
               {t("draftBannerText")}
             </span>
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              disabled={publishing}
-              onClick={handlePublish}
-            >
-              {publishing ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                t("publishService")
-              )}
-            </Button>
+            {service.canPublish === true && (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                disabled={publishing}
+                onClick={handlePublish}
+              >
+                {publishing ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  t("publishService")
+                )}
+              </Button>
+            )}
           </div>
         </div>
       )}

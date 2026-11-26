@@ -25,7 +25,7 @@ export default function ServiceActionsBar({ service, view }: ServiceActionsBarPr
       {view === "liturgia" ? (
         <>
           <ShareButton service={service} />
-          <EditPlanButton />
+          {service.canEdit !== false && <EditPlanButton />}
         </>
       ) : (
         // (o Holyrics saiu daqui: agora é um ícone no topo, ao lado das setinhas — ServiceHeader)

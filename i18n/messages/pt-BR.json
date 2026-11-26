@@ -109,7 +109,13 @@
     "draftBannerText": "Rascunho privado — visível apenas para você até publicar.",
     "draftPublishedToast": "Liturgia publicada!",
     "draftSavedToast": "Rascunho salvo.",
-    "publishError": "Não foi possível publicar a liturgia. Tente novamente."
+    "publishError": "Não foi possível publicar a liturgia. Tente novamente.",
+    "tabChurch": "Igreja",
+    "tabPersonal": "Minhas liturgias",
+    "sharedBadge": "Compartilhada",
+    "personalEmptyTitle": "Nenhuma liturgia pessoal ainda",
+    "personalEmptyDescription": "Crie liturgias para grupos pequenos, células ou reuniões e compartilhe com quem quiser.",
+    "newPersonalService": "Criar liturgia pessoal"
   },
   "ServiceData": {
     "title": "Título",
@@ -313,5 +319,35 @@
     "emptyTitle": "Nenhum usuário cadastrado",
     "emptyDescription": "Os usuários aparecerão aqui assim que fizerem login.",
     "noResults": "Nenhum usuário encontrado para \"{query}\"."
+  },
+  "ShareService": {
+    "shareButton": "Compartilhar",
+    "title": "Compartilhar liturgia",
+    "description": "Escolha pessoas específicas ou ative um link compartilhável para visualização.",
+    "descriptionLinkOnly": "Ative um link compartilhável para enviar a pastores ou convidados sem listar a liturgia no site.",
+    "emailPlaceholder": "E-mail da pessoa cadastrada...",
+    "permissionLabel": "Permissão",
+    "permissionView": "Visualizar",
+    "permissionEdit": "Editar",
+    "addPerson": "Adicionar",
+    "peopleWithAccess": "Pessoas com acesso",
+    "loading": "Carregando…",
+    "noPeopleYet": "Ainda não foi compartilhada com nenhuma conta específica.",
+    "removePerson": "Remover acesso",
+    "linkSharingTitle": "Qualquer pessoa com o link pode visualizar",
+    "linkSharingDescription": "Ideal para enviar no grupo do WhatsApp sem precisar adicionar cada pessoa.",
+    "copyLink": "Copiar link",
+    "copied": "Copiado",
+    "regenerateLink": "Gerar novo link",
+    "linkCopied": "Link copiado!",
+    "copyError": "Não foi possível copiar o link.",
+    "linkRegenerated": "Novo link gerado. O link anterior deixou de funcionar.",
+    "personAdded": "Acesso concedido!",
+    "permissionUpdated": "Permissão atualizada.",
+    "personRemoved": "Acesso removido.",
+    "userNotFound": "Nenhuma conta encontrada com esse e-mail. A pessoa precisa entrar no site ao menos uma vez.",
+    "cannotShareWithSelf": "Você já é o dono desta liturgia.",
+    "loadError": "Não foi possível carregar os compartilhamentos.",
+    "updateError": "Não foi possível atualizar o compartilhamento."
   }
 }
