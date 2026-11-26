@@ -273,7 +273,7 @@
     "emailPlaceholder": "your@email.com",
     "sendMagicLink": "Send magic link",
     "loginTitle": "Welcome to Chorder",
-    "loginSubtitle": "Sign in to manage your songs and services",
+    "loginSubtitle": "Sign in to access your services and the ones shared with you",
     "signingIn": "Signing in...",
     "logout": "Logout",
     "userMenu": "Account menu",
@@ -295,7 +295,11 @@
     "roleMedia": "Media",
     "accessDeniedTitle": "Restricted access",
     "accessDeniedDescription": "Your account does not have permission to view this page. Contact an administrator if you need access.",
-    "backToSongs": "Go to Songs"
+    "backToSongs": "Go to Songs",
+    "linkUnavailableTitle": "Service unavailable",
+    "linkUnavailableDescription": "You don't have access to this service, or the link is no longer valid. Ask whoever shared it for a new link.",
+    "linkUnavailableVisitorDescription": "This link is no longer available, or the service only opens for signed-in accounts. Sign in to try again, or ask whoever shared it for a new link.",
+    "signIn": "Sign in"
   },
   "AdminUsers": {
     "title": "Users",

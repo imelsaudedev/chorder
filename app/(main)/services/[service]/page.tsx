@@ -44,7 +44,9 @@ export default async function ServicePage({
   });
 
   if (!service) {
-    return <AccessDeniedView />;
+    // Link inválido, desativado ou liturgia sem acesso: diz o que aconteceu e, para visitante, oferece Entrar.
+    const path = `/services/${serviceSlug}${share ? `?share=${encodeURIComponent(share)}` : ""}`;
+    return <AccessDeniedView variant="link" signInCallbackUrl={live.authenticated ? undefined : path} />;
   }
 
   return <ClientPage serviceSlug={serviceSlug} shareToken={share ?? null} />;
