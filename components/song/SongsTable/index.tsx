@@ -10,6 +10,7 @@ import {
 } from "@/lib/songs-list-memory";
 import { SongSort, initialOf, sortSongs } from "@/lib/songs-list-state";
 import { ClientSong } from "@/prisma/models";
+import { useViewer } from "@/components/auth/ViewerProvider";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
@@ -19,9 +20,15 @@ const PAD = "px-4 @[560px]:px-5 @[860px]:px-6";
 
 /** Cabeçalho de colunas: acompanha as colunas do item em cada largura da lista. */
 function ColumnHeader({ count }: { count: number }) {
+  // A coluna de uso só existe para a equipe; sem ela, o grid fecha o vão (igual à linha, SongRow).
+  const { canSeeUsageStats } = useViewer();
   return (
     <div
-      className={`grid items-center gap-x-4 bg-surface-subtle py-3 text-sm font-medium text-muted-foreground ${PAD} grid-cols-[minmax(0,1fr)] @[560px]:gap-x-5 @[560px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_3.5rem_2.5rem] @[860px]:grid-cols-[minmax(0,2.3fr)_minmax(0,2.4fr)_minmax(0,1.6fr)_11rem_3.5rem_2.5rem]`}
+      className={`grid items-center gap-x-4 bg-surface-subtle py-3 text-sm font-medium text-muted-foreground ${PAD} grid-cols-[minmax(0,1fr)] @[560px]:gap-x-5 @[560px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_3.5rem_2.5rem] ${
+        canSeeUsageStats
+          ? "@[860px]:grid-cols-[minmax(0,2.3fr)_minmax(0,2.4fr)_minmax(0,1.6fr)_11rem_3.5rem_2.5rem]"
+          : "@[860px]:grid-cols-[minmax(0,2.3fr)_minmax(0,2.4fr)_minmax(0,1.6fr)_3.5rem_2.5rem]"
+      }`}
     >
       <span>
         {count} música{count === 1 ? "" : "s"}
@@ -29,7 +36,7 @@ function ColumnHeader({ count }: { count: number }) {
       <span className="hidden @[560px]:block @[860px]:hidden">Letra e categorias</span>
       <span className="hidden @[860px]:block">Letra</span>
       <span className="hidden @[860px]:block">Categorias</span>
-      <span className="hidden @[860px]:block">Último uso</span>
+      {canSeeUsageStats && <span className="hidden @[860px]:block">Último uso</span>}
       <span className="hidden @[560px]:block" aria-hidden />
       <span className="hidden @[560px]:block" aria-hidden />
     </div>

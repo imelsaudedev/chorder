@@ -88,6 +88,15 @@ describe("SongRow", () => {
     expect(screen.getByText("Congregacional")).toBeInTheDocument();
   });
 
+  it("quem não é da equipe não vê o uso, mesmo que os dados cheguem", () => {
+    const used = song({ lastUsedAt: new Date(Date.now() - 3 * DAY), usageCount: 5 });
+    const { unmount } = renderRow(used, "", []);
+    expect(screen.queryByText(/hoje|há |Nunca usada|5×/)).not.toBeInTheDocument();
+    unmount();
+    renderRow(used, "", ["USER"]);
+    expect(screen.queryByText(/hoje|há |Nunca usada|5×/)).not.toBeInTheDocument();
+  });
+
   it("sem estatísticas de uso, não mostra o último uso", () => {
     renderRow(song());
     expect(screen.queryByText(/Nunca usada|hoje|há /)).not.toBeInTheDocument();

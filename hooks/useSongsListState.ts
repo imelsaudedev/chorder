@@ -1,6 +1,7 @@
 "use client";
 
-import { SongsListState, applySongsListState, parseSongsListState } from "@/lib/songs-list-state";
+import { useViewer } from "@/components/auth/ViewerProvider";
+import { DEFAULT_SORT, SongsListState, applySongsListState, parseSongsListState } from "@/lib/songs-list-state";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
@@ -12,9 +13,14 @@ export default function useSongsListState() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const { canSeeUsageStats } = useViewer();
 
   const paramsKey = searchParams.toString();
-  const state = useMemo(() => parseSongsListState(new URLSearchParams(paramsKey)), [paramsKey]);
+  const state = useMemo(() => {
+    const parsed = parseSongsListState(new URLSearchParams(paramsKey));
+    // Endereço antigo ou compartilhado com ordenação por uso: quem não vê o uso cai no padrão.
+    return !canSeeUsageStats && parsed.sort.key === "usage" ? { ...parsed, sort: DEFAULT_SORT } : parsed;
+  }, [paramsKey, canSeeUsageStats]);
 
   const update = useCallback(
     (patch: Partial<SongsListState>) => {
