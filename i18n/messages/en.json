@@ -264,7 +264,16 @@
     "authErrorGeneric": "Unable to sign in. Please try again.",
     "authErrorOAuthAccountNotLinked": "This email is already linked to another sign-in method.",
     "authErrorAccessDenied": "Access was denied. Please try again.",
-    "authErrorVerification": "The sign-in link is invalid or has expired."
+    "authErrorVerification": "The sign-in link is invalid or has expired.",
+    "rolePreviewTitle": "Preview roles",
+    "rolePreviewActive": "Previewing",
+    "rolePreviewUserHint": "No roles selected: viewing as a regular User.",
+    "rolePreviewApply": "Apply",
+    "rolePreviewReset": "Restore real roles",
+    "rolePreviewError": "Could not update preview roles.",
+    "roleAdmin": "Admin",
+    "roleWorship": "Worship",
+    "roleMedia": "Media"
   },
   "AdminUsers": {
     "title": "Users",

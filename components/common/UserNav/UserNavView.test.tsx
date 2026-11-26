@@ -76,4 +76,61 @@ describe("UserNavView component", () => {
 
     expect(mockSignOut).toHaveBeenCalledWith({ callbackUrl: "/login" });
   });
+
+  it("hides role preview controls for non-admin users", async () => {
+    const userEventInstance = userEvent.setup();
+    render(
+      <UserNavView
+        user={user}
+        isRealAdmin={false}
+        activeRoles={["WORSHIP"]}
+      />
+    );
+
+    await userEventInstance.click(screen.getByRole("button", { name: "userMenu" }));
+    expect(screen.queryByText("rolePreviewTitle")).toBeNull();
+  });
+
+  it("allows real admins to toggle simulated roles, apply, and reset preview", async () => {
+    const userEventInstance = userEvent.setup();
+    const onApplyRolePreview = vi.fn().mockResolvedValue(undefined);
+    render(
+      <UserNavView
+        user={user}
+        isRealAdmin
+        activeRoles={["ADMIN"]}
+        isPreviewing={false}
+        onApplyRolePreview={onApplyRolePreview}
+      />
+    );
+
+    await userEventInstance.click(screen.getByRole("button", { name: "userMenu" }));
+    expect(screen.getByText("rolePreviewTitle")).toBeDefined();
+
+    // Uncheck Admin, check Media
+    await userEventInstance.click(screen.getByRole("menuitemcheckbox", { name: "roleAdmin" }));
+    await userEventInstance.click(screen.getByRole("menuitemcheckbox", { name: "roleMedia" }));
+    await userEventInstance.click(screen.getByRole("button", { name: "rolePreviewApply" }));
+
+    expect(onApplyRolePreview).toHaveBeenCalledWith(["MEDIA"]);
+  });
+
+  it("renders reset button when preview mode is active", async () => {
+    const userEventInstance = userEvent.setup();
+    const onApplyRolePreview = vi.fn().mockResolvedValue(undefined);
+    render(
+      <UserNavView
+        user={user}
+        isRealAdmin
+        activeRoles={[]}
+        isPreviewing
+        onApplyRolePreview={onApplyRolePreview}
+      />
+    );
+
+    await userEventInstance.click(screen.getByRole("button", { name: "userMenu" }));
+    await userEventInstance.click(screen.getByRole("button", { name: "rolePreviewReset" }));
+
+    expect(onApplyRolePreview).toHaveBeenCalledWith(null);
+  });
 });

@@ -265,7 +265,16 @@
     "authErrorGeneric": "Não foi possível entrar. Tente novamente.",
     "authErrorOAuthAccountNotLinked": "Este e-mail já está associado a outro método de entrada.",
     "authErrorAccessDenied": "Acesso negado. Tente novamente.",
-    "authErrorVerification": "O link de acesso é inválido ou expirou."
+    "authErrorVerification": "O link de acesso é inválido ou expirou.",
+    "rolePreviewTitle": "Simular perfis",
+    "rolePreviewActive": "Simulando",
+    "rolePreviewUserHint": "Sem perfis selecionados: visualizando como Usuário comum.",
+    "rolePreviewApply": "Aplicar",
+    "rolePreviewReset": "Voltar ao perfil real",
+    "rolePreviewError": "Não foi possível alterar os perfis simulados.",
+    "roleAdmin": "Admin",
+    "roleWorship": "Louvor",
+    "roleMedia": "Mídia"
   },
   "AdminUsers": {
     "title": "Usuários",
