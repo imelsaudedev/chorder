@@ -1,6 +1,116 @@
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { GET, POST } from './route';
+import { POST as POST_ONE } from './[slugOrId]/route';
+import { POST as POST_MINIMAL_ARRANGEMENT } from '../songs/[slugOrId]/arrangements/route';
 import prisma from '../../../prisma/client';
+import { auth } from '@/auth';
+import { NextRequest } from 'next/server';
+
+vi.mock('@/auth', () => ({ auth: vi.fn() }));
+
+beforeEach(() => {
+  vi.mocked(auth).mockResolvedValue({
+    user: { id: 'test-user-id', email: 'admin@test.com', roles: ['ADMIN'] },
+    expires: new Date(Date.now() + 60_000).toISOString(),
+  });
+});
+
+describe('Services API role guards', () => {
+  it('blocks unauthenticated and regular users from GET /api/services, allows MEDIA', async () => {
+    vi.mocked(auth).mockResolvedValueOnce(null);
+    expect((await GET(new Request('http://localhost/api/services'))).status).toBe(401);
+
+    vi.mocked(auth).mockResolvedValueOnce({
+      user: { id: 'test-user-id', email: 'regular@test.com', roles: [] },
+      expires: new Date(Date.now() + 60_000).toISOString(),
+    });
+    expect((await GET(new Request('http://localhost/api/services'))).status).toBe(403);
+
+    vi.mocked(auth).mockResolvedValueOnce({
+      user: { id: 'test-user-id', email: 'media@test.com', roles: ['MEDIA'] },
+      expires: new Date(Date.now() + 60_000).toISOString(),
+    });
+    expect((await GET(new Request('http://localhost/api/services'))).status).toBe(200);
+  });
+
+  it('blocks unauthenticated and MEDIA users from POST /api/songs/[slugOrId]/arrangements', async () => {
+    vi.mocked(auth).mockResolvedValueOnce(null);
+    const unauthRes = await POST_MINIMAL_ARRANGEMENT(
+      new NextRequest('http://localhost/api/songs/any/arrangements', { method: 'POST' }),
+      { params: Promise.resolve({ slugOrId: 'any' }) }
+    );
+    expect(unauthRes.status).toBe(401);
+
+    vi.mocked(auth).mockResolvedValueOnce({
+      user: { id: 'test-user-id', email: 'media@test.com', roles: ['MEDIA'] },
+      expires: new Date(Date.now() + 60_000).toISOString(),
+    });
+    const mediaRes = await POST_MINIMAL_ARRANGEMENT(
+      new NextRequest('http://localhost/api/songs/any/arrangements', { method: 'POST' }),
+      { params: Promise.resolve({ slugOrId: 'any' }) }
+    );
+    expect(mediaRes.status).toBe(403);
+  });
+
+  it('prevents POST /api/services from overwriting an existing slug and prevents slug/id mismatch overwrite', async () => {
+    const victim = await prisma.service.create({
+      data: {
+        title: 'Victim Service',
+        slug: 'victim-service',
+        date: new Date('2026-08-01T10:00:00Z'),
+        isDeleted: false,
+      },
+    });
+    const owned = await prisma.service.create({
+      data: {
+        title: 'Owned Service',
+        slug: 'owned-service',
+        date: new Date('2026-08-02T10:00:00Z'),
+        isDeleted: false,
+      },
+    });
+
+    // 1. POST /api/services with existing slug returns 409 and does NOT overwrite victim
+    const dupRes = await POST(
+      new Request('http://localhost/api/services', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: 'Overwritten',
+          slug: 'victim-service',
+          date: '2026-08-01T10:00:00Z',
+          worshipLeader: null,
+          isDeleted: false,
+          plan: { startTime: '10:00', sections: [{ id: 's1', type: 'CULTO', label: 'Culto', order: 1, units: [] }] },
+        }),
+      })
+    );
+    expect(dupRes.status).toBe(409);
+
+    // 2. POST /api/services/<owned.id> with victim's slug returns 400 and does NOT overwrite victim
+    const mismatchRes = await POST_ONE(
+      new NextRequest(`http://localhost/api/services/${owned.id}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          id: owned.id,
+          title: 'Overwritten via mismatch',
+          slug: 'victim-service',
+          date: '2026-08-02T10:00:00Z',
+          worshipLeader: null,
+          preacher: null,
+          sermonTheme: null,
+          sermonReference: null,
+          isDeleted: false,
+          plan: { startTime: '10:00', sections: [{ id: 's1', type: 'CULTO', label: 'Culto', order: 1, units: [] }] },
+        }),
+      }),
+      { params: Promise.resolve({ slugOrId: String(owned.id) }) }
+    );
+    expect(mismatchRes.status).toBe(400);
+
+    const freshVictim = await prisma.service.findUnique({ where: { id: victim.id } });
+    expect(freshVictim?.title).toBe('Victim Service');
+  });
+});
 
 describe('Services API integration', () => {
     it('returns services via GET', async () => {

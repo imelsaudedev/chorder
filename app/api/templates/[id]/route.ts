@@ -1,3 +1,4 @@
+import { requireAdmin, requireChurchServiceManager } from "@/lib/auth-guard";
 import {
   createOrUpdateTemplate,
   deleteTemplate,
@@ -8,6 +9,9 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const guard = await requireChurchServiceManager();
+  if (!guard.ok) return guard.response;
+
   const { id } = await params;
   const template = await retrieveTemplate(parseInt(id));
   if (!template) return new Response("Template not found", { status: 404 });
@@ -18,6 +22,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
   const { id } = await params;
   const body = await request.json();
   if (!body?.name || !body?.items) {
@@ -35,6 +42,9 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
   const { id } = await params;
   await deleteTemplate(parseInt(id));
   return new Response(null, { status: 204 });

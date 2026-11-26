@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth-guard";
 import { parseTagFields } from "@/lib/tag-fields";
 import prisma from "@/prisma/client";
 import { NextRequest } from "next/server";
@@ -6,6 +7,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
   const { id } = await params;
   const body = await request.json();
   const { name } = body;
@@ -31,6 +35,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
   const { id } = await params;
   const tagId = parseInt(id);
 

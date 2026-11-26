@@ -1,4 +1,9 @@
 import {
+  requireChurchServiceEditor,
+  requireChurchServiceManager,
+  requireChurchServiceViewer,
+} from "@/lib/auth-guard";
+import {
   createOrUpdateService,
   deleteService,
   retrieveService,
@@ -22,6 +27,9 @@ export async function GET(
     params: Promise<{ slugOrId: string; arrangementId: string | "default" }>;
   }
 ) {
+  const guard = await requireChurchServiceViewer();
+  if (!guard.ok) return guard.response;
+
   const { slugOrId } = await params;
   const service = await retrieveService(slugOrId);
   if (!service) {
@@ -39,6 +47,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
+  const guard = await requireChurchServiceManager();
+  if (!guard.ok) return guard.response;
+
   const { slugOrId } = await params;
   const success = await deleteService(slugOrId);
   if (!success) {
@@ -51,6 +62,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
+  const guard = await requireChurchServiceEditor();
+  if (!guard.ok) return guard.response;
+
   const { slugOrId } = await params;
   const body = await request.json();
 
@@ -83,15 +97,21 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slugOrId: string }> }
 ) {
+  const guard = await requireChurchServiceEditor();
+  if (!guard.ok) return guard.response;
+
   const { slugOrId } = await params;
+  const existing = await retrieveService(slugOrId);
+  if (!existing || !existing.id) {
+    return new Response("Service not found", { status: 404 });
+  }
+
   const parsed = serviceSchema.safeParse(await request.json());
   if (!parsed.success) return invalidServiceResponse(parsed.error);
   const service = parsed.data;
-  if (service.id !== parseInt(slugOrId) && service.slug !== slugOrId) {
+  if (service.id !== existing.id || (service.slug && service.slug !== existing.slug)) {
     return new Response(
-      `Arrangement ID or slug mismatch. Expected ${
-        service.id
-      } or ${JSON.stringify(service.slug)} to be equal to ${slugOrId}`,
+      `Service ID or slug mismatch for ${slugOrId}`,
       { status: 400 }
     );
   }
@@ -102,7 +122,10 @@ export async function POST(
   }
 
   try {
-    const updatedService = await createOrUpdateService(service);
+    const updatedService = await createOrUpdateService(
+      { ...service, id: existing.id, slug: existing.slug },
+      { mode: "update" }
+    );
     return new Response(JSON.stringify(updatedService), {
       status: 200,
       headers: { "Content-Type": "application/json" },

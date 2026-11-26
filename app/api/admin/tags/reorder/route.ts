@@ -1,8 +1,12 @@
+import { requireAdmin } from "@/lib/auth-guard";
 import prisma from "@/prisma/client";
 import { NextRequest } from "next/server";
 
 // Body: { tagGroupId: number, ids: number[] } — nova ordem das tags do grupo (da primeira à última)
 export async function POST(request: NextRequest) {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
   const { tagGroupId, ids } = await request.json();
   if (!Number.isInteger(tagGroupId) || !Array.isArray(ids) || !ids.every(Number.isInteger)) {
     return Response.json({ error: "tagGroupId e ids são obrigatórios" }, { status: 400 });

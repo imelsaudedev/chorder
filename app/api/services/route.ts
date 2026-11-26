@@ -1,8 +1,13 @@
 import {
+  requireChurchServiceManager,
+  requireChurchServiceViewer,
+} from "@/lib/auth-guard";
+import {
   createOrUpdateService,
   retrieveServices,
   retrieveServicesList,
   ServiceConflictError,
+  ServiceSlugExistsError,
 } from "@/prisma/data";
 import { serviceSchema } from "@/schemas/service";
 
@@ -15,6 +20,9 @@ function invalidServiceResponse(error: import("zod").ZodError) {
 
 // `?view=list` devolve o resumo leve da lista de Liturgias (sem o plano).
 export async function GET(request: Request) {
+  const guard = await requireChurchServiceViewer();
+  if (!guard.ok) return guard.response;
+
   if (new URL(request.url).searchParams.get("view") === "list") {
     return Response.json(await retrieveServicesList());
   }
@@ -23,6 +31,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const guard = await requireChurchServiceManager();
+  if (!guard.ok) return guard.response;
+
   const body = await request.json();
   const parsed = serviceSchema.safeParse({
     sermonTheme: null,
@@ -41,12 +52,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const createdService = await createOrUpdateService(service);
+    const createdService = await createOrUpdateService(service, { mode: "create" });
     return new Response(JSON.stringify(createdService), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
+    if (err instanceof ServiceSlugExistsError) {
+      return Response.json({ error: "Service slug already exists" }, { status: 409 });
+    }
     if (err instanceof ServiceConflictError) {
       return new Response(
         "Este culto foi atualizado por outra pessoa enquanto você editava. Recarregue a página antes de salvar novamente.",

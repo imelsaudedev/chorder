@@ -276,7 +276,10 @@
     "rolePreviewError": "Não foi possível alterar os perfis simulados.",
     "roleAdmin": "Admin",
     "roleWorship": "Louvor",
-    "roleMedia": "Mídia"
+    "roleMedia": "Mídia",
+    "accessDeniedTitle": "Acesso restrito",
+    "accessDeniedDescription": "Sua conta não tem permissão para acessar esta página. Fale com um administrador caso precise de acesso.",
+    "backToSongs": "Ir para Músicas"
   },
   "AdminUsers": {
     "title": "Usuários",
