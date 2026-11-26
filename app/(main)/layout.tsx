@@ -1,14 +1,24 @@
 import NavBar from "@/components/common/NavBar";
 import UserNav from "@/components/common/UserNav";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { getLiveUserAuth } from "@/lib/auth-guard";
+import { canAccessAdmin } from "@/lib/permissions";
 import ContentWrapper from "./ContentWrapper";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({ children }: { children: React.ReactNode }) {
+  const live = await getLiveUserAuth();
+  const isAuthenticated = live.authenticated;
+  const isAdmin = canAccessAdmin(live.roles);
+
   return (
     <TooltipProvider>
       <div className="max-w-100vw flex">
         <div className="stage-mode-hidden">
-          <NavBar userNav={<UserNav />} />
+          <NavBar
+            userNav={<UserNav />}
+            isAuthenticated={isAuthenticated}
+            isAdmin={isAdmin}
+          />
         </div>
         <ContentWrapper>{children}</ContentWrapper>
       </div>

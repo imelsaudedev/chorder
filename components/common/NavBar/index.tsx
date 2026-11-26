@@ -3,12 +3,28 @@
 import clsx from "clsx";
 import { useBottomNavVisible } from "@/hooks/useBottomNavVisible";
 import { ThemeMenu, ThemeSheet } from "@/components/common/Theme/ThemeToggle";
-import { ListMusic, MessageCircleHeart, Music } from "lucide-react";
+import {
+  ListMusic,
+  LogIn,
+  MessageCircleHeart,
+  Music,
+  Shield,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
+type NavBarProps = {
+  userNav?: React.ReactNode;
+  isAuthenticated?: boolean;
+  isAdmin?: boolean;
+};
+
+export default function NavBar({
+  userNav,
+  isAuthenticated = true,
+  isAdmin = false,
+}: NavBarProps) {
   const t = useTranslations("Messages");
   const pathname = usePathname();
   const pathParts = pathname.split("/");
@@ -23,15 +39,17 @@ export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
 
   const items = (
     <>
-      <NavItem
-        href="/services"
-        icon={<ListMusic size={24} />}
-        label={t("services")}
-        // Os modelos são acessados pelo menu da lista de liturgias, então ficam sob "Liturgias".
-        active={
-          currentPage === "services" || pathname.startsWith("/admin/templates")
-        }
-      />
+      {isAuthenticated && (
+        <NavItem
+          href="/services"
+          icon={<ListMusic size={24} />}
+          label={t("services")}
+          // Os modelos são acessados pelo menu da lista de liturgias, então ficam sob "Liturgias".
+          active={
+            currentPage === "services" || pathname.startsWith("/admin/templates")
+          }
+        />
+      )}
       <NavItem
         href="/songs"
         icon={<Music size={24} />}
@@ -44,7 +62,30 @@ export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
         label={t("feedback")}
         active={currentPage === "feedback"}
       />
+      {isAdmin && (
+        <NavItem
+          href="/admin/users"
+          icon={<Shield size={24} />}
+          label={t("admin")}
+          active={
+            currentPage === "admin" && !pathname.startsWith("/admin/templates")
+          }
+        />
+      )}
     </>
+  );
+
+  const authSlot = isAuthenticated ? (
+    userNav ? (
+      <div className="flex flex-col items-center">{userNav}</div>
+    ) : null
+  ) : (
+    <NavItem
+      href="/login"
+      icon={<LogIn size={22} />}
+      label={t("signIn")}
+      active={currentPage === "login"}
+    />
   );
 
   return (
@@ -61,9 +102,7 @@ export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
         </div>
         <div className="mt-auto flex flex-col items-center pb-6 gap-4">
           <ThemeMenu />
-          {userNav && (
-            <div className="flex flex-col items-center">{userNav}</div>
-          )}
+          {authSlot}
         </div>
       </nav>
 
@@ -73,9 +112,9 @@ export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
           <div className="flex justify-around py-3 items-center">
             {items}
             <ThemeSheet />
-            {userNav && (
+            {authSlot && (
               <div className="flex flex-col items-center justify-center -mt-1">
-                {userNav}
+                {authSlot}
               </div>
             )}
           </div>

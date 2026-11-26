@@ -15,9 +15,12 @@ import { useEffect } from "react";
 
 const SORT_STORAGE_KEY = "musicas:sort";
 
-type ClientSongsPageProps = { query: string };
+type ClientSongsPageProps = { query: string; canEdit?: boolean };
 
-export default function ClientSongsPage({ query }: ClientSongsPageProps) {
+export default function ClientSongsPage({
+  query,
+  canEdit = false,
+}: ClientSongsPageProps) {
   const t = useTranslations("Messages");
   const { openNewSong } = useNewSong();
   // Categorias e ordenação ficam na URL: ao abrir uma música e voltar, a lista retoma como estava.
@@ -53,7 +56,9 @@ export default function ClientSongsPage({ query }: ClientSongsPageProps) {
       <ClientSongList query={query} tagIds={selectedTagIds} sort={sort} />
 
       {/* No tablet e no desktop a ação está no cabeçalho. */}
-      <FloatingAddLink label={t("newSong")} onClick={openNewSong} mobileOnly />
+      {canEdit && (
+        <FloatingAddLink label={t("newSong")} onClick={openNewSong} mobileOnly />
+      )}
     </>
   );
 }

@@ -21,14 +21,24 @@ import SongConfig from "./SongConfig";
 
 type ArrangementHeaderProps = {
   arrangement: ClientArrangement | null;
+  canEdit?: boolean;
 };
 
-export default function ArrangementHeader({ arrangement }: ArrangementHeaderProps) {
+export default function ArrangementHeader({
+  arrangement,
+  canEdit = true,
+}: ArrangementHeaderProps) {
   if (!arrangement) return <Skeleton />;
-  return <ArrangementHeaderContent arrangement={arrangement} />;
+  return <ArrangementHeaderContent arrangement={arrangement} canEdit={canEdit} />;
 }
 
-function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangement }) {
+function ArrangementHeaderContent({
+  arrangement,
+  canEdit,
+}: {
+  arrangement: ClientArrangement;
+  canEdit: boolean;
+}) {
   const t = useTranslations("Messages");
   const { updateSong } = useUpdateSong(arrangement.song!.slug);
   const { openSongMetaModal } = useSongMetaModal();
@@ -87,10 +97,12 @@ function ArrangementHeaderContent({ arrangement }: { arrangement: ClientArrangem
                   <span className="sr-only">{t("layout")}</span>
                 </Button>
               </PopoverTrigger>
-              <ArrangementActionMenu
-                arrangement={arrangement}
-                onEditSong={handleEditSong}
-              />
+              {canEdit && (
+                <ArrangementActionMenu
+                  arrangement={arrangement}
+                  onEditSong={handleEditSong}
+                />
+              )}
             </div>
           }
           contentActions={

@@ -1,8 +1,10 @@
-import PageTitleBlock from "@/components/common/PageTitleBlock";
 import Main from "@/components/common/Main";
+import PageTitleBlock from "@/components/common/PageTitleBlock";
 import ScrollToTopButton from "@/components/common/ScrollToTopButton";
-import { getTranslations } from "next-intl/server";
+import { getLiveUserAuth } from "@/lib/auth-guard";
+import { canEditSongs } from "@/lib/permissions";
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import ClientSongsPage from "./ClientSongsPage";
 import NewSongProvider from "./NewSongProvider";
 import SongsHeaderActions from "./SongsHeaderActions";
@@ -17,16 +19,23 @@ type SongListPageProps = {
 };
 
 export default async function SongListPage(props: SongListPageProps) {
-  const t = await getTranslations();
-  const searchParams = await props.searchParams;
+  const [t, searchParams, live] = await Promise.all([
+    getTranslations(),
+    props.searchParams,
+    getLiveUserAuth(),
+  ]);
   const query = searchParams?.query || "";
+  const canEdit = canEditSongs(live.roles);
 
   return (
     <NewSongProvider>
-      <PageTitleBlock title={t("Messages.songs")} actions={<SongsHeaderActions />} />
+      <PageTitleBlock
+        title={t("Messages.songs")}
+        actions={canEdit ? <SongsHeaderActions /> : undefined}
+      />
 
       <Main className="max-w-full">
-        <ClientSongsPage query={query} />
+        <ClientSongsPage query={query} canEdit={canEdit} />
       </Main>
 
       <ScrollToTopButton />
