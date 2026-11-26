@@ -274,7 +274,7 @@
     "emailPlaceholder": "seu@email.com",
     "sendMagicLink": "Enviar link mágico",
     "loginTitle": "Bem-vindo ao Chorder",
-    "loginSubtitle": "Entre para gerenciar suas músicas e liturgias",
+    "loginSubtitle": "Entre para acessar suas liturgias e as que compartilharam com você",
     "signingIn": "Entrando...",
     "logout": "Sair",
     "userMenu": "Menu da conta",
@@ -296,7 +296,11 @@
     "roleMedia": "Mídia",
     "accessDeniedTitle": "Acesso restrito",
     "accessDeniedDescription": "Sua conta não tem permissão para acessar esta página. Fale com um administrador caso precise de acesso.",
-    "backToSongs": "Ir para Músicas"
+    "backToSongs": "Ir para Músicas",
+    "linkUnavailableTitle": "Liturgia indisponível",
+    "linkUnavailableDescription": "Você não tem acesso a esta liturgia, ou o link deixou de valer. Peça um novo link a quem a compartilhou.",
+    "linkUnavailableVisitorDescription": "Este link não está mais disponível, ou a liturgia só abre para quem entrou na conta. Entre para tentar de novo ou peça um novo link a quem a compartilhou.",
+    "signIn": "Entrar"
   },
   "AdminUsers": {
     "title": "Usuários",
