@@ -29,7 +29,7 @@
     "admin": "Admin",
     "signIn": "Entrar",
     "signInToAccessServices": "Entre para acessar liturgias",
-    "requiresWorshipOrAdmin": "Disponível para equipe de Louvor e Admins",
+    "requiresWorshipOrAdmin": "Disponível para equipe de Louvor",
     "stats": "Stats",
     "newService": "Nova liturgia",
     "editService": "Editar liturgia",
@@ -297,7 +297,7 @@
     "roleWorship": "Louvor",
     "roleMedia": "Mídia",
     "accessDeniedTitle": "Acesso restrito",
-    "accessDeniedDescription": "Sua conta não tem permissão para acessar esta página. Fale com um administrador caso precise de acesso.",
+    "accessDeniedDescription": "Sua conta não tem permissão para acessar esta página. Fale com a liderança caso precise de acesso.",
     "backToSongs": "Ir para Músicas"
   },
   "AdminUsers": {

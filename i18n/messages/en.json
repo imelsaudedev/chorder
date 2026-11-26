@@ -29,7 +29,7 @@
     "admin": "Admin",
     "signIn": "Sign in",
     "signInToAccessServices": "Sign in to access liturgies",
-    "requiresWorshipOrAdmin": "Available to Worship team and Admins",
+    "requiresWorshipOrAdmin": "Available to the Worship team",
     "stats": "Stats",
     "newService": "New service",
     "editService": "Edit service",
@@ -296,7 +296,7 @@
     "roleWorship": "Worship",
     "roleMedia": "Media",
     "accessDeniedTitle": "Restricted access",
-    "accessDeniedDescription": "Your account does not have permission to view this page. Contact an administrator if you need access.",
+    "accessDeniedDescription": "Your account does not have permission to view this page. Contact the church leadership if you need access.",
     "backToSongs": "Go to Songs"
   },
   "AdminUsers": {
