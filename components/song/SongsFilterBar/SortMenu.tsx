@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SORT_KEYS, SongSort, SongSortKey, defaultDir } from "@/lib/songs-list-state";
+import { useViewer } from "@/components/auth/ViewerProvider";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 export const SORT_LABELS: Record<SongSortKey, string> = {
@@ -20,6 +21,8 @@ type SortMenuProps = { sort: SongSort; onChange: (sort: SongSort) => void };
 
 /** Ordenação: a seta indica o sentido; tocar de novo no mesmo item inverte. */
 export default function SortMenu({ sort, onChange }: SortMenuProps) {
+  const { canSeeUsageStats } = useViewer();
+  const keys = SORT_KEYS.filter((key) => key !== "usage" || canSeeUsageStats);
   const Arrow = sort.dir === "asc" ? ArrowUp : ArrowDown;
 
   function pick(key: SongSortKey) {
@@ -36,7 +39,7 @@ export default function SortMenu({ sort, onChange }: SortMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {SORT_KEYS.map((key) => (
+        {keys.map((key) => (
           <DropdownMenuItem
             key={key}
             onSelect={(e) => {

@@ -78,7 +78,7 @@ export default function SongRow({
   /** Dentro do cartão da lista: sem margem negativa; o respiro lateral acompanha o cabeçalho. */
   flush?: boolean;
 }) {
-  const { canEditSongs } = useViewer();
+  const { canEditSongs, canSeeUsageStats } = useViewer();
   const [metaOpen, setMetaOpen] = useState(false);
   const { updateSong } = useUpdateSong(song.slug);
   const { mutate } = useSWRConfig();
@@ -89,7 +89,7 @@ export default function SongRow({
   const lyric = leadLines(song.lyrics, 2);
   const tags = song.tags ?? [];
   // Só mostra o uso quando a lista pediu as estatísticas.
-  const hasUsage = song.usageCount !== undefined;
+  const hasUsage = canSeeUsageStats && song.usageCount !== undefined;
 
   function handleMetaSave(payload: SongMetaSavePayload) {
     updateSong({ title: payload.title, artist: payload.artist ?? null, tagIds: payload.tagIds }).then(() =>
@@ -108,8 +108,9 @@ export default function SongRow({
           "@[560px]:gap-x-5",
           "@[560px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_3.5rem_2.5rem]",
           "@[560px]:[grid-template-areas:'id_lyric_play_act'_'id_tags_play_act']",
-          "@[860px]:grid-cols-[minmax(0,2.3fr)_minmax(0,2.4fr)_minmax(0,1.6fr)_11rem_3.5rem_2.5rem]",
-          "@[860px]:[grid-template-areas:'id_lyric_tags_used_play_act']"
+          hasUsage
+            ? "@[860px]:grid-cols-[minmax(0,2.3fr)_minmax(0,2.4fr)_minmax(0,1.6fr)_11rem_3.5rem_2.5rem] @[860px]:[grid-template-areas:'id_lyric_tags_used_play_act']"
+            : "@[860px]:grid-cols-[minmax(0,2.3fr)_minmax(0,2.4fr)_minmax(0,1.6fr)_3.5rem_2.5rem] @[860px]:[grid-template-areas:'id_lyric_tags_play_act']"
         )}
       >
         <Link href={`/songs/${song.slug}`} className="absolute inset-0 z-0" aria-label={song.title} />
