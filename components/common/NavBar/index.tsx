@@ -4,11 +4,6 @@ import clsx from "clsx";
 import { useBottomNavVisible } from "@/hooks/useBottomNavVisible";
 import { ThemeMenu, ThemeSheet } from "@/components/common/Theme/ThemeToggle";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   ListMusic,
   LogIn,
   MessageCircleHeart,
@@ -44,17 +39,18 @@ export default function NavBar({
 
   const items = (
     <>
-      <NavItem
-        href="/services"
-        icon={<ListMusic size={24} />}
-        label={t("services")}
-        // Os modelos são acessados pelo menu da lista de liturgias, então ficam sob "Liturgias".
-        active={
-          currentPage === "services" || pathname.startsWith("/admin/templates")
-        }
-        disabled={!isAuthenticated}
-        disabledReason={t("signInToAccessServices")}
-      />
+      {/* Visitante não tem liturgias para ver: o item some, em vez de aparecer apagado. */}
+      {isAuthenticated && (
+        <NavItem
+          href="/services"
+          icon={<ListMusic size={24} />}
+          label={t("services")}
+          // Os modelos são acessados pelo menu da lista de liturgias, então ficam sob "Liturgias".
+          active={
+            currentPage === "services" || pathname.startsWith("/admin/templates")
+          }
+        />
+      )}
       <NavItem
         href="/songs"
         icon={<Music size={24} />}
@@ -134,39 +130,9 @@ type NavItemProps = {
   icon: JSX.Element;
   label: string;
   active: boolean;
-  disabled?: boolean;
-  disabledReason?: string;
 };
 
-function NavItem({
-  href,
-  icon,
-  label,
-  active,
-  disabled = false,
-  disabledReason,
-}: NavItemProps) {
-  if (disabled) {
-    const content = (
-      <span
-        aria-disabled="true"
-        className="flex flex-col items-center text-sm text-muted-foreground opacity-40 cursor-not-allowed select-none"
-      >
-        {icon}
-        <span className="text-xs">{label}</span>
-      </span>
-    );
-
-    if (!disabledReason) return content;
-
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>{content}</TooltipTrigger>
-        <TooltipContent side="right">{disabledReason}</TooltipContent>
-      </Tooltip>
-    );
-  }
-
+function NavItem({ href, icon, label, active }: NavItemProps) {
   return (
     <Link
       href={href}

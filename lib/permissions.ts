@@ -63,3 +63,13 @@ export function canEditSongs(
 ): boolean {
   return hasRole(roles, "ADMIN") || hasRole(roles, "WORSHIP");
 }
+
+/**
+ * Quem vê o uso das músicas em liturgias (última vez, quantidade, "Uso em liturgias"):
+ * a equipe que monta e usa os cultos (MEDIA, WORSHIP, ADMIN). Visitantes e usuários comuns não.
+ */
+export function canSeeUsageStats(
+  roles: readonly UserRole[] | null | undefined
+): boolean {
+  return canViewChurchServices(roles);
+}

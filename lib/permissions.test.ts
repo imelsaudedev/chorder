@@ -4,6 +4,7 @@ import {
   canAccessAdmin,
   canEditChurchServices,
   canEditSongs,
+  canSeeUsageStats,
   canManageChurchServices,
   canViewChurchServices,
   hasRole,
@@ -60,5 +61,13 @@ describe("lib/permissions", () => {
     expect(canEditSongs(mediaUser)).toBe(false);
     expect(canEditSongs(worshipUser)).toBe(true);
     expect(canEditSongs(adminUser)).toBe(true);
+  });
+
+  it("só a equipe vê o uso das músicas em liturgias", () => {
+    expect(canSeeUsageStats(unauthenticated)).toBe(false);
+    expect(canSeeUsageStats(regularUser)).toBe(false);
+    expect(canSeeUsageStats(mediaUser)).toBe(true);
+    expect(canSeeUsageStats(worshipUser)).toBe(true);
+    expect(canSeeUsageStats(adminUser)).toBe(true);
   });
 });

@@ -76,4 +76,10 @@ describe('ArrangementHeader component', () => {
     expect(screen.getByTestId('arrangement-selector')).toBeDefined();
     expect(screen.getByTestId('arrangement-action-menu')).toBeDefined();
   });
+
+  it('sem permissão de edição, não mostra o menu de ações (nem apagado)', () => {
+    render(<ArrangementHeader arrangement={mockArrangement} canEdit={false} />);
+    expect(screen.queryByTestId('arrangement-action-menu')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'actions' })).toBeNull();
+  });
 });
