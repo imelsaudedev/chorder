@@ -22,6 +22,7 @@ import { Maximize } from "lucide-react";
 import { pushStageModeEntry } from "@/components/service/StageMode/useStageModeHistory";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { isServiceKey } from "./isServiceKey";
 import ServiceSongUnitView from "./ServiceSongUnitView";
 import { useServiceTransposes } from "./useServiceTransposes";
 
@@ -75,7 +76,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
   // Cifra corrigida em outro aparelho aparece aqui sem recarregar. Pausa com edição com alterações
   // abertas e com a rolagem automática do Palco rodando; a atualização vem na consulta seguinte.
   useAutoRevalidate(
-    (key) => !!service && (key === `/api/services/${service.slug}` || key === `/api/services/${service.id}`),
+    (key) => !!service && isServiceKey(key, service),
     { enabled: !!service && !unsavedEdits.some(Boolean) && !isStageScrolling }
   );
   // Indexado pela posição entre as músicas.
