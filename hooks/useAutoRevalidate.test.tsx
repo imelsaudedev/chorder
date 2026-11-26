@@ -16,10 +16,12 @@ const setVisibility = (state: "visible" | "hidden") =>
 
 beforeEach(() => {
   vi.useFakeTimers();
+  vi.spyOn(Math, "random").mockReturnValue(0.5);
   mutate.mockClear();
   setVisibility("visible");
 });
 afterEach(() => {
+  vi.restoreAllMocks();
   vi.useRealTimers();
   setVisibility("visible");
 });
