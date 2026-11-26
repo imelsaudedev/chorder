@@ -296,7 +296,7 @@
     "roleWorship": "Worship",
     "roleMedia": "Media",
     "accessDeniedTitle": "Restricted access",
-    "accessDeniedDescription": "Your account does not have permission to view this page. Contact the church leadership if you need access.",
+    "accessDeniedDescription": "Your account does not have permission to view this page. Contact an administrator if you need access.",
     "backToSongs": "Go to Songs"
   },
   "AdminUsers": {

@@ -297,7 +297,7 @@
     "roleWorship": "Louvor",
     "roleMedia": "Mídia",
     "accessDeniedTitle": "Acesso restrito",
-    "accessDeniedDescription": "Sua conta não tem permissão para acessar esta página. Fale com a liderança caso precise de acesso.",
+    "accessDeniedDescription": "Sua conta não tem permissão para acessar esta página. Fale com um administrador caso precise de acesso.",
     "backToSongs": "Ir para Músicas"
   },
   "AdminUsers": {
