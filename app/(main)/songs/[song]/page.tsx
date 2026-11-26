@@ -1,3 +1,5 @@
+import { getLiveUserAuth } from "@/lib/auth-guard";
+import { canEditSongs } from "@/lib/permissions";
 import { retrieveSong } from "@/prisma/data";
 import { Metadata } from "next";
 import ClientPage from "./ClientPage";
@@ -19,8 +21,19 @@ export default async function SongPage({
   params: Promise<{ song: string }>;
   searchParams?: Promise<{ arrangement?: number }>;
 }) {
-  const { song: songSlug } = await params;
-  const arrangementId = (await searchParams)?.arrangement;
+  const [{ song: songSlug }, resolvedSearchParams, live] = await Promise.all([
+    params,
+    searchParams,
+    getLiveUserAuth(),
+  ]);
+  const arrangementId = resolvedSearchParams?.arrangement;
+  const canEdit = canEditSongs(live.roles);
 
-  return <ClientPage songSlug={songSlug} arrangementId={arrangementId} />;
+  return (
+    <ClientPage
+      songSlug={songSlug}
+      arrangementId={arrangementId}
+      canEdit={canEdit}
+    />
+  );
 }

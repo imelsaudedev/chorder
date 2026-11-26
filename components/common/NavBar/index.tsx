@@ -3,12 +3,33 @@
 import clsx from "clsx";
 import { useBottomNavVisible } from "@/hooks/useBottomNavVisible";
 import { ThemeMenu, ThemeSheet } from "@/components/common/Theme/ThemeToggle";
-import { ListMusic, MessageCircleHeart, Music } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  ListMusic,
+  LogIn,
+  MessageCircleHeart,
+  Music,
+  Shield,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
+type NavBarProps = {
+  userNav?: React.ReactNode;
+  isAuthenticated?: boolean;
+  isAdmin?: boolean;
+};
+
+export default function NavBar({
+  userNav,
+  isAuthenticated = true,
+  isAdmin = false,
+}: NavBarProps) {
   const t = useTranslations("Messages");
   const pathname = usePathname();
   const pathParts = pathname.split("/");
@@ -31,6 +52,8 @@ export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
         active={
           currentPage === "services" || pathname.startsWith("/admin/templates")
         }
+        disabled={!isAuthenticated}
+        disabledReason={t("signInToAccessServices")}
       />
       <NavItem
         href="/songs"
@@ -44,7 +67,30 @@ export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
         label={t("feedback")}
         active={currentPage === "feedback"}
       />
+      {isAdmin && (
+        <NavItem
+          href="/admin/users"
+          icon={<Shield size={24} />}
+          label={t("admin")}
+          active={
+            currentPage === "admin" && !pathname.startsWith("/admin/templates")
+          }
+        />
+      )}
     </>
+  );
+
+  const authSlot = isAuthenticated ? (
+    userNav ? (
+      <div className="flex flex-col items-center">{userNav}</div>
+    ) : null
+  ) : (
+    <NavItem
+      href="/login"
+      icon={<LogIn size={22} />}
+      label={t("signIn")}
+      active={currentPage === "login"}
+    />
   );
 
   return (
@@ -61,9 +107,7 @@ export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
         </div>
         <div className="mt-auto flex flex-col items-center pb-6 gap-4">
           <ThemeMenu />
-          {userNav && (
-            <div className="flex flex-col items-center">{userNav}</div>
-          )}
+          {authSlot}
         </div>
       </nav>
 
@@ -73,9 +117,9 @@ export default function NavBar({ userNav }: { userNav?: React.ReactNode }) {
           <div className="flex justify-around py-3 items-center">
             {items}
             <ThemeSheet />
-            {userNav && (
+            {authSlot && (
               <div className="flex flex-col items-center justify-center -mt-1">
-                {userNav}
+                {authSlot}
               </div>
             )}
           </div>
@@ -90,9 +134,39 @@ type NavItemProps = {
   icon: JSX.Element;
   label: string;
   active: boolean;
+  disabled?: boolean;
+  disabledReason?: string;
 };
 
-function NavItem({ href, icon, label, active }: NavItemProps) {
+function NavItem({
+  href,
+  icon,
+  label,
+  active,
+  disabled = false,
+  disabledReason,
+}: NavItemProps) {
+  if (disabled) {
+    const content = (
+      <span
+        aria-disabled="true"
+        className="flex flex-col items-center text-sm text-muted-foreground opacity-40 cursor-not-allowed select-none"
+      >
+        {icon}
+        <span className="text-xs">{label}</span>
+      </span>
+    );
+
+    if (!disabledReason) return content;
+
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{content}</TooltipTrigger>
+        <TooltipContent side="right">{disabledReason}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
     <Link
       href={href}

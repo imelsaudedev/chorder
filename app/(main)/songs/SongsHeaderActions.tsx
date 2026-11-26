@@ -1,17 +1,51 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useNewSong } from "./NewSongProvider";
 
+type SongsHeaderActionsProps = {
+  canEdit?: boolean;
+};
+
 /** Ação do cabeçalho de Músicas: Nova música a partir do tablet; no celular vale o botão flutuante. */
-export default function SongsHeaderActions() {
+export default function SongsHeaderActions({
+  canEdit = true,
+}: SongsHeaderActionsProps) {
   const t = useTranslations("Messages");
   const { openNewSong } = useNewSong();
 
+  if (!canEdit) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="max-sm:hidden inline-flex">
+            <Button type="button" variant="secondary" disabled>
+              <Plus />
+              {t("newSong")}
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          {t("requiresWorshipOrAdmin")}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
-    <Button type="button" variant="secondary" className="max-sm:hidden" onClick={openNewSong}>
+    <Button
+      type="button"
+      variant="secondary"
+      className="max-sm:hidden"
+      onClick={openNewSong}
+    >
       <Plus />
       {t("newSong")}
     </Button>

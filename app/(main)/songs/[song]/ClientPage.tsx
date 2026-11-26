@@ -12,10 +12,15 @@ import { useAutoRevalidate } from "@/hooks/useAutoRevalidate";
 import { ClientArrangement } from "@/prisma/models";
 import { useRef } from "react";
 
-type ClientPageProps = { songSlug: string; arrangementId?: number };
+type ClientPageProps = {
+  songSlug: string;
+  arrangementId?: number;
+  canEdit?: boolean;
+};
 export default function ClientPage({
   songSlug,
   arrangementId,
+  canEdit = true,
 }: ClientPageProps) {
   const { arrangement } = useFetchArrangement(songSlug, arrangementId);
   // Cifra corrigida em outro aparelho aparece aqui sem recarregar.
@@ -25,7 +30,7 @@ export default function ClientPage({
 
   return (
     <SongConfigProvider>
-      <ArrangementHeader arrangement={arrangement} />
+      <ArrangementHeader arrangement={arrangement} canEdit={canEdit} />
       <Main className="pb-4 sm:pb-5 lg:pb-8">
         <ArrangementBody arrangement={arrangement} />
       </Main>
