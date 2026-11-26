@@ -1,4 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// A rota consulta a sessão (para decidir se entrega o uso das músicas); aqui, sem login.
+vi.mock('@/auth', () => ({ auth: vi.fn().mockResolvedValue(null) }));
+
 import { GET } from './route';
 import prisma from '@/prisma/client';
 import { NextRequest } from 'next/server';
