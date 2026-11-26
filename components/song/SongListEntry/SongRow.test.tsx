@@ -1,4 +1,6 @@
+import { ViewerProvider } from "@/components/auth/ViewerProvider";
 import { ClientSong } from "@/prisma/models";
+import type { UserRole } from "@prisma/client";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import SongRow from "./SongRow";
@@ -35,13 +37,15 @@ const song = (extra: Partial<ClientSong> = {}): ClientSong =>
     ...extra,
   }) as ClientSong;
 
-const renderRow = (s: ClientSong, query = "") =>
+const renderRow = (s: ClientSong, query = "", roles: UserRole[] = ["WORSHIP"]) =>
   render(
-    <AudioPlayerProvider>
-      <YoutubePlayerProvider>
-        <SongRow song={s} query={query} />
-      </YoutubePlayerProvider>
-    </AudioPlayerProvider>
+    <ViewerProvider authenticated roles={roles}>
+      <AudioPlayerProvider>
+        <YoutubePlayerProvider>
+          <SongRow song={s} query={query} />
+        </YoutubePlayerProvider>
+      </AudioPlayerProvider>
+    </ViewerProvider>
   );
 
 describe("SongRow — Editar dados", () => {
@@ -107,8 +111,16 @@ describe("SongRow", () => {
     expect(screen.getAllByText("5×")[0]).toBeInTheDocument();
   });
 
-  it("tem o menu de ações", () => {
-    renderRow(song());
+  it("tem o menu de ações para quem edita músicas (Louvor e Admin)", () => {
+    renderRow(song(), "", ["WORSHIP"]);
     expect(screen.getByRole("button", { name: "Mais ações" })).toBeInTheDocument();
+  });
+
+  it("não mostra o menu de ações para quem não edita músicas: usuário comum e Mídia", () => {
+    for (const roles of [[], ["MEDIA"]] as UserRole[][]) {
+      const { unmount } = renderRow(song(), "", roles);
+      expect(screen.queryByRole("button", { name: "Mais ações" })).not.toBeInTheDocument();
+      unmount();
+    }
   });
 });

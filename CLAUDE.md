@@ -85,6 +85,10 @@ youtubeUrl: z.string().url().or(z.literal("")).nullable()
 <Button type="button" onClick={...}>  // sempre type="button" se não for submit
 ```
 
+### Ações sem permissão: esconder, não desabilitar
+
+O que a pessoa não pode usar **some** da tela (nada de botão apagado com dica: no celular a dica nem aparece). A regra é por **permissão**, não por login. Em componentes use `useViewer()` (`components/auth/ViewerProvider.tsx`, alimentado pelo layout com os perfis vindos de `getLiveUserAuth`, que já considera a simulação de perfis do Admin): `canEditSongs`, `canViewChurchServices`, `canSeeUsageStats`, `isAdmin`. Sem provedor (testes, histórias) vale o visitante. Esconder na tela **não é segurança**: a rota do servidor continua recusando (`requirePermission`, `requireSongEditor`).
+
 ### UI flutuante global (modais, players, toasts)
 
 Componentes que precisam aparecer sobre Drawers e headers com `backdrop-filter` devem ser renderizados no **nível do layout raiz** via contexto React, não via `createPortal`. Drawers (vaul) têm listeners de captura no `document` que bloqueiam eventos em portais.

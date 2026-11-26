@@ -4,6 +4,7 @@ import { useUpdateSong } from "#api-client";
 import HighlightKeyword from "@/components/common/HighlightKeyword";
 import Text from "@/components/common/Text";
 import SongMetaModal, { SongMetaSavePayload } from "@/components/song/SongMetaModal";
+import { useViewer } from "@/components/auth/ViewerProvider";
 import LastUsedIndicator from "@/components/song/LastUsedIndicator";
 import SongReferences from "@/components/song/SongReferences";
 import TagList from "@/components/song/TagList";
@@ -77,6 +78,7 @@ export default function SongRow({
   /** Dentro do cartão da lista: sem margem negativa; o respiro lateral acompanha o cabeçalho. */
   flush?: boolean;
 }) {
+  const { canEditSongs } = useViewer();
   const [metaOpen, setMetaOpen] = useState(false);
   const { updateSong } = useUpdateSong(song.slug);
   const { mutate } = useSWRConfig();
@@ -162,27 +164,29 @@ export default function SongRow({
         </div>
 
         {/* ⋯ */}
-        <div className="relative z-10 -mt-2 flex justify-end [grid-area:act]">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button type="button" variant="ghost" size="icon" className="h-10 w-10 hover:bg-muted/40 data-[state=open]:bg-muted/40" aria-label="Mais ações">
-                <MoreVertical size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => setMetaOpen(true)}>
-                <Pencil size={14} className="mr-2" />
-                Editar dados
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={() => router.push(`/songs/${song.slug}/edit?arrangement=${mainArrangement?.id}`)}
-              >
-                <NotebookPen size={14} className="mr-2" />
-                Editar arranjo
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        {canEditSongs && (
+          <div className="relative z-10 -mt-2 flex justify-end [grid-area:act]">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="ghost" size="icon" className="h-10 w-10 hover:bg-muted/40 data-[state=open]:bg-muted/40" aria-label="Mais ações">
+                  <MoreVertical size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => setMetaOpen(true)}>
+                  <Pencil size={14} className="mr-2" />
+                  Editar dados
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => router.push(`/songs/${song.slug}/edit?arrangement=${mainArrangement?.id}`)}
+                >
+                  <NotebookPen size={14} className="mr-2" />
+                  Editar arranjo
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
       <SongMetaModal
         open={metaOpen}

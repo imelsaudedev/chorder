@@ -1,11 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useNewSong } from "./NewSongProvider";
@@ -21,23 +16,8 @@ export default function SongsHeaderActions({
   const t = useTranslations("Messages");
   const { openNewSong } = useNewSong();
 
-  if (!canEdit) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="max-sm:hidden inline-flex">
-            <Button type="button" variant="secondary" disabled>
-              <Plus />
-              {t("newSong")}
-            </Button>
-          </span>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          {t("requiresWorshipOrAdmin")}
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
+  // Quem não edita músicas não vê a ação (em vez de um botão apagado).
+  if (!canEdit) return null;
 
   return (
     <Button
