@@ -9,9 +9,10 @@ import { useSongMetaModal } from "@/components/song/SongMetaModal/context";
 import SongTags from "@/components/song/SongTags";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import useSongsListHref from "@/hooks/useSongsListHref";
 import { ClientArrangement } from "@/prisma/models";
-import { NotebookPen, SlidersHorizontal } from "lucide-react";
+import { MoreVertical, NotebookPen, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { mutate } from "swr";
 import ArrangementActionMenu from "./ArrangementActionMenu";
@@ -97,11 +98,25 @@ function ArrangementHeaderContent({
                   <span className="sr-only">{t("layout")}</span>
                 </Button>
               </PopoverTrigger>
-              {canEdit && (
+              {canEdit ? (
                 <ArrangementActionMenu
                   arrangement={arrangement}
                   onEditSong={handleEditSong}
                 />
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex">
+                      <Button variant="ghost" size="icon" disabled>
+                        <MoreVertical />
+                        <span className="sr-only">{t("actions")}</span>
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    {t("requiresWorshipOrAdmin")}
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
           }

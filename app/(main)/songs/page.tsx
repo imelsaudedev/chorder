@@ -31,7 +31,7 @@ export default async function SongListPage(props: SongListPageProps) {
     <NewSongProvider>
       <PageTitleBlock
         title={t("Messages.songs")}
-        actions={canEdit ? <SongsHeaderActions /> : undefined}
+        actions={<SongsHeaderActions canEdit={canEdit} />}
       />
 
       <Main className="max-w-full">

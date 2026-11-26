@@ -56,9 +56,13 @@ export default function ClientSongsPage({
       <ClientSongList query={query} tagIds={selectedTagIds} sort={sort} />
 
       {/* No tablet e no desktop a ação está no cabeçalho. */}
-      {canEdit && (
-        <FloatingAddLink label={t("newSong")} onClick={openNewSong} mobileOnly />
-      )}
+      <FloatingAddLink
+        label={t("newSong")}
+        onClick={openNewSong}
+        mobileOnly
+        disabled={!canEdit}
+        disabledReason={t("requiresWorshipOrAdmin")}
+      />
     </>
   );
 }

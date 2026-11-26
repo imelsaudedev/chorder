@@ -28,6 +28,8 @@
     "songs": "Músicas",
     "admin": "Admin",
     "signIn": "Entrar",
+    "signInToAccessServices": "Entre para acessar liturgias",
+    "requiresWorshipOrAdmin": "Disponível para equipe de Louvor e Admins",
     "stats": "Stats",
     "newService": "Nova liturgia",
     "editService": "Editar liturgia",

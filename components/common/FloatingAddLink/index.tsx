@@ -11,18 +11,62 @@ type FloatingAddLinkProps = {
   onClick?: () => void;
   /** Só o botão redondo do celular (a ação já existe no cabeçalho em telas maiores). */
   mobileOnly?: boolean;
+  disabled?: boolean;
+  disabledReason?: string;
 };
 
-export default function FloatingAddLink({ label, href, onClick, mobileOnly = false }: FloatingAddLinkProps) {
+export default function FloatingAddLink({
+  label,
+  href,
+  onClick,
+  mobileOnly = false,
+  disabled = false,
+  disabledReason,
+}: FloatingAddLinkProps) {
   const mediaBarOpen = useMediaBarOpen();
 
-  const mobile = href
-    ? <Button asChild variant="secondary" size="icon" className="shadow-lg rounded-full sm:hidden"><Link href={href}><Plus /></Link></Button>
-    : <Button variant="secondary" size="icon" className="shadow-lg rounded-full sm:hidden" onClick={onClick}><Plus /></Button>;
+  const mobile =
+    href && !disabled ? (
+      <Button asChild variant="secondary" size="icon" className="shadow-lg rounded-full sm:hidden">
+        <Link href={href}>
+          <Plus />
+        </Link>
+      </Button>
+    ) : (
+      <Button
+        variant="secondary"
+        size="icon"
+        className="shadow-lg rounded-full sm:hidden"
+        onClick={onClick}
+        disabled={disabled}
+        title={disabled ? disabledReason : label}
+        aria-label={label}
+      >
+        <Plus />
+      </Button>
+    );
 
-  const desktop = href
-    ? <Button asChild variant="secondary" size="lg" className="shadow-lg hidden sm:flex"><Link href={href}><Plus />{label}</Link></Button>
-    : <Button variant="secondary" size="lg" className="shadow-lg hidden sm:flex" onClick={onClick}><Plus />{label}</Button>;
+  const desktop =
+    href && !disabled ? (
+      <Button asChild variant="secondary" size="lg" className="shadow-lg hidden sm:flex">
+        <Link href={href}>
+          <Plus />
+          {label}
+        </Link>
+      </Button>
+    ) : (
+      <Button
+        variant="secondary"
+        size="lg"
+        className="shadow-lg hidden sm:flex"
+        onClick={onClick}
+        disabled={disabled}
+        title={disabled ? disabledReason : undefined}
+      >
+        <Plus />
+        {label}
+      </Button>
+    );
 
   return (
     <div
