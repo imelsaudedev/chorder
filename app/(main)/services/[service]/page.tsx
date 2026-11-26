@@ -1,3 +1,4 @@
+import { getLiveUserAuth } from "@/lib/auth-guard";
 import { retrieveService } from "@/prisma/data";
 import { Metadata } from "next";
 import ClientPage from "./ClientPage";
@@ -7,8 +8,11 @@ export async function generateMetadata({
 }: {
   params: Promise<{ service: string }>;
 }): Promise<Metadata> {
-  const { service: serviceSlug } = await params;
-  const service = await retrieveService(serviceSlug);
+  const [{ service: serviceSlug }, live] = await Promise.all([
+    params,
+    getLiveUserAuth(),
+  ]);
+  const service = await retrieveService(serviceSlug, live.userId);
   return { title: service?.title ?? "Liturgia" };
 }
 

@@ -7,12 +7,22 @@ type FormFooterProps = {
   loading?: boolean;
   label?: string;
   cancelButton?: React.ReactNode;
+  /** Ação secundária à esquerda do botão principal (ex.: "Salvar rascunho"). */
+  secondaryAction?: React.ReactNode;
   /** Texto de estado à esquerda (ex.: "Não salvo"). */
   status?: React.ReactNode;
   onSave?: () => void;
 };
 
-export default function FormFooter({ disabled = false, loading = false, label, cancelButton, status, onSave }: FormFooterProps) {
+export default function FormFooter({
+  disabled = false,
+  loading = false,
+  label,
+  cancelButton,
+  secondaryAction,
+  status,
+  onSave,
+}: FormFooterProps) {
   const t = useTranslations("Messages");
 
   return (
@@ -22,8 +32,13 @@ export default function FormFooter({ disabled = false, loading = false, label, c
           {status}
         </div>
       )}
-      <div className={`gap-2 sm:flex sm:justify-end ${cancelButton ? "grid grid-cols-2" : "flex justify-end"}`}>
+      <div
+        className={`gap-2 sm:flex sm:justify-end ${
+          cancelButton && !secondaryAction ? "grid grid-cols-2" : "flex flex-wrap justify-end"
+        }`}
+      >
         {cancelButton}
+        {secondaryAction}
         <Button
           type={onSave ? "button" : "submit"}
           onClick={onSave}

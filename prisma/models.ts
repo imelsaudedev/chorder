@@ -2,6 +2,7 @@ import {
   ArrangementAudio,
   Prisma,
   Service,
+  ServiceStatus,
   ServiceTemplate,
   Song,
   SongArrangement,
@@ -11,7 +12,7 @@ import {
   TagGroup,
 } from "@prisma/client";
 
-export type { ArrangementAudio, ServiceTemplate, Song, SongArrangement, SongUnit, SongUnitType, Tag, TagGroup };
+export type { ArrangementAudio, ServiceStatus, ServiceTemplate, Song, SongArrangement, SongUnit, SongUnitType, Tag, TagGroup };
 
 export type ClientArrangementAudio = Omit<Pick<ArrangementAudio, "id" | "url" | "label" | "order">, "id"> & { id?: number };
 
@@ -120,6 +121,7 @@ export type ServiceListItem = Pick<
   Service,
   "slug" | "title" | "date" | "worshipLeader" | "preacher" | "sermonTheme" | "sermonReference"
 > & {
+  status?: ServiceStatus;
   startTime: string | null;
   songCount: number;
   /** Títulos das músicas, na ordem da liturgia (a busca da lista usa isto). */
@@ -134,9 +136,11 @@ export type ServicePlan = {
 
 export type ClientService = Omit<
   Service,
-  "id" | "legacyId" | "preacher" | "sermonTheme" | "sermonReference" | "plan" | "updatedAt"
+  "id" | "legacyId" | "preacher" | "sermonTheme" | "sermonReference" | "plan" | "updatedAt" | "status" | "createdById"
 > & {
   id?: number;
+  status?: ServiceStatus;
+  createdById?: string | null;
   units?: ClientServiceUnit[];
   plan?: ServicePlan | null;
   prevService?: ServiceRef | null;
