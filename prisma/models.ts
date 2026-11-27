@@ -179,6 +179,8 @@ export type ClientService = Omit<
   preacherId?: string | null;
   /** Quem conduz (uma ou mais pessoas). Vazio em culto antigo: use `leadersOf`. */
   leaders?: ServiceLeaderEntry[];
+  /** Os mesmos dirigentes, com a foto da conta, só para exibir (não vai no salvamento). */
+  leaderPeople?: { userId: string | null; name: string; image: string | null }[];
   sermonTheme?: string | null;
   sermonReference?: string | null;
   // Presente em cultos já salvos — o client manda de volta o valor que carregou

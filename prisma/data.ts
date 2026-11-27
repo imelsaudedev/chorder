@@ -1024,7 +1024,7 @@ export async function retrieveService(
       shares: ctx?.userId
         ? { where: { userId: ctx.userId }, select: { userId: true, permission: true } }
         : false,
-      leaders: { orderBy: { order: "asc" }, select: { userId: true, name: true } },
+      leaders: { orderBy: { order: "asc" }, select: { userId: true, name: true, user: { select: { image: true } } } },
     },
   });
 
@@ -1156,10 +1156,11 @@ export async function retrieveService(
     ...serviceFields,
     // Culto salvo antes da lista de dirigentes só tem o texto: vira um dirigente sem conta.
     leaders: leaderRows.length
-      ? leaderRows
+      ? leaderRows.map(({ userId, name }) => ({ userId, name }))
       : service.worshipLeader?.trim()
         ? [{ userId: null, name: service.worshipLeader.trim() }]
         : [],
+    leaderPeople: leaderRows.map((l) => ({ userId: l.userId, name: l.name, image: l.user?.image ?? null })),
     shareToken: canManageShareLink ? shareToken : null,
     isOwner,
     canEdit,

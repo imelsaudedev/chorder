@@ -1,5 +1,6 @@
 "use client";
 
+import LeaderAvatars from "@/components/service/LeaderAvatars";
 import PageHeader from "@/components/common/PageHeader";
 import ShareServiceDialog from "@/components/service/ShareServiceDialog";
 import { Button } from "@/components/ui/button";
@@ -128,7 +129,8 @@ function Subtitle({ service }: SubtitleProps) {
         {formattedDate}
       </span>
       {service.worshipLeader && (
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1.5">
+          {service.leaderPeople && service.leaderPeople.length > 0 && <LeaderAvatars people={service.leaderPeople} />}
           <span className="hidden sm:block">{t("Service.ledBy")}</span>
           {service.worshipLeader}
         </span>

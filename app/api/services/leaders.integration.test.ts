@@ -64,6 +64,12 @@ describe('vários dirigentes', () => {
       { userId: null, name: 'Visitante' },
     ]);
 
+    expect(created.leaderPeople).toEqual([
+      { userId: 'ana', name: 'Ana Souza', image: null },
+      { userId: 'hugo', name: 'Hugo Lima', image: null },
+      { userId: null, name: 'Visitante', image: null },
+    ]);
+
     const list = await (await GET(new Request('http://localhost/api/services?view=list'))).json();
     expect(list[0].leaders).toEqual(['Ana Souza', 'Hugo Lima', 'Visitante']);
     expect(list[0].leaderPeople).toEqual([

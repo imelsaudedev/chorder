@@ -137,8 +137,8 @@ Todo elemento clicável mostra o cursor de mão (regra global em `globals.css`).
 ### Escolha de pessoas: `PeopleField`
 Dirigente (várias pessoas) e pregador (uma, `max={1}`) na gaveta da liturgia. Pessoas escolhidas viram chips com iniciais/foto e botão de remover (pílula `h-8`, a mesma altura dos chips `soft` `sm`, fundo `secondary/10`; avatar de 30px encostado na borda; nome sem conta com borda tracejada; X com área de toque de 44px); o campo busca em `/api/people` (só id, nome e foto) e oferece "Adicionar "nome" (sem conta)" para convidado. A lista de sugestões é **inline**, sem Popover/portal, porque dentro de gaveta (vaul) os portais perdem os eventos. Enter adiciona sem enviar o formulário; Backspace no campo vazio remove o último.
 
-### Quem conduz na lista de liturgias
-Na linha da liturgia (`ServiceRow`), o dirigente aparece com a foto da conta ao lado do nome, **sem chip**: avatar de 20px (`size-5`), cabe nos 22px da linha e fica na escala dos ícones de 14px; sem foto, iniciais em `secondary/15`. Com mais de uma pessoa, as fotos se sobrepõem (até 3, anel de 2px na cor do fundo) e o nome é o texto junto ("Hugo, Ana e Caio"). Sem ícone de microfone (nem na lista, nem no cabeçalho da liturgia): só a foto e o nome. Culto antigo, sem a lista de pessoas, mostra só o nome.
+### Quem conduz na lista e no cabeçalho da liturgia
+Na linha da liturgia (`ServiceRow`) e no cabeçalho da view (`ServiceHeader`), via `components/service/LeaderAvatars`, o dirigente aparece com a foto da conta ao lado do nome, **sem chip**: avatar de 20px (`size-5`), cabe nos 22px da linha e fica na escala dos ícones de 14px; sem foto, iniciais em `secondary/15`. Com mais de uma pessoa, as fotos se sobrepõem (até 3, anel de 2px na cor do fundo) e o nome é o texto junto ("Hugo, Ana e Caio"). Sem ícone de microfone (nem na lista, nem no cabeçalho da liturgia): só a foto e o nome. Culto antigo, sem a lista de pessoas, mostra só o nome.
 
 ### Blocos da cifra
 Cores por tipo em `components/song/unit-colors.ts` (ver 6.3 para a versão escura proposta).
