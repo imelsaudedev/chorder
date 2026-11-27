@@ -114,7 +114,8 @@
     "savedToast": "Liturgia salva.",
     "publishError": "Não foi possível publicar a liturgia. Tente novamente.",
     "tabChurch": "Igreja",
-    "tabPersonal": "Minhas liturgias",
+    "tabPersonal": "Pessoais",
+    "personalPageTitle": "Minhas liturgias",
     "sharedBadge": "Compartilhada",
     "personalEmptyTitle": "Nenhuma liturgia pessoal ainda",
     "personalEmptyDescription": "Crie liturgias para grupos pequenos, células ou reuniões e compartilhe com quem quiser.",
@@ -126,7 +127,7 @@
     "date": "Data",
     "worshipLeader": "Dirigente",
     "worshipLeaderPlaceholder": "Dirigente",
-    "titlePlaceholderPersonal": "Ex.: Célula de quinta",
+    "titlePlaceholderPersonal": "Grupo pequeno",
     "leaderPersonal": "Quem conduz",
     "leaderPersonalPlaceholder": "Ex.: Ana e Pedro"
   },

@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
     getTranslations("Service"),
     getLiveUserAuth(),
   ]);
-  return { title: canViewChurchServices(live.roles) ? t("services") : tService("tabPersonal") };
+  return { title: canViewChurchServices(live.roles) ? t("services") : tService("personalPageTitle") };
 }
 
 export default async function ServiceListPage() {
@@ -37,7 +37,7 @@ export default async function ServiceListPage() {
   return (
     <NewServiceProvider defaultScope={canViewChurch ? "CHURCH" : "PERSONAL"}>
       <PageTitleBlock
-        title={canViewChurch ? t("Messages.services") : t("Service.tabPersonal")}
+        title={canViewChurch ? t("Messages.services") : t("Service.personalPageTitle")}
         actions={
           <ServicesHeaderActions
             canManageChurch={canManageChurch}

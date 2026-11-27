@@ -13,7 +13,7 @@ type ServicesHeaderActionsProps = {
 
 /**
  * Ações do cabeçalho de Liturgias: Modelos (apenas Admin) e
- * Nova liturgia (na aba Igreja apenas para Louvor/Admin; em Minhas liturgias para qualquer usuário logado).
+ * Nova liturgia (na aba Igreja apenas para Louvor/Admin; na aba Pessoais para qualquer usuário logado).
  */
 export default function ServicesHeaderActions({
   canManageChurch = false,

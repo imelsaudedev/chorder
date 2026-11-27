@@ -114,7 +114,8 @@
     "savedToast": "Service saved.",
     "publishError": "Could not publish the service. Please try again.",
     "tabChurch": "Church",
-    "tabPersonal": "My liturgies",
+    "tabPersonal": "Personal",
+    "personalPageTitle": "My liturgies",
     "sharedBadge": "Shared",
     "personalEmptyTitle": "No personal liturgies yet",
     "personalEmptyDescription": "Create liturgies for small groups or gatherings and share them with whoever you choose.",
@@ -126,7 +127,7 @@
     "date": "Date",
     "worshipLeader": "Worship leader",
     "worshipLeaderPlaceholder": "Worship leader",
-    "titlePlaceholderPersonal": "e.g. Thursday small group",
+    "titlePlaceholderPersonal": "Small group",
     "leaderPersonal": "Who leads",
     "leaderPersonalPlaceholder": "e.g. Ana and Pedro"
   },
