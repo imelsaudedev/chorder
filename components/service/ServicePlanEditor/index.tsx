@@ -144,6 +144,12 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
       title: config.title,
       worshipLeader: config.worshipLeader,
       leaders: config.leaders,
+      // quem já estava salvo mantém a foto; quem acabou de ser escolhido a ganha ao salvar
+      leaderPeople: config.leaders.map((l) => ({
+        userId: l.userId,
+        name: l.name,
+        image: editor.service.leaderPeople?.find((p) => p.userId && p.userId === l.userId)?.image ?? null,
+      })),
       preacher: config.preacher,
       preacherId: config.preacherId,
       date: config.date,
