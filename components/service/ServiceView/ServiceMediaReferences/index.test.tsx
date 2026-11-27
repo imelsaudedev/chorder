@@ -2,6 +2,8 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { toast } from 'sonner';
+import { ViewerProvider } from '@/components/auth/ViewerProvider';
+import type { UserRole } from '@prisma/client';
 import ServiceMediaReferences from './index';
 import { YoutubePlayerProvider } from '@/components/common/YoutubePlayer/context';
 import { AudioPlayerProvider } from '@/components/common/AudioPlayer/context';
@@ -13,13 +15,16 @@ vi.mock('next-intl', () => ({
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }));
 const toastFn = toast as unknown as ReturnType<typeof vi.fn> & { error: ReturnType<typeof vi.fn> };
 
-function renderWithProviders(props: Parameters<typeof ServiceMediaReferences>[0]) {
+// Por padrão, quem edita músicas (Louvor): é quem altera as referências.
+function renderWithProviders(props: Parameters<typeof ServiceMediaReferences>[0], roles: UserRole[] = ['WORSHIP']) {
   return render(
-    <YoutubePlayerProvider>
-      <AudioPlayerProvider>
-        <ServiceMediaReferences {...props} />
-      </AudioPlayerProvider>
-    </YoutubePlayerProvider>
+    <ViewerProvider authenticated roles={roles}>
+      <YoutubePlayerProvider>
+        <AudioPlayerProvider>
+          <ServiceMediaReferences {...props} />
+        </AudioPlayerProvider>
+      </YoutubePlayerProvider>
+    </ViewerProvider>
   );
 }
 
@@ -178,5 +183,27 @@ describe('ServiceMediaReferences', () => {
       '/api/arrangements/42/audios/1',
       expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ label: 'Voz (ensaio)' }) })
     ));
+  });
+
+  describe('quem não edita músicas', () => {
+    it('sem nenhuma referência, o botão "Adicionar referência" não aparece', () => {
+      renderWithProviders(baseProps, ['USER' as UserRole]);
+      expect(screen.queryByRole('button', { name: 'mediaButtonLabelEmpty' })).toBeNull();
+    });
+
+    it('com referências, ouve e assiste, mas não adiciona, renomeia nem remove', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        { ...baseProps, youtubeUrl: 'https://youtu.be/abc', audios: [{ id: 1, url: 'https://x/a.mp3', label: 'Áudio 1', order: 1 }] },
+        []
+      );
+      await user.click(screen.getByRole('button', { name: 'mediaButtonLabelWithMedia' }));
+      expect(screen.getByText('Áudio 1')).toBeDefined();
+      expect(screen.queryByText('mediaAddVideo')).toBeNull();
+      expect(screen.queryByText('mediaAddAudio')).toBeNull();
+      expect(screen.queryByLabelText('mediaRenameAudio')).toBeNull();
+      expect(screen.queryByLabelText('mediaRemoveAudio')).toBeNull();
+      expect(screen.queryByLabelText('mediaRemoveVideo')).toBeNull();
+    });
   });
 });

@@ -1,11 +1,19 @@
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import type { UserRole } from '@prisma/client';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
+import { ViewerProvider } from '@/components/auth/ViewerProvider';
 import EditOrSaveCancelGroup from './EditOrSaveCancelGroup';
+import { ServiceEditAccessProvider } from './ServiceEditAccess';
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
+
+// Por padrão, quem edita músicas (Louvor); os casos de quem não edita passam os perfis.
+const render = (ui: ReactElement, roles: UserRole[] = ['WORSHIP']) =>
+  rtlRender(<ViewerProvider authenticated roles={roles}>{ui}</ViewerProvider>);
 
 const defaultProps = {
   isEditing: false,
@@ -108,5 +116,40 @@ describe('EditOrSaveCancelGroup — edição, com original', () => {
     render(<EditOrSaveCancelGroup {...editProps} onSaveServiceOnly={onSaveServiceOnly} />);
     await user.click(screen.getByRole('button', { name: /saveChanges/i }));
     expect(onSaveServiceOnly).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('EditOrSaveCancelGroup — quem não edita músicas', () => {
+  const editProps = { ...defaultProps, isEditing: true, hasOriginal: true };
+
+  it('salva "só nesta liturgia" direto, sem perguntar (não pode alterar o original)', async () => {
+    const user = userEvent.setup();
+    const onSaveServiceOnly = vi.fn();
+    render(<EditOrSaveCancelGroup {...editProps} onSaveServiceOnly={onSaveServiceOnly} />, []);
+    await user.click(screen.getByRole('button', { name: /saveChanges/i }));
+    expect(onSaveServiceOnly).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('serviceAndOriginal')).toBeNull();
+  });
+
+  it('Mídia também (edita a liturgia, não as músicas)', async () => {
+    const user = userEvent.setup();
+    const onSaveServiceOnly = vi.fn();
+    render(<EditOrSaveCancelGroup {...editProps} onSaveServiceOnly={onSaveServiceOnly} />, ['MEDIA']);
+    await user.click(screen.getByRole('button', { name: /saveChanges/i }));
+    expect(onSaveServiceOnly).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('EditOrSaveCancelGroup — quem só visualiza a liturgia', () => {
+  it('não mostra o lápis', () => {
+    rtlRender(
+      <ViewerProvider authenticated roles={['WORSHIP']}>
+        <ServiceEditAccessProvider value={false}>
+          <EditOrSaveCancelGroup {...defaultProps} />
+        </ServiceEditAccessProvider>
+      </ViewerProvider>
+    );
+    expect(screen.queryByRole('button', { name: 'editChords' })).toBeNull();
   });
 });

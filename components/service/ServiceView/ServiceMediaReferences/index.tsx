@@ -1,5 +1,6 @@
 "use client";
 
+import { useViewer } from "@/components/auth/ViewerProvider";
 import { AudioItem, useAudioPlayer } from "@/components/common/AudioPlayer/context";
 import { extractYoutubeId } from "@/components/common/YoutubePlayer/extractYoutubeId";
 import { useYoutubePlayer } from "@/components/common/YoutubePlayer/context";
@@ -62,6 +63,7 @@ export default function ServiceMediaReferences({
   const audioPlayer = useAudioPlayer();
   const { play: playAudio, close: closeAudio } = audioPlayer;
   const { mutate } = useSWRConfig();
+  const { canEditSongs } = useViewer();
 
   const [open, setOpen] = useState(false);
   const [arrangementId, setArrangementId] = useState(originalArrangementId);
@@ -274,6 +276,10 @@ export default function ServiceMediaReferences({
     }
   }
 
+  // Referências valem para todos os cultos que usam o arranjo: só quem edita músicas as altera. Os demais
+  // só ouvem e assistem as que existem (e não veem o botão quando não há nenhuma).
+  if (isEmpty && !canEditSongs) return null;
+
   const buttonLabel = isEmpty ? t("mediaButtonLabelEmpty") : t("mediaButtonLabelWithMedia");
 
   return (
@@ -342,16 +348,18 @@ export default function ServiceMediaReferences({
                 <Play size={16} className="shrink-0 text-media-video" />
                 <span className="truncate">{videoTitle ?? t("mediaVideoLabel")}</span>
               </button>
-              <button
-                type="button"
-                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-destructive"
-                onClick={handleRemoveVideo}
-                aria-label={t("mediaRemoveVideo")}
-              >
-                <Trash2 size={16} />
-              </button>
+              {canEditSongs && (
+                <button
+                  type="button"
+                  className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-destructive"
+                  onClick={handleRemoveVideo}
+                  aria-label={t("mediaRemoveVideo")}
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
-          ) : (
+          ) : canEditSongs ? (
             <button
               type="button"
               className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground hover:bg-muted/50"
@@ -360,7 +368,7 @@ export default function ServiceMediaReferences({
               <Plus size={16} className="shrink-0" />
               {t("mediaAddVideo")}
             </button>
-          )}
+          ) : null}
 
           {/* Áudios */}
           {liveAudios.map((audio) => (
@@ -387,7 +395,7 @@ export default function ServiceMediaReferences({
                   <span className="truncate">{audio.label}</span>
                 </button>
               )}
-              {renamingId !== audio.id && (
+              {canEditSongs && renamingId !== audio.id && (
                 <button
                   type="button"
                   className="flex h-11 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground"
@@ -397,14 +405,16 @@ export default function ServiceMediaReferences({
                   <Pencil size={14} />
                 </button>
               )}
-              <button
-                type="button"
-                className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-destructive"
-                onClick={() => handleRemoveAudio(audio)}
-                aria-label={t("mediaRemoveAudio")}
-              >
-                <Trash2 size={16} />
-              </button>
+              {canEditSongs && (
+                <button
+                  type="button"
+                  className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-destructive"
+                  onClick={() => handleRemoveAudio(audio)}
+                  aria-label={t("mediaRemoveAudio")}
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
           ))}
 
@@ -415,22 +425,26 @@ export default function ServiceMediaReferences({
             </div>
           )}
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={ACCEPTED_AUDIO_TYPES}
-            className="hidden"
-            onChange={handleFileChange}
-          />
-          <button
-            type="button"
-            disabled={uploading}
-            className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground hover:bg-muted/50 disabled:cursor-default disabled:opacity-50"
-            onClick={startAddAudio}
-          >
-            <Plus size={16} className="shrink-0" />
-            {t("mediaAddAudio")}
-          </button>
+          {canEditSongs && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={ACCEPTED_AUDIO_TYPES}
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <button
+                type="button"
+                disabled={uploading}
+                className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground hover:bg-muted/50 disabled:cursor-default disabled:opacity-50"
+                onClick={startAddAudio}
+              >
+                <Plus size={16} className="shrink-0" />
+                {t("mediaAddAudio")}
+              </button>
+            </>
+          )}
           {uploadError && <p className="px-2.5 py-1 text-xs text-destructive">{uploadError}</p>}
         </div>
       </PopoverContent>

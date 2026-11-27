@@ -801,6 +801,39 @@ export async function deleteDefaultArrangement(
   return true;
 }
 
+/** Liturgias (slugs) cujo plano usa o arranjo `arrangementId`. Uma cópia de arranjo pertence a uma só. */
+export async function retrieveServiceSlugsUsingArrangement(arrangementId: number): Promise<string[]> {
+  const rows = await prisma.$queryRaw<{ slug: string }[]>`
+    SELECT slug FROM "Service"
+    WHERE "isDeleted" = false
+      AND plan IS NOT NULL
+      AND jsonb_path_exists(
+        plan::jsonb,
+        '$.sections[*].units[*] ? (@.arrangementId == $id)',
+        jsonb_build_object('id', ${arrangementId}::int)
+      )`;
+  return rows.map((row) => row.slug);
+}
+
+/**
+ * Grava só a cifra de uma cópia de arranjo de liturgia. Não toca na música (título, autor, letra),
+ * no original nem nas mídias: é o que quem edita a liturgia, mas não as músicas, pode alterar.
+ */
+export async function updateServiceArrangementUnits(
+  arrangementId: number,
+  units: NonNullable<ClientArrangement["units"]>
+): Promise<ClientArrangement> {
+  return prisma.songArrangement.update({
+    where: { id: arrangementId },
+    data: { units: { deleteMany: {}, createMany: { data: units as any } } },
+    include: {
+      song: { include: { arrangements: { where: { isDeleted: false } } } },
+      units: { orderBy: { order: "asc" } },
+      audios: { orderBy: { order: "asc" } },
+    },
+  }) as unknown as Promise<ClientArrangement>;
+}
+
 export async function deleteArrangement(
   arrangementId: number
 ): Promise<boolean> {
