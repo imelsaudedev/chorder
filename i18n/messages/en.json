@@ -72,6 +72,8 @@
     "nextServices": "Upcoming services",
     "history": "History",
     "colService": "Service and leader",
+    "colServicePersonal": "Service and who leads",
+    "leaderPersonal": "Who leads",
     "colPreacherTheme": "Preacher and theme/text",
     "colSongs": "Songs",
     "colDate": "Date",

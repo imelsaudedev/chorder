@@ -53,5 +53,5 @@ export default function ClientServiceList({ scope = "church" }: ClientServiceLis
     );
   }
 
-  return <ServiceList services={services} />;
+  return <ServiceList services={services} scope={scope === "personal" ? "PERSONAL" : "CHURCH"} />;
 }
