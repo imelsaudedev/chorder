@@ -20,10 +20,11 @@ export default function ServicesHeaderActions({
   isAdmin = false,
 }: ServicesHeaderActionsProps) {
   const t = useTranslations("Messages");
-  const { activeScope, openNewService } = useNewService();
+  const { activeScope, openNewService, personalEmpty } = useNewService();
 
+  // Lista pessoal vazia: o botão do próprio estado vazio é o único chamado para criar.
   const canCreateInCurrentTab =
-    activeScope === "PERSONAL" || canManageChurch;
+    (activeScope === "PERSONAL" && !personalEmpty) || (activeScope === "CHURCH" && canManageChurch);
 
   return (
     <>

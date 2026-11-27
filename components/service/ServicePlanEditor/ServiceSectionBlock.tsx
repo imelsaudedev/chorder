@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { useServiceProfile } from "./ServiceProfileContext";
 import { UNIT_CONFIG, ServiceUnitTypeValue } from "./unitConfig";
 import { Button } from "@/components/ui/button";
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
@@ -419,10 +420,12 @@ function ItemTypeMenuContent({
   onPick: (type: ServiceUnitTypeValue) => void;
   align?: "start" | "center" | "end";
 }) {
+  const { itemTypes } = useServiceProfile();
   return (
     <DropdownMenuContent align={align} className="w-48">
-      {(Object.entries(UNIT_CONFIG) as [ServiceUnitTypeValue, (typeof UNIT_CONFIG)[ServiceUnitTypeValue]][]).map(
-        ([type, config]) => {
+      {itemTypes.map(
+        (type) => {
+          const config = UNIT_CONFIG[type];
           const Icon = config.icon;
           return (
             <DropdownMenuItem key={type} className="min-h-11 cursor-pointer" onClick={() => onPick(type)}>

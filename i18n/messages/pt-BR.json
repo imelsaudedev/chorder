@@ -111,6 +111,7 @@
     "draftBannerText": "Rascunho privado — visível apenas para você até publicar.",
     "draftPublishedToast": "Liturgia publicada!",
     "draftSavedToast": "Rascunho salvo.",
+    "savedToast": "Liturgia salva.",
     "publishError": "Não foi possível publicar a liturgia. Tente novamente.",
     "tabChurch": "Igreja",
     "tabPersonal": "Minhas liturgias",

@@ -91,7 +91,7 @@ O que a pessoa não pode usar **some** da tela (nada de botão apagado com dica:
 
 ### Perfis de liturgia (Igreja × Pessoal)
 
-O que muda entre uma liturgia da igreja e uma pessoal (título obrigatório, modelos, pregador, "dirigente" × "quem conduz") fica em `lib/service-profile.ts`, derivado do `scope`. Telas e formulários consultam `serviceProfile(scope)` em vez de testar `scope === "PERSONAL"`. Perfil novo = entrada nova no registro. Título em branco é gravado como nulo e aparece como "Sem título".
+O que muda entre uma liturgia da igreja e uma pessoal (título obrigatório, modelos, pregador, "dirigente" × "quem conduz") fica em `lib/service-profile.ts`, derivado do `scope`. Telas e formulários consultam `serviceProfile(scope)` em vez de testar `scope === "PERSONAL"`. Perfil novo = entrada nova no registro. Título em branco é gravado como nulo e aparece como "Sem título". O registro também define os tipos de item do menu "Adicionar item" (pessoal: Música, Leitura, Oração, Fala, Outro), a seção inicial ("Roteiro", sem escolha de tipo) e o aviso ao salvar; o editor lê o perfil por `useServiceProfile()`.
 
 ### UI flutuante global (modais, players, toasts)
 

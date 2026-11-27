@@ -111,6 +111,7 @@
     "draftBannerText": "Private draft — visible only to you until published.",
     "draftPublishedToast": "Service published!",
     "draftSavedToast": "Draft saved.",
+    "savedToast": "Service saved.",
     "publishError": "Could not publish the service. Please try again.",
     "tabChurch": "Church",
     "tabPersonal": "My liturgies",

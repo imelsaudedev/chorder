@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { ClientServiceSection, SERVICE_SECTION_TYPES, ServiceSectionType } from "@/prisma/models";
 import { useEffect, useState } from "react";
+import { useServiceProfile } from "./ServiceProfileContext";
 import { SECTION_TYPE_LABEL } from "./unitSummary";
 
 export type SectionDialogValues = {
@@ -35,6 +36,7 @@ type SectionDialogProps = {
 };
 
 export default function SectionDialog({ open, onOpenChange, section, onSubmit }: SectionDialogProps) {
+  const profile = useServiceProfile();
   const [label, setLabel] = useState("");
   const [type, setType] = useState<ServiceSectionType>("ESPECIAL");
 
@@ -47,7 +49,7 @@ export default function SectionDialog({ open, onOpenChange, section, onSubmit }:
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onSubmit({ label: label.trim() || SECTION_TYPE_LABEL[type], type });
+    onSubmit({ label: label.trim() || (profile.chooseSectionType ? SECTION_TYPE_LABEL[type] : "Seção"), type });
     onOpenChange(false);
   }
 
@@ -64,11 +66,12 @@ export default function SectionDialog({ open, onOpenChange, section, onSubmit }:
               id="section-label"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder={SECTION_TYPE_LABEL[type]}
+              placeholder={profile.chooseSectionType ? SECTION_TYPE_LABEL[type] : "Ex.: Abertura"}
               autoComplete="off"
               className="h-11"
             />
           </div>
+          {profile.chooseSectionType && (
           <div className="flex flex-col gap-2">
             <Label htmlFor="section-type">Tipo</Label>
             <Select value={type} onValueChange={(v) => setType(v as ServiceSectionType)}>
@@ -84,6 +87,7 @@ export default function SectionDialog({ open, onOpenChange, section, onSubmit }:
               </SelectContent>
             </Select>
           </div>
+          )}
           <DialogFooter className="gap-2">
             <Button type="button" variant="outline" className="h-11" onClick={() => onOpenChange(false)}>
               Cancelar

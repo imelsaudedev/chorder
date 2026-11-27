@@ -6,6 +6,7 @@ import FormFooter from "@/components/common/FormFooter";
 import ServicePlanDrawer, { ServicePlanConfig } from "@/components/service/ServicePlanDrawer";
 import { Button } from "@/components/ui/button";
 import { friendlySaveError } from "@/lib/friendly-save-error";
+import { serviceProfile } from "@/lib/service-profile";
 import { ClientService, ServiceStatus } from "@/prisma/models";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useTranslations } from "next-intl";
@@ -16,6 +17,7 @@ import { DrawerState, findUnitByClientId, usePlanEditor } from "./hooks/usePlanE
 import DraftRecoveryDialog from "./DraftRecoveryDialog";
 import { usePlanDraft } from "./hooks/usePlanDraft";
 import ServiceItemDrawer from "./ServiceItemDrawer";
+import { ServiceProfileProvider } from "./ServiceProfileContext";
 import ServiceItemPanel from "./ServiceItemPanel";
 import SongFlow from "./SongFlow";
 import { listPendingUnits } from "./unitSummary";
@@ -99,6 +101,7 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
     editor.setDrawer(next);
   }
 
+  const profile = serviceProfile(editor.service.scope);
   const isPersonal = editor.service.scope === "PERSONAL";
   const isNewOrDraft = !isPersonal && (!editor.service.id || editor.service.status === "DRAFT");
   const canPublishDraft = !editor.service.id || editor.service.canPublish !== false;
@@ -112,6 +115,8 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
         toast.success(tService("draftSavedToast"));
       } else if (targetStatus === "PUBLISHED" && editor.service.status === "DRAFT") {
         toast.success(tService("draftPublishedToast"));
+      } else if (profile.toastOnSave) {
+        toast.success(tService("savedToast"));
       }
       if (onSaved) onSaved(saved);
     } catch (err) {
@@ -147,6 +152,7 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
   }
 
   return (
+    <ServiceProfileProvider value={profile}>
     <div className="flex flex-col h-dvh">
       {/* Header — read-only, click to edit */}
       <ServicePlanHeader
@@ -346,5 +352,6 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
         onSave={handleMetaSave}
       />
     </div>
+    </ServiceProfileProvider>
   );
 }

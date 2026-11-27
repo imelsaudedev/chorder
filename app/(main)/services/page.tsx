@@ -14,9 +14,14 @@ import ClientServicesPage from "./ClientServicesPage";
 import NewServiceProvider from "./NewServiceProvider";
 import ServicesHeaderActions from "./ServicesHeaderActions";
 
+// Quem não vê as liturgias da igreja só tem as próprias: a página se chama "Minhas liturgias".
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("Messages");
-  return { title: t("services") };
+  const [t, tService, live] = await Promise.all([
+    getTranslations("Messages"),
+    getTranslations("Service"),
+    getLiveUserAuth(),
+  ]);
+  return { title: canViewChurchServices(live.roles) ? t("services") : tService("tabPersonal") };
 }
 
 export default async function ServiceListPage() {
@@ -32,7 +37,7 @@ export default async function ServiceListPage() {
   return (
     <NewServiceProvider defaultScope={canViewChurch ? "CHURCH" : "PERSONAL"}>
       <PageTitleBlock
-        title={t("Messages.services")}
+        title={canViewChurch ? t("Messages.services") : t("Service.tabPersonal")}
         actions={
           <ServicesHeaderActions
             canManageChurch={canManageChurch}

@@ -9,6 +9,9 @@ type NewServiceContextValue = {
   activeScope: ServiceScope;
   setActiveScope: (scope: ServiceScope) => void;
   openNewService: (scope?: ServiceScope) => void;
+  /** A lista pessoal está vazia: o estado vazio já tem o botão de criar, então o resto da tela não repete. */
+  personalEmpty: boolean;
+  setPersonalEmpty: (empty: boolean) => void;
 };
 
 const NewServiceContext = createContext<NewServiceContextValue | null>(null);
@@ -31,6 +34,7 @@ export default function NewServiceProvider({
   const [activeScope, setActiveScope] = useState<ServiceScope>(defaultScope);
   const [drawerScope, setDrawerScope] = useState<ServiceScope>(defaultScope);
   const [open, setOpen] = useState(false);
+  const [personalEmpty, setPersonalEmpty] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
 
   const openNewService = useCallback(
@@ -42,8 +46,8 @@ export default function NewServiceProvider({
   );
 
   const value = useMemo(
-    () => ({ activeScope, setActiveScope, openNewService }),
-    [activeScope, openNewService]
+    () => ({ activeScope, setActiveScope, openNewService, personalEmpty, setPersonalEmpty }),
+    [activeScope, openNewService, personalEmpty]
   );
 
   function handleSave(config: ServicePlanConfig) {

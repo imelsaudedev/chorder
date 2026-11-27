@@ -1,4 +1,7 @@
-import type { ServiceScope } from "@/prisma/models";
+import type { ServiceUnitTypeValue } from "@/components/service/ServicePlanEditor/unitConfig";
+import type { ClientServiceSection, ServiceScope } from "@/prisma/models";
+
+const ALL_ITEM_TYPES: ServiceUnitTypeValue[] = ["SONG", "FALA", "LEITURA", "ORACAO", "AVISOS", "SERMAO", "OUTRO"];
 
 /**
  * Perfil de liturgia: o que muda na experiência conforme o tipo.
@@ -20,6 +23,14 @@ export type ServiceProfile = {
   showTemplates: boolean;
   /** Como o campo de quem conduz se chama: "dirigente" (obrigatório na cultura da igreja) ou "conduz" (opcional). */
   leader: "dirigente" | "conduz";
+  /** Tipos de item que o menu "Adicionar item" oferece (itens de outros tipos já salvos continuam aparecendo). */
+  itemTypes: ServiceUnitTypeValue[];
+  /** Seção com que uma liturgia nova começa. */
+  defaultSection: Pick<ClientServiceSection, "type" | "label">;
+  /** A pessoa escolhe o tipo da seção (Pré-culto, Culto…). Sem isso, a seção é só um nome. */
+  chooseSectionType: boolean;
+  /** Avisa que salvou (liturgias da igreja têm o fluxo de rascunho e publicação, que já avisa). */
+  toastOnSave: boolean;
 };
 
 export const SERVICE_PROFILES: Record<ServiceScope, ServiceProfile> = {
@@ -29,6 +40,10 @@ export const SERVICE_PROFILES: Record<ServiceScope, ServiceProfile> = {
     showPreacher: true,
     showTemplates: true,
     leader: "dirigente",
+    itemTypes: ALL_ITEM_TYPES,
+    defaultSection: { type: "CULTO", label: "Culto" },
+    chooseSectionType: true,
+    toastOnSave: false,
   },
   PERSONAL: {
     titleRequired: false,
@@ -36,6 +51,11 @@ export const SERVICE_PROFILES: Record<ServiceScope, ServiceProfile> = {
     showPreacher: false,
     showTemplates: false,
     leader: "conduz",
+    // Sem Avisos e Sermão: não fazem sentido num roteiro de grupo pequeno ou playlist.
+    itemTypes: ["SONG", "LEITURA", "ORACAO", "FALA", "OUTRO"],
+    defaultSection: { type: "ESPECIAL", label: "Roteiro" },
+    chooseSectionType: false,
+    toastOnSave: true,
   },
 };
 
