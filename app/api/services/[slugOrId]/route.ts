@@ -3,6 +3,7 @@ import { canManageChurchServices } from "@/lib/permissions";
 import {
   createOrUpdateService,
   deleteService,
+  existingUserId,
   setServiceLeaders,
   retrieveService,
   ServiceConflictError,
@@ -109,6 +110,7 @@ export async function PATCH(
     worshipLeader?: string | null;
     date?: Date;
     preacher?: string | null;
+    preacherId?: string | null;
     sermonTheme?: string | null;
     sermonReference?: string | null;
     status?: ServiceStatus;
@@ -128,6 +130,10 @@ export async function PATCH(
   }
   if ("date" in body) data.date = new Date(body.date);
   if ("preacher" in body) data.preacher = body.preacher ?? null;
+  if ("preacherId" in body) {
+    const { default: prisma } = await import("@/prisma/client");
+    data.preacherId = await existingUserId(prisma, typeof body.preacherId === "string" ? body.preacherId : null);
+  }
   if ("sermonTheme" in body) data.sermonTheme = body.sermonTheme ?? null;
   if ("sermonReference" in body) data.sermonReference = body.sermonReference ?? null;
   if ("status" in body && service.scope !== "PERSONAL") {

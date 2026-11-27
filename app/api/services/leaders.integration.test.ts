@@ -170,6 +170,26 @@ describe('editar dados pela lista (PATCH)', () => {
       { userId: null, name: 'Caio', image: null },
     ]);
 
+    // pregador escolhido entre as pessoas: guarda a conta; conta que não existe vira só o nome
+    await PATCH_ONE(
+      new NextRequest(`http://localhost/api/services/${created.slug}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ preacher: 'Hugo Lima', preacherId: hugo.id }),
+      }),
+      { params: Promise.resolve({ slugOrId: created.slug }) }
+    );
+    expect((await prisma.service.findFirstOrThrow()).preacherId).toBe('hugo');
+    await PATCH_ONE(
+      new NextRequest(`http://localhost/api/services/${created.slug}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ preacher: 'Convidado', preacherId: 'nao-existe' }),
+      }),
+      { params: Promise.resolve({ slugOrId: created.slug }) }
+    );
+    const afterPreacher = await prisma.service.findFirstOrThrow();
+    expect(afterPreacher.preacher).toBe('Convidado');
+    expect(afterPreacher.preacherId).toBeNull();
+
     // limpar tudo remove os dirigentes e o texto
     await PATCH_ONE(
       new NextRequest(`http://localhost/api/services/${created.slug}`, { method: 'PATCH', body: JSON.stringify({ leaders: [] }) }),

@@ -8,7 +8,7 @@ import ServiceRow, { ServiceTimeline } from "./index";
 vi.mock("next/link", () => ({
   default: ({ children, href, ...rest }: any) => <a href={href} {...rest}>{children}</a>,
 }));
-vi.mock("@/components/service/ServiceMetaModal", () => ({ default: () => null }));
+vi.mock("@/components/service/ServicePlanDrawer", () => ({ default: () => null }));
 
 const service = (extra: Partial<ServiceListItem> = {}): ServiceListItem => ({
   slug: "culto-1",

@@ -1250,6 +1250,7 @@ export async function retrieveServicesList(
       worshipLeader: true,
       leaders: { orderBy: { order: "asc" }, select: { userId: true, name: true, user: { select: { image: true } } } },
       preacher: true,
+      preacherId: true,
       sermonTheme: true,
       sermonReference: true,
       status: true,

@@ -139,6 +139,8 @@ export type ServiceListItem = Pick<
   status?: ServiceStatus;
   scope?: ServiceScope;
   isSharedWithMe?: boolean;
+  /** Conta do pregador, quando escolhido entre as pessoas (a edição pela lista a devolve ao salvar). */
+  preacherId?: string | null;
   /** Nomes de quem conduz, um por pessoa (`worshipLeader` é o texto junto, "Hugo e Ana"). */
   leaders?: string[];
   /** Quem conduz, com a foto da conta (quando há): a lista de Liturgias mostra foto e nome. */

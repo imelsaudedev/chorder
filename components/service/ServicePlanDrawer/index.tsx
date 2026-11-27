@@ -586,6 +586,7 @@ function EditFields({ form, profile }: EditFieldsProps) {
                 placeholder={profile.titleRequired ? t("ServiceData.titlePlaceholder") : t("ServiceData.titlePlaceholderPersonal")}
                 autoFocus
                 {...field}
+                className="h-11"
               />
             </FormControl>
             <FormMessage />
@@ -601,7 +602,7 @@ function EditFields({ form, profile }: EditFieldsProps) {
             <FormLabel>{t("ServiceData.date")}</FormLabel>
             <FormControl>
               <DatePicker
-                buttonProps={{ className: "w-full" }}
+                buttonProps={{ className: "w-full h-11" }}
                 disabled={field.disabled}
                 onChange={field.onChange}
                 value={field.value ?? undefined}

@@ -3,7 +3,7 @@
 import Text from "@/components/common/Text";
 import { serviceProfile } from "@/lib/service-profile";
 import LeaderAvatars from "@/components/service/LeaderAvatars";
-import ServiceMetaModal, { ServiceMeta } from "@/components/service/ServiceMetaModal";
+import ServicePlanDrawer, { ServicePlanConfig } from "@/components/service/ServicePlanDrawer";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -116,6 +116,8 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
   const locale = useLocale();
   const { mutate } = useSWRConfig();
   const [metaOpen, setMetaOpen] = useState(false);
+  // a gaveta só é montada na primeira vez que abre (a lista tem muitas linhas)
+  const [metaMounted, setMetaMounted] = useState(false);
   const [local, setLocal] = useState(service);
   const [saving, setSaving] = useState(false);
 
@@ -129,12 +131,24 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
   const title = local.title?.trim() || t("Service.noTitle");
   const themeAndText = [local.sermonTheme, local.sermonReference].filter(Boolean).join(" · ");
 
-  function handleMetaSave(values: ServiceMeta): false {
+  function openMeta() {
+    setMetaMounted(true);
+    setMetaOpen(true);
+  }
+
+  function handleMetaSave(values: ServicePlanConfig): false {
     setSaving(true);
     fetch(`/api/services/${local.slug}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
+      body: JSON.stringify({
+        title: values.title,
+        date: values.date,
+        worshipLeader: values.worshipLeader,
+        leaders: values.leaders,
+        preacher: values.preacher,
+        preacherId: values.preacherId,
+      }),
     })
       .then((res) => {
         if (!res.ok) return;
@@ -143,6 +157,8 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
           title: values.title,
           date: values.date,
           worshipLeader: values.worshipLeader,
+          preacher: values.preacher,
+          preacherId: values.preacherId,
           leaders: values.leaders.map((l) => l.name),
           leaderPeople: values.leaders.map((l) => ({
             userId: l.userId,
@@ -273,7 +289,7 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => setMetaOpen(true)}>
+            <DropdownMenuItem onSelect={openMeta}>
               <Pencil size={14} className="mr-2" />
               {t("Messages.editServiceData")}
             </DropdownMenuItem>
@@ -281,20 +297,24 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
         </DropdownMenu>
       </div>
 
-      <ServiceMetaModal
-        open={metaOpen}
-        onOpenChange={setMetaOpen}
-        isNew={false}
-        isPersonal={local.scope === "PERSONAL"}
-        defaultValues={{
-          title: local.title ?? "",
-          worshipLeader: local.worshipLeader ?? "",
-          leaders: local.leaderPeople?.map(({ userId, name }) => ({ userId, name })),
-          date,
-        }}
-        onSave={handleMetaSave}
-        loading={saving}
-      />
+      {metaMounted && (
+        <ServicePlanDrawer
+          open={metaOpen}
+          onOpenChange={setMetaOpen}
+          isNew={false}
+          isPersonal={local.scope === "PERSONAL"}
+          defaultValues={{
+            title: local.title ?? "",
+            worshipLeader: local.worshipLeader ?? "",
+            leaders: local.leaderPeople?.map(({ userId, name }) => ({ userId, name })),
+            preacher: local.preacher ?? "",
+            preacherId: local.preacherId ?? null,
+            date,
+          }}
+          onSave={handleMetaSave}
+          loading={saving}
+        />
+      )}
     </li>
   );
 }
