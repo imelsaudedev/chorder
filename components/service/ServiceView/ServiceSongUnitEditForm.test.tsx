@@ -4,10 +4,15 @@ import { MutableRefObject } from 'react';
 import ServiceSongUnitEditForm, { EditFormHandle } from './ServiceSongUnitEditForm';
 import { useCreateOrUpdateArrangement } from '#api-client';
 import { ClientServiceUnit } from '@/prisma/models';
+import { ViewerProvider } from '@/components/auth/ViewerProvider';
+import type { UserRole } from '@prisma/client';
+import { toast } from 'sonner';
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
+
+vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 vi.mock('#api-client', () => ({
   useCreateOrUpdateArrangement: vi.fn(),
@@ -179,5 +184,53 @@ describe('ServiceSongUnitEditForm', () => {
       expect(originalCallArg.isServiceArrangement).toBe(false);
       expect(originalCallArg.originalArrangementId).toBeNull();
     });
+  });
+});
+
+
+describe('ServiceSongUnitEditForm — aviso e confirmação', () => {
+  const renderAs = (roles: UserRole[], submitRef = makeSubmitRef()) => {
+    render(
+      <ViewerProvider authenticated roles={roles}>
+        <ServiceSongUnitEditForm
+          unit={mockUnit}
+          submitRef={submitRef}
+          onSavingChange={vi.fn()}
+          onDirtyChange={vi.fn()}
+          onSaved={vi.fn()}
+        />
+      </ViewerProvider>
+    );
+    return submitRef;
+  };
+
+  beforeEach(() => vi.mocked(toast.success).mockClear());
+
+  it('quem não edita músicas vê o aviso de que só a liturgia muda, antes de digitar', () => {
+    renderAs([]);
+    expect(screen.getByText('editCopyNotice')).toBeDefined();
+  });
+
+  it('quem edita músicas não vê o aviso (a pergunta de escopo já explica)', () => {
+    renderAs(['WORSHIP']);
+    expect(screen.queryByText('editCopyNotice')).toBeNull();
+  });
+
+  it('ao salvar só na liturgia, confirma e diz que a original não mudou', async () => {
+    const submitRef = renderAs([]);
+    await act(async () => {
+      await submitRef.current?.submit('service');
+    });
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('savedServiceOnly', { description: 'savedServiceOnlyHint' })
+    );
+  });
+
+  it('ao salvar também no original, confirma os dois', async () => {
+    const submitRef = renderAs(['WORSHIP']);
+    await act(async () => {
+      await submitRef.current?.submit('both');
+    });
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('savedBoth'));
   });
 });

@@ -23,6 +23,7 @@ import { pushStageModeEntry } from "@/components/service/StageMode/useStageModeH
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { isServiceKey } from "./isServiceKey";
+import { ServiceEditAccessProvider } from "./ServiceEditAccess";
 import ServiceSongUnitView from "./ServiceSongUnitView";
 import { useServiceTransposes } from "./useServiceTransposes";
 
@@ -197,7 +198,7 @@ export default function ServiceView({ service }: ServiceViewProps) {
   }
 
   return (
-    <>
+    <ServiceEditAccessProvider value={service.canEdit !== false}>
       <div
         className={`flex flex-col gap-14 ${isMediaOpen ? "pb-24" : ""}`}
         style={{ fontSize: `${fontSize}px` }}
@@ -274,6 +275,6 @@ export default function ServiceView({ service }: ServiceViewProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </ServiceEditAccessProvider>
   );
 }

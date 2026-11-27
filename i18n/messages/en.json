@@ -207,6 +207,10 @@
     "expand": "Expand block"
   },
   "ServiceView": {
+    "editCopyNotice": "You're editing only in this service. The original chart won't be changed.",
+    "savedServiceOnly": "Chart saved in this service",
+    "savedServiceOnlyHint": "The original chart did not change.",
+    "savedBoth": "Chart saved in the service and the original",
     "editChords": "Edit chords",
     "saveScopeTitle": "Save changes",
     "serviceOnly": "This service only",

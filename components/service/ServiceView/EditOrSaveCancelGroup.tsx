@@ -1,6 +1,8 @@
 "use client";
 
 import ConfirmDiscardDialog from "@/components/common/ConfirmDiscardDialog";
+import { useViewer } from "@/components/auth/ViewerProvider";
+import { useCanEditService } from "@/components/service/ServiceView/ServiceEditAccess";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,8 +43,14 @@ export default function EditOrSaveCancelGroup({
 }: Props) {
   const t = useTranslations("ServiceView");
   const [scopeDialogOpen, setScopeDialogOpen] = useState(false);
+  // "Na liturgia e no original" altera a música para todos: só quem edita músicas. Quem só edita a
+  // liturgia salva "só nesta liturgia", direto, sem a pergunta.
+  const { canEditSongs } = useViewer();
+  const canEditService = useCanEditService();
 
   if (!isEditing) {
+    // Quem só visualiza a liturgia não edita cifras.
+    if (!canEditService) return null;
     return (
       <Button
         type="button"
@@ -63,7 +71,7 @@ export default function EditOrSaveCancelGroup({
         type="button"
         size="sm"
         disabled={isSaving}
-        onClick={() => (hasOriginal ? setScopeDialogOpen(true) : onSaveServiceOnly())}
+        onClick={() => (hasOriginal && canEditSongs ? setScopeDialogOpen(true) : onSaveServiceOnly())}
         className="h-10 md:h-9 gap-1.5 px-3"
       >
         {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}

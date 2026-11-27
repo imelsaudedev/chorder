@@ -3,13 +3,16 @@
 import { useCreateOrUpdateArrangement } from "#api-client";
 import { defaultArrangementValues } from "@/components/song/ArrangementForm/useArrangementForm";
 import BlockEditorFormBridge from "@/components/song/ArrangementForm/BlockEditorFormBridge";
+import { useViewer } from "@/components/auth/ViewerProvider";
 import { Form } from "@/components/ui/form";
 import { ClientArrangement, ClientServiceUnit } from "@/prisma/models";
 import { ArrangementSchema, arrangementSchema } from "@/schemas/arrangement";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { Info } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 
 export type EditFormHandle = {
@@ -34,6 +37,8 @@ export default function ServiceSongUnitEditForm({
   onSaved,
 }: ServiceSongUnitEditFormProps) {
   const t = useTranslations("ServiceView");
+  // Quem não edita músicas só altera a cópia desta liturgia: o aviso tira o medo de mexer na cifra da igreja.
+  const { canEditSongs } = useViewer();
 
   const arrangement = unit.arrangement!;
 
@@ -103,8 +108,10 @@ export default function ServiceSongUnitEditForm({
           saveToService(buildServicePayload(data)),
           saveToOriginal(buildOriginalPayload(data)),
         ]);
+        toast.success(t("savedBoth"));
       } else {
         await saveToService(buildServicePayload(data));
+        toast.success(t("savedServiceOnly"), { description: t("savedServiceOnlyHint") });
       }
       mutate((key) => typeof key === "string" && key.startsWith("/api/services"));
       onSaved();
@@ -121,6 +128,15 @@ export default function ServiceSongUnitEditForm({
 
   return (
     <Form {...form}>
+      {!canEditSongs && (
+        <div
+          role="note"
+          className="mb-4 flex items-start gap-2.5 rounded-lg border border-info-border bg-info-subtle px-3.5 py-3 text-sm text-foreground"
+        >
+          <Info className="mt-0.5 size-4 shrink-0 text-info-text" aria-hidden />
+          <p>{t("editCopyNotice")}</p>
+        </div>
+      )}
       <BlockEditorFormBridge className="" />
       {saveError && (
         <p className="text-sm text-danger text-right py-2 px-2">{saveError}</p>

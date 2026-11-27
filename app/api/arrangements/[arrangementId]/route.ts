@@ -1,8 +1,10 @@
-import { requireSongEditor } from "@/lib/auth-guard";
+import { canEditServiceArrangementCopy } from "@/lib/arrangement-copy-access";
+import { getLiveUserAuth, requireSongEditor } from "@/lib/auth-guard";
 import {
   deleteArrangement,
   retrieveArrangement,
   updateArrangement,
+  updateServiceArrangementUnits,
 } from "@/prisma/data";
 import prisma from "@/prisma/client";
 import { arrangementSchema } from "@/schemas/arrangement";
@@ -100,10 +102,22 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ arrangementId: string }> }
 ) {
-  const guard = await requireSongEditor();
-  if (!guard.ok) return guard.response;
-
   const { arrangementId } = await params;
+  const guard = await requireSongEditor();
+  if (!guard.ok) {
+    // Quem não edita músicas pode salvar a cifra da cópia que está na liturgia que ele edita
+    // ("Só nesta liturgia"): só a cifra dessa cópia, nunca a música, o original ou as mídias.
+    const live = await getLiveUserAuth();
+    const copyId = parseInt(arrangementId);
+    const preserveMedia = request.nextUrl.searchParams.get("preserveMedia") === "true";
+    if (!preserveMedia || !(await canEditServiceArrangementCopy(copyId, live))) return guard.response;
+    const body = arrangementSchema.parse(await request.json());
+    if (body.id !== copyId || !body.units) {
+      return new Response("Invalid arrangement data", { status: 400 });
+    }
+    return Response.json(await updateServiceArrangementUnits(copyId, body.units));
+  }
+
   const arrangement = arrangementSchema.parse(await request.json());
   if (arrangement.id !== parseInt(arrangementId)) {
     return new Response("Arrangement ID mismatch", { status: 400 });
