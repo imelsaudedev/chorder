@@ -24,13 +24,14 @@ import {
   getTemplateDefaultStartTime,
   summarizeTemplate,
 } from "@/lib/template-utils";
+import { cn } from "@/lib/utils";
 import { buildServiceTitle, nextSunday } from "@/lib/service-schedule";
 import { ServiceProfile, serviceProfile } from "@/lib/service-profile";
 import { ClientServiceSection, ClientServiceTemplate } from "@/prisma/models";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Clock, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
@@ -295,6 +296,30 @@ type CreationFieldsProps = {
   onTimeChange: () => void;
 };
 
+/**
+ * Campo de hora nativo com o relógio à esquerda (como o calendário do campo de data). O indicador nativo
+ * (à direita) fica esticado e invisível sobre o campo: tocar em qualquer ponto abre o seletor nativo
+ * (a roleta no celular). O formato (24 h ou AM/PM) segue o do sistema da pessoa.
+ */
+function TimeInput({ className, ...props }: Omit<React.ComponentProps<typeof Input>, "type">) {
+  return (
+    <div className="relative w-36">
+      <Clock
+        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+        aria-hidden
+      />
+      <Input
+        type="time"
+        {...props}
+        className={cn(
+          "h-11 pl-9 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0",
+          className
+        )}
+      />
+    </div>
+  )
+}
+
 /** Rótulo "Sugestão" e, abaixo dele, atalhos de um toque (chips do sistema: Button soft), acima do campo. */
 function Suggestions({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -443,10 +468,8 @@ function CreationFields({
               </Suggestions>
             )}
             <FormControl>
-              <Input
-                type="time"
+              <TimeInput
                 {...field}
-                className="h-11 w-32"
                 onChange={(e) => {
                   onTimeChange();
                   field.onChange(e);
@@ -579,7 +602,7 @@ function EditFields({ form, profile }: EditFieldsProps) {
           <FormItem>
             <FormLabel>Hora de início</FormLabel>
             <FormControl>
-              <Input type="time" {...field} className="w-32" />
+              <TimeInput {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
