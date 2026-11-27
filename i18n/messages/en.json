@@ -365,7 +365,7 @@
     "noTeamRolesHint": "You have standard access. If you are part of the Worship or Media team, let leadership know to enable your access.",
     "nameLabel": "Name",
     "namePlaceholder": "How you prefer to be called",
-    "nameHint": "This is the name displayed for you across the site.",
+    "nameHint": "This is the name displayed across the site.",
     "save": "Save",
     "nameSaved": "Name updated!",
     "saveError": "Could not save your name. Please try again."

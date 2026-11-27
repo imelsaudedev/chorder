@@ -366,7 +366,7 @@
     "noTeamRolesHint": "Você tem acesso padrão. Se faz parte da equipe de Louvor ou Mídia, avise a liderança para liberar o acesso.",
     "nameLabel": "Nome",
     "namePlaceholder": "Como você prefere ser chamado(a)",
-    "nameHint": "Este é o nome exibido para você no site.",
+    "nameHint": "Este é o nome exibido no site.",
     "save": "Salvar",
     "nameSaved": "Nome atualizado!",
     "saveError": "Não foi possível salvar o nome. Tente novamente."
