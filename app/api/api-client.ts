@@ -495,5 +495,5 @@ export function useFetchPeople(query: string, enabled = true) {
       fetch(`${url}?q=${encodeURIComponent(q)}`).then((res) => (res.ok ? res.json() : [])),
     { keepPreviousData: true, dedupingInterval: 30_000 }
   );
-  return { people: (data ?? []) as { id: string; name: string; image: string | null }[], isLoading };
+  return { people: (data ?? []) as { id: string; name: string; image: string | null; recent?: boolean }[], isLoading };
 }

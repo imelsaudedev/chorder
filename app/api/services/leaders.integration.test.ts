@@ -139,6 +139,30 @@ describe('GET /api/people', () => {
     expect(JSON.stringify(people)).not.toContain('@');
   });
 
+  it('campo vazio: quem conduziu cultos publicados da igreja vem primeiro, e liturgia pessoal não conta', async () => {
+    await POST(
+      new Request('http://localhost/api/services', {
+        method: 'POST',
+        body: body({ leaders: [{ userId: hugo.id, name: 'Hugo Lima' }] }),
+      })
+    );
+    // Ana conduz só uma liturgia pessoal: não deve aparecer como "recente"
+    await POST(
+      new Request('http://localhost/api/services', {
+        method: 'POST',
+        body: body({ slug: 'pessoal-ana', scope: 'PERSONAL', leaders: [{ userId: ana.id, name: 'Ana Souza' }] }),
+      })
+    );
+
+    const people = await (await GET_PEOPLE(new Request('http://localhost/api/people'))).json();
+    expect(people.map((p: { id: string }) => p.id)).toEqual(['hugo', 'ana']);
+    expect(people[0].recent).toBe(true);
+    expect(people[1].recent).toBeUndefined();
+
+    const searched = await (await GET_PEOPLE(new Request('http://localhost/api/people?q=hug'))).json();
+    expect(searched).toEqual([{ id: 'hugo', name: 'Hugo Lima', image: null }]);
+  });
+
   it('usuário comum, sem perfil, também busca (monta liturgia pessoal)', async () => {
     vi.mocked(auth).mockResolvedValueOnce({
       user: { id: 'ana', email: 'ana@test.com', roles: [] },

@@ -4,14 +4,15 @@ import { useFetchPeople } from "@/app/api/api-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { ServiceLeaderEntry } from "@/lib/service-leaders";
 import { cn } from "@/lib/utils";
-import { Plus, X } from "lucide-react";
+import { Command } from "cmdk";
+import { Plus, UserRound, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type PeopleFieldProps = {
   value: ServiceLeaderEntry[];
   onChange: (next: ServiceLeaderEntry[]) => void;
-  /** Quantas pessoas cabem: 1 vira escolha única (a escolha nova troca a anterior). Sem limite por padrão. */
+  /** 1 = escolha única: a pessoa escolhida fica no campo e "Trocar" a tira. Sem limite por padrão. */
   max?: number;
   placeholder: string;
   className?: string;
@@ -31,137 +32,262 @@ function useDebounced<T>(value: T, ms: number) {
   return debounced;
 }
 
+const fold = (text: string) =>
+  Array.from(text)
+    .map((c) => c.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase())
+    .join("");
+
+/** Nome com o trecho digitado em negrito (sem diferenciar maiúsculas nem acentos). */
+function Highlight({ name, query }: { name: string; query: string }) {
+  const folded = fold(name);
+  const at = query && folded.length === name.length ? folded.indexOf(fold(query)) : -1;
+  if (at < 0) return <>{name}</>;
+  return (
+    <>
+      {name.slice(0, at)}
+      <strong className="font-semibold">{name.slice(at, at + query.length)}</strong>
+      {name.slice(at + query.length)}
+    </>
+  );
+}
+
+const sameName = (a: string, b: string) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }) === 0;
+
 /**
- * Escolha de pessoas do sistema (com foto e nome) ou de um nome livre, para convidado sem conta.
- * A lista de sugestões aparece embaixo do campo, sem portal: dentro de gavetas (vaul) os
- * portais perdem os eventos.
+ * Escolha de pessoas do sistema (foto e nome) ou de um nome livre, para convidado sem conta.
+ * Chips e busca ficam dentro de um campo só. A lista é inline (sem portal: em gaveta do vaul os
+ * portais perdem os eventos) e vem do `cmdk`, que cuida de setas, Enter e `aria-activedescendant`.
+ * Pessoa com conta tem avatar; nome sem conta tem borda tracejada.
  */
 export default function PeopleField({ value, onChange, max, placeholder, className }: PeopleFieldProps) {
   const t = useTranslations("ServiceData");
-  const listId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
-  const [focused, setFocused] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [armed, setArmed] = useState(false); // Backspace em dois passos: o 1º marca o último chip
+  const [announcement, setAnnouncement] = useState("");
   const query = useDebounced(text.trim(), 200);
-  const { people } = useFetchPeople(query, focused);
+  const { people, isLoading } = useFetchPeople(query, open);
 
   const single = max === 1;
   const full = max !== undefined && !single && value.length >= max;
+  const hasSingleValue = single && value.length > 0;
   const chosenIds = new Set(value.map((v) => v.userId).filter(Boolean));
   const suggestions = people.filter((p) => !chosenIds.has(p.id));
+  const recent = suggestions.filter((p) => p.recent);
+  const others = suggestions.filter((p) => !p.recent);
   const typed = text.trim();
-  const sameName = (a: string, b: string) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }) === 0;
-  const exact = suggestions.find((p) => sameName(p.name, typed));
-  const alreadyThere = value.some((v) => sameName(v.name, typed));
-  const canAddFree = typed !== "" && !exact && !alreadyThere;
+  const canAddFree =
+    typed !== "" && !suggestions.some((p) => sameName(p.name, typed)) && !value.some((v) => sameName(v.name, typed));
+  const nothing = suggestions.length === 0 && !canAddFree;
+
+  // Item marcado: controlado, para o primeiro da lista ficar marcado também depois que a busca
+  // (que espera a digitação parar) troca as sugestões. Sem isso o Enter não faria nada.
+  const shown = typed ? suggestions : [...recent, ...others];
+  const firstValue = shown[0] ? `pessoa-${shown[0].id}` : canAddFree ? "adicionar-sem-conta" : "";
+  const [active, setActive] = useState("");
+  useEffect(() => setActive(firstValue), [firstValue]);
 
   function add(entry: ServiceLeaderEntry) {
     onChange(single ? [entry] : [...value, entry]);
+    setAnnouncement(t("peopleAdded", { name: entry.name }));
     setText("");
+    setArmed(false);
+    if (single) setOpen(false);
   }
 
   function remove(index: number) {
+    const gone = value[index];
     onChange(value.filter((_, i) => i !== index));
+    setAnnouncement(t("peopleRemoved", { name: gone.name }));
+    setArmed(false);
+    inputRef.current?.focus();
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      e.preventDefault(); // não envia o formulário
-      if (exact) add({ userId: exact.id, name: exact.name });
-      else if (canAddFree) add({ userId: null, name: typed });
-    } else if (e.key === "Backspace" && text === "" && value.length > 0) {
-      remove(value.length - 1);
+    if (e.key === "Escape") {
+      setOpen(false);
+    } else if (text === "" && value.length > 0 && (e.key === "Backspace" || e.key === "ArrowLeft")) {
+      if (armed && e.key === "Backspace") {
+        e.preventDefault();
+        remove(value.length - 1);
+      } else if (!armed) {
+        e.preventDefault();
+        setArmed(true);
+      }
+    } else if (armed && e.key === "ArrowRight") {
+      setArmed(false);
+    } else if (armed && e.key.length === 1) {
+      setArmed(false);
     }
   }
 
-  const showList = focused && !full && (suggestions.length > 0 || canAddFree);
-
   return (
-    <div className={cn("space-y-2", className)}>
-      {value.length > 0 && (
-        <ul className="flex flex-wrap gap-2">
-          {value.map((person, index) => (
-            <li
-              key={`${person.userId ?? "nome"}-${person.name}`}
-              className="flex items-center gap-2 rounded-full border bg-muted/40 py-1 pl-1 pr-1 text-sm"
-            >
-              <Avatar className="size-6">
-                <AvatarFallback className="text-[10px]">{initials(person.name)}</AvatarFallback>
-              </Avatar>
-              <span>{person.name}</span>
-              <button
-                type="button"
-                onClick={() => remove(index)}
-                aria-label={t("peopleRemove", { name: person.name })}
-                className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+    <div
+      ref={rootRef}
+      className={cn("relative", className)}
+      onBlur={(e) => {
+        if (!rootRef.current?.contains(e.relatedTarget as Node | null)) {
+          setOpen(false);
+          setArmed(false);
+        }
+      }}
+    >
+      <Command shouldFilter={false} loop label={placeholder} value={active} onValueChange={setActive}>
+        <div
+          className={cn(
+            "flex min-h-11 flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1.5",
+            "focus-within:ring-2 focus-within:ring-ring",
+          )}
+          onClick={() => inputRef.current?.focus()}
+        >
+          {value.map((person, index) => {
+            const linked = person.userId !== null;
+            return (
+              <span
+                key={`${person.userId ?? "nome"}-${person.name}`}
+                title={linked ? undefined : t("peopleNoAccount")}
+                className={cn(
+                  "flex h-8 items-center gap-1.5 rounded-full border py-0.5 pl-1 pr-1 text-sm",
+                  linked ? "bg-muted/50" : "border-dashed bg-background",
+                  armed && index === value.length - 1 && "ring-2 ring-ring",
+                )}
               >
-                <X className="size-4" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+                <Avatar className="size-6" aria-hidden>
+                  <AvatarFallback className="text-[10px]">
+                    {linked ? initials(person.name) : <UserRound className="size-3.5 text-muted-foreground" />}
+                  </AvatarFallback>
+                </Avatar>
+                <span>{person.name}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    remove(index);
+                  }}
+                  aria-label={t("peopleRemove", { name: person.name })}
+                  // a área de toque vai a 44px sem engordar o chip
+                  className="relative grid size-6 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground after:absolute after:-inset-2.5 after:content-['']"
+                >
+                  <X className="size-4" />
+                </button>
+              </span>
+            );
+          })}
 
-      {!(single && value.length > 0) && !full && (
-        <div className="relative">
-          <input
-            type="text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setTimeout(() => setFocused(false), 120)}
-            onKeyDown={onKeyDown}
-            placeholder={placeholder}
-            role="combobox"
-            aria-expanded={showList}
-            aria-controls={listId}
-            aria-autocomplete="list"
-            autoComplete="off"
-            className="h-11 w-full rounded-md border bg-background px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
-          {showList && (
-            <ul
-              id={listId}
-              role="listbox"
-              className="mt-1 max-h-64 overflow-auto rounded-md border bg-popover p-1 shadow-sm"
+          {hasSingleValue ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange([]);
+                setOpen(true);
+                requestAnimationFrame(() => inputRef.current?.focus());
+              }}
+              className="ml-auto min-h-8 rounded-md px-2 text-sm text-muted-foreground hover:text-foreground"
             >
-              {suggestions.map((p) => (
-                <li key={p.id} role="option" aria-selected={false}>
-                  <button
-                    type="button"
-                    // mouseDown, não click: o campo perde o foco antes do click e a lista sumiria
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      add({ userId: p.id, name: p.name });
-                    }}
-                    className="flex min-h-11 w-full items-center gap-3 rounded-sm px-2 text-left text-sm hover:bg-muted"
-                  >
-                    <Avatar className="size-7">
-                      {p.image && <AvatarImage src={p.image} alt="" />}
-                      <AvatarFallback className="text-[10px]">{initials(p.name)}</AvatarFallback>
-                    </Avatar>
-                    {p.name}
-                  </button>
-                </li>
-              ))}
-              {canAddFree && (
-                <li role="option" aria-selected={false}>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      add({ userId: null, name: typed });
-                    }}
-                    className="flex min-h-11 w-full items-center gap-3 rounded-sm px-2 text-left text-sm text-muted-foreground hover:bg-muted"
-                  >
-                    <Plus className="size-5 shrink-0" />
-                    {t("peopleAddWithoutAccount", { name: typed })}
-                  </button>
-                </li>
-              )}
-            </ul>
+              {t("peopleSwitch")}
+            </button>
+          ) : (
+            !full && (
+              <Command.Input
+                ref={inputRef}
+                value={text}
+                onValueChange={(v) => {
+                  setText(v);
+                  setArmed(false);
+                  setOpen(true);
+                }}
+                onFocus={() => {
+                  setOpen(true);
+                  // no celular o teclado cobre a lista: traz o campo para a área visível
+                  requestAnimationFrame(() => rootRef.current?.scrollIntoView?.({ block: "center", behavior: "smooth" }));
+                }}
+                onKeyDown={onKeyDown}
+                placeholder={value.length === 0 ? placeholder : undefined}
+                className="h-8 min-w-24 flex-1 bg-transparent px-1 text-base outline-none placeholder:text-muted-foreground"
+              />
+            )
           )}
         </div>
-      )}
+
+        {open && !hasSingleValue && !full && (
+          <Command.List
+            label={t("peopleList")}
+            // mouseDown no item não pode tirar o foco do campo (a lista fecharia antes do clique)
+            onMouseDown={(e) => e.preventDefault()}
+            className="mt-1 max-h-[min(16rem,40dvh)] overflow-auto rounded-md border bg-popover p-1 shadow-sm"
+          >
+            {isLoading && suggestions.length === 0 && !canAddFree && (
+              <Command.Loading>
+                <p className="px-2 py-3 text-sm text-muted-foreground">{t("peopleSearching")}</p>
+              </Command.Loading>
+            )}
+            {!isLoading && nothing && (
+              <Command.Empty className="px-2 py-3 text-sm text-muted-foreground">{t("peopleEmpty")}</Command.Empty>
+            )}
+
+            {recent.length > 0 && !typed && (
+              <Command.Group heading={t("peopleRecent")} className={groupClass}>
+                {recent.map((p) => (
+                  <PersonRow key={p.id} person={p} query="" onPick={add} />
+                ))}
+              </Command.Group>
+            )}
+            {(typed ? suggestions : others).length > 0 && (
+              <Command.Group heading={typed ? undefined : t("peopleAll")} className={groupClass}>
+                {(typed ? suggestions : others).map((p) => (
+                  <PersonRow key={p.id} person={p} query={typed} onPick={add} />
+                ))}
+              </Command.Group>
+            )}
+            {canAddFree && (
+              <Command.Item
+                value="adicionar-sem-conta"
+                onSelect={() => add({ userId: null, name: typed })}
+                className={cn(itemClass, "text-muted-foreground")}
+              >
+                <span className="grid size-8 shrink-0 place-items-center rounded-full border border-dashed">
+                  <Plus className="size-4" />
+                </span>
+                {t("peopleAddWithoutAccount", { name: typed })}
+              </Command.Item>
+            )}
+          </Command.List>
+        )}
+      </Command>
+      <p className="sr-only" role="status" aria-live="polite" data-testid="people-announcement">
+        {announcement}
+      </p>
     </div>
+  );
+}
+
+const groupClass =
+  "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:pt-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground";
+
+const itemClass =
+  "flex min-h-12 cursor-pointer items-center gap-3 rounded-sm px-2 text-sm data-[selected=true]:bg-muted";
+
+function PersonRow({
+  person,
+  query,
+  onPick,
+}: {
+  person: { id: string; name: string; image: string | null };
+  query: string;
+  onPick: (entry: ServiceLeaderEntry) => void;
+}) {
+  return (
+    <Command.Item value={`pessoa-${person.id}`} onSelect={() => onPick({ userId: person.id, name: person.name })} className={itemClass}>
+      <Avatar className="size-8" aria-hidden>
+        {person.image && <AvatarImage src={person.image} alt="" />}
+        <AvatarFallback className="text-xs">{initials(person.name)}</AvatarFallback>
+      </Avatar>
+      <span>
+        <Highlight name={person.name} query={query} />
+      </span>
+    </Command.Item>
   );
 }

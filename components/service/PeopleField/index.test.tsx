@@ -1,20 +1,26 @@
 import messages from "@/i18n/messages/pt-BR.json";
 import type { ServiceLeaderEntry } from "@/lib/service-leaders";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { useState } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import PeopleField from "./index";
 
 vi.mock("@/app/api/api-client", () => ({
   useFetchPeople: (q: string) => ({
     people: [
+      { id: "hugo", name: "Hugo Lima", image: null, recent: true },
       { id: "ana", name: "Ana Souza", image: null },
-      { id: "hugo", name: "Hugo Lima", image: null },
+      { id: "caio", name: "Caio Álvares", image: null },
     ].filter((p) => p.name.toLowerCase().includes(q.toLowerCase())),
     isLoading: false,
   }),
 }));
+
+beforeAll(() => {
+  // o cmdk rola o item marcado para a vista; o jsdom não implementa
+  Element.prototype.scrollIntoView = vi.fn();
+});
 
 function Harness({ initial = [], max }: { initial?: ServiceLeaderEntry[]; max?: number }) {
   const [value, setValue] = useState(initial);
@@ -27,36 +33,61 @@ function Harness({ initial = [], max }: { initial?: ServiceLeaderEntry[]; max?: 
 }
 
 const value = () => JSON.parse(screen.getByTestId("value").textContent ?? "[]");
+const input = () => screen.getByRole("combobox");
+const announcement = () => screen.getByTestId("people-announcement").textContent ?? "";
+// a busca espera 200ms depois da digitação; os testes esperam a lista acompanhar o texto
+const optionNames = () => screen.queryAllByRole("option").map((o) => o.lastElementChild?.textContent ?? o.textContent ?? "");
 
 describe("PeopleField", () => {
-  it("escolhe uma pessoa da lista e depois outra (vários dirigentes)", () => {
+  it("campo vazio mostra primeiro quem conduziu recentemente, depois as demais pessoas", () => {
     render(<Harness />);
-    const input = screen.getByRole("combobox");
-    fireEvent.focus(input);
-    fireEvent.mouseDown(screen.getByRole("button", { name: /Ana Souza/ }));
-    fireEvent.focus(input);
-    fireEvent.mouseDown(screen.getByRole("button", { name: /Hugo Lima/ }));
-    expect(value()).toEqual([
-      { userId: "ana", name: "Ana Souza" },
-      { userId: "hugo", name: "Hugo Lima" },
-    ]);
+    fireEvent.focus(input());
+    expect(screen.getByText("Conduziram recentemente")).toBeTruthy();
+    expect(screen.getByRole("listbox", { name: "Sugestões de pessoas" })).toBeTruthy();
+    expect(optionNames()).toEqual(["Hugo Lima", "Ana Souza", "Caio Álvares"]);
   });
 
-  it("Enter adiciona um nome sem conta, e não repete quem já está", () => {
+  it("escolhe por clique e depois por Enter (vários dirigentes), anunciando para leitor de tela", () => {
+    render(<Harness />);
+    fireEvent.focus(input());
+    fireEvent.click(screen.getByRole("option", { name: /Ana Souza/ }));
+    expect(value()).toEqual([{ userId: "ana", name: "Ana Souza" }]);
+
+    fireEvent.focus(input());
+    fireEvent.keyDown(input(), { key: "ArrowDown" });
+    fireEvent.keyDown(input(), { key: "Enter" });
+    expect(value()).toHaveLength(2);
+    expect(announcement()).toContain("adicionada");
+  });
+
+  it("digitar um nome sem correspondência oferece adicionar sem conta, e Enter adiciona", async () => {
     render(<Harness initial={[{ userId: "ana", name: "Ana Souza" }]} />);
-    const input = screen.getByRole("combobox");
-    fireEvent.change(input, { target: { value: "Visitante" } });
-    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.change(input(), { target: { value: "Visitante" } });
+    await waitFor(() => expect(optionNames()).toHaveLength(1));
+    expect(screen.getByRole("option", { name: /Visitante/ })).toBeTruthy();
+    fireEvent.keyDown(input(), { key: "Enter" });
     expect(value()).toEqual([
       { userId: "ana", name: "Ana Souza" },
       { userId: null, name: "Visitante" },
     ]);
-    fireEvent.change(input, { target: { value: "ana souza" } });
-    fireEvent.keyDown(input, { key: "Enter" });
-    expect(value()).toHaveLength(2);
+    // o nome sem conta fica marcado no chip
+    expect(screen.getByTitle("Sem conta")).toBeTruthy();
   });
 
-  it("remove pelo X e com Backspace no campo vazio", () => {
+  it("não oferece adicionar quem já está na lista", async () => {
+    render(<Harness initial={[{ userId: null, name: "Visitante" }]} />);
+    fireEvent.change(input(), { target: { value: "visitante" } });
+    await screen.findByText("Nenhuma pessoa encontrada");
+    expect(screen.queryByRole("option", { name: /Adicionar/ })).toBeNull();
+  });
+
+  it("sem resultado e sem nada a adicionar, avisa que ninguém foi encontrado", async () => {
+    render(<Harness initial={[{ userId: null, name: "Zé" }]} />);
+    fireEvent.change(input(), { target: { value: "ze" } }); // o mock não acha ninguém, e "Zé" já está na lista
+    expect(await screen.findByText("Nenhuma pessoa encontrada")).toBeTruthy();
+  });
+
+  it("Backspace em dois passos: o primeiro marca o último chip, o segundo remove", () => {
     render(
       <Harness
         initial={[
@@ -65,16 +96,25 @@ describe("PeopleField", () => {
         ]}
       />
     );
-    fireEvent.click(screen.getByRole("button", { name: "Remover Visitante" }));
+    fireEvent.keyDown(input(), { key: "Backspace" });
+    expect(value()).toHaveLength(2);
+    fireEvent.keyDown(input(), { key: "Backspace" });
     expect(value()).toEqual([{ userId: "ana", name: "Ana Souza" }]);
-    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Backspace" });
+    expect(announcement()).toContain("removida");
+  });
+
+  it("remove pelo X", () => {
+    render(<Harness initial={[{ userId: "ana", name: "Ana Souza" }]} />);
+    fireEvent.click(screen.getByRole("button", { name: "Remover Ana Souza" }));
     expect(value()).toEqual([]);
   });
 
-  it("escolha única (pregador): a pessoa escolhida esconde o campo e remover o devolve", () => {
+  it("escolha única (pregador): a pessoa fica no campo, sem busca, e Trocar libera a busca", () => {
     render(<Harness max={1} initial={[{ userId: "hugo", name: "Hugo Lima" }]} />);
     expect(screen.queryByRole("combobox")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Remover Hugo Lima" }));
+    expect(screen.getByText("Hugo Lima")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Trocar" }));
+    expect(value()).toEqual([]);
     expect(screen.getByRole("combobox")).toBeTruthy();
   });
 });

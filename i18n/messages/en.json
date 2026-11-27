@@ -140,7 +140,16 @@
     "peopleAddWithoutAccount": "Add \"{name}\" (no account)",
     "peopleRemove": "Remove {name}",
     "leadersHint": "There can be more than one. People without an account are added by name only.",
-    "preacherPlaceholder": "Search a person or type the preacher's name"
+    "preacherPlaceholder": "Search a person or type the preacher's name",
+    "peopleRecent": "Led recently",
+    "peopleAll": "People",
+    "peopleEmpty": "No one found",
+    "peopleSearching": "Searching…",
+    "peopleSwitch": "Change",
+    "peopleAdded": "{name} added",
+    "peopleRemoved": "{name} removed",
+    "peopleNoAccount": "No account",
+    "peopleList": "Suggested people"
   },
   "SongData": {
     "title": "Title",
