@@ -116,26 +116,24 @@ export default function NotificationsBellView({
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Button
+        <button
           type="button"
-          variant="ghost"
-          size="icon"
           aria-label={
             unreadCount > 0
               ? t("bellAriaUnread", { count: unreadCount })
               : t("bellAria")
           }
-          className="relative h-10 w-10 rounded-full text-muted-foreground hover:text-foreground"
+          className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Bell className="h-5 w-5" aria-hidden="true" />
+          <Bell size={24} aria-hidden="true" />
           {unreadCount > 0 && (
             <span
               data-testid="notifications-unread-dot"
-              className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-background"
+              className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-background"
               aria-hidden="true"
             />
           )}
-        </Button>
+        </button>
       </PopoverTrigger>
 
       <PopoverContent

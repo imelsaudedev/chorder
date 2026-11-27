@@ -19,7 +19,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
           <div className="stage-mode-hidden">
             <NavBar
               userNav={<UserNav />}
-              notificationsNav={<NotificationsBell />}
+              notificationsNav={isAdmin ? <NotificationsBell /> : undefined}
               isAuthenticated={isAuthenticated}
               isAdmin={isAdmin}
             />
