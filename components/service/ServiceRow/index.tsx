@@ -3,6 +3,7 @@
 import Text from "@/components/common/Text";
 import { serviceProfile } from "@/lib/service-profile";
 import ServiceMetaModal, { ServiceMeta } from "@/components/service/ServiceMetaModal";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -216,6 +217,7 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
         {local.worshipLeader && (
           <span className="inline-flex min-w-0 items-start gap-1 @[720px]:[grid-area:leader]">
             <MicVocal className="mt-1 size-3.5 shrink-0" aria-hidden />
+            {local.leaderPeople && local.leaderPeople.length > 0 && <LeaderAvatars people={local.leaderPeople} />}
             <span className="min-w-0 @[720px]:truncate">{local.worshipLeader}</span>
           </span>
         )}
@@ -279,5 +281,29 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
         loading={saving}
       />
     </li>
+  );
+}
+
+const initialsOf = (name: string) => {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
+};
+
+/**
+ * Foto de quem conduz, ao lado do nome (sem chip). 20px: cabe nos 22px da linha da lista, na
+ * mesma escala dos ícones de 14px ao lado. Com mais de uma pessoa, as fotos se sobrepõem (até 3).
+ */
+function LeaderAvatars({ people }: { people: { name: string; image: string | null }[] }) {
+  return (
+    <span className="mt-px flex shrink-0 -space-x-1.5" aria-hidden>
+      {people.slice(0, 3).map((p, i) => (
+        <Avatar key={`${p.name}-${i}`} className="size-5 ring-2 ring-background">
+          {p.image && <AvatarImage src={p.image} alt="" />}
+          <AvatarFallback className="bg-secondary/15 text-[9px] font-medium text-secondary">
+            {initialsOf(p.name)}
+          </AvatarFallback>
+        </Avatar>
+      ))}
+    </span>
   );
 }

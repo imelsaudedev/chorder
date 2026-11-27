@@ -66,6 +66,11 @@ describe('vários dirigentes', () => {
 
     const list = await (await GET(new Request('http://localhost/api/services?view=list'))).json();
     expect(list[0].leaders).toEqual(['Ana Souza', 'Hugo Lima', 'Visitante']);
+    expect(list[0].leaderPeople).toEqual([
+      { name: 'Ana Souza', image: null },
+      { name: 'Hugo Lima', image: null },
+      { name: 'Visitante', image: null },
+    ]);
   });
 
   it('trocar a lista ao salvar substitui os dirigentes e conta de usuário apagado vira só o nome', async () => {

@@ -548,7 +548,6 @@ function CreationFields({
               <FormControl>
                 <PeopleField value={field.value} onChange={field.onChange} placeholder={leaderPlaceholder} />
               </FormControl>
-              <Hint>{t("ServiceData.leadersHint")}</Hint>
               <FormMessage />
             </FormItem>
           )}
@@ -636,7 +635,6 @@ function EditFields({ form, profile }: EditFieldsProps) {
             <FormControl>
               <PeopleField value={field.value} onChange={field.onChange} placeholder={leaderPlaceholder} />
             </FormControl>
-            <Hint>{t("ServiceData.leadersHint")}</Hint>
             <FormMessage />
           </FormItem>
         )}

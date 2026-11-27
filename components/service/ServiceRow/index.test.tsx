@@ -85,6 +85,27 @@ describe("ServiceRow", () => {
     expect(withTimeline.querySelector("li .rounded-full")).not.toBeNull();
   });
 
+  it("mostra a foto (ou as iniciais) de quem conduz ao lado do nome, sem chip", () => {
+    renderRow(
+      service({
+        worshipLeader: "Ana Souza e Hugo Lima",
+        leaderPeople: [
+          { name: "Ana Souza", image: null },
+          { name: "Hugo Lima", image: null },
+        ],
+      })
+    );
+    expect(screen.getByText("Ana Souza e Hugo Lima")).toBeInTheDocument();
+    expect(screen.getByText("AS")).toBeInTheDocument();
+    expect(screen.getByText("HL")).toBeInTheDocument();
+  });
+
+  it("culto antigo, sem a lista de pessoas, mostra só o nome", () => {
+    renderRow(service({ worshipLeader: "Rafael", leaderPeople: undefined }));
+    expect(screen.getByText("Rafael")).toBeInTheDocument();
+    expect(screen.queryByText("R")).toBeNull();
+  });
+
   it("data em duas partes: dia da semana em maiúscula e número com dois dígitos", () => {
     renderRow(service({ date: new Date(2026, 10, 8, 9, 30) }));
     expect(screen.getByText("08")).toBeInTheDocument();

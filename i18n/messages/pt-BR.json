@@ -139,7 +139,6 @@
     "peoplePlaceholder": "Buscar pessoa ou digitar um nome",
     "peopleAddWithoutAccount": "Adicionar \"{name}\" (sem conta)",
     "peopleRemove": "Remover {name}",
-    "leadersHint": "Pode ter mais de um. Quem não tem conta entra só pelo nome.",
     "preacherPlaceholder": "Buscar pessoa ou digitar o nome do pregador",
     "peopleRecent": "Conduziram recentemente",
     "peopleAll": "Pessoas",

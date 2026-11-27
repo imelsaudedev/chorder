@@ -1247,7 +1247,7 @@ export async function retrieveServicesList(
       title: true,
       date: true,
       worshipLeader: true,
-      leaders: { orderBy: { order: "asc" }, select: { name: true } },
+      leaders: { orderBy: { order: "asc" }, select: { name: true, user: { select: { image: true } } } },
       preacher: true,
       sermonTheme: true,
       sermonReference: true,
@@ -1274,6 +1274,7 @@ export async function retrieveServicesList(
       ...service,
       // Culto antigo, sem a lista: o texto do dirigente conta como um nome só.
       leaders: leaders.length ? leaders.map((l) => l.name) : service.worshipLeader?.trim() ? [service.worshipLeader.trim()] : [],
+      leaderPeople: leaders.map((l) => ({ name: l.name, image: l.user?.image ?? null })),
       isSharedWithMe:
         service.scope === "PERSONAL" &&
         Boolean(viewerUserId) &&
