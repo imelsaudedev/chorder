@@ -3,15 +3,29 @@ export const dynamic = "force-dynamic";
 import Main from "@/components/common/Main";
 import PageTitleBlock from "@/components/common/PageTitleBlock";
 import { getLiveUserAuth } from "@/lib/auth-guard";
+import { getUnseenNewUserIdsForAdmin } from "@/lib/notifications";
 import { canAccessAdmin } from "@/lib/permissions";
 import prisma from "@/prisma/client";
 import { getTranslations } from "next-intl/server";
-import UsersAdminClient, { type AdminUserRow } from "./UsersAdminClient";
+import UsersAdminClient, {
+  type AdminUserFilter,
+  type AdminUserRow,
+} from "./UsersAdminClient";
 
-export default async function AdminUsersPage() {
-  const [t, live, users] = await Promise.all([
+function parseInitialFilter(raw?: string): AdminUserFilter {
+  if (raw === "unseen" || raw === "no-roles") return raw;
+  return "all";
+}
+
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ filter?: string }>;
+}) {
+  const [t, live, resolvedSearchParams, users] = await Promise.all([
     getTranslations("AdminUsers"),
     getLiveUserAuth(),
+    searchParams ? searchParams : Promise.resolve<{ filter?: string }>({}),
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       select: {
@@ -30,6 +44,10 @@ export default async function AdminUsersPage() {
       },
     }),
   ]);
+
+  const unseenUserIds = live.authenticated
+    ? await getUnseenNewUserIdsForAdmin(live.userId)
+    : [];
 
   const mappedUsers: AdminUserRow[] = users.map((u) => {
     const providers = Array.from(new Set(u.accounts.map((a) => a.provider)));
@@ -55,6 +73,8 @@ export default async function AdminUsersPage() {
           users={mappedUsers}
           currentUserId={live.userId}
           canManageRoles={canAccessAdmin(live.roles)}
+          unseenUserIds={unseenUserIds}
+          initialFilter={parseInitialFilter(resolvedSearchParams.filter)}
         />
       </Main>
     </>

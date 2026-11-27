@@ -16,12 +16,14 @@ import { usePathname } from "next/navigation";
 
 type NavBarProps = {
   userNav?: React.ReactNode;
+  notificationsNav?: React.ReactNode;
   isAuthenticated?: boolean;
   isAdmin?: boolean;
 };
 
 export default function NavBar({
   userNav,
+  notificationsNav,
   isAuthenticated = true,
   isAdmin = false,
 }: NavBarProps) {
@@ -102,6 +104,7 @@ export default function NavBar({
           {items}
         </div>
         <div className="mt-auto flex flex-col items-center pb-6 gap-4">
+          {isAuthenticated && notificationsNav}
           <ThemeMenu />
           {authSlot}
         </div>
@@ -112,6 +115,11 @@ export default function NavBar({
         <nav className="sm:hidden fixed bottom-0 left-0 w-full z-40 bg-background/80 backdrop-blur-lg shadow-md border-t border-border/50">
           <div className="flex justify-around py-3 items-center">
             {items}
+            {isAuthenticated && notificationsNav && (
+              <div className="flex flex-col items-center justify-center -mt-1">
+                {notificationsNav}
+              </div>
+            )}
             <ThemeSheet />
             {authSlot && (
               <div className="flex flex-col items-center justify-center -mt-1">

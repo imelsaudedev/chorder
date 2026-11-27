@@ -3,6 +3,7 @@ import {
   isBootstrapAdminEmail,
   isE2ETestMode,
 } from "@/lib/auth-utils";
+import { notifyAdminsOfNewUser } from "@/lib/notifications";
 import prisma from "@/prisma/client";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { PrismaClient, UserRole } from "@prisma/client";
@@ -14,6 +15,17 @@ const nextAuthResult = NextAuth({
   adapter: PrismaAdapter(prisma as unknown as PrismaClient),
   session: { strategy: "jwt" },
   ...authConfig,
+  events: {
+    async createUser({ user }) {
+      if (user.id) {
+        await notifyAdminsOfNewUser({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        }).catch(() => {});
+      }
+    },
+  },
   callbacks: {
     ...authConfig.callbacks,
     async signIn({ user, account, profile }) {

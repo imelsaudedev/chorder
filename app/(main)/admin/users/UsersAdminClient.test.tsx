@@ -5,6 +5,11 @@ import UsersAdminClient, { type AdminUserRow } from "./UsersAdminClient";
 
 const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
+const mockRefresh = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: mockRefresh }),
+}));
 
 vi.mock("sonner", () => ({
   toast: {
@@ -156,5 +161,44 @@ describe("UsersAdminClient", () => {
 
     expect(screen.getByText("emptyTitle")).toBeDefined();
     expect(screen.getByText("emptyDescription")).toBeDefined();
+  });
+
+  it("filters by unseen and no-roles and marks all unseen as seen", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, updatedCount: 1 }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const user = userEvent.setup();
+    render(
+      <UsersAdminClient
+        users={sampleUsers}
+        currentUserId="u1"
+        canManageRoles={true}
+        unseenUserIds={["u2"]}
+        initialFilter="unseen"
+      />
+    );
+
+    expect(screen.queryByText("Maria Clara Silva")).toBeNull();
+    expect(screen.getByText("pedro@example.com")).toBeDefined();
+    expect(screen.getByText("newUserBadge")).toBeDefined();
+
+    await user.click(screen.getByRole("button", { name: "markAllSeen" }));
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/notifications/read", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "NEW_USER_REGISTERED" }),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("noUnseenUsers")).toBeDefined();
+    });
+
+    await user.click(screen.getByRole("button", { name: "filterNoRoles:1" }));
+    expect(screen.getByText("pedro@example.com")).toBeDefined();
+    expect(screen.queryByText("Maria Clara Silva")).toBeNull();
   });
 });

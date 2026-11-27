@@ -324,7 +324,17 @@
     "roleUpdateError": "Could not update user roles. Please try again.",
     "emptyTitle": "No users registered yet",
     "emptyDescription": "Users will appear here once they sign in.",
-    "noResults": "No users match \"{query}\"."
+    "noResults": "No users match \"{query}\".",
+    "filtersAria": "User filters",
+    "filterAll": "All ({count})",
+    "filterUnseen": "New ({count})",
+    "filterNoRoles": "No role ({count})",
+    "markAllSeen": "Mark all as seen",
+    "allMarkedSeen": "All new users marked as seen.",
+    "markSeenError": "Could not mark users as seen. Please try again.",
+    "newUserBadge": "New",
+    "noUnseenUsers": "No unseen new users.",
+    "noUsersWithoutRoles": "Every user already has at least one role."
   },
   "ShareService": {
     "shareButton": "Share",
@@ -371,5 +381,17 @@
     "save": "Save",
     "nameSaved": "Name updated!",
     "saveError": "Could not save your name. Please try again."
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "bellAria": "Notifications",
+    "bellAriaUnread": "Notifications ({count} unread)",
+    "markAllRead": "Mark all as read",
+    "markAsRead": "Mark as read",
+    "markReadError": "Could not update notifications.",
+    "empty": "No notifications yet.",
+    "newUsersTitle": "{count, plural, =1 {1 new user registered} other {# new users registered}}",
+    "andMoreUsers": "and {count} more",
+    "unnamed": "Unnamed user"
   }
 }
