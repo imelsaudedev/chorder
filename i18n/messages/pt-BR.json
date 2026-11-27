@@ -4,6 +4,8 @@
     "siteDescription": "Uma ferramenta de gerenciamento de liturgias"
   },
   "Messages": {
+    "newPersonalService": "Nova liturgia pessoal",
+    "newCommunityService": "Nova liturgia comunitária",
     "theme": "Tema",
     "themeSystem": "Sistema",
     "themeLight": "Claro",
@@ -124,6 +126,8 @@
     "newPersonalService": "Criar liturgia pessoal"
   },
   "ServiceData": {
+    "titleRequired": "Informe o título",
+    "suggestion": "Sugestão",
     "title": "Título",
     "titlePlaceholder": "Título da liturgia (ex: Culto matutino)",
     "date": "Data",

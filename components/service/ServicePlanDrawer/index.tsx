@@ -39,8 +39,8 @@ import { z } from "zod";
 
 // Data e hora começam vazias na criação (a pessoa precisa escolher), então a data
 // aceita nulo e a obrigatoriedade fica na validação.
-const buildSchema = (titleRequired: boolean) => z.object({
-  title: titleRequired ? z.string().min(1) : z.string(),
+const buildSchema = (titleRequired: boolean, titleMessage: string) => z.object({
+  title: titleRequired ? z.string().min(1, titleMessage) : z.string(),
   worshipLeader: z.string().nullable(),
   preacher: z.string().nullable(),
   // Boolean(...) de propósito: um `value !== null` estreitaria o tipo de saída e separaria
@@ -102,8 +102,9 @@ export default function ServicePlanDrawer({
   const t = useTranslations();
   const profile = serviceProfile(isPersonal ? "PERSONAL" : "CHURCH");
   // O resolver é criado uma vez; lê o perfil atual por aqui (a gaveta serve a perfis diferentes).
-  const schemaRef = useRef(buildSchema(profile.titleRequired));
-  schemaRef.current = buildSchema(profile.titleRequired);
+  const titleMessage = t("ServiceData.titleRequired");
+  const schemaRef = useRef(buildSchema(profile.titleRequired, titleMessage));
+  schemaRef.current = buildSchema(profile.titleRequired, titleMessage);
 
   // Criação: data, hora e título começam vazios. Edição: os valores do culto.
   const initialValues = (): FormValues => {
@@ -153,11 +154,9 @@ export default function ServicePlanDrawer({
   const dateValue = form.watch("date");
   useEffect(() => {
     if (!isNew || !profile.suggestTitle || isTitleDirty.current) return;
-    form.setValue(
-      "title",
-      buildServiceTitle(selectedTemplate?.name, dateValue ? new Date(dateValue) : null),
-      { shouldValidate: true }
-    );
+    const suggested = buildServiceTitle(selectedTemplate?.name, dateValue ? new Date(dateValue) : null);
+    // Sem data ainda não há sugestão: não valida um campo vazio que a pessoa nem chegou a ver.
+    form.setValue("title", suggested, { shouldValidate: suggested !== "" });
   }, [dateValue, selectedTemplate, isNew, profile.suggestTitle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleTemplateSelect(tmpl: ClientServiceTemplate | null) {
@@ -193,7 +192,9 @@ export default function ServicePlanDrawer({
 
   const { isValid } = form.formState;
   const drawerTitle = isNew
-    ? t("Messages.newService")
+    ? isPersonal
+      ? t("Messages.newPersonalService")
+      : t("Messages.newCommunityService")
     : t("Messages.editServiceData");
   const submitLabel = isNew ? t("Messages.continue") : t("Messages.save");
 
@@ -294,31 +295,6 @@ type CreationFieldsProps = {
   onTimeChange: () => void;
 };
 
-function ChoiceChip({
-  selected,
-  onClick,
-  children,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={selected}
-      onClick={onClick}
-      className={`cursor-pointer inline-flex h-10 items-center rounded-full border px-3.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-        selected
-          ? "border-ring bg-ring/10 text-foreground"
-          : "border-border text-muted-foreground hover:border-ring hover:text-foreground"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
 function isSameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
@@ -376,14 +352,6 @@ function CreationFields({
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("ServiceData.date")}</FormLabel>
-            <div className="flex flex-wrap gap-1.5">
-              <ChoiceChip
-                selected={!!dateValue && isSameDay(new Date(dateValue), sunday)}
-                onClick={() => form.setValue("date", sunday, { shouldValidate: true, shouldDirty: true })}
-              >
-                {sundayLabel}
-              </ChoiceChip>
-            </div>
             <FormControl>
               <DatePicker
                 buttonProps={{ className: "w-full h-11" }}
@@ -392,6 +360,20 @@ function CreationFields({
                 value={field.value ?? undefined}
               />
             </FormControl>
+            {/* Sugestão de data: chip do sistema (Button soft) logo abaixo do campo */}
+            <div className="flex flex-col items-start gap-1.5 pt-1">
+              <span className="text-xs text-muted-foreground">{t("ServiceData.suggestion")}</span>
+              <Button
+                type="button"
+                variant="soft"
+                size="sm"
+                aria-pressed={!!dateValue && isSameDay(new Date(dateValue), sunday)}
+                onClick={() => form.setValue("date", sunday, { shouldValidate: true, shouldDirty: true })}
+              >
+                {!!dateValue && isSameDay(new Date(dateValue), sunday) && <Check className="size-3.5" aria-hidden />}
+                {sundayLabel}
+              </Button>
+            </div>
             {sameDayServices.length > 0 && (
               <p className="text-xs text-muted-foreground">
                 Já existe uma liturgia neste dia:{" "}

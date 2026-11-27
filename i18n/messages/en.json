@@ -4,6 +4,8 @@
     "siteDescription": "A tool for managing chord sheets"
   },
   "Messages": {
+    "newPersonalService": "New personal service",
+    "newCommunityService": "New community service",
     "theme": "Theme",
     "themeSystem": "System",
     "themeLight": "Light",
@@ -124,6 +126,8 @@
     "newPersonalService": "Create personal liturgy"
   },
   "ServiceData": {
+    "titleRequired": "Enter a title",
+    "suggestion": "Suggestion",
     "title": "Title",
     "titlePlaceholder": "Service title",
     "date": "Date",
