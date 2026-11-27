@@ -25,6 +25,7 @@ import {
   summarizeTemplate,
 } from "@/lib/template-utils";
 import { buildServiceTitle, nextSunday } from "@/lib/service-schedule";
+import { ServiceProfile, serviceProfile } from "@/lib/service-profile";
 import { ClientServiceSection, ClientServiceTemplate } from "@/prisma/models";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -38,8 +39,8 @@ import { z } from "zod";
 
 // Data e hora começam vazias na criação (a pessoa precisa escolher), então a data
 // aceita nulo e a obrigatoriedade fica na validação.
-const schema = z.object({
-  title: z.string().min(1),
+const buildSchema = (titleRequired: boolean) => z.object({
+  title: titleRequired ? z.string().min(1) : z.string(),
   worshipLeader: z.string().nullable(),
   preacher: z.string().nullable(),
   // Boolean(...) de propósito: um `value !== null` estreitaria o tipo de saída e separaria
@@ -48,7 +49,7 @@ const schema = z.object({
   startTime: z.string().regex(/^\d{2}:\d{2}$/, "Escolha a hora"),
 });
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<ReturnType<typeof buildSchema>>;
 
 export type ServicePlanConfig = {
   title: string;
@@ -99,6 +100,10 @@ export default function ServicePlanDrawer({
   onSave,
 }: ServicePlanDrawerProps) {
   const t = useTranslations();
+  const profile = serviceProfile(isPersonal ? "PERSONAL" : "CHURCH");
+  // O resolver é criado uma vez; lê o perfil atual por aqui (a gaveta serve a perfis diferentes).
+  const schemaRef = useRef(buildSchema(profile.titleRequired));
+  schemaRef.current = buildSchema(profile.titleRequired);
 
   // Criação: data, hora e título começam vazios. Edição: os valores do culto.
   const initialValues = (): FormValues => {
@@ -114,7 +119,7 @@ export default function ServicePlanDrawer({
 
   const form = useForm<FormValues>({
     mode: "onChange",
-    resolver: zodResolver(schema),
+    resolver: (values, context, options) => zodResolver(schemaRef.current)(values, context, options),
     defaultValues: initialValues(),
   });
 
@@ -147,13 +152,13 @@ export default function ServicePlanDrawer({
   // preenchido sozinho: data e hora precisam ser escolhidas.
   const dateValue = form.watch("date");
   useEffect(() => {
-    if (!isNew || isTitleDirty.current) return;
+    if (!isNew || !profile.suggestTitle || isTitleDirty.current) return;
     form.setValue(
       "title",
       buildServiceTitle(selectedTemplate?.name, dateValue ? new Date(dateValue) : null),
       { shouldValidate: true }
     );
-  }, [dateValue, selectedTemplate, isNew]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dateValue, selectedTemplate, isNew, profile.suggestTitle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleTemplateSelect(tmpl: ClientServiceTemplate | null) {
     setSelectedTemplate(tmpl);
@@ -210,7 +215,7 @@ export default function ServicePlanDrawer({
               {isNew ? (
                 <CreationFields
                   form={form}
-                  isPersonal={isPersonal}
+                  profile={profile}
                   selectedTemplate={selectedTemplate}
                   onSelectTemplate={handleTemplateSelect}
                   onTitleChange={() => {
@@ -221,7 +226,7 @@ export default function ServicePlanDrawer({
                   }}
                 />
               ) : (
-                <EditFields form={form} />
+                <EditFields form={form} profile={profile} />
               )}
             </div>
 
@@ -251,6 +256,27 @@ export default function ServicePlanDrawer({
   );
 }
 
+/** "(opcional)" ao lado do rótulo, para campos que o perfil não exige. */
+function OptionalMark() {
+  return <span className="font-normal text-muted-foreground"> (opcional)</span>;
+}
+
+/** Rótulo de quem conduz: "Dirigente" na igreja; "Quem conduz (opcional)" no pessoal. */
+function LeaderLabel({ profile }: { profile: ServiceProfile }) {
+  const t = useTranslations("ServiceData");
+  return (
+    <FormLabel>
+      {profile.leader === "conduz" ? t("leaderPersonal") : t("worshipLeader")}
+      {profile.leader === "conduz" && <OptionalMark />}
+    </FormLabel>
+  );
+}
+
+function useLeaderPlaceholder(profile: ServiceProfile) {
+  const t = useTranslations("ServiceData");
+  return profile.leader === "conduz" ? t("leaderPersonalPlaceholder") : t("worshipLeaderPlaceholder");
+}
+
 // ---------------------------------------------------------------------------
 // Creation fields: modelo → data e hora → título → dirigente
 //
@@ -261,7 +287,7 @@ export default function ServicePlanDrawer({
 
 type CreationFieldsProps = {
   form: ReturnType<typeof useForm<FormValues>>;
-  isPersonal?: boolean;
+  profile: ServiceProfile;
   selectedTemplate: ClientServiceTemplate | null | undefined;
   onSelectTemplate: (t: ClientServiceTemplate | null) => void;
   onTitleChange: () => void;
@@ -299,14 +325,15 @@ function isSameDay(a: Date, b: Date): boolean {
 
 function CreationFields({
   form,
-  isPersonal = false,
+  profile,
   selectedTemplate,
   onSelectTemplate,
   onTitleChange,
   onTimeChange,
 }: CreationFieldsProps) {
   const t = useTranslations();
-  const { services } = useFetchServices(!isPersonal);
+  const leaderPlaceholder = useLeaderPlaceholder(profile);
+  const { services } = useFetchServices(profile.showTemplates);
 
   // Liturgias existentes, para avisar quando o dia escolhido já tem uma.
   const existingServices = useMemo<{ slug: string; title: string | null; date: Date }[]>(
@@ -334,8 +361,8 @@ function CreationFields({
 
   return (
     <>
-      {/* 1. Modelo (apenas para liturgias da igreja) */}
-      {!isPersonal && (
+      {/* 1. Modelo (só nos perfis que têm modelos) */}
+      {profile.showTemplates && (
         <div>
           <p className="text-sm font-medium mb-2">Modelo</p>
           <TemplateSelector selected={selectedTemplate} onSelect={onSelectTemplate} />
@@ -415,10 +442,15 @@ function CreationFields({
         name="title"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{t("ServiceData.title")}</FormLabel>
+            <FormLabel>
+              {t("ServiceData.title")}
+              {!profile.titleRequired && <OptionalMark />}
+            </FormLabel>
             <FormControl>
               <Input
-                placeholder="Aparece depois de escolher a data"
+                placeholder={
+                  profile.suggestTitle ? "Aparece depois de escolher a data" : t("ServiceData.titlePlaceholderPersonal")
+                }
                 {...field}
                 className="h-11"
                 onChange={(e) => {
@@ -427,9 +459,11 @@ function CreationFields({
                 }}
               />
             </FormControl>
-            <p className="text-xs text-muted-foreground">
-              Sugerido pelo modelo e pela data. Pode editar.
-            </p>
+            {profile.suggestTitle && (
+              <p className="text-xs text-muted-foreground">
+                Sugerido pelo modelo e pela data. Pode editar.
+              </p>
+            )}
             <FormMessage />
           </FormItem>
         )}
@@ -441,10 +475,10 @@ function CreationFields({
         name="worshipLeader"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{t("ServiceData.worshipLeader")}</FormLabel>
+            <LeaderLabel profile={profile} />
             <FormControl>
               <Input
-                placeholder={t("ServiceData.worshipLeaderPlaceholder")}
+                placeholder={leaderPlaceholder}
                 {...field}
                 className="h-11"
                 value={field.value ?? ""}
@@ -465,10 +499,12 @@ function CreationFields({
 
 type EditFieldsProps = {
   form: ReturnType<typeof useForm<FormValues>>;
+  profile: ServiceProfile;
 };
 
-function EditFields({ form }: EditFieldsProps) {
+function EditFields({ form, profile }: EditFieldsProps) {
   const t = useTranslations();
+  const leaderPlaceholder = useLeaderPlaceholder(profile);
   return (
     <>
       <FormField
@@ -476,10 +512,13 @@ function EditFields({ form }: EditFieldsProps) {
         name="title"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{t("ServiceData.title")}</FormLabel>
+            <FormLabel>
+              {t("ServiceData.title")}
+              {!profile.titleRequired && <OptionalMark />}
+            </FormLabel>
             <FormControl>
               <Input
-                placeholder={t("ServiceData.titlePlaceholder")}
+                placeholder={profile.titleRequired ? t("ServiceData.titlePlaceholder") : t("ServiceData.titlePlaceholderPersonal")}
                 autoFocus
                 {...field}
               />
@@ -527,10 +566,10 @@ function EditFields({ form }: EditFieldsProps) {
         name="worshipLeader"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{t("ServiceData.worshipLeader")}</FormLabel>
+            <LeaderLabel profile={profile} />
             <FormControl>
               <Input
-                placeholder={t("ServiceData.worshipLeaderPlaceholder")}
+                placeholder={leaderPlaceholder}
                 {...field}
                 value={field.value ?? ""}
               />
@@ -540,6 +579,7 @@ function EditFields({ form }: EditFieldsProps) {
         )}
       />
 
+      {profile.showPreacher && (
       <FormField
         control={form.control}
         name="preacher"
@@ -557,6 +597,7 @@ function EditFields({ form }: EditFieldsProps) {
           </FormItem>
         )}
       />
+      )}
     </>
   );
 }

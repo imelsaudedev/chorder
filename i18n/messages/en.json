@@ -124,7 +124,10 @@
     "titlePlaceholder": "Service title",
     "date": "Date",
     "worshipLeader": "Worship leader",
-    "worshipLeaderPlaceholder": "Worship leader"
+    "worshipLeaderPlaceholder": "Worship leader",
+    "titlePlaceholderPersonal": "e.g. Thursday small group",
+    "leaderPersonal": "Who leads",
+    "leaderPersonalPlaceholder": "e.g. Ana and Pedro"
   },
   "SongData": {
     "title": "Title",

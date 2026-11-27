@@ -124,7 +124,10 @@
     "titlePlaceholder": "Título da liturgia (ex: Culto matutino)",
     "date": "Data",
     "worshipLeader": "Dirigente",
-    "worshipLeaderPlaceholder": "Dirigente"
+    "worshipLeaderPlaceholder": "Dirigente",
+    "titlePlaceholderPersonal": "Ex.: Célula de quinta",
+    "leaderPersonal": "Quem conduz",
+    "leaderPersonalPlaceholder": "Ex.: Ana e Pedro"
   },
   "SongData": {
     "title": "Título",
