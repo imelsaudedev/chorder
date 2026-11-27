@@ -336,6 +336,7 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
         open={metaDrawerOpen}
         onOpenChange={setMetaDrawerOpen}
         isNew={false}
+        isPersonal={isPersonal}
         defaultValues={{
           title: editor.service.title ?? "",
           worshipLeader: editor.service.worshipLeader,

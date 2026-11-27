@@ -43,7 +43,7 @@ export default function ServicePlanHeader({ service, onEdit, compact = false }: 
             size={compact ? "lg" : undefined}
             className="truncate transition-[font-size] duration-200 motion-reduce:transition-none"
           >
-            {service.title ?? "Sem título"}
+            {service.title?.trim() || "Sem título"}
           </Text>
           {isDraft && (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-warning-border bg-warning-bg px-2 py-0.5 text-xs font-medium text-warning-text">

@@ -1293,7 +1293,8 @@ export async function createOrUpdateService(
       : null;
 
     const data = {
-      title: service.title,
+      // Título em branco (liturgia pessoal pode não ter) vira "sem título", nunca texto vazio.
+      title: service.title?.trim() || null,
       worshipLeader: service.worshipLeader,
       date: service.date,
       preacher: service.preacher ?? null,
