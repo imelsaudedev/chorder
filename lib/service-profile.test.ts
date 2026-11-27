@@ -10,6 +10,9 @@ describe("serviceProfile", () => {
   it("igreja: título obrigatório, modelos, pregador e dirigente", () => {
     const p = serviceProfile("CHURCH");
     expect(p).toMatchObject({ titleRequired: true, showTemplates: true, showPreacher: true, leader: "dirigente" });
+    expect(p.itemTypes).toHaveLength(7);
+    expect(p.defaultSection).toEqual({ type: "CULTO", label: "Culto" });
+    expect(p.chooseSectionType).toBe(true);
   });
 
   it("pessoal: título opcional, sem modelos nem pregador, quem conduz", () => {
@@ -20,6 +23,12 @@ describe("serviceProfile", () => {
       showTemplates: false,
       showPreacher: false,
       leader: "conduz",
+      chooseSectionType: false,
+      toastOnSave: true,
     });
+    expect(p.itemTypes).toEqual(["SONG", "LEITURA", "ORACAO", "FALA", "OUTRO"]);
+    expect(p.itemTypes).not.toContain("AVISOS");
+    expect(p.itemTypes).not.toContain("SERMAO");
+    expect(p.defaultSection).toEqual({ type: "ESPECIAL", label: "Roteiro" });
   });
 });

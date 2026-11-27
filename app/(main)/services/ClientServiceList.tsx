@@ -5,6 +5,7 @@ import ServiceList from "@/components/service/ServiceList";
 import { Button } from "@/components/ui/button";
 import { Plus, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import { useNewService } from "./NewServiceProvider";
 
 type ClientServiceListProps = {
@@ -13,14 +14,21 @@ type ClientServiceListProps = {
 
 export default function ClientServiceList({ scope = "church" }: ClientServiceListProps) {
   const t = useTranslations("Service");
-  const { openNewService } = useNewService();
+  const { openNewService, setPersonalEmpty } = useNewService();
   const { services, isLoading } = useFetchServicesList(scope);
+  const showPersonalEmpty = scope === "personal" && !!services && !isLoading && services.length === 0;
+
+  // Avisa a tela: com o estado vazio na tela, só ele oferece "Criar liturgia".
+  useEffect(() => {
+    setPersonalEmpty(showPersonalEmpty);
+    return () => setPersonalEmpty(false);
+  }, [showPersonalEmpty, setPersonalEmpty]);
 
   if (!services || isLoading) {
     return null;
   }
 
-  if (scope === "personal" && services.length === 0) {
+  if (showPersonalEmpty) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 px-6 py-14 text-center">
         <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-secondary/10 text-secondary">
@@ -45,5 +53,5 @@ export default function ClientServiceList({ scope = "church" }: ClientServiceLis
     );
   }
 
-  return <ServiceList services={services} />;
+  return <ServiceList services={services} scope={scope === "personal" ? "PERSONAL" : "CHURCH"} />;
 }

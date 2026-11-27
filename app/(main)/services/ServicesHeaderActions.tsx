@@ -13,17 +13,18 @@ type ServicesHeaderActionsProps = {
 
 /**
  * Ações do cabeçalho de Liturgias: Modelos (apenas Admin) e
- * Nova liturgia (na aba Igreja apenas para Louvor/Admin; em Minhas liturgias para qualquer usuário logado).
+ * Nova liturgia (na aba Comunitárias apenas para Louvor/Admin; na aba Pessoais para qualquer usuário logado).
  */
 export default function ServicesHeaderActions({
   canManageChurch = false,
   isAdmin = false,
 }: ServicesHeaderActionsProps) {
   const t = useTranslations("Messages");
-  const { activeScope, openNewService } = useNewService();
+  const { activeScope, openNewService, personalEmpty } = useNewService();
 
+  // Lista pessoal vazia: o botão do próprio estado vazio é o único chamado para criar.
   const canCreateInCurrentTab =
-    activeScope === "PERSONAL" || canManageChurch;
+    (activeScope === "PERSONAL" && !personalEmpty) || (activeScope === "CHURCH" && canManageChurch);
 
   return (
     <>

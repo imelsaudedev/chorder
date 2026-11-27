@@ -6,6 +6,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react"
+import { enUS, ptBR } from "date-fns/locale"
+import { useLocale } from "next-intl"
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
@@ -24,9 +26,21 @@ function Calendar({
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
 }) {
   const defaultClassNames = getDefaultClassNames()
+  // Meses, dias da semana e rótulos seguem o idioma do app (o padrão do react-day-picker é inglês).
+  const appLocale = useLocale()
+  const isPt = appLocale.toLowerCase().startsWith("pt")
 
   return (
     <DayPicker
+      locale={isPt ? ptBR : enUS}
+      labels={
+        isPt
+          ? {
+              labelPrevious: () => "Mês anterior",
+              labelNext: () => "Próximo mês",
+            }
+          : undefined
+      }
       showOutsideDays={showOutsideDays}
       className={cn(
         "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
@@ -37,7 +51,7 @@ function Calendar({
       captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+          date.toLocaleString(appLocale, { month: "short" }),
         ...formatters,
       }}
       classNames={{

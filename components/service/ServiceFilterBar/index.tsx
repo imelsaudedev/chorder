@@ -21,6 +21,7 @@ import {
   defaultServiceDir,
   effectiveGroup,
 } from "@/lib/services-list-state";
+import { ServiceProfile } from "@/lib/service-profile";
 import { ArrowDown, ArrowUp, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import FilterPicker from "./FilterPicker";
@@ -31,14 +32,17 @@ type ServiceFilterBarProps = {
   options: { years: number[]; leaders: string[]; preachers: string[] };
   /** Muda quando os filtros são limpos de fora, para a busca esvaziar o campo. */
   searchKey: number;
+  /** Perfil da lista: sem pregador nas pessoais, e "Quem conduz" no lugar de "Dirigente". */
+  profile: ServiceProfile;
 };
 
 /**
  * Filtros do histórico, no desenho da lista de Músicas: seletores à esquerda; busca e ordenação
  * à direita (tablet e desktop) ou numa segunda linha (celular).
  */
-export default function ServiceFilterBar({ state, onChange, options, searchKey }: ServiceFilterBarProps) {
+export default function ServiceFilterBar({ state, onChange, options, searchKey, profile }: ServiceFilterBarProps) {
   const t = useTranslations("Service");
+  const conduz = profile.leader === "conduz";
   const group = effectiveGroup(state);
   const { ref, sentinelRef, hidden, stuck } = useStickyBar();
   const Arrow = state.sort.dir === "asc" ? ArrowUp : ArrowDown;
@@ -55,12 +59,12 @@ export default function ServiceFilterBar({ state, onChange, options, searchKey }
   const sortLabel: Record<ServiceSortKey, string> = {
     date: t("sortDate"),
     title: t("sortTitle"),
-    leader: t("sortLeader"),
+    leader: conduz ? t("leaderPersonal") : t("sortLeader"),
   };
   const groupLabel: Record<ServiceGroupBy, string> = {
     month: t("groupMonth"),
     year: t("groupYear"),
-    leader: t("groupLeader"),
+    leader: conduz ? t("leaderPersonal") : t("groupLeader"),
     none: t("groupNone"),
   };
 
@@ -79,19 +83,21 @@ export default function ServiceFilterBar({ state, onChange, options, searchKey }
           onChange={(v) => onChange({ year: v[0] ? Number(v[0]) : null })}
         />
         <FilterPicker
-          label={t("filterLeader")}
-          clearLabel={t("clearFilter", { name: t("filterLeader") })}
+          label={conduz ? t("leaderPersonal") : t("filterLeader")}
+          clearLabel={t("clearFilter", { name: conduz ? t("leaderPersonal") : t("filterLeader") })}
           options={options.leaders}
           selected={state.leaders}
           onChange={(leaders) => onChange({ leaders })}
         />
-        <FilterPicker
-          label={t("filterPreacher")}
-          clearLabel={t("clearFilter", { name: t("filterPreacher") })}
-          options={options.preachers}
-          selected={state.preachers}
-          onChange={(preachers) => onChange({ preachers })}
-        />
+        {profile.showPreacher && (
+          <FilterPicker
+            label={t("filterPreacher")}
+            clearLabel={t("clearFilter", { name: t("filterPreacher") })}
+            options={options.preachers}
+            selected={state.preachers}
+            onChange={(preachers) => onChange({ preachers })}
+          />
+        )}
       </div>
       <div className="flex items-center gap-2 sm:ml-auto sm:justify-end">
         <ExpandingSearch

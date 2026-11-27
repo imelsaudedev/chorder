@@ -1,6 +1,7 @@
 "use client";
 
 import Text from "@/components/common/Text";
+import { serviceProfile } from "@/lib/service-profile";
 import ServiceMetaModal, { ServiceMeta } from "@/components/service/ServiceMetaModal";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,13 @@ import { useSWRConfig } from "swr";
 /** Colunas do desktop; o cabeçalho da lista usa a mesma grade (ver `SERVICE_ROW_GRID`). */
 export const SERVICE_ROW_GRID =
   "@[720px]:grid-cols-[4.5rem_1.5rem_minmax(0,1.4fr)_minmax(0,1.6fr)_5rem_2.5rem]";
+/** Sem a coluna de pregador e tema (liturgias pessoais não têm). */
+export const SERVICE_ROW_GRID_NO_PREACHER = "@[720px]:grid-cols-[4.5rem_1.5rem_minmax(0,1fr)_5rem_2.5rem]";
+
+/** Grade do desktop conforme o perfil: a lista e o cabeçalho usam a mesma. */
+export function serviceRowGrid(showPreacher: boolean) {
+  return showPreacher ? SERVICE_ROW_GRID : SERVICE_ROW_GRID_NO_PREACHER;
+}
 /** Colunas do estreito: data | trilho | conteúdo | ⋯. */
 export const SERVICE_ROW_GRID_NARROW = "grid-cols-[3.75rem_1.5rem_minmax(0,1fr)_2.5rem]";
 
@@ -103,6 +111,7 @@ type ServiceRowProps = {
  */
 export default function ServiceRow({ service, badge, timeline }: ServiceRowProps) {
   const t = useTranslations();
+  const profile = serviceProfile(service.scope);
   const locale = useLocale();
   const { mutate } = useSWRConfig();
   const [metaOpen, setMetaOpen] = useState(false);
@@ -152,8 +161,10 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
         SERVICE_ROW_GAP,
         SERVICE_ROW_GRID_NARROW,
         "[grid-template-areas:'when_rail_title_act'_'when_rail_meta_act']",
-        SERVICE_ROW_GRID,
-        "@[720px]:[grid-template-areas:'when_rail_title_pre_songs_act'_'when_rail_leader_tema_songs_act']"
+        serviceRowGrid(profile.showPreacher),
+        profile.showPreacher
+          ? "@[720px]:[grid-template-areas:'when_rail_title_pre_songs_act'_'when_rail_leader_tema_songs_act']"
+          : "@[720px]:[grid-template-areas:'when_rail_title_songs_act'_'when_rail_leader_songs_act']"
       )}
     >
       <Link href={`/services/${local.slug}`} className="absolute inset-0 z-0" aria-label={title} />
@@ -208,18 +219,22 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
             <span className="min-w-0 @[720px]:truncate">{local.worshipLeader}</span>
           </span>
         )}
-        {local.preacher ? (
-          <span className="inline-flex min-w-0 items-start gap-1 @[720px]:[grid-area:pre]">
-            <MessageSquare className="mt-1 size-3.5 shrink-0" aria-hidden />
-            <span className="min-w-0 @[720px]:truncate">{local.preacher}</span>
-          </span>
-        ) : (
-          placeholder("@[720px]:[grid-area:pre]")
-        )}
-        {themeAndText ? (
-          <span className="min-w-0 @[720px]:[grid-area:tema] @[720px]:truncate">{themeAndText}</span>
-        ) : (
-          placeholder("@[720px]:[grid-area:tema]")
+        {profile.showPreacher && (
+          <>
+            {local.preacher ? (
+              <span className="inline-flex min-w-0 items-start gap-1 @[720px]:[grid-area:pre]">
+                <MessageSquare className="mt-1 size-3.5 shrink-0" aria-hidden />
+                <span className="min-w-0 @[720px]:truncate">{local.preacher}</span>
+              </span>
+            ) : (
+              placeholder("@[720px]:[grid-area:pre]")
+            )}
+            {themeAndText ? (
+              <span className="min-w-0 @[720px]:[grid-area:tema] @[720px]:truncate">{themeAndText}</span>
+            ) : (
+              placeholder("@[720px]:[grid-area:tema]")
+            )}
+          </>
         )}
         {local.songCount > 0 ? (
           <span className="inline-flex items-start gap-1 whitespace-nowrap @[720px]:[grid-area:songs]">
@@ -258,6 +273,7 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
         open={metaOpen}
         onOpenChange={setMetaOpen}
         isNew={false}
+        isPersonal={local.scope === "PERSONAL"}
         defaultValues={{ title: local.title ?? "", worshipLeader: local.worshipLeader ?? "", date }}
         onSave={handleMetaSave}
         loading={saving}

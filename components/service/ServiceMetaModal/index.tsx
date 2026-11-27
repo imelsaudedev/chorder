@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { serviceProfile } from "@/lib/service-profile";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -28,10 +29,10 @@ const serviceMetaSchema = z.object({
 
 export type ServiceMeta = z.infer<typeof serviceMetaSchema>;
 
-function useServiceMetaSchema() {
+function useServiceMetaSchema(titleRequired: boolean) {
   const t = useTranslations("SongForm");
   return z.object({
-    title: z.string().min(1, t("cantBeEmpty")),
+    title: titleRequired ? z.string().min(1, t("cantBeEmpty")) : z.string(),
     worshipLeader: z.string().nullable(),
     date: z.coerce.date(),
   });
@@ -44,6 +45,8 @@ type ServiceMetaModalProps = {
   onSave: (values: ServiceMeta) => void | false;
   isNew?: boolean;
   loading?: boolean;
+  /** Liturgia pessoal: título opcional e "Quem conduz" no lugar de "Dirigente". */
+  isPersonal?: boolean;
 };
 
 export default function ServiceMetaModal({
@@ -53,9 +56,11 @@ export default function ServiceMetaModal({
   onSave,
   isNew = false,
   loading = false,
+  isPersonal = false,
 }: ServiceMetaModalProps) {
   const t = useTranslations();
-  const schema = useServiceMetaSchema();
+  const profile = serviceProfile(isPersonal ? "PERSONAL" : "CHURCH");
+  const schema = useServiceMetaSchema(profile.titleRequired);
 
   const form = useForm<ServiceMeta>({
     mode: "onChange",
@@ -97,10 +102,13 @@ export default function ServiceMetaModal({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("ServiceData.title")}</FormLabel>
+                  <FormLabel>
+                    {t("ServiceData.title")}
+                    {!profile.titleRequired && <span className="font-normal text-muted-foreground"> (opcional)</span>}
+                  </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t("ServiceData.titlePlaceholder")}
+                      placeholder={profile.titleRequired ? t("ServiceData.titlePlaceholder") : t("ServiceData.titlePlaceholderPersonal")}
                       autoFocus
                       {...field}
                       value={field.value ?? ""}
@@ -135,10 +143,19 @@ export default function ServiceMetaModal({
               name="worshipLeader"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("ServiceData.worshipLeader")}</FormLabel>
+                  <FormLabel>
+                    {profile.leader === "conduz" ? t("ServiceData.leaderPersonal") : t("ServiceData.worshipLeader")}
+                    {profile.leader === "conduz" && (
+                      <span className="font-normal text-muted-foreground"> (opcional)</span>
+                    )}
+                  </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t("ServiceData.worshipLeaderPlaceholder")}
+                      placeholder={
+                        profile.leader === "conduz"
+                          ? t("ServiceData.leaderPersonalPlaceholder")
+                          : t("ServiceData.worshipLeaderPlaceholder")
+                      }
                       {...field}
                       value={field.value ?? ""}
                     />

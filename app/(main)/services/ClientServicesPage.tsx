@@ -18,10 +18,10 @@ export default function ClientServicesPage({
 }: ClientServicesPageProps) {
   const t = useTranslations("Messages");
   const tService = useTranslations("Service");
-  const { activeScope, setActiveScope, openNewService } = useNewService();
+  const { activeScope, setActiveScope, openNewService, personalEmpty } = useNewService();
 
   const canCreateInCurrentTab =
-    activeScope === "PERSONAL" || canManageChurch;
+    (activeScope === "PERSONAL" && !personalEmpty) || (activeScope === "CHURCH" && canManageChurch);
 
   return (
     <>
