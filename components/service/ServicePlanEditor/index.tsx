@@ -143,7 +143,9 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
     editor.updateServiceMeta({
       title: config.title,
       worshipLeader: config.worshipLeader,
+      leaders: config.leaders,
       preacher: config.preacher,
+      preacherId: config.preacherId,
       date: config.date,
     });
     if (config.templateSections) {
@@ -346,7 +348,9 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
         defaultValues={{
           title: editor.service.title ?? "",
           worshipLeader: editor.service.worshipLeader,
+          leaders: editor.service.leaders,
           preacher: editor.service.preacher,
+          preacherId: editor.service.preacherId,
           date: new Date(editor.service.date),
         }}
         onSave={handleMetaSave}

@@ -100,6 +100,10 @@ export const normalize = (text: string) =>
 
 const clean = (value: string | null | undefined) => value?.trim() ?? "";
 
+/** Cada pessoa que conduz. Sem a lista (dado antigo ou de teste), o texto do dirigente vale como um nome. */
+const leaderNames = (s: ServiceListItem): string[] =>
+  s.leaders?.length ? s.leaders : clean(s.worshipLeader) ? [clean(s.worshipLeader)] : [];
+
 export function filterServices(items: ServiceListItem[], state: ServicesListState): ServiceListItem[] {
   const terms = normalize(state.query).split(/\s+/).filter(Boolean);
   const leaders = new Set(state.leaders.map(normalize));
@@ -107,7 +111,7 @@ export function filterServices(items: ServiceListItem[], state: ServicesListStat
 
   return items.filter((s) => {
     if (state.year !== null && new Date(s.date).getFullYear() !== state.year) return false;
-    if (leaders.size > 0 && !leaders.has(normalize(clean(s.worshipLeader)))) return false;
+    if (leaders.size > 0 && !leaderNames(s).some((name) => leaders.has(normalize(name)))) return false;
     if (preachers.size > 0 && !preachers.has(normalize(clean(s.preacher)))) return false;
     if (terms.length === 0) return true;
     const haystack = normalize(
@@ -175,13 +179,15 @@ export function groupServices(
 /** Opções dos seletores, tiradas do próprio histórico (anos do mais recente ao mais antigo; nomes de A a Z). */
 export function filterOptions(items: ServiceListItem[]) {
   const years = [...new Set(items.map((s) => new Date(s.date).getFullYear()))].sort((a, b) => b - a);
-  const names = (pick: (s: ServiceListItem) => string | null | undefined) => {
+  const names = (pick: (s: ServiceListItem) => (string | null | undefined)[]) => {
     const map = new Map<string, string>();
     for (const s of items) {
-      const name = clean(pick(s));
-      if (name && !map.has(normalize(name))) map.set(normalize(name), name);
+      for (const raw of pick(s)) {
+        const name = clean(raw);
+        if (name && !map.has(normalize(name))) map.set(normalize(name), name);
+      }
     }
     return [...map.values()].sort(collator.compare);
   };
-  return { years, leaders: names((s) => s.worshipLeader), preachers: names((s) => s.preacher) };
+  return { years, leaders: names(leaderNames), preachers: names((s) => [s.preacher]) };
 }

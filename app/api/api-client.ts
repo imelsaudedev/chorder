@@ -486,3 +486,14 @@ export function useFetchRecentServices() {
     isError: error,
   };
 }
+
+/** Pessoas com conta que combinam com a busca (nome e foto), para escolher dirigente e pregador. */
+export function useFetchPeople(query: string, enabled = true) {
+  const { data, isLoading } = useSWR(
+    enabled ? ["/api/people", query] : null,
+    ([url, q]: [string, string]) =>
+      fetch(`${url}?q=${encodeURIComponent(q)}`).then((res) => (res.ok ? res.json() : [])),
+    { keepPreviousData: true, dedupingInterval: 30_000 }
+  );
+  return { people: (data ?? []) as { id: string; name: string; image: string | null }[], isLoading };
+}

@@ -135,7 +135,12 @@
     "worshipLeaderPlaceholder": "Worship leader",
     "titlePlaceholderPersonal": "Small group",
     "leaderPersonal": "Who leads",
-    "leaderPersonalPlaceholder": "e.g. Ana and Pedro"
+    "leaderPersonalPlaceholder": "e.g. Ana and Pedro",
+    "peoplePlaceholder": "Search a person or type a name",
+    "peopleAddWithoutAccount": "Add \"{name}\" (no account)",
+    "peopleRemove": "Remove {name}",
+    "leadersHint": "There can be more than one. People without an account are added by name only.",
+    "preacherPlaceholder": "Search a person or type the preacher's name"
   },
   "SongData": {
     "title": "Title",

@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import PeopleField from "@/components/service/PeopleField";
 import { Input } from "@/components/ui/input";
 import {
   buildSectionsFromTemplate,
@@ -26,6 +27,7 @@ import {
 } from "@/lib/template-utils";
 import { cn } from "@/lib/utils";
 import { buildServiceTitle, nextSunday } from "@/lib/service-schedule";
+import { joinLeaderNames, leadersOf, type ServiceLeaderEntry } from "@/lib/service-leaders";
 import { ServiceProfile, serviceProfile } from "@/lib/service-profile";
 import { ClientServiceSection, ClientServiceTemplate } from "@/prisma/models";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,8 +44,10 @@ import { z } from "zod";
 // aceita nulo e a obrigatoriedade fica na validação.
 const buildSchema = (titleRequired: boolean, titleMessage: string) => z.object({
   title: titleRequired ? z.string().min(1, titleMessage) : z.string(),
-  worshipLeader: z.string().nullable(),
+  // Quem conduz: uma ou mais pessoas (com conta ou só o nome). O texto do dirigente é derivado daqui.
+  leaders: z.array(z.object({ userId: z.string().nullable(), name: z.string() })),
   preacher: z.string().nullable(),
+  preacherId: z.string().nullable(),
   // Boolean(...) de propósito: um `value !== null` estreitaria o tipo de saída e separaria
   // entrada e saída do formulário.
   date: z.date().nullable().refine((value) => Boolean(value), "Escolha a data"),
@@ -55,7 +59,9 @@ type FormValues = z.infer<ReturnType<typeof buildSchema>>;
 export type ServicePlanConfig = {
   title: string;
   worshipLeader: string | null;
+  leaders: ServiceLeaderEntry[];
   preacher: string | null;
+  preacherId: string | null;
   date: Date;
   templateId: number | null;
   templateSections: ClientServiceSection[] | null;
@@ -69,7 +75,9 @@ type ServicePlanDrawerProps = {
   defaultValues?: {
     title?: string;
     worshipLeader?: string | null;
+    leaders?: ServiceLeaderEntry[];
     preacher?: string | null;
+    preacherId?: string | null;
     date?: Date;
   };
   loading?: boolean;
@@ -112,8 +120,9 @@ export default function ServicePlanDrawer({
     const date = isNew ? null : (defaultValues?.date ?? new Date());
     return {
       title: isNew ? "" : (defaultValues?.title ?? ""),
-      worshipLeader: defaultValues?.worshipLeader ?? "",
+      leaders: leadersOf({ leaders: defaultValues?.leaders, worshipLeader: defaultValues?.worshipLeader }),
       preacher: defaultValues?.preacher ?? "",
+      preacherId: defaultValues?.preacherId ?? null,
       date,
       startTime: date ? timeFromDate(date) : "",
     };
@@ -177,10 +186,13 @@ export default function ServicePlanDrawer({
   function handleSubmit(values: FormValues) {
     const date = combineDateAndTime(values.date as Date, values.startTime);
 
+    const leaders = leadersOf({ leaders: values.leaders });
     const result = onSave({
       title: values.title,
-      worshipLeader: values.worshipLeader || null,
+      worshipLeader: joinLeaderNames(leaders.map((l) => l.name)),
+      leaders,
       preacher: values.preacher || null,
+      preacherId: values.preacher ? values.preacherId : null,
       date,
       templateId: selectedTemplate?.id ?? null,
       templateSections: selectedTemplate
@@ -529,13 +541,14 @@ function CreationFields({
 
         <FormField
           control={form.control}
-          name="worshipLeader"
+          name="leaders"
           render={({ field }) => (
             <FormItem>
               <LeaderLabel profile={profile} />
               <FormControl>
-                <Input placeholder={leaderPlaceholder} {...field} className="h-11" value={field.value ?? ""} />
+                <PeopleField value={field.value} onChange={field.onChange} placeholder={leaderPlaceholder} />
               </FormControl>
+              <Hint>{t("ServiceData.leadersHint")}</Hint>
               <FormMessage />
             </FormItem>
           )}
@@ -616,17 +629,14 @@ function EditFields({ form, profile }: EditFieldsProps) {
 
       <FormField
         control={form.control}
-        name="worshipLeader"
+        name="leaders"
         render={({ field }) => (
           <FormItem>
             <LeaderLabel profile={profile} />
             <FormControl>
-              <Input
-                placeholder={leaderPlaceholder}
-                {...field}
-                value={field.value ?? ""}
-              />
+              <PeopleField value={field.value} onChange={field.onChange} placeholder={leaderPlaceholder} />
             </FormControl>
+            <Hint>{t("ServiceData.leadersHint")}</Hint>
             <FormMessage />
           </FormItem>
         )}
@@ -640,10 +650,14 @@ function EditFields({ form, profile }: EditFieldsProps) {
           <FormItem>
             <FormLabel>Pregador</FormLabel>
             <FormControl>
-              <Input
-                placeholder="Nome do pregador"
-                {...field}
-                value={field.value ?? ""}
+              <PeopleField
+                max={1}
+                value={field.value ? [{ userId: form.watch("preacherId"), name: field.value }] : []}
+                onChange={(next) => {
+                  field.onChange(next[0]?.name ?? "");
+                  form.setValue("preacherId", next[0]?.userId ?? null, { shouldDirty: true });
+                }}
+                placeholder={t("ServiceData.preacherPlaceholder")}
               />
             </FormControl>
             <FormMessage />

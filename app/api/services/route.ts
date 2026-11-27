@@ -56,6 +56,8 @@ export async function POST(request: Request) {
     sermonTheme: null,
     sermonReference: null,
     preacher: null,
+    preacherId: null,
+    leaders: [],
     plan: null,
     ...body,
   });

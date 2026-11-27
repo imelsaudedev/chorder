@@ -165,7 +165,8 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const parsed = serviceSchema.safeParse(await request.json());
+  // Cliente que ainda não conhece a lista de dirigentes (aba aberta antes da atualização) manda só o texto.
+  const parsed = serviceSchema.safeParse({ leaders: [], preacherId: null, ...(await request.json()) });
   if (!parsed.success) return invalidServiceResponse(parsed.error);
   const service = parsed.data;
   if (service.id !== existing.id || (service.slug && service.slug !== existing.slug)) {

@@ -53,8 +53,9 @@ export default function NewServiceProvider({
   function handleSave(config: ServicePlanConfig) {
     const params = new URLSearchParams();
     if (config.title) params.set("title", config.title);
-    if (config.worshipLeader) params.set("worshipLeader", config.worshipLeader);
+    if (config.leaders.length) params.set("leaders", JSON.stringify(config.leaders));
     if (config.preacher) params.set("preacher", config.preacher);
+    if (config.preacherId) params.set("preacherId", config.preacherId);
     if (config.templateId) params.set("templateId", String(config.templateId));
     if (drawerScope === "PERSONAL") params.set("scope", "personal");
     params.set("date", config.date.toISOString());

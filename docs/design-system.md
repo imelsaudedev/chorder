@@ -134,6 +134,9 @@ próprio e comentário só naquela liturgia (`metadata.title` e `metadata.commen
 `variant`: `default` (preto, `primary`), `secondary` (**ação principal, azul**), `outline`, `soft` (chips e seletores do sistema, fundo `muted/[.22]`), `ghost`, `destructive`, `link`. Alturas: `default` h-9, `sm` h-8, `lg` h-10.
 Todo elemento clicável mostra o cursor de mão (regra global em `globals.css`). Botão dentro de `<form>` leva `type="button"`.
 
+### Escolha de pessoas: `PeopleField`
+Dirigente (várias pessoas) e pregador (uma, `max={1}`) na gaveta da liturgia. Pessoas escolhidas viram chips com iniciais/foto e botão de remover (alvo de 28px dentro de uma pílula de 36px); o campo busca em `/api/people` (só id, nome e foto) e oferece "Adicionar "nome" (sem conta)" para convidado. A lista de sugestões é **inline**, sem Popover/portal, porque dentro de gaveta (vaul) os portais perdem os eventos. Enter adiciona sem enviar o formulário; Backspace no campo vazio remove o último.
+
 ### Blocos da cifra
 Cores por tipo em `components/song/unit-colors.ts` (ver 6.3 para a versão escura proposta).
 
