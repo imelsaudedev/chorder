@@ -208,6 +208,11 @@
     "expand": "Expandir bloco"
   },
   "ServiceView": {
+    "editCopyNoticeTitle": "Só esta liturgia será alterada",
+    "editCopyNoticeBody": "A cifra original da música continua como está. Se ela for corrigida depois, esta versão não acompanha.",
+    "savedServiceOnly": "Cifra salva nesta liturgia",
+    "savedServiceOnlyHint": "A cifra original não mudou.",
+    "savedBoth": "Cifra salva na liturgia e no original",
     "editChords": "Editar cifras",
     "saveScopeTitle": "Salvar alterações",
     "serviceOnly": "Só nesta liturgia",
