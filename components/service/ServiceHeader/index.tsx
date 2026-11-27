@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useFormattedDate } from "@/hooks/useFormattedDate";
 import { ClientService, ServiceRef } from "@/prisma/models";
-import { Calendar, ChevronLeft, ChevronRight, MicVocal, Share2 } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -129,7 +129,6 @@ function Subtitle({ service }: SubtitleProps) {
       </span>
       {service.worshipLeader && (
         <span className="flex items-center gap-1">
-          <MicVocal className="w-4 h-4" />
           <span className="hidden sm:block">{t("Service.ledBy")}</span>
           {service.worshipLeader}
         </span>

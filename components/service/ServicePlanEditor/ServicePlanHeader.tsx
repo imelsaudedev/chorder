@@ -4,7 +4,7 @@ import Text from "@/components/common/Text";
 import { ClientService } from "@/prisma/models";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, Lock, Mic2, MicVocal, Pencil } from "lucide-react";
+import { Calendar, Lock, Mic2, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { countPlanProgress } from "./unitSummary";
 
@@ -84,7 +84,6 @@ export default function ServicePlanHeader({ service, onEdit, compact = false }: 
             </Text>
             {service.worshipLeader && (
               <Text variant="caption" className="flex items-center gap-1 truncate text-foreground/80">
-                <MicVocal className="w-3.5 h-3.5 shrink-0" />
                 {service.worshipLeader}
               </Text>
             )}

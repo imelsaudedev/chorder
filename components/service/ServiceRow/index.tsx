@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { ServiceListItem } from "@/prisma/models";
-import { MessageSquare, MicVocal, MoreVertical, Music, Pencil } from "lucide-react";
+import { MessageSquare, MoreVertical, Music, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
@@ -227,7 +227,6 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
         )}
         {local.worshipLeader && (
           <span className="inline-flex min-w-0 items-start gap-1 @[720px]:[grid-area:leader]">
-            <MicVocal className="mt-1 size-3.5 shrink-0" aria-hidden />
             {local.leaderPeople && local.leaderPeople.length > 0 && <LeaderAvatars people={local.leaderPeople} />}
             <span className="min-w-0 @[720px]:truncate">{local.worshipLeader}</span>
           </span>
