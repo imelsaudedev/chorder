@@ -13,8 +13,6 @@ export type ServiceDefaultMeta = {
   title: string;
   worshipLeader: string | null;
   leaders?: ServiceLeaderEntry[];
-  preacher?: string | null;
-  preacherId?: string | null;
   date: Date;
   sections?: ClientServiceSection[];
   scope?: ServiceScope;
@@ -49,8 +47,7 @@ export default function ClientServiceFormPage({
     title: defaultMeta.title,
     worshipLeader: defaultMeta.worshipLeader,
     leaders: defaultMeta.leaders ?? [],
-    preacher: defaultMeta.preacher ?? null,
-    preacherId: defaultMeta.preacherId ?? null,
+    preacher: null,
     date: defaultMeta.date,
     isDeleted: false,
     scope: defaultMeta.scope ?? "CHURCH",

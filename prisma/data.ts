@@ -1250,7 +1250,6 @@ export async function retrieveServicesList(
       worshipLeader: true,
       leaders: { orderBy: { order: "asc" }, select: { userId: true, name: true, user: { select: { image: true } } } },
       preacher: true,
-      preacherId: true,
       sermonTheme: true,
       sermonReference: true,
       status: true,
@@ -1348,10 +1347,6 @@ export async function createOrUpdateService(
       title: service.title?.trim() || null,
       worshipLeader: joinLeaderNames(leaders.map((l) => l.name)),
       date: service.date,
-      preacher: service.preacher ?? null,
-      preacherId: await existingUserId(tx, service.preacherId),
-      sermonTheme: service.sermonTheme ?? null,
-      sermonReference: service.sermonReference ?? null,
       plan: (resolvedPlan as object) ?? Prisma.DbNull,
       ...(service.status && existing?.scope !== "PERSONAL" ? { status: service.status } : {}),
     };

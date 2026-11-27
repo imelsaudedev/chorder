@@ -12,7 +12,6 @@ export const serviceSchema = z.object({
   units: z.array(serviceUnitSchema).optional(),
   plan: servicePlanSchema.nullable(),
   preacher: z.string().nullable(),
-  preacherId: z.string().nullable(),
   sermonTheme: z.string().nullable(),
   sermonReference: z.string().nullable(),
   isDeleted: z.boolean(),

@@ -150,8 +150,6 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
         name: l.name,
         image: editor.service.leaderPeople?.find((p) => p.userId && p.userId === l.userId)?.image ?? null,
       })),
-      preacher: config.preacher,
-      preacherId: config.preacherId,
       date: config.date,
     });
     if (config.templateSections) {
@@ -355,8 +353,6 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
           title: editor.service.title ?? "",
           worshipLeader: editor.service.worshipLeader,
           leaders: editor.service.leaders,
-          preacher: editor.service.preacher,
-          preacherId: editor.service.preacherId,
           date: new Date(editor.service.date),
         }}
         onSave={handleMetaSave}

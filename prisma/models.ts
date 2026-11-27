@@ -139,8 +139,6 @@ export type ServiceListItem = Pick<
   status?: ServiceStatus;
   scope?: ServiceScope;
   isSharedWithMe?: boolean;
-  /** Conta do pregador, quando escolhido entre as pessoas (a edição pela lista a devolve ao salvar). */
-  preacherId?: string | null;
   /** Nomes de quem conduz, um por pessoa (`worshipLeader` é o texto junto, "Hugo e Ana"). */
   leaders?: string[];
   /** Quem conduz, com a foto da conta (quando há): a lista de Liturgias mostra foto e nome. */
@@ -159,7 +157,7 @@ export type ServicePlan = {
 
 export type ClientService = Omit<
   Service,
-  "id" | "legacyId" | "preacher" | "preacherId" | "sermonTheme" | "sermonReference" | "plan" | "updatedAt" | "status" | "scope" | "createdById" | "shareToken"
+  "id" | "legacyId" | "preacher" | "sermonTheme" | "sermonReference" | "plan" | "updatedAt" | "status" | "scope" | "createdById" | "shareToken"
 > & {
   id?: number;
   status?: ServiceStatus;
@@ -177,8 +175,6 @@ export type ClientService = Omit<
   prevService?: ServiceRef | null;
   nextService?: ServiceRef | null;
   preacher?: string | null;
-  /** Conta do pregador, quando escolhido entre as pessoas do sistema. */
-  preacherId?: string | null;
   /** Quem conduz (uma ou mais pessoas). Vazio em culto antigo: use `leadersOf`. */
   leaders?: ServiceLeaderEntry[];
   /** Os mesmos dirigentes, com a foto da conta, só para exibir (não vai no salvamento). */

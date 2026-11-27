@@ -3,7 +3,6 @@ import { canManageChurchServices } from "@/lib/permissions";
 import {
   createOrUpdateService,
   deleteService,
-  existingUserId,
   setServiceLeaders,
   retrieveService,
   ServiceConflictError,
@@ -109,10 +108,6 @@ export async function PATCH(
     title?: string | null;
     worshipLeader?: string | null;
     date?: Date;
-    preacher?: string | null;
-    preacherId?: string | null;
-    sermonTheme?: string | null;
-    sermonReference?: string | null;
     status?: ServiceStatus;
   } = {};
   if ("title" in body) data.title = body.title ?? null;
@@ -129,13 +124,6 @@ export async function PATCH(
     data.worshipLeader = body.worshipLeader || null;
   }
   if ("date" in body) data.date = new Date(body.date);
-  if ("preacher" in body) data.preacher = body.preacher ?? null;
-  if ("preacherId" in body) {
-    const { default: prisma } = await import("@/prisma/client");
-    data.preacherId = await existingUserId(prisma, typeof body.preacherId === "string" ? body.preacherId : null);
-  }
-  if ("sermonTheme" in body) data.sermonTheme = body.sermonTheme ?? null;
-  if ("sermonReference" in body) data.sermonReference = body.sermonReference ?? null;
   if ("status" in body && service.scope !== "PERSONAL") {
     if (body.status !== "DRAFT" && body.status !== "PUBLISHED") {
       return Response.json({ error: "Invalid status" }, { status: 400 });
@@ -184,7 +172,7 @@ export async function POST(
   }
 
   // Cliente que ainda não conhece a lista de dirigentes (aba aberta antes da atualização) manda só o texto.
-  const parsed = serviceSchema.safeParse({ leaders: [], preacherId: null, ...(await request.json()) });
+  const parsed = serviceSchema.safeParse({ leaders: [], ...(await request.json()) });
   if (!parsed.success) return invalidServiceResponse(parsed.error);
   const service = parsed.data;
   if (service.id !== existing.id || (service.slug && service.slug !== existing.slug)) {

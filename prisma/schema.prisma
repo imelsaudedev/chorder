@@ -161,20 +161,17 @@ model Service {
   createdById     String?
   shareToken      String?       @unique
   preacher        String?
-  preacherId      String?
   sermonTheme     String?
   sermonReference String?
   plan            Json?
   updatedAt       DateTime      @default(now()) @updatedAt
 
   createdBy    User?          @relation("CreatedServices", fields: [createdById], references: [id], onDelete: SetNull)
-  preacherUser User?          @relation("ServicePreacher", fields: [preacherId], references: [id], onDelete: SetNull)
   leaders      ServiceLeader[]
   shares       ServiceShare[]
   units     ServiceUnit[]
 
   @@index([createdById])
-  @@index([preacherId])
   @@index([scope])
 }
 
@@ -253,7 +250,6 @@ model User {
   accounts        Account[]
   sessions        Session[]
   createdServices Service[]      @relation("CreatedServices")
-  preachedServices Service[]     @relation("ServicePreacher")
   ledServices     ServiceLeader[] @relation("ServiceLeaderUser")
   sharedServices  ServiceShare[]
 

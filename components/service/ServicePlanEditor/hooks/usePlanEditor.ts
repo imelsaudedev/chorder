@@ -177,7 +177,7 @@ export function usePlanEditor(initialService: ClientService) {
   );
 
   const updateServiceMeta = useCallback(
-    (changes: Partial<Pick<ClientService, "title" | "worshipLeader" | "leaders" | "leaderPeople" | "date" | "preacher" | "preacherId">>) => {
+    (changes: Partial<Pick<ClientService, "title" | "worshipLeader" | "leaders" | "leaderPeople" | "date">>) => {
       mutate((s) => ({ ...s, ...changes }));
     },
     [mutate]

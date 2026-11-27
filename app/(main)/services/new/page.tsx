@@ -32,14 +32,12 @@ export default async function NewServicePage({
   searchParams: Promise<{
     title?: string;
     leaders?: string;
-    preacher?: string;
-    preacherId?: string;
     date?: string;
     templateId?: string;
     scope?: string;
   }>;
 }) {
-  const [{ title, leaders: leadersParam, preacher, preacherId, date, templateId, scope }, live] =
+  const [{ title, leaders: leadersParam, date, templateId, scope }, live] =
     await Promise.all([searchParams, getLiveUserAuth()]);
 
   if (!live.authenticated) {
@@ -68,8 +66,6 @@ export default async function NewServicePage({
         title: title ?? "",
         worshipLeader: joinLeaderNames(leaders.map((l) => l.name)),
         leaders,
-        preacher: preacher ?? "",
-        preacherId: preacherId ?? null,
         date: date ? new Date(date) : new Date(),
         sections: defaultSections,
         scope: targetScope,

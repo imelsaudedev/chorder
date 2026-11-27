@@ -46,8 +46,6 @@ const buildSchema = (titleRequired: boolean, titleMessage: string) => z.object({
   title: titleRequired ? z.string().min(1, titleMessage) : z.string(),
   // Quem conduz: uma ou mais pessoas (com conta ou só o nome). O texto do dirigente é derivado daqui.
   leaders: z.array(z.object({ userId: z.string().nullable(), name: z.string() })),
-  preacher: z.string().nullable(),
-  preacherId: z.string().nullable(),
   // Boolean(...) de propósito: um `value !== null` estreitaria o tipo de saída e separaria
   // entrada e saída do formulário.
   date: z.date().nullable().refine((value) => Boolean(value), "Escolha a data"),
@@ -60,8 +58,6 @@ export type ServicePlanConfig = {
   title: string;
   worshipLeader: string | null;
   leaders: ServiceLeaderEntry[];
-  preacher: string | null;
-  preacherId: string | null;
   date: Date;
   templateId: number | null;
   templateSections: ClientServiceSection[] | null;
@@ -76,8 +72,6 @@ type ServicePlanDrawerProps = {
     title?: string;
     worshipLeader?: string | null;
     leaders?: ServiceLeaderEntry[];
-    preacher?: string | null;
-    preacherId?: string | null;
     date?: Date;
   };
   loading?: boolean;
@@ -121,8 +115,6 @@ export default function ServicePlanDrawer({
     return {
       title: isNew ? "" : (defaultValues?.title ?? ""),
       leaders: leadersOf({ leaders: defaultValues?.leaders, worshipLeader: defaultValues?.worshipLeader }),
-      preacher: defaultValues?.preacher ?? "",
-      preacherId: defaultValues?.preacherId ?? null,
       date,
       startTime: date ? timeFromDate(date) : "",
     };
@@ -191,8 +183,6 @@ export default function ServicePlanDrawer({
       title: values.title,
       worshipLeader: joinLeaderNames(leaders.map((l) => l.name)),
       leaders,
-      preacher: values.preacher || null,
-      preacherId: values.preacher ? values.preacherId : null,
       date,
       templateId: selectedTemplate?.id ?? null,
       templateSections: selectedTemplate
@@ -559,7 +549,7 @@ function CreationFields({
 
 
 // ---------------------------------------------------------------------------
-// Edit fields: título → data → hora → dirigente → pregador
+// Edit fields: título → data → hora → dirigente (pregador e sermão ficam no item Sermão do roteiro)
 // ---------------------------------------------------------------------------
 
 type EditFieldsProps = {
@@ -640,31 +630,6 @@ function EditFields({ form, profile }: EditFieldsProps) {
           </FormItem>
         )}
       />
-
-      {profile.showPreacher && (
-      <FormField
-        control={form.control}
-        name="preacher"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Pregador</FormLabel>
-            <FormControl>
-              <PeopleField
-                size="lg"
-                max={1}
-                value={field.value ? [{ userId: form.watch("preacherId"), name: field.value }] : []}
-                onChange={(next) => {
-                  field.onChange(next[0]?.name ?? "");
-                  form.setValue("preacherId", next[0]?.userId ?? null, { shouldDirty: true });
-                }}
-                placeholder={t("ServiceData.preacherPlaceholder")}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      )}
     </>
   );
 }

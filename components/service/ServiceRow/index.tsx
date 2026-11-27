@@ -146,8 +146,6 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
         date: values.date,
         worshipLeader: values.worshipLeader,
         leaders: values.leaders,
-        preacher: values.preacher,
-        preacherId: values.preacherId,
       }),
     })
       .then((res) => {
@@ -157,8 +155,6 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
           title: values.title,
           date: values.date,
           worshipLeader: values.worshipLeader,
-          preacher: values.preacher,
-          preacherId: values.preacherId,
           leaders: values.leaders.map((l) => l.name),
           leaderPeople: values.leaders.map((l) => ({
             userId: l.userId,
@@ -307,8 +303,6 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
             title: local.title ?? "",
             worshipLeader: local.worshipLeader ?? "",
             leaders: local.leaderPeople?.map(({ userId, name }) => ({ userId, name })),
-            preacher: local.preacher ?? "",
-            preacherId: local.preacherId ?? null,
             date,
           }}
           onSave={handleMetaSave}

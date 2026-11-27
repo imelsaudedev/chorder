@@ -26,8 +26,6 @@ function renderDrawer(props: Partial<React.ComponentProps<typeof ServicePlanDraw
           title: "Culto",
           worshipLeader: "Ana Souza",
           leaders: [{ userId: "ana", name: "Ana Souza" }],
-          preacher: "Hugo Lima",
-          preacherId: "hugo",
           date: new Date(2026, 11, 6, 10, 30),
         }}
         {...props}
@@ -38,6 +36,11 @@ function renderDrawer(props: Partial<React.ComponentProps<typeof ServicePlanDraw
 }
 
 describe("ServicePlanDrawer (editar dados)", () => {
+  it("não pede pregador: ele fica só no item Sermão do roteiro", () => {
+    renderDrawer();
+    expect(screen.queryByText("Pregador")).toBeNull();
+  });
+
   it("todos os campos da edição têm a mesma altura (44px, h-11) e o mesmo espaçamento entre eles", () => {
     renderDrawer({ defaultValues: { title: "Culto", date: new Date(2026, 11, 6, 10, 30) } });
     const title = screen.getByPlaceholderText(/Título da liturgia/i);
@@ -46,7 +49,7 @@ describe("ServicePlanDrawer (editar dados)", () => {
     expect(title.className).toContain("h-11");
     expect(date.className).toContain("h-11");
     expect(time.className).toContain("h-11");
-    // dirigente e pregador (campos de pessoas) também têm 44px
+    // o dirigente (campo de pessoas) também tem 44px
     for (const box of document.querySelectorAll("[cmdk-root] > div")) {
       expect((box as HTMLElement).className).toContain("min-h-11");
     }
@@ -54,7 +57,7 @@ describe("ServicePlanDrawer (editar dados)", () => {
     expect(title.closest(".gap-5")).not.toBeNull();
   });
 
-  it("salva título, data e hora, dirigentes e pregador na mesma configuração", async () => {
+  it("salva título, data e hora e dirigentes na mesma configuração", async () => {
     const onSave = renderDrawer();
     const save = screen.getByRole("button", { name: /salvar/i });
     await waitFor(() => expect(save).toBeEnabled());
@@ -65,8 +68,6 @@ describe("ServicePlanDrawer (editar dados)", () => {
         title: "Culto",
         worshipLeader: "Ana Souza",
         leaders: [{ userId: "ana", name: "Ana Souza" }],
-        preacher: "Hugo Lima",
-        preacherId: "hugo",
       })
     );
     const config = onSave.mock.calls[0] as unknown as [{ date: Date }];
