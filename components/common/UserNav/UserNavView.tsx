@@ -15,9 +15,10 @@ import {
 import { ASSIGNABLE_ROLES } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@prisma/client";
-import { Eye, Loader2, LogOut, RotateCcw } from "lucide-react";
+import { Eye, Loader2, LogOut, RotateCcw, User as UserIcon } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -185,6 +186,14 @@ export default function UserNavView({
             <DropdownMenuSeparator />
           </>
         )}
+
+        <DropdownMenuItem asChild className="w-full cursor-pointer">
+          <Link href="/profile" className="flex items-center">
+            <UserIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+            <span className="font-medium">{t("myProfile")}</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
 
         {isRealAdmin && (
           <>

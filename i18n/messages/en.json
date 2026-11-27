@@ -275,6 +275,7 @@
     "loginTitle": "Welcome to Chorder",
     "loginSubtitle": "Sign in to access your services and the ones shared with you",
     "signingIn": "Signing in...",
+    "myProfile": "My profile",
     "logout": "Logout",
     "userMenu": "Account menu",
     "checkEmailTitle": "Check your email",
@@ -354,5 +355,21 @@
     "cannotShareWithSelf": "You already own this liturgy.",
     "loadError": "Could not load sharing settings.",
     "updateError": "Could not update sharing settings."
+  },
+  "Profile": {
+    "title": "My profile",
+    "unnamed": "Unnamed user",
+    "rolesTitle": "Your roles",
+    "roleAdmin": "Admin",
+    "roleWorship": "Worship",
+    "roleMedia": "Media",
+    "roleUser": "User",
+    "noTeamRolesHint": "You have standard access. If you are part of the Worship or Media team, let leadership know to enable your access.",
+    "nameLabel": "Name",
+    "namePlaceholder": "How you prefer to be called",
+    "nameHint": "This is the name displayed across the site.",
+    "save": "Save",
+    "nameSaved": "Name updated!",
+    "saveError": "Could not save your name. Please try again."
   }
 }

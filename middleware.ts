@@ -18,6 +18,7 @@ function requiresAuthentication(
   searchParams: URLSearchParams
 ): boolean {
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return true;
+  if (pathname === "/profile") return true;
   if (
     /^\/services\/(?!new$)[^/]+$/.test(pathname) &&
     searchParams.has("share")

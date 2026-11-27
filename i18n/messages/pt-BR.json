@@ -276,6 +276,7 @@
     "loginTitle": "Bem-vindo ao Chorder",
     "loginSubtitle": "Entre para acessar suas liturgias e as que compartilharam com você",
     "signingIn": "Entrando...",
+    "myProfile": "Meu perfil",
     "logout": "Sair",
     "userMenu": "Menu da conta",
     "checkEmailTitle": "Confira seu e-mail",
@@ -355,5 +356,21 @@
     "cannotShareWithSelf": "Você já é o dono desta liturgia.",
     "loadError": "Não foi possível carregar os compartilhamentos.",
     "updateError": "Não foi possível atualizar o compartilhamento."
+  },
+  "Profile": {
+    "title": "Meu perfil",
+    "unnamed": "Sem nome",
+    "rolesTitle": "Seus perfis",
+    "roleAdmin": "Admin",
+    "roleWorship": "Louvor",
+    "roleMedia": "Mídia",
+    "roleUser": "Usuário",
+    "noTeamRolesHint": "Você tem acesso padrão. Se faz parte da equipe de Louvor ou Mídia, avise a liderança para liberar o acesso.",
+    "nameLabel": "Nome",
+    "namePlaceholder": "Como você prefere ser chamado(a)",
+    "nameHint": "Este é o nome exibido no site.",
+    "save": "Salvar",
+    "nameSaved": "Nome atualizado!",
+    "saveError": "Não foi possível salvar o nome. Tente novamente."
   }
 }
