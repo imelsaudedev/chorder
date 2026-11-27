@@ -278,6 +278,7 @@
     "loginTitle": "Bem-vindo ao Chorder",
     "loginSubtitle": "Entre para gerenciar suas músicas e liturgias",
     "signingIn": "Entrando...",
+    "myProfile": "Meu perfil",
     "logout": "Sair",
     "userMenu": "Menu da conta",
     "checkEmailTitle": "Confira seu e-mail",
@@ -353,5 +354,24 @@
     "cannotShareWithSelf": "Você já é o dono desta liturgia.",
     "loadError": "Não foi possível carregar os compartilhamentos.",
     "updateError": "Não foi possível atualizar o compartilhamento."
+  },
+  "Profile": {
+    "title": "Meu perfil",
+    "unnamed": "Sem nome",
+    "accountName": "Nome da conta: {name}",
+    "rolesTitle": "Seus perfis",
+    "roleAdmin": "Admin",
+    "roleWorship": "Louvor",
+    "roleMedia": "Mídia",
+    "roleUser": "Usuário",
+    "noTeamRolesHint": "Você tem acesso padrão. Se faz parte da equipe de Louvor ou Mídia, avise a liderança para liberar o acesso.",
+    "nicknameLabel": "Apelido",
+    "nicknamePlaceholder": "Como você prefere ser chamado(a)",
+    "nicknameHint": "Se definir um apelido, ele será exibido no lugar do seu nome. Deixe em branco para usar o nome original da sua conta.",
+    "save": "Salvar",
+    "useOriginalName": "Usar nome original",
+    "nicknameSaved": "Apelido atualizado!",
+    "nicknameCleared": "Apelido removido. Usando o nome da conta.",
+    "saveError": "Não foi possível salvar o apelido. Tente novamente."
   }
 }

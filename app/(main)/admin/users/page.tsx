@@ -4,6 +4,7 @@ import Main from "@/components/common/Main";
 import PageTitleBlock from "@/components/common/PageTitleBlock";
 import { getLiveUserAuth } from "@/lib/auth-guard";
 import { canAccessAdmin } from "@/lib/permissions";
+import { getDisplayName } from "@/lib/user-display";
 import prisma from "@/prisma/client";
 import { getTranslations } from "next-intl/server";
 import UsersAdminClient, { type AdminUserRow } from "./UsersAdminClient";
@@ -17,6 +18,7 @@ export default async function AdminUsersPage() {
       select: {
         id: true,
         name: true,
+        nickname: true,
         email: true,
         image: true,
         roles: true,
@@ -38,7 +40,7 @@ export default async function AdminUsersPage() {
     }
     return {
       id: u.id,
-      name: u.name,
+      name: getDisplayName(u),
       email: u.email,
       image: u.image,
       roles: u.roles,

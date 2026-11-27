@@ -16,6 +16,35 @@ const nextAuthResult = NextAuth({
   ...authConfig,
   callbacks: {
     ...authConfig.callbacks,
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google" && user.id && profile) {
+        const googlePicture =
+          typeof profile.picture === "string" && profile.picture.trim()
+            ? profile.picture.trim()
+            : null;
+        const googleName =
+          typeof profile.name === "string" && profile.name.trim()
+            ? profile.name.trim()
+            : null;
+
+        const updates: { image?: string; name?: string } = {};
+        if (googlePicture && googlePicture !== user.image) {
+          updates.image = googlePicture;
+        }
+        if (googleName && googleName !== user.name) {
+          updates.name = googleName;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await prisma.user
+            .update({ where: { id: user.id }, data: updates })
+            .catch(() => {});
+          if (updates.image) user.image = updates.image;
+          if (updates.name) user.name = updates.name;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         let roles: UserRole[] = Array.isArray(user.roles) ? [...user.roles] : [];

@@ -277,6 +277,7 @@
     "loginTitle": "Welcome to Chorder",
     "loginSubtitle": "Sign in to manage your songs and services",
     "signingIn": "Signing in...",
+    "myProfile": "My profile",
     "logout": "Logout",
     "userMenu": "Account menu",
     "checkEmailTitle": "Check your email",
@@ -352,5 +353,24 @@
     "cannotShareWithSelf": "You already own this liturgy.",
     "loadError": "Could not load sharing settings.",
     "updateError": "Could not update sharing settings."
+  },
+  "Profile": {
+    "title": "My profile",
+    "unnamed": "Unnamed user",
+    "accountName": "Account name: {name}",
+    "rolesTitle": "Your roles",
+    "roleAdmin": "Admin",
+    "roleWorship": "Worship",
+    "roleMedia": "Media",
+    "roleUser": "User",
+    "noTeamRolesHint": "You have standard access. If you are part of the Worship or Media team, let leadership know to enable your access.",
+    "nicknameLabel": "Nickname",
+    "nicknamePlaceholder": "How you prefer to be called",
+    "nicknameHint": "If set, your nickname will be shown instead of your account name. Leave blank to use your original account name.",
+    "save": "Save",
+    "useOriginalName": "Use original name",
+    "nicknameSaved": "Nickname updated!",
+    "nicknameCleared": "Nickname removed. Using your account name.",
+    "saveError": "Could not save your nickname. Please try again."
   }
 }

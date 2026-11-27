@@ -13,6 +13,14 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
+vi.mock("next/link", () => ({
+  default: ({ children, href, ...props }: any) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 describe("UserNavView component", () => {
   beforeEach(() => {
     mockSignOut.mockReset();
@@ -89,6 +97,8 @@ describe("UserNavView component", () => {
 
     await userEventInstance.click(screen.getByRole("button", { name: "userMenu" }));
     expect(screen.queryByText("rolePreviewTitle")).toBeNull();
+    const profileLink = screen.getByRole("menuitem", { name: "myProfile" });
+    expect(profileLink.getAttribute("href")).toBe("/profile");
   });
 
   it("allows real admins to toggle simulated roles, apply, and reset preview", async () => {
