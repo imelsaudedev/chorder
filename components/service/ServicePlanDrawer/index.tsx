@@ -234,9 +234,7 @@ export default function ServicePlanDrawer({
 
             <DrawerFooter>
               {isNew && (!dateValue || !form.watch("startTime")) && (
-                <p className="text-center text-xs text-muted-foreground">
-                  Escolha a data e a hora para continuar.
-                </p>
+                <Hint className="text-center">Escolha a data e a hora para continuar.</Hint>
               )}
               <Button
                 type="submit"
@@ -297,27 +295,47 @@ type CreationFieldsProps = {
 };
 
 /**
- * Campo de hora nativo com o relógio à esquerda (como o calendário do campo de data). O indicador nativo
- * (à direita) fica esticado e invisível sobre o campo: tocar em qualquer ponto abre o seletor nativo
- * (a roleta no celular). O formato (24 h ou AM/PM) segue o do sistema da pessoa.
+ * Campo de hora nativo com o relógio à esquerda (como o calendário do campo de data). Dá para digitar
+ * no campo; o relógio abre o seletor nativo (a roleta no celular). O indicador nativo, à direita, fica
+ * escondido para não haver dois relógios. O formato (24 h ou AM/PM) segue o do sistema da pessoa.
  */
 function TimeInput({ className, ...props }: Omit<React.ComponentProps<typeof Input>, "type">) {
+  const box = useRef<HTMLDivElement>(null);
+
+  function openPicker() {
+    const input = box.current?.querySelector("input");
+    if (!input) return;
+    input.focus();
+    try {
+      input.showPicker?.();
+    } catch {
+      // Sem suporte (ou sem gesto do usuário): o campo focado já aceita digitação.
+    }
+  }
+
   return (
-    <div className="relative w-36">
-      <Clock
-        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-        aria-hidden
-      />
+    <div ref={box} className="relative w-36">
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label="Abrir seletor de hora"
+        onClick={openPicker}
+        className="absolute left-0 top-0 z-10 flex h-11 w-9 cursor-pointer items-center justify-center text-muted-foreground"
+      >
+        <Clock className="size-4" aria-hidden />
+      </button>
       <Input
         type="time"
         {...props}
-        className={cn(
-          "h-11 pl-9 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:size-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0",
-          className
-        )}
+        className={cn("h-11 pl-9 [&::-webkit-calendar-picker-indicator]:hidden", className)}
       />
     </div>
   )
+}
+
+/** Texto de apoio sob campos e grupos: um só estilo (caption, 12 px, muted). */
+function Hint({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <p className={cn("text-xs text-muted-foreground", className)}>{children}</p>;
 }
 
 /** Rótulo "Sugestão" e, abaixo dele, atalhos de um toque (chips do sistema: Button soft), acima do campo. */
@@ -386,156 +404,143 @@ function CreationFields({
 
   return (
     <>
-      {/* 1. Modelo (só nos perfis que têm modelos) */}
-      {profile.showTemplates && (
-        <div>
-          <p className="text-sm font-medium mb-2">Modelo</p>
-          <TemplateSelector selected={selectedTemplate} onSelect={onSelectTemplate} />
-        </div>
-      )}
+      {/* Modelo: o bloco só existe quando há modelos cadastrados */}
+      {profile.showTemplates && <TemplateSelector selected={selectedTemplate} onSelect={onSelectTemplate} />}
 
-      {/* 2. Data */}
-      <FormField
-        control={form.control}
-        name="date"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t("ServiceData.date")}</FormLabel>
-            <Suggestions label={t("ServiceData.suggestion")}>
-              <Button
-                type="button"
-                variant="soft"
-                size="sm"
-                aria-pressed={!!dateValue && isSameDay(new Date(dateValue), sunday)}
-                onClick={() => form.setValue("date", sunday, { shouldValidate: true, shouldDirty: true })}
-              >
-                {!!dateValue && isSameDay(new Date(dateValue), sunday) && <Check className="size-3.5" aria-hidden />}
-                {sundayLabel}
-              </Button>
-            </Suggestions>
-            <FormControl>
-              <DatePicker
-                buttonProps={{ className: "w-full h-11" }}
-                disabled={field.disabled}
-                onChange={(date) => field.onChange(date ?? null)}
-                value={field.value ?? undefined}
-              />
-            </FormControl>
+      {/* Quando: sugestões (um toque) acima; data e hora lado a lado */}
+      <div className="flex flex-col gap-3">
+        <Suggestions label={t("ServiceData.suggestion")}>
+          <Button
+            type="button"
+            variant="soft"
+            size="sm"
+            aria-pressed={!!dateValue && isSameDay(new Date(dateValue), sunday)}
+            onClick={() => form.setValue("date", sunday, { shouldValidate: true, shouldDirty: true })}
+          >
+            {!!dateValue && isSameDay(new Date(dateValue), sunday) && <Check className="size-3.5" aria-hidden />}
+            {sundayLabel}
+          </Button>
+          {timeSuggestions.map((time) => (
+            <Button
+              key={time}
+              type="button"
+              variant="soft"
+              size="sm"
+              aria-pressed={timeValue === time}
+              onClick={() => {
+                onTimeChange();
+                form.setValue("startTime", time, { shouldValidate: true, shouldDirty: true });
+              }}
+            >
+              {timeValue === time ? <Check className="size-3.5" aria-hidden /> : <Clock className="size-3.5" aria-hidden />}
+              {time}
+            </Button>
+          ))}
+        </Suggestions>
 
-            {sameDayServices.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Já existe uma liturgia neste dia:{" "}
-                {sameDayServices.map((service, index) => (
-                  <Fragment key={service.slug}>
-                    {index > 0 && ", "}
-                    <a href={`/services/${service.slug}`} className="cursor-pointer underline">
-                      {service.title?.trim() || "Sem título"}
-                    </a>
-                  </Fragment>
-                ))}
-              </p>
+        <div className="flex items-start gap-3">
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className="min-w-0 flex-1">
+                <FormLabel>{t("ServiceData.date")}</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    buttonProps={{ className: "w-full h-11" }}
+                    disabled={field.disabled}
+                    onChange={(date) => field.onChange(date ?? null)}
+                    value={field.value ?? undefined}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+          />
 
-      {/* 3. Hora de início: o modelo, quando tem horário, define; sem ele a pessoa escolhe */}
-      <FormField
-        control={form.control}
-        name="startTime"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Hora de início</FormLabel>
-            {timeSuggestions.length > 0 && (
-              <Suggestions label={t("ServiceData.suggestion")}>
-                {timeSuggestions.map((time) => (
-                  <Button
-                    key={time}
-                    type="button"
-                    variant="soft"
-                    size="sm"
-                    aria-pressed={timeValue === time}
-                    onClick={() => {
+          <FormField
+            control={form.control}
+            name="startTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hora de início</FormLabel>
+                <FormControl>
+                  <TimeInput
+                    {...field}
+                    onChange={(e) => {
                       onTimeChange();
-                      form.setValue("startTime", time, { shouldValidate: true, shouldDirty: true });
+                      field.onChange(e);
                     }}
-                  >
-                    {timeValue === time && <Check className="size-3.5" aria-hidden />}
-                    {time}
-                  </Button>
-                ))}
-              </Suggestions>
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-            <FormControl>
-              <TimeInput
-                {...field}
-                onChange={(e) => {
-                  onTimeChange();
-                  field.onChange(e);
-                }}
-              />
-            </FormControl>
-            {templateTime && timeValue === templateTime && (
-              <p className="text-xs text-muted-foreground">Horário definido pelo modelo.</p>
-            )}
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+          />
+        </div>
 
-      {/* 4. Título (sugerido a partir do modelo e da data) */}
-      <FormField
-        control={form.control}
-        name="title"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              {t("ServiceData.title")}
-              {!profile.titleRequired && <OptionalMark />}
-            </FormLabel>
-            <FormControl>
-              <Input
-                placeholder={
-                  profile.suggestTitle ? "Aparece depois de escolher a data" : t("ServiceData.titlePlaceholderPersonal")
-                }
-                {...field}
-                className="h-11"
-                onChange={(e) => {
-                  onTitleChange();
-                  field.onChange(e);
-                }}
-              />
-            </FormControl>
-            {profile.suggestTitle && (
-              <p className="text-xs text-muted-foreground">
-                Sugerido pelo modelo e pela data. Pode editar.
-              </p>
-            )}
-            <FormMessage />
-          </FormItem>
+        {templateTime && timeValue === templateTime && <Hint>Horário definido pelo modelo.</Hint>}
+        {sameDayServices.length > 0 && (
+          <Hint>
+            Já existe uma liturgia neste dia:{" "}
+            {sameDayServices.map((service, index) => (
+              <Fragment key={service.slug}>
+                {index > 0 && ", "}
+                <a href={`/services/${service.slug}`} className="cursor-pointer underline">
+                  {service.title?.trim() || "Sem título"}
+                </a>
+              </Fragment>
+            ))}
+          </Hint>
         )}
-      />
+      </div>
 
-      {/* 5. Dirigente */}
-      <FormField
-        control={form.control}
-        name="worshipLeader"
-        render={({ field }) => (
-          <FormItem>
-            <LeaderLabel profile={profile} />
-            <FormControl>
-              <Input
-                placeholder={leaderPlaceholder}
-                {...field}
-                className="h-11"
-                value={field.value ?? ""}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {/* Identificação: título e quem conduz */}
+      <div className="flex flex-col gap-5 border-t border-border pt-5">
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                {t("ServiceData.title")}
+                {!profile.titleRequired && <OptionalMark />}
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={
+                    profile.suggestTitle ? "Aparece depois de escolher a data" : t("ServiceData.titlePlaceholderPersonal")
+                  }
+                  {...field}
+                  className="h-11"
+                  onChange={(e) => {
+                    onTitleChange();
+                    field.onChange(e);
+                  }}
+                />
+              </FormControl>
+              {profile.suggestTitle && (
+                <Hint>{selectedTemplate ? "Sugerido pelo modelo e pela data. Pode editar." : "Sugerido pela data. Pode editar."}</Hint>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="worshipLeader"
+          render={({ field }) => (
+            <FormItem>
+              <LeaderLabel profile={profile} />
+              <FormControl>
+                <Input placeholder={leaderPlaceholder} {...field} className="h-11" value={field.value ?? ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </>
   );
 }
@@ -662,16 +667,12 @@ type TemplateSelectorProps = {
 function TemplateSelector({ selected, onSelect }: TemplateSelectorProps) {
   const { templates, isLoading } = useFetchTemplates();
 
-  if (isLoading) {
-    return <p className="text-xs text-muted-foreground">Carregando modelos...</p>;
-  }
-
-  if (templates.length === 0) {
-    return <p className="text-xs text-muted-foreground">Nenhum modelo cadastrado.</p>;
-  }
+  // Sem modelos cadastrados (ou ainda carregando) o bloco não aparece: nada a escolher.
+  if (isLoading || templates.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-1.5">
+      <span className="text-sm leading-none font-medium">Modelo</span>
       {templates.map((tmpl) => {
         const isSelected = selected?.id === tmpl.id;
         return (
