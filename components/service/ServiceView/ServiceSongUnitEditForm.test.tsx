@@ -208,13 +208,12 @@ describe('ServiceSongUnitEditForm — aviso e confirmação', () => {
 
   it('quem não edita músicas vê o aviso de que só a liturgia muda, antes de digitar', () => {
     renderAs([]);
-    expect(screen.getByText('editCopyNoticeTitle')).toBeDefined();
-    expect(screen.getByText('editCopyNoticeBody')).toBeDefined();
+    expect(screen.getByText('editCopyNotice')).toBeDefined();
   });
 
   it('quem edita músicas não vê o aviso (a pergunta de escopo já explica)', () => {
     renderAs(['WORSHIP']);
-    expect(screen.queryByText('editCopyNoticeTitle')).toBeNull();
+    expect(screen.queryByText('editCopyNotice')).toBeNull();
   });
 
   it('ao salvar só na liturgia, confirma e diz que a original não mudou', async () => {

@@ -131,13 +131,10 @@ export default function ServiceSongUnitEditForm({
       {!canEditSongs && (
         <div
           role="note"
-          className="mb-4 flex items-start gap-2.5 rounded-lg border border-info-border bg-info-subtle px-3.5 py-3 text-sm"
+          className="mb-4 flex items-start gap-2.5 rounded-lg border border-info-border bg-info-subtle px-3.5 py-3 text-sm text-foreground"
         >
           <Info className="mt-0.5 size-4 shrink-0 text-info-text" aria-hidden />
-          <div className="space-y-0.5">
-            <p className="font-medium text-foreground">{t("editCopyNoticeTitle")}</p>
-            <p className="text-muted-foreground">{t("editCopyNoticeBody")}</p>
-          </div>
+          <p>{t("editCopyNotice")}</p>
         </div>
       )}
       <BlockEditorFormBridge className="" />

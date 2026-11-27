@@ -207,8 +207,7 @@
     "expand": "Expand block"
   },
   "ServiceView": {
-    "editCopyNoticeTitle": "Only this service will change",
-    "editCopyNoticeBody": "The song's original chart stays as it is. If it is corrected later, this version won't follow.",
+    "editCopyNotice": "You're editing only in this service. The original chart won't be changed.",
     "savedServiceOnly": "Chart saved in this service",
     "savedServiceOnlyHint": "The original chart did not change.",
     "savedBoth": "Chart saved in the service and the original",
