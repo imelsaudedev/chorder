@@ -29,7 +29,7 @@ describe("PATCH /api/profile integration", () => {
     const created = await prisma.user.create({
       data: {
         email: testEmail,
-        name: "Original Google Name",
+        name: null,
         roles: ["WORSHIP"],
       },
     });
@@ -49,11 +49,11 @@ describe("PATCH /api/profile integration", () => {
       isPreviewing: false,
     });
 
-    const res = await PATCH(makePatchRequest({ nickname: "Toshi" }));
+    const res = await PATCH(makePatchRequest({ name: "Toshi" }));
     expect(res.status).toBe(401);
   });
 
-  it("sets and trims nickname for the authenticated user", async () => {
+  it("updates and trims name for the authenticated user", async () => {
     mockGetLiveUserAuth.mockResolvedValue({
       authenticated: true,
       userId,
@@ -62,23 +62,16 @@ describe("PATCH /api/profile integration", () => {
       isPreviewing: false,
     });
 
-    const res = await PATCH(makePatchRequest({ nickname: "  Toshi  " }));
+    const res = await PATCH(makePatchRequest({ name: "  Toshi  " }));
     expect(res.status).toBe(200);
     const data = await res.json();
-    expect(data.nickname).toBe("Toshi");
-    expect(data.name).toBe("Original Google Name");
+    expect(data.name).toBe("Toshi");
 
     const dbUser = await prisma.user.findUnique({ where: { id: userId } });
-    expect(dbUser?.nickname).toBe("Toshi");
-    expect(dbUser?.name).toBe("Original Google Name");
+    expect(dbUser?.name).toBe("Toshi");
   });
 
-  it("clears nickname to null when empty string is submitted", async () => {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { nickname: "Toshi" },
-    });
-
+  it("returns 400 when name is empty or whitespace", async () => {
     mockGetLiveUserAuth.mockResolvedValue({
       authenticated: true,
       userId,
@@ -87,16 +80,11 @@ describe("PATCH /api/profile integration", () => {
       isPreviewing: false,
     });
 
-    const res = await PATCH(makePatchRequest({ nickname: "   " }));
-    expect(res.status).toBe(200);
-    const data = await res.json();
-    expect(data.nickname).toBeNull();
-
-    const dbUser = await prisma.user.findUnique({ where: { id: userId } });
-    expect(dbUser?.nickname).toBeNull();
+    const res = await PATCH(makePatchRequest({ name: "   " }));
+    expect(res.status).toBe(400);
   });
 
-  it("returns 400 when nickname exceeds 60 characters", async () => {
+  it("returns 400 when name exceeds 60 characters", async () => {
     mockGetLiveUserAuth.mockResolvedValue({
       authenticated: true,
       userId,
@@ -105,7 +93,7 @@ describe("PATCH /api/profile integration", () => {
       isPreviewing: false,
     });
 
-    const res = await PATCH(makePatchRequest({ nickname: "a".repeat(61) }));
+    const res = await PATCH(makePatchRequest({ name: "a".repeat(61) }));
     expect(res.status).toBe(400);
   });
 });

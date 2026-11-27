@@ -31,7 +31,9 @@ const nextAuthResult = NextAuth({
         if (googlePicture && googlePicture !== user.image) {
           updates.image = googlePicture;
         }
-        if (googleName && googleName !== user.name) {
+        // Only fill name from Google if the user does not have one yet,
+        // so manual edits on /profile are preserved.
+        if (googleName && !user.name) {
           updates.name = googleName;
         }
 

@@ -357,20 +357,17 @@
   "Profile": {
     "title": "My profile",
     "unnamed": "Unnamed user",
-    "accountName": "Account name: {name}",
     "rolesTitle": "Your roles",
     "roleAdmin": "Admin",
     "roleWorship": "Worship",
     "roleMedia": "Media",
     "roleUser": "User",
     "noTeamRolesHint": "You have standard access. If you are part of the Worship or Media team, let leadership know to enable your access.",
-    "nicknameLabel": "Nickname",
-    "nicknamePlaceholder": "How you prefer to be called",
-    "nicknameHint": "If set, your nickname will be shown instead of your account name. Leave blank to use your original account name.",
+    "nameLabel": "Name",
+    "namePlaceholder": "How you prefer to be called",
+    "nameHint": "This is the name displayed for you across the site.",
     "save": "Save",
-    "useOriginalName": "Use original name",
-    "nicknameSaved": "Nickname updated!",
-    "nicknameCleared": "Nickname removed. Using your account name.",
-    "saveError": "Could not save your nickname. Please try again."
+    "nameSaved": "Name updated!",
+    "saveError": "Could not save your name. Please try again."
   }
 }

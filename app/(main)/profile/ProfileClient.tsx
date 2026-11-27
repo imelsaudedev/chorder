@@ -5,10 +5,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getDisplayName } from "@/lib/user-display";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@prisma/client";
-import { Loader2, Shield, Users, Video, Music } from "lucide-react";
+import { Loader2, Music, Shield, Users, Video } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -18,7 +17,6 @@ interface ProfileClientProps {
   user: {
     id: string;
     name: string | null;
-    nickname: string | null;
     email: string;
     image: string | null;
     roles: UserRole[];
@@ -45,18 +43,14 @@ export default function ProfileClient({ user }: ProfileClientProps) {
   const t = useTranslations("Profile");
   const router = useRouter();
 
-  const [savedNickname, setSavedNickname] = useState<string>(user.nickname ?? "");
-  const [nickname, setNickname] = useState<string>(user.nickname ?? "");
+  const [savedName, setSavedName] = useState<string>(user.name ?? "");
+  const [name, setName] = useState<string>(user.name ?? "");
   const [isSaving, setIsSaving] = useState(false);
 
-  const displayName = getDisplayName({
-    nickname: savedNickname || null,
-    name: user.name,
-  });
-  const initials = getInitials(displayName, user.email);
+  const initials = getInitials(savedName || null, user.email);
 
-  const trimmedInput = nickname.trim();
-  const hasChanged = trimmedInput !== savedNickname.trim();
+  const trimmedInput = name.trim();
+  const canSave = trimmedInput.length > 0 && trimmedInput !== savedName.trim();
 
   const visibleTeamRoles: UserRole[] = [];
   if (user.roles.includes("WORSHIP")) visibleTeamRoles.push("WORSHIP");
@@ -65,27 +59,25 @@ export default function ProfileClient({ user }: ProfileClientProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (isSaving || !hasChanged) return;
+    if (isSaving || !canSave) return;
 
     setIsSaving(true);
     try {
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname: trimmedInput || null }),
+        body: JSON.stringify({ name: trimmedInput }),
       });
 
       if (!res.ok) {
         throw new Error("Failed to update profile");
       }
 
-      const data: { nickname: string | null } = await res.json();
-      const nextNickname = data.nickname ?? "";
-      setSavedNickname(nextNickname);
-      setNickname(nextNickname);
-      toast.success(
-        nextNickname ? t("nicknameSaved") : t("nicknameCleared")
-      );
+      const data: { name: string | null } = await res.json();
+      const nextName = data.name ?? "";
+      setSavedName(nextName);
+      setName(nextName);
+      toast.success(t("nameSaved"));
       router.refresh();
     } catch {
       toast.error(t("saveError"));
@@ -138,7 +130,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
           <Avatar className="h-16 w-16 ring-2 ring-border">
             <AvatarImage
               src={user.image ?? undefined}
-              alt={displayName ?? user.email}
+              alt={savedName || user.email}
             />
             <AvatarFallback className="bg-secondary text-secondary-foreground text-base font-display font-semibold">
               {initials}
@@ -147,16 +139,11 @@ export default function ProfileClient({ user }: ProfileClientProps) {
 
           <div className="min-w-0 flex-1 space-y-1">
             <h2 className="truncate text-lg font-semibold text-foreground">
-              {displayName ?? t("unnamed")}
+              {savedName || t("unnamed")}
             </h2>
             <Text variant="caption" as="p" className="truncate">
               {user.email}
             </Text>
-            {savedNickname && user.name && savedNickname !== user.name && (
-              <Text variant="caption" size="xs" as="p" className="truncate">
-                {t("accountName", { name: user.name })}
-              </Text>
-            )}
           </div>
         </div>
 
@@ -187,39 +174,29 @@ export default function ProfileClient({ user }: ProfileClientProps) {
       <section className="rounded-xl border border-border bg-card p-6 shadow-xs">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="nickname">{t("nicknameLabel")}</Label>
+            <Label htmlFor="name">{t("nameLabel")}</Label>
             <Input
-              id="nickname"
-              name="nickname"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              placeholder={t("nicknamePlaceholder")}
+              id="name"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t("namePlaceholder")}
               maxLength={60}
               disabled={isSaving}
-              autoComplete="nickname"
+              autoComplete="name"
             />
             <Text variant="caption" size="xs" as="p">
-              {t("nicknameHint")}
+              {t("nameHint")}
             </Text>
           </div>
 
           <div className="flex items-center gap-2 pt-1">
-            <Button type="submit" disabled={isSaving || !hasChanged}>
+            <Button type="submit" disabled={isSaving || !canSave}>
               {isSaving && (
                 <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
               )}
               {t("save")}
             </Button>
-            {savedNickname && (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isSaving}
-                onClick={() => setNickname("")}
-              >
-                {t("useOriginalName")}
-              </Button>
-            )}
           </div>
         </form>
       </section>

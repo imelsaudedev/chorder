@@ -358,20 +358,17 @@
   "Profile": {
     "title": "Meu perfil",
     "unnamed": "Sem nome",
-    "accountName": "Nome da conta: {name}",
     "rolesTitle": "Seus perfis",
     "roleAdmin": "Admin",
     "roleWorship": "Louvor",
     "roleMedia": "Mídia",
     "roleUser": "Usuário",
     "noTeamRolesHint": "Você tem acesso padrão. Se faz parte da equipe de Louvor ou Mídia, avise a liderança para liberar o acesso.",
-    "nicknameLabel": "Apelido",
-    "nicknamePlaceholder": "Como você prefere ser chamado(a)",
-    "nicknameHint": "Se definir um apelido, ele será exibido no lugar do seu nome. Deixe em branco para usar o nome original da sua conta.",
+    "nameLabel": "Nome",
+    "namePlaceholder": "Como você prefere ser chamado(a)",
+    "nameHint": "Este é o nome exibido para você no site.",
     "save": "Salvar",
-    "useOriginalName": "Usar nome original",
-    "nicknameSaved": "Apelido atualizado!",
-    "nicknameCleared": "Apelido removido. Usando o nome da conta.",
-    "saveError": "Não foi possível salvar o apelido. Tente novamente."
+    "nameSaved": "Nome atualizado!",
+    "saveError": "Não foi possível salvar o nome. Tente novamente."
   }
 }

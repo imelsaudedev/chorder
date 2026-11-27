@@ -1,5 +1,4 @@
 import { getLiveUserAuth } from "@/lib/auth-guard";
-import { getDisplayName } from "@/lib/user-display";
 import prisma from "@/prisma/client";
 import { retrieveService } from "@/prisma/data";
 import type { UserRole } from "@prisma/client";
@@ -39,13 +38,13 @@ async function listShares(serviceId: number) {
     select: {
       userId: true,
       permission: true,
-      user: { select: { name: true, nickname: true, email: true, image: true } },
+      user: { select: { name: true, email: true, image: true } },
     },
   });
   return rows.map((row) => ({
     userId: row.userId,
     permission: row.permission,
-    name: getDisplayName(row.user),
+    name: row.user.name,
     email: row.user.email,
     image: row.user.image,
   }));

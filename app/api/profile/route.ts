@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const updateProfileSchema = z.object({
-  nickname: z.string().trim().max(60).nullable(),
+  name: z.string().trim().min(1).max(60),
 });
 
 export async function PATCH(request: NextRequest) {
@@ -16,18 +16,15 @@ export async function PATCH(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const parsed = updateProfileSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid nickname" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid name" }, { status: 400 });
   }
-
-  const normalizedNickname = parsed.data.nickname?.trim() || null;
 
   const updated = await prisma.user.update({
     where: { id: live.userId },
-    data: { nickname: normalizedNickname },
+    data: { name: parsed.data.name },
     select: {
       id: true,
       name: true,
-      nickname: true,
       email: true,
       image: true,
     },

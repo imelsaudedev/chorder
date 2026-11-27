@@ -23,7 +23,6 @@ export default async function ProfilePage() {
     select: {
       id: true,
       name: true,
-      nickname: true,
       email: true,
       image: true,
       roles: true,
