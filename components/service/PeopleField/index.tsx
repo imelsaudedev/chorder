@@ -18,6 +18,8 @@ type PeopleFieldProps = {
   className?: string;
   /** Altura do campo: `lg` (44px) como os campos da gaveta (`h-11`); `default` (36px) como o `Input` padrão. */
   size?: "default" | "lg";
+  /** Campo necessário e ainda vazio: borda de aviso, como os campos de texto dos itens do roteiro. */
+  warn?: boolean;
   // O FormControl entrega estes três: o rótulo foca o campo e o erro pinta a borda.
   id?: string;
   "aria-invalid"?: boolean | "true" | "false";
@@ -72,6 +74,7 @@ export default function PeopleField({
   placeholder,
   className,
   size = "default",
+  warn = false,
   id,
   "aria-invalid": ariaInvalid,
   "aria-describedby": ariaDescribedBy,
@@ -167,6 +170,7 @@ export default function PeopleField({
             size === "lg" ? "min-h-11 py-1" : "min-h-9 py-px",
             "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
             "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+            warn && "border-warning",
           )}
           onClick={() => inputRef.current?.focus()}
         >

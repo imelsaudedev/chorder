@@ -5,6 +5,8 @@ export type FalaMeta = { speaker?: string | null; description?: string | null };
 export type LeituraMeta = { version?: string | null; text?: string | null };
 export type SermaoMeta = {
   preacher?: string | null;
+  /** Conta do pregador, quando escolhido entre as pessoas do sistema. */
+  preacherId?: string | null;
   reference?: string | null;
   description?: string | null;
 };

@@ -2,6 +2,7 @@
 
 import LeaderAvatars from "@/components/service/LeaderAvatars";
 import { leadersOf } from "@/lib/service-leaders";
+import { summarizeSermons } from "@/lib/sermon-summary";
 import Text from "@/components/common/Text";
 import { ClientService } from "@/prisma/models";
 import { format } from "date-fns";
@@ -27,6 +28,8 @@ export default function ServicePlanHeader({ service, onEdit, compact = false }: 
   const { filled, total } = countPlanProgress(service.plan?.sections ?? []);
   const percent = total > 0 ? Math.round((filled / total) * 100) : 0;
   const isDraft = service.status === "DRAFT";
+  // O pregador vem do item Sermão (ao vivo, enquanto se edita); culto só de canções não tem.
+  const preacher = summarizeSermons(service.plan, service).preacher;
   // Culto salvo: as pessoas e as fotos vêm de `leaderPeople` (culto antigo, só com o texto, fica sem foto).
   // Culto novo, ainda sem `leaderPeople`: as pessoas escolhidas na gaveta, com as iniciais até salvar.
   const leaderPeople =
@@ -94,10 +97,10 @@ export default function ServicePlanHeader({ service, onEdit, compact = false }: 
                 {service.worshipLeader}
               </Text>
             )}
-            {service.preacher && (
+            {preacher && (
               <Text variant="caption" className="flex items-center gap-1 truncate text-foreground/80">
                 <Mic2 className="w-3.5 h-3.5 shrink-0" />
-                {service.preacher}
+                {preacher}
               </Text>
             )}
           </div>

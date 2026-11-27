@@ -53,9 +53,6 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const parsed = serviceSchema.safeParse({
-    sermonTheme: null,
-    sermonReference: null,
-    preacher: null,
     leaders: [],
     plan: null,
     ...body,

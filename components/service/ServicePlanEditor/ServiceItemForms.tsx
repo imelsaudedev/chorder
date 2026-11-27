@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import PeopleField from "@/components/service/PeopleField";
 import { Textarea } from "@/components/ui/textarea";
 import { ClientServiceUnit } from "@/prisma/models";
 import {
@@ -568,6 +569,8 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
 
     const [label, setLabel] = useState(unit.label ?? "");
     const [preacher, setPreacher] = useState(existingMeta?.preacher ?? "");
+    // conta do pregador, quando escolhido entre as pessoas do sistema (nome digitado fica sem conta)
+    const [preacherId, setPreacherId] = useState(existingMeta?.preacherId ?? null);
     const [reference, setReference] = useState(existingMeta?.reference ?? "");
     const [description, setDescription] = useState(existingMeta?.description ?? "");
     const [duration, setDuration] = useState(
@@ -590,6 +593,7 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
     function buildChanges(): Partial<ClientServiceUnit> {
       const metadata = {
         preacher: preacher.trim() || null,
+        preacherId: preacher.trim() ? preacherId : null,
         reference: reference.trim() || null,
         description: description.trim() || null,
       };
@@ -614,13 +618,22 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
           autoFocus
         />
         <FieldWithDuration duration={duration} onDurationChange={setDuration}>
-          <TextField
-          label="Pregador"
-          required={mode !== "template"}
-          value={preacher}
-          onChange={setPreacher}
-          placeholder="Ex: Pastor João..."
-        />
+          <Field label="Pregador" required={mode !== "template" && !preacher.trim()}>
+            {(id) => (
+              <PeopleField
+                id={id}
+                size="lg"
+                max={1}
+                warn={mode !== "template" && !preacher.trim()}
+                value={preacher ? [{ userId: preacherId, name: preacher }] : []}
+                onChange={(next) => {
+                  setPreacher(next[0]?.name ?? "");
+                  setPreacherId(next[0]?.userId ?? null);
+                }}
+                placeholder="Buscar pessoa ou digitar o nome"
+              />
+            )}
+          </Field>
         </FieldWithDuration>
         <TextField
           label="Referência bíblica"
