@@ -1,6 +1,6 @@
 "use client";
 
-import { useFetchServices, useFetchTemplates } from "@/app/api/api-client";
+import { useFetchServicesList, useFetchTemplates } from "@/app/api/api-client";
 import DatePicker from "@/components/common/DatePicker";
 import { Button } from "@/components/ui/button";
 import {
@@ -295,6 +295,16 @@ type CreationFieldsProps = {
   onTimeChange: () => void;
 };
 
+/** Rótulo "Sugestão" e, abaixo dele, atalhos de um toque (chips do sistema: Button soft), acima do campo. */
+function Suggestions({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-start gap-1.5 pb-1">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <div className="flex flex-wrap gap-1.5">{children}</div>
+    </div>
+  );
+}
+
 function isSameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
@@ -309,13 +319,13 @@ function CreationFields({
 }: CreationFieldsProps) {
   const t = useTranslations();
   const leaderPlaceholder = useLeaderPlaceholder(profile);
-  const { services } = useFetchServices(profile.showTemplates);
+  // Mesma consulta (e cache) da lista de liturgias do mesmo tipo.
+  const { services } = useFetchServicesList(profile.showTemplates ? "church" : "personal");
 
   // Liturgias existentes, para avisar quando o dia escolhido já tem uma.
   const existingServices = useMemo<{ slug: string; title: string | null; date: Date }[]>(
     () =>
       (Array.isArray(services) ? services : [])
-        .filter((service: { isDeleted?: boolean }) => !service.isDeleted)
         .map((service: { slug: string; title?: string | null; date: string | Date }) => ({
           slug: service.slug,
           title: service.title ?? null,
@@ -331,6 +341,20 @@ function CreationFields({
   const dateValue = form.watch("date");
   const timeValue = form.watch("startTime");
   const sundayLabel = `${isSameDay(sunday, new Date()) ? "Hoje" : "Próximo domingo"} · ${format(sunday, "d/MM", { locale: ptBR })}`;
+  // Horários de início mais usados nas liturgias deste tipo (até 3): um toque preenche.
+  const timeSuggestions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const service of services ?? []) {
+      // O horário mora na data da liturgia (hora local). 00:00 é "sem horário" (cultos importados só com o dia).
+      const time = timeFromDate(new Date(String(service.date)));
+      if (time !== "00:00") counts.set(time, (counts.get(time) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 3)
+      .map(([time]) => time)
+      .sort();
+  }, [services]);
   const sameDayServices = dateValue
     ? existingServices.filter((service) => isSameDay(service.date, new Date(dateValue)))
     : [];
@@ -352,17 +376,7 @@ function CreationFields({
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("ServiceData.date")}</FormLabel>
-            <FormControl>
-              <DatePicker
-                buttonProps={{ className: "w-full h-11" }}
-                disabled={field.disabled}
-                onChange={(date) => field.onChange(date ?? null)}
-                value={field.value ?? undefined}
-              />
-            </FormControl>
-            {/* Sugestão de data: chip do sistema (Button soft) logo abaixo do campo */}
-            <div className="flex flex-col items-start gap-1.5 pt-1">
-              <span className="text-xs text-muted-foreground">{t("ServiceData.suggestion")}</span>
+            <Suggestions label={t("ServiceData.suggestion")}>
               <Button
                 type="button"
                 variant="soft"
@@ -373,7 +387,16 @@ function CreationFields({
                 {!!dateValue && isSameDay(new Date(dateValue), sunday) && <Check className="size-3.5" aria-hidden />}
                 {sundayLabel}
               </Button>
-            </div>
+            </Suggestions>
+            <FormControl>
+              <DatePicker
+                buttonProps={{ className: "w-full h-11" }}
+                disabled={field.disabled}
+                onChange={(date) => field.onChange(date ?? null)}
+                value={field.value ?? undefined}
+              />
+            </FormControl>
+
             {sameDayServices.length > 0 && (
               <p className="text-xs text-muted-foreground">
                 Já existe uma liturgia neste dia:{" "}
@@ -399,6 +422,26 @@ function CreationFields({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Hora de início</FormLabel>
+            {timeSuggestions.length > 0 && (
+              <Suggestions label={t("ServiceData.suggestion")}>
+                {timeSuggestions.map((time) => (
+                  <Button
+                    key={time}
+                    type="button"
+                    variant="soft"
+                    size="sm"
+                    aria-pressed={timeValue === time}
+                    onClick={() => {
+                      onTimeChange();
+                      form.setValue("startTime", time, { shouldValidate: true, shouldDirty: true });
+                    }}
+                  >
+                    {timeValue === time && <Check className="size-3.5" aria-hidden />}
+                    {time}
+                  </Button>
+                ))}
+              </Suggestions>
+            )}
             <FormControl>
               <Input
                 type="time"
