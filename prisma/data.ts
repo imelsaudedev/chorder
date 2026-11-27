@@ -1247,7 +1247,7 @@ export async function retrieveServicesList(
       title: true,
       date: true,
       worshipLeader: true,
-      leaders: { orderBy: { order: "asc" }, select: { name: true, user: { select: { image: true } } } },
+      leaders: { orderBy: { order: "asc" }, select: { userId: true, name: true, user: { select: { image: true } } } },
       preacher: true,
       sermonTheme: true,
       sermonReference: true,
@@ -1274,7 +1274,7 @@ export async function retrieveServicesList(
       ...service,
       // Culto antigo, sem a lista: o texto do dirigente conta como um nome só.
       leaders: leaders.length ? leaders.map((l) => l.name) : service.worshipLeader?.trim() ? [service.worshipLeader.trim()] : [],
-      leaderPeople: leaders.map((l) => ({ name: l.name, image: l.user?.image ?? null })),
+      leaderPeople: leaders.map((l) => ({ userId: l.userId, name: l.name, image: l.user?.image ?? null })),
       isSharedWithMe:
         service.scope === "PERSONAL" &&
         Boolean(viewerUserId) &&
@@ -1442,6 +1442,23 @@ async function resolveLeaders(
   if (ids.length === 0) return list;
   const found = new Set((await db.user.findMany({ where: { id: { in: ids } }, select: { id: true } })).map((u) => u.id));
   return list.map((l) => (l.userId && !found.has(l.userId) ? { ...l, userId: null } : l));
+}
+
+/**
+ * Troca a lista de dirigentes de uma liturgia (edição rápida pela lista) e devolve o texto derivado,
+ * que também é gravado em `Service.worshipLeader`.
+ */
+export async function setServiceLeaders(
+  serviceId: number,
+  entries: readonly ServiceLeaderEntry[]
+): Promise<string | null> {
+  return prisma.$transaction(async (tx) => {
+    const leaders = await resolveLeaders(tx, entries, null);
+    await replaceLeaders(tx, serviceId, leaders);
+    const worshipLeader = joinLeaderNames(leaders.map((l) => l.name));
+    await tx.service.update({ where: { id: serviceId }, data: { worshipLeader } });
+    return worshipLeader;
+  });
 }
 
 async function replaceLeaders(tx: Prisma.TransactionClient, serviceId: number, leaders: readonly ServiceLeaderEntry[]) {

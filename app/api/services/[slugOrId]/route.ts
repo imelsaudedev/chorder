@@ -3,6 +3,7 @@ import { canManageChurchServices } from "@/lib/permissions";
 import {
   createOrUpdateService,
   deleteService,
+  setServiceLeaders,
   retrieveService,
   ServiceConflictError,
 } from "@/prisma/data";
@@ -113,7 +114,18 @@ export async function PATCH(
     status?: ServiceStatus;
   } = {};
   if ("title" in body) data.title = body.title ?? null;
-  if ("worshipLeader" in body) data.worshipLeader = body.worshipLeader || null;
+  if (Array.isArray(body.leaders)) {
+    // edição rápida pela lista: a lista de pessoas é a fonte e o texto do dirigente é derivado dela
+    const entries = body.leaders.flatMap((item: unknown) => {
+      const entry = item as { userId?: unknown; name?: unknown } | null;
+      return typeof entry?.name === "string"
+        ? [{ userId: typeof entry.userId === "string" ? entry.userId : null, name: entry.name }]
+        : [];
+    });
+    data.worshipLeader = await setServiceLeaders(service.id, entries);
+  } else if ("worshipLeader" in body) {
+    data.worshipLeader = body.worshipLeader || null;
+  }
   if ("date" in body) data.date = new Date(body.date);
   if ("preacher" in body) data.preacher = body.preacher ?? null;
   if ("sermonTheme" in body) data.sermonTheme = body.sermonTheme ?? null;

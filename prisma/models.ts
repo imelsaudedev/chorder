@@ -142,7 +142,7 @@ export type ServiceListItem = Pick<
   /** Nomes de quem conduz, um por pessoa (`worshipLeader` é o texto junto, "Hugo e Ana"). */
   leaders?: string[];
   /** Quem conduz, com a foto da conta (quando há): a lista de Liturgias mostra foto e nome. */
-  leaderPeople?: { name: string; image: string | null }[];
+  leaderPeople?: { userId: string | null; name: string; image: string | null }[];
   startTime: string | null;
   songCount: number;
   /** Títulos das músicas, na ordem da liturgia (a busca da lista usa isto). */

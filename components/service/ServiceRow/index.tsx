@@ -138,7 +138,18 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
     })
       .then((res) => {
         if (!res.ok) return;
-        setLocal((prev) => ({ ...prev, ...values }));
+        setLocal((prev) => ({
+          ...prev,
+          title: values.title,
+          date: values.date,
+          worshipLeader: values.worshipLeader,
+          leaders: values.leaders.map((l) => l.name),
+          leaderPeople: values.leaders.map((l) => ({
+            userId: l.userId,
+            name: l.name,
+            image: prev.leaderPeople?.find((p) => p.userId && p.userId === l.userId)?.image ?? null,
+          })),
+        }));
         setMetaOpen(false);
         mutate((key) => typeof key === "string" && key.startsWith("/api/services"));
       })
@@ -276,7 +287,12 @@ export default function ServiceRow({ service, badge, timeline }: ServiceRowProps
         onOpenChange={setMetaOpen}
         isNew={false}
         isPersonal={local.scope === "PERSONAL"}
-        defaultValues={{ title: local.title ?? "", worshipLeader: local.worshipLeader ?? "", date }}
+        defaultValues={{
+          title: local.title ?? "",
+          worshipLeader: local.worshipLeader ?? "",
+          leaders: local.leaderPeople?.map(({ userId, name }) => ({ userId, name })),
+          date,
+        }}
         onSave={handleMetaSave}
         loading={saving}
       />

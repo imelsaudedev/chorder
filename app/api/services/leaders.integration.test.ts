@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import prisma from '../../../prisma/client';
 import { GET as GET_PEOPLE } from '../people/route';
 import { GET, POST } from './route';
-import { GET as GET_ONE, POST as POST_ONE } from './[slugOrId]/route';
+import { GET as GET_ONE, PATCH as PATCH_ONE, POST as POST_ONE } from './[slugOrId]/route';
 
 vi.mock('@/auth', () => ({ auth: vi.fn() }));
 
@@ -67,9 +67,9 @@ describe('vários dirigentes', () => {
     const list = await (await GET(new Request('http://localhost/api/services?view=list'))).json();
     expect(list[0].leaders).toEqual(['Ana Souza', 'Hugo Lima', 'Visitante']);
     expect(list[0].leaderPeople).toEqual([
-      { name: 'Ana Souza', image: null },
-      { name: 'Hugo Lima', image: null },
-      { name: 'Visitante', image: null },
+      { userId: 'ana', name: 'Ana Souza', image: null },
+      { userId: 'hugo', name: 'Hugo Lima', image: null },
+      { userId: null, name: 'Visitante', image: null },
     ]);
   });
 
@@ -130,6 +130,48 @@ describe('vários dirigentes', () => {
     const row = await prisma.serviceLeader.findFirstOrThrow();
     expect(row.userId).toBeNull();
     expect(row.name).toBe('Hugo Lima');
+  });
+});
+
+describe('editar dados pela lista (PATCH)', () => {
+  it('troca os dirigentes, deriva o texto e a lista passa a devolver as pessoas', async () => {
+    const created = await (
+      await POST(new Request('http://localhost/api/services', { method: 'POST', body: body({ worshipLeader: 'Antigo' }) }))
+    ).json();
+
+    const res = await PATCH_ONE(
+      new NextRequest(`http://localhost/api/services/${created.slug}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          title: 'Culto',
+          date: '2026-12-06T10:00:00Z',
+          leaders: [
+            { userId: ana.id, name: 'Ana Souza' },
+            { userId: null, name: 'Visitante' },
+            { userId: 'nao-existe', name: 'Caio' },
+          ],
+        }),
+      }),
+      { params: Promise.resolve({ slugOrId: created.slug }) }
+    );
+    expect(res.status).toBe(200);
+
+    const list = await (await GET(new Request('http://localhost/api/services?view=list'))).json();
+    expect(list[0].worshipLeader).toBe('Ana Souza, Visitante e Caio');
+    expect(list[0].leaderPeople).toEqual([
+      { userId: 'ana', name: 'Ana Souza', image: null },
+      { userId: null, name: 'Visitante', image: null },
+      { userId: null, name: 'Caio', image: null },
+    ]);
+
+    // limpar tudo remove os dirigentes e o texto
+    await PATCH_ONE(
+      new NextRequest(`http://localhost/api/services/${created.slug}`, { method: 'PATCH', body: JSON.stringify({ leaders: [] }) }),
+      { params: Promise.resolve({ slugOrId: created.slug }) }
+    );
+    const after = await (await GET(new Request('http://localhost/api/services?view=list'))).json();
+    expect(after[0].worshipLeader).toBeNull();
+    expect(after[0].leaders).toEqual([]);
   });
 });
 

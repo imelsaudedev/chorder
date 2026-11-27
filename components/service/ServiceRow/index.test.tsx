@@ -90,8 +90,8 @@ describe("ServiceRow", () => {
       service({
         worshipLeader: "Ana Souza e Hugo Lima",
         leaderPeople: [
-          { name: "Ana Souza", image: null },
-          { name: "Hugo Lima", image: null },
+          { userId: "ana", name: "Ana Souza", image: null },
+          { userId: null, name: "Hugo Lima", image: null },
         ],
       })
     );

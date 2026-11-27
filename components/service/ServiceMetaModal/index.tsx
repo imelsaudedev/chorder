@@ -13,7 +13,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import PeopleField from "@/components/service/PeopleField";
 import { Input } from "@/components/ui/input";
+import { joinLeaderNames, leadersOf } from "@/lib/service-leaders";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { serviceProfile } from "@/lib/service-profile";
 import { useTranslations } from "next-intl";
@@ -21,22 +23,26 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const serviceMetaSchema = z.object({
-  title: z.string().min(1),
-  worshipLeader: z.string().nullable(),
-  date: z.coerce.date(),
-});
+const leadersSchema = z.array(z.object({ userId: z.string().nullable(), name: z.string() }));
 
-export type ServiceMeta = z.infer<typeof serviceMetaSchema>;
+/** O que o formulário edita; `worshipLeader` (texto) é derivado das pessoas ao salvar. */
+export type ServiceMeta = {
+  title: string;
+  worshipLeader: string | null;
+  leaders: z.infer<typeof leadersSchema>;
+  date: Date;
+};
 
 function useServiceMetaSchema(titleRequired: boolean) {
   const t = useTranslations("SongForm");
   return z.object({
     title: titleRequired ? z.string().min(1, t("cantBeEmpty")) : z.string(),
-    worshipLeader: z.string().nullable(),
+    leaders: leadersSchema,
     date: z.coerce.date(),
   });
 }
+
+type FormValues = z.infer<ReturnType<typeof useServiceMetaSchema>>;
 
 type ServiceMetaModalProps = {
   open: boolean;
@@ -62,12 +68,12 @@ export default function ServiceMetaModal({
   const profile = serviceProfile(isPersonal ? "PERSONAL" : "CHURCH");
   const schema = useServiceMetaSchema(profile.titleRequired);
 
-  const form = useForm<ServiceMeta>({
+  const form = useForm<FormValues>({
     mode: "onChange",
     resolver: zodResolver(schema),
     defaultValues: {
       title: defaultValues?.title ?? "",
-      worshipLeader: defaultValues?.worshipLeader ?? "",
+      leaders: leadersOf(defaultValues ?? {}),
       date: defaultValues?.date ?? new Date(),
     },
   });
@@ -78,14 +84,20 @@ export default function ServiceMetaModal({
     if (open) {
       form.reset({
         title: defaultValues?.title ?? "",
-        worshipLeader: defaultValues?.worshipLeader ?? "",
+        leaders: leadersOf(defaultValues ?? {}),
         date: defaultValues?.date ?? new Date(),
       });
     }
   }, [open]);
 
-  function handleSubmit(values: ServiceMeta) {
-    const result = onSave(values);
+  function handleSubmit(values: FormValues) {
+    const leaders = leadersOf({ leaders: values.leaders });
+    const result = onSave({
+      title: values.title,
+      worshipLeader: joinLeaderNames(leaders.map((l) => l.name)),
+      leaders,
+      date: values.date,
+    });
     if (result !== false) onOpenChange(false);
   }
 
@@ -140,7 +152,7 @@ export default function ServiceMetaModal({
 
             <FormField
               control={form.control}
-              name="worshipLeader"
+              name="leaders"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -150,14 +162,14 @@ export default function ServiceMetaModal({
                     )}
                   </FormLabel>
                   <FormControl>
-                    <Input
+                    <PeopleField
+                      value={field.value}
+                      onChange={field.onChange}
                       placeholder={
                         profile.leader === "conduz"
                           ? t("ServiceData.leaderPersonalPlaceholder")
                           : t("ServiceData.worshipLeaderPlaceholder")
                       }
-                      {...field}
-                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
