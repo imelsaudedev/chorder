@@ -149,13 +149,13 @@ export default function PeopleField({ value, onChange, max, placeholder, classNa
                 key={`${person.userId ?? "nome"}-${person.name}`}
                 title={linked ? undefined : t("peopleNoAccount")}
                 className={cn(
-                  // avatar encostado na borda esquerda, do tamanho da altura do chip
-                  "flex h-9 items-center gap-2 overflow-hidden rounded-full border bg-secondary/10 pl-0 pr-1.5 text-sm",
+                  // altura h-8, a mesma dos chips do sistema (Button soft sm); avatar encostado na borda esquerda
+                  "flex h-8 items-center gap-2 overflow-hidden rounded-full border bg-secondary/10 pl-0 pr-1.5 text-sm",
                   linked ? "border-transparent" : "border-dashed border-secondary/40",
                   armed && index === value.length - 1 && "ring-2 ring-ring",
                 )}
               >
-                <Avatar className="size-[34px]" aria-hidden>
+                <Avatar className="size-[30px]" aria-hidden>
                   <AvatarFallback className="bg-secondary/20 text-xs">
                     {linked ? initials(person.name) : <UserRound className="size-3.5 text-muted-foreground" />}
                   </AvatarFallback>
