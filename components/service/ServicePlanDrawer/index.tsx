@@ -546,7 +546,7 @@ function CreationFields({
             <FormItem>
               <LeaderLabel profile={profile} />
               <FormControl>
-                <PeopleField value={field.value} onChange={field.onChange} placeholder={leaderPlaceholder} />
+                <PeopleField size="lg" value={field.value} onChange={field.onChange} placeholder={leaderPlaceholder} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -633,7 +633,7 @@ function EditFields({ form, profile }: EditFieldsProps) {
           <FormItem>
             <LeaderLabel profile={profile} />
             <FormControl>
-              <PeopleField value={field.value} onChange={field.onChange} placeholder={leaderPlaceholder} />
+              <PeopleField size="lg" value={field.value} onChange={field.onChange} placeholder={leaderPlaceholder} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -649,6 +649,7 @@ function EditFields({ form, profile }: EditFieldsProps) {
             <FormLabel>Pregador</FormLabel>
             <FormControl>
               <PeopleField
+                size="lg"
                 max={1}
                 value={field.value ? [{ userId: form.watch("preacherId"), name: field.value }] : []}
                 onChange={(next) => {

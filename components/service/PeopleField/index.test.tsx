@@ -117,4 +117,23 @@ describe("PeopleField", () => {
     expect(value()).toEqual([]);
     expect(screen.getByRole("combobox")).toBeTruthy();
   });
+
+  it("segue o Input do sistema: id para o rótulo, borda de erro e altura por tamanho", () => {
+    const { container, rerender } = render(
+      <NextIntlClientProvider locale="pt-BR" messages={messages}>
+        <PeopleField value={[]} onChange={() => {}} placeholder="Buscar" id="campo" aria-invalid="true" />
+      </NextIntlClientProvider>
+    );
+    expect(input().id).toBe("campo"); // clicar no rótulo foca o campo
+    const box = container.querySelector("[aria-invalid]") as HTMLElement;
+    expect(box.className).toContain("border-input");
+    expect(box.className).toContain("min-h-9"); // 36px, como o Input padrão
+
+    rerender(
+      <NextIntlClientProvider locale="pt-BR" messages={messages}>
+        <PeopleField value={[]} onChange={() => {}} placeholder="Buscar" size="lg" />
+      </NextIntlClientProvider>
+    );
+    expect(container.querySelector(".min-h-11")).not.toBeNull(); // 44px, como os campos da gaveta (h-11)
+  });
 });

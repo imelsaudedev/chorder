@@ -16,6 +16,12 @@ type PeopleFieldProps = {
   max?: number;
   placeholder: string;
   className?: string;
+  /** Altura do campo: `lg` (44px) como os campos da gaveta (`h-11`); `default` (36px) como o `Input` padrão. */
+  size?: "default" | "lg";
+  // O FormControl entrega estes três: o rótulo foca o campo e o erro pinta a borda.
+  id?: string;
+  "aria-invalid"?: boolean | "true" | "false";
+  "aria-describedby"?: string;
 };
 
 function initials(name: string) {
@@ -59,7 +65,17 @@ const sameName = (a: string, b: string) => a.localeCompare(b, "pt-BR", { sensiti
  * portais perdem os eventos) e vem do `cmdk`, que cuida de setas, Enter e `aria-activedescendant`.
  * Pessoa com conta tem avatar; nome sem conta tem borda tracejada.
  */
-export default function PeopleField({ value, onChange, max, placeholder, className }: PeopleFieldProps) {
+export default function PeopleField({
+  value,
+  onChange,
+  max,
+  placeholder,
+  className,
+  size = "default",
+  id,
+  "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
+}: PeopleFieldProps) {
   const t = useTranslations("ServiceData");
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -69,6 +85,13 @@ export default function PeopleField({ value, onChange, max, placeholder, classNa
   const [announcement, setAnnouncement] = useState("");
   const query = useDebounced(text.trim(), 200);
   const { people, isLoading } = useFetchPeople(query, open);
+
+  // O cmdk fixa o próprio `id` no input e ignora o da prop: aplicamos o do formulário depois de montar,
+  // para o clique no rótulo focar o campo. O nome acessível segue vindo do aria-labelledby do cmdk.
+  const hasInput = !(max === 1 && value.length > 0) && !(max !== undefined && max !== 1 && value.length >= max);
+  useEffect(() => {
+    if (id && inputRef.current) inputRef.current.id = id;
+  }, [id, hasInput]);
 
   const single = max === 1;
   const full = max !== undefined && !single && value.length >= max;
@@ -136,9 +159,14 @@ export default function PeopleField({ value, onChange, max, placeholder, classNa
     >
       <Command shouldFilter={false} loop label={placeholder} value={active} onValueChange={setActive}>
         <div
+          // mesmas bordas, fundo, sombra, foco e erro do `Input` (components/ui/input.tsx)
+          aria-invalid={ariaInvalid}
           className={cn(
-            "flex min-h-11 flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1.5",
-            "focus-within:ring-2 focus-within:ring-ring",
+            "flex w-full min-w-0 flex-wrap items-center gap-1.5 rounded-md border border-input bg-background px-2 shadow-xs transition-[color,box-shadow] dark:bg-input/30",
+            // chip h-8 (32px) + borda: `default` fecha em 36px com 1px de respiro; `lg` em 44px
+            size === "lg" ? "min-h-11 py-1" : "min-h-9 py-px",
+            "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
+            "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
           )}
           onClick={() => inputRef.current?.focus()}
         >
@@ -194,6 +222,7 @@ export default function PeopleField({ value, onChange, max, placeholder, classNa
             !full && (
               <Command.Input
                 ref={inputRef}
+                aria-describedby={ariaDescribedBy}
                 value={text}
                 onValueChange={(v) => {
                   setText(v);
@@ -207,7 +236,7 @@ export default function PeopleField({ value, onChange, max, placeholder, classNa
                 }}
                 onKeyDown={onKeyDown}
                 placeholder={value.length === 0 ? placeholder : undefined}
-                className="h-8 min-w-24 flex-1 bg-transparent px-1 text-base outline-none placeholder:text-muted-foreground"
+                className="h-8 min-w-24 flex-1 bg-transparent px-1 text-base outline-none placeholder:text-muted-foreground md:text-sm"
               />
             )
           )}
