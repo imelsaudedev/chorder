@@ -8,6 +8,7 @@ import {
   canViewChurchServices,
 } from "@/lib/permissions";
 import { summarizeServicePlan } from "@/lib/service-list";
+import { summarizeSermons } from "@/lib/sermon-summary";
 import prisma from "./client";
 import {
   ClientArrangement,
@@ -1269,10 +1270,15 @@ export async function retrieveServicesList(
     : [];
   const titleByArrangementId = new Map(arrangements.map((a) => [a.id, a.song.title]));
 
-  return services.map(({ plan: _plan, createdById, leaders, ...service }, index) => {
+  return services.map(({ plan, createdById, leaders, ...service }, index) => {
     const summary = summaries[index];
+    // Pregador, tema e texto vêm do item Sermão do roteiro; as colunas antigas só valem onde o item não diz nada.
+    const sermon = summarizeSermons(plan as ServicePlan | null, service);
     return {
       ...service,
+      preacher: sermon.preacher,
+      sermonTheme: sermon.theme,
+      sermonReference: sermon.reference,
       // Culto antigo, sem a lista: o texto do dirigente conta como um nome só.
       leaders: leaders.length ? leaders.map((l) => l.name) : service.worshipLeader?.trim() ? [service.worshipLeader.trim()] : [],
       leaderPeople: leaders.map((l) => ({ userId: l.userId, name: l.name, image: l.user?.image ?? null })),
