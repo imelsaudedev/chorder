@@ -622,6 +622,7 @@ export const SermaoUnitForm = forwardRef<UnitFormHandle, UnitFormBaseProps>(
             {(id) => (
               <PeopleField
                 id={id}
+                kind="preacher"
                 size="lg"
                 max={1}
                 warn={mode !== "template" && !preacher.trim()}

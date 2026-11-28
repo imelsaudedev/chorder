@@ -488,11 +488,11 @@ export function useFetchRecentServices() {
 }
 
 /** Pessoas com conta que combinam com a busca (nome e foto), para escolher dirigente e pregador. */
-export function useFetchPeople(query: string, enabled = true) {
+export function useFetchPeople(query: string, enabled = true, kind: "leader" | "preacher" = "leader") {
   const { data, isLoading } = useSWR(
-    enabled ? ["/api/people", query] : null,
-    ([url, q]: [string, string]) =>
-      fetch(`${url}?q=${encodeURIComponent(q)}`).then((res) => (res.ok ? res.json() : [])),
+    enabled ? ["/api/people", query, kind] : null,
+    ([url, q, k]: [string, string, string]) =>
+      fetch(`${url}?q=${encodeURIComponent(q)}&for=${k}`).then((res) => (res.ok ? res.json() : [])),
     { keepPreviousData: true, dedupingInterval: 30_000 }
   );
   return { people: (data ?? []) as { id: string; name: string; image: string | null; recent?: boolean }[], isLoading };
