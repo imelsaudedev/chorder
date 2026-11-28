@@ -160,9 +160,6 @@ model Service {
   scope           ServiceScope  @default(CHURCH)
   createdById     String?
   shareToken      String?       @unique
-  preacher        String?
-  sermonTheme     String?
-  sermonReference String?
   plan            Json?
   updatedAt       DateTime      @default(now()) @updatedAt
 

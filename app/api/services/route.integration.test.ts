@@ -162,15 +162,13 @@ describe('Services API integration', () => {
                 slug: 'culto-lista',
                 date: new Date('2026-05-03T10:00:00Z'),
                 worshipLeader: 'Ana',
-                preacher: 'Pr. Samuel',
-                sermonTheme: 'Gratidão',
-                sermonReference: 'Sl 103',
                 plan: {
                     startTime: '09:30',
                     sections: [
                         { id: 's1', type: 'CULTO', label: 'Culto', order: 1, units: [
                             { clientId: 'u1', type: 'SONG', arrangementId, semitoneTranspose: 0, order: 1 },
                             { clientId: 'u2', type: 'ORACAO', arrangementId: null, semitoneTranspose: 0, order: 2 },
+                            { clientId: 'u3', type: 'SERMAO', arrangementId: null, semitoneTranspose: 0, order: 3, label: 'Gratidão', metadata: { preacher: 'Pr. Samuel', reference: 'Sl 103' } },
                         ] },
                     ],
                 },

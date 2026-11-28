@@ -47,7 +47,6 @@ export default function ClientServiceFormPage({
     title: defaultMeta.title,
     worshipLeader: defaultMeta.worshipLeader,
     leaders: defaultMeta.leaders ?? [],
-    preacher: null,
     date: defaultMeta.date,
     isDeleted: false,
     scope: defaultMeta.scope ?? "CHURCH",

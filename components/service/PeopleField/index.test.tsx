@@ -86,6 +86,25 @@ describe("PeopleField", () => {
     expect(screen.getByTitle("Sem conta")).toBeTruthy();
   });
 
+  it("quando a busca troca as sugestões, o primeiro item já nasce marcado (sem janela em que o Enter não faz nada)", async () => {
+    render(<Harness initial={[{ userId: "ana", name: "Ana Souza" }]} />);
+    // registra qualquer estado do DOM em que há uma lista de uma opção que não está marcada
+    let unmarkedMoment = false;
+    const observer = new MutationObserver(() => {
+      const options = screen.queryAllByRole("option");
+      if (options.length === 1 && options[0].getAttribute("aria-selected") !== "true") unmarkedMoment = true;
+    });
+    observer.observe(document.body, { subtree: true, childList: true, attributes: true });
+
+    fireEvent.change(input(), { target: { value: "Visitante" } });
+    await waitFor(() => expect(optionNames()).toHaveLength(1));
+    await new Promise((resolve) => setTimeout(resolve, 50)); // deixa assentar os efeitos
+    observer.disconnect();
+
+    expect(unmarkedMoment).toBe(false);
+    expect(screen.getByRole("option").getAttribute("aria-selected")).toBe("true");
+  });
+
   it("não oferece adicionar quem já está na lista", async () => {
     render(<Harness initial={[{ userId: null, name: "Visitante" }]} />);
     fireEvent.change(input(), { target: { value: "visitante" } });

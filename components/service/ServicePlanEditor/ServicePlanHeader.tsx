@@ -29,7 +29,7 @@ export default function ServicePlanHeader({ service, onEdit, compact = false }: 
   const percent = total > 0 ? Math.round((filled / total) * 100) : 0;
   const isDraft = service.status === "DRAFT";
   // O pregador vem do item Sermão (ao vivo, enquanto se edita); culto só de canções não tem.
-  const preacher = summarizeSermons(service.plan, service).preacher;
+  const preacher = summarizeSermons(service.plan).preacher;
   // Culto salvo: as pessoas e as fotos vêm de `leaderPeople` (culto antigo, só com o texto, fica sem foto).
   // Culto novo, ainda sem `leaderPeople`: as pessoas escolhidas na gaveta, com as iniciais até salvar.
   const leaderPeople =

@@ -65,7 +65,6 @@ export default function TemplateEditor({ id, name, defaultStartTime, sections }:
       title: editor.name,
       date,
       worshipLeader: null,
-      preacher: null,
       isArchived: false,
       isDeleted: false,
       plan: {

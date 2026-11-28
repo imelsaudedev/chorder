@@ -117,6 +117,10 @@ export default function PeopleField({
   const firstValue = shown[0] ? `pessoa-${shown[0].id}` : canAddFree ? "adicionar-sem-conta" : "";
   const [active, setActive] = useState("");
   useEffect(() => setActive(firstValue), [firstValue]);
+  // Se o item marcado saiu da lista (a busca acabou de trocar as sugestões), vale o primeiro já neste
+  // render, sem esperar o efeito acima: no intervalo nenhum item ficaria marcado e o Enter não faria nada.
+  const itemValues = [...shown.map((p) => `pessoa-${p.id}`), ...(canAddFree ? ["adicionar-sem-conta"] : [])];
+  const markedValue = itemValues.includes(active) ? active : firstValue;
 
   function add(entry: ServiceLeaderEntry) {
     onChange(single ? [entry] : [...value, entry]);
@@ -163,7 +167,7 @@ export default function PeopleField({
         }
       }}
     >
-      <Command shouldFilter={false} loop label={placeholder} value={active} onValueChange={setActive}>
+      <Command shouldFilter={false} loop label={placeholder} value={markedValue} onValueChange={setActive}>
         <div
           // mesmas bordas, fundo, sombra, foco e erro do `Input` (components/ui/input.tsx)
           aria-invalid={ariaInvalid}
