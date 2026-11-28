@@ -50,7 +50,7 @@ beforeEach(async () => {
 });
 
 describe('pregador, tema e texto vêm do item Sermão', () => {
-  it('a lista mostra o que está no item Sermão, e a liturgia não grava nas colunas antigas', async () => {
+  it('a lista mostra pregador, tema e texto do item Sermão', async () => {
     const res = await create('com-sermao', [
       unit(1, 'SERMAO', 'A graça que transforma', { preacher: 'Hugo Lima', reference: 'Jo 3.16', description: null }),
     ]);
@@ -60,11 +60,6 @@ describe('pregador, tema e texto vêm do item Sermão', () => {
     expect(row.preacher).toBe('Hugo Lima');
     expect(row.sermonTheme).toBe('A graça que transforma');
     expect(row.sermonReference).toBe('Jo 3.16');
-
-    const stored = await prisma.service.findFirstOrThrow({ where: { slug: 'com-sermao' } });
-    expect(stored.preacher).toBeNull();
-    expect(stored.sermonTheme).toBeNull();
-    expect(stored.sermonReference).toBeNull();
   });
 
   it('culto só de canções não tem pregador', async () => {
@@ -75,61 +70,13 @@ describe('pregador, tema e texto vêm do item Sermão', () => {
     expect(row.sermonReference).toBeNull();
   });
 
-  it('culto antigo: a coluna antiga vale quando o item não diz nada, e o item vence quando diz', async () => {
-    await prisma.service.create({
-      data: {
-        slug: 'antigo',
-        title: 'Antigo',
-        date: new Date('2020-01-05'),
-        preacher: 'Pr. Antigo',
-        sermonTheme: 'Tema antigo',
-        sermonReference: 'Sl 23',
-        plan: planWith(unit(1, 'OUTRO', 'Cantos', { description: null })) as object,
-      },
-    });
-    await prisma.service.create({
-      data: {
-        slug: 'migrado',
-        title: 'Migrado',
-        date: new Date('2020-01-12'),
-        preacher: 'Pr. Antigo',
-        plan: planWith(unit(1, 'SERMAO', null, { preacher: 'Hugo Lima' })) as object,
-      },
-    });
-    const rows = await list();
-    expect(rows.find((r) => r.slug === 'antigo')).toMatchObject({
-      preacher: 'Pr. Antigo',
-      sermonTheme: 'Tema antigo',
-      sermonReference: 'Sl 23',
-    });
-    expect(rows.find((r) => r.slug === 'migrado').preacher).toBe('Hugo Lima');
-  });
-
-  it('salvar um culto antigo não apaga as colunas antigas', async () => {
-    await prisma.service.create({
-      data: { slug: 'antigo-2', title: 'Antigo 2', date: new Date('2020-02-02'), preacher: 'Pr. Antigo', plan: planWith(unit(1, 'OUTRO', null, { description: null })) as object },
-    });
-    const existing = await prisma.service.findFirstOrThrow({ where: { slug: 'antigo-2' } });
-    const { POST: SAVE } = await import('./[slugOrId]/route');
-    const { NextRequest } = await import('next/server');
-    const res = await SAVE(
-      new NextRequest('http://localhost/api/services/antigo-2', {
-        method: 'POST',
-        body: JSON.stringify({
-          id: existing.id,
-          slug: 'antigo-2',
-          title: 'Antigo 2 editado',
-          date: existing.date,
-          isDeleted: false,
-          worshipLeader: null,
-          leaders: [],
-          updatedAt: existing.updatedAt,
-          plan: planWith(unit(1, 'OUTRO', null, { description: null })),
-        }),
-      }),
-      { params: Promise.resolve({ slugOrId: 'antigo-2' }) }
-    );
-    expect(res.status).toBe(200);
-    expect((await prisma.service.findFirstOrThrow({ where: { slug: 'antigo-2' } })).preacher).toBe('Pr. Antigo');
+  it('vários sermões: os pregadores aparecem juntos', async () => {
+    await create('dois-sermoes', [
+      unit(1, 'SERMAO', 'Primeiro', { preacher: 'Hugo Lima' }),
+      unit(2, 'SERMAO', 'Segundo', { preacher: 'Ana Souza' }),
+    ]);
+    const [row] = await list();
+    expect(row.preacher).toBe('Hugo Lima e Ana Souza');
+    expect(row.sermonTheme).toBe('Primeiro');
   });
 });

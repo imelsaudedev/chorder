@@ -42,20 +42,6 @@ describe("summarizeSermons", () => {
     });
   });
 
-  it("culto antigo: as colunas antigas valem só onde o item não diz nada", () => {
-    const legacy = { preacher: "Pr. Antigo", sermonTheme: "Tema antigo", sermonReference: "Sl 23" };
-    expect(summarizeSermons(plan(unit(1, "SONG", null)), legacy)).toEqual({
-      preacher: "Pr. Antigo",
-      theme: "Tema antigo",
-      reference: "Sl 23",
-    });
-    expect(summarizeSermons(plan(unit(1, "SERMAO", "Novo tema", { preacher: "Hugo Lima" })), legacy)).toEqual({
-      preacher: "Hugo Lima",
-      theme: "Novo tema",
-      reference: "Sl 23",
-    });
-  });
-
   it("respeita a ordem das seções e dos itens, não a do array", () => {
     const p: ServicePlan = {
       startTime: null,

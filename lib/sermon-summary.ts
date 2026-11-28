@@ -15,16 +15,9 @@ export type SermonSummary = {
   reference: string | null;
 };
 
-/** Colunas antigas da liturgia (dados importados): só valem onde o item Sermão não diz nada. */
-export type LegacySermon = {
-  preacher?: string | null;
-  sermonTheme?: string | null;
-  sermonReference?: string | null;
-};
-
 const clean = (value: string | null | undefined) => value?.trim() || null;
 
-export function summarizeSermons(plan: ServicePlan | null | undefined, legacy?: LegacySermon): SermonSummary {
+export function summarizeSermons(plan: ServicePlan | null | undefined): SermonSummary {
   const sermons = [...(plan?.sections ?? [])]
     .sort((a, b) => a.order - b.order)
     .flatMap((section) => [...section.units].sort((a, b) => a.order - b.order))
@@ -44,8 +37,8 @@ export function summarizeSermons(plan: ServicePlan | null | undefined, legacy?: 
     .find(Boolean);
 
   return {
-    preacher: joinLeaderNames(preachers) ?? clean(legacy?.preacher),
-    theme: theme ?? clean(legacy?.sermonTheme),
-    reference: reference ?? clean(legacy?.sermonReference),
+    preacher: joinLeaderNames(preachers),
+    theme: theme ?? null,
+    reference: reference ?? null,
   };
 }

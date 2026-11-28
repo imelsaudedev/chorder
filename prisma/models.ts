@@ -132,10 +132,11 @@ export type ClientServiceTemplate = Omit<ServiceTemplate, "id"> & {
 export type ServiceRef = Pick<Service, "slug" | "title" | "date">;
 
 /** Liturgia como a lista de Liturgias a vê: sem o plano, com o resumo pronto. */
-export type ServiceListItem = Pick<
-  Service,
-  "slug" | "title" | "date" | "worshipLeader" | "preacher" | "sermonTheme" | "sermonReference"
-> & {
+export type ServiceListItem = Pick<Service, "slug" | "title" | "date" | "worshipLeader"> & {
+  /** Pregador(es), tema e texto: vêm dos itens Sermão do plano (lib/sermon-summary.ts), não de colunas. */
+  preacher: string | null;
+  sermonTheme: string | null;
+  sermonReference: string | null;
   status?: ServiceStatus;
   scope?: ServiceScope;
   isSharedWithMe?: boolean;
@@ -157,7 +158,7 @@ export type ServicePlan = {
 
 export type ClientService = Omit<
   Service,
-  "id" | "legacyId" | "preacher" | "sermonTheme" | "sermonReference" | "plan" | "updatedAt" | "status" | "scope" | "createdById" | "shareToken"
+  "id" | "legacyId" | "plan" | "updatedAt" | "status" | "scope" | "createdById" | "shareToken"
 > & {
   id?: number;
   status?: ServiceStatus;
@@ -174,13 +175,10 @@ export type ClientService = Omit<
   plan?: ServicePlan | null;
   prevService?: ServiceRef | null;
   nextService?: ServiceRef | null;
-  preacher?: string | null;
   /** Quem conduz (uma ou mais pessoas). Vazio em culto antigo: use `leadersOf`. */
   leaders?: ServiceLeaderEntry[];
   /** Os mesmos dirigentes, com a foto da conta, só para exibir (não vai no salvamento). */
   leaderPeople?: { userId: string | null; name: string; image: string | null }[];
-  sermonTheme?: string | null;
-  sermonReference?: string | null;
   // Presente em cultos já salvos — o client manda de volta o valor que carregou
   // pra detectar se alguém mais salvou o mesmo culto nesse meio tempo (ver
   // syncPlanArrangements/createOrUpdateService em prisma/data.ts).

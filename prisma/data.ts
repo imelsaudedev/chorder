@@ -1250,9 +1250,6 @@ export async function retrieveServicesList(
       date: true,
       worshipLeader: true,
       leaders: { orderBy: { order: "asc" }, select: { userId: true, name: true, user: { select: { image: true } } } },
-      preacher: true,
-      sermonTheme: true,
-      sermonReference: true,
       status: true,
       scope: true,
       createdById: true,
@@ -1272,8 +1269,8 @@ export async function retrieveServicesList(
 
   return services.map(({ plan, createdById, leaders, ...service }, index) => {
     const summary = summaries[index];
-    // Pregador, tema e texto vêm do item Sermão do roteiro; as colunas antigas só valem onde o item não diz nada.
-    const sermon = summarizeSermons(plan as ServicePlan | null, service);
+    // Pregador, tema e texto vêm do item Sermão do roteiro.
+    const sermon = summarizeSermons(plan as ServicePlan | null);
     return {
       ...service,
       preacher: sermon.preacher,
