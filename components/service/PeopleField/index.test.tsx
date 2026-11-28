@@ -47,6 +47,18 @@ describe("PeopleField", () => {
     expect(optionNames()).toEqual(["Hugo Lima", "Ana Souza", "Caio Álvares"]);
   });
 
+  it("campo de pregador diz que a pessoa pregou recentemente, e o de dirigente que conduziu", () => {
+    const { unmount } = render(
+      <NextIntlClientProvider locale="pt-BR" messages={messages}>
+        <PeopleField value={[]} onChange={() => {}} placeholder="Buscar" kind="preacher" />
+      </NextIntlClientProvider>
+    );
+    fireEvent.focus(input());
+    expect(screen.getByText("Pregaram recentemente")).toBeTruthy();
+    expect(screen.queryByText("Conduziram recentemente")).toBeNull();
+    unmount();
+  });
+
   it("escolhe por clique e depois por Enter (vários dirigentes), anunciando para leitor de tela", () => {
     render(<Harness />);
     fireEvent.focus(input());

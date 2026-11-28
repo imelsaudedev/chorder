@@ -140,6 +140,7 @@
     "peopleAddWithoutAccount": "Adicionar \"{name}\" (sem conta)",
     "peopleRemove": "Remover {name}",
     "peopleRecent": "Conduziram recentemente",
+    "peoplePreachedRecent": "Pregaram recentemente",
     "peopleAll": "Pessoas",
     "peopleEmpty": "Nenhuma pessoa encontrada",
     "peopleSearching": "Buscando…",

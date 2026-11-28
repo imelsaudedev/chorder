@@ -16,8 +16,12 @@ type PeopleFieldProps = {
   max?: number;
   placeholder: string;
   className?: string;
+  /** Quem o campo escolhe: define quem aparece primeiro ("Conduziram recentemente" × "Pregaram recentemente"). */
+  kind?: "leader" | "preacher";
   /** Altura do campo: `lg` (44px) como os campos da gaveta (`h-11`); `default` (36px) como o `Input` padrão. */
   size?: "default" | "lg";
+  /** Campo necessário e ainda vazio: borda de aviso, como os campos de texto dos itens do roteiro. */
+  warn?: boolean;
   // O FormControl entrega estes três: o rótulo foca o campo e o erro pinta a borda.
   id?: string;
   "aria-invalid"?: boolean | "true" | "false";
@@ -71,7 +75,9 @@ export default function PeopleField({
   max,
   placeholder,
   className,
+  kind = "leader",
   size = "default",
+  warn = false,
   id,
   "aria-invalid": ariaInvalid,
   "aria-describedby": ariaDescribedBy,
@@ -84,7 +90,7 @@ export default function PeopleField({
   const [armed, setArmed] = useState(false); // Backspace em dois passos: o 1º marca o último chip
   const [announcement, setAnnouncement] = useState("");
   const query = useDebounced(text.trim(), 200);
-  const { people, isLoading } = useFetchPeople(query, open);
+  const { people, isLoading } = useFetchPeople(query, open, kind);
 
   // O cmdk fixa o próprio `id` no input e ignora o da prop: aplicamos o do formulário depois de montar,
   // para o clique no rótulo focar o campo. O nome acessível segue vindo do aria-labelledby do cmdk.
@@ -167,6 +173,7 @@ export default function PeopleField({
             size === "lg" ? "min-h-11 py-1" : "min-h-9 py-px",
             "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
             "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+            warn && "border-warning",
           )}
           onClick={() => inputRef.current?.focus()}
         >
@@ -259,7 +266,7 @@ export default function PeopleField({
             )}
 
             {recent.length > 0 && !typed && (
-              <Command.Group heading={t("peopleRecent")} className={groupClass}>
+              <Command.Group heading={t(kind === "preacher" ? "peoplePreachedRecent" : "peopleRecent")} className={groupClass}>
                 {recent.map((p) => (
                   <PersonRow key={p.id} person={p} query="" onPick={add} />
                 ))}

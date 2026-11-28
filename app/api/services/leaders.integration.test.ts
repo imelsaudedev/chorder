@@ -216,6 +216,41 @@ describe('GET /api/people', () => {
     expect(searched).toEqual([{ id: 'hugo', name: 'Hugo Lima', image: null }]);
   });
 
+  it('para pregador: quem pregou recentemente vem primeiro (pela conta ou pelo nome), não quem conduziu', async () => {
+    const sermon = (preacher: string | null, preacherId: string | null) => ({
+      startTime: '10:00',
+      sections: [
+        {
+          id: 's',
+          type: 'CULTO',
+          label: 'Culto',
+          order: 1,
+          units: [{ clientId: 'u', type: 'SERMAO', order: 1, label: null, metadata: { preacher, preacherId } }],
+        },
+      ],
+    });
+    // Hugo conduziu (tabela de dirigentes) mas não pregou; Ana pregou, só com o nome digitado (sem a conta)
+    await POST(
+      new Request('http://localhost/api/services', {
+        method: 'POST',
+        body: body({ slug: 'conduzido', leaders: [{ userId: hugo.id, name: 'Hugo Lima' }] }),
+      })
+    );
+    await prisma.service.create({
+      data: { slug: 'pregado', title: 'Pregado', date: new Date('2026-12-13'), plan: sermon('ana souza', null) as object },
+    });
+    // pregação de uma liturgia pessoal não conta
+    await prisma.service.create({
+      data: { slug: 'pessoal', title: 'Pessoal', scope: 'PERSONAL', date: new Date('2026-12-20'), plan: sermon('Hugo Lima', hugo.id) as object },
+    });
+
+    const preachers = await (await GET_PEOPLE(new Request('http://localhost/api/people?for=preacher'))).json();
+    expect(preachers.filter((p: { recent?: boolean }) => p.recent).map((p: { id: string }) => p.id)).toEqual(['ana']);
+
+    const leaders = await (await GET_PEOPLE(new Request('http://localhost/api/people?for=leader'))).json();
+    expect(leaders.filter((p: { recent?: boolean }) => p.recent).map((p: { id: string }) => p.id)).toEqual(['hugo']);
+  });
+
   it('usuário comum, sem perfil, também busca (monta liturgia pessoal)', async () => {
     vi.mocked(auth).mockResolvedValueOnce({
       user: { id: 'ana', email: 'ana@test.com', roles: [] },
