@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import PeopleField from "@/components/service/PeopleField";
 import { Input } from "@/components/ui/input";
 import {
   buildSectionsFromTemplate,
@@ -26,6 +27,7 @@ import {
 } from "@/lib/template-utils";
 import { cn } from "@/lib/utils";
 import { buildServiceTitle, nextSunday } from "@/lib/service-schedule";
+import { joinLeaderNames, leadersOf, type ServiceLeaderEntry } from "@/lib/service-leaders";
 import { ServiceProfile, serviceProfile } from "@/lib/service-profile";
 import { ClientServiceSection, ClientServiceTemplate } from "@/prisma/models";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,8 +44,8 @@ import { z } from "zod";
 // aceita nulo e a obrigatoriedade fica na validação.
 const buildSchema = (titleRequired: boolean, titleMessage: string) => z.object({
   title: titleRequired ? z.string().min(1, titleMessage) : z.string(),
-  worshipLeader: z.string().nullable(),
-  preacher: z.string().nullable(),
+  // Quem conduz: uma ou mais pessoas (com conta ou só o nome). O texto do dirigente é derivado daqui.
+  leaders: z.array(z.object({ userId: z.string().nullable(), name: z.string() })),
   // Boolean(...) de propósito: um `value !== null` estreitaria o tipo de saída e separaria
   // entrada e saída do formulário.
   date: z.date().nullable().refine((value) => Boolean(value), "Escolha a data"),
@@ -55,7 +57,7 @@ type FormValues = z.infer<ReturnType<typeof buildSchema>>;
 export type ServicePlanConfig = {
   title: string;
   worshipLeader: string | null;
-  preacher: string | null;
+  leaders: ServiceLeaderEntry[];
   date: Date;
   templateId: number | null;
   templateSections: ClientServiceSection[] | null;
@@ -69,7 +71,7 @@ type ServicePlanDrawerProps = {
   defaultValues?: {
     title?: string;
     worshipLeader?: string | null;
-    preacher?: string | null;
+    leaders?: ServiceLeaderEntry[];
     date?: Date;
   };
   loading?: boolean;
@@ -112,8 +114,7 @@ export default function ServicePlanDrawer({
     const date = isNew ? null : (defaultValues?.date ?? new Date());
     return {
       title: isNew ? "" : (defaultValues?.title ?? ""),
-      worshipLeader: defaultValues?.worshipLeader ?? "",
-      preacher: defaultValues?.preacher ?? "",
+      leaders: leadersOf({ leaders: defaultValues?.leaders, worshipLeader: defaultValues?.worshipLeader }),
       date,
       startTime: date ? timeFromDate(date) : "",
     };
@@ -177,10 +178,11 @@ export default function ServicePlanDrawer({
   function handleSubmit(values: FormValues) {
     const date = combineDateAndTime(values.date as Date, values.startTime);
 
+    const leaders = leadersOf({ leaders: values.leaders });
     const result = onSave({
       title: values.title,
-      worshipLeader: values.worshipLeader || null,
-      preacher: values.preacher || null,
+      worshipLeader: joinLeaderNames(leaders.map((l) => l.name)),
+      leaders,
       date,
       templateId: selectedTemplate?.id ?? null,
       templateSections: selectedTemplate
@@ -529,12 +531,12 @@ function CreationFields({
 
         <FormField
           control={form.control}
-          name="worshipLeader"
+          name="leaders"
           render={({ field }) => (
             <FormItem>
               <LeaderLabel profile={profile} />
               <FormControl>
-                <Input placeholder={leaderPlaceholder} {...field} className="h-11" value={field.value ?? ""} />
+                <PeopleField size="lg" value={field.value} onChange={field.onChange} placeholder={leaderPlaceholder} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -547,7 +549,7 @@ function CreationFields({
 
 
 // ---------------------------------------------------------------------------
-// Edit fields: título → data → hora → dirigente → pregador
+// Edit fields: título → data → hora → dirigente (pregador e sermão ficam no item Sermão do roteiro)
 // ---------------------------------------------------------------------------
 
 type EditFieldsProps = {
@@ -574,6 +576,7 @@ function EditFields({ form, profile }: EditFieldsProps) {
                 placeholder={profile.titleRequired ? t("ServiceData.titlePlaceholder") : t("ServiceData.titlePlaceholderPersonal")}
                 autoFocus
                 {...field}
+                className="h-11"
               />
             </FormControl>
             <FormMessage />
@@ -589,7 +592,7 @@ function EditFields({ form, profile }: EditFieldsProps) {
             <FormLabel>{t("ServiceData.date")}</FormLabel>
             <FormControl>
               <DatePicker
-                buttonProps={{ className: "w-full" }}
+                buttonProps={{ className: "w-full h-11" }}
                 disabled={field.disabled}
                 onChange={field.onChange}
                 value={field.value ?? undefined}
@@ -616,41 +619,17 @@ function EditFields({ form, profile }: EditFieldsProps) {
 
       <FormField
         control={form.control}
-        name="worshipLeader"
+        name="leaders"
         render={({ field }) => (
           <FormItem>
             <LeaderLabel profile={profile} />
             <FormControl>
-              <Input
-                placeholder={leaderPlaceholder}
-                {...field}
-                value={field.value ?? ""}
-              />
+              <PeopleField size="lg" value={field.value} onChange={field.onChange} placeholder={leaderPlaceholder} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
-      {profile.showPreacher && (
-      <FormField
-        control={form.control}
-        name="preacher"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Pregador</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="Nome do pregador"
-                {...field}
-                value={field.value ?? ""}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      )}
     </>
   );
 }

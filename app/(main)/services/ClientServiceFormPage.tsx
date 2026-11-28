@@ -3,6 +3,7 @@
 import { useFetchService } from "@/app/api/api-client";
 import ServiceFormSkeleton from "@/components/service/ServiceForm/Skeleton";
 import ServicePlanEditor from "@/components/service/ServicePlanEditor";
+import type { ServiceLeaderEntry } from "@/lib/service-leaders";
 import { serviceProfile } from "@/lib/service-profile";
 import { ClientService, ClientServiceSection, ServicePlan, ServiceScope } from "@/prisma/models";
 import { useRouter } from "next/navigation";
@@ -11,7 +12,7 @@ import { Suspense } from "react";
 export type ServiceDefaultMeta = {
   title: string;
   worshipLeader: string | null;
-  preacher?: string | null;
+  leaders?: ServiceLeaderEntry[];
   date: Date;
   sections?: ClientServiceSection[];
   scope?: ServiceScope;
@@ -45,7 +46,8 @@ export default function ClientServiceFormPage({
     slug: "",
     title: defaultMeta.title,
     worshipLeader: defaultMeta.worshipLeader,
-    preacher: defaultMeta.preacher ?? null,
+    leaders: defaultMeta.leaders ?? [],
+    preacher: null,
     date: defaultMeta.date,
     isDeleted: false,
     scope: defaultMeta.scope ?? "CHURCH",

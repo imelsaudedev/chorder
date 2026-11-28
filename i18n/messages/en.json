@@ -135,7 +135,19 @@
     "worshipLeaderPlaceholder": "Worship leader",
     "titlePlaceholderPersonal": "Small group",
     "leaderPersonal": "Who leads",
-    "leaderPersonalPlaceholder": "e.g. Ana and Pedro"
+    "leaderPersonalPlaceholder": "e.g. Ana and Pedro",
+    "peoplePlaceholder": "Search a person or type a name",
+    "peopleAddWithoutAccount": "Add \"{name}\" (no account)",
+    "peopleRemove": "Remove {name}",
+    "peopleRecent": "Led recently",
+    "peopleAll": "People",
+    "peopleEmpty": "No one found",
+    "peopleSearching": "Searching…",
+    "peopleSwitch": "Change",
+    "peopleAdded": "{name} added",
+    "peopleRemoved": "{name} removed",
+    "peopleNoAccount": "No account",
+    "peopleList": "Suggested people"
   },
   "SongData": {
     "title": "Title",

@@ -1,3 +1,4 @@
+import type { ServiceLeaderEntry } from "@/lib/service-leaders";
 import {
   ArrangementAudio,
   Prisma,
@@ -138,6 +139,10 @@ export type ServiceListItem = Pick<
   status?: ServiceStatus;
   scope?: ServiceScope;
   isSharedWithMe?: boolean;
+  /** Nomes de quem conduz, um por pessoa (`worshipLeader` é o texto junto, "Hugo e Ana"). */
+  leaders?: string[];
+  /** Quem conduz, com a foto da conta (quando há): a lista de Liturgias mostra foto e nome. */
+  leaderPeople?: { userId: string | null; name: string; image: string | null }[];
   startTime: string | null;
   songCount: number;
   /** Títulos das músicas, na ordem da liturgia (a busca da lista usa isto). */
@@ -170,6 +175,10 @@ export type ClientService = Omit<
   prevService?: ServiceRef | null;
   nextService?: ServiceRef | null;
   preacher?: string | null;
+  /** Quem conduz (uma ou mais pessoas). Vazio em culto antigo: use `leadersOf`. */
+  leaders?: ServiceLeaderEntry[];
+  /** Os mesmos dirigentes, com a foto da conta, só para exibir (não vai no salvamento). */
+  leaderPeople?: { userId: string | null; name: string; image: string | null }[];
   sermonTheme?: string | null;
   sermonReference?: string | null;
   // Presente em cultos já salvos — o client manda de volta o valor que carregou

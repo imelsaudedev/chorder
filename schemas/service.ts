@@ -7,6 +7,7 @@ export const serviceSchema = z.object({
   slug: z.string(),
   title: z.string().nullable(),
   worshipLeader: z.string().nullable(),
+  leaders: z.array(z.object({ userId: z.string().nullable(), name: z.string() })),
   date: z.coerce.date(),
   units: z.array(serviceUnitSchema).optional(),
   plan: servicePlanSchema.nullable(),

@@ -1,3 +1,4 @@
+import { joinLeaderNames, normalizeLeaders, type ServiceLeaderEntry } from "@/lib/service-leaders";
 import { Prisma, ServiceScope, UserRole } from "@prisma/client";
 import { timingSafeEqual } from "crypto";
 import { getLyrics } from "@/chopro/music";
@@ -1023,6 +1024,7 @@ export async function retrieveService(
       shares: ctx?.userId
         ? { where: { userId: ctx.userId }, select: { userId: true, permission: true } }
         : false,
+      leaders: { orderBy: { order: "asc" }, select: { userId: true, name: true, user: { select: { image: true } } } },
     },
   });
 
@@ -1149,9 +1151,16 @@ export async function retrieveService(
     .filter((unit) => unit.type === "SONG" && unit.arrangement != null)
     .map((unit) => ({ ...unit, order: order++ }));
 
-  const { shares: _shares, shareToken, ...serviceFields } = service;
+  const { shares: _shares, shareToken, leaders: leaderRows, ...serviceFields } = service;
   return {
     ...serviceFields,
+    // Culto salvo antes da lista de dirigentes só tem o texto: vira um dirigente sem conta.
+    leaders: leaderRows.length
+      ? leaderRows.map(({ userId, name }) => ({ userId, name }))
+      : service.worshipLeader?.trim()
+        ? [{ userId: null, name: service.worshipLeader.trim() }]
+        : [],
+    leaderPeople: leaderRows.map((l) => ({ userId: l.userId, name: l.name, image: l.user?.image ?? null })),
     shareToken: canManageShareLink ? shareToken : null,
     isOwner,
     canEdit,
@@ -1239,6 +1248,7 @@ export async function retrieveServicesList(
       title: true,
       date: true,
       worshipLeader: true,
+      leaders: { orderBy: { order: "asc" }, select: { userId: true, name: true, user: { select: { image: true } } } },
       preacher: true,
       sermonTheme: true,
       sermonReference: true,
@@ -1259,10 +1269,13 @@ export async function retrieveServicesList(
     : [];
   const titleByArrangementId = new Map(arrangements.map((a) => [a.id, a.song.title]));
 
-  return services.map(({ plan: _plan, createdById, ...service }, index) => {
+  return services.map(({ plan: _plan, createdById, leaders, ...service }, index) => {
     const summary = summaries[index];
     return {
       ...service,
+      // Culto antigo, sem a lista: o texto do dirigente conta como um nome só.
+      leaders: leaders.length ? leaders.map((l) => l.name) : service.worshipLeader?.trim() ? [service.worshipLeader.trim()] : [],
+      leaderPeople: leaders.map((l) => ({ userId: l.userId, name: l.name, image: l.user?.image ?? null })),
       isSharedWithMe:
         service.scope === "PERSONAL" &&
         Boolean(viewerUserId) &&
@@ -1325,14 +1338,15 @@ export async function createOrUpdateService(
       ? await syncPlanArrangements(tx, service.plan, previousPlan)
       : null;
 
+    // Dirigentes: a lista é a fonte; o texto `worshipLeader` é derivado dela. Cliente antigo,
+    // que só manda o texto, continua valendo como um dirigente sem conta.
+    const leaders = await resolveLeaders(tx, service.leaders, service.worshipLeader);
+
     const data = {
       // Título em branco (liturgia pessoal pode não ter) vira "sem título", nunca texto vazio.
       title: service.title?.trim() || null,
-      worshipLeader: service.worshipLeader,
+      worshipLeader: joinLeaderNames(leaders.map((l) => l.name)),
       date: service.date,
-      preacher: service.preacher ?? null,
-      sermonTheme: service.sermonTheme ?? null,
-      sermonReference: service.sermonReference ?? null,
       plan: (resolvedPlan as object) ?? Prisma.DbNull,
       ...(service.status && existing?.scope !== "PERSONAL" ? { status: service.status } : {}),
     };
@@ -1352,6 +1366,7 @@ export async function createOrUpdateService(
           createdById: actorExists?.id ?? null,
         },
       });
+      await replaceLeaders(tx, created.id, leaders);
       return created.id;
     }
 
@@ -1368,6 +1383,7 @@ export async function createOrUpdateService(
     if (result.count === 0) throw new ServiceConflictError();
 
     const current = await tx.service.findUniqueOrThrow({ where: { slug: serviceSlug }, select: { id: true } });
+    await replaceLeaders(tx, current.id, leaders);
     return current.id;
   });
 
@@ -1401,6 +1417,55 @@ function stripUnitForPersistence(unit: ClientServiceUnit) {
 // pelo `clientId` estável, não por posição) pra decidir quais cópias de arranjo criar,
 // reaproveitar ou apagar — em vez de recriar tudo a cada save. Devolve o plano com
 // `arrangementId` resolvido em cada unidade SONG e sem o objeto `arrangement` pesado.
+/** Id de usuário só se ele existir; senão nulo (evita erro de chave estrangeira por id velho). */
+export async function existingUserId(
+  db: Pick<Prisma.TransactionClient, "user">,
+  id: string | null | undefined
+): Promise<string | null> {
+  if (!id) return null;
+  const user = await db.user.findUnique({ where: { id }, select: { id: true } });
+  return user?.id ?? null;
+}
+
+/** Lista final de dirigentes: limpa, sem repetidos e só com contas que existem (as outras viram só o nome). */
+async function resolveLeaders(
+  db: Pick<Prisma.TransactionClient, "user">,
+  leaders: readonly ServiceLeaderEntry[] | null | undefined,
+  legacyText: string | null | undefined
+): Promise<ServiceLeaderEntry[]> {
+  let list = normalizeLeaders(leaders);
+  if (list.length === 0 && legacyText?.trim()) list = [{ userId: null, name: legacyText.trim() }];
+  const ids = [...new Set(list.map((l) => l.userId).filter((id): id is string => Boolean(id)))];
+  if (ids.length === 0) return list;
+  const found = new Set((await db.user.findMany({ where: { id: { in: ids } }, select: { id: true } })).map((u) => u.id));
+  return list.map((l) => (l.userId && !found.has(l.userId) ? { ...l, userId: null } : l));
+}
+
+/**
+ * Troca a lista de dirigentes de uma liturgia (edição rápida pela lista) e devolve o texto derivado,
+ * que também é gravado em `Service.worshipLeader`.
+ */
+export async function setServiceLeaders(
+  serviceId: number,
+  entries: readonly ServiceLeaderEntry[]
+): Promise<string | null> {
+  return prisma.$transaction(async (tx) => {
+    const leaders = await resolveLeaders(tx, entries, null);
+    await replaceLeaders(tx, serviceId, leaders);
+    const worshipLeader = joinLeaderNames(leaders.map((l) => l.name));
+    await tx.service.update({ where: { id: serviceId }, data: { worshipLeader } });
+    return worshipLeader;
+  });
+}
+
+async function replaceLeaders(tx: Prisma.TransactionClient, serviceId: number, leaders: readonly ServiceLeaderEntry[]) {
+  await tx.serviceLeader.deleteMany({ where: { serviceId } });
+  if (leaders.length === 0) return;
+  await tx.serviceLeader.createMany({
+    data: leaders.map((l, index) => ({ serviceId, userId: l.userId, name: l.name, order: index })),
+  });
+}
+
 async function syncPlanArrangements(
   tx: Prisma.TransactionClient,
   newPlan: ServicePlan,
@@ -1618,7 +1683,7 @@ export async function retrieveStats(): Promise<StatsData> {
     prisma.song.count({ where: { isDeleted: false } }),
     prisma.service.findMany({
       where: { isDeleted: false, scope: "CHURCH", status: "PUBLISHED" },
-      select: { slug: true, worshipLeader: true, plan: true },
+      select: { slug: true, worshipLeader: true, leaders: { orderBy: { order: "asc" }, select: { name: true } }, plan: true },
     }),
   ]);
 
@@ -1644,7 +1709,10 @@ export async function retrieveStats(): Promise<StatsData> {
 
   for (const service of services) {
     const plan = service.plan as ServicePlan | null;
-    const leaderName = service.worshipLeader?.trim() || "Sem dirigente";
+    // Cada dirigente do culto conta; sem nenhum, "Sem dirigente".
+    const leaderNames = service.leaders.length
+      ? service.leaders.map((l) => l.name)
+      : [service.worshipLeader?.trim() || "Sem dirigente"];
 
     for (const section of plan?.sections ?? []) {
       for (const unit of section.units) {
@@ -1658,12 +1726,14 @@ export async function retrieveStats(): Promise<StatsData> {
         else songMap.set(song.slug, { slug: song.slug, title: song.title, count: 1 });
 
         // By leader
-        if (!leaderMap.has(leaderName)) leaderMap.set(leaderName, { services: new Set(), songs: new Map() });
-        const leader = leaderMap.get(leaderName)!;
-        leader.services.add(service.slug);
-        const leaderSong = leader.songs.get(song.slug);
-        if (leaderSong) leaderSong.count++;
-        else leader.songs.set(song.slug, { slug: song.slug, title: song.title, count: 1 });
+        for (const leaderName of leaderNames) {
+          if (!leaderMap.has(leaderName)) leaderMap.set(leaderName, { services: new Set(), songs: new Map() });
+          const leader = leaderMap.get(leaderName)!;
+          leader.services.add(service.slug);
+          const leaderSong = leader.songs.get(song.slug);
+          if (leaderSong) leaderSong.count++;
+          else leader.songs.set(song.slug, { slug: song.slug, title: song.title, count: 1 });
+        }
       }
     }
   }

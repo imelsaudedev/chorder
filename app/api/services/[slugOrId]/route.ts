@@ -3,6 +3,7 @@ import { canManageChurchServices } from "@/lib/permissions";
 import {
   createOrUpdateService,
   deleteService,
+  setServiceLeaders,
   retrieveService,
   ServiceConflictError,
 } from "@/prisma/data";
@@ -107,17 +108,22 @@ export async function PATCH(
     title?: string | null;
     worshipLeader?: string | null;
     date?: Date;
-    preacher?: string | null;
-    sermonTheme?: string | null;
-    sermonReference?: string | null;
     status?: ServiceStatus;
   } = {};
   if ("title" in body) data.title = body.title ?? null;
-  if ("worshipLeader" in body) data.worshipLeader = body.worshipLeader || null;
+  if (Array.isArray(body.leaders)) {
+    // edição rápida pela lista: a lista de pessoas é a fonte e o texto do dirigente é derivado dela
+    const entries = body.leaders.flatMap((item: unknown) => {
+      const entry = item as { userId?: unknown; name?: unknown } | null;
+      return typeof entry?.name === "string"
+        ? [{ userId: typeof entry.userId === "string" ? entry.userId : null, name: entry.name }]
+        : [];
+    });
+    data.worshipLeader = await setServiceLeaders(service.id, entries);
+  } else if ("worshipLeader" in body) {
+    data.worshipLeader = body.worshipLeader || null;
+  }
   if ("date" in body) data.date = new Date(body.date);
-  if ("preacher" in body) data.preacher = body.preacher ?? null;
-  if ("sermonTheme" in body) data.sermonTheme = body.sermonTheme ?? null;
-  if ("sermonReference" in body) data.sermonReference = body.sermonReference ?? null;
   if ("status" in body && service.scope !== "PERSONAL") {
     if (body.status !== "DRAFT" && body.status !== "PUBLISHED") {
       return Response.json({ error: "Invalid status" }, { status: 400 });
@@ -165,7 +171,8 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const parsed = serviceSchema.safeParse(await request.json());
+  // Cliente que ainda não conhece a lista de dirigentes (aba aberta antes da atualização) manda só o texto.
+  const parsed = serviceSchema.safeParse({ leaders: [], ...(await request.json()) });
   if (!parsed.success) return invalidServiceResponse(parsed.error);
   const service = parsed.data;
   if (service.id !== existing.id || (service.slug && service.slug !== existing.slug)) {

@@ -143,7 +143,13 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
     editor.updateServiceMeta({
       title: config.title,
       worshipLeader: config.worshipLeader,
-      preacher: config.preacher,
+      leaders: config.leaders,
+      // quem já estava salvo mantém a foto; quem acabou de ser escolhido a ganha ao salvar
+      leaderPeople: config.leaders.map((l) => ({
+        userId: l.userId,
+        name: l.name,
+        image: editor.service.leaderPeople?.find((p) => p.userId && p.userId === l.userId)?.image ?? null,
+      })),
       date: config.date,
     });
     if (config.templateSections) {
@@ -346,7 +352,7 @@ export default function ServicePlanEditor({ service, onSaved }: ServicePlanEdito
         defaultValues={{
           title: editor.service.title ?? "",
           worshipLeader: editor.service.worshipLeader,
-          preacher: editor.service.preacher,
+          leaders: editor.service.leaders,
           date: new Date(editor.service.date),
         }}
         onSave={handleMetaSave}

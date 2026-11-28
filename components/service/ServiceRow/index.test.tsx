@@ -8,7 +8,7 @@ import ServiceRow, { ServiceTimeline } from "./index";
 vi.mock("next/link", () => ({
   default: ({ children, href, ...rest }: any) => <a href={href} {...rest}>{children}</a>,
 }));
-vi.mock("@/components/service/ServiceMetaModal", () => ({ default: () => null }));
+vi.mock("@/components/service/ServicePlanDrawer", () => ({ default: () => null }));
 
 const service = (extra: Partial<ServiceListItem> = {}): ServiceListItem => ({
   slug: "culto-1",
@@ -83,6 +83,27 @@ describe("ServiceRow", () => {
     unmount();
     const { container: withTimeline } = renderRow(service(), undefined, { tone: "upcoming", highlight: true });
     expect(withTimeline.querySelector("li .rounded-full")).not.toBeNull();
+  });
+
+  it("mostra a foto (ou as iniciais) de quem conduz ao lado do nome, sem chip", () => {
+    renderRow(
+      service({
+        worshipLeader: "Ana Souza e Hugo Lima",
+        leaderPeople: [
+          { userId: "ana", name: "Ana Souza", image: null },
+          { userId: null, name: "Hugo Lima", image: null },
+        ],
+      })
+    );
+    expect(screen.getByText("Ana Souza e Hugo Lima")).toBeInTheDocument();
+    expect(screen.getByText("AS")).toBeInTheDocument();
+    expect(screen.getByText("HL")).toBeInTheDocument();
+  });
+
+  it("culto antigo, sem a lista de pessoas, mostra só o nome", () => {
+    renderRow(service({ worshipLeader: "Rafael", leaderPeople: undefined }));
+    expect(screen.getByText("Rafael")).toBeInTheDocument();
+    expect(screen.queryByText("R")).toBeNull();
   });
 
   it("data em duas partes: dia da semana em maiúscula e número com dois dígitos", () => {

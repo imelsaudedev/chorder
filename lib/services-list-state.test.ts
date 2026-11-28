@@ -157,3 +157,20 @@ describe("filterOptions", () => {
     expect(filterOptions(items)).toEqual({ years: [2025, 2024], leaders: ["Ana", "Beto"], preachers: ["Caio", "Dani"] });
   });
 });
+
+describe("vários dirigentes", () => {
+  const base = { slug: "x", title: null, date: new Date("2026-11-01"), preacher: null, sermonTheme: null, sermonReference: null, startTime: null, songCount: 0, songTitles: [], updatedAt: new Date() };
+  const items = [
+    { ...base, slug: "a", worshipLeader: "Hugo e Ana", leaders: ["Hugo", "Ana"] },
+    { ...base, slug: "b", worshipLeader: "Caio", leaders: ["Caio"] },
+    { ...base, slug: "c", worshipLeader: "Ana" },
+  ] as ServiceListItem[];
+  const state = { ...parseServicesListState(new URLSearchParams()), leaders: ["Ana"] };
+
+  it("o filtro acha a pessoa em qualquer posição, e em culto antigo sem a lista", () => {
+    expect(filterServices(items, state).map((s) => s.slug)).toEqual(["a", "c"]);
+  });
+  it("as opções do filtro listam cada pessoa uma vez", () => {
+    expect(filterOptions(items).leaders).toEqual(["Ana", "Caio", "Hugo"]);
+  });
+});

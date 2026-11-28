@@ -135,7 +135,19 @@
     "worshipLeaderPlaceholder": "Dirigente",
     "titlePlaceholderPersonal": "Grupo pequeno",
     "leaderPersonal": "Quem conduz",
-    "leaderPersonalPlaceholder": "Ex.: Ana e Pedro"
+    "leaderPersonalPlaceholder": "Ex.: Ana e Pedro",
+    "peoplePlaceholder": "Buscar pessoa ou digitar um nome",
+    "peopleAddWithoutAccount": "Adicionar \"{name}\" (sem conta)",
+    "peopleRemove": "Remover {name}",
+    "peopleRecent": "Conduziram recentemente",
+    "peopleAll": "Pessoas",
+    "peopleEmpty": "Nenhuma pessoa encontrada",
+    "peopleSearching": "Buscando…",
+    "peopleSwitch": "Trocar",
+    "peopleAdded": "{name} adicionada",
+    "peopleRemoved": "{name} removida",
+    "peopleNoAccount": "Sem conta",
+    "peopleList": "Sugestões de pessoas"
   },
   "SongData": {
     "title": "Título",
