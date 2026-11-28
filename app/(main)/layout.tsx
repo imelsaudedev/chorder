@@ -1,5 +1,6 @@
 import { ViewerProvider } from "@/components/auth/ViewerProvider";
 import NavBar from "@/components/common/NavBar";
+import NotificationsBell from "@/components/common/NotificationsBell";
 import UserNav from "@/components/common/UserNav";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getLiveUserAuth } from "@/lib/auth-guard";
@@ -18,6 +19,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
           <div className="stage-mode-hidden">
             <NavBar
               userNav={<UserNav />}
+              notificationsNav={isAdmin ? <NotificationsBell /> : undefined}
               isAuthenticated={isAuthenticated}
               isAdmin={isAdmin}
             />

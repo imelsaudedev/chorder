@@ -353,7 +353,17 @@
     "roleUpdateError": "Não foi possível atualizar os perfis. Tente novamente.",
     "emptyTitle": "Nenhum usuário cadastrado",
     "emptyDescription": "Os usuários aparecerão aqui assim que fizerem login.",
-    "noResults": "Nenhum usuário encontrado para \"{query}\"."
+    "noResults": "Nenhum usuário encontrado para \"{query}\".",
+    "filtersAria": "Filtros de usuários",
+    "filterAll": "Todos ({count})",
+    "filterUnseen": "Novos ({count})",
+    "filterNoRoles": "Sem perfil ({count})",
+    "markAllSeen": "Marcar todos como vistos",
+    "allMarkedSeen": "Todos os novos usuários foram marcados como vistos.",
+    "markSeenError": "Não foi possível marcar como vistos. Tente novamente.",
+    "newUserBadge": "Novo",
+    "noUnseenUsers": "Nenhum usuário novo pendente de revisão.",
+    "noUsersWithoutRoles": "Todos os usuários já possuem pelo menos um perfil."
   },
   "ShareService": {
     "shareButton": "Compartilhar",
@@ -400,5 +410,17 @@
     "save": "Salvar",
     "nameSaved": "Nome atualizado!",
     "saveError": "Não foi possível salvar o nome. Tente novamente."
+  },
+  "Notifications": {
+    "title": "Notificações",
+    "bellAria": "Notificações",
+    "bellAriaUnread": "Notificações ({count} não lidas)",
+    "markAllRead": "Marcar todas como lidas",
+    "markAsRead": "Marcar como lida",
+    "markReadError": "Não foi possível atualizar as notificações.",
+    "empty": "Nenhuma notificação por enquanto.",
+    "newUsersTitle": "{count, plural, =1 {1 novo usuário cadastrado} other {# novos usuários cadastrados}}",
+    "andMoreUsers": "e mais {count}",
+    "unnamed": "Sem nome"
   }
 }
